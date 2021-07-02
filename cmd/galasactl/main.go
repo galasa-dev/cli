@@ -7,16 +7,9 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/galasa.dev/cli/pkg/cli"
 	"github.com/galasa.dev/cli/pkg/cmd"
 )
 
 func main() {
-	gp := &cli.GalasaParams{}
-	galasa := cmd.Root(gp)
-	_ = galasa
-
-	fmt.Println("Boo")
+	cmd.Execute()
 }

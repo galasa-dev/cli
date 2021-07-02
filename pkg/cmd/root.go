@@ -7,19 +7,21 @@
 package cmd
 
 import (
-	"github.com/galasa.dev/cli/pkg/cli"
+	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
-func Root(p cli.Params) *cobra.Command {
+var rootCmd = &cobra.Command{
+	Use:   "galasactl",
+	Short: "CLI for Galasa",
+	Long:  "",
+}
 
-	var cmd = &cobra.Command{
-		Use:          "galasactl",
-		Short:        "CLI for Galasa",
-		Long:         "",
-		SilenceUsage: true,
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
-
-	return cmd
 }
