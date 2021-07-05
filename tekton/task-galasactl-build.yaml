@@ -83,6 +83,7 @@ spec:
     - --skip-tls-verify-pull
     - --single-snapshot
     - --verbosity=info
+    - --build-arg=dockerRepository=$(params.dockerRepo)
   - name: docker-build-cli
     workingDir: /workspace/git-cli
     image: $(params.dockerRepo)/library/kaniko-executor:latest
