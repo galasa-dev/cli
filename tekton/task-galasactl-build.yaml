@@ -84,6 +84,7 @@ spec:
     - --single-snapshot
     - --verbosity=info
     - --build-arg=dockerRepository=$(params.dockerRepo)
+    - --build-arg=branch=$(params.distBranch)
   - name: docker-build-cli
     workingDir: /workspace/git-cli
     image: $(params.dockerRepo)/library/kaniko-executor:latest

@@ -48,4 +48,4 @@ spec:
     - name: namespace
       value: galasa-development
     - name: deployment
-      value: galasa-cli
+      value: cli-main-http
