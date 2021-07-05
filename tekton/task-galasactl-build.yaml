@@ -103,3 +103,4 @@ spec:
     - --single-snapshot
     - --verbosity=info
     - --build-arg=platform=linux-amd64
+    - --build-arg=dockerRepository=$(params.dockerRepo)

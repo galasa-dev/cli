@@ -3,8 +3,11 @@
 # 
 # (c) Copyright IBM Corp. 2021.
 #
-FROM scratch
+ARG dockerRepository
+FROM ${dockerRepository}/library/alpine:3.14
 
 ARG platform
 
-COPY bin/galasactl-${platform} /
+COPY bin/galasactl-${platform} /bin/galasactl
+
+RUN chmod +x /bin/galasactl
