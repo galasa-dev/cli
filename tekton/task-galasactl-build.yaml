@@ -1,0 +1,103 @@
+#
+# Licensed Materials - Property of IBM
+# 
+# (c) Copyright IBM Corp. 2021.
+#
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: galasactl-build
+  namespace: galasa-tekton
+spec:
+  resources:
+    inputs:
+    - name: git-cli
+      type: git
+    - name: git-framework
+      type: git
+  params:
+  - name: distBranch
+    type: string
+  - name: dockerRepo
+    type: string
+    default: nexus.cics-ts.hur.hdclab.intranet.ibm.com:8080
+  - name: noPush
+    type: string
+    default: ""
+  steps:
+  - name: generate-api
+    workingDir: /workspace/git-cli
+    image: $(params.dockerRepo)/galasa/galasa-build
+    command:
+    - java
+    - -jar
+    - /opt/openapi/openapi-generator-cli.jar
+    - generate
+    - -i
+    - /workspace/git-framework/openapi.yaml
+    - -g
+    - go 
+    - -o
+    - pkg/galasaapi
+    - --additional-properties=packageName=galasaapi
+  - name: clear-mod
+    workingDir: /workspace/git-cli/pkg/galasaapi
+    image: $(params.dockerRepo)/galasa/galasa-build
+    command:
+    - rm
+    - -v
+    - go.mod
+  - name: clear-sum
+    workingDir: /workspace/git-cli/pkg/galasaapi
+    image: $(params.dockerRepo)/galasa/galasa-build
+    command:
+    - rm
+    - -v
+    - go.sum
+  - name: ls
+    workingDir: /workspace/git-cli/pkg/galasaapi
+    image: $(params.dockerRepo)/galasa/galasa-build
+    command:
+    - ls
+    - -al
+  - name: galasactl-build
+    workingDir: /workspace/git-cli
+    image: $(params.dockerRepo)/galasa/galasa-build
+    command:
+    - make
+    - all
+  - name: docker-build-http
+    workingDir: /workspace/git-cli
+    image: $(params.dockerRepo)/library/kaniko-executor:latest
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    command:
+    - /kaniko/executor
+    - --dockerfile=./DockerfileHttp
+    - --context=/workspace/git-cli
+    - --destination=$(params.dockerRepo)/galasadev/galasa-cli-http:$(params.distBranch)
+    - $(params.noPush)
+    - --oci-layout-path=/workspace/git-framework/docker/image-digest
+    - --skip-tls-verify
+    - --skip-tls-verify-pull
+    - --single-snapshot
+    - --verbosity=info
+  - name: docker-build-cli
+    workingDir: /workspace/git-cli
+    image: $(params.dockerRepo)/library/kaniko-executor:latest
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    command:
+    - /kaniko/executor
+    - --dockerfile=./DockerfileCli
+    - --context=/workspace/git-cli
+    - --destination=$(params.dockerRepo)/galasadev/galasa-cli-amd64:$(params.distBranch)
+    - $(params.noPush)
+    - --oci-layout-path=/workspace/git-framework/docker/image-digest
+    - --skip-tls-verify
+    - --skip-tls-verify-pull
+    - --single-snapshot
+    - --verbosity=info
+    - --build-arg=platform=linux-amd64

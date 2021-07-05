@@ -1,0 +1,19 @@
+#
+# Licensed Materials - Property of IBM
+# 
+# (c) Copyright IBM Corp. 2021.
+#
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: git-cli-main
+  namespace: galasa-tekton
+spec:
+  type: git
+  params:
+  - name: revision
+    value: main
+  - name: refspec
+    value: +refs/heads/main:refs/heads/main
+  - name: url
+    value: https://github.com/galasa-dev/cli
