@@ -8,6 +8,11 @@ FROM ${dockerRepository}/library/alpine:3.14
 
 ARG platform
 
-COPY bin/galasactl-${platform} /bin/galasactl
+RUN addgroup galasa && \ 
+    adduser -D -G galasa -h /galasa -s /bin/sh galasa 
 
+COPY bin/galasactl-${platform} /bin/galasactl
 RUN chmod +x /bin/galasactl
+
+WORKDIR /galasa
+USER galasa
