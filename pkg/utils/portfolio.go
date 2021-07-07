@@ -8,6 +8,7 @@ package utils
 
 import (
 	"bufio"
+	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -73,4 +74,30 @@ func WritePortfolio(portfolio Portfolio, filename string) {
 	w.Flush()
 	encoder.Close()
 	file.Close()
+}
+
+
+func LoadPortfolio(filename string) Portfolio {
+
+	var portfolio Portfolio
+
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	err = yaml.Unmarshal(b, &portfolio)
+	if err != nil {
+		panic(err)
+	}
+
+	if portfolio.APIVersion != "v1alpha" {
+		panic("Portfolio file is not version 'v1alpha'")
+	}
+
+	if portfolio.Kind != "galasa.dev/testPortfolio" {
+		panic("Portfolio file is not kind 'galasa.dev/testPortfolio'")
+	}
+
+	return portfolio
 }
