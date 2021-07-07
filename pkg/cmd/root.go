@@ -17,6 +17,7 @@ var rootCmd = &cobra.Command{
     Use:   "galasactl",
     Short: "CLI for Galasa",
     Long:  "",
+    Version: "0.17.0-alpha",
 }
 
 var (
@@ -32,5 +33,4 @@ func Execute() {
 
 func init() {
     rootCmd.PersistentFlags().StringVarP(&bootstrap, "bootstrap", "b", "", "Bootstrap URL")
-
 }

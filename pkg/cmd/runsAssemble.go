@@ -22,7 +22,7 @@ var (
             Short: "assembles a list of tests",
             Long:  "Assembles a list of tests from a test catalog providing specific overrides if required",
             Args: cobra.NoArgs,
-            Run:   execute,
+            Run:   executeAssemble,
     }
 
     portfolioFilename string
@@ -42,7 +42,7 @@ func init() {
     runsCmd.AddCommand(runsAssembleCmd)
 }
 
-func execute(cmd *cobra.Command, args []string) {
+func executeAssemble(cmd *cobra.Command, args []string) {
     fmt.Println("Galasa CLI - Assemble tests")
 
     apiClient := api.InitialiseAPI(bootstrap)
