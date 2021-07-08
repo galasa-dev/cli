@@ -3,6 +3,7 @@ module github.com/galasa.dev/cli
 go 1.14
 
 require (
+	github.com/google/martian/v3 v3.2.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.1.3
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect

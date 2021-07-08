@@ -29,30 +29,34 @@ var (
             Run:   executeSubmit,
     }
 
-    groupName     string
-    throttle      *int 
-    pollFlag      *int64
-    poll          time.Duration
-    progressFlag  *int64
-    progress      time.Duration
+    groupName           string
+    throttle            *int 
+    pollFlag            *int64
+    progressFlag        *int
+    submitFlagOverrides *[]string
+
+    submitSelectionFlags = utils.TestSelectionFlags{}
 )
 
 type TestRun struct {
-    Name     string   `yaml:"name"`
-	Bundle   string   `yaml:"bundle"`
-	Class    string   `yaml:"class"`
-	Stream   string   `yaml:"stream"`
-    Status   string   `yaml:"status"`
-    Result   string   `yaml:"result"`
+    Name      string            `yaml:"name"`
+	Bundle    string            `yaml:"bundle"`
+	Class     string            `yaml:"class"`
+	Stream    string            `yaml:"stream"`
+    Status    string            `yaml:"status"`
+    Result    string            `yaml:"result"`
+    Overrides map[string]string `yaml:"overrides"`
 }
 
 func init() {
     runsSubmitCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio containing the tests to run")
     runsSubmitCmd.Flags().StringVarP(&groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
     pollFlag = runsSubmitCmd.Flags().Int64("poll", 30, "in seconds, how often the cli will poll the ecosystem for the status of the test runs")
-    progressFlag = runsSubmitCmd.Flags().Int64("progress", 5, "in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports")
+    progressFlag = runsSubmitCmd.Flags().Int("progress", 5, "in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports")
     throttle = runsSubmitCmd.Flags().Int("throttle", 3, "how many test runs can be submitted in parallel, 0 or less will disable throttling")
-    runsAssembleCmd.MarkFlagRequired("portfolio")
+	submitFlagOverrides = runsSubmitCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
+
+    utils.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
 
     runsCmd.AddCommand(runsSubmitCmd)
 }
@@ -64,15 +68,15 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     if *pollFlag < 1 {
         *pollFlag = 30
     }
-    poll = time.Second * time.Duration(*pollFlag)
+    poll := time.Second * time.Duration(*pollFlag)
 
     // Set the progress time
     if *progressFlag < 0 {
-        progress = 525600 // surely we wont have a run that lasts a year
+        *progressFlag = int(^uint(0) >> 1) // set to maximum size of the int
     } else if *progressFlag == 0 {
         *progressFlag = 5
     }
-    progress = time.Minute * time.Duration(*progressFlag)
+    progress := time.Minute * time.Duration(*progressFlag)
 
     // Set the throttle
     if *throttle <= 0 {
@@ -81,9 +85,49 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
     apiClient := api.InitialiseAPI(bootstrap)
 
-    // Load the portfolio of tests
 
-    portfolio := utils.LoadPortfolio(portfolioFilename)  
+    //  Dont mix portfolio and test selection on the same command
+
+    if portfolioFilename != "" {
+        if utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
+            fmt.Println("The submit command does not support mixing of the test selection flags and a portfolio")
+            os.Exit(1)
+        }
+    } else {
+        if !utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
+            fmt.Println("The submit command requires either test selection flags or a portfolio")
+            os.Exit(1)
+        }
+    }
+
+    // Convert overrides to a map
+    runOverrides := make(map[string]string)
+    for _, override := range *submitFlagOverrides {
+        pos := strings.Index(override, "=")
+        if (pos < 1) {
+            fmt.Printf("Invalid override '%v'",override)
+            os.Exit(1)
+        }
+        key := override[:pos]
+        value := override[pos+1:]
+        if value == "" {
+            fmt.Printf("Invalid override '%v'",override)
+            os.Exit(1)
+        }
+        runOverrides[key] = value
+    }
+
+    // Load the portfolio of tests
+    var portfolio utils.Portfolio
+    if portfolioFilename != "" {
+        portfolio = utils.LoadPortfolio(portfolioFilename)  
+    } else {
+        testSelection := utils.SelectTests(apiClient, &submitSelectionFlags)
+
+        testOverrides := make(map[string]string)
+        portfolio = utils.NewPortfolio()
+        utils.CreatePortfolio(&testSelection, &testOverrides, &portfolio)
+    }
 
     if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
         fmt.Println("There are no tests in the test porfolio")
@@ -117,6 +161,17 @@ func executeSubmit(cmd *cobra.Command, args []string) {
             Class: portfolioTest.Class,
             Stream: portfolioTest.Stream,
             Status: "queued",
+            Overrides: make(map[string]string, 0),
+        }
+
+        // load the run overrides
+        for key, value := range runOverrides {
+            newTestrun.Overrides[key] = value
+        }
+
+        // load the assemble overrides, they take precedence on the run overrides
+        for key, value := range portfolioTest.Overrides {
+            newTestrun.Overrides[key] = value
         }
 
         readyRuns = append(readyRuns, newTestrun)
@@ -139,7 +194,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     nextProgressReport := time.Now().Add(progress)
     for (len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0) { // Loop whilst there are runs to submit or are running
         for (len(submittedRuns) < *throttle && len(readyRuns) > 0) {
-            readyRuns = submitRun(apiClient, groupName, readyRuns, submittedRuns, lostRuns)
+            readyRuns = submitRun(apiClient, groupName, readyRuns, submittedRuns, lostRuns, &runOverrides)
         }
 
         now := time.Now()
@@ -157,7 +212,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     report(finishedRuns, lostRuns)
 }
 
-func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, lostRuns map[string]*TestRun) []TestRun {
+func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, lostRuns map[string]*TestRun, runOverrides *map[string]string) []TestRun {
 
     if len(readyRuns) < 1 {
         return readyRuns
@@ -167,7 +222,13 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
     readyRuns = readyRuns[1:]
     
     className := nextRun.Bundle + "/" + nextRun.Class
-    classNames := []string{className}    
+    classNames := []string{className}
+    
+    submitOverrides := make(map[string]interface{})
+    
+    for key,value := range nextRun.Overrides {
+        submitOverrides[key] = value
+    }
 
     testRunRequest := galasaapi.NewTestRunRequest()
     testRunRequest.SetClassNames(classNames)
@@ -175,6 +236,7 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
     testRunRequest.SetRequestor("cli")
     testRunRequest.SetTestStream(nextRun.Stream)
     testRunRequest.SetTrace(false)
+    testRunRequest.SetOverrides(submitOverrides)
  
     resultGroup, _, err := apiClient.RunsAPIApi.PostSubmitTestRuns(nil, groupName).TestRunRequest(*testRunRequest).Execute()
     if err != nil {
@@ -251,6 +313,9 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
 
     resultCounts := make(map[string]int, 0)
 
+    resultCounts["Passed"] = 0
+    resultCounts["Failed"] = 0
+
     for _, run := range finishedRuns {
         c, ok := resultCounts[run.Result]
         if !ok {
@@ -259,7 +324,8 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
             resultCounts[run.Result] = c + 1
         }
     }
-    resultCounts["lost"] = len(lostRuns)
+
+    resultCounts["Lost"] = len(lostRuns)
 
 
     fmt.Println("***")

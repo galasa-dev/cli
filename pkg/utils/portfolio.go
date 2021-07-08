@@ -27,31 +27,35 @@ type PortfolioMetadata struct {
 }
 
 type PortfolioClass struct {
-	Bundle   string   `yaml:"bundle"`
-	Class    string   `yaml:"class"`
-	Stream   string   `yaml:"stream"`
+	Bundle     string             `yaml:"bundle"`
+	Class      string             `yaml:"class"`
+	Stream     string             `yaml:"stream"`
+	Overrides  map[string] string `yaml:"overrides"`
 }
 
-
-func CreatePortfolio(testSelection *TestSelection) Portfolio {
+func NewPortfolio() Portfolio {
 	portfolio := Portfolio {
 		APIVersion: "v1alpha",
 		Kind:       "galasa.dev/testPortfolio",
 		Metadata: PortfolioMetadata { Name: "adhoc"},
-	}
-
+	}	
+	
 	portfolio.Classes = make([]PortfolioClass, 0)
+
+	return portfolio
+}
+
+func CreatePortfolio(testSelection *TestSelection, testOverrides *map[string]string, portfolio *Portfolio) {
 
 	for _, selectedClass := range testSelection.Classes {
 		portfolioClass := PortfolioClass {
 			Bundle: selectedClass.Bundle,
 			Class: selectedClass.Class,
 			Stream: selectedClass.Stream,
+			Overrides: *testOverrides,
 		}
 		portfolio.Classes = append(portfolio.Classes, portfolioClass)
 	}
-
-	return portfolio
 }
 
 
