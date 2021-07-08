@@ -34,6 +34,8 @@ var (
     pollFlag            *int64
     progressFlag        *int
     submitFlagOverrides *[]string
+    trace               *bool
+    requestor           string 
 
     submitSelectionFlags = utils.TestSelectionFlags{}
 )
@@ -51,11 +53,12 @@ type TestRun struct {
 func init() {
     runsSubmitCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio containing the tests to run")
     runsSubmitCmd.Flags().StringVarP(&groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
+    runsSubmitCmd.Flags().StringVar(&requestor, "requestor", "cli", "(temporary until authentication is enabled on the ecosystem) the requestor id to be associated with the test runs")
     pollFlag = runsSubmitCmd.Flags().Int64("poll", 30, "in seconds, how often the cli will poll the ecosystem for the status of the test runs")
     progressFlag = runsSubmitCmd.Flags().Int("progress", 5, "in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports")
     throttle = runsSubmitCmd.Flags().Int("throttle", 3, "how many test runs can be submitted in parallel, 0 or less will disable throttling")
 	submitFlagOverrides = runsSubmitCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
-
+    trace = runsSubmitCmd.Flags().Bool("trace", false, "Trace to be enabled on the test runs")
     utils.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
 
     runsCmd.AddCommand(runsSubmitCmd)
@@ -233,9 +236,9 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
     testRunRequest := galasaapi.NewTestRunRequest()
     testRunRequest.SetClassNames(classNames)
     testRunRequest.SetRequestorType("CLI")
-    testRunRequest.SetRequestor("cli")
+    testRunRequest.SetRequestor(requestor)
     testRunRequest.SetTestStream(nextRun.Stream)
-    testRunRequest.SetTrace(false)
+    testRunRequest.SetTrace(*trace)
     testRunRequest.SetOverrides(submitOverrides)
  
     resultGroup, _, err := apiClient.RunsAPIApi.PostSubmitTestRuns(nil, groupName).TestRunRequest(*testRunRequest).Execute()
