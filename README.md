@@ -1,6 +1,6 @@
 # Galasa cli
 
-The Galasa cli is used to interact with the Galasa ecosystem or local development.
+The Galasa cli is used to interact with the Galasa ecosystem or local development environment.
 
 Most commands will need a reference to the Galasa bootstrap file or url.  This can be provided with the `--bootstrap` flag or the `GALASA_BOOTSTRAP`environment variable.
 
@@ -26,6 +26,16 @@ galasactl runs assemble
           --stream inttests
           --package test.package.one
           --package test.package.two
+```
+
+Selecting tests using regex:-
+
+```
+galasactl runs assemble
+          --portfolio test.yaml
+          --stream inttests
+          --package '.*age.*'
+          --regex
 ```
 
 Selecting tests without a test stream:-
