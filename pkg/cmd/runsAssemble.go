@@ -9,6 +9,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -25,19 +26,21 @@ var (
             Run:   executeAssemble,
     }
 
-    portfolioFilename string
-    stream string
+    portfolioFilename      string
+    assembleFlagOverrides  *[]string
+    assembleAppend         *bool
 
+    assembleSelectionFlags = utils.TestSelectionFlags{}
 )
 
 
 func init() {
     runsAssembleCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
-    runsAssembleCmd.Flags().StringVarP(&stream, "stream", "s", "", "test stream to extract the tests from")
+    assembleFlagOverrides = runsAssembleCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
+    assembleAppend = runsAssembleCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
     runsAssembleCmd.MarkFlagRequired("portfolio")
-    runsAssembleCmd.MarkFlagRequired("stream")
 
-    utils.AddCommandFlags(runsAssembleCmd)
+    utils.AddCommandFlags(runsAssembleCmd, &assembleSelectionFlags)
 
     runsCmd.AddCommand(runsAssembleCmd)
 }
@@ -45,29 +48,54 @@ func init() {
 func executeAssemble(cmd *cobra.Command, args []string) {
     fmt.Println("Galasa CLI - Assemble tests")
 
+    // Convert overrides to a map
+    testOverrides := make(map[string]string)
+    for _, override := range *assembleFlagOverrides {
+        pos := strings.Index(override, "=")
+        if (pos < 1) {
+            fmt.Printf("Invalid override '%v'",override)
+            os.Exit(1)
+        }
+        key := override[:pos]
+        value := override[pos+1:]
+        if value == "" {
+            fmt.Printf("Invalid override '%v'",override)
+            os.Exit(1)
+        }
+
+        testOverrides[key] = value
+    }
+
     apiClient := api.InitialiseAPI(bootstrap)
 
-    availableStreams := utils.FetchTestStreams(apiClient)
-
-    err := utils.ValidateStream(availableStreams, stream)
-    if err != nil {
-        fmt.Printf("%v", err)
+    testSelection := utils.SelectTests(apiClient, &assembleSelectionFlags)
+    count := len(testSelection.Classes)
+    if count < 1 {
+        fmt.Println("No tests were selected")
         os.Exit(1)
+    } else {
+        if count == 1 {
+            fmt.Println("1 test was selected")
+        } else {
+            fmt.Printf("%v tests were selected", count)
+        }
     }
 
-    testCatalog, err := utils.FetchTestCatalog(apiClient, stream)
-    if err != nil {
-        panic(err)
+    var portfolio utils.Portfolio
+    if *assembleAppend {
+        portfolio = utils.LoadPortfolio(portfolioFilename)
+    } else {
+        portfolio = utils.NewPortfolio()
     }
 
-    fmt.Println("Test catalog retrieved")
-
-    testSelection := utils.SelectTests(testCatalog, stream)
-
-    portfolio := utils.CreatePortfolio(&testSelection)
+    utils.CreatePortfolio(&testSelection, &testOverrides, &portfolio)
 
     utils.WritePortfolio(portfolio, portfolioFilename)
 
-    fmt.Println("Portfolio created")
+    if *assembleAppend {
+        fmt.Println("Portfolio appended")
+    } else {
+        fmt.Println("Portfolio created")
+    }    
 }
 
