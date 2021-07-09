@@ -33,4 +33,5 @@ func Execute() {
 
 func init() {
     rootCmd.PersistentFlags().StringVarP(&bootstrap, "bootstrap", "b", "", "Bootstrap URL")
+    rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 }
