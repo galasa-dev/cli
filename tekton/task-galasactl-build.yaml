@@ -60,6 +60,15 @@ spec:
     command:
     - ls
     - -al
+  - name: get-commit
+    workingDir: /workspace/git-cli
+    image: $(params.dockerRepo)/galasa/galasa-build
+    script: |
+      #!/bin/sh
+      set +e
+      COMMIT="$(git log --format="%H" -n 1)"
+      echo sed -i "s/unknowngithash/${COMMIT}/" /workspace/git-cli/pkg/cmd/root.go
+      echo commit is $COMMIT
   - name: galasactl-build
     workingDir: /workspace/git-cli
     image: $(params.dockerRepo)/galasa/galasa-build
