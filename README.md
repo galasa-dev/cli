@@ -4,9 +4,9 @@ The Galasa cli is used to interact with the Galasa ecosystem or local developmen
 
 Most commands will need a reference to the Galasa bootstrap file or url.  This can be provided with the `--bootstrap` flag or the `GALASA_BOOTSTRAP`environment variable.
 
-## runs assemble
+## runs prepare
 
-The purpose of `runs assemble` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.
+The purpose of `runs prepare` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.
 
 ### Examples
 
@@ -15,13 +15,13 @@ Getting help:-
 ```
 galasactl --help
 galasactl runs --help
-galasactl runs assemble --help
+galasactl runs prepare --help
 ```
 
 Selecting tests from a test steam:-
 
 ```
-galasactl runs assemble
+galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package test.package.one
@@ -31,7 +31,7 @@ galasactl runs assemble
 Selecting tests using regex:-
 
 ```
-galasactl runs assemble
+galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package '.*age.*'
@@ -41,7 +41,7 @@ galasactl runs assemble
 Selecting tests without a test stream:-
 
 ```
-galasactl runs assemble
+galasactl runs prepare
           --portfolio test.yaml
           --class test.package.one/Test1
           --class test.package.one/Test2
@@ -50,7 +50,7 @@ galasactl runs assemble
 Providing test specific overrides:-
 
 ```
-galasactl runs assemble
+galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package test.package.one
@@ -61,14 +61,14 @@ galasactl runs assemble
 Building a portfolio over mulitple selections and overrides:-
 
 ```
-galasactl runs assemble
+galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package test.package.one
           --override zos.default.lpar=MV2C
           --override zos.default.cluster=PLEX2
 
-galasactl runs assemble
+galasactl runs prepare
           --portfolio test.yaml
           --append
           --stream inttests
@@ -79,7 +79,7 @@ galasactl runs assemble
 
 ## runs submit
 
-The purpose of `runs submit` is to submit and monitor tests in the Galasa ecosystem.  Tests can be input from a portfolio or using the same commands as the `runs assemble` command, but not both.
+The purpose of `runs submit` is to submit and monitor tests in the Galasa ecosystem.  Tests can be input from a portfolio or using the same commands as the `runs prepare` command, but not both.
 
 ### Examples
 
