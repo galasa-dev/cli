@@ -212,7 +212,12 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     }
 
 
-    report(finishedRuns, lostRuns)
+    runOk := report(finishedRuns, lostRuns)
+
+    if !runOk {
+        fmt.Println("Not all runs passed, exiting with code 1")
+        os.Exit(1)
+    }
 }
 
 func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, lostRuns map[string]*TestRun, runOverrides *map[string]string) []TestRun {
@@ -312,7 +317,7 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
     
 }
 
-func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) bool {
 
     resultCounts := make(map[string]int, 0)
 
@@ -330,6 +335,7 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
 
     resultCounts["Lost"] = len(lostRuns)
 
+    totalFailed := len(lostRuns)
 
     fmt.Println("***")
     fmt.Println("*** Final report")
@@ -360,6 +366,7 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
         if strings.HasPrefix(run.Result, "Failed") {
             fmt.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
             found = true
+            totalFailed = totalFailed + 1
         }
     }
     if !found {
@@ -373,12 +380,19 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
         if !strings.HasPrefix(run.Result, "Passed") && !strings.HasPrefix(run.Result, "Failed") {
             fmt.Printf("***     Run %v(%v) - %v/%v/%v\n", runName, run.Result, run.Stream, run.Bundle, run.Class)
             found = true
+            totalFailed = totalFailed + 1
         }
     }
     if !found {
         fmt.Println("***     None")
     }
     fmt.Println("***")
+
+    if totalFailed > 0 {
+        return false
+    }
+
+    return true
 }
 
 func reportProgress(readyRuns []TestRun, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
