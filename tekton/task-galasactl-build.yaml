@@ -67,7 +67,7 @@ spec:
       #!/bin/sh
       set +e
       COMMIT="$(git log --format="%H" -n 1)"
-      echo sed -i "s/unknowngithash/${COMMIT}/" /workspace/git-cli/pkg/cmd/root.go
+      sed -i "s/unknowngithash/${COMMIT}/" /workspace/git-cli/pkg/cmd/root.go
       echo commit is $COMMIT
   - name: galasactl-build
     workingDir: /workspace/git-cli
