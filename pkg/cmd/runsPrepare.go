@@ -19,28 +19,28 @@ import (
 
 var (
         runsAssembleCmd = &cobra.Command{
-            Use:   "assemble",
-            Short: "assembles a list of tests",
-            Long:  "Assembles a list of tests from a test catalog providing specific overrides if required",
+            Use:   "prepare",
+            Short: "prepares a list of tests",
+            Long:  "Prepares a list of tests from a test catalog providing specific overrides if required",
             Args: cobra.NoArgs,
             Run:   executeAssemble,
     }
 
     portfolioFilename      string
-    assembleFlagOverrides  *[]string
-    assembleAppend         *bool
+    prepareFlagOverrides  *[]string
+    prepareAppend         *bool
 
-    assembleSelectionFlags = utils.TestSelectionFlags{}
+    prepareSelectionFlags = utils.TestSelectionFlags{}
 )
 
 
 func init() {
     runsAssembleCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
-    assembleFlagOverrides = runsAssembleCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
-    assembleAppend = runsAssembleCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
+    prepareFlagOverrides = runsAssembleCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
+    prepareAppend = runsAssembleCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
     runsAssembleCmd.MarkFlagRequired("portfolio")
 
-    utils.AddCommandFlags(runsAssembleCmd, &assembleSelectionFlags)
+    utils.AddCommandFlags(runsAssembleCmd, &prepareSelectionFlags)
 
     runsCmd.AddCommand(runsAssembleCmd)
 }
@@ -50,7 +50,7 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
     // Convert overrides to a map
     testOverrides := make(map[string]string)
-    for _, override := range *assembleFlagOverrides {
+    for _, override := range *prepareFlagOverrides {
         pos := strings.Index(override, "=")
         if (pos < 1) {
             fmt.Printf("Invalid override '%v'",override)
@@ -68,7 +68,7 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
     apiClient := api.InitialiseAPI(bootstrap)
 
-    testSelection := utils.SelectTests(apiClient, &assembleSelectionFlags)
+    testSelection := utils.SelectTests(apiClient, &prepareSelectionFlags)
     count := len(testSelection.Classes)
     if count < 1 {
         fmt.Println("No tests were selected")
@@ -82,7 +82,7 @@ func executeAssemble(cmd *cobra.Command, args []string) {
     }
 
     var portfolio utils.Portfolio
-    if *assembleAppend {
+    if *prepareAppend {
         portfolio = utils.LoadPortfolio(portfolioFilename)
     } else {
         portfolio = utils.NewPortfolio()
@@ -92,7 +92,7 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
     utils.WritePortfolio(portfolio, portfolioFilename)
 
-    if *assembleAppend {
+    if *prepareAppend {
         fmt.Println("Portfolio appended")
     } else {
         fmt.Println("Portfolio created")
