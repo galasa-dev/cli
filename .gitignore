@@ -2,4 +2,8 @@ bin/
 vendor/
 pkg/galasaapi/
 p*.yaml
+r*.yaml
+r*.json
+r*.xml
+junit.xml
 .vscode/

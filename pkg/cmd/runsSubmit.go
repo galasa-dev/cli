@@ -7,13 +7,18 @@
 package cmd
 
 import (
+	"bufio"
+	"encoding/json"
+	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 
 	satori "github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
@@ -36,22 +41,69 @@ var (
     submitFlagOverrides *[]string
     trace               *bool
     requestor           string 
+    resultYamlFilename  string 
+    resultJsonFilename  string 
+    resultJunitFilename  string 
 
     submitSelectionFlags = utils.TestSelectionFlags{}
 )
 
+type TestReport struct {
+    Tests    []TestRun          `yaml:"tests" json:"tests"`
+}
+
 type TestRun struct {
-    Name      string            `yaml:"name"`
-	Bundle    string            `yaml:"bundle"`
-	Class     string            `yaml:"class"`
-	Stream    string            `yaml:"stream"`
-    Status    string            `yaml:"status"`
-    Result    string            `yaml:"result"`
-    Overrides map[string]string `yaml:"overrides"`
+    Name      string            `yaml:"name" json:"name"`
+	Bundle    string            `yaml:"bundle" json:"bundle"`
+	Class     string            `yaml:"class" json:"class"`
+	Stream    string            `yaml:"stream" json:"stream"`
+    Status    string            `yaml:"status" json:"status"`
+    Result    string            `yaml:"result" json:"result"`
+    Overrides map[string]string `yaml:"overrides" json:"overrides"`
+    Tests     []TestMethod      `yaml:"tests" json:"tests"`
+}
+
+type TestMethod struct {
+    Method    string     `yaml:"name" json:"name"`
+    Result    string     `yaml:"result" json:"result"`
+}
+
+type JunitTestSuites struct {
+    XMLName  xml.Name            `xml:"testsuites"`
+    ID       string              `xml:"id,attr"`
+    Name     string              `xml:"name,attr"`
+    Tests    int                 `xml:"tests,attr"`
+    Failures int                 `xml:"failures,attr"`
+    Time     int                 `xml:"time,attr"`
+    Testsuite []JunitTestSuite   `xml:"testsuite"`
+} 
+
+type JunitTestSuite struct {
+    ID       string            `xml:"id,attr"`
+    Name     string            `xml:"name,attr"`
+    Tests    int               `xml:"tests,attr"`
+    Failures int               `xml:"failures,attr"`
+    Time     int               `xml:"time,attr"`
+    TestCase []JunitTestCase   `xml:"testcase"`
+}
+
+type JunitTestCase struct {
+    ID       string          `xml:"id,attr"`
+    Name     string          `xml:"name,attr"`
+    Time     int             `xml:"time,attr"`
+    Failure  *JunitFailure   `xml:"failure"`
+}
+
+type JunitFailure struct {
+    Message    string   `xml:"message,attr"`
+    Type       string   `xml:"type,attr"`
 }
 
 func init() {
     runsSubmitCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio containing the tests to run")
+    runsSubmitCmd.Flags().StringVar(&resultYamlFilename, "resultYaml", "", "yaml file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&resultJsonFilename, "resultJson", "", "json file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&resultJunitFilename, "resultJunit", "", "junit xml file to record the final results in")
     runsSubmitCmd.Flags().StringVarP(&groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
     runsSubmitCmd.Flags().StringVar(&requestor, "requestor", "cli", "(temporary until authentication is enabled on the ecosystem) the requestor id to be associated with the test runs")
     pollFlag = runsSubmitCmd.Flags().Int64("poll", 30, "in seconds, how often the cli will poll the ecosystem for the status of the test runs")
@@ -118,6 +170,18 @@ func executeSubmit(cmd *cobra.Command, args []string) {
             os.Exit(1)
         }
         runOverrides[key] = value
+    }
+
+    // Do we need to ask the RAS for the test structure
+    fetchRas := false
+    if resultYamlFilename != "" {
+        fetchRas = true
+    }
+    if resultJsonFilename != "" {
+        fetchRas = true
+    }
+    if resultJunitFilename != "" {
+        fetchRas = true
     }
 
     // Load the portfolio of tests
@@ -208,11 +272,21 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
         time.Sleep(poll)
 
-        runsFetchCurrentStatus(apiClient, groupName, readyRuns, submittedRuns, finishedRuns, lostRuns)
+        runsFetchCurrentStatus(apiClient, groupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
     }
 
 
     runOk := report(finishedRuns, lostRuns)
+
+    if resultYamlFilename != "" {
+        reportYaml(finishedRuns, lostRuns)
+    }
+    if resultJsonFilename != "" {
+        reportJSON(finishedRuns, lostRuns)
+    }
+    if resultJunitFilename != "" {
+        reportJunit(finishedRuns, lostRuns)
+    }
 
     if !runOk {
         fmt.Println("Not all runs passed, exiting with code 1")
@@ -269,7 +343,7 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
     return readyRuns
 }
 
-func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun, fetchRas bool) {
     currentGroup, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
     if err != nil {
         fmt.Printf("Received error from group request - %v\n", err)
@@ -297,6 +371,28 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
                     result = currentRun.GetResult()
                 }
                 checkRun.Result = result
+
+                // Extract the ras run result to get the method names if a report is requested
+                rasRunID := currentRun.RasRunId
+                if fetchRas && rasRunID != nil {
+                    rasRun, _, err := apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, *rasRunID).Execute()
+                    if err != nil {
+                        fmt.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
+                    } else {
+                        checkRun.Tests = make([]TestMethod, 0)
+
+                        testStructure := rasRun.GetTestStructure()
+                        for _, testMethod := range testStructure.GetMethods() {
+                            test := TestMethod {
+                                Method: testMethod.GetMethodName(),
+                                Result: testMethod.GetResult(),
+                            }
+
+                            checkRun.Tests = append(checkRun.Tests, test)
+                        }
+                    }
+                }
+
                 fmt.Printf("Run %v has finished(%v) - %v/%v/%v\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class)
             } else {
                 // Check to see if there was a status change
@@ -340,12 +436,6 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) bool
     fmt.Println("***")
     fmt.Println("*** Final report")
     fmt.Println("*** ---------------")
-    fmt.Print("*** results")
-    for result, count := range resultCounts {
-        fmt.Printf(", %v=%v", result, count)
-    }
-    fmt.Print("\n")
-
     fmt.Println("***")
     fmt.Println("*** Passed test runs:-")
     found := false
@@ -387,6 +477,12 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) bool
         fmt.Println("***     None")
     }
     fmt.Println("***")
+    fmt.Print("*** results")
+    for result, count := range resultCounts {
+        fmt.Printf(", %v=%v", result, count)
+    }
+    fmt.Print("\n")
+
 
     if totalFailed > 0 {
         return false
@@ -439,5 +535,129 @@ func copyTestRuns(original map[string]*TestRun) map[string]*TestRun {
     }
 
     return new
+}
+
+
+func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+
+    var testReport TestReport
+    testReport.Tests = make([]TestRun, 0)
+
+    for _, run := range finishedRuns {
+        testReport.Tests = append(testReport.Tests, *run)
+    }
+
+    for _, run := range lostRuns {
+        testReport.Tests = append(testReport.Tests, *run)
+    }
+
+	file,err := os.Create(resultYamlFilename)
+	if err != nil {
+		panic(err)
+	}
+
+	w := bufio.NewWriter(file)
+
+	encoder := yaml.NewEncoder(w)
+	encoder.SetIndent(2)
+
+	err = encoder.Encode(&testReport)
+	if err != nil {
+		panic(err)
+	}
+	w.Flush()
+	encoder.Close()
+	file.Close()  
+    
+    fmt.Printf("Yaml test report written to %v\n", resultYamlFilename)
+}
+
+func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+
+    var testReport TestReport
+    testReport.Tests = make([]TestRun, 0)
+
+    for _, run := range finishedRuns {
+        testReport.Tests = append(testReport.Tests, *run)
+    }
+
+    for _, run := range lostRuns {
+        testReport.Tests = append(testReport.Tests, *run)
+    }
+
+    data, err := json.MarshalIndent(&testReport, "", " ")
+    if err != nil {
+        panic(err)
+    }
+
+    err = ioutil.WriteFile(resultJsonFilename, data, 0644)
+    if err != nil {
+        panic(err)
+    }
+    
+    fmt.Printf("Json test report written to %v\n", resultJsonFilename)
+}
+
+
+func reportJunit(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+
+    var testSuites JunitTestSuites
+    testSuites.ID   = groupName
+    testSuites.Name = "Galasa test run"
+    testSuites.Tests = 0
+    testSuites.Failures = 0
+    testSuites.Time = 0
+    testSuites.Testsuite = make([]JunitTestSuite, 0)
+
+    for _, run := range finishedRuns {
+        var testSuite JunitTestSuite
+
+        testSuite.ID = run.Name
+        testSuite.Name = run.Stream + "/" + run.Bundle + "/" + run.Class
+        testSuite.TestCase = make([]JunitTestCase, 0)
+
+        for _, method := range run.Tests {
+            var testCase JunitTestCase
+            testCase.ID = method.Method
+            testCase.Name = method.Method
+
+            testSuites.Tests = testSuites.Tests + 1
+            testSuite.Tests = testSuite.Tests + 1
+            if !strings.HasPrefix(method.Result, "Passed") {
+                testSuites.Failures = testSuites.Failures + 1
+                testSuite.Failures = testSuite.Failures + 1
+
+                var failure JunitFailure
+                failure.Message = "Failure messages are unavailable at this time"
+                failure.Type    = "Unknown"
+
+                testCase.Failure = &failure
+            }
+            
+            testSuite.TestCase = append(testSuite.TestCase, testCase)
+        }
+
+        testSuites.Testsuite = append(testSuites.Testsuite, testSuite)
+    }
+
+    for range lostRuns {
+        testSuites.Tests = testSuites.Tests + 1
+        testSuites.Failures = testSuites.Failures + 1
+    }
+
+
+    data, err := xml.MarshalIndent(&testSuites, "", "    ")
+    if err != nil {
+        panic(err)
+    }
+
+    prologue := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + string(data))
+
+    err = ioutil.WriteFile(resultJunitFilename, prologue, 0644)
+    if err != nil {
+        panic(err)
+    }
+    
+    fmt.Printf("Junit XML test report written to %v\n", resultJunitFilename)
 }
 
