@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
     Use:   "galasactl",
     Short: "CLI for Galasa",
     Long:  "",
-    Version: "0.17.0-alpha-unknowngithash",
+    Version: "unknowncliversion-unknowngithash",
 }
 
 var (
