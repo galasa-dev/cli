@@ -34,16 +34,16 @@ var (
             Run:   executeSubmit,
     }
 
-    groupName           string
-    throttle            *int 
-    pollFlag            *int64
-    progressFlag        *int
-    submitFlagOverrides *[]string
-    trace               *bool
-    requestor           string 
-    resultYamlFilename  string 
-    resultJsonFilename  string 
-    resultJunitFilename  string 
+    groupName            string
+    throttle             *int 
+    pollFlag             *int64
+    progressFlag         *int
+    submitFlagOverrides  *[]string
+    trace                *bool
+    requestor            string 
+    reportYamlFilename   string 
+    reportJsonFilename   string 
+    reportJunitFilename  string 
 
     submitSelectionFlags = utils.TestSelectionFlags{}
 )
@@ -101,9 +101,9 @@ type JunitFailure struct {
 
 func init() {
     runsSubmitCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio containing the tests to run")
-    runsSubmitCmd.Flags().StringVar(&resultYamlFilename, "resultYaml", "", "yaml file to record the final results in")
-    runsSubmitCmd.Flags().StringVar(&resultJsonFilename, "resultJson", "", "json file to record the final results in")
-    runsSubmitCmd.Flags().StringVar(&resultJunitFilename, "resultJunit", "", "junit xml file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&reportYamlFilename, "reportYaml", "", "yaml file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&reportJsonFilename, "reportJson", "", "json file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&reportJunitFilename, "reportJunit", "", "junit xml file to record the final results in")
     runsSubmitCmd.Flags().StringVarP(&groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
     runsSubmitCmd.Flags().StringVar(&requestor, "requestor", "cli", "(temporary until authentication is enabled on the ecosystem) the requestor id to be associated with the test runs")
     pollFlag = runsSubmitCmd.Flags().Int64("poll", 30, "in seconds, how often the cli will poll the ecosystem for the status of the test runs")
@@ -174,13 +174,13 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
     // Do we need to ask the RAS for the test structure
     fetchRas := false
-    if resultYamlFilename != "" {
+    if reportYamlFilename != "" {
         fetchRas = true
     }
-    if resultJsonFilename != "" {
+    if reportJsonFilename != "" {
         fetchRas = true
     }
-    if resultJunitFilename != "" {
+    if reportJunitFilename != "" {
         fetchRas = true
     }
 
@@ -278,13 +278,13 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
     runOk := report(finishedRuns, lostRuns)
 
-    if resultYamlFilename != "" {
+    if reportYamlFilename != "" {
         reportYaml(finishedRuns, lostRuns)
     }
-    if resultJsonFilename != "" {
+    if reportJsonFilename != "" {
         reportJSON(finishedRuns, lostRuns)
     }
-    if resultJunitFilename != "" {
+    if reportJunitFilename != "" {
         reportJunit(finishedRuns, lostRuns)
     }
 
@@ -551,7 +551,7 @@ func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
         testReport.Tests = append(testReport.Tests, *run)
     }
 
-	file,err := os.Create(resultYamlFilename)
+	file,err := os.Create(reportYamlFilename)
 	if err != nil {
 		panic(err)
 	}
@@ -569,7 +569,7 @@ func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
 	encoder.Close()
 	file.Close()  
     
-    fmt.Printf("Yaml test report written to %v\n", resultYamlFilename)
+    fmt.Printf("Yaml test report written to %v\n", reportYamlFilename)
 }
 
 func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
@@ -590,12 +590,12 @@ func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
         panic(err)
     }
 
-    err = ioutil.WriteFile(resultJsonFilename, data, 0644)
+    err = ioutil.WriteFile(reportJsonFilename, data, 0644)
     if err != nil {
         panic(err)
     }
     
-    fmt.Printf("Json test report written to %v\n", resultJsonFilename)
+    fmt.Printf("Json test report written to %v\n", reportJsonFilename)
 }
 
 
@@ -653,11 +653,11 @@ func reportJunit(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun)
 
     prologue := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + string(data))
 
-    err = ioutil.WriteFile(resultJunitFilename, prologue, 0644)
+    err = ioutil.WriteFile(reportJunitFilename, prologue, 0644)
     if err != nil {
         panic(err)
     }
     
-    fmt.Printf("Junit XML test report written to %v\n", resultJunitFilename)
+    fmt.Printf("Junit XML test report written to %v\n", reportJunitFilename)
 }
 
