@@ -15,6 +15,10 @@ spec:
       type: git
     - name: git-framework
       type: git
+  workspaces:
+  - name: clibin
+    optional: true
+    mountpath: /workspace/git-cli/bin
   params:
   - name: distBranch
     type: string
@@ -69,31 +73,28 @@ spec:
       COMMIT="$(git log --format="%H" -n 1)"
       sed -i "s/unknowngithash/${COMMIT}/" /workspace/git-cli/pkg/cmd/root.go
       echo commit is $COMMIT
+  - name: get-version
+    workingDir: /workspace/git-cli
+    image: $(params.dockerRepo)/galasa/galasa-build
+    script: |
+      #!/bin/sh
+      set +e
+      VERSION="$(cat VERSION)"
+      sed -i "s/unknowncliversion/${VERSION}/" /workspace/git-cli/pkg/cmd/root.go
+      echo version is $VERSION
   - name: galasactl-build
     workingDir: /workspace/git-cli
     image: $(params.dockerRepo)/galasa/galasa-build
     command:
     - make
     - all
-  - name: docker-build-http
+  - name: ls2
     workingDir: /workspace/git-cli
-    image: $(params.dockerRepo)/library/kaniko-executor:latest
-    env:
-    - name: DOCKER_CONFIG
-      value: /tekton/home/.docker
-    command:
-    - /kaniko/executor
-    - --dockerfile=./DockerfileHttp
-    - --context=/workspace/git-cli
-    - --destination=$(params.dockerRepo)/galasadev/galasa-cli-http:$(params.distBranch)
-    - $(params.noPush)
-    - --oci-layout-path=/workspace/git-framework/docker/image-digest
-    - --skip-tls-verify
-    - --skip-tls-verify-pull
-    - --single-snapshot
-    - --verbosity=info
-    - --build-arg=dockerRepository=$(params.dockerRepo)
-    - --build-arg=branch=$(params.distBranch)
+    image: $(params.dockerRepo)/galasa/galasa-build
+    script: |
+      #!/bin/sh
+      set +e
+      ls -l /workspace/git-cli
   - name: docker-build-cli
     workingDir: /workspace/git-cli
     image: $(params.dockerRepo)/library/kaniko-executor:latest

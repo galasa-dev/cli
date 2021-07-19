@@ -26,3 +26,13 @@ spec:
     nodeSelector:
       beta.kubernetes.io/arch: amd64
       platform: hdc
+  workspaces:
+  - name: clibin
+    volumeClaimTemplate:
+      spec:
+        storageClassName: rbd
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

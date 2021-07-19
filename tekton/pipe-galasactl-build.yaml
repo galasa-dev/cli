@@ -20,6 +20,9 @@ spec:
   - name: noPush
     type: string
     default: ""
+  workspaces:
+  - name: clibin
+    optional: true
   tasks:
   - name: galasactl
     taskRef:
@@ -35,9 +38,12 @@ spec:
         resource: git-cli
       - name: git-framework
         resource: git-framework
-  - name: recycle-galasactl
+    workspaces:
+     - name: clibin
+       workspace: clibin
+  - name: release-galasactl
     taskRef:
-      name: recycle-deployment
+      name: galasactl-release
     runAfter:
     - galasactl
     when:
@@ -45,7 +51,12 @@ spec:
       operator: notin
       values: ["--no-push"]
     params:
-    - name: namespace
-      value: galasa-development
-    - name: deployment
-      value: cli-main-http
+    - name: noPush
+      value: $(params.noPush)
+    resources:
+      inputs:
+      - name: git-cli
+        resource: git-cli
+    workspaces:
+     - name: clibin
+       workspace: clibin
