@@ -18,20 +18,6 @@ spec:
   - name: oldBranch
     type: string
   tasks:
-  - name: snapshot-http
-    taskRef:
-      name: snapshot-generic
-    params:
-    - name: distBranch
-      value: $(params.distBranch)
-    - name: oldBranch
-      value: $(params.oldBranch)
-    - name: image
-      value: galasa-cli-http
-    resources:
-      inputs:
-      - name: git-tekton
-        resource: git-tekton
   - name: snapshot-cli
     taskRef:
       name: snapshot-generic
