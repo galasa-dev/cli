@@ -117,8 +117,3 @@ galasactl runs submit
           --override zos.default.lpar=MV2C
           --override zos.default.cluster=PLEX2
 ```
-
-
-Things left to do:-
-* test report yaml
-* junit reports
