@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+    "os/user"
 	"strings"
 	"time"
 
@@ -41,9 +42,10 @@ var (
     submitFlagOverrides  *[]string
     trace                *bool
     requestor            string 
+    requestType          string 
     reportYamlFilename   string 
     reportJsonFilename   string 
-    reportJunitFilename  string 
+    reportJunitFilename  string
 
     submitSelectionFlags = utils.TestSelectionFlags{}
 )
@@ -100,12 +102,19 @@ type JunitFailure struct {
 }
 
 func init() {
+    username := "cli"
+    currentUser, err := user.Current()
+    if err == nil {
+        username = currentUser.Username
+    }
+
     runsSubmitCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio containing the tests to run")
-    runsSubmitCmd.Flags().StringVar(&reportYamlFilename, "reportYaml", "", "yaml file to record the final results in")
-    runsSubmitCmd.Flags().StringVar(&reportJsonFilename, "reportJson", "", "json file to record the final results in")
-    runsSubmitCmd.Flags().StringVar(&reportJunitFilename, "reportJunit", "", "junit xml file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&reportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&reportJsonFilename, "reportjson", "", "json file to record the final results in")
+    runsSubmitCmd.Flags().StringVar(&reportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
     runsSubmitCmd.Flags().StringVarP(&groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
-    runsSubmitCmd.Flags().StringVar(&requestor, "requestor", "cli", "(temporary until authentication is enabled on the ecosystem) the requestor id to be associated with the test runs")
+    runsSubmitCmd.Flags().StringVar(&requestor, "requestor", username, "the requestor id to be associated with the test runs")
+    runsSubmitCmd.Flags().StringVar(&requestType, "requesttype", "CLI", "the type of request, used to allocate a run name")
     pollFlag = runsSubmitCmd.Flags().Int64("poll", 30, "in seconds, how often the cli will poll the ecosystem for the status of the test runs")
     progressFlag = runsSubmitCmd.Flags().Int("progress", 5, "in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports")
     throttle = runsSubmitCmd.Flags().Int("throttle", 3, "how many test runs can be submitted in parallel, 0 or less will disable throttling")
@@ -314,7 +323,7 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
 
     testRunRequest := galasaapi.NewTestRunRequest()
     testRunRequest.SetClassNames(classNames)
-    testRunRequest.SetRequestorType("CLI")
+    testRunRequest.SetRequestorType(requestType)
     testRunRequest.SetRequestor(requestor)
     testRunRequest.SetTestStream(nextRun.Stream)
     testRunRequest.SetTrace(*trace)
