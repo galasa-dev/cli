@@ -7,7 +7,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -46,20 +46,20 @@ func init() {
 }
 
 func executeAssemble(cmd *cobra.Command, args []string) {
-    fmt.Println("Galasa CLI - Assemble tests")
+    log.Println("Galasa CLI - Assemble tests")
 
     // Convert overrides to a map
     testOverrides := make(map[string]string)
     for _, override := range *prepareFlagOverrides {
         pos := strings.Index(override, "=")
         if (pos < 1) {
-            fmt.Printf("Invalid override '%v'",override)
+            log.Printf("Invalid override '%v'",override)
             os.Exit(1)
         }
         key := override[:pos]
         value := override[pos+1:]
         if value == "" {
-            fmt.Printf("Invalid override '%v'",override)
+            log.Printf("Invalid override '%v'",override)
             os.Exit(1)
         }
 
@@ -71,13 +71,13 @@ func executeAssemble(cmd *cobra.Command, args []string) {
     testSelection := utils.SelectTests(apiClient, &prepareSelectionFlags)
     count := len(testSelection.Classes)
     if count < 1 {
-        fmt.Println("No tests were selected")
+        log.Println("No tests were selected")
         os.Exit(1)
     } else {
         if count == 1 {
-            fmt.Println("1 test was selected")
+            log.Println("1 test was selected")
         } else {
-            fmt.Printf("%v tests were selected", count)
+            log.Printf("%v tests were selected", count)
         }
     }
 
@@ -93,9 +93,9 @@ func executeAssemble(cmd *cobra.Command, args []string) {
     utils.WritePortfolio(portfolio, portfolioFilename)
 
     if *prepareAppend {
-        fmt.Println("Portfolio appended")
+        log.Println("Portfolio appended")
     } else {
-        fmt.Println("Portfolio created")
+        log.Println("Portfolio created")
     }    
 }
 

@@ -7,7 +7,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -86,7 +86,7 @@ func SelectTests(apiClient *galasaapi.APIClient, flags *TestSelectionFlags) Test
 
         err := ValidateStream(availableStreams, flags.stream)
         if err != nil {
-            fmt.Printf("%v", err)
+            log.Printf("%v", err)
             os.Exit(1)
         }
 
@@ -94,19 +94,19 @@ func SelectTests(apiClient *galasaapi.APIClient, flags *TestSelectionFlags) Test
         if err != nil {
             panic(err)
         }
-        fmt.Println("Test catalog retrieved")
+        log.Println("Test catalog retrieved")
     }
 
 	testSelection := TestSelection{ Classes: make([]TestClass, 0)}
 
 	if len(*flags.tags) > 0 {
-		fmt.Printf("tags are unsupported at the moment")
+		log.Printf("tags are unsupported at the moment")
 		os.Exit(1)
 	}
 
 	if flags.stream == "" {
 		if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 {
-			fmt.Printf("--bundle, --package, --test and --tag flags can only be specified if --stream is provided\n")
+			log.Printf("--bundle, --package, --test and --tag flags can only be specified if --stream is provided\n")
 			os.Exit(1)
 		}
 	}
@@ -202,7 +202,7 @@ func selectTestsByClass(testCatalog TestCatalog, testSelection *TestSelection, f
 	for _, class := range *flags.classes {
 		pos := strings.Index(class, "/")
 		if pos < 1 {
-			fmt.Printf("Class '%v' is not format 'bundle/class'\n", class)
+			log.Printf("Class '%v' is not format 'bundle/class'\n", class)
 			os.Exit(1)
 		}
 
@@ -210,7 +210,7 @@ func selectTestsByClass(testCatalog TestCatalog, testSelection *TestSelection, f
 		name   := class[pos+1:]
 
 		if (name == "") {
-			fmt.Printf("Class '%v' is not format 'bundle/class'\n", class)
+			log.Printf("Class '%v' is not format 'bundle/class'\n", class)
 			os.Exit(1)
 		}
 
@@ -245,7 +245,7 @@ func selectClass(testSelection *TestSelection, bundle string, name string, flags
 
 	testSelection.Classes = append(testSelection.Classes, newSelectedClass)
 
-	fmt.Printf("    Selected test class '%v/%v'\n", bundle, name)
+	log.Printf("    Selected test class '%v/%v'\n", bundle, name)
 }
 
 
@@ -257,7 +257,7 @@ func convertRegex(patterns *[]string, regexSelect bool) *[]*regexp.Regexp {
 		for _, selection := range *patterns {
 			r, err := regexp.Compile(selection)
 			if err != nil {
-				fmt.Printf("Error with regex '%v' - %v", selection, err)
+				log.Printf("Error with regex '%v' - %v", selection, err)
 				panic(err)
 			}
 			regexPatterns = append(regexPatterns, r)
@@ -267,7 +267,7 @@ func convertRegex(patterns *[]string, regexSelect bool) *[]*regexp.Regexp {
 		for _, selection := range *patterns {
 			r, err := regexp.Compile("\\Q" + selection + "\\E")
 			if err != nil {
-				fmt.Printf("Error with quoted regex '%v' - %v", selection, err)
+				log.Printf("Error with quoted regex '%v' - %v", selection, err)
 				panic(err)
 			}
 			regexPatterns = append(regexPatterns, r)

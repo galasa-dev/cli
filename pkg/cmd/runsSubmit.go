@@ -10,10 +10,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
+	"log"
 	"io/ioutil"
 	"os"
-    "os/user"
+	"os/user"
+	"strconv"
 	"strings"
 	"time"
 
@@ -46,6 +47,8 @@ var (
     reportYamlFilename   string 
     reportJsonFilename   string 
     reportJunitFilename  string
+    throttleFilename     string
+    lostThrottleFile     bool      = false
 
     submitSelectionFlags = utils.TestSelectionFlags{}
 )
@@ -115,6 +118,7 @@ func init() {
     runsSubmitCmd.Flags().StringVarP(&groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
     runsSubmitCmd.Flags().StringVar(&requestor, "requestor", username, "the requestor id to be associated with the test runs")
     runsSubmitCmd.Flags().StringVar(&requestType, "requesttype", "CLI", "the type of request, used to allocate a run name")
+    runsSubmitCmd.Flags().StringVar(&throttleFilename, "throttlefile", "", "a file where the current throttle is stored and monitored, used to dynamically change the throttle")
     pollFlag = runsSubmitCmd.Flags().Int64("poll", 30, "in seconds, how often the cli will poll the ecosystem for the status of the test runs")
     progressFlag = runsSubmitCmd.Flags().Int("progress", 5, "in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports")
     throttle = runsSubmitCmd.Flags().Int("throttle", 3, "how many test runs can be submitted in parallel, 0 or less will disable throttling")
@@ -126,7 +130,7 @@ func init() {
 }
 
 func executeSubmit(cmd *cobra.Command, args []string) {
-    fmt.Println("Galasa CLI - Submit tests")
+    log.Println("Galasa CLI - Submit tests")
 
     // Set the poll time
     if *pollFlag < 1 {
@@ -147,6 +151,16 @@ func executeSubmit(cmd *cobra.Command, args []string) {
         *throttle = int(^uint(0) >> 1) // set to maximum size of the int
     } 
 
+    // Set the throttle file if required
+    if throttleFilename != "" {
+        sThrottle := strconv.Itoa(*throttle)
+        err := ioutil.WriteFile(throttleFilename, []byte(sThrottle), 0644)
+        if err != nil {
+            panic(err)
+        }
+        log.Printf("Throttle file created at %v\n", throttleFilename)
+    }
+
     apiClient := api.InitialiseAPI(bootstrap)
 
 
@@ -154,12 +168,12 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
     if portfolioFilename != "" {
         if utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-            fmt.Println("The submit command does not support mixing of the test selection flags and a portfolio")
+            log.Println("The submit command does not support mixing of the test selection flags and a portfolio")
             os.Exit(1)
         }
     } else {
         if !utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-            fmt.Println("The submit command requires either test selection flags or a portfolio")
+            log.Println("The submit command requires either test selection flags or a portfolio")
             os.Exit(1)
         }
     }
@@ -169,13 +183,13 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     for _, override := range *submitFlagOverrides {
         pos := strings.Index(override, "=")
         if (pos < 1) {
-            fmt.Printf("Invalid override '%v'",override)
+            log.Printf("Invalid override '%v'",override)
             os.Exit(1)
         }
         key := override[:pos]
         value := override[pos+1:]
         if value == "" {
-            fmt.Printf("Invalid override '%v'",override)
+            log.Printf("Invalid override '%v'",override)
             os.Exit(1)
         }
         runOverrides[key] = value
@@ -206,7 +220,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     }
 
     if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
-        fmt.Println("There are no tests in the test porfolio")
+        log.Println("There are no tests in the test porfolio")
         os.Exit(1)
     }
 
@@ -215,7 +229,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
         groupName = satori.NewV4().String()
     }
 
-    fmt.Printf("Using group name '%v' for test run submission\n", groupName)
+    log.Printf("Using group name '%v' for test run submission\n", groupName)
 
     // Just check if it is already in use,  which is perfectly valid for custom group names
     uuidCheck, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
@@ -224,7 +238,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     }
 
     if uuidCheck.Runs != nil && len(*uuidCheck.Runs) > 0 {
-        fmt.Printf("Group name '%v' is aleady in use\n", groupName)
+        log.Printf("Group name '%v' is aleady in use\n", groupName)
     }
 
     // Build list of runs to submit
@@ -252,7 +266,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
         readyRuns = append(readyRuns, newTestrun)
 
-        fmt.Printf("Added test %v/%v/%v to the ready queue\n", newTestrun.Stream, newTestrun.Bundle, newTestrun.Class)
+        log.Printf("Added test %v/%v/%v to the ready queue\n", newTestrun.Stream, newTestrun.Bundle, newTestrun.Class)
     }
 
 
@@ -281,6 +295,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
         time.Sleep(poll)
 
+        checkThrottleFile()
+
         runsFetchCurrentStatus(apiClient, groupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
     }
 
@@ -298,7 +314,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
     }
 
     if !runOk {
-        fmt.Println("Not all runs passed, exiting with code 1")
+        log.Println("Not all runs passed, exiting with code 1")
         os.Exit(1)
     }
 }
@@ -331,13 +347,13 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
  
     resultGroup, _, err := apiClient.RunsAPIApi.PostSubmitTestRuns(nil, groupName).TestRunRequest(*testRunRequest).Execute()
     if err != nil {
-        fmt.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
+        log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
         lostRuns[className] = &nextRun
         return readyRuns
     }
 
     if len(resultGroup.GetRuns()) < 1 {
-        fmt.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
+        log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
         lostRuns[className] = &nextRun
         return readyRuns
     }
@@ -347,7 +363,7 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
 
     submittedRuns[nextRun.Name] = &nextRun
 
-    fmt.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
+    log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
 
     return readyRuns
 }
@@ -355,7 +371,7 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
 func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun, fetchRas bool) {
     currentGroup, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
     if err != nil {
-        fmt.Printf("Received error from group request - %v\n", err)
+        log.Printf("Received error from group request - %v\n", err)
         return
     }
     
@@ -386,7 +402,7 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
                 if fetchRas && rasRunID != nil {
                     rasRun, _, err := apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, *rasRunID).Execute()
                     if err != nil {
-                        fmt.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
+                        log.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
                     } else {
                         checkRun.Tests = make([]TestMethod, 0)
 
@@ -402,12 +418,12 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
                     }
                 }
 
-                fmt.Printf("Run %v has finished(%v) - %v/%v/%v\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+                log.Printf("Run %v has finished(%v) - %v/%v/%v\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class)
             } else {
                 // Check to see if there was a status change
                 if checkRun.Status != currentRun.GetStatus() {
                     checkRun.Status = currentRun.GetStatus()
-                    fmt.Printf("    Run %v status is now '%v' - %v/%v/%v\n", runName, checkRun.Status, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+                    log.Printf("    Run %v status is now '%v' - %v/%v/%v\n", runName, checkRun.Status, checkRun.Stream, checkRun.Bundle, checkRun.Class)
                 }
             }
         }
@@ -417,10 +433,41 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
     for runName, lostRun := range checkRuns {
         lostRuns[runName] = lostRun
         delete(submittedRuns, runName)
-        fmt.Printf("Run %v was lost - %v/%v/%v\n", runName, lostRun.Stream, lostRun.Bundle, lostRun.Class)
+        log.Printf("Run %v was lost - %v/%v/%v\n", runName, lostRun.Stream, lostRun.Bundle, lostRun.Class)
     }
     
 }
+
+func checkThrottleFile() {
+    if throttleFilename == "" {
+        return
+    }
+
+    bNewThrottle, err := ioutil.ReadFile(throttleFilename)
+    if err != nil {
+        if !lostThrottleFile {
+            lostThrottleFile = true
+            log.Printf("Error with throttle file %v\n",err)
+        }
+        return
+    }
+
+    lostThrottleFile = false
+
+    sNewThrottle := string(bNewThrottle)
+    newThrottle, err := strconv.Atoi(sNewThrottle)
+    if err != nil {
+        log.Printf("Invalid throttle value '%v'\n", sNewThrottle)
+        return
+    }    
+
+    if newThrottle != *throttle {
+        throttle = &newThrottle
+        log.Printf("New throttle set to %v\n", *throttle)
+    }
+}
+
+
 
 func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) bool {
 
@@ -442,55 +489,55 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) bool
 
     totalFailed := len(lostRuns)
 
-    fmt.Println("***")
-    fmt.Println("*** Final report")
-    fmt.Println("*** ---------------")
-    fmt.Println("***")
-    fmt.Println("*** Passed test runs:-")
+    log.Println("***")
+    log.Println("*** Final report")
+    log.Println("*** ---------------")
+    log.Println("***")
+    log.Println("*** Passed test runs:-")
     found := false
     for runName, run := range finishedRuns {
         if strings.HasPrefix(run.Result, "Passed") {
-            fmt.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
+            log.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
             found = true
         }
     }
     if !found {
-        fmt.Println("***     None")
+        log.Println("***     None")
     }
 
-    fmt.Println("***")
-    fmt.Println("*** Failed test runs:-")
+    log.Println("***")
+    log.Println("*** Failed test runs:-")
     found = false
     for runName, run := range finishedRuns {
         if strings.HasPrefix(run.Result, "Failed") {
-            fmt.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
+            log.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
             found = true
             totalFailed = totalFailed + 1
         }
     }
     if !found {
-        fmt.Println("***     None")
+        log.Println("***     None")
     }
 
-    fmt.Println("***")
-    fmt.Println("*** Other test runs:-")
+    log.Println("***")
+    log.Println("*** Other test runs:-")
     found = false
     for runName, run := range finishedRuns {
         if !strings.HasPrefix(run.Result, "Passed") && !strings.HasPrefix(run.Result, "Failed") {
-            fmt.Printf("***     Run %v(%v) - %v/%v/%v\n", runName, run.Result, run.Stream, run.Bundle, run.Class)
+            log.Printf("***     Run %v(%v) - %v/%v/%v\n", runName, run.Result, run.Stream, run.Bundle, run.Class)
             found = true
             totalFailed = totalFailed + 1
         }
     }
     if !found {
-        fmt.Println("***     None")
+        log.Println("***     None")
     }
-    fmt.Println("***")
-    fmt.Print("*** results")
+    log.Println("***")
+    log.Print("*** results")
     for result, count := range resultCounts {
-        fmt.Printf(", %v=%v", result, count)
+        log.Printf(", %v=%v", result, count)
     }
-    fmt.Print("\n")
+    log.Print("\n")
 
 
     if totalFailed > 0 {
@@ -518,22 +565,23 @@ func reportProgress(readyRuns []TestRun, submittedRuns map[string]*TestRun, fini
     }
 
 
-    fmt.Println("***")
-    fmt.Println("*** Progress report")
-    fmt.Println("*** ---------------")
+    log.Println("***")
+    log.Println("*** Progress report")
+    log.Println("*** ---------------")
     for runName, run := range submittedRuns {
-        fmt.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
+        log.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
     }
-    fmt.Println("*** ----------------------------------------------------------------------------")
-    fmt.Printf("*** run status, ready=%v, submitted=%v, finished=%v, lost=%v\n", ready, submitted, finished, lost)
+    log.Println("*** ----------------------------------------------------------------------------")
+    log.Printf("*** run status, ready=%v, submitted=%v, finished=%v, lost=%v\n", ready, submitted, finished, lost)
+    log.Printf("*** throttle=%v\n", throttle)
     if len(resultCounts) > 0 {
-        fmt.Print("*** results so far")
+        log.Print("*** results so far")
         for result, count := range resultCounts {
-            fmt.Printf(", %v=%v", result, count)
+            log.Printf(", %v=%v", result, count)
         }
-        fmt.Print("\n")
+        log.Print("\n")
     }   
-    fmt.Println("***")
+    log.Println("***")
 }
 
 
@@ -578,7 +626,7 @@ func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
 	encoder.Close()
 	file.Close()  
     
-    fmt.Printf("Yaml test report written to %v\n", reportYamlFilename)
+    log.Printf("Yaml test report written to %v\n", reportYamlFilename)
 }
 
 func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
@@ -604,7 +652,7 @@ func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
         panic(err)
     }
     
-    fmt.Printf("Json test report written to %v\n", reportJsonFilename)
+    log.Printf("Json test report written to %v\n", reportJsonFilename)
 }
 
 
@@ -667,6 +715,6 @@ func reportJunit(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun)
         panic(err)
     }
     
-    fmt.Printf("Junit XML test report written to %v\n", reportJunitFilename)
+    log.Printf("Junit XML test report written to %v\n", reportJunitFilename)
 }
 
