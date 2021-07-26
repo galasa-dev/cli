@@ -1,13 +1,12 @@
-//
-// Licensed Materials - Property of IBM
-//
-// (c) Copyright IBM Corp. 2021.
-//
+/*
+*  Licensed Materials - Property of IBM
+*
+* (c) Copyright IBM Corp. 2021.
+*/
 
 package api
 
 import (
-//	"fmt"
 	"os"
 	"io"
 	"strings"
