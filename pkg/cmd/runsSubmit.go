@@ -10,8 +10,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"encoding/xml"
-	"log"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"strconv"
@@ -573,13 +574,14 @@ func reportProgress(readyRuns []TestRun, submittedRuns map[string]*TestRun, fini
     }
     log.Println("*** ----------------------------------------------------------------------------")
     log.Printf("*** run status, ready=%v, submitted=%v, finished=%v, lost=%v\n", ready, submitted, finished, lost)
-    log.Printf("*** throttle=%v\n", throttle)
+    log.Printf("*** throttle=%v\n", *throttle)
     if len(resultCounts) > 0 {
-        log.Print("*** results so far")
+        resultsSoFar := "*** results so far"
+        log.Print()
         for result, count := range resultCounts {
-            log.Printf(", %v=%v", result, count)
+            resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", result, count)
         }
-        log.Print("\n")
+        log.Print(resultsSoFar)
     }   
     log.Println("***")
 }
