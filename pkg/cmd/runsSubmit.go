@@ -577,11 +577,10 @@ func reportProgress(readyRuns []TestRun, submittedRuns map[string]*TestRun, fini
     log.Printf("*** throttle=%v\n", *throttle)
     if len(resultCounts) > 0 {
         resultsSoFar := "*** results so far"
-        log.Print()
         for result, count := range resultCounts {
             resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", result, count)
         }
-        log.Print(resultsSoFar)
+        log.Println(resultsSoFar)
     }   
     log.Println("***")
 }
