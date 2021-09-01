@@ -535,11 +535,11 @@ func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) bool
     }
     log.Println("***")
     log.Print("*** results")
+    resultsSoFar := "*** results "
     for result, count := range resultCounts {
-        log.Printf(", %v=%v", result, count)
+        resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", result, count)
     }
-    log.Print("\n")
-
+    log.Println(resultsSoFar)
 
     if totalFailed > 0 {
         return false
