@@ -1,7 +1,5 @@
 /*
-*  Licensed Materials - Property of IBM
-*
-* (c) Copyright IBM Corp. 2021.
+*  Copyright contributors to the Galasa project 
 */
 
 package utils
@@ -99,11 +97,6 @@ func SelectTests(apiClient *galasaapi.APIClient, flags *TestSelectionFlags) Test
 
 	testSelection := TestSelection{ Classes: make([]TestClass, 0)}
 
-	if len(*flags.tags) > 0 {
-		log.Printf("tags are unsupported at the moment")
-		os.Exit(1)
-	}
-
 	if flags.stream == "" {
 		if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 {
 			log.Printf("--bundle, --package, --test and --tag flags can only be specified if --stream is provided\n")
@@ -114,7 +107,7 @@ func SelectTests(apiClient *galasaapi.APIClient, flags *TestSelectionFlags) Test
 	selectTestsByBundle(testCatalog, &testSelection, flags)
 	selectTestsByPackage(testCatalog, &testSelection, flags)
 	selectTestsByTest(testCatalog, &testSelection, flags)
-//	selectTestsByTag(testCatalog, &testSelection, stream)
+	selectTestsByTag(testCatalog, &testSelection, flags)
 	selectTestsByClass(testCatalog, &testSelection, flags)
 
 	return testSelection
@@ -217,6 +210,43 @@ func selectTestsByClass(testCatalog TestCatalog, testSelection *TestSelection, f
 		selectClass(testSelection, bundle, name, flags)
 	}
 }
+
+
+func selectTestsByTag(testCatalog TestCatalog, testSelection *TestSelection, flags *TestSelectionFlags) {
+
+	if len(*flags.tags) < 1 {
+		return 
+	}
+
+	if testCatalog["classes"] == nil {
+		return
+	}
+
+	regexPatterns := convertRegex(flags.tags, *flags.regexSelect)
+	availableClasses := testCatalog["classes"].(map[string]interface{})
+
+	classSearch:
+	for _, oclassDef := range availableClasses {
+		classDef := oclassDef.(map[string]interface{})
+		oclassTags := classDef["tags"]
+        if oclassTags == nil {
+            continue classSearch
+        }
+		for _, itag := range oclassTags.([]interface{}) {
+			tag := itag.(string)
+
+			for _, regexBundle := range *regexPatterns {
+				if regexBundle.MatchString(tag) {
+					selectClassByCatalog(testSelection, classDef, flags)
+					continue classSearch
+				}
+			}	
+		}
+	}
+}
+
+
+
 
 func selectClassByCatalog(testSelection *TestSelection, appendClass map[string]interface{}, flags *TestSelectionFlags) {
 

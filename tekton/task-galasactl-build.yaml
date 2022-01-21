@@ -1,7 +1,5 @@
 #
-# Licensed Materials - Property of IBM
-# 
-# (c) Copyright IBM Corp. 2021.
+# Copyright contributors to the Galasa project 
 #
 apiVersion: tekton.dev/v1beta1
 kind: Task
@@ -44,6 +42,12 @@ spec:
     - -o
     - pkg/galasaapi
     - --additional-properties=packageName=galasaapi
+  - name: lspre
+    workingDir: /workspace/git-cli/pkg/galasaapi
+    image: $(params.dockerRepo)/galasa/galasa-build
+    command:
+    - ls
+    - -al
   - name: clear-mod
     workingDir: /workspace/git-cli/pkg/galasaapi
     image: $(params.dockerRepo)/galasa/galasa-build
@@ -100,7 +104,7 @@ spec:
     image: $(params.dockerRepo)/library/kaniko-executor:latest
     env:
     - name: DOCKER_CONFIG
-      value: /tekton/home/.docker
+      value: /tekton/creds/.docker
     command:
     - /kaniko/executor
     - --dockerfile=./DockerfileCli
