@@ -6,7 +6,7 @@ kind: Deployment
 metadata:
   name: binary-cli
 spec:
-  replicas: {{ .Values.replicas.standard }}
+  replicas: {{ .Values.replicas }}
   revisionHistoryLimit: 0
   selector:
     matchLabels:
