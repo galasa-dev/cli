@@ -3,8 +3,6 @@
 #
 branch: main
 
-managerBranch: main
-
 registry: harbor-cicsk8s.hursley.ibm.com
 
 replicas: 1

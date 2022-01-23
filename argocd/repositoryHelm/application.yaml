@@ -4,7 +4,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: simplatform-prod-app
+  name: cli-iss794-main
   namespace: argocd
 spec:
   project: galasa
