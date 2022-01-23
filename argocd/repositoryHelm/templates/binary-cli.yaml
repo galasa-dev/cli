@@ -1,0 +1,43 @@
+#
+# Copyright contributors to the Galasa project 
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: binary-cli
+spec:
+  replicas: {{ .Values.replicas.standard }}
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: binary-cli
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: binary-cli
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: http
+        image: {{ .Values.registry }}/galasadev/galasa-cli-binary:{{ .Values.branch }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: 50Mi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - binary-cli
+              topologyKey: kubernetes.io/hostname
