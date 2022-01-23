@@ -7,7 +7,9 @@ FROM ${dockerRepository}/galasadev/galasa-cli-amd64:${branch}
 
 USER root
 
-COPY ibmroot.pem /etc/ssl/certs/ibmroot.pem
+COPY ibmroot.pem  /etc/ssl/certs/ibmroot.pem
+COPY ibminter.pem /etc/ssl/certs/ibminter.pem
 RUN  cat /etc/ssl/certs/ibmroot.pem >> /etc/ssl/certs/ca-certificates.crt
+RUN  cat /etc/ssl/certs/ibminter.pem >> /etc/ssl/certs/ca-certificates.crt
 
 USER galasa
