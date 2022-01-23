@@ -4,7 +4,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cli-iss794-main
+  name: cli-main-repo
   namespace: argocd
 spec:
   project: galasa
