@@ -55,6 +55,25 @@ note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" 
 # Main script logic
 #
 #--------------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------------
+# Check that the ../framework is present.
+h2 "Making sure the openapi yaml file is available..."
+if [[ ! -e "../framework" ]]; then
+    error "../framework is not present. Clone the framework repository."
+    info "The openapi.yaml file from the framework repository is needed to generate a go client for the rest API"
+    exit 1
+fi
+
+if [[ ! -e "../framework/openapi.yaml" ]]; then 
+    error "File ../framework/openapi.yaml is not found."
+    info "The openapi.yaml file from the framework repository is needed to generate a go client for the rest API"
+    exit 1
+fi
+success "OK"
+
+#--------------------------------------------------------------------------
 # Create a temporary folder which is never checked in.
 h2 "Making sure the tools folder is present."
 mkdir -p tools
