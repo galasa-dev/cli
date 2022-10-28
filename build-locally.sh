@@ -83,7 +83,7 @@ success "OK"
 #--------------------------------------------------------------------------
 # Download the open api generator tool if we've not got it already.
 export OPENAPI_GENERATOR_CLI_VERSION="6.2.0"
-export OPENAPI_GENERATOR_CLI_JAR=${BASEDIR}/tools/openapi-generator-cli.jar
+export OPENAPI_GENERATOR_CLI_JAR=${BASEDIR}/tools/openapi-generator-cli-${OPENAPI_GENERATOR_CLI_VERSION}.jar
 if [[ ! -e ${OPENAPI_GENERATOR_CLI_JAR} ]]; then
     info "The openapi generator tool is not available, so download it."
     export OPENAPI_GENERATOR_CLI_SITE="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli"
