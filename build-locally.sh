@@ -89,10 +89,11 @@ if [[ ! -e ${OPENAPI_GENERATOR_CLI_JAR} ]]; then
 
     which wget 2>&1 > /dev/null
     rc=$?
-    if [[ "${rc}" == "0" ]]; then
+    if [[ "${rc}" != "0" ]]; then
         info "The wget tool is not available. Install it and try again."
         exit 1
     fi
+
     export OPENAPI_GENERATOR_CLI_SITE="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli"
     wget ${OPENAPI_GENERATOR_CLI_SITE}/${OPENAPI_GENERATOR_CLI_VERSION}/openapi-generator-cli-${OPENAPI_GENERATOR_CLI_VERSION}.jar \
     -O ${OPENAPI_GENERATOR_CLI_JAR}

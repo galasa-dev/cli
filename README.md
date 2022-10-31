@@ -124,3 +124,5 @@ galasactl runs submit
   - The openapi.yaml file is kept in the `framework` repository.
 - Run the `build-locally.sh` script.
 - Binary executable programs appear in the `bin` folder.
+
+
