@@ -7,3 +7,4 @@ r*.json
 r*.xml
 junit.xml
 .vscode/
+tools/
