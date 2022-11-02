@@ -123,6 +123,6 @@ galasactl runs submit
   - This repo genrates a golang client for the openapi REST interface offered by the framework.
   - The openapi.yaml file is kept in the `framework` repository.
 - Run the `build-locally.sh` script.
-- Binary executable programs appear in the `bin` folder.
+- Binary executable programs appear in the `bin` folder
 
 
