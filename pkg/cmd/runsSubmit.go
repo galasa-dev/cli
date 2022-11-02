@@ -35,19 +35,20 @@ var (
 		Run:   executeSubmit,
 	}
 
-	groupName           string
-	throttle            *int
-	pollFlag            *int64
-	progressFlag        *int
-	submitFlagOverrides *[]string
-	trace               *bool
-	requestor           string
-	requestType         string
-	reportYamlFilename  string
-	reportJsonFilename  string
-	reportJunitFilename string
-	throttleFilename    string
-	lostThrottleFile    bool = false
+	groupName                string
+	throttle                 *int
+	pollFlag                 *int64
+	progressFlag             *int
+	submitFlagOverrides      *[]string
+	trace                    *bool
+	requestor                string
+	requestType              string
+	reportYamlFilename       string
+	reportJsonFilename       string
+	reportJunitFilename      string
+	throttleFilename         string
+	lostThrottleFile         bool = false
+	noExitCodeOnTestFailures *bool
 
 	submitSelectionFlags = utils.TestSelectionFlags{}
 )
@@ -123,6 +124,7 @@ func init() {
 	throttle = runsSubmitCmd.Flags().Int("throttle", 3, "how many test runs can be submitted in parallel, 0 or less will disable throttling")
 	submitFlagOverrides = runsSubmitCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
 	trace = runsSubmitCmd.Flags().Bool("trace", false, "Trace to be enabled on the test runs")
+	noExitCodeOnTestFailures = runsSubmitCmd.Flags().Bool("noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
 	utils.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
 
 	runsCmd.AddCommand(runsSubmitCmd)
@@ -309,7 +311,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 		reportJunit(finishedRuns, lostRuns)
 	}
 
-	if !runOk {
+	if !runOk && *noExitCodeOnTestFailures == false {
 		log.Println("Not all runs passed, exiting with code 1")
 		os.Exit(1)
 	}

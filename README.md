@@ -117,3 +117,12 @@ galasactl runs submit
           --override zos.default.lpar=MV2C
           --override zos.default.cluster=PLEX2
 ```
+
+## How to build locally
+- Clone the `framework` repository so it is a sibling project of this repository
+  - This repo genrates a golang client for the openapi REST interface offered by the framework.
+  - The openapi.yaml file is kept in the `framework` repository.
+- Run the `build-locally.sh` script.
+- Binary executable programs appear in the `bin` folder
+
+
