@@ -117,3 +117,7 @@ galasactl runs submit
           --override zos.default.lpar=MV2C
           --override zos.default.cluster=PLEX2
 ```
+
+
+## Building locally
+To build the cli tools locally, use the `./build-locally.sh --help` script for instructions.

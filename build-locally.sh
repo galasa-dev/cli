@@ -49,12 +49,54 @@ bold() { printf "${bold}%s${reset}\n" "$@"
 note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
 }
 
+#-----------------------------------------------------------------------------------------                   
+# Functions
+#-----------------------------------------------------------------------------------------                   
+function usage {
+    info "Syntax: build-locally.sh [OPTIONS]"
+    cat << EOF
+Options are:
+-c | --clean : Do a clean build. One of the --clean or --delta flags are mandatory.
+-d | --delta : Do a delta build. One of the --clean or --delta flags are mandatory.
+
+Environment variables used:
+OPENAPI_GENERATOR_CLI_JAR - Optional. The full path to the openapi generator jar.
+    By default, the tool will be downloaded if it's not already found in the 'tools' folder.
+EOF
+}
 
 #--------------------------------------------------------------------------
 # 
 # Main script logic
 #
 #--------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------                   
+# Process parameters
+#-----------------------------------------------------------------------------------------                   
+build_type=""
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -c | --clean )          build_type="clean"
+                                ;;
+        -d | --delta )          build_type="delta"
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     error "Unexpected argument $1"
+                                usage
+                                exit 1
+    esac
+    shift
+done
+
+if [[ "${build_type}" == "" ]]; then
+    error "Need to use either the --clean or --delta parameter."
+    usage
+    exit 1  
+fi
 
 
 #--------------------------------------------------------------------------
@@ -119,10 +161,12 @@ success "Code generation part II - OK"
 
 #--------------------------------------------------------------------------
 # Build the executables
-h2 "Cleaning the binaries out..."
-make clean
-rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
-success "Binaries cleaned up - OK"
+if [[ "${build_type}" == "clean" ]]; then
+    h2 "Cleaning the binaries out..."
+    make clean
+    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
+    success "Binaries cleaned up - OK"
+fi
 
 h2 "Building new binaries..."
 make all
