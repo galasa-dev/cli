@@ -35,14 +35,18 @@ func ValidateStream(streams []string, stream string) error {
 	// Build the error message.
 	var errorMsg = ""
 	if len(streams) < 1 {
-		template := "Stream \"%s\" is not found in the ecosystem. There are no streams set up."
+		template := "Stream \"%s\" is not found in the ecosystem. There are no streams set up. " +
+			"Ask your Galasa system administrator to add a new stream with the desired name."
 		errorMsg = fmt.Sprintf(template, stream)
 	} else {
-		template := "Stream \"%s\" is not found in the ecosystem. Valid streams are:%s"
+		template := "Stream \"%s\" is not found in the ecosystem. Valid streams are:%s. " +
+			"Try again using a valid stream, or ask your Galasa system administrator to " +
+			"add a new stream with the desired name."
 		var buffer strings.Builder
 		for _, s := range streams {
-			buffer.WriteString(" ")
+			buffer.WriteString(" '")
 			buffer.WriteString(s)
+			buffer.WriteString("'")
 		}
 		errorMsg = fmt.Sprintf(template, stream, buffer.String())
 	}
