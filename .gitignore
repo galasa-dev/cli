@@ -8,3 +8,4 @@ r*.xml
 junit.xml
 .vscode/
 tools/
+build/
