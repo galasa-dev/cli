@@ -160,6 +160,11 @@ rm -f tools/generate-log.txt
 success "Code generation part II - OK"
 
 #--------------------------------------------------------------------------
+# Invoke unit tests
+# - These are executed within the Makefile currently. 
+#   No need to expose it here as we call the makefile shortly.
+
+#--------------------------------------------------------------------------
 # Build the executables
 if [[ "${build_type}" == "clean" ]]; then
     h2 "Cleaning the binaries out..."
