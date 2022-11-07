@@ -160,6 +160,10 @@ rm -f tools/generate-log.txt
 success "Code generation part II - OK"
 
 #--------------------------------------------------------------------------
+# Invoke unit tests
+
+
+#--------------------------------------------------------------------------
 # Build the executables
 if [[ "${build_type}" == "clean" ]]; then
     h2 "Cleaning the binaries out..."
