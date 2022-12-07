@@ -1,19 +1,19 @@
 /*
-*  Licensed Materials - Property of IBM
-*
-* (c) Copyright IBM Corp. 2021.
-*/
-
+ * Copyright contributors to the Galasa project
+ */
 package api
 
 import (
-	"os"
+	"fmt"
 	"io"
-	"strings"
+	"log"
 	"net/http"
+	"os"
+	"strings"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/utils"
 )
 
 var (
@@ -27,11 +27,11 @@ func InitialiseAPI(providedBootstrap string) *galasaapi.APIClient {
 	// Calculate the bootstrap for this execution
 	bootstrap = providedBootstrap
 
-	if (bootstrap == "") {
+	if bootstrap == "" {
 		bootstrap = os.Getenv("GALASA_BOOTSTRAP")
 	}
 
-	if (bootstrap == "") {
+	if bootstrap == "" {
 		bootstrap = "~/.galasa/bootstrap"
 	}
 
@@ -46,36 +46,45 @@ func InitialiseAPI(providedBootstrap string) *galasaapi.APIClient {
 }
 
 func loadBootstrap() {
-//	fmt.Printf("using bootstrap %v\n", bootstrap)
+	//	fmt.Printf("using bootstrap %v\n", bootstrap)
 
 	bootstrapString := new(strings.Builder)
 
 	baseURL = "http://127.0.0.1"
 
-	if (strings.HasPrefix(bootstrap, "http:") || strings.HasPrefix(bootstrap, "https:")) {
-		resp, err := http.Get(bootstrap)
-		if (err != nil) {
-			panic(err)
-		}
-		defer resp.Body.Close()
-
-		_, err = io.Copy(bootstrapString, resp.Body)
-		if (err != nil) {
-			panic(err)
-		}
+	if strings.HasPrefix(bootstrap, "http:") || strings.HasPrefix(bootstrap, "https:") {
 
 		if strings.HasSuffix(bootstrap, "/bootstrap") {
 			baseURL = bootstrap[:len(bootstrap)-10]
 		} else {
-			panic("bootstrap url does not end in /bootstrap")
+			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_BOOTSTRAP_URL_BAD_ENDING.Template, bootstrap)
+			log.Println(msg)
+			panic(msg)
 		}
 
-//		fmt.Printf("base=%v\n", baseURL)
+		resp, err := http.Get(bootstrap)
+		if err != nil {
+			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP.Template, bootstrap, err.Error())
+			log.Println(msg)
+			panic(msg)
+		}
+		defer resp.Body.Close()
+
+		_, err = io.Copy(bootstrapString, resp.Body)
+		if err != nil {
+			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_BAD_BOOTSTRAP_CONTENT.Template, bootstrap, err.Error())
+			log.Println(msg)
+			panic(msg)
+		}
+
+		//		fmt.Printf("base=%v\n", baseURL)
 	} else { // assume file
-		panic("unsupported bootstrap")
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_UNSUPPORTED_BOOTSTRAP_URL.Template, bootstrap)
+		log.Println(msg)
+		panic(msg)
 	}
 
 	// read the lines and extract the properties
-//	fmt.Printf("bootstrap contents:-\n%v\n", bootstrapString.String())
+	//	fmt.Printf("bootstrap contents:-\n%v\n", bootstrapString.String())
 	bootstrapProperties = utils.ReadProperties(bootstrapString.String())
 }

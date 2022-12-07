@@ -1,7 +1,6 @@
 /*
  * Copyright contributors to the Galasa project
  */
-
 package cmd
 
 import (
@@ -22,6 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
@@ -49,8 +49,7 @@ var (
 	throttleFilename         string
 	lostThrottleFile         bool = false
 	noExitCodeOnTestFailures *bool
-
-	submitSelectionFlags = utils.TestSelectionFlags{}
+	submitSelectionFlags     = utils.TestSelectionFlags{}
 )
 
 type TestReport struct {
@@ -110,7 +109,6 @@ func init() {
 	if err == nil {
 		username = currentUser.Username
 	}
-
 	runsSubmitCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio containing the tests to run")
 	runsSubmitCmd.Flags().StringVar(&reportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
 	runsSubmitCmd.Flags().StringVar(&reportJsonFilename, "reportjson", "", "json file to record the final results in")
@@ -131,6 +129,9 @@ func init() {
 }
 
 func executeSubmit(cmd *cobra.Command, args []string) {
+
+	utils.CaptureLog(logFileName)
+
 	log.Println("Galasa CLI - Submit tests")
 
 	// Set the poll time
@@ -157,7 +158,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 		sThrottle := strconv.Itoa(*throttle)
 		err := ioutil.WriteFile(throttleFilename, []byte(sThrottle), 0644)
 		if err != nil {
-			panic(err)
+			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE.Template, throttleFilename, err.Error())
+			panic(msg)
 		}
 		log.Printf("Throttle file created at %v\n", throttleFilename)
 	}
@@ -168,13 +170,13 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 	if portfolioFilename != "" {
 		if utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-			log.Println("The submit command does not support mixing of the test selection flags and a portfolio")
-			os.Exit(1)
+			msg := galasaErrors.GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO.Template
+			panic(msg)
 		}
 	} else {
 		if !utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-			log.Println("The submit command requires either test selection flags or a portfolio")
-			os.Exit(1)
+			msg := galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS.Template
+			panic(msg)
 		}
 	}
 
@@ -183,14 +185,14 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	for _, override := range *submitFlagOverrides {
 		pos := strings.Index(override, "=")
 		if pos < 1 {
-			log.Printf("Invalid override '%v'", override)
-			os.Exit(1)
+			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE.Template, override)
+			panic(msg)
 		}
 		key := override[:pos]
 		value := override[pos+1:]
 		if value == "" {
-			log.Printf("Invalid override '%v'", override)
-			os.Exit(1)
+			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE.Template, override)
+			panic(msg)
 		}
 		runOverrides[key] = value
 	}
@@ -220,8 +222,9 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	}
 
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
-		log.Println("There are no tests in the test porfolio")
-		os.Exit(1)
+		// Empty portfolio
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO.Template, portfolioFilename)
+		panic(msg)
 	}
 
 	// generate a group name if required
@@ -234,7 +237,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	// Just check if it is already in use,  which is perfectly valid for custom group names
 	uuidCheck, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
 	if err != nil {
-		panic(err)
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK.Template, groupName, err.Error())
+		panic(msg)
 	}
 
 	if uuidCheck.Runs != nil && len(uuidCheck.Runs) > 0 {
@@ -312,8 +316,9 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	}
 
 	if !runOk && *noExitCodeOnTestFailures == false {
-		log.Println("Not all runs passed, exiting with code 1")
-		os.Exit(1)
+		// Not all runs passed
+		msg := galasaErrors.GALASA_ERROR_TESTS_FAILED.Template
+		panic(msg)
 	}
 }
 
@@ -632,21 +637,30 @@ func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
 
 	file, err := os.Create(reportYamlFilename)
 	if err != nil {
-		panic(err)
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML.Template, reportYamlFilename, err)
+		panic(msg)
 	}
+	defer func() {
+		file.Close()
+	}()
 
 	w := bufio.NewWriter(file)
+	defer func() {
+		w.Flush()
+	}()
 
 	encoder := yaml.NewEncoder(w)
+	defer func() {
+		encoder.Close()
+	}()
+
 	encoder.SetIndent(2)
 
 	err = encoder.Encode(&testReport)
 	if err != nil {
-		panic(err)
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_YAML_ENCODE.Template, reportYamlFilename, err.Error())
+		panic(msg)
 	}
-	w.Flush()
-	encoder.Close()
-	file.Close()
 
 	log.Printf("Yaml test report written to %v\n", reportYamlFilename)
 }
@@ -666,12 +680,14 @@ func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
 
 	data, err := json.MarshalIndent(&testReport, "", " ")
 	if err != nil {
-		panic(err)
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL.Template, reportJsonFilename, err.Error())
+		panic(msg)
 	}
 
 	err = ioutil.WriteFile(reportJsonFilename, data, 0644)
 	if err != nil {
-		panic(err)
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_WRITE_FAIL.Template, reportJsonFilename, err.Error())
+		panic(msg)
 	}
 
 	log.Printf("Json test report written to %v\n", reportJsonFilename)
@@ -725,14 +741,16 @@ func reportJunit(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun)
 
 	data, err := xml.MarshalIndent(&testSuites, "", "    ")
 	if err != nil {
-		panic(err)
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_PREPARE.Template, reportJunitFilename, err.Error())
+		panic(msg)
 	}
 
 	prologue := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + string(data))
 
 	err = ioutil.WriteFile(reportJunitFilename, prologue, 0644)
 	if err != nil {
-		panic(err)
+		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_WRITE_FAIL.Template, reportJunitFilename, err.Error())
+		panic(msg)
 	}
 
 	log.Printf("Junit XML test report written to %v\n", reportJunitFilename)
