@@ -4,7 +4,7 @@
 # (c) Copyright IBM Corp. 2021.
 #
 
-all: tests bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasactl-darwin-amd64 bin/galasactl-darwin-arm64 bin/galasactl-linux-s390x
+all: tests bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasactl-darwin-amd64 bin/galasactl-darwin-arm64 bin/galasactl-linux-s390x bin/gendocs-galasactl-darwin-arm64
 
 tests: ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
 	mkdir -p build
@@ -27,6 +27,9 @@ bin/galasactl-darwin-arm64 : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go 
 
 bin/galasactl-linux-s390x : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=s390x go build -o bin/galasactl-linux-s390x ./cmd/galasactl
+
+bin/gendocs-galasactl-darwin-arm64 : ./cmd/gendocs-galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/gendocs-galasactl-darwin-arm64 ./cmd/gendocs-galasactl
 
 clean:
 	rm -rf bin

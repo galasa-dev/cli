@@ -119,5 +119,8 @@ galasactl runs submit
 ```
 
 
+## Reference Material
+Full syntax, with descriptions of every parameter is available [here](./docs/generated/galasactl.md)
+
 ## Building locally
 To build the cli tools locally, use the `./build-locally.sh --help` script for instructions.

@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	rootCmd = &cobra.Command{
+	RootCmd = &cobra.Command{
 		Use:     "galasactl",
 		Short:   "CLI for Galasa",
-		Long:    "",
+		Long:    `A tool for controlling Galasa resources using the command-line.`,
 		Version: "unknowncliversion-unknowngithash",
 	}
 
@@ -36,15 +36,14 @@ func Execute() {
 	}()
 
 	// Execute the command
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
 func init() {
-
-	rootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "", "File to which log information will be sent")
-	rootCmd.PersistentFlags().StringVarP(&bootstrap, "bootstrap", "b", "", "Bootstrap URL")
-	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "", "File to which log information will be sent")
+	RootCmd.PersistentFlags().StringVarP(&bootstrap, "bootstrap", "b", "", "Bootstrap URL")
+	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 }

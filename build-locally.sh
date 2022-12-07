@@ -179,6 +179,28 @@ rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable g
 success "New binaries built - OK"
 
 #--------------------------------------------------------------------------
+# Build the documentation
+generated_docs_folder=${BASEDIR}/docs/generated
+h2 "Generating documentation"
+info "Documentation will be placed in ${generated_docs_folder}"
+mkdir -p ${generated_docs_folder}
+
+# Figure out which type of machine this script is currently running on.
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     machine=linux;;
+    Darwin*)    machine=darwin;;
+    *)          error "Unknown machine type ${unameOut}"
+                exit 1
+esac
+architecture="$(uname -m)"
+
+info "Using program ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} to generate the documentation..."
+${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} ${generated_docs_folder}
+rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to generate documentation. rc=${rc}" ; exit 1 ; fi
+success "Documentation generated - OK"
+
+#--------------------------------------------------------------------------
 h2 "Use the results.."
 info "Binary executable programs are found in the 'bin' folder."
-ls bin
+ls bin | grep -v "gendocs"
