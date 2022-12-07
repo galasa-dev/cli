@@ -120,7 +120,12 @@ galasactl runs submit
 
 
 ## Reference Material
+
+### Syntax
 Full syntax, with descriptions of every parameter is available [here](./docs/generated/galasactl.md)
+
+### Errors
+See [here](./docs/generated/errors-list.md) for a list of error messages the `galasactl` tool can output.
 
 ## Building locally
 To build the cli tools locally, use the `./build-locally.sh --help` script for instructions.
