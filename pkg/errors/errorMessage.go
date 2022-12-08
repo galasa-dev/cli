@@ -9,11 +9,11 @@ type ErrorMessage struct {
 }
 
 var (
-	GALASA_ERROR_UNSUPPORTED_BOOTSTRAP_URL      = ErrorMessage{Template: "GAL1001E: unsupported bootstrap URL %s. Acceptable values start with 'http' or 'https'", Ordinal: 1001}
-	GALASA_ERROR_BOOTSTRAP_URL_BAD_ENDING       = ErrorMessage{Template: "GAL1002E: bootstrap url does not end in '/bootstrap'. Bootstrap url is %s", Ordinal: 1002}
-	GALASA_ERROR_BAD_BOOTSTRAP_CONTENT          = ErrorMessage{Template: "GAL1003E: bootstrap contents is badly formed. Bootstrap is at %s. Reason is: %s", Ordinal: 1003}
-	GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP        = ErrorMessage{Template: "GAL1004E: failed to load the bootstrap from %s. Reason is %s", Ordinal: 1004}
-	GALASA_ERROR_THROTTLE_FILE_WRITE            = ErrorMessage{Template: "GAL1005E: failed to write to 'throttle' file %v. Reason is %s", Ordinal: 1005}
+	GALASA_ERROR_UNSUPPORTED_BOOTSTRAP_URL      = ErrorMessage{Template: "GAL1001E: Unsupported bootstrap URL %s. Acceptable values start with 'http' or 'https'", Ordinal: 1001}
+	GALASA_ERROR_BOOTSTRAP_URL_BAD_ENDING       = ErrorMessage{Template: "GAL1002E: Bootstrap url does not end in '/bootstrap'. Bootstrap url is %s", Ordinal: 1002}
+	GALASA_ERROR_BAD_BOOTSTRAP_CONTENT          = ErrorMessage{Template: "GAL1003E: Bootstrap contents is badly formed. Bootstrap is at %s. Reason is: %s", Ordinal: 1003}
+	GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP        = ErrorMessage{Template: "GAL1004E: Failed to load the bootstrap from %s. Reason is %s", Ordinal: 1004}
+	GALASA_ERROR_THROTTLE_FILE_WRITE            = ErrorMessage{Template: "GAL1005E: Failed to write to 'throttle' file %v. Reason is %s", Ordinal: 1005}
 	GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO = ErrorMessage{Template: "GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio", Ordinal: 1006}
 	GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML      = ErrorMessage{Template: "GAL1007E: Failed to create report yaml file %s. Reason is %s", Ordinal: 1007}
 	GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK        = ErrorMessage{Template: "GAL1008E: Failed to check if group %s exists already. Reason is %s", Ordinal: 1008}

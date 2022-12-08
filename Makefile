@@ -4,7 +4,13 @@
 # (c) Copyright IBM Corp. 2021.
 #
 
-all: tests bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasactl-darwin-amd64 bin/galasactl-darwin-arm64 bin/galasactl-linux-s390x bin/gendocs-galasactl-darwin-arm64
+all: tests galasactl gendocs-galasactl
+
+galasactl: bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasactl-darwin-amd64 bin/galasactl-darwin-arm64 bin/galasactl-linux-s390x
+
+# 'gendocs-galasactl' is a command-line tool which generates documentation about the galasactl tool.
+# When executed, the .md produced contain up-to-date information on tool syntax.
+gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darwin-amd64 bin/gendocs-galasactl-linux-amd64
 
 tests: ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
 	mkdir -p build
@@ -30,6 +36,9 @@ bin/galasactl-linux-s390x : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go .
 
 bin/gendocs-galasactl-darwin-arm64 : ./cmd/gendocs-galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/gendocs-galasactl-darwin-arm64 ./cmd/gendocs-galasactl
+
+bin/gendocs-galasactl-darwin-amd64 : ./cmd/gendocs-galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/gendocs-galasactl-darwin-amd64 ./cmd/gendocs-galasactl
 
 clean:
 	rm -rf bin
