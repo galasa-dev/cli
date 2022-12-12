@@ -127,5 +127,10 @@ Full syntax, with descriptions of every parameter is available [here](./docs/gen
 ### Errors
 See [here](./docs/generated/errors-list.md) for a list of error messages the `galasactl` tool can output.
 
+### Known limitations
+- Go programs can sometimes struggle to resolve DNS names, especially when a working over a virtual private network (VPN). In such situations, you may notice that a bootstrap file cannot be found with `galasactl` but can be found by a desktop browser, or curl command.
+In such situations we recommend that you manually add the host detail to the `/etc/hosts` file, 
+to avoid DNS being involved in the resolution mechanism.
+
 ## Building locally
 To build the cli tools locally, use the `./build-locally.sh --help` script for instructions.

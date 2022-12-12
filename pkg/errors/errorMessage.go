@@ -57,11 +57,10 @@ var (
 	// A map of all the messages. Indexed by ordinal number.
 	GALASA_ALL_MESSAGES = make(map[int]*MessageType)
 
-	GALASA_ERROR_UNSUPPORTED_BOOTSTRAP_URL = NewMessageType("GAL1001E: Unsupported bootstrap URL %s. Acceptable values start with 'http' or 'https'", 1001)
-
+	GALASA_ERROR_UNSUPPORTED_BOOTSTRAP_URL      = NewMessageType("GAL1001E: Unsupported bootstrap URL %s. Acceptable values start with 'http' or 'https'", 1001)
 	GALASA_ERROR_BOOTSTRAP_URL_BAD_ENDING       = NewMessageType("GAL1002E: Bootstrap url does not end in '/bootstrap'. Bootstrap url is %s", 1002)
 	GALASA_ERROR_BAD_BOOTSTRAP_CONTENT          = NewMessageType("GAL1003E: Bootstrap contents is badly formed. Bootstrap is at %s. Reason is: %s", 1003)
-	GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP        = NewMessageType("GAL1004E: Failed to load the bootstrap from %s. Reason is %s", 1004)
+	GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP        = NewMessageType("GAL1004E: Failed to load the bootstrap from %s. Reason is %s. If the URL is not resolving, try adding the hostname to your /etc/hosts file. This might especially be needed if communicating over a VPN connection.", 1004)
 	GALASA_ERROR_THROTTLE_FILE_WRITE            = NewMessageType("GAL1005E: Failed to write to 'throttle' file %v. Reason is %s", 1005)
 	GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO = NewMessageType("GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio", 1006)
 	GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML      = NewMessageType("GAL1007E: Failed to create report yaml file %s. Reason is %s", 1007)
