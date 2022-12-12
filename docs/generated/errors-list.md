@@ -4,7 +4,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1001E: Unsupported bootstrap URL {}. Acceptable values start with 'http' or 'https'
 - GAL1002E: Bootstrap url does not end in '/bootstrap'. Bootstrap url is {}
 - GAL1003E: Bootstrap contents is badly formed. Bootstrap is at {}. Reason is: {}
-- GAL1004E: Failed to load the bootstrap from {}. Reason is {}
+- GAL1004E: Failed to load the bootstrap from {}. Reason is {}. If the URL is not resolving, try adding the hostname to your /etc/hosts file. This might especially be needed if communicating over a VPN connection.
 - GAL1005E: Failed to write to 'throttle' file {}. Reason is {}
 - GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio
 - GAL1007E: Failed to create report yaml file {}. Reason is {}
