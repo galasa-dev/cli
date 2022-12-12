@@ -18,7 +18,7 @@ func TestValidateStreamFound(t *testing.T) {
 
 func TestValidateStreamNotFoundNormal(t *testing.T) {
 	err := ValidateStream(streams, "apple")
-	expected := "Stream \"apple\" is not found in the ecosystem. Valid streams are: 'bsf' 'prod'. " +
+	expected := "GAL1030E: Stream 'apple' is not found in the ecosystem. Valid streams are: 'bsf' 'prod'. " +
 		"Try again using a valid stream, or ask your Galasa system administrator to " +
 		"add a new stream with the desired name."
 	if assert.NotNil(t, err, "ValidateStream found a stream where it should have returned an error message.") {
@@ -30,7 +30,7 @@ func TestValidateStreamNotFoundNormal(t *testing.T) {
 func TestValidateStreamNotFoundNoStreamsToFind(t *testing.T) {
 	emptyStreams := []string{}
 	err := ValidateStream(emptyStreams, "orange")
-	expected := "Stream \"orange\" is not found in the ecosystem. There are no streams set up. " +
+	expected := "GAL1029E: Stream 'orange' is not found in the ecosystem. There are no streams set up. " +
 		"Ask your Galasa system administrator to add a new stream with the desired name."
 	if assert.NotNil(t, err) {
 		errorString := err.Error()

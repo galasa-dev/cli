@@ -4,9 +4,10 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"os"
+
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
 
 /*
@@ -24,7 +25,8 @@ func CaptureLog(logFileName string) *os.File {
 		if err == nil {
 			log.SetOutput(f)
 		} else {
-			panic(fmt.Sprintf("error opening log file: %v", err))
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_OPEN_LOG_FILE_FAILED, logFileName, err.Error())
+			panic(err)
 		}
 	}
 

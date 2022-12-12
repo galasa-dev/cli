@@ -37,6 +37,9 @@ bin/galasactl-linux-s390x : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go .
 bin/gendocs-galasactl-darwin-arm64 : ./cmd/gendocs-galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/gendocs-galasactl-darwin-arm64 ./cmd/gendocs-galasactl
 
+bin/gendocs-galasactl-linux-amd64 : ./cmd/gendocs-galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/gendocs-galasactl-linux-amd64 ./cmd/gendocs-galasactl
+
 bin/gendocs-galasactl-darwin-amd64 : ./cmd/gendocs-galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/gendocs-galasactl-darwin-amd64 ./cmd/gendocs-galasactl
 

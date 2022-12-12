@@ -4,9 +4,7 @@
 package api
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -57,31 +55,27 @@ func loadBootstrap() {
 		if strings.HasSuffix(bootstrap, "/bootstrap") {
 			baseURL = bootstrap[:len(bootstrap)-10]
 		} else {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_BOOTSTRAP_URL_BAD_ENDING.Template, bootstrap)
-			log.Println(msg)
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BOOTSTRAP_URL_BAD_ENDING, bootstrap)
+			panic(err)
 		}
 
 		resp, err := http.Get(bootstrap)
 		if err != nil {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP.Template, bootstrap, err.Error())
-			log.Println(msg)
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP, bootstrap, err.Error())
+			panic(err)
 		}
 		defer resp.Body.Close()
 
 		_, err = io.Copy(bootstrapString, resp.Body)
 		if err != nil {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_BAD_BOOTSTRAP_CONTENT.Template, bootstrap, err.Error())
-			log.Println(msg)
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_BOOTSTRAP_CONTENT, bootstrap, err.Error())
+			panic(err)
 		}
 
 		//		fmt.Printf("base=%v\n", baseURL)
 	} else { // assume file
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_UNSUPPORTED_BOOTSTRAP_URL.Template, bootstrap)
-		log.Println(msg)
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNSUPPORTED_BOOTSTRAP_URL, bootstrap)
+		panic(err)
 	}
 
 	// read the lines and extract the properties

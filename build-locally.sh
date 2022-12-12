@@ -216,18 +216,6 @@ done
 success "Documentation generated - OK"
 
 #--------------------------------------------------------------------------
-# Now generate an .md file with a list of all the error codes.
-h2 "Generating errors documentation."
-error_markdown_file="${generated_docs_folder}/errors-list.md"
-cat << EOF > ${error_markdown_file}
-## Errors
-The \`galasactl\` tool can generate the following errors:
-
-EOF
-cat ${BASEDIR}/pkg/errors/errorMessage.go | grep "GALASA_ERROR" | cut -f 2 -d'"' | sed "s/^/- /g" | sed "s/%[svdil]/{}/g" >> ${error_markdown_file}
-success "Error documentation generated - OK"
-
-#--------------------------------------------------------------------------
 h2 "Use the results.."
 info "Binary executable programs are found in the 'bin' folder."
 ls bin | grep -v "gendocs"

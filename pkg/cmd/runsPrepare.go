@@ -4,7 +4,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -52,14 +51,14 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	for _, override := range *prepareFlagOverrides {
 		pos := strings.Index(override, "=")
 		if pos < 1 {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE.Template, override)
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
+			panic(err)
 		}
 		key := override[:pos]
 		value := override[pos+1:]
 		if value == "" {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE.Template, override)
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
+			panic(err)
 		}
 
 		testOverrides[key] = value
@@ -70,8 +69,8 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	testSelection := utils.SelectTests(apiClient, &prepareSelectionFlags)
 	count := len(testSelection.Classes)
 	if count < 1 {
-		msg := galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED.Template
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
+		panic(err)
 	} else {
 		if count == 1 {
 			log.Println("1 test was selected")

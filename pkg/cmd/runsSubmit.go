@@ -158,8 +158,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 		sThrottle := strconv.Itoa(*throttle)
 		err := ioutil.WriteFile(throttleFilename, []byte(sThrottle), 0644)
 		if err != nil {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE.Template, throttleFilename, err.Error())
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE, throttleFilename, err.Error())
+			panic(err)
 		}
 		log.Printf("Throttle file created at %v\n", throttleFilename)
 	}
@@ -170,13 +170,13 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 	if portfolioFilename != "" {
 		if utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-			msg := galasaErrors.GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO.Template
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO)
+			panic(err)
 		}
 	} else {
 		if !utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-			msg := galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS.Template
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS)
+			panic(err)
 		}
 	}
 
@@ -185,14 +185,14 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	for _, override := range *submitFlagOverrides {
 		pos := strings.Index(override, "=")
 		if pos < 1 {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE.Template, override)
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
+			panic(err)
 		}
 		key := override[:pos]
 		value := override[pos+1:]
 		if value == "" {
-			msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE.Template, override)
-			panic(msg)
+			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
+			panic(err)
 		}
 		runOverrides[key] = value
 	}
@@ -223,8 +223,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
 		// Empty portfolio
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO.Template, portfolioFilename)
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
+		panic(err)
 	}
 
 	// generate a group name if required
@@ -237,8 +237,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	// Just check if it is already in use,  which is perfectly valid for custom group names
 	uuidCheck, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
 	if err != nil {
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK.Template, groupName, err.Error())
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
+		panic(err)
 	}
 
 	if uuidCheck.Runs != nil && len(uuidCheck.Runs) > 0 {
@@ -317,8 +317,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 	if !runOk && *noExitCodeOnTestFailures == false {
 		// Not all runs passed
-		msg := galasaErrors.GALASA_ERROR_TESTS_FAILED.Template
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED)
+		panic(err)
 	}
 }
 
@@ -637,8 +637,8 @@ func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
 
 	file, err := os.Create(reportYamlFilename)
 	if err != nil {
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML.Template, reportYamlFilename, err)
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML, reportYamlFilename, err)
+		panic(err)
 	}
 	defer func() {
 		file.Close()
@@ -658,8 +658,8 @@ func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
 
 	err = encoder.Encode(&testReport)
 	if err != nil {
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_YAML_ENCODE.Template, reportYamlFilename, err.Error())
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_YAML_ENCODE, reportYamlFilename, err.Error())
+		panic(err)
 	}
 
 	log.Printf("Yaml test report written to %v\n", reportYamlFilename)
@@ -680,14 +680,14 @@ func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) 
 
 	data, err := json.MarshalIndent(&testReport, "", " ")
 	if err != nil {
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL.Template, reportJsonFilename, err.Error())
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL, reportJsonFilename, err.Error())
+		panic(err)
 	}
 
 	err = ioutil.WriteFile(reportJsonFilename, data, 0644)
 	if err != nil {
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_WRITE_FAIL.Template, reportJsonFilename, err.Error())
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_WRITE_FAIL, reportJsonFilename, err.Error())
+		panic(err)
 	}
 
 	log.Printf("Json test report written to %v\n", reportJsonFilename)
@@ -741,16 +741,16 @@ func reportJunit(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun)
 
 	data, err := xml.MarshalIndent(&testSuites, "", "    ")
 	if err != nil {
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_PREPARE.Template, reportJunitFilename, err.Error())
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_PREPARE, reportJunitFilename, err.Error())
+		panic(err)
 	}
 
 	prologue := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + string(data))
 
 	err = ioutil.WriteFile(reportJunitFilename, prologue, 0644)
 	if err != nil {
-		msg := fmt.Sprintf(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_WRITE_FAIL.Template, reportJunitFilename, err.Error())
-		panic(msg)
+		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_WRITE_FAIL, reportJunitFilename, err.Error())
+		panic(err)
 	}
 
 	log.Printf("Junit XML test report written to %v\n", reportJunitFilename)
