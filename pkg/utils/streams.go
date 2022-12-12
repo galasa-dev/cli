@@ -5,10 +5,9 @@
 package utils
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 )
 
@@ -33,23 +32,22 @@ func ValidateStream(streams []string, stream string) error {
 	}
 
 	// Build the error message.
-	var errorMsg = ""
+	var error *galasaErrors.GalasaError
 	if len(streams) < 1 {
-		template := "Stream \"%s\" is not found in the ecosystem. There are no streams set up. " +
-			"Ask your Galasa system administrator to add a new stream with the desired name."
-		errorMsg = fmt.Sprintf(template, stream)
+		// No streams configured.
+		error = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_STREAMS_CONFIGURED, stream)
 	} else {
-		template := "Stream \"%s\" is not found in the ecosystem. Valid streams are:%s. " +
-			"Try again using a valid stream, or ask your Galasa system administrator to " +
-			"add a new stream with the desired name."
+
 		var buffer strings.Builder
+		var availableStreamsList string
 		for _, s := range streams {
 			buffer.WriteString(" '")
 			buffer.WriteString(s)
 			buffer.WriteString("'")
 		}
-		errorMsg = fmt.Sprintf(template, stream, buffer.String())
+		availableStreamsList = buffer.String()
+		error = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_STREAM, stream, availableStreamsList)
 	}
 
-	return errors.New(errorMsg)
+	return error
 }
