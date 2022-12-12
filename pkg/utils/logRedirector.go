@@ -21,7 +21,9 @@ func CaptureLog(logFileName string) *os.File {
 	// Send the log to a file
 	if logFileName != "" && logFileName != "-" {
 		// The user has set the logFileName using the --log xxxx syntax
-		f, err := os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		// Note: If the file exists, it gets truncated.
+		// Default permissions are 0666
+		f, err := os.Create(logFileName)
 		if err == nil {
 			log.SetOutput(f)
 		} else {
