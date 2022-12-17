@@ -138,6 +138,14 @@ To build the cli tools locally, use the `./build-locally.sh --help` script for i
 ## Built artifacts
 Download built artifacts:
 
+Built artifacts include:
+
+- galasactl-darwin-amd64 
+- galasactl-darwin-arm64
+- galasactl-linux-amd64 
+- galasactl-linux-s390x 
+- galasactl-windows-amd64.exe
+
 Browse the following web site and download whichever built binary files you wish:
 
 - Bleeding edge/Unstable : https://development.galasa.dev/main/binary/cli/
