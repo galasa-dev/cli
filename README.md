@@ -148,6 +148,7 @@ Built artifacts include:
 
 Browse the following web site and download whichever built binary files you wish:
 
+- Latest (and previous) stable releases: https://github.com/galasa-dev/cli/releases
 - Bleeding edge/Unstable : https://development.galasa.dev/main/binary/cli/
 
 ## Docker images containing the command-line tools
