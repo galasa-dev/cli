@@ -9,3 +9,6 @@ junit.xml
 .vscode/
 tools/
 build/
+.idea/
+temp/
+run.sh

@@ -13,8 +13,14 @@ var (
 		Short: "Manage test runs in the ecosystem",
 		Long:  "Assembles, submits and monitors test runs in Galasa Ecosystem",
 	}
+	bootstrap string
 )
 
 func init() {
-	RootCmd.AddCommand(runsCmd)
+	cmd := runsCmd
+	parentCmd := RootCmd
+
+	cmd.PersistentFlags().StringVarP(&bootstrap, "bootstrap", "b", "", "Bootstrap URL")
+
+	parentCmd.AddCommand(runsCmd)
 }

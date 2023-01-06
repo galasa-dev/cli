@@ -14,7 +14,7 @@ gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darw
 
 tests: ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
 	mkdir -p build
-	go test -v ./pkg/utils/* -cover -coverprofile=build/coverage.out
+	go test -v ./pkg/* -cover -coverprofile=build/coverage.out
 	go tool cover -html=build/coverage.out -o build/coverage.html
 	go tool cover -func=build/coverage.out > build/coverage.txt
 	cat build/coverage.txt

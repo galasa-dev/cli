@@ -30,7 +30,7 @@ galasactl runs prepare [flags]
 
 ```
   -b, --bootstrap string   Bootstrap URL
-  -l, --log string         File to which log information will be sent
+  -l, --log string         File to which log information will be sent. Any folder referred to must exist. An existing file will be over-written.
 ```
 
 ### SEE ALSO

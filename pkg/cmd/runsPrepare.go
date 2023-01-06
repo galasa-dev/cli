@@ -34,7 +34,6 @@ func init() {
 	prepareFlagOverrides = runsAssembleCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
 	prepareAppend = runsAssembleCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
 	runsAssembleCmd.MarkFlagRequired("portfolio")
-
 	utils.AddCommandFlags(runsAssembleCmd, &prepareSelectionFlags)
 
 	runsCmd.AddCommand(runsAssembleCmd)

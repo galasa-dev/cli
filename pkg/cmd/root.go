@@ -19,7 +19,6 @@ var (
 		Version: "unknowncliversion-unknowngithash",
 	}
 
-	bootstrap   string
 	logFileName string
 )
 
@@ -44,6 +43,5 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "", "File to which log information will be sent. Any folder referred to must exist. An existing file will be over-written.")
-	RootCmd.PersistentFlags().StringVarP(&bootstrap, "bootstrap", "b", "", "Bootstrap URL")
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 }
