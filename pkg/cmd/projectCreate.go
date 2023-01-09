@@ -10,6 +10,8 @@ import (
 	"strings"
 	"text/template"
 
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -97,16 +99,18 @@ func createProject(fileSystem utils.FileSystem, packageName string, forceOverwri
 
 	// Create the parent folder
 	parentProjectFolder := packageName
-	createFolder(fileSystem, parentProjectFolder)
+	err := createFolder(fileSystem, parentProjectFolder)
+	if err == nil {
+		err = createParentFolderPom(fileSystem, packageName, forceOverwrite)
+		if err == nil {
+			err = createTestProject(fileSystem, packageName, forceOverwrite)
+		}
+	}
 
-	createParentFolderPom(fileSystem, packageName, forceOverwrite)
-
-	createTestProject(fileSystem, packageName, forceOverwrite)
-
-	return nil
+	return err
 }
 
-func createParentFolderPom(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) {
+func createParentFolderPom(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) error {
 
 	templateParameters := PomTemplateSubstitutionParameters{
 		GroupId:    packageName,
@@ -119,40 +123,44 @@ func createParentFolderPom(fileSystem utils.FileSystem, packageName string, forc
 		embeddedTemplateFilePath: "templates/projectCreate/parent-project/pom.xml",
 		templateParameters:       templateParameters}
 
-	createFile(fileSystem, targetFile, forceOverwrite)
+	err := createFile(fileSystem, targetFile, forceOverwrite)
+	return err
 }
 
-func createFolder(fileSystem utils.FileSystem, targetFolderPath string) {
+func createFolder(fileSystem utils.FileSystem, targetFolderPath string) error {
 	err := fileSystem.MkdirAll(targetFolderPath)
-	if err != nil {
-		panic(err)
-	}
+	return err
 }
 
-func createTestProject(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) {
+func createTestProject(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) error {
 	targetFolderPath := packageName + "/" + packageName + ".test"
 	log.Printf("Creating tests project %s\n", targetFolderPath)
 
 	// Create the base test folder
-	createFolder(fileSystem, targetFolderPath)
-
-	createTestFolderPom(fileSystem, targetFolderPath, packageName, forceOverwrite)
-
-	createJavaSourceFolder(fileSystem, targetFolderPath, packageName, forceOverwrite)
+	err := createFolder(fileSystem, targetFolderPath)
+	if err == nil {
+		err = createTestFolderPom(fileSystem, targetFolderPath, packageName, forceOverwrite)
+		if err == nil {
+			err = createJavaSourceFolder(fileSystem, targetFolderPath, packageName, forceOverwrite)
+		}
+	}
+	return err
 }
 
-func createJavaSourceFolder(fileSystem utils.FileSystem, testFolderPath string, packageName string, forceOverwrite bool) {
+func createJavaSourceFolder(fileSystem utils.FileSystem, testFolderPath string, packageName string, forceOverwrite bool) error {
 
 	// The folder is the package name but with slashes.
 	// eg: my.package becomes my/package
 	packageNameWithSlashes := strings.Replace(packageName, ".", "/", -1)
 	targetSrcFolderPath := testFolderPath + "/src/main/java/" + packageNameWithSlashes + "/test"
-	createFolder(fileSystem, targetSrcFolderPath)
-
-	createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName, forceOverwrite)
+	err := createFolder(fileSystem, targetSrcFolderPath)
+	if err == nil {
+		err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName, forceOverwrite)
+	}
+	return err
 }
 
-func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath string, packageName string, forceOverwrite bool) {
+func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath string, packageName string, forceOverwrite bool) error {
 	templateParameters := JavaTestTemplateSubstitutionParameters{
 		Package: packageName + ".test"}
 
@@ -162,10 +170,11 @@ func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath strin
 		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/src/main/java/SampleTest.java",
 		templateParameters:       templateParameters}
 
-	createFile(fileSystem, targetFile, forceOverwrite)
+	err := createFile(fileSystem, targetFile, forceOverwrite)
+	return err
 }
 
-func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath string, packageName string, forceOverwrite bool) {
+func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath string, packageName string, forceOverwrite bool) error {
 
 	pomTemplateParameters := PomTemplateSubstitutionParameters{
 		GroupId:          packageName,
@@ -180,7 +189,8 @@ func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath strin
 		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/pom.xml",
 		templateParameters:       pomTemplateParameters}
 
-	createFile(fileSystem, targetFile, forceOverwrite)
+	err := createFile(fileSystem, targetFile, forceOverwrite)
+	return err
 }
 
 // createFile creates a file on the file system.
@@ -188,56 +198,55 @@ func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath strin
 func createFile(
 	fileSystem utils.FileSystem,
 	generatedFile GeneratedFile,
-	forceOverwrite bool) {
+	forceOverwrite bool) error {
 
 	log.Printf("Creating file of type %s at %s\n", generatedFile.fileType, generatedFile.targetFilePath)
 
-	assertAllowedToWrite(fileSystem, generatedFile.targetFilePath, forceOverwrite)
-	template := loadEmbeddedTemplate(generatedFile.embeddedTemplateFilePath)
-	fileContents := substituteParametersIntoTemplate(template, generatedFile.templateParameters)
-
-	// Write it out to the target file.
-	err := fileSystem.WriteTextFile(generatedFile.targetFilePath, fileContents)
-	if err != nil {
-		panic(err)
+	err := assertAllowedToWrite(fileSystem, generatedFile.targetFilePath, forceOverwrite)
+	if err == nil {
+		var template *template.Template
+		template, err = loadEmbeddedTemplate(generatedFile.embeddedTemplateFilePath)
+		if err == nil {
+			var fileContents string
+			fileContents, err = substituteParametersIntoTemplate(template, generatedFile.templateParameters)
+			if err == nil {
+				// Write it out to the target file.
+				err = fileSystem.WriteTextFile(generatedFile.targetFilePath, fileContents)
+			}
+		}
 	}
+	return err
 }
 
-func substituteParametersIntoTemplate(template *template.Template, templateParameters interface{}) string {
+func substituteParametersIntoTemplate(template *template.Template, templateParameters interface{}) (string, error) {
 	// Render the golang template into a string
 	var buffer bytes.Buffer
+	fileContents := ""
 	err := template.Execute(&buffer, templateParameters)
-	if err != nil {
-		panic(err)
+	if err == nil {
+		fileContents = buffer.String()
 	}
-	fileContents := buffer.String()
-	return fileContents
+	return fileContents, err
 }
 
-func loadEmbeddedTemplate(embeddedTemplateFilePath string) *template.Template {
+func loadEmbeddedTemplate(embeddedTemplateFilePath string) (*template.Template, error) {
 	// Load-up the template file from the embedded file system.
 	data, err := embeddedFileSystem.ReadFile(embeddedTemplateFilePath)
-	if err != nil {
-		panic(err)
+	var templ *template.Template = nil
+	if err == nil {
+		// Parse the string data into a golang template
+		rawTemplate := template.New(embeddedTemplateFilePath)
+		templ, err = rawTemplate.Parse(string(data))
 	}
-
-	// Parse the string data into a golang template
-	template, err := template.New(embeddedTemplateFilePath).Parse(string(data))
-	if err != nil {
-		panic(err)
-	}
-
-	return template
+	return templ, err
 }
 
-func assertAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) {
-
+func assertAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) error {
 	isAlreadyExists, err := fileSystem.Exists(targetFilePath)
-	if err != nil {
-		panic(err)
+	if err == nil {
+		if isAlreadyExists && (!forceOverwrite) {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
+		}
 	}
-
-	if isAlreadyExists && (!forceOverwrite) {
-		panic("File '%s' already exists, so cannot be over-written")
-	}
+	return err
 }

@@ -36,3 +36,4 @@ The `galasactl` tool can generate the following errors:
 - GAL1033E: Invalid select quoted regex '{}'. Reason is {}
 - GAL1034E: Class '{}' is not format 'bundle/class'
 - GAL1035E: Class '{}' is not format. Name is blank
+- GAL1036E: File '{}' exists. Use the --force flag to over-write it.

@@ -33,6 +33,10 @@ type GalasaError struct {
 	message string
 }
 
+func (err *GalasaError) getMessageType() *MessageType {
+	return err.msgType
+}
+
 // NewGalasaError creates a new GalasaError structure.
 //
 // params - are substituted into the message indicated by the message type.
@@ -92,4 +96,5 @@ var (
 	GALASA_ERROR_SELECTION_REGEX_QUOTED_ERROR   = NewMessageType("GAL1033E: Invalid select quoted regex '%v'. Reason is %v", 1033)
 	GALASA_ERROR_CLASS_FORMAT                   = NewMessageType("GAL1034E: Class '%v' is not format 'bundle/class'", 1034)
 	GALASA_ERROR_CLASS_NAME_BLANK               = NewMessageType("GAL1035E: Class '%v' is not format. Name is blank", 1035)
+	GALASA_ERROR_CANNOT_OVERWRITE_FILE          = NewMessageType("GAL1036E: File '%s' exists. Use the --force flag to over-write it.", 1036)
 )
