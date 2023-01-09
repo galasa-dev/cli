@@ -15,6 +15,7 @@ galasactl project create [flags]
 ```
       --force            Force-overwrite files which already exist.
   -h, --help             help for create
+      --obr              An OSGi Object Bundle Resource (OBR) project is needed.
       --package string   Java package name for tests we create. Forms part of the project name, maven/gradle group/artifact ID, and OSGi bundle name. For example: com.myco.myproduct.myapp
 ```
 

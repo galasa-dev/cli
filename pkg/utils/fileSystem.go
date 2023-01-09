@@ -66,6 +66,7 @@ func (OSFileSystem) Exists(path string) (bool, error) {
 		if errors.Is(err, os.ErrNotExist) {
 			// path/to/whatever does not exist
 			isExists = false
+			err = nil
 		}
 	}
 	return isExists, err
@@ -78,6 +79,7 @@ func (OSFileSystem) DirExists(path string) (bool, error) {
 		if errors.Is(err, os.ErrNotExist) {
 			// path/to/whatever does not exist
 			isDirExists = false
+			err = nil
 		}
 	} else {
 		isDirExists = metadata.IsDir()

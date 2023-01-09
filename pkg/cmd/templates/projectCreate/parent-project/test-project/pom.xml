@@ -8,8 +8,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   
-  <artifactId>{{.ArtifactId}}</artifactId>
-  <name>{{.ArtifactId}}</name>
+  <artifactId>{{.TestArtifactId}}</artifactId>
+  <name>{{.TestArtifactId}}</name>
   
   <packaging>bundle</packaging>
   

@@ -3,20 +3,20 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>dev.galasa</groupId>
-    <artifactId>dev.galasa.examples.tests.parent</artifactId>
+    <groupId>{{.GroupId}}</groupId>
+    <artifactId>{{.ParentArtifactId}}</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>dev.galasa.examples.obr</artifactId>
-  <name>dev.galasa.examples.obr</name>
+  <artifactId>{{.OBRArtifactId}}</artifactId>
+  <name>{{.OBRArtifactId}}</name>
   
   <packaging>galasa-obr</packaging>
   
   <dependencies>
 	<dependency>
-	  <groupId>dev.galasa</groupId>
-	  <artifactId>dev.galasa.examples.tests</artifactId>
+	  <groupId>{{.GroupId}}</groupId>
+	  <artifactId>{{.TestArtifactId}}</artifactId>
 	  <version>0.0.1-SNAPSHOT</version>
 	  <scope>compile</scope>
 	</dependency>

@@ -16,14 +16,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	GALASA_VERSION = "0.24.0"
+)
+
 // PomTemplateSubstitutionParameters holds all the substitution parameters a pom.xml file
 // template uses.
 type PomTemplateSubstitutionParameters struct {
 	GroupId          string
-	ArtifactId       string
+	TestArtifactId   string
+	OBRArtifactId    string
 	Name             string
 	ParentArtifactId string
 	GalasaVersion    string
+	IsOBRRequired    bool
 }
 
 // JavaTestTemplateSubstitutionParameters holds all the substitution parameters a java test file
@@ -52,12 +58,12 @@ var (
 		Short: "Creates a new Galasa project",
 		Long:  "Creates a new Galasa test project with optional OBR project and build process files",
 		Args:  cobra.NoArgs,
-		Run:   executeCreateProject,
+		RunE:  executeCreateProject,
 	}
 
-	packageName   string
-	force         bool
-	galasaVersion = RootCmd.Version
+	packageName          string
+	force                bool
+	isOBRProjectRequired bool
 )
 
 func init() {
@@ -68,11 +74,12 @@ func init() {
 	cmd.MarkFlagRequired("package")
 
 	cmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
+	cmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
 
 	parentCommand.AddCommand(cmd)
 }
 
-func executeCreateProject(cmd *cobra.Command, args []string) {
+func executeCreateProject(cmd *cobra.Command, args []string) error {
 
 	utils.CaptureLog(logFileName)
 
@@ -81,7 +88,9 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
-	createProject(fileSystem, packageName, force)
+	err := createProject(fileSystem, packageName, isOBRProjectRequired, force)
+
+	return err
 }
 
 // createProject will create the following artifacts in the specified file system:
@@ -94,28 +103,39 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 //	│   └── pom.xml
 //	└── packageName.obr       The OBR project.
 //	    └── pom.xml
-func createProject(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) error {
+
+// isOBRProjectRequired - Controls whether the optional OBR project is going to be created.
+func createProject(fileSystem utils.FileSystem, packageName string, isOBRProjectRequired bool, forceOverwrite bool) error {
 	log.Printf("Creating project using packageName:%s\n", packageName)
+
+	var err error
 
 	// Create the parent folder
 	parentProjectFolder := packageName
-	err := createFolder(fileSystem, parentProjectFolder)
+	err = createFolder(fileSystem, parentProjectFolder)
 	if err == nil {
-		err = createParentFolderPom(fileSystem, packageName, forceOverwrite)
+		err = createParentFolderPom(fileSystem, packageName, isOBRProjectRequired, forceOverwrite)
 		if err == nil {
 			err = createTestProject(fileSystem, packageName, forceOverwrite)
+			if err == nil {
+				err = createOBRProject(fileSystem, packageName, forceOverwrite)
+			}
 		}
 	}
 
 	return err
 }
 
-func createParentFolderPom(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) error {
+func createParentFolderPom(fileSystem utils.FileSystem, packageName string, isOBRProjectRequired bool, forceOverwrite bool) error {
 
 	templateParameters := PomTemplateSubstitutionParameters{
-		GroupId:    packageName,
-		ArtifactId: packageName,
-		Name:       packageName}
+		GroupId:          packageName,
+		ParentArtifactId: packageName,
+		Name:             packageName,
+		TestArtifactId:   packageName + ".test",
+		OBRArtifactId:    packageName + ".obr",
+		IsOBRRequired:    isOBRProjectRequired,
+		GalasaVersion:    GALASA_VERSION}
 
 	targetFile := GeneratedFile{
 		fileType:                 "pom",
@@ -143,6 +163,26 @@ func createTestProject(fileSystem utils.FileSystem, packageName string, forceOve
 		if err == nil {
 			err = createJavaSourceFolder(fileSystem, targetFolderPath, packageName, forceOverwrite)
 		}
+	}
+
+	if err == nil {
+		log.Printf("Tests project %s created OK.", targetFolderPath)
+	}
+	return err
+}
+
+func createOBRProject(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) error {
+	targetFolderPath := packageName + "/" + packageName + ".obr"
+	log.Printf("Creating obr project %s\n", targetFolderPath)
+
+	// Create the base test folder
+	err := createFolder(fileSystem, targetFolderPath)
+	if err == nil {
+		err = createOBRFolderPom(fileSystem, targetFolderPath, packageName, forceOverwrite)
+	}
+
+	if err == nil {
+		log.Printf("OBR project %s created OK.", targetFolderPath)
 	}
 	return err
 }
@@ -179,14 +219,35 @@ func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath strin
 	pomTemplateParameters := PomTemplateSubstitutionParameters{
 		GroupId:          packageName,
 		ParentArtifactId: packageName,
-		ArtifactId:       packageName + ".test",
+		TestArtifactId:   packageName + ".test",
+		OBRArtifactId:    packageName + ".obr",
 		Name:             packageName + ".test",
-		GalasaVersion:    galasaVersion}
+		GalasaVersion:    GALASA_VERSION}
 
 	targetFile := GeneratedFile{
 		fileType:                 "pom",
 		targetFilePath:           targetTestFolderPath + "/pom.xml",
 		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/pom.xml",
+		templateParameters:       pomTemplateParameters}
+
+	err := createFile(fileSystem, targetFile, forceOverwrite)
+	return err
+}
+
+func createOBRFolderPom(fileSystem utils.FileSystem, targetOBRFolderPath string, packageName string, forceOverwrite bool) error {
+
+	pomTemplateParameters := PomTemplateSubstitutionParameters{
+		GroupId:          packageName,
+		ParentArtifactId: packageName,
+		TestArtifactId:   packageName + ".test",
+		OBRArtifactId:    packageName + ".obr",
+		Name:             packageName + ".obr",
+		GalasaVersion:    GALASA_VERSION}
+
+	targetFile := GeneratedFile{
+		fileType:                 "pom",
+		targetFilePath:           targetOBRFolderPath + "/pom.xml",
+		embeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/pom.xml",
 		templateParameters:       pomTemplateParameters}
 
 	err := createFile(fileSystem, targetFile, forceOverwrite)
@@ -214,6 +275,9 @@ func createFile(
 				err = fileSystem.WriteTextFile(generatedFile.targetFilePath, fileContents)
 			}
 		}
+	}
+	if err == nil {
+		log.Printf("Created file %s OK.", generatedFile.targetFilePath)
 	}
 	return err
 }
@@ -245,6 +309,7 @@ func assertAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, fo
 	isAlreadyExists, err := fileSystem.Exists(targetFilePath)
 	if err == nil {
 		if isAlreadyExists && (!forceOverwrite) {
+			log.Printf("File %s exists, and we cannot over-write it as the --force flag is not set.", targetFilePath)
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
 		}
 	}

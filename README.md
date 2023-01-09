@@ -4,6 +4,38 @@ The Galasa cli is used to interact with the Galasa ecosystem or local developmen
 
 Most commands will need a reference to the Galasa bootstrap file or url.  This can be provided with the `--bootstrap` flag or the `GALASA_BOOTSTRAP`environment variable.
 
+## Syntax
+The syntax is documented in generated documentation [here](docs/generated/galasactl.md)
+
+
+## Creating example projects using built-in templates
+
+`galasactl` can be used to create near-empty test projects to lay-down an initial structure for fleshing out tests with.
+
+
+### Examples
+
+
+Getting help:-
+
+```
+galasactl --help
+galasactl project --help
+galasactl project create --help
+```
+
+Create a folder tree which can be built into an OSGi bundle (without an OBR):
+```
+galasactl project create --package com.myco.myapp.tests
+```
+
+Create a folder tree which can be built into an OSGi bundle (with an OBR):
+```
+galasactl project create --package com.myco.myapp.tests --obr
+```
+
+
+
 ## runs prepare
 
 The purpose of `runs prepare` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.

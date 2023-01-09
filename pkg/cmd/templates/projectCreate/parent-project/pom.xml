@@ -1,113 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>{{.GroupId}}</groupId>
-  <artifactId>{{.ArtifactId}}</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
+	<groupId>{{.GroupId}}</groupId>
+	<artifactId>{{.ParentArtifactId}}</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+  	<packaging>pom</packaging>
 
-  <name>{{.Name}}</name>
+  	<name>{{.Name}}</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  	  <java.version>11</java.version>
-	  <maven.compiler.source>11</maven.compiler.source>
-	  <maven.compiler.target>11</maven.compiler.target>
-	  <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-	  <unpackBundle>true</unpackBundle>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>11</java.version>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+		<unpackBundle>true</unpackBundle>
+	</properties>
   
-  <modules>
-    <module>{{.GroupId}}.test</module>
-	<!--
-    <module>{{.GroupId}}.obr</module>
-	-->
-  </modules>
+	<modules>
+		<module>{{.TestArtifactId}}</module>
+		{{if .IsOBRRequired}}
+		<module>{{.OBRArtifactId}}</module>
+		{{end}}
+	</modules>
 
-  <dependencyManagement>
-    <dependencies>
-        <dependency>
-	      <groupId>dev.galasa</groupId>
-		  <artifactId>galasa-bom</artifactId>
-		  <version>{{.GalasaVersion}}</version>
-		  <type>pom</type>
-		  <scope>import</scope>
-	    </dependency>
-      </dependencies>
-	</dependencyManagement>
-	
-	<dependencies>
-	  <dependency>
-		<groupId>dev.galasa</groupId>
-		<artifactId>dev.galasa.framework</artifactId>
-	  </dependency>
-	  <dependency>
-		<groupId>dev.galasa</groupId>
-		<artifactId>dev.galasa</artifactId>
-	  </dependency>
-	  <dependency>
-		<groupId>dev.galasa</groupId>
-		<artifactId>dev.galasa.core.manager</artifactId>
-	  </dependency>
-	  <dependency>
-		<groupId>dev.galasa</groupId>
-		<artifactId>dev.galasa.artifact.manager</artifactId>
-	  </dependency>
-	  <dependency>
-		<groupId>org.assertj</groupId>
-		<artifactId>assertj-core</artifactId>
-	  </dependency>
-	</dependencies>
-	
-	<build>
-		<pluginManagement>
-		  <plugins>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+			<groupId>dev.galasa</groupId>
+			<artifactId>galasa-bom</artifactId>
+			<version>{{.GalasaVersion}}</version>
+			<type>pom</type>
+			<scope>import</scope>
+			</dependency>
+		</dependencies>
+		</dependencyManagement>
+		
+		<dependencies>
+		<dependency>
+			<groupId>dev.galasa</groupId>
+			<artifactId>dev.galasa.framework</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.galasa</groupId>
+			<artifactId>dev.galasa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.galasa</groupId>
+			<artifactId>dev.galasa.core.manager</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.galasa</groupId>
+			<artifactId>dev.galasa.artifact.manager</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+		</dependency>
+		</dependencies>
+		
+		<!--
+		<build>
+			<pluginManagement>
+			<plugins>
+				<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>4.1.0</version>
+				</plugin>
+				<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>3.6.0</version>
+				</plugin>
+				<plugin>
+				<groupId>dev.galasa</groupId>
+				<artifactId>galasa-maven-plugin</artifactId>
+				<version>0.11.0</version>
+				</plugin>
+			</plugins>
+			</pluginManagement>
+			<plugins>
 			<plugin>
-			  <groupId>org.apache.felix</groupId>
-			  <artifactId>maven-bundle-plugin</artifactId>
-			  <version>4.1.0</version>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>4.1.0</version>
+				<extensions>true</extensions>
 			</plugin>
 			<plugin>
-			  <groupId>org.apache.maven.plugins</groupId>
-			  <artifactId>maven-plugin-plugin</artifactId>
-			  <version>3.6.0</version>
+				<groupId>dev.galasa</groupId>
+				<artifactId>galasa-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<executions>
+				<execution>
+					<id>build-testcatalog</id>
+					<phase>package</phase>
+					<goals>
+					<goal>bundletestcat</goal>
+					</goals>
+				</execution>
+
+					<id>process-resources</id>
+					<goals>
+					<goal>gitcommithash</goal>
+					</goals>
+				</execution>
+				</executions>
 			</plugin>
-			<plugin>
-			  <groupId>dev.galasa</groupId>
-			  <artifactId>galasa-maven-plugin</artifactId>
-			  <version>0.11.0</version>
-		    </plugin>
-		  </plugins>
-		</pluginManagement>
-		<plugins>
-		  <plugin>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>maven-bundle-plugin</artifactId>
-			<version>4.1.0</version>
-			<extensions>true</extensions>
-		  </plugin>
-		  <plugin>
-		    <groupId>dev.galasa</groupId>
-			<artifactId>galasa-maven-plugin</artifactId>
-			<extensions>true</extensions>
-            <executions>
-              <execution>
-                <id>build-testcatalog</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>bundletestcat</goal>
-                </goals>
-              </execution>
-			  <!-- <execution>
-			    <id>process-resources</id>
-				<goals>
-				  <goal>gitcommithash</goal>
-				</goals>
-			  </execution> -->
-            </executions>
-      	  </plugin>
-		</plugins>
-	</build>
+			</plugins>
+		</build>
+		-->
 </project>
