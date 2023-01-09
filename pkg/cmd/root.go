@@ -36,12 +36,19 @@ func Execute() {
 
 	// Execute the command
 	if err := RootCmd.Execute(); err != nil {
+		log.Printf("Error : %s. exit code 1.", err.Error())
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
+	log.Printf("OK. Exit code 0")
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "", "File to which log information will be sent. Any folder referred to must exist. An existing file will be over-written.")
+	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "",
+		"File to which log information will be sent. Any folder referred to must exist. "+
+			"An existing file will be over-written. "+
+			"Specify \"-\" to log to stderr. "+
+			"Defaults to not logging.")
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 }

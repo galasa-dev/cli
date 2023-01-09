@@ -29,16 +29,16 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-			<groupId>dev.galasa</groupId>
-			<artifactId>galasa-bom</artifactId>
-			<version>{{.GalasaVersion}}</version>
-			<type>pom</type>
-			<scope>import</scope>
+				<groupId>dev.galasa</groupId>
+				<artifactId>galasa-bom</artifactId>
+				<version>{{.GalasaVersion}}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
-		</dependencyManagement>
+	</dependencyManagement>
 		
-		<dependencies>
+	<dependencies>
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.framework</artifactId>
@@ -59,30 +59,29 @@
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 		</dependency>
-		</dependencies>
+	</dependencies>
 		
-		<!--
-		<build>
-			<pluginManagement>
+	<build>
+		<pluginManagement>
 			<plugins>
 				<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>4.1.0</version>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-bundle-plugin</artifactId>
+					<version>4.1.0</version>
 				</plugin>
 				<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.6.0</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
-				<groupId>dev.galasa</groupId>
-				<artifactId>galasa-maven-plugin</artifactId>
-				<version>0.11.0</version>
+					<groupId>dev.galasa</groupId>
+					<artifactId>galasa-maven-plugin</artifactId>
+					<version>0.11.0</version>
 				</plugin>
 			</plugins>
-			</pluginManagement>
-			<plugins>
+		</pluginManagement>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -94,22 +93,24 @@
 				<artifactId>galasa-maven-plugin</artifactId>
 				<extensions>true</extensions>
 				<executions>
-				<execution>
-					<id>build-testcatalog</id>
-					<phase>package</phase>
-					<goals>
-					<goal>bundletestcat</goal>
-					</goals>
-				</execution>
-
-					<id>process-resources</id>
-					<goals>
-					<goal>gitcommithash</goal>
-					</goals>
-				</execution>
+					<execution>
+						<id>build-testcatalog</id>
+						<phase>package</phase>
+						<goals>
+						<goal>bundletestcat</goal>
+						</goals>
+					</execution>
+					<!--
+					<execution>
+						<id>process-resources</id>
+						<goals>
+						<goal>gitcommithash</goal>
+						</goals>
+					</execution>
+					-->
 				</executions>
 			</plugin>
-			</plugins>
-		</build>
-		-->
+		</plugins>
+	</build>
+
 </project>
