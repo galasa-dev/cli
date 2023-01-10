@@ -6,6 +6,9 @@ import dev.galasa.Test;
 import dev.galasa.core.manager.CoreManager;
 import dev.galasa.core.manager.ICoreManager;
 
+/**
+ * A sample galasa test class 
+ */
 @Test
 public class SampleTest {
 
@@ -13,9 +16,12 @@ public class SampleTest {
 	@CoreManager
 	public ICoreManager core;
 	
+	/**
+	 * Test which demonstrates that the core manager was injected.
+	 */
 	@Test
 	public void simpleSampleTest() {
 		assertThat(core).isNotNull();
 	}
-
+	
 }

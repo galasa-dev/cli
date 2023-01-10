@@ -8,13 +8,13 @@ Most commands will need a reference to the Galasa bootstrap file or url.  This c
 The syntax is documented in generated documentation [here](docs/generated/galasactl.md)
 
 
-## Creating example projects using built-in templates
+## Creating example project
 
-`galasactl` can be used to create near-empty test projects to lay-down an initial structure for fleshing out tests with.
-
+`galasactl` can be used to create near-empty test projects to lay-down an initial structure 
+prior to fleshing out with more tests. This can provide a boost to productivity when 
+starting a new OSGi bundle containing Galasa tests.
 
 ### Examples
-
 
 Getting help:-
 
@@ -49,6 +49,17 @@ galasactl --help
 galasactl runs --help
 galasactl runs prepare --help
 ```
+
+Finding out the version of the galasactl tool:-
+```
+galasactl --version
+```
+
+Will yield output such as this:
+```
+galasactl version 0.20.0-alpha-2305ba574524af5cd0fba59de18411582f470de5
+```
+
 
 Selecting tests from a test steam:-
 
@@ -113,6 +124,10 @@ galasactl runs prepare
 
 The purpose of `runs submit` is to submit and monitor tests in the Galasa ecosystem.  Tests can be input from a portfolio or using the same commands as the `runs prepare` command, but not both.
 
+Note: The `--log -` directs logging information to the stderr console.
+Omit this option if you do not want to see logging, or specify `--log myFileName.txt` if you wish 
+to capture log information in a file.
+
 ### Examples
 
 Getting help:-
@@ -123,28 +138,29 @@ galasactl runs --help
 galasactl runs runs --help
 ```
 
-Running tests from a portfolio:-
+Running tests from a portfolio (and see the log on the console):-
 
 ```
-galasactl runs submit
+galasactl runs submit --log -
           --portfolio test.yaml
           --poll 5
           --progress 1
           --throttle 5
 ```
 
-Submitting tests without a portfolio:-
+Submitting tests without a portfolio (and see the log on the console) :-
 
 ```
-galasactl runs submit
+galasactl runs submit --log -
           --class test.package.one/Test1
           --class test.package.one/Test2
 ```
 
-Providing overrides for all tests during this run, note, overrides in the portfolio will take precedence over these:-
+Providing overrides for all tests during this run, note, overrides in the portfolio will take precedence over these
+(and see the log on the console) :-
 
 ```
-galasactl runs submit
+galasactl runs submit --log -
           --portfolio test.yaml
           --override zos.default.lpar=MV2C
           --override zos.default.cluster=PLEX2
@@ -195,6 +211,3 @@ So, invoke the `galasactl` without installing on your local machine, using the d
 ```
 docker run harbor.galasa.dev/galasadev/galasa-cli-amd64:main galasactl --version
 ```
-
-
-

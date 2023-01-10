@@ -95,15 +95,19 @@ func executeCreateProject(cmd *cobra.Command, args []string) error {
 
 // createProject will create the following artifacts in the specified file system:
 //
-// .							 All files are relative to the current directory.
-// └── packageName               The parent package.
+//		. - All files are relative to the current directory.
+//		└── packageName - The parent package
+//			├── pom.xml - The parent pom.
+//	 		├── packageName.test - The tests project.
+//	  		│   └── pom.xml
+//	  		│   └── src
+//	  		│       └── main
+//	  		│           └── java
+//	  		│               └── packageName - There will be multiple nested folders if there are dots ('.') in the package name
+//	  		│                   └── SampleTest.java - Contains an example Galasa testcase
+//	  		└── packageName.obr - The OBR project. (only if the --obr option is used).
+//	    	 	 └── pom.xml
 //
-//	├── pom.xml               The parent pom.
-//	├── packageName.test      The tests project.
-//	│   └── pom.xml
-//	└── packageName.obr       The OBR project.
-//	    └── pom.xml
-
 // isOBRProjectRequired - Controls whether the optional OBR project is going to be created.
 func createProject(fileSystem utils.FileSystem, packageName string, isOBRProjectRequired bool, forceOverwrite bool) error {
 	log.Printf("Creating project using packageName:%s\n", packageName)
@@ -263,7 +267,7 @@ func createFile(
 
 	log.Printf("Creating file of type %s at %s\n", generatedFile.fileType, generatedFile.targetFilePath)
 
-	err := assertAllowedToWrite(fileSystem, generatedFile.targetFilePath, forceOverwrite)
+	err := checkAllowedToWrite(fileSystem, generatedFile.targetFilePath, forceOverwrite)
 	if err == nil {
 		var template *template.Template
 		template, err = loadEmbeddedTemplate(generatedFile.embeddedTemplateFilePath)
@@ -305,7 +309,10 @@ func loadEmbeddedTemplate(embeddedTemplateFilePath string) (*template.Template, 
 	return templ, err
 }
 
-func assertAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) error {
+// checkAllowedToWrite - Checks to see if we are allowed to write a file.
+// The file may exist already. If it does, then we won't be able to over-write it unless
+// the forceOverWrite flag is true.
+func checkAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) error {
 	isAlreadyExists, err := fileSystem.Exists(targetFilePath)
 	if err == nil {
 		if isAlreadyExists && (!forceOverwrite) {
