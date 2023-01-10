@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	GALASA_VERSION = "0.24.0"
+	GALASA_VERSION = "0.25.0"
 )
 
 // PomTemplateSubstitutionParameters holds all the substitution parameters a pom.xml file
@@ -58,7 +58,7 @@ var (
 		Short: "Creates a new Galasa project",
 		Long:  "Creates a new Galasa test project with optional OBR project and build process files",
 		Args:  cobra.NoArgs,
-		RunE:  executeCreateProject,
+		Run:   executeCreateProject,
 	}
 
 	packageName          string
@@ -70,7 +70,10 @@ func init() {
 	cmd := projectCreateCmd
 	parentCommand := projectCmd
 
-	cmd.Flags().StringVar(&packageName, "package", "", "Java package name for tests we create. Forms part of the project name, maven/gradle group/artifact ID, and OSGi bundle name. For example: com.myco.myproduct.myapp")
+	cmd.Flags().StringVar(&packageName, "package", "", "Java package name for tests we create. "+
+		"Forms part of the project name, maven/gradle group/artifact ID, "+
+		"and OSGi bundle name. It may reflect the name of your organisation or company. "+
+		"For example: dev.galasa.myapp.mycomponent")
 	cmd.MarkFlagRequired("package")
 
 	cmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
@@ -79,7 +82,7 @@ func init() {
 	parentCommand.AddCommand(cmd)
 }
 
-func executeCreateProject(cmd *cobra.Command, args []string) error {
+func executeCreateProject(cmd *cobra.Command, args []string) {
 
 	utils.CaptureLog(logFileName)
 
@@ -90,7 +93,13 @@ func executeCreateProject(cmd *cobra.Command, args []string) error {
 
 	err := createProject(fileSystem, packageName, isOBRProjectRequired, force)
 
-	return err
+	// Convey the error to the top level.
+	// Tried doing this with RunE: entry, passing back the error, but we always
+	// got a 'usage' syntax summary for the command which failed.
+	if err != nil {
+		// We can't unit test
+		panic(err)
+	}
 }
 
 // createProject will create the following artifacts in the specified file system:

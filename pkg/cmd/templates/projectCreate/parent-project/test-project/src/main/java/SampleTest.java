@@ -12,7 +12,7 @@ import dev.galasa.core.manager.ICoreManager;
 @Test
 public class SampleTest {
 
-	// Galasa will inject a core manager into the following field
+	// Galasa will inject an instance of the core manager into the following field
 	@CoreManager
 	public ICoreManager core;
 	

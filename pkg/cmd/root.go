@@ -30,6 +30,7 @@ func Execute() {
 		if errobj != nil {
 			fmt.Fprintln(os.Stderr, errobj)
 			log.Println(errobj)
+			log.Printf("Exit code 1")
 			os.Exit(1)
 		}
 	}()
