@@ -179,11 +179,10 @@ rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable g
 success "New binaries built - OK"
 
 #--------------------------------------------------------------------------
-# Invoke the tool to create a sample project.
+h2 "Invoke the tool to create a sample project."
 rm -fr ${BASEDIR}/temp
 mkdir -p ${BASEDIR}/temp
 cd ${BASEDIR}/temp
-
 
 raw_os=$(uname -s) # eg: "Darwin"
 os=""
@@ -214,8 +213,10 @@ if [[ "${rc}" != "0" ]]; then
     error " Failed to create the galasa test project using galasactl command. rc=${rc}"
     exit 1
 fi
+success "OK"
 
 # Now build the source it created.
+h2 "Building the sample project we just generated."
 cd com.myco.example
 mvn clean test install 
 rc=$?
@@ -223,6 +224,7 @@ if [[ "${rc}" != "0" ]]; then
     error " Failed to build the generated source code which galasactl created."
     exit 1
 fi
+success "OK"
 
 # Return to the top folder so we can do other things.
 cd ${BASEDIR}
