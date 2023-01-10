@@ -37,3 +37,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1034E: Class '{}' is not format 'bundle/class'
 - GAL1035E: Class '{}' is not format. Name is blank
 - GAL1036E: File '{}' exists. Use the --force flag to over-write it.
+- GAL1037E: Invalid Java package name '{}' should not contain the '{}' character.
+- GAL1038E: Invalid Java package name '{}' should not start with the '{}' character.
+- GAL1039E: Invalid Java package name '{}' should not end with the '{}' character.
+- GAL1040E: Invalid Java package name. Package name should not be blank.

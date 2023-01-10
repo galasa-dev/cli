@@ -123,15 +123,18 @@ func createProject(fileSystem utils.FileSystem, packageName string, isOBRProject
 
 	var err error
 
-	// Create the parent folder
-	parentProjectFolder := packageName
-	err = createFolder(fileSystem, parentProjectFolder)
+	err = utils.ValidateJavaPackageName(packageName)
 	if err == nil {
-		err = createParentFolderPom(fileSystem, packageName, isOBRProjectRequired, forceOverwrite)
+		// Create the parent folder
+		parentProjectFolder := packageName
+		err = createFolder(fileSystem, parentProjectFolder)
 		if err == nil {
-			err = createTestProject(fileSystem, packageName, forceOverwrite)
+			err = createParentFolderPom(fileSystem, packageName, isOBRProjectRequired, forceOverwrite)
 			if err == nil {
-				err = createOBRProject(fileSystem, packageName, forceOverwrite)
+				err = createTestProject(fileSystem, packageName, forceOverwrite)
+				if err == nil {
+					err = createOBRProject(fileSystem, packageName, forceOverwrite)
+				}
 			}
 		}
 	}

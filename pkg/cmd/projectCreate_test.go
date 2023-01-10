@@ -11,6 +11,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCanCreateProjectFailsIfPackageNameInvalid(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := true
+	isObrProjectRequired := false
+
+	// When ...
+	err := createProject(mockFileSystem, "very.INVALID_PACKAGE_NAME.very", isObrProjectRequired, forceOverwrite)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	assert.NotNil(t, err, "Should return an error if java package name is invalid")
+	assert.Contains(t, err.Error(), "GAL1037E:", "Wrong error message reported.")
+}
+
 func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	// Given...
 	mockFileSystem := utils.NewMockFileSystem()

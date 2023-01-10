@@ -97,4 +97,8 @@ var (
 	GALASA_ERROR_CLASS_FORMAT                   = NewMessageType("GAL1034E: Class '%v' is not format 'bundle/class'", 1034)
 	GALASA_ERROR_CLASS_NAME_BLANK               = NewMessageType("GAL1035E: Class '%v' is not format. Name is blank", 1035)
 	GALASA_ERROR_CANNOT_OVERWRITE_FILE          = NewMessageType("GAL1036E: File '%s' exists. Use the --force flag to over-write it.", 1036)
+	GALASA_ERROR_INVALID_CHAR_IN_PACKAGE_NAME   = NewMessageType("GAL1037E: Invalid Java package name '%s' should not contain the '%s' character.", 1037)
+	GALASA_ERROR_INVALID_FIRST_CHAR_IN_PKG_NAME = NewMessageType("GAL1038E: Invalid Java package name '%s' should not start with the '%s' character.", 1038)
+	GALASA_ERROR_INVALID_LAST_CHAR_IN_PKG_NAME  = NewMessageType("GAL1039E: Invalid Java package name '%s' should not end with the '%s' character.", 1039)
+	GALASA_ERROR_PACKAGE_NAME_BLANK             = NewMessageType("GAL1040E: Invalid Java package name. Package name should not be blank.", 1040)
 )
