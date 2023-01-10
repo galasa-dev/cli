@@ -179,6 +179,55 @@ rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable g
 success "New binaries built - OK"
 
 #--------------------------------------------------------------------------
+# Invoke the tool to create a sample project.
+rm -fr ${BASEDIR}/temp
+mkdir -p ${BASEDIR}/temp
+cd ${BASEDIR}/temp
+
+
+raw_os=$(uname -s) # eg: "Darwin"
+os=""
+case $raw_os in
+    Darwin*) 
+        os="darwin" 
+        ;;
+    Windows*)
+        os="windows"
+        ;;
+    Linux*)
+        os="linux"
+        ;;
+    *) 
+        error "Failed to recognise which operating system is in use. $raw_os"
+        exit 1
+esac
+
+architecture=$(uname -m)
+
+galasactl_command="galasactl-${os}-${architecture}"
+info "galasactl command is ${galasactl_command}"
+
+# Invoke the galasactl command to create a project.
+${BASEDIR}/bin/${galasactl_command} project create --package com.myco.example --obr 
+rc=$?
+if [[ "${rc}" != "0" ]]; then
+    error " Failed to create the galasa test project using galasactl command. rc=${rc}"
+    exit 1
+fi
+
+# Now build the source it created.
+cd com.myco.example
+mvn clean test install 
+rc=$?
+if [[ "${rc}" != "0" ]]; then
+    error " Failed to build the generated source code which galasactl created."
+    exit 1
+fi
+
+# Return to the top folder so we can do other things.
+cd ${BASEDIR}
+
+#--------------------------------------------------------------------------
 # Build the documentation
 generated_docs_folder=${BASEDIR}/docs/generated
 h2 "Generating documentation"
@@ -188,8 +237,8 @@ mkdir -p ${generated_docs_folder}
 # Figure out which type of machine this script is currently running on.
 unameOut="$(uname -s)"
 case "${unameOut}" in
-    Linux*)     machine=linux;;
-    Darwin*)    machine=darwin;;
+    Linux)      machine=linux;;
+    Darwin)     machine=darwin;;
     *)          error "Unknown machine type ${unameOut}"
                 exit 1
 esac
