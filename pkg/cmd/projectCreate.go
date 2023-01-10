@@ -220,7 +220,7 @@ func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath strin
 	targetFile := GeneratedFile{
 		fileType:                 "JavaSourceFile",
 		targetFilePath:           targetSrcFolderPath + "/SampleTest.java",
-		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/src/main/java/SampleTest.java",
+		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/src/main/java/SampleTest.java.template",
 		templateParameters:       templateParameters}
 
 	err := createFile(fileSystem, targetFile, forceOverwrite)
