@@ -33,7 +33,7 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	isObrProjectRequired := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.package", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -44,56 +44,56 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 }
 
 func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.FileSystem, isObrProjectRequired bool) {
-	parentFolderExists, err := mockFileSystem.DirExists("my.test.package")
+	parentFolderExists, err := mockFileSystem.DirExists("my.test.pkg")
 	assert.Nil(t, err)
 	assert.True(t, parentFolderExists, "Parent folder was not created.")
 
-	parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.package/pom.xml")
+	parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.pkg/pom.xml")
 	assert.Nil(t, err)
 	assert.True(t, parentPomXmlFileExists, "Parent folder pom.xml was not created.")
 
-	text, err := mockFileSystem.ReadTextFile("my.test.package/pom.xml")
+	text, err := mockFileSystem.ReadTextFile("my.test.pkg/pom.xml")
 	assert.Nil(t, err)
-	assert.Contains(t, text, "<groupId>my.test.package</groupId>", "parent pom.xml didn't substitute the group id")
-	assert.Contains(t, text, "<artifactId>my.test.package</artifactId>", "parent pom.xml didn't substitute the artifact id")
+	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "parent pom.xml didn't substitute the group id")
+	assert.Contains(t, text, "<artifactId>my.test.pkg</artifactId>", "parent pom.xml didn't substitute the artifact id")
 
-	assert.Contains(t, text, "<module>my.test.package.test</module>", "parent pom.xml didn't have a test module included")
+	assert.Contains(t, text, "<module>my.test.pkg.test</module>", "parent pom.xml didn't have a test module included")
 
 	if isObrProjectRequired {
-		assert.Contains(t, text, "<module>my.test.package.obr</module>", "parent pom.xml didn't have an obr module included")
+		assert.Contains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml didn't have an obr module included")
 	} else {
-		assert.NotContains(t, text, "<module>my.test.package.obr</module>", "parent pom.xml should not have an obr module included")
+		assert.NotContains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml should not have an obr module included")
 	}
 }
 
 func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.FileSystem) {
 
-	testFolderExists, err := mockFileSystem.DirExists("my.test.package/my.test.package.test")
+	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.test")
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test folder was not created.")
 
-	expectedPomFilePath := "my.test.package/my.test.package.test/pom.xml"
+	expectedPomFilePath := "my.test.pkg/my.test.pkg.test/pom.xml"
 	testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created.")
 
 	text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
 	assert.Nil(t, err)
-	assert.Contains(t, text, "<groupId>my.test.package</groupId>", "Test folder pom.xml didn't substitute the group id")
-	assert.Contains(t, text, "<artifactId>my.test.package.test</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
+	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
+	assert.Contains(t, text, "<artifactId>my.test.pkg.test</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
 
-	testSrcFolderExists, err := mockFileSystem.DirExists("my.test.package/my.test.package.test/src/main/java/my/test/package/test")
+	testSrcFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.test/src/main/java/my/test/pkg/test")
 	assert.Nil(t, err)
 	assert.True(t, testSrcFolderExists, "Test src folder was not created.")
 
-	expectedJavaFilePath := "my.test.package/my.test.package.test/src/main/java/my/test/package/test/SampleTest.java"
+	expectedJavaFilePath := "my.test.pkg/my.test.pkg.test/src/main/java/my/test/pkg/test/SampleTest.java"
 	testJavaFileExists, err := mockFileSystem.Exists(expectedJavaFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testJavaFileExists, "Test java file was not created.")
 
 	text, err = mockFileSystem.ReadTextFile(expectedJavaFilePath)
 	assert.Nil(t, err)
-	assert.Contains(t, text, "package my.test.package.test", "Test java file didn't substitute the java package")
+	assert.Contains(t, text, "package my.test.pkg.test", "Test java file didn't substitute the java package")
 
 }
 
@@ -110,7 +110,7 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.package", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -130,7 +130,7 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.package", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -142,7 +142,7 @@ func TestCreateProjectPomFileAlreadyExistsNoForceOverwrite(t *testing.T) {
 	mockFileSystem := utils.NewMockFileSystem()
 	forceOverwrite := false
 	isObrProjectRequired := false
-	testPackageName := "my.test.package"
+	testPackageName := "my.test.pkg"
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
@@ -162,7 +162,7 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 	mockFileSystem := utils.NewMockFileSystem()
 	isObrProjectRequired := false
 	forceOverwrite := true
-	testPackageName := "my.test.package"
+	testPackageName := "my.test.pkg"
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
@@ -178,14 +178,14 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 	}
 
 	// Check that the pom with decent inputs has over-written the dummy test pom contents.
-	parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.package/pom.xml")
+	parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.pkg/pom.xml")
 	assert.Nil(t, err)
 	assert.True(t, parentPomXmlFileExists, "Parent folder pom.xml was not created.")
 
-	text, err := mockFileSystem.ReadTextFile("my.test.package/pom.xml")
+	text, err := mockFileSystem.ReadTextFile("my.test.pkg/pom.xml")
 	assert.Nil(t, err)
-	assert.Contains(t, text, "<groupId>my.test.package</groupId>", "parent pom.xml didn't substitute the group id")
-	assert.Contains(t, text, "<artifactId>my.test.package</artifactId>", "parent pom.xml didn't substitute the artifact id")
+	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "parent pom.xml didn't substitute the group id")
+	assert.Contains(t, text, "<artifactId>my.test.pkg</artifactId>", "parent pom.xml didn't substitute the artifact id")
 
 }
 
@@ -196,7 +196,7 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	isObrProjectRequired := true
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.package", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -210,17 +210,17 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 }
 
 func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.FileSystem) {
-	testFolderExists, err := mockFileSystem.DirExists("my.test.package/my.test.package.obr")
+	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.obr")
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test folder was not created.")
 
-	expectedPomFilePath := "my.test.package/my.test.package.obr/pom.xml"
+	expectedPomFilePath := "my.test.pkg/my.test.pkg.obr/pom.xml"
 	testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created.")
 
 	text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
 	assert.Nil(t, err)
-	assert.Contains(t, text, "<groupId>my.test.package</groupId>", "Test folder pom.xml didn't substitute the group id")
-	assert.Contains(t, text, "<artifactId>my.test.package.obr</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
+	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
+	assert.Contains(t, text, "<artifactId>my.test.pkg.obr</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
 }

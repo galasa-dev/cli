@@ -19,7 +19,19 @@ var (
 	validStartingCharacters = LOWER_CASE_LETTERS + DIGITS
 	validMiddleCharacters   = LOWER_CASE_LETTERS + DIGITS + SEPARATOR
 	validLastCharacters     = LOWER_CASE_LETTERS + DIGITS
+
+	javaReservedWords = " abstract assert boolean break byte case " +
+		"catch char class continue const default do double else enum exports externds " +
+		"final finally float for goto if implements import instanceof int interface long module native new " +
+		"package private protected public requires return short static strictfp super switch synchronized " +
+		"this throw throws transient try var void volatile while true false null "
 )
+
+func isJavaReservedWord(stringToCheck string) bool {
+	wordToLookFor := " " + stringToCheck + " "
+	isReserved := strings.Contains(javaReservedWords, wordToLookFor)
+	return isReserved
+}
 
 // To validate the string as a valid java package name before we start to use it.
 func ValidateJavaPackageName(javaPackageName string) error {
@@ -54,6 +66,15 @@ func ValidateJavaPackageName(javaPackageName string) error {
 		lastChar := string(javaPackageName[length-1])
 		if !strings.Contains(validLastCharacters, lastChar) {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_LAST_CHAR_IN_PKG_NAME, javaPackageName, lastChar)
+		}
+	}
+
+	if err == nil {
+		// Check if any of the parts of the package are reserved java keywords
+		for _, part := range strings.Split(javaPackageName, ".") {
+			if isJavaReservedWord(part) {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PKG_RESERVED_WORD, javaPackageName, part)
+			}
 		}
 	}
 	return err

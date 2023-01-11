@@ -22,7 +22,7 @@ func CaptureLog(logFileName string) *os.File {
 
 	// Send the log to a file
 	if logFileName == "-" {
-		// Log to the console. This is the defaul behaviour.
+		// Log to the console. This is the default behaviour.
 	} else {
 		if logFileName == "" {
 			// Log not specified, so needs to be suppressed.

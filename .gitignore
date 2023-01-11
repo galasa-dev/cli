@@ -12,3 +12,5 @@ build/
 .idea/
 temp/
 run.sh
+**/.DS_Store
+.DS_Store

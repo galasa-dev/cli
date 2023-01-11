@@ -39,3 +39,9 @@ func TestValidateJavaPackageNameBlank(t *testing.T) {
 	assert.NotNil(t, err, "Validation reported OK when it should be invalid.")
 	assert.Contains(t, err.Error(), "GAL1040E:", "Wrong error message reported.")
 }
+
+func TestValidateJavaPackageNameReservedJavaKeyword(t *testing.T) {
+	err := ValidateJavaPackageName("bad.because.it.contains.this.java.keyword")
+	assert.NotNil(t, err, "Validation reported OK when it should be invalid.")
+	assert.Contains(t, err.Error(), "GAL1044E:", "Wrong error message reported.")
+}
