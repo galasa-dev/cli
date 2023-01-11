@@ -101,4 +101,7 @@ var (
 	GALASA_ERROR_INVALID_FIRST_CHAR_IN_PKG_NAME = NewMessageType("GAL1038E: Invalid Java package name '%s' should not start with the '%s' character.", 1038)
 	GALASA_ERROR_INVALID_LAST_CHAR_IN_PKG_NAME  = NewMessageType("GAL1039E: Invalid Java package name '%s' should not end with the '%s' character.", 1039)
 	GALASA_ERROR_PACKAGE_NAME_BLANK             = NewMessageType("GAL1040E: Invalid Java package name. Package name should not be blank.", 1040)
+	GALASA_ERROR_FAILED_TO_CREATE_FOLDERS       = NewMessageType("GAL1041E: Failed to create folders '%s'. Reason is '%s'. Check that you have permissions to write to that folder, and that there is enough disk space available and try again.", 1041)
+	GALASA_ERROR_FAILED_TO_WRITE_FILE           = NewMessageType("GAL1042E: Failed to open file '%s' for writing. Reason is '%s'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.", 1042)
+	GALASA_ERROR_FAILED_TO_READ_FILE            = NewMessageType("GAL1042E: Failed to open file '%s' for reading. Reason is '%s'. Check that you have permissions to read the file and try again.", 1043)
 )

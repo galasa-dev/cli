@@ -41,3 +41,6 @@ The `galasactl` tool can generate the following errors:
 - GAL1038E: Invalid Java package name '{}' should not start with the '{}' character.
 - GAL1039E: Invalid Java package name '{}' should not end with the '{}' character.
 - GAL1040E: Invalid Java package name. Package name should not be blank.
+- GAL1041E: Failed to create folders '{}'. Reason is '{}'. Check that you have permissions to write to that folder, and that there is enough disk space available and try again.
+- GAL1042E: Failed to open file '{}' for writing. Reason is '{}'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.
+- GAL1042E: Failed to open file '{}' for reading. Reason is '{}'. Check that you have permissions to read the file and try again.

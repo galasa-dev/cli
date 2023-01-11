@@ -6,6 +6,8 @@ package utils
 import (
 	"errors"
 	"os"
+
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
 
 // FileSystem is a thin interface layer above the os package which can be mocked out
@@ -41,19 +43,27 @@ func NewOSFileSystem() FileSystem {
 
 func (OSFileSystem) MkdirAll(targetFolderPath string) error {
 	err := os.MkdirAll(targetFolderPath, 0755)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_CREATE_FOLDERS, targetFolderPath, err.Error())
+	}
 	return err
 }
 
 func (OSFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
 	bytes := []byte(desiredContents)
 	err := os.WriteFile(targetFilePath, bytes, 0644)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
+	}
 	return err
 }
 
 func (OSFileSystem) ReadTextFile(filePath string) (string, error) {
 	text := ""
 	bytes, err := os.ReadFile(filePath)
-	if err == nil {
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, filePath, err.Error())
+	} else {
 		text = string(bytes)
 	}
 	return text, err
