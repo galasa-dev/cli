@@ -5,8 +5,7 @@
 		Package   string
 		ClassName string
 	}
-*/}}
-
+*/ -}}
 package {{.Package}};
 
 import static org.assertj.core.api.Assertions.*;
