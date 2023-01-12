@@ -16,9 +16,11 @@ func TestCanCreateProjectFailsIfPackageNameInvalid(t *testing.T) {
 	mockFileSystem := utils.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
+	featureNamesCommandSeparatedList := "test"
 
 	// When ...
-	err := createProject(mockFileSystem, "very.INVALID_PACKAGE_NAME.very", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "very.INVALID_PACKAGE_NAME.very",
+		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -31,16 +33,19 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	mockFileSystem := utils.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
+	featureNamesCommandSeparatedList := "test"
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	// Should have created a folder for the parent package.
-	assert.Nil(t, err, "Golden path should not return an error")
+	if err != nil {
+		assert.Fail(t, "Golden path should not return an error. %s", err.Error())
+	}
 
 	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired)
-	assertTestFolderAndContentsCreatedOk(t, mockFileSystem)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test")
 }
 
 func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.FileSystem, isObrProjectRequired bool) {
@@ -63,19 +68,27 @@ func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.Fil
 		assert.Contains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml didn't have an obr module included")
 	} else {
 		assert.NotContains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml should not have an obr module included")
+
+		// Make sure the OBR folder does not exist.
+		expectedObrFolderPath := packageName + "/" + packageName + ".obr"
+		var obrFolderExists bool
+		obrFolderExists, _ = mockFileSystem.DirExists(expectedObrFolderPath)
+		assert.False(t, obrFolderExists, "OBR folder exists, when it should not!")
+
+		// OBR should not be mentioned in the parent pom.xml
 	}
 }
 
-func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.FileSystem) {
+func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.FileSystem, featureName string) {
 
-	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.test")
+	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg." + featureName)
 	assert.Nil(t, err)
-	assert.True(t, testFolderExists, "Test folder was not created.")
+	assert.True(t, testFolderExists, "Test"+featureName+" folder was not created.")
 
-	expectedPomFilePath := "my.test.pkg/my.test.pkg.test/pom.xml"
+	expectedPomFilePath := "my.test.pkg/my.test.pkg." + featureName + "/pom.xml"
 	testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
 	assert.Nil(t, err)
-	assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created.")
+	assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created for feature."+featureName)
 
 	text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
 	assert.Nil(t, err)
@@ -86,7 +99,7 @@ func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.Fil
 	assert.Nil(t, err)
 	assert.True(t, testSrcFolderExists, "Test src folder was not created.")
 
-	expectedJavaFilePath := "my.test.pkg/my.test.pkg.test/src/main/java/my/test/pkg/test/SampleTest.java"
+	expectedJavaFilePath := "my.test.pkg/my.test.pkg." + featureName + "/src/main/java/my/test/pkg/" + featureName + "/Test" + utils.UppercaseFirstLetter(featureName) + ".java"
 	testJavaFileExists, err := mockFileSystem.Exists(expectedJavaFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testJavaFileExists, "Test java file was not created.")
@@ -103,6 +116,7 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	mockFileSystem := utils.NewOverridableMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
+	featureNamesCommandSeparatedList := "test"
 
 	// Over-ride the default MkdirAll function so that it fails...
 	mockFileSystem.VirtualFunction_MkdirAll = func(targetFolderPath string) error {
@@ -110,7 +124,7 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -123,6 +137,7 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	mockFileSystem := utils.NewOverridableMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
+	featureNamesCommandSeparatedList := "test"
 
 	// Over-ride the default WriteTextFile function so that it fails...
 	mockFileSystem.VirtualFunction_WriteTextFile = func(targetFilePath string, desiredContents string) error {
@@ -130,7 +145,7 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -143,13 +158,14 @@ func TestCreateProjectPomFileAlreadyExistsNoForceOverwrite(t *testing.T) {
 	forceOverwrite := false
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
+	featureNamesCommandSeparatedList := "test"
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
 	mockFileSystem.WriteTextFile(testPackageName+"/pom.xml", "dummy test pom.xml")
 
 	// When ...
-	err := createProject(mockFileSystem, testPackageName, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -163,13 +179,14 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 	isObrProjectRequired := false
 	forceOverwrite := true
 	testPackageName := "my.test.pkg"
+	featureNamesCommandSeparatedList := "test"
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
 	mockFileSystem.WriteTextFile(testPackageName+"/pom.xml", "dummy test pom.xml")
 
 	// When ...
-	err := createProject(mockFileSystem, testPackageName, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -194,9 +211,10 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	mockFileSystem := utils.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := true
+	featureNamesCommandSeparatedList := "test"
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -205,7 +223,7 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	}
 
 	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired)
-	assertTestFolderAndContentsCreatedOk(t, mockFileSystem)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test")
 	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem)
 }
 
@@ -223,4 +241,48 @@ func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.File
 	assert.Nil(t, err)
 	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
 	assert.Contains(t, text, "<artifactId>my.test.pkg.obr</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
+}
+
+func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := false
+	isObrProjectRequired := false
+	testPackageName := "my.test.pkg"
+	featureNamesCommandSeparatedList := "account,payee"
+
+	// When ...
+	err := createProject(mockFileSystem, testPackageName,
+		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	if err != nil {
+		assert.Fail(t, "err should not have been set. "+err.Error())
+	}
+
+	isAccountModuleExists, _ := mockFileSystem.DirExists(testPackageName + "/" + testPackageName + ".account")
+	assert.True(t, isAccountModuleExists, "account feature module does not exist.")
+
+	isPayeeModuleExists, _ := mockFileSystem.DirExists(testPackageName + "/" + testPackageName + ".payee")
+	assert.True(t, isPayeeModuleExists, "payee feature module does not exist.")
+}
+
+func TestCreateProjectWithInvalidFeaturesFails(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := false
+	isObrProjectRequired := false
+	testPackageName := "my.test.pkg"
+	featureNamesCommandSeparatedList := "Account"
+
+	// When ...
+	err := createProject(mockFileSystem, testPackageName,
+		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	assert.NotNil(t, err, "err should have been set!")
+	assert.Contains(t, err.Error(), "GAL1045E")
+
 }

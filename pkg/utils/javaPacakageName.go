@@ -79,3 +79,12 @@ func ValidateJavaPackageName(javaPackageName string) error {
 	}
 	return err
 }
+
+// UppercaseFirstLetter - takes a string and returns the same string, but with the first letter
+// turned into an uppercase letter.
+func UppercaseFirstLetter(s string) string {
+	firstLetter := string(s[0])
+	upperCaseFirstLetter := strings.ToUpper(firstLetter)
+	result := upperCaseFirstLetter + s[1:]
+	return result
+}

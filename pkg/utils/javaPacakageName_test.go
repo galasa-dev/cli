@@ -45,3 +45,11 @@ func TestValidateJavaPackageNameReservedJavaKeyword(t *testing.T) {
 	assert.NotNil(t, err, "Validation reported OK when it should be invalid.")
 	assert.Contains(t, err.Error(), "GAL1044E:", "Wrong error message reported.")
 }
+
+func TestUpperCaseFirstLetterNormalWorks(t *testing.T) {
+	assert.Equal(t, "Lower", UppercaseFirstLetter("lower"), "failed to uppercase the first letter")
+}
+
+func TestUpperCaseFirstLetterSingleCharWorks(t *testing.T) {
+	assert.Equal(t, "L", UppercaseFirstLetter("l"), "failed to uppercase the first letter")
+}

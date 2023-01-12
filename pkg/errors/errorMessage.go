@@ -105,4 +105,5 @@ var (
 	GALASA_ERROR_FAILED_TO_WRITE_FILE           = NewMessageType("GAL1042E: Failed to open file '%s' for writing. Reason is '%s'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.", 1042)
 	GALASA_ERROR_FAILED_TO_READ_FILE            = NewMessageType("GAL1043E: Failed to open file '%s' for reading. Reason is '%s'. Check that you have permissions to read the file and try again.", 1043)
 	GALASA_ERROR_INVALID_PKG_RESERVED_WORD      = NewMessageType("GAL1044E: Invalid Java package name. Package name '%s' contains the reserved java keyword '%s'.", 1044)
+	GALASA_ERROR_INVALID_FEATURE_NAME           = NewMessageType("GAL1045E: Invalid feature name. Feature name '%s' cannot be used as a java package name. '%s'", 1045)
 )

@@ -1,3 +1,12 @@
+{{/*
+	This template expects the following parameters:
+
+	type JavaTestTemplateSubstitutionParameters struct {
+		Package   string
+		ClassName string
+	}
+*/}}
+
 package {{.Package}};
 
 import static org.assertj.core.api.Assertions.*;
@@ -10,7 +19,7 @@ import dev.galasa.core.manager.ICoreManager;
  * A sample galasa test class 
  */
 @Test
-public class SampleTest {
+public class {{.ClassName}} {
 
 	// Galasa will inject an instance of the core manager into the following field
 	@CoreManager

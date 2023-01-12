@@ -45,3 +45,4 @@ The `galasactl` tool can generate the following errors:
 - GAL1042E: Failed to open file '{}' for writing. Reason is '{}'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.
 - GAL1043E: Failed to open file '{}' for reading. Reason is '{}'. Check that you have permissions to read the file and try again.
 - GAL1044E: Invalid Java package name. Package name '{}' contains the reserved java keyword '{}'.
+- GAL1045E: Invalid feature name. Feature name '{}' cannot be used as a java package name. '{}'

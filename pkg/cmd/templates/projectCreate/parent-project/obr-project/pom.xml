@@ -2,25 +2,36 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    
+{{/*	
+	This template expects the following parameters:
+
+	type OBRPomParameters struct {
+		Parent      MavenCoordinates
+		Coordinates MavenCoordinates
+		Modules    []MavenCoordinates
+	}
+*/}}    
     <parent>
-        <groupId>{{.GroupId}}</groupId>
-        <artifactId>{{.ParentArtifactId}}</artifactId>
+        <groupId>{{.Parent.GroupId}}</groupId>
+        <artifactId>{{.Parent.ArtifactId}}</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>{{.OBRArtifactId}}</artifactId>
-    <name>{{.OBRArtifactId}}</name>
+    <artifactId>{{.Coordinates.ArtifactId}}</artifactId>
+    <name>{{.Coordinates.Name}}</name>
 
     <packaging>galasa-obr</packaging>
 
     <dependencies>
+
+{{range $module := .Modules }}
         <dependency>
-            <groupId>{{.GroupId}}</groupId>
-            <artifactId>{{.TestArtifactId}}</artifactId>
+            <groupId>{{$module.GroupId}}</groupId>
+            <artifactId>{{$module.ArtifactId}}</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+{{end}}
     </dependencies>
 
 </project>

@@ -207,7 +207,8 @@ galasactl_command="galasactl-${os}-${architecture}"
 info "galasactl command is ${galasactl_command}"
 
 # Invoke the galasactl command to create a project.
-${BASEDIR}/bin/${galasactl_command} project create --package com.myco.example --obr 
+PACKAGE_NAME="dev.galasa.example.banking"
+${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr 
 rc=$?
 if [[ "${rc}" != "0" ]]; then
     error " Failed to create the galasa test project using galasactl command. rc=${rc}"
@@ -217,7 +218,7 @@ success "OK"
 
 # Now build the source it created.
 h2 "Building the sample project we just generated."
-cd com.myco.example
+cd ${PACKAGE_NAME}
 mvn clean test install 
 rc=$?
 if [[ "${rc}" != "0" ]]; then

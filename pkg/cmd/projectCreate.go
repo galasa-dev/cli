@@ -20,29 +20,12 @@ const (
 	GALASA_VERSION = "0.25.0"
 )
 
-// PomTemplateSubstitutionParameters holds all the substitution parameters a pom.xml file
+// CommonPomParameters holds common substitution parameters a pom.xml file
 // template uses.
-type PomTemplateSubstitutionParameters struct {
-	GroupId          string
-	TestArtifactId   string
-	OBRArtifactId    string
-	Name             string
-	ParentArtifactId string
-	GalasaVersion    string
-	IsOBRRequired    bool
-}
-
-// JavaTestTemplateSubstitutionParameters holds all the substitution parameters a java test file
-// template uses
-type JavaTestTemplateSubstitutionParameters struct {
-	Package string
-}
-
-type GeneratedFile struct {
-	fileType                 string
-	targetFilePath           string
-	embeddedTemplateFilePath string
-	templateParameters       interface{}
+type MavenCoordinates struct {
+	GroupId    string
+	ArtifactId string
+	Name       string
 }
 
 // Embed all the template files into the go executable, so there are no extra files
@@ -61,9 +44,10 @@ var (
 		Run:   executeCreateProject,
 	}
 
-	packageName          string
-	force                bool
-	isOBRProjectRequired bool
+	packageName                string
+	force                      bool
+	isOBRProjectRequired       bool
+	featureNamesCommaSeparated string
 )
 
 func init() {
@@ -72,12 +56,17 @@ func init() {
 
 	cmd.Flags().StringVar(&packageName, "package", "", "Java package name for tests we create. "+
 		"Forms part of the project name, maven/gradle group/artifact ID, "+
-		"and OSGi bundle name. It may reflect the name of your organisation or company. "+
-		"For example: dev.galasa.myapp.mycomponent")
+		"and OSGi bundle name. It may reflect the name of your organisation or company, "+
+		"the department, function or application under test. "+
+		"For example: dev.galasa.banking.example")
 	cmd.MarkFlagRequired("package")
 
 	cmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
 	cmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
+	cmd.Flags().StringVar(&featureNamesCommaSeparated, "features", "main",
+		"A comma-separated list of features you are testing. Defaults to \"test\". "+
+			"These must be able to form parts of a java package name. "+
+			"For example: \"payee,account\"")
 
 	parentCommand.AddCommand(cmd)
 }
@@ -91,7 +80,7 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
-	err := createProject(fileSystem, packageName, isOBRProjectRequired, force)
+	err := createProject(fileSystem, packageName, featureNamesCommaSeparated, isOBRProjectRequired, force)
 
 	// Convey the error to the top level.
 	// Tried doing this with RunE: entry, passing back the error, but we always
@@ -118,22 +107,37 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 //	    	 	 └── pom.xml
 //
 // isOBRProjectRequired - Controls whether the optional OBR project is going to be created.
-func createProject(fileSystem utils.FileSystem, packageName string, isOBRProjectRequired bool, forceOverwrite bool) error {
+// featureNamesCommaSeparated - eg: kettle,toaster. Causes a kettle and toaster project to be created with a sample test in.
+func createProject(
+	fileSystem utils.FileSystem,
+	packageName string,
+	featureNamesCommaSeparated string,
+	isOBRProjectRequired bool,
+	forceOverwrite bool) error {
+
 	log.Printf("Creating project using packageName:%s\n", packageName)
 
 	var err error
 
-	err = utils.ValidateJavaPackageName(packageName)
+	// Separate out the feature names from a string into a slice of strings.
+	var featureNames []string
+	featureNames, err = separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated)
+
 	if err == nil {
-		// Create the parent folder
-		parentProjectFolder := packageName
-		err = createFolder(fileSystem, parentProjectFolder)
+		err = utils.ValidateJavaPackageName(packageName)
 		if err == nil {
-			err = createParentFolderPom(fileSystem, packageName, isOBRProjectRequired, forceOverwrite)
+			// Create the parent folder
+			parentProjectFolder := packageName
+			err = createFolder(fileSystem, parentProjectFolder)
 			if err == nil {
-				err = createTestProject(fileSystem, packageName, forceOverwrite)
+				err = createParentFolderPom(fileSystem, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
 				if err == nil {
-					err = createOBRProject(fileSystem, packageName, forceOverwrite)
+					err = createTestProjects(fileSystem, packageName, featureNames, forceOverwrite)
+					if err == nil {
+						if isOBRProjectRequired {
+							err = createOBRProject(fileSystem, packageName, featureNames, forceOverwrite)
+						}
+					}
 				}
 			}
 		}
@@ -142,16 +146,48 @@ func createProject(fileSystem utils.FileSystem, packageName string, isOBRProject
 	return err
 }
 
-func createParentFolderPom(fileSystem utils.FileSystem, packageName string, isOBRProjectRequired bool, forceOverwrite bool) error {
+func separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated string) ([]string, error) {
+	featureNames := strings.Split(featureNamesCommaSeparated, ",")
 
-	templateParameters := PomTemplateSubstitutionParameters{
-		GroupId:          packageName,
-		ParentArtifactId: packageName,
-		Name:             packageName,
-		TestArtifactId:   packageName + ".test",
-		OBRArtifactId:    packageName + ".obr",
-		IsOBRRequired:    isOBRProjectRequired,
-		GalasaVersion:    GALASA_VERSION}
+	var err error
+
+	// Validate each feature name can form part of a package...
+	// meaning it should be a valid package name in it's own right.
+	for _, featureName := range featureNames {
+		err = utils.ValidateJavaPackageName(featureName)
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FEATURE_NAME, featureName, err.Error())
+			featureNames = nil
+			break
+		}
+	}
+
+	return featureNames, err
+}
+
+func createParentFolderPom(fileSystem utils.FileSystem, packageName string, featureNames []string, isOBRRequired bool, forceOverwrite bool) error {
+
+	type ParentPomParameters struct {
+		Coordinates MavenCoordinates
+
+		// Version of Galasa we are targetting
+		GalasaVersion string
+
+		IsOBRRequired    bool
+		ObrName          string
+		ChildModuleNames []string
+	}
+
+	templateParameters := ParentPomParameters{
+		Coordinates:      MavenCoordinates{ArtifactId: packageName, GroupId: packageName, Name: packageName},
+		GalasaVersion:    GALASA_VERSION,
+		IsOBRRequired:    isOBRRequired,
+		ObrName:          packageName + ".obr",
+		ChildModuleNames: make([]string, len(featureNames))}
+	// Populate the child module names
+	for index, featureName := range featureNames {
+		templateParameters.ChildModuleNames[index] = packageName + "." + featureName
+	}
 
 	targetFile := GeneratedFile{
 		fileType:                 "pom",
@@ -168,16 +204,34 @@ func createFolder(fileSystem utils.FileSystem, targetFolderPath string) error {
 	return err
 }
 
-func createTestProject(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) error {
-	targetFolderPath := packageName + "/" + packageName + ".test"
+// createTestProjects - creates a number of projects, each of whichh containing tests which test a feature.
+func createTestProjects(fileSystem utils.FileSystem, packageName string, featureNames []string, forceOverwrite bool) error {
+	var err error = nil
+	for _, featureName := range featureNames {
+		err = createTestProject(fileSystem, packageName, featureName, forceOverwrite)
+		if err != nil {
+			break
+		}
+	}
+	return err
+}
+
+// createTestProject - creates a single project to contain tests which test a feature.
+func createTestProject(
+	fileSystem utils.FileSystem,
+	packageName string,
+	featureName string,
+	forceOverwrite bool) error {
+
+	targetFolderPath := packageName + "/" + packageName + "." + featureName
 	log.Printf("Creating tests project %s\n", targetFolderPath)
 
 	// Create the base test folder
 	err := createFolder(fileSystem, targetFolderPath)
 	if err == nil {
-		err = createTestFolderPom(fileSystem, targetFolderPath, packageName, forceOverwrite)
+		err = createTestFolderPom(fileSystem, targetFolderPath, packageName, featureName, forceOverwrite)
 		if err == nil {
-			err = createJavaSourceFolder(fileSystem, targetFolderPath, packageName, forceOverwrite)
+			err = createJavaSourceFolder(fileSystem, targetFolderPath, packageName, featureName, forceOverwrite)
 		}
 	}
 
@@ -187,14 +241,14 @@ func createTestProject(fileSystem utils.FileSystem, packageName string, forceOve
 	return err
 }
 
-func createOBRProject(fileSystem utils.FileSystem, packageName string, forceOverwrite bool) error {
+func createOBRProject(fileSystem utils.FileSystem, packageName string, featureNames []string, forceOverwrite bool) error {
 	targetFolderPath := packageName + "/" + packageName + ".obr"
 	log.Printf("Creating obr project %s\n", targetFolderPath)
 
 	// Create the base test folder
 	err := createFolder(fileSystem, targetFolderPath)
 	if err == nil {
-		err = createOBRFolderPom(fileSystem, targetFolderPath, packageName, forceOverwrite)
+		err = createOBRFolderPom(fileSystem, targetFolderPath, packageName, featureNames, forceOverwrite)
 	}
 
 	if err == nil {
@@ -203,26 +257,38 @@ func createOBRProject(fileSystem utils.FileSystem, packageName string, forceOver
 	return err
 }
 
-func createJavaSourceFolder(fileSystem utils.FileSystem, testFolderPath string, packageName string, forceOverwrite bool) error {
+func createJavaSourceFolder(fileSystem utils.FileSystem, testFolderPath string, packageName string, featureName string, forceOverwrite bool) error {
 
 	// The folder is the package name but with slashes.
 	// eg: my.package becomes my/package
 	packageNameWithSlashes := strings.Replace(packageName, ".", "/", -1)
-	targetSrcFolderPath := testFolderPath + "/src/main/java/" + packageNameWithSlashes + "/test"
+	targetSrcFolderPath := testFolderPath + "/src/main/java/" + packageNameWithSlashes + "/" + featureName
 	err := createFolder(fileSystem, targetSrcFolderPath)
 	if err == nil {
-		err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName, forceOverwrite)
+		err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName, featureName, forceOverwrite)
 	}
 	return err
 }
 
-func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath string, packageName string, forceOverwrite bool) error {
+func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath string,
+	packageName string, featureName string, forceOverwrite bool) error {
+
+	// JavaTestTemplateSubstitutionParameters holds all the substitution parameters a java test file
+	// template uses
+	type JavaTestTemplateSubstitutionParameters struct {
+		Package   string
+		ClassName string
+	}
+
+	classNameNoClassSuffix := "Test" + utils.UppercaseFirstLetter(featureName)
+
 	templateParameters := JavaTestTemplateSubstitutionParameters{
-		Package: packageName + ".test"}
+		Package:   packageName + "." + featureName,
+		ClassName: classNameNoClassSuffix}
 
 	targetFile := GeneratedFile{
 		fileType:                 "JavaSourceFile",
-		targetFilePath:           targetSrcFolderPath + "/SampleTest.java",
+		targetFilePath:           targetSrcFolderPath + "/" + classNameNoClassSuffix + ".java",
 		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/src/main/java/SampleTest.java.template",
 		templateParameters:       templateParameters}
 
@@ -230,15 +296,19 @@ func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath strin
 	return err
 }
 
-func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath string, packageName string, forceOverwrite bool) error {
+func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath string,
+	packageName string, featureName string, forceOverwrite bool) error {
 
-	pomTemplateParameters := PomTemplateSubstitutionParameters{
-		GroupId:          packageName,
-		ParentArtifactId: packageName,
-		TestArtifactId:   packageName + ".test",
-		OBRArtifactId:    packageName + ".obr",
-		Name:             packageName + ".test",
-		GalasaVersion:    GALASA_VERSION}
+	type TestPomParameters struct {
+		Parent      MavenCoordinates
+		Coordinates MavenCoordinates
+		FeatureName string
+	}
+
+	pomTemplateParameters := TestPomParameters{
+		Parent:      MavenCoordinates{GroupId: packageName, ArtifactId: packageName, Name: packageName},
+		Coordinates: MavenCoordinates{GroupId: packageName, ArtifactId: packageName + "." + featureName, Name: packageName + "." + featureName},
+		FeatureName: featureName}
 
 	targetFile := GeneratedFile{
 		fileType:                 "pom",
@@ -250,15 +320,25 @@ func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath strin
 	return err
 }
 
-func createOBRFolderPom(fileSystem utils.FileSystem, targetOBRFolderPath string, packageName string, forceOverwrite bool) error {
+func createOBRFolderPom(fileSystem utils.FileSystem, targetOBRFolderPath string, packageName string,
+	featureNames []string, forceOverwrite bool) error {
 
-	pomTemplateParameters := PomTemplateSubstitutionParameters{
-		GroupId:          packageName,
-		ParentArtifactId: packageName,
-		TestArtifactId:   packageName + ".test",
-		OBRArtifactId:    packageName + ".obr",
-		Name:             packageName + ".obr",
-		GalasaVersion:    GALASA_VERSION}
+	type OBRPomParameters struct {
+		Parent      MavenCoordinates
+		Coordinates MavenCoordinates
+		Modules     []MavenCoordinates
+	}
+
+	// Fill-in all the parameters the template needs.
+	pomTemplateParameters := OBRPomParameters{
+		Parent:      MavenCoordinates{GroupId: packageName, ArtifactId: packageName, Name: packageName},
+		Coordinates: MavenCoordinates{GroupId: packageName, ArtifactId: packageName + ".obr", Name: packageName + ".obr"},
+		Modules:     make([]MavenCoordinates, len(featureNames))}
+	// Populate the list of modules.
+	for index, featureName := range featureNames {
+		pomTemplateParameters.Modules[index] = MavenCoordinates{
+			GroupId: packageName, ArtifactId: packageName + "." + featureName, Name: packageName + "." + featureName}
+	}
 
 	targetFile := GeneratedFile{
 		fileType:                 "pom",
@@ -267,6 +347,31 @@ func createOBRFolderPom(fileSystem utils.FileSystem, targetOBRFolderPath string,
 		templateParameters:       pomTemplateParameters}
 
 	err := createFile(fileSystem, targetFile, forceOverwrite)
+	return err
+}
+
+//---------------------------------------------------------------------------------------------------
+// File generation functions
+//---------------------------------------------------------------------------------------------------
+
+type GeneratedFile struct {
+	fileType                 string
+	targetFilePath           string
+	embeddedTemplateFilePath string
+	templateParameters       interface{}
+}
+
+// checkAllowedToWrite - Checks to see if we are allowed to write a file.
+// The file may exist already. If it does, then we won't be able to over-write it unless
+// the forceOverWrite flag is true.
+func checkAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) error {
+	isAlreadyExists, err := fileSystem.Exists(targetFilePath)
+	if err == nil {
+		if isAlreadyExists && (!forceOverwrite) {
+			log.Printf("File %s exists, and we cannot over-write it as the --force flag is not set.", targetFilePath)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
+		}
+	}
 	return err
 }
 
@@ -319,18 +424,4 @@ func loadEmbeddedTemplate(embeddedTemplateFilePath string) (*template.Template, 
 		templ, err = rawTemplate.Parse(string(data))
 	}
 	return templ, err
-}
-
-// checkAllowedToWrite - Checks to see if we are allowed to write a file.
-// The file may exist already. If it does, then we won't be able to over-write it unless
-// the forceOverWrite flag is true.
-func checkAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) error {
-	isAlreadyExists, err := fileSystem.Exists(targetFilePath)
-	if err == nil {
-		if isAlreadyExists && (!forceOverwrite) {
-			log.Printf("File %s exists, and we cannot over-write it as the --force flag is not set.", targetFilePath)
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
-		}
-	}
-	return err
 }

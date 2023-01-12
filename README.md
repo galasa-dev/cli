@@ -26,12 +26,18 @@ galasactl project create --help
 
 Create a folder tree which can be built into an OSGi bundle (without an OBR):
 ```
-galasactl project create --package com.myco.myapp.tests
+galasactl project create --package dev.galasa.example.banking
 ```
 
 Create a folder tree which can be built into an OSGi bundle (with an OBR):
 ```
-galasactl project create --package com.myco.myapp.tests --obr
+galasactl project create --package dev.galasa.example.banking --obr
+```
+
+Create a folder tree which has two bundles, each aiming to test different features of an application
+(while also viewing the tooling log on the console)
+```
+galasactl project create --package dev.galasa.example.banking --features payee,account --obr --log -
 ```
 
 

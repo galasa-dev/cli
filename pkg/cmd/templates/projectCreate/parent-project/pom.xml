@@ -1,13 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+{{/*	
+	This template expects the following parameters:
 
-	<groupId>{{.GroupId}}</groupId>
-	<artifactId>{{.ParentArtifactId}}</artifactId>
+	type ParentPomParameters struct {
+		Coordinates MavenCoordinates
+
+		// Version of Galasa we are targetting
+		GalasaVersion string
+
+		IsOBRRequired    bool
+		ObrName          string
+		ChildModuleNames []string
+	}
+*/}}
+	<groupId>{{.Coordinates.GroupId}}</groupId>
+	<artifactId>{{.Coordinates.ArtifactId}}</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
   	<packaging>pom</packaging>
 
-  	<name>{{.Name}}</name>
+  	<name>{{.Coordinates.Name}}</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,10 +33,12 @@
 	</properties>
   
 	<modules>
-		<module>{{.TestArtifactId}}</module>
-		{{if .IsOBRRequired}}
-		<module>{{.OBRArtifactId}}</module>
-		{{end}}
+{{- range $componentName := .ChildModuleNames }}
+		<module>{{$componentName}}</module>
+{{- end -}}
+{{if .IsOBRRequired}}
+		<module>{{.ObrName}}</module>
+{{- end}}
 	</modules>
 
 	<dependencyManagement>

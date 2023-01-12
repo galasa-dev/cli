@@ -13,10 +13,11 @@ galasactl project create [flags]
 ### Options
 
 ```
-      --force            Force-overwrite files which already exist.
-  -h, --help             help for create
-      --obr              An OSGi Object Bundle Resource (OBR) project is needed.
-      --package string   Java package name for tests we create. Forms part of the project name, maven/gradle group/artifact ID, and OSGi bundle name. It may reflect the name of your organisation or company. For example: dev.galasa.myapp.mycomponent
+      --features string   A comma-separated list of features you are testing. Defaults to "test". These must be able to form parts of a java package name. For example: "payee,account" (default "main")
+      --force             Force-overwrite files which already exist.
+  -h, --help              help for create
+      --obr               An OSGi Object Bundle Resource (OBR) project is needed.
+      --package string    Java package name for tests we create. Forms part of the project name, maven/gradle group/artifact ID, and OSGi bundle name. It may reflect the name of your organisation or company, the department, function or application under test. For example: dev.galasa.banking.example
 ```
 
 ### Options inherited from parent commands
