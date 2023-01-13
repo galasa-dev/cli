@@ -57,18 +57,22 @@
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.framework</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.core.manager</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.artifact.manager</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.assertj</groupId>

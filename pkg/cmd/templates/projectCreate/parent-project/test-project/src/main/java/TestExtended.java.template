@@ -51,7 +51,7 @@ public class {{.ClassName}} {
     public void testRetrieveBundleResourceFileAsStringMethod() throws Exception {
 		
 		// The path to the file we want to load. Relative to the src/main/resources folder.
-		String resourcePathInBundle = "/textFiles/sampleText.txt";
+		String resourcePathInBundle = "/textfiles/sampleText.txt";
 
         String textContent = resources.retrieveFileAsString(resourcePathInBundle);
 
