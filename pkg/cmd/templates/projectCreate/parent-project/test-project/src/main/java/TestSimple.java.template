@@ -10,9 +10,8 @@ package {{.Package}};
 
 import static org.assertj.core.api.Assertions.*;
 
+import dev.galasa.core.manager.*;
 import dev.galasa.Test;
-import dev.galasa.core.manager.CoreManager;
-import dev.galasa.core.manager.ICoreManager;
 
 /**
  * A sample galasa test class 
@@ -23,13 +22,13 @@ public class {{.ClassName}} {
 	// Galasa will inject an instance of the core manager into the following field
 	@CoreManager
 	public ICoreManager core;
-	
+
 	/**
-	 * Test which demonstrates that the core manager was injected.
+	 * Test which demonstrates that the managers have been injected ok.
 	 */
 	@Test
 	public void simpleSampleTest() {
 		assertThat(core).isNotNull();
 	}
-	
+
 }

@@ -1,0 +1,61 @@
+{{/*
+	This template expects the following parameters:
+
+	type JavaTestTemplateSubstitutionParameters struct {
+		Package   string
+		ClassName string
+	}
+*/ -}}
+package {{.Package}};
+
+import static org.assertj.core.api.Assertions.*;
+
+import dev.galasa.artifact.*;
+import dev.galasa.core.manager.*;
+import dev.galasa.Test;
+
+/**
+ * A sample galasa test class, which does slightly more than the simple test class
+ */
+@Test
+public class {{.ClassName}} {
+
+	// Galasa will inject an instance of the core manager into the following field
+	@CoreManager
+	public ICoreManager core;
+	
+	@ArtifactManager
+    public IArtifactManager artifacts;
+
+	// Allows us to access resources packaged within this bundle.
+	@BundleResources
+    public IBundleResources resources;
+
+	// The run id of this test will be injected, so we can name things using it as a prefix.
+	@RunName
+    public String runName;
+
+	/**
+	 * Test which demonstrates that the managers have been injected ok.
+	 */
+	@Test
+	public void simpleSampleTest() {
+		assertThat(core).isNotNull();
+		assertThat(artifacts).isNotNull();
+		assertThat(resources).isNotNull();
+		assertThat(runName).isNotNull();
+		assertThat(runName.trim()).isNotEqualTo("");
+	}
+
+	@Test
+    public void testRetrieveBundleResourceFileAsStringMethod() throws Exception {
+		
+		// The path to the file we want to load. Relative to the src/main/resources folder.
+		String resourcePathInBundle = "/textFiles/sampleText.txt";
+
+        String textContent = resources.retrieveFileAsString(resourcePathInBundle);
+
+        assertThat(textContent.trim()).isEqualTo("This content is read from a bundle resource file.");
+    }
+	
+}

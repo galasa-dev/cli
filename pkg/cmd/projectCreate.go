@@ -67,7 +67,6 @@ func init() {
 		"A comma-separated list of features you are testing. Defaults to \"test\". "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
-
 	parentCommand.AddCommand(cmd)
 }
 
@@ -230,9 +229,14 @@ func createTestProject(
 	err := createFolder(fileSystem, targetFolderPath)
 	if err == nil {
 		err = createTestFolderPom(fileSystem, targetFolderPath, packageName, featureName, forceOverwrite)
-		if err == nil {
-			err = createJavaSourceFolder(fileSystem, targetFolderPath, packageName, featureName, forceOverwrite)
-		}
+	}
+
+	if err == nil {
+		err = createJavaSourceFolder(fileSystem, targetFolderPath, packageName, featureName, forceOverwrite)
+	}
+
+	if err == nil {
+		err = createTestResourceFolder(fileSystem, targetFolderPath, packageName, forceOverwrite)
 	}
 
 	if err == nil {
@@ -265,13 +269,51 @@ func createJavaSourceFolder(fileSystem utils.FileSystem, testFolderPath string, 
 	targetSrcFolderPath := testFolderPath + "/src/main/java/" + packageNameWithSlashes + "/" + featureName
 	err := createFolder(fileSystem, targetSrcFolderPath)
 	if err == nil {
-		err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName, featureName, forceOverwrite)
+		// Create our first test java source file.
+		classNameNoClassSuffix := "Test" + utils.UppercaseFirstLetter(featureName)
+		templateBundlePath := "templates/projectCreate/parent-project/test-project/src/main/java/TestSimple.java.template"
+		err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName,
+			featureName, forceOverwrite, classNameNoClassSuffix, templateBundlePath)
+
+		if err == nil {
+			// Create our second test java source file. To show that you can have multiples.
+			classNameNoClassSuffix = "Test" + utils.UppercaseFirstLetter(featureName) + "Extended"
+			templateBundlePath := "templates/projectCreate/parent-project/test-project/src/main/java/TestExtended.java.template"
+			err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName,
+				featureName, forceOverwrite, classNameNoClassSuffix, templateBundlePath)
+		}
+	}
+	return err
+}
+
+func createTestResourceFolder(
+	fileSystem utils.FileSystem, targetSrcFolderPath string,
+	packageName string, forceOverwrite bool) error {
+
+	var err error
+
+	// Create the folder for the resources to sit in.
+	targetResourceFolderPath := targetSrcFolderPath + "/src/main/resources/textfiles"
+	err = createFolder(fileSystem, targetResourceFolderPath)
+	if err == nil {
+
+		targetFilePath := targetResourceFolderPath + "/sampleText.txt"
+		templateBundlePath := "templates/projectCreate/parent-project/test-project/src/main/resources/textfiles/sampleText.txt"
+
+		targetFile := GeneratedFile{
+			fileType:                 "TextFile",
+			targetFilePath:           targetFilePath,
+			embeddedTemplateFilePath: templateBundlePath,
+			templateParameters:       nil}
+
+		err = createFile(fileSystem, targetFile, forceOverwrite)
 	}
 	return err
 }
 
 func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath string,
-	packageName string, featureName string, forceOverwrite bool) error {
+	packageName string, featureName string, forceOverwrite bool,
+	classNameNoClassSuffix string, templateBundlePath string) error {
 
 	// JavaTestTemplateSubstitutionParameters holds all the substitution parameters a java test file
 	// template uses
@@ -280,8 +322,6 @@ func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath strin
 		ClassName string
 	}
 
-	classNameNoClassSuffix := "Test" + utils.UppercaseFirstLetter(featureName)
-
 	templateParameters := JavaTestTemplateSubstitutionParameters{
 		Package:   packageName + "." + featureName,
 		ClassName: classNameNoClassSuffix}
@@ -289,7 +329,7 @@ func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath strin
 	targetFile := GeneratedFile{
 		fileType:                 "JavaSourceFile",
 		targetFilePath:           targetSrcFolderPath + "/" + classNameNoClassSuffix + ".java",
-		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/src/main/java/SampleTest.java.template",
+		embeddedTemplateFilePath: templateBundlePath,
 		templateParameters:       templateParameters}
 
 	err := createFile(fileSystem, targetFile, forceOverwrite)

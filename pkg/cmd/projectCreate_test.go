@@ -99,15 +99,30 @@ func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.Fil
 	assert.Nil(t, err)
 	assert.True(t, testSrcFolderExists, "Test src folder was not created.")
 
+	// Examine the test java file generated.
 	expectedJavaFilePath := "my.test.pkg/my.test.pkg." + featureName + "/src/main/java/my/test/pkg/" + featureName + "/Test" + utils.UppercaseFirstLetter(featureName) + ".java"
+	assertJavaFileWasGenerated(t, mockFileSystem, expectedJavaFilePath, "my.test.pkg")
+
+	// Examine the extended test java file generated.
+	expectedJavaFilePath = "my.test.pkg/my.test.pkg." + featureName + "/src/main/java/my/test/pkg/" + featureName + "/Test" + utils.UppercaseFirstLetter(featureName) + "Extended.java"
+	assertJavaFileWasGenerated(t, mockFileSystem, expectedJavaFilePath, "my.test.pkg")
+
+	// Examine the resources file generated.
+	expectedTextFilePath := "my.test.pkg/my.test.pkg." + featureName + "/src/main/resources/textfiles/sampleText.txt"
+	isTestResourcesTextFileExists, err := mockFileSystem.Exists(expectedTextFilePath)
+	assert.Nil(t, err)
+	assert.True(t, isTestResourcesTextFileExists, "Test text resource file was not created.")
+}
+
+func assertJavaFileWasGenerated(t *testing.T, mockFileSystem utils.FileSystem, expectedJavaFilePath string, packageName string) {
 	testJavaFileExists, err := mockFileSystem.Exists(expectedJavaFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testJavaFileExists, "Test java file was not created.")
 
+	var text string
 	text, err = mockFileSystem.ReadTextFile(expectedJavaFilePath)
 	assert.Nil(t, err)
-	assert.Contains(t, text, "package my.test.pkg.test", "Test java file didn't substitute the java package")
-
+	assert.Contains(t, text, "package "+packageName, "Test java file didn't substitute the java package")
 }
 
 func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
