@@ -4,11 +4,8 @@
 package cmd
 
 import (
-	"bytes"
-	"embed"
 	"log"
 	"strings"
-	"text/template"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 
@@ -27,13 +24,6 @@ type MavenCoordinates struct {
 	ArtifactId string
 	Name       string
 }
-
-// Embed all the template files into the go executable, so there are no extra files
-// we need to ship/install/locate on the target machine.
-// We can access the "embedded" file system as if they are normal files.
-//
-//go:embed templates/*
-var embeddedFileSystem embed.FS
 
 var (
 	projectCreateCmd = &cobra.Command{
@@ -118,6 +108,8 @@ func createProject(
 
 	var err error
 
+	fileGenerator := utils.NewFileGenerator(fileSystem, embeddedFileSystem)
+
 	// Separate out the feature names from a string into a slice of strings.
 	var featureNames []string
 	featureNames, err = separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated)
@@ -127,14 +119,14 @@ func createProject(
 		if err == nil {
 			// Create the parent folder
 			parentProjectFolder := packageName
-			err = createFolder(fileSystem, parentProjectFolder)
+			err = fileGenerator.CreateFolder(parentProjectFolder)
 			if err == nil {
-				err = createParentFolderPom(fileSystem, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
+				err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
 				if err == nil {
-					err = createTestProjects(fileSystem, packageName, featureNames, forceOverwrite)
+					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite)
 					if err == nil {
 						if isOBRProjectRequired {
-							err = createOBRProject(fileSystem, packageName, featureNames, forceOverwrite)
+							err = createOBRProject(fileGenerator, packageName, featureNames, forceOverwrite)
 						}
 					}
 				}
@@ -164,7 +156,7 @@ func separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated strin
 	return featureNames, err
 }
 
-func createParentFolderPom(fileSystem utils.FileSystem, packageName string, featureNames []string, isOBRRequired bool, forceOverwrite bool) error {
+func createParentFolderPom(fileGenerator *utils.FileGenerator, packageName string, featureNames []string, isOBRRequired bool, forceOverwrite bool) error {
 
 	type ParentPomParameters struct {
 		Coordinates MavenCoordinates
@@ -188,26 +180,21 @@ func createParentFolderPom(fileSystem utils.FileSystem, packageName string, feat
 		templateParameters.ChildModuleNames[index] = packageName + "." + featureName
 	}
 
-	targetFile := GeneratedFile{
-		fileType:                 "pom",
-		targetFilePath:           packageName + "/pom.xml",
-		embeddedTemplateFilePath: "templates/projectCreate/parent-project/pom.xml",
-		templateParameters:       templateParameters}
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 "pom",
+		TargetFilePath:           packageName + "/pom.xml",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/pom.xml",
+		TemplateParameters:       templateParameters}
 
-	err := createFile(fileSystem, targetFile, forceOverwrite)
-	return err
-}
-
-func createFolder(fileSystem utils.FileSystem, targetFolderPath string) error {
-	err := fileSystem.MkdirAll(targetFolderPath)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
 	return err
 }
 
 // createTestProjects - creates a number of projects, each of whichh containing tests which test a feature.
-func createTestProjects(fileSystem utils.FileSystem, packageName string, featureNames []string, forceOverwrite bool) error {
+func createTestProjects(fileGenerator *utils.FileGenerator, packageName string, featureNames []string, forceOverwrite bool) error {
 	var err error = nil
 	for _, featureName := range featureNames {
-		err = createTestProject(fileSystem, packageName, featureName, forceOverwrite)
+		err = createTestProject(fileGenerator, packageName, featureName, forceOverwrite)
 		if err != nil {
 			break
 		}
@@ -217,7 +204,7 @@ func createTestProjects(fileSystem utils.FileSystem, packageName string, feature
 
 // createTestProject - creates a single project to contain tests which test a feature.
 func createTestProject(
-	fileSystem utils.FileSystem,
+	fileGenerator *utils.FileGenerator,
 	packageName string,
 	featureName string,
 	forceOverwrite bool) error {
@@ -226,17 +213,17 @@ func createTestProject(
 	log.Printf("Creating tests project %s\n", targetFolderPath)
 
 	// Create the base test folder
-	err := createFolder(fileSystem, targetFolderPath)
+	err := fileGenerator.CreateFolder(targetFolderPath)
 	if err == nil {
-		err = createTestFolderPom(fileSystem, targetFolderPath, packageName, featureName, forceOverwrite)
+		err = createTestFolderPom(fileGenerator, targetFolderPath, packageName, featureName, forceOverwrite)
 	}
 
 	if err == nil {
-		err = createJavaSourceFolder(fileSystem, targetFolderPath, packageName, featureName, forceOverwrite)
+		err = createJavaSourceFolder(fileGenerator, targetFolderPath, packageName, featureName, forceOverwrite)
 	}
 
 	if err == nil {
-		err = createTestResourceFolder(fileSystem, targetFolderPath, packageName, forceOverwrite)
+		err = createTestResourceFolder(fileGenerator, targetFolderPath, packageName, forceOverwrite)
 	}
 
 	if err == nil {
@@ -245,14 +232,14 @@ func createTestProject(
 	return err
 }
 
-func createOBRProject(fileSystem utils.FileSystem, packageName string, featureNames []string, forceOverwrite bool) error {
+func createOBRProject(fileGenerator *utils.FileGenerator, packageName string, featureNames []string, forceOverwrite bool) error {
 	targetFolderPath := packageName + "/" + packageName + ".obr"
 	log.Printf("Creating obr project %s\n", targetFolderPath)
 
 	// Create the base test folder
-	err := createFolder(fileSystem, targetFolderPath)
+	err := fileGenerator.CreateFolder(targetFolderPath)
 	if err == nil {
-		err = createOBRFolderPom(fileSystem, targetFolderPath, packageName, featureNames, forceOverwrite)
+		err = createOBRFolderPom(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
 	}
 
 	if err == nil {
@@ -261,25 +248,25 @@ func createOBRProject(fileSystem utils.FileSystem, packageName string, featureNa
 	return err
 }
 
-func createJavaSourceFolder(fileSystem utils.FileSystem, testFolderPath string, packageName string, featureName string, forceOverwrite bool) error {
+func createJavaSourceFolder(fileGenerator *utils.FileGenerator, testFolderPath string, packageName string, featureName string, forceOverwrite bool) error {
 
 	// The folder is the package name but with slashes.
 	// eg: my.package becomes my/package
 	packageNameWithSlashes := strings.Replace(packageName, ".", "/", -1)
 	targetSrcFolderPath := testFolderPath + "/src/main/java/" + packageNameWithSlashes + "/" + featureName
-	err := createFolder(fileSystem, targetSrcFolderPath)
+	err := fileGenerator.CreateFolder(targetSrcFolderPath)
 	if err == nil {
 		// Create our first test java source file.
 		classNameNoClassSuffix := "Test" + utils.UppercaseFirstLetter(featureName)
 		templateBundlePath := "templates/projectCreate/parent-project/test-project/src/main/java/TestSimple.java.template"
-		err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName,
+		err = createJavaSourceFile(fileGenerator, targetSrcFolderPath, packageName,
 			featureName, forceOverwrite, classNameNoClassSuffix, templateBundlePath)
 
 		if err == nil {
 			// Create our second test java source file. To show that you can have multiples.
 			classNameNoClassSuffix = "Test" + utils.UppercaseFirstLetter(featureName) + "Extended"
 			templateBundlePath := "templates/projectCreate/parent-project/test-project/src/main/java/TestExtended.java.template"
-			err = createJavaSourceFile(fileSystem, targetSrcFolderPath, packageName,
+			err = createJavaSourceFile(fileGenerator, targetSrcFolderPath, packageName,
 				featureName, forceOverwrite, classNameNoClassSuffix, templateBundlePath)
 		}
 	}
@@ -287,31 +274,31 @@ func createJavaSourceFolder(fileSystem utils.FileSystem, testFolderPath string, 
 }
 
 func createTestResourceFolder(
-	fileSystem utils.FileSystem, targetSrcFolderPath string,
+	fileGenerator *utils.FileGenerator, targetSrcFolderPath string,
 	packageName string, forceOverwrite bool) error {
 
 	var err error
 
 	// Create the folder for the resources to sit in.
 	targetResourceFolderPath := targetSrcFolderPath + "/src/main/resources/textfiles"
-	err = createFolder(fileSystem, targetResourceFolderPath)
+	err = fileGenerator.CreateFolder(targetResourceFolderPath)
 	if err == nil {
 
 		targetFilePath := targetResourceFolderPath + "/sampleText.txt"
 		templateBundlePath := "templates/projectCreate/parent-project/test-project/src/main/resources/textfiles/sampleText.txt"
 
-		targetFile := GeneratedFile{
-			fileType:                 "TextFile",
-			targetFilePath:           targetFilePath,
-			embeddedTemplateFilePath: templateBundlePath,
-			templateParameters:       nil}
+		targetFile := utils.GeneratedFileDef{
+			FileType:                 "TextFile",
+			TargetFilePath:           targetFilePath,
+			EmbeddedTemplateFilePath: templateBundlePath,
+			TemplateParameters:       nil}
 
-		err = createFile(fileSystem, targetFile, forceOverwrite)
+		err = fileGenerator.CreateFile(targetFile, forceOverwrite)
 	}
 	return err
 }
 
-func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath string,
+func createJavaSourceFile(fileGenerator *utils.FileGenerator, targetSrcFolderPath string,
 	packageName string, featureName string, forceOverwrite bool,
 	classNameNoClassSuffix string, templateBundlePath string) error {
 
@@ -326,17 +313,17 @@ func createJavaSourceFile(fileSystem utils.FileSystem, targetSrcFolderPath strin
 		Package:   packageName + "." + featureName,
 		ClassName: classNameNoClassSuffix}
 
-	targetFile := GeneratedFile{
-		fileType:                 "JavaSourceFile",
-		targetFilePath:           targetSrcFolderPath + "/" + classNameNoClassSuffix + ".java",
-		embeddedTemplateFilePath: templateBundlePath,
-		templateParameters:       templateParameters}
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 "JavaSourceFile",
+		TargetFilePath:           targetSrcFolderPath + "/" + classNameNoClassSuffix + ".java",
+		EmbeddedTemplateFilePath: templateBundlePath,
+		TemplateParameters:       templateParameters}
 
-	err := createFile(fileSystem, targetFile, forceOverwrite)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
 	return err
 }
 
-func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath string,
+func createTestFolderPom(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
 	packageName string, featureName string, forceOverwrite bool) error {
 
 	type TestPomParameters struct {
@@ -350,17 +337,17 @@ func createTestFolderPom(fileSystem utils.FileSystem, targetTestFolderPath strin
 		Coordinates: MavenCoordinates{GroupId: packageName, ArtifactId: packageName + "." + featureName, Name: packageName + "." + featureName},
 		FeatureName: featureName}
 
-	targetFile := GeneratedFile{
-		fileType:                 "pom",
-		targetFilePath:           targetTestFolderPath + "/pom.xml",
-		embeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/pom.xml",
-		templateParameters:       pomTemplateParameters}
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 "pom",
+		TargetFilePath:           targetTestFolderPath + "/pom.xml",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/pom.xml",
+		TemplateParameters:       pomTemplateParameters}
 
-	err := createFile(fileSystem, targetFile, forceOverwrite)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
 	return err
 }
 
-func createOBRFolderPom(fileSystem utils.FileSystem, targetOBRFolderPath string, packageName string,
+func createOBRFolderPom(fileGenerator *utils.FileGenerator, targetOBRFolderPath string, packageName string,
 	featureNames []string, forceOverwrite bool) error {
 
 	type OBRPomParameters struct {
@@ -380,88 +367,12 @@ func createOBRFolderPom(fileSystem utils.FileSystem, targetOBRFolderPath string,
 			GroupId: packageName, ArtifactId: packageName + "." + featureName, Name: packageName + "." + featureName}
 	}
 
-	targetFile := GeneratedFile{
-		fileType:                 "pom",
-		targetFilePath:           targetOBRFolderPath + "/pom.xml",
-		embeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/pom.xml",
-		templateParameters:       pomTemplateParameters}
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 "pom",
+		TargetFilePath:           targetOBRFolderPath + "/pom.xml",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/pom.xml",
+		TemplateParameters:       pomTemplateParameters}
 
-	err := createFile(fileSystem, targetFile, forceOverwrite)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
 	return err
-}
-
-//---------------------------------------------------------------------------------------------------
-// File generation functions
-//---------------------------------------------------------------------------------------------------
-
-type GeneratedFile struct {
-	fileType                 string
-	targetFilePath           string
-	embeddedTemplateFilePath string
-	templateParameters       interface{}
-}
-
-// checkAllowedToWrite - Checks to see if we are allowed to write a file.
-// The file may exist already. If it does, then we won't be able to overwrite it unless
-// the forceOverWrite flag is true.
-func checkAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) error {
-	isAlreadyExists, err := fileSystem.Exists(targetFilePath)
-	if err == nil {
-		if isAlreadyExists && (!forceOverwrite) {
-			log.Printf("File %s exists, and we cannot overwrite it as the --force flag is not set.", targetFilePath)
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
-		}
-	}
-	return err
-}
-
-// createFile creates a file on the file system.
-// If forceOverwrite is false, and there is already a file there, then an error will occur.
-func createFile(
-	fileSystem utils.FileSystem,
-	generatedFile GeneratedFile,
-	forceOverwrite bool) error {
-
-	log.Printf("Creating file of type %s at %s\n", generatedFile.fileType, generatedFile.targetFilePath)
-
-	err := checkAllowedToWrite(fileSystem, generatedFile.targetFilePath, forceOverwrite)
-	if err == nil {
-		var template *template.Template
-		template, err = loadEmbeddedTemplate(generatedFile.embeddedTemplateFilePath)
-		if err == nil {
-			var fileContents string
-			fileContents, err = substituteParametersIntoTemplate(template, generatedFile.templateParameters)
-			if err == nil {
-				// Write it out to the target file.
-				err = fileSystem.WriteTextFile(generatedFile.targetFilePath, fileContents)
-			}
-		}
-	}
-	if err == nil {
-		log.Printf("Created file %s OK.", generatedFile.targetFilePath)
-	}
-	return err
-}
-
-func substituteParametersIntoTemplate(template *template.Template, templateParameters interface{}) (string, error) {
-	// Render the golang template into a string
-	var buffer bytes.Buffer
-	fileContents := ""
-	err := template.Execute(&buffer, templateParameters)
-	if err == nil {
-		fileContents = buffer.String()
-	}
-	return fileContents, err
-}
-
-func loadEmbeddedTemplate(embeddedTemplateFilePath string) (*template.Template, error) {
-	// Load-up the template file from the embedded file system.
-	data, err := embeddedFileSystem.ReadFile(embeddedTemplateFilePath)
-	var templ *template.Template = nil
-	if err == nil {
-		// Parse the string data into a golang template
-		rawTemplate := template.New(embeddedTemplateFilePath)
-		templ, err = rawTemplate.Parse(string(data))
-	}
-	return templ, err
 }
