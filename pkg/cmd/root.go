@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"embed"
 	"fmt"
 	"log"
 	"os"
@@ -21,6 +22,13 @@ var (
 
 	logFileName string
 )
+
+// Embed all the template files into the go executable, so there are no extra files
+// we need to ship/install/locate on the target machine.
+// We can access the "embedded" file system as if they are normal files.
+//
+//go:embed templates/*
+var embeddedFileSystem embed.FS
 
 func Execute() {
 
