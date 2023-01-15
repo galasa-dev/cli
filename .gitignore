@@ -14,3 +14,9 @@ temp/
 run.sh
 **/.DS_Store
 .DS_Store
+# Ignore Gradle project-specific cache directory
+.gradle
+.dependencies
+# Ignore Gradle build output directory
+build
+pkg/cmd/templates/lib/

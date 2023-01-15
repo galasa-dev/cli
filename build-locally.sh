@@ -116,47 +116,41 @@ fi
 success "OK"
 
 #--------------------------------------------------------------------------
+h2 "Setting versions of things."
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.24.0/
+export BOOT_JAR_VERSION="0.24.0"
+info "BOOT_JAR_VERSION=${BOOT_JAR_VERSION}"
+success "OK"
+
+#--------------------------------------------------------------------------
 # Create a temporary folder which is never checked in.
 h2 "Making sure the tools folder is present."
-mkdir -p tools
+mkdir -p dependencies
 rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to ensure the tools folder is present. rc=${rc}" ; exit 1 ; fi
 success "OK"
 
 #--------------------------------------------------------------------------
-# Download the open api generator tool if we've not got it already.
-export OPENAPI_GENERATOR_CLI_VERSION="6.2.0"
-export OPENAPI_GENERATOR_CLI_JAR=${BASEDIR}/tools/openapi-generator-cli-${OPENAPI_GENERATOR_CLI_VERSION}.jar
-if [[ ! -e ${OPENAPI_GENERATOR_CLI_JAR} ]]; then
-    info "The openapi generator tool is not available, so download it."
-
-    which wget 2>&1 > /dev/null
-    rc=$?
-    if [[ "${rc}" != "0" ]]; then
-        info "The wget tool is not available. Install it and try again."
-        exit 1
-    fi
-
-    export OPENAPI_GENERATOR_CLI_SITE="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli"
-    wget ${OPENAPI_GENERATOR_CLI_SITE}/${OPENAPI_GENERATOR_CLI_VERSION}/openapi-generator-cli-${OPENAPI_GENERATOR_CLI_VERSION}.jar \
-    -O ${OPENAPI_GENERATOR_CLI_JAR}
-    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to download the open api generator tool. rc=${rc}" ; exit 1 ; fi
-    success "Downloaded OK"
-fi
+# Download the dependencies we define in gradle into a local folder
+h2 "Downloading dependencies"
+gradle installJarsIntoTemplates --warning-mode all
+rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
+success "OK"
 
 #--------------------------------------------------------------------------
 # Invoke the generator
 h2 "Generate the openapi client go code..."
-./genapi.sh 2>&1 > tools/generate-log.txt
-rc=$? ; if [[ "${rc}" != "0" ]]; then cat tools/generate-log.txt ; error "Failed to generate the code from the yaml file. rc=${rc}" ; exit 1 ; fi
-rm -f tools/generate-log.txt
+mkdir -p build
+./genapi.sh 2>&1 > build/generate-log.txt
+rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate the code from the yaml file. rc=${rc}" ; exit 1 ; fi
+rm -f build/generate-log.txt
 success "Code generation OK"
 
 #--------------------------------------------------------------------------
 # Invoke the generator again with different parameters
 h2 "Generate the openapi client go code... part II"
-./generate.sh 2>&1 > tools/generate-log.txt
-rc=$? ; if [[ "${rc}" != "0" ]]; then cat tools/generate-log.txt ; error "Failed to generate II the code from the yaml file. rc=${rc}" ; exit 1 ; fi
-rm -f tools/generate-log.txt
+./generate.sh 2>&1 > build/generate-log.txt
+rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate II the code from the yaml file. rc=${rc}" ; exit 1 ; fi
+rm -f build/generate-log.txt
 success "Code generation part II - OK"
 
 #--------------------------------------------------------------------------
@@ -164,8 +158,12 @@ success "Code generation part II - OK"
 # - These are executed within the Makefile currently. 
 #   No need to expose it here as we call the makefile shortly.
 
+
 #--------------------------------------------------------------------------
+#
 # Build the executables
+#
+#--------------------------------------------------------------------------
 if [[ "${build_type}" == "clean" ]]; then
     h2 "Cleaning the binaries out..."
     make clean
@@ -177,6 +175,13 @@ h2 "Building new binaries..."
 make all
 rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
 success "New binaries built - OK"
+
+
+#--------------------------------------------------------------------------
+#
+# Testing what was built...
+#
+#--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
 h2 "Invoke the tool to create a sample project."
@@ -206,6 +211,7 @@ architecture=$(uname -m)
 galasactl_command="galasactl-${os}-${architecture}"
 info "galasactl command is ${galasactl_command}"
 
+#--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
 PACKAGE_NAME="dev.galasa.example.banking"
 ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr 
@@ -216,6 +222,7 @@ if [[ "${rc}" != "0" ]]; then
 fi
 success "OK"
 
+#--------------------------------------------------------------------------
 # Now build the source it created.
 h2 "Building the sample project we just generated."
 cd ${PACKAGE_NAME}
@@ -225,6 +232,88 @@ if [[ "${rc}" != "0" ]]; then
     error " Failed to build the generated source code which galasactl created."
     exit 1
 fi
+success "OK"
+
+#--------------------------------------------------------------------------
+# Execute the tests in Galasa
+h2 "Executing the tests we just built..."
+
+function run_test {
+
+    TEST_BUNDLE=$1
+    TEST_JAVA_CLASS=$2
+    TEST_OBR_GROUP_ID=$3
+    TEST_OBR_ARTIFACT_ID=$4
+    TEST_OBR_VERSION=$5
+
+    export M2_PATH=$(cd ~/.m2 ; pwd)
+    export BOOT_JAR_PATH=${BASEDIR}/pkg/cmd/templates/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
+
+    export OBR_VERSION="0.25.0"
+
+
+    # Local .m2 content over-rides these anyway...
+    # use development version of the OBR
+    export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
+    # else go to maven central
+    #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
+
+
+
+    echo "Running the following command..."
+    cat << EOF 
+
+    java -jar ${BOOT_JAR_PATH} \\
+    --localmaven file:${M2_PATH}/repository/ \\
+    --remotemaven $REMOTE_MAVEN \\
+    --bootstrap file:${HOME}/.galasa/bootstrap.properties \\
+    --overrides file:${HOME}/.galasa/overrides.properties \\
+    --obr mvn:dev.galasa/dev.galasa.uber.obr/${OBR_VERSION}/obr \\
+    --obr mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr \\
+    --test ${TEST_BUNDLE}/${TEST_JAVA_CLASS} 
+
+EOF
+
+
+    java -jar ${BOOT_JAR_PATH} \
+    --localmaven file:${M2_PATH}/repository/ \
+    --remotemaven $REMOTE_MAVEN \
+    --bootstrap file:${HOME}/.galasa/bootstrap.properties \
+    --overrides file:${HOME}/.galasa/overrides.properties \
+    --obr mvn:dev.galasa/dev.galasa.uber.obr/${OBR_VERSION}/obr \
+    --obr mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr \
+    --test ${TEST_BUNDLE}/${TEST_JAVA_CLASS} | tee jvm-log.txt | grep "[*][*][*]" | grep -v "[*][*][*][*]" | sed -e "s/[--]*//g"
+    cat jvm-log.txt | grep "Passed - Test class ${TEST_JAVA_CLASS}"
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        echo "Failed to run the test"
+        exit 1
+    fi
+    echo "Test ran OK"
+}
+
+TEST_BUNDLE=dev.galasa.example.banking.payee
+TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
+TEST_OBR_GROUP_ID=dev.galasa.example.banking
+TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
+TEST_OBR_VERSION=0.0.1-SNAPSHOT
+
+run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+
+TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayeeExtended
+run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+
+
+TEST_BUNDLE=dev.galasa.example.banking.account
+TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccount
+TEST_OBR_GROUP_ID=dev.galasa.example.banking
+TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
+TEST_OBR_VERSION=0.0.1-SNAPSHOT
+run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+
+TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccountExtended
+run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+
 success "OK"
 
 # Return to the top folder so we can do other things.
