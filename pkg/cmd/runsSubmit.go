@@ -47,6 +47,7 @@ var (
 	reportJsonFilename       string
 	reportJunitFilename      string
 	throttleFilename         string
+	isLocal                  *bool
 	lostThrottleFile         bool = false
 	noExitCodeOnTestFailures *bool
 	submitSelectionFlags     = utils.TestSelectionFlags{}
@@ -124,6 +125,8 @@ func init() {
 	trace = runsSubmitCmd.Flags().Bool("trace", false, "Trace to be enabled on the test runs")
 	noExitCodeOnTestFailures = runsSubmitCmd.Flags().Bool("noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
 	utils.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
+
+	isLocal = runsSubmitCmd.Flags().Bool("local", false, "when used, test(s) are launched in a local JVM and not sent to an ecosystem")
 
 	runsCmd.AddCommand(runsSubmitCmd)
 }
