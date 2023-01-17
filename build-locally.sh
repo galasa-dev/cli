@@ -247,7 +247,7 @@ function run_test {
     TEST_OBR_VERSION=$5
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
-    export BOOT_JAR_PATH=${BASEDIR}/pkg/cmd/templates/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
+    export BOOT_JAR_PATH=${BASEDIR}/pkg/embedded/templates/galasahome/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
 
     export OBR_VERSION="0.25.0"
 
