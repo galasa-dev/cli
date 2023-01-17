@@ -33,6 +33,10 @@ type GalasaError struct {
 	message string
 }
 
+func (err *GalasaError) getMessageType() *MessageType {
+	return err.msgType
+}
+
 // NewGalasaError creates a new GalasaError structure.
 //
 // params - are substituted into the message indicated by the message type.
@@ -92,4 +96,14 @@ var (
 	GALASA_ERROR_SELECTION_REGEX_QUOTED_ERROR   = NewMessageType("GAL1033E: Invalid select quoted regex '%v'. Reason is %v", 1033)
 	GALASA_ERROR_CLASS_FORMAT                   = NewMessageType("GAL1034E: Class '%v' is not format 'bundle/class'", 1034)
 	GALASA_ERROR_CLASS_NAME_BLANK               = NewMessageType("GAL1035E: Class '%v' is not format. Name is blank", 1035)
+	GALASA_ERROR_CANNOT_OVERWRITE_FILE          = NewMessageType("GAL1036E: File '%s' exists. Use the --force flag to overwrite it.", 1036)
+	GALASA_ERROR_INVALID_CHAR_IN_PACKAGE_NAME   = NewMessageType("GAL1037E: Invalid Java package name '%s' should not contain the '%s' character.", 1037)
+	GALASA_ERROR_INVALID_FIRST_CHAR_IN_PKG_NAME = NewMessageType("GAL1038E: Invalid Java package name '%s' should not start with the '%s' character.", 1038)
+	GALASA_ERROR_INVALID_LAST_CHAR_IN_PKG_NAME  = NewMessageType("GAL1039E: Invalid Java package name '%s' should not end with the '%s' character.", 1039)
+	GALASA_ERROR_PACKAGE_NAME_BLANK             = NewMessageType("GAL1040E: Invalid Java package name. Package name should not be blank.", 1040)
+	GALASA_ERROR_FAILED_TO_CREATE_FOLDERS       = NewMessageType("GAL1041E: Failed to create folders '%s'. Reason is '%s'. Check that you have permissions to write to that folder, and that there is enough disk space available and try again.", 1041)
+	GALASA_ERROR_FAILED_TO_WRITE_FILE           = NewMessageType("GAL1042E: Failed to open file '%s' for writing. Reason is '%s'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.", 1042)
+	GALASA_ERROR_FAILED_TO_READ_FILE            = NewMessageType("GAL1043E: Failed to open file '%s' for reading. Reason is '%s'. Check that you have permissions to read the file and try again.", 1043)
+	GALASA_ERROR_INVALID_PKG_RESERVED_WORD      = NewMessageType("GAL1044E: Invalid Java package name. Package name '%s' contains the reserved java keyword '%s'.", 1044)
+	GALASA_ERROR_INVALID_FEATURE_NAME           = NewMessageType("GAL1045E: Invalid feature name. Feature name '%s' cannot be used as a java package name. '%s'", 1045)
 )

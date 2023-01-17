@@ -4,6 +4,7 @@
 package utils
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -16,19 +17,28 @@ import (
  * re-directed, but will appear on stderr.
  */
 func CaptureLog(logFileName string) *os.File {
+
 	var logFile = os.Stderr
 
 	// Send the log to a file
-	if logFileName != "" && logFileName != "-" {
-		// The user has set the logFileName using the --log xxxx syntax
-		// Note: If the file exists, it gets truncated.
-		// Default permissions are 0666
-		f, err := os.Create(logFileName)
-		if err == nil {
-			log.SetOutput(f)
+	if logFileName == "-" {
+		// Log to the console. This is the default behaviour.
+	} else {
+		if logFileName == "" {
+			// Log not specified, so needs to be suppressed.
+			log.SetOutput(ioutil.Discard)
 		} else {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_OPEN_LOG_FILE_FAILED, logFileName, err.Error())
-			panic(err)
+
+			// The user has set the logFileName using the --log xxxx syntax
+			// Note: If the file exists, it gets truncated.
+			// Default permissions are 0666
+			f, err := os.Create(logFileName)
+			if err == nil {
+				log.SetOutput(f)
+			} else {
+				err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_OPEN_LOG_FILE_FAILED, logFileName, err.Error())
+				panic(err)
+			}
 		}
 	}
 
