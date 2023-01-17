@@ -209,7 +209,7 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	// Check that the pom with decent inputs has over-written the dummy test pom contents.
+	// Check that the pom with decent inputs has overwritten the dummy test pom contents.
 	parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.pkg/pom.xml")
 	assert.Nil(t, err)
 	assert.True(t, parentPomXmlFileExists, "Parent folder pom.xml was not created.")

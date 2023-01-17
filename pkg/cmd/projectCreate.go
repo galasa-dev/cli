@@ -402,13 +402,13 @@ type GeneratedFile struct {
 }
 
 // checkAllowedToWrite - Checks to see if we are allowed to write a file.
-// The file may exist already. If it does, then we won't be able to over-write it unless
+// The file may exist already. If it does, then we won't be able to overwrite it unless
 // the forceOverWrite flag is true.
 func checkAllowedToWrite(fileSystem utils.FileSystem, targetFilePath string, forceOverwrite bool) error {
 	isAlreadyExists, err := fileSystem.Exists(targetFilePath)
 	if err == nil {
 		if isAlreadyExists && (!forceOverwrite) {
-			log.Printf("File %s exists, and we cannot over-write it as the --force flag is not set.", targetFilePath)
+			log.Printf("File %s exists, and we cannot overwrite it as the --force flag is not set.", targetFilePath)
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
 		}
 	}

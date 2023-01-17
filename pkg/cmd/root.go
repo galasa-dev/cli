@@ -48,7 +48,7 @@ func Execute() {
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "",
 		"File to which log information will be sent. Any folder referred to must exist. "+
-			"An existing file will be over-written. "+
+			"An existing file will be overwritten. "+
 			"Specify \"-\" to log to stderr. "+
 			"Defaults to not logging.")
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
