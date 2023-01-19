@@ -107,4 +107,5 @@ var (
 	GALASA_ERROR_INVALID_PKG_RESERVED_WORD      = NewMessageType("GAL1044E: Invalid Java package name. Package name '%s' contains the reserved java keyword '%s'.", 1044)
 	GALASA_ERROR_INVALID_FEATURE_NAME           = NewMessageType("GAL1045E: Invalid feature name. Feature name '%s' cannot be used as a java package name. '%s'", 1045)
 	GALASA_ERROR_FAILED_TO_FIND_USER_HOME       = NewMessageType("GAL1046E: Failed to determine the home folder of this user. '%s'", 1046)
+	GALASA_ERROR_CREATE_REPORT_YAML_EXISTS      = NewMessageType("GAL1047E: Cannot create the yaml report in file '%s' as that file already exists.", 1047)
 )
