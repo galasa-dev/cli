@@ -17,11 +17,10 @@ galasactl runs submit [flags]
       --class strings              test class names, for building a portfolio when a stream/test catalog is not available
   -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
   -h, --help                       help for submit
-      --local                      when used, test(s) are launched in a local JVM and not sent to an ecosystem
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence)
       --package strings            packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
-      --poll int                   in seconds, how often the cli will poll the ecosystem for the status of the test runs (default 30)
+      --poll int                   Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. Defaults to 30 seconds. (default 30)
   -p, --portfolio string           portfolio containing the tests to run
       --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports (default 5)
       --regex                      Test selection is performed by using regex

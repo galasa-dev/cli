@@ -47,3 +47,4 @@ The `galasactl` tool can generate the following errors:
 - GAL1044E: Invalid Java package name. Package name '{}' contains the reserved java keyword '{}'.
 - GAL1045E: Invalid feature name. Feature name '{}' cannot be used as a java package name. '{}'
 - GAL1046E: Failed to determine the home folder of this user. '{}'
+- GAL1047E: Cannot create the yaml report in file '{}' as that file already exists.
