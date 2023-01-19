@@ -12,14 +12,14 @@ galasactl: bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasac
 # When executed, the .md produced contain up-to-date information on tool syntax.
 gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darwin-amd64 bin/gendocs-galasactl-linux-amd64
 
-tests: ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go
+tests: ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go
 	mkdir -p build
-	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/errors,./pkg/utils ./pkg/...
+	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/errors,./pkg/utils,./pkg/runs ./pkg/...
 	go tool cover -html=build/coverage.out -o build/coverage.html
 	go tool cover -func=build/coverage.out > build/coverage.txt
 	cat build/coverage.txt
 
-galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/embedded/templates/galasahome/lib/*.jar 
+galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/embedded/templates/galasahome/lib/*.jar 
 
 bin/galasactl-linux-amd64 : galasactl-source 
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/galasactl-linux-amd64 ./cmd/galasactl
