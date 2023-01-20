@@ -249,7 +249,7 @@ function run_test {
     export M2_PATH=$(cd ~/.m2 ; pwd)
     export BOOT_JAR_PATH=${BASEDIR}/pkg/cmd/templates/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
 
-    export OBR_VERSION="0.25.0"
+    export OBR_VERSION="0.26.0"
 
 
     # Local .m2 content over-rides these anyway...
