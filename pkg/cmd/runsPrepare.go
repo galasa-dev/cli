@@ -45,6 +45,9 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
 	log.Println("Galasa CLI - Assemble tests")
 
+	// Operations on the file system will all be relative to the current folder.
+	fileSystem := utils.NewOSFileSystem()
+
 	// Convert overrides to a map
 	testOverrides := make(map[string]string)
 	for _, override := range *prepareFlagOverrides {
@@ -63,7 +66,10 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 		testOverrides[key] = value
 	}
 
-	apiClient := api.InitialiseAPI(bootstrap)
+	apiClient, err := api.InitialiseAPI(bootstrap)
+	if err != nil {
+		panic(err)
+	}
 
 	testSelection := utils.SelectTests(apiClient, &prepareSelectionFlags)
 	count := len(testSelection.Classes)
@@ -78,16 +84,22 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	var portfolio utils.Portfolio
+	var portfolio *utils.Portfolio
 	if *prepareAppend {
-		portfolio = utils.LoadPortfolio(portfolioFilename)
+		portfolio, err = utils.LoadPortfolio(fileSystem, portfolioFilename)
+		if err != nil {
+			panic(err)
+		}
 	} else {
 		portfolio = utils.NewPortfolio()
 	}
 
-	utils.CreatePortfolio(&testSelection, &testOverrides, &portfolio)
+	utils.CreatePortfolio(&testSelection, &testOverrides, portfolio)
 
-	utils.WritePortfolio(portfolio, portfolioFilename)
+	err = utils.WritePortfolio(fileSystem, portfolioFilename, portfolio)
+	if err != nil {
+		panic(err)
+	}
 
 	if *prepareAppend {
 		log.Println("Portfolio appended")

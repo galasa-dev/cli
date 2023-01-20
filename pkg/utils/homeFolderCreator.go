@@ -34,6 +34,19 @@ func InitialiseGalasaHomeFolder(fileSystem FileSystem, embeddedFileSystem embed.
 		if err == nil {
 			err = createOverridesPropertiesFile(fileGenerator, galasaHomeDir)
 		}
+
+		if err == nil {
+			err = createCPSPropertiesFile(fileGenerator, galasaHomeDir)
+		}
+
+		if err == nil {
+			err = createDSSPropertiesFile(fileGenerator, galasaHomeDir)
+		}
+
+		if err == nil {
+			err = createCredentialsPropertiesFile(fileGenerator, galasaHomeDir)
+		}
+
 	}
 
 	return err
@@ -47,6 +60,54 @@ func createBootstrapPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir s
 		FileType:                 "properties",
 		TargetFilePath:           targetPath,
 		EmbeddedTemplateFilePath: "templates/galasahome/bootstrap.properties",
+		TemplateParameters:       nil,
+	}
+
+	err := fileGenerator.CreateFile(propertyFile, false, false)
+
+	return err
+}
+
+func createCPSPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
+
+	targetPath := galasaHomeDir + "/cps.properties"
+
+	propertyFile := GeneratedFileDef{
+		FileType:                 "properties",
+		TargetFilePath:           targetPath,
+		EmbeddedTemplateFilePath: "templates/galasahome/cps.properties",
+		TemplateParameters:       nil,
+	}
+
+	err := fileGenerator.CreateFile(propertyFile, false, false)
+
+	return err
+}
+
+func createDSSPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
+
+	targetPath := galasaHomeDir + "/dss.properties"
+
+	propertyFile := GeneratedFileDef{
+		FileType:                 "properties",
+		TargetFilePath:           targetPath,
+		EmbeddedTemplateFilePath: "templates/galasahome/dss.properties",
+		TemplateParameters:       nil,
+	}
+
+	err := fileGenerator.CreateFile(propertyFile, false, false)
+
+	return err
+}
+
+func createCredentialsPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
+
+	targetPath := galasaHomeDir + "/credentials.properties"
+
+	propertyFile := GeneratedFileDef{
+		FileType:                 "properties",
+		TargetFilePath:           targetPath,
+		EmbeddedTemplateFilePath: "templates/galasahome/credentials.properties",
 		TemplateParameters:       nil,
 	}
 

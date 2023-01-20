@@ -50,6 +50,15 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 
 	isExists, _ = mockFileSystem.Exists(galasaHomeDir + "/overrides.properties")
 	assert.True(t, isExists, "Failed to create file "+galasaHomeDir+"/overrides.properties")
+
+	isExists, _ = mockFileSystem.Exists(galasaHomeDir + "/cps.properties")
+	assert.True(t, isExists, "Failed to create file "+galasaHomeDir+"/cps.properties")
+
+	isExists, _ = mockFileSystem.Exists(galasaHomeDir + "/dss.properties")
+	assert.True(t, isExists, "Failed to create file "+galasaHomeDir+"/dss.properties")
+
+	isExists, _ = mockFileSystem.Exists(galasaHomeDir + "/credentials.properties")
+	assert.True(t, isExists, "Failed to create file "+galasaHomeDir+"/credentials.properties")
 }
 
 func assertFolderExists(t *testing.T, mockFileSystem FileSystem, path string, message string) {
