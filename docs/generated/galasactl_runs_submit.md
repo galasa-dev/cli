@@ -20,20 +20,20 @@ galasactl runs submit [flags]
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence)
       --package strings            packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
-      --poll int                   Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. Defaults to 30 seconds. (default 30)
+      --poll int                   Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
   -p, --portfolio string           portfolio containing the tests to run
-      --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports (default 5)
+      --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. Defaults to 5 minutes. If less than 1, then default value is used. (default 5)
       --regex                      Test selection is performed by using regex
       --reportjson string          json file to record the final results in
       --reportjunit string         junit xml file to record the final results in
       --reportyaml string          yaml file to record the final results in
-      --requestor string           the requestor id to be associated with the test runs (default "mcobbett")
-      --requesttype string         the type of request, used to allocate a run name (default "CLI")
+      --requestor string           the requestor id to be associated with the test runs. Defaults to the current user id (default "mcobbett")
+      --requesttype string         the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
   -s, --stream string              test stream to extract the tests from
       --tag strings                tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex
       --test strings               test names which will be selected if the name contains this string, or if --regex is specified then matches the regex
       --throttle int               how many test runs can be submitted in parallel, 0 or less will disable throttling (default 3)
-      --throttlefile string        a file where the current throttle is stored and monitored, used to dynamically change the throttle
+      --throttlefile string        the type of request, used to allocate a run name. Defaults to CLI. (default "~/.")
       --trace                      Trace to be enabled on the test runs
 ```
 

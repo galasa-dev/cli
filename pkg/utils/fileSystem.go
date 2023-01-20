@@ -14,7 +14,6 @@ import (
 type FileSystem interface {
 	// MkdirAll creates all folders in the file system if they don't already exist.
 	MkdirAll(targetFolderPath string) error
-
 	ReadTextFile(filePath string) (string, error)
 	WriteTextFile(targetFilePath string, desiredContents string) error
 	WriteBinaryFile(targetFilePath string, desiredContents []byte) error
