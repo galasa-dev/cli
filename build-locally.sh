@@ -212,6 +212,12 @@ galasactl_command="galasactl-${os}-${architecture}"
 info "galasactl command is ${galasactl_command}"
 
 #--------------------------------------------------------------------------
+# Build a portfolio
+${BASEDIR}/bin/${galasactl_command} runs prepare --portfolio my.portfolio --bootstrap file:~/.galasa/bootstrap.properties
+
+exit 1
+
+#--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
 PACKAGE_NAME="dev.galasa.example.banking"
 ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr 
@@ -318,6 +324,8 @@ success "OK"
 
 # Return to the top folder so we can do other things.
 cd ${BASEDIR}
+
+
 
 #--------------------------------------------------------------------------
 # Build the documentation
