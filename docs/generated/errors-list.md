@@ -48,3 +48,5 @@ The `galasactl` tool can generate the following errors:
 - GAL1045E: Invalid feature name. Feature name '{}' cannot be used as a java package name. '{}'
 - GAL1046E: Failed to determine the home folder of this user. '{}'
 - GAL1047E: Cannot create the yaml report in file '{}' as that file already exists.
+- GAL1048E: Failed to read from 'throttle' file '{}'. Reason is {}
+- GAL1049E: Invalid value '{}' read from 'throttle' file '{}'. Reason is {}
