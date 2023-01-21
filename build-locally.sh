@@ -213,9 +213,7 @@ info "galasactl command is ${galasactl_command}"
 
 #--------------------------------------------------------------------------
 # Build a portfolio
-${BASEDIR}/bin/${galasactl_command} runs prepare --portfolio my.portfolio --bootstrap file:~/.galasa/bootstrap.properties
-
-exit 1
+# ${BASEDIR}/bin/${galasactl_command} runs prepare --portfolio my.portfolio --bootstrap file:~/.galasa/bootstrap.properties
 
 #--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
