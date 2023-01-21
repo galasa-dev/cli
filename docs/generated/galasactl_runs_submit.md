@@ -33,7 +33,7 @@ galasactl runs submit [flags]
       --tag strings                tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex
       --test strings               test names which will be selected if the name contains this string, or if --regex is specified then matches the regex
       --throttle int               how many test runs can be submitted in parallel, 0 or less will disable throttling (default 3)
-      --throttlefile string        the type of request, used to allocate a run name. Defaults to CLI. (default "~/.")
+      --throttlefile string        a file where the current throttle is stored and monitored, used to dynamically change the throttle
       --trace                      Trace to be enabled on the test runs
 ```
 
