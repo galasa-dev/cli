@@ -73,7 +73,7 @@ func init() {
 	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.requestor, "requestor", currentUserName, "the requestor id to be associated with the test runs. Defaults to the current user id")
 	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.requestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
 
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.throttleFileName, "throttlefile", "~/.", "the type of request, used to allocate a run name. Defaults to CLI.")
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.throttleFileName, "throttlefile", "", "a file where the current throttle is stored and monitored, used to dynamically change the throttle")
 
 	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.pollIntervalSeconds, "poll", DEFAULT_POLL_INTERVAL_SECONDS,
 		"Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. "+
@@ -163,10 +163,16 @@ func executeSubmitRemote(
 	fetchRas := isRasDetailNeededForReports(params)
 	pollInterval := time.Second * time.Duration(params.pollIntervalSeconds)
 
+	err = writeThrottleFile(fileSystem, params.throttleFileName, throttle)
+	if err != nil {
+		return err
+	}
+
 	//
 	// Main submit loop
 	//
 	nextProgressReport := timeService.Now().Add(progressReportInterval)
+	isThrottleFileLost := false
 	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
 
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
@@ -181,6 +187,8 @@ func executeSubmitRemote(
 		}
 
 		timeService.Sleep(pollInterval)
+
+		throttle, isThrottleFileLost = updateThrottleFromFileIfDifferent(fileSystem, params.throttleFileName, throttle, isThrottleFileLost)
 
 		runsFetchCurrentStatus(apiClient, params.groupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
 	}
@@ -198,6 +206,70 @@ func executeSubmitRemote(
 	}
 
 	return err
+}
+
+func writeThrottleFile(fileSystem utils.FileSystem, throttleFileName string, throttle int) error {
+	err := fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE, throttleFileName, err.Error())
+	}
+	return err
+}
+
+func updateThrottleFromFileIfDifferent(
+	fileSystem utils.FileSystem,
+	throttleFileName string,
+	currentThrottle int,
+	wasThrottleFileLostAlready bool) (int, bool) {
+
+	var newThrottle int = currentThrottle
+	var isThrottleFileLost bool = false
+
+	savedThrottle, err := readThrottleFile(fileSystem, throttleFileName)
+	if err != nil {
+		if wasThrottleFileLostAlready {
+			// Don't log it, as we logged it when it was first lost.
+		} else {
+			// We just lost it, so log the fact.
+			log.Printf("Error with throttle file %v\n", err)
+		}
+		// Don't report the throttle file as being lost until after it's been found again.
+		isThrottleFileLost = true
+	} else {
+		isThrottleFileLost = false
+		// Only log something if we are changing the throttle value.
+		if savedThrottle != currentThrottle {
+			log.Printf("Changing throttle from %v to %v\n", currentThrottle, newThrottle)
+		}
+		newThrottle = savedThrottle
+	}
+	return newThrottle, isThrottleFileLost
+}
+
+const (
+	INT_TYPE_VARIANT_PLAIN_INT = 0
+	INT_TYPE_VARIANT_INT8      = 8
+	INT_TYPE_VARIANT_INT16     = 16
+	INT_TYPE_VARIANT_INT32     = 32
+	INT_TYPE_VARIANT_INT64     = 64
+)
+
+func readThrottleFile(fileSystem utils.FileSystem, throttleFileName string) (int, error) {
+	var savedThrottle int = 0
+	var intermediateThrottle int64
+	contents, err := fileSystem.ReadTextFile(throttleFileName)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_READ, throttleFileName, err.Error())
+	} else {
+		intermediateThrottle, err = strconv.ParseInt(contents, 10, INT_TYPE_VARIANT_PLAIN_INT)
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_INVALID, contents, throttleFileName, err.Error())
+			log.Printf("Throttle file %s contains bad integer value %s returning %s\n", throttleFileName, contents, err.Error())
+		} else {
+			savedThrottle = int(intermediateThrottle)
+		}
+	}
+	return savedThrottle, err
 }
 
 func submitRun(
