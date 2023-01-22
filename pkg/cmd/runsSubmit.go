@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 	"os/user"
 	"strconv"
 	"strings"
@@ -38,6 +39,7 @@ type RunsSubmitCmdParameters struct {
 	requestType                   string
 	throttleFileName              string
 	portfolioFileName             string
+	isLocal                       bool // Is the runs submit to a local JVM ?
 }
 
 var (
@@ -56,9 +58,11 @@ var (
 )
 
 const (
-	DEFAULT_POLL_INTERVAL_SECONDS            int = 30
-	MAX_INT                                  int = int(^uint(0) >> 1)
-	DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES int = 5
+	DEFAULT_POLL_INTERVAL_SECONDS            int    = 30
+	MAX_INT                                  int    = int(^uint(0) >> 1)
+	DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES int    = 5
+	DEFAULT_THROTTLE_TESTS_AT_ONCE           int    = 3
+	FILE_SYSTEM_PATH_SEPARATOR               string = string(os.PathSeparator)
 )
 
 func init() {
@@ -73,22 +77,47 @@ func init() {
 	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.requestor, "requestor", currentUserName, "the requestor id to be associated with the test runs. Defaults to the current user id")
 	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.requestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
 
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.throttleFileName, "throttlefile", "", "a file where the current throttle is stored and monitored, used to dynamically change the throttle")
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.throttleFileName, "throttlefile", "",
+		"a file where the current throttle is stored. Periodically the throttle value is read from the file used. "+
+			"Someone with edit access to the file can change it which dynamically takes effect. "+
+			"Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). "+
+			"And they can be resumed (un-paused) if the value is set back. "+
+			"This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.")
 
 	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.pollIntervalSeconds, "poll", DEFAULT_POLL_INTERVAL_SECONDS,
 		"Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. "+
 			"Defaults to "+strconv.Itoa(DEFAULT_POLL_INTERVAL_SECONDS)+" seconds. "+
 			"If less than 1, then default value is used.")
+
 	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.progressReportIntervalMinutes, "progress", DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES,
 		"in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. "+
 			"Defaults to "+strconv.Itoa(DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES)+" minutes. "+
 			"If less than 1, then default value is used.")
 
-	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.throttle, "throttle", 3, "how many test runs can be submitted in parallel, 0 or less will disable throttling")
-	runsSubmitCmd.Flags().StringSliceVar(&runsSubmitCmdParams.overrides, "override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
+	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.throttle, "throttle", DEFAULT_THROTTLE_TESTS_AT_ONCE,
+		"how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is "+
+			strconv.Itoa(DEFAULT_THROTTLE_TESTS_AT_ONCE))
+
+	runsSubmitCmd.Flags().StringSliceVar(&runsSubmitCmdParams.overrides, "override", make([]string, 0),
+		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+
+			"Each override is of the form 'name=value'. Multiple instances of this flag can be used. "+
+			"For example --override=prop1=val1 --override=prop2=val2")
+
+	// The trace flag defaults to 'false' if you don't use it.
+	// If you say '--trace' on it's own, it defaults to 'true'
+	// If you say --trace=false or --trace=true you can set the value explicitly.
 	runsSubmitCmd.Flags().BoolVar(&runsSubmitCmdParams.trace, "trace", false, "Trace to be enabled on the test runs")
+	runsSubmitCmd.Flags().Lookup("trace").NoOptDefVal = "true"
 
 	runsSubmitCmd.Flags().BoolVar(&(runsSubmitCmdParams.noExitCodeOnTestFailures), "noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
+
+	// The local flag defaults to 'false' if you don't use it.
+	// If you say '--local' on it's own, it defaults to 'true'
+	// If you say --local=false or --local=true you can set the value explicitly.
+	runsSubmitCmd.Flags().BoolVar(&(runsSubmitCmdParams.isLocal), "local", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
+	localFlag := runsSubmitCmd.Flags().Lookup("trace")
+	localFlag.NoOptDefVal = "true"
+	localFlag.Hidden = true // Currently this flag is hidden from user view until it works.
 
 	utils.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
 
@@ -97,20 +126,33 @@ func init() {
 
 func executeSubmit(cmd *cobra.Command, args []string) {
 
+	var err error
 	utils.CaptureLog(logFileName)
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
-	apiClient, err := api.InitialiseAPI(bootstrap)
-	if err != nil {
-		panic(err)
+	if runsSubmitCmdParams.isLocal {
+
+		javaHome := os.Getenv("JAVA_HOME")
+
+		err = executeSubmitLocal(fileSystem, runsSubmitCmdParams, javaHome)
+
+	} else {
+		// the submit is targetting an ecosysystem to run the command.
+
+		// An HTTP client which can communicate with the api server in an ecosystem.
+		var apiClient *galasaapi.APIClient
+		apiClient, err = api.InitialiseAPI(bootstrap)
+		if err != nil {
+			panic(err)
+		}
+
+		timeService := utils.NewRealTimeService()
+
+		err = executeSubmitRemote(fileSystem, runsSubmitCmdParams, apiClient, timeService)
 	}
 
-	timeService := utils.NewRealTimeService()
-
-	err = executeSubmitRemote(fileSystem, runsSubmitCmdParams, apiClient, timeService)
 	if err != nil {
 		// Panic. If we could pass an error back we would.
 		// The panic is recovered from in the root command, where
