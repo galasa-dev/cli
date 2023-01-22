@@ -48,5 +48,10 @@ The `galasactl` tool can generate the following errors:
 - GAL1045E: Invalid feature name. Feature name '{}' cannot be used as a java package name. '{}'
 - GAL1046E: Failed to determine the home folder of this user. '{}'
 - GAL1047E: Cannot create the yaml report in file '{}' as that file already exists.
-- GAL1048E: Failed to read from 'throttle' file '{}'. Reason is {}
-- GAL1049E: Invalid value '{}' read from 'throttle' file '{}'. Reason is {}
+- GAL1048E: Failed to read from 'throttle' file '{}'. Reason is '{}'
+- GAL1049E: Invalid value '{}' read from 'throttle' file '{}'. Reason is '{}'
+- GAL1050E: JAVA_HOME environment variable is not set. It must be for when --local flag is used.
+- GAL1051E: Failed to determine if folder '{}' exists. Reason is '{}'
+- GAL1052E: Folder '{}' is missing. JAVA_HOME environment variable should refer to a folder which contains a 'bin' folder.
+- GAL1053E: Failed to determine if '{}' exists. Reason is '{}'
+- GAL1054E: Program '{}' should exist. JAVA_HOME has been set incorrectly.
