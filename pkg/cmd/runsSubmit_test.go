@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"testing"
+
 	// "github.com/stretchr/testify/mock"
 	// "github.com/galasa.dev/cli/pkg/galasaapi"
 
@@ -104,6 +105,7 @@ func TestCanSubmitSmallPortfolio(t *testing.T) {
 		reportJunitFilename:           "a.junit.xml",
 		groupName:                     "babe",
 		portfolioFileName:             "small.portfolio",
+		isLocal:					   false,
 	}
 
 	mockTimeService := utils.NewMockTimeServiceAsMock()
