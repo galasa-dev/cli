@@ -36,3 +36,13 @@ The `galasactl` tool can generate the following errors:
 - GAL1033E: Invalid select quoted regex '{}'. Reason is {}
 - GAL1034E: Class '{}' is not format 'bundle/class'
 - GAL1035E: Class '{}' is not format. Name is blank
+- GAL1036E: File '{}' exists. Use the --force flag to overwrite it.
+- GAL1037E: Invalid Java package name '{}' should not contain the '{}' character.
+- GAL1038E: Invalid Java package name '{}' should not start with the '{}' character.
+- GAL1039E: Invalid Java package name '{}' should not end with the '{}' character.
+- GAL1040E: Invalid Java package name. Package name should not be blank.
+- GAL1041E: Failed to create folders '{}'. Reason is '{}'. Check that you have permissions to write to that folder, and that there is enough disk space available and try again.
+- GAL1042E: Failed to open file '{}' for writing. Reason is '{}'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.
+- GAL1043E: Failed to open file '{}' for reading. Reason is '{}'. Check that you have permissions to read the file and try again.
+- GAL1044E: Invalid Java package name. Package name '{}' contains the reserved java keyword '{}'.
+- GAL1045E: Invalid feature name. Feature name '{}' cannot be used as a java package name. '{}'

@@ -8,7 +8,7 @@ cd "${BASEDIR}"
 # Allow an environment variable to over-ride the location of the openapi generator cli tool
 # otherwise set a default.
 if [[ -z $OPENAPI_GENERATOR_CLI_JAR ]]; then
-    export OPENAPI_GENERATOR_CLI_JAR=~/openapi/openapi-generator-cli.jar
+    export OPENAPI_GENERATOR_CLI_JAR=${BASEDIR}/build/dependencies/openapi-generator-cli.jar
     echo "The location of the open generator jar is not specified. Defaulting it to ${OPENAPI_GENERATOR_CLI_JAR}"
     echo "Set the OPENAPI_GENERATOR_CLI_JAR environment variable to over-ride this setting."
     exit 1

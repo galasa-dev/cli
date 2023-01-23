@@ -1,5 +1,5 @@
 #
-# Copyright contributors to the Galasa project 
+# Copyright contributors to the Galasa project
 #
 kind: Ingress
 apiVersion: networking.k8s.io/v1
