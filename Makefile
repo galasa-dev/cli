@@ -19,7 +19,9 @@ tests: ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg
 	go tool cover -func=build/coverage.out > build/coverage.txt
 	cat build/coverage.txt
 
-galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/embedded/templates/galasahome/lib/*.jar 
+galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go 
+
+# when the gradle stuff works, we can rely on this jar being here: ./pkg/embedded/templates/galasahome/lib/*.jar 
 
 bin/galasactl-linux-amd64 : galasactl-source 
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/galasactl-linux-amd64 ./cmd/galasactl
