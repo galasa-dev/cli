@@ -20,11 +20,11 @@ func InitialiseGalasaHomeFolder(fileSystem FileSystem, embeddedFileSystem embed.
 
 	userHomeDir, err = fileSystem.GetUserHomeDir()
 	if err == nil {
-		galasaHomeDir := userHomeDir + "/.galasa"
+		galasaHomeDir := userHomeDir + FILE_SYSTEM_PATH_SEPARATOR + ".galasa"
 		err = fileGenerator.CreateFolder(galasaHomeDir)
 
 		if err == nil {
-			err = createLibDirAndContent(fileGenerator, galasaHomeDir+"/lib")
+			err = createLibDirAndContent(fileGenerator, galasaHomeDir+FILE_SYSTEM_PATH_SEPARATOR+"lib")
 		}
 
 		if err == nil {
@@ -54,7 +54,7 @@ func InitialiseGalasaHomeFolder(fileSystem FileSystem, embeddedFileSystem embed.
 
 func createBootstrapPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
 
-	targetPath := galasaHomeDir + "/bootstrap.properties"
+	targetPath := galasaHomeDir + FILE_SYSTEM_PATH_SEPARATOR + "bootstrap.properties"
 
 	propertyFile := GeneratedFileDef{
 		FileType:                 "properties",
@@ -70,7 +70,7 @@ func createBootstrapPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir s
 
 func createCPSPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
 
-	targetPath := galasaHomeDir + "/cps.properties"
+	targetPath := galasaHomeDir + FILE_SYSTEM_PATH_SEPARATOR + "cps.properties"
 
 	propertyFile := GeneratedFileDef{
 		FileType:                 "properties",
@@ -86,7 +86,7 @@ func createCPSPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string)
 
 func createDSSPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
 
-	targetPath := galasaHomeDir + "/dss.properties"
+	targetPath := galasaHomeDir + FILE_SYSTEM_PATH_SEPARATOR + "dss.properties"
 
 	propertyFile := GeneratedFileDef{
 		FileType:                 "properties",
@@ -102,7 +102,7 @@ func createDSSPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string)
 
 func createCredentialsPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
 
-	targetPath := galasaHomeDir + "/credentials.properties"
+	targetPath := galasaHomeDir + FILE_SYSTEM_PATH_SEPARATOR + "credentials.properties"
 
 	propertyFile := GeneratedFileDef{
 		FileType:                 "properties",
@@ -118,7 +118,7 @@ func createCredentialsPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir
 
 func createOverridesPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
 
-	targetPath := galasaHomeDir + "/overrides.properties"
+	targetPath := galasaHomeDir + FILE_SYSTEM_PATH_SEPARATOR + "overrides.properties"
 
 	propertyFile := GeneratedFileDef{
 		FileType:                 "properties",
@@ -141,15 +141,16 @@ func createLibDirAndContent(fileGenerator *FileGenerator, galasaLibDir string) e
 
 	if err == nil {
 		galasaVersion := embedded.GetGalasaVersion()
-		galasaVersionLibDir := galasaLibDir + "/" + galasaVersion
+		galasaVersionLibDir := galasaLibDir + FILE_SYSTEM_PATH_SEPARATOR + galasaVersion
 		err = fileGenerator.CreateFolder(galasaVersionLibDir)
 
 		if err == nil {
 			bootJarVersion := embedded.GetBootJarVersion()
 
 			installedBootJar := GeneratedFileDef{
-				FileType:                 "jar",
-				TargetFilePath:           galasaVersionLibDir + "/galasa-boot-" + bootJarVersion + ".jar",
+				FileType: "jar",
+				TargetFilePath: galasaVersionLibDir + FILE_SYSTEM_PATH_SEPARATOR +
+					"galasa-boot-" + bootJarVersion + ".jar",
 				EmbeddedTemplateFilePath: "templates/galasahome/lib/galasa-boot-" + bootJarVersion + ".jar",
 				TemplateParameters:       nil,
 			}
@@ -162,4 +163,20 @@ func createLibDirAndContent(fileGenerator *FileGenerator, galasaLibDir string) e
 	}
 
 	return err
+}
+
+func GetGalasaBootJarPath(fileSystem FileSystem) (string, error) {
+	var galasaBootJarPath string = ""
+	var userHomeDir, err = fileSystem.GetUserHomeDir()
+	if err == nil {
+		galasaVersion := embedded.GetGalasaVersion()
+		bootJarVersion := embedded.GetBootJarVersion()
+
+		galasaBootJarPath = userHomeDir +
+			FILE_SYSTEM_PATH_SEPARATOR + ".galasa" +
+			FILE_SYSTEM_PATH_SEPARATOR + "lib" +
+			FILE_SYSTEM_PATH_SEPARATOR + galasaVersion +
+			FILE_SYSTEM_PATH_SEPARATOR + "galasa-boot-" + bootJarVersion + ".jar"
+	}
+	return galasaBootJarPath, err
 }
