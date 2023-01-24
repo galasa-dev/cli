@@ -131,10 +131,10 @@ success "OK"
 
 #--------------------------------------------------------------------------
 # Download the dependencies we define in gradle into a local folder
-h2 "Downloading dependencies"
-gradle installJarsIntoTemplates --warning-mode all
-rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
-success "OK"
+# h2 "Downloading dependencies"
+# gradle installJarsIntoTemplates --warning-mode all
+# rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
+# success "OK"
 
 #--------------------------------------------------------------------------
 # Invoke the generator
