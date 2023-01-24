@@ -22,6 +22,10 @@ type FileSystem interface {
 	GetUserHomeDir() (string, error)
 }
 
+const (
+	FILE_SYSTEM_PATH_SEPARATOR string = string(os.PathSeparator)
+)
+
 //------------------------------------------------------------------------------------
 // The implementation of the real os-delegating variant of the FileSystem interface
 //------------------------------------------------------------------------------------
