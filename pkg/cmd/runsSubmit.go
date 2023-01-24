@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/runs"
@@ -58,11 +59,10 @@ var (
 )
 
 const (
-	DEFAULT_POLL_INTERVAL_SECONDS            int    = 30
-	MAX_INT                                  int    = int(^uint(0) >> 1)
-	DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES int    = 5
-	DEFAULT_THROTTLE_TESTS_AT_ONCE           int    = 3
-	FILE_SYSTEM_PATH_SEPARATOR               string = string(os.PathSeparator)
+	DEFAULT_POLL_INTERVAL_SECONDS            int = 30
+	MAX_INT                                  int = int(^uint(0) >> 1)
+	DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES int = 5
+	DEFAULT_THROTTLE_TESTS_AT_ONCE           int = 3
 )
 
 func init() {
@@ -136,7 +136,9 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 		javaHome := os.Getenv("JAVA_HOME")
 
-		err = executeSubmitLocal(fileSystem, runsSubmitCmdParams, javaHome)
+		embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+
+		err = executeSubmitLocal(fileSystem, embeddedFileSystem, runsSubmitCmdParams, javaHome)
 
 	} else {
 		// the submit is targetting an ecosysystem to run the command.
@@ -600,6 +602,8 @@ func getPortfolio(fileSystem utils.FileSystem, portfolioFileName string, apiClie
 			return nil, err
 		}
 	} else {
+		// There is no portfolio file, so create an in-memory portfolio 
+		// from the tests we can find from the test selection.
 		testSelection := utils.SelectTests(apiClient, &submitSelectionFlags)
 
 		testOverrides := make(map[string]string)
