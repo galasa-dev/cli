@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	GALASA_VERSION = "0.25.0"
+	GALASA_VERSION = "0.26.0"
 )
 
 // CommonPomParameters holds common substitution parameters a pom.xml file
