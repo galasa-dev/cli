@@ -16,12 +16,11 @@ type FileSystem interface {
 	MkdirAll(targetFolderPath string) error
 
 	ReadTextFile(filePath string) (string, error)
-
 	WriteTextFile(targetFilePath string, desiredContents string) error
-
+	WriteBinaryFile(targetFilePath string, desiredContents []byte) error
 	Exists(path string) (bool, error)
-
 	DirExists(path string) (bool, error)
+	GetUserHomeDir() (string, error)
 }
 
 //------------------------------------------------------------------------------------
@@ -41,7 +40,7 @@ func NewOSFileSystem() FileSystem {
 // Interface methods...
 //------------------------------------------------------------------------------------
 
-func (OSFileSystem) MkdirAll(targetFolderPath string) error {
+func (osFS OSFileSystem) MkdirAll(targetFolderPath string) error {
 	err := os.MkdirAll(targetFolderPath, 0755)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_CREATE_FOLDERS, targetFolderPath, err.Error())
@@ -49,12 +48,17 @@ func (OSFileSystem) MkdirAll(targetFolderPath string) error {
 	return err
 }
 
-func (OSFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
-	bytes := []byte(desiredContents)
-	err := os.WriteFile(targetFilePath, bytes, 0644)
+func (osFS OSFileSystem) WriteBinaryFile(targetFilePath string, desiredContents []byte) error {
+	err := os.WriteFile(targetFilePath, desiredContents, 0644)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
 	}
+	return err
+}
+
+func (osFS OSFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
+	bytes := []byte(desiredContents)
+	err := osFS.WriteBinaryFile(targetFilePath, bytes)
 	return err
 }
 
@@ -95,4 +99,12 @@ func (OSFileSystem) DirExists(path string) (bool, error) {
 		isDirExists = metadata.IsDir()
 	}
 	return isDirExists, err
+}
+
+func (OSFileSystem) GetUserHomeDir() (string, error) {
+	dirName, err := os.UserHomeDir()
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_FIND_USER_HOME, err.Error())
+	}
+	return dirName, err
 }
