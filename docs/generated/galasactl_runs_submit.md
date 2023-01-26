@@ -34,7 +34,7 @@ galasactl runs submit [flags]
       --tag strings                tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex
       --test strings               test names which will be selected if the name contains this string, or if --regex is specified then matches the regex
       --throttle int               how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is 3 (default 3)
-      --throttlefile string        a file where the current throttle is stored. Periodically the throttle value is read from the file used. Someone with edit access to the file can change it which dynamically takes effect. Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). And they can be resumed (un-paused) if the value is set back. This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.
+      --throttlefile string        a file where the current throttle is stored. Periodically the throttle value is read from the file used. Someone with edit access to the file can change it which dynamically takes effect. Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). And they can be resumed (un-paused) if the value is set back. This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.Optional. If not specified, no throttle file is used.
 ```
 
 ### Options inherited from parent commands

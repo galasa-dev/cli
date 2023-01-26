@@ -199,6 +199,39 @@ func executeSubmitRemote(
 	// Build list of runs to submit
 	readyRuns := buildListOfRunsToSubmit(portfolio, runOverrides)
 
+	// Run all the tests
+	var finishedRuns map[string]*runs.TestRun
+	var lostRuns map[string]*runs.TestRun
+	finishedRuns, lostRuns, err = executeSubmitRunsRemote(
+		fileSystem, params, apiClient, timeService, readyRuns, runOverrides)
+
+	// Report on the results.
+	if err == nil {
+		// Generate all the reports summarising the end-results.
+		err = createReports(fileSystem, params, finishedRuns, lostRuns)
+		if err == nil {
+
+			// Fail the command if tests failed, and the user wanted us to fail if tests fail.
+			failureCount := runs.CountTotalFailedRuns(finishedRuns, lostRuns)
+			if failureCount > 0 && !params.noExitCodeOnTestFailures {
+				// Not all runs passed
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED, failureCount)
+			}
+		}
+	}
+
+	return err
+}
+
+func executeSubmitRunsRemote(fileSystem utils.FileSystem,
+	params RunsSubmitCmdParameters,
+	apiClient *galasaapi.APIClient,
+	timeService utils.TimeService,
+	readyRuns []runs.TestRun,
+	runOverrides map[string]string) (map[string]*runs.TestRun, map[string]*runs.TestRun, error) {
+
+	var err error = nil
+
 	submittedRuns := make(map[string]*runs.TestRun)
 	rerunRuns := make(map[string]*runs.TestRun)
 	finishedRuns := make(map[string]*runs.TestRun)
@@ -211,7 +244,7 @@ func executeSubmitRemote(
 
 	err = writeThrottleFile(fileSystem, params.throttleFileName, throttle)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	//
@@ -239,19 +272,7 @@ func executeSubmitRemote(
 		runsFetchCurrentStatus(apiClient, params.groupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
 	}
 
-	// Generate all the reports summarising the end-results.
-	err = createReports(fileSystem, params, finishedRuns, lostRuns)
-	if err == nil {
-
-		// Fail the command if tests failed, and the user wanted us to fail if tests fail.
-		failureCount := runs.CountTotalFailedRuns(finishedRuns, lostRuns)
-		if failureCount > 0 && !params.noExitCodeOnTestFailures {
-			// Not all runs passed
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED, failureCount)
-		}
-	}
-
-	return err
+	return finishedRuns, lostRuns, err
 }
 
 func writeThrottleFile(fileSystem utils.FileSystem, throttleFileName string, throttle int) error {
