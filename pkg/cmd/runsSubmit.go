@@ -4,11 +4,6 @@
 package cmd
 
 import (
-	"bufio"
-	"encoding/json"
-	"encoding/xml"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -16,15 +11,37 @@ import (
 	"strings"
 	"time"
 
-	satori "github.com/satori/go.uuid"
+	randomGenerator "github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/runs"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
+
+// RunsSubmitCmdParameters - Holds variables set by cobra's command-line parsing.
+// We collect the parameters here so that our unit tests can feed in different values
+// easily.
+type RunsSubmitCmdParameters struct {
+	pollIntervalSeconds           int
+	noExitCodeOnTestFailures      bool
+	reportYamlFilename            string
+	reportJsonFilename            string
+	reportJunitFilename           string
+	groupName                     string
+	progressReportIntervalMinutes int
+	throttle                      int
+	overrides                     []string
+	trace                         bool
+	requestor                     string
+	requestType                   string
+	throttleFileName              string
+	portfolioFileName             string
+	isLocal                       bool // Is the runs submit to a local JVM ?
+}
 
 var (
 	runsSubmitCmd = &cobra.Command{
@@ -35,94 +52,75 @@ var (
 		Run:   executeSubmit,
 	}
 
-	groupName                string
-	throttle                 *int
-	pollFlag                 *int64
-	progressFlag             *int
-	submitFlagOverrides      *[]string
-	trace                    *bool
-	requestor                string
-	requestType              string
-	reportYamlFilename       string
-	reportJsonFilename       string
-	reportJunitFilename      string
-	throttleFilename         string
-	lostThrottleFile         bool = false
-	noExitCodeOnTestFailures *bool
-	submitSelectionFlags     = utils.TestSelectionFlags{}
+	// Variables set by cobra's command-line parsing.
+	runsSubmitCmdParams RunsSubmitCmdParameters
+
+	submitSelectionFlags = utils.TestSelectionFlags{}
 )
 
-type TestReport struct {
-	Tests []TestRun `yaml:"tests" json:"tests"`
-}
-
-type TestRun struct {
-	Name      string            `yaml:"name" json:"name"`
-	Bundle    string            `yaml:"bundle" json:"bundle"`
-	Class     string            `yaml:"class" json:"class"`
-	Stream    string            `yaml:"stream" json:"stream"`
-	Status    string            `yaml:"status" json:"status"`
-	Result    string            `yaml:"result" json:"result"`
-	Overrides map[string]string `yaml:"overrides" json:"overrides"`
-	Tests     []TestMethod      `yaml:"tests" json:"tests"`
-}
-
-type TestMethod struct {
-	Method string `yaml:"name" json:"name"`
-	Result string `yaml:"result" json:"result"`
-}
-
-type JunitTestSuites struct {
-	XMLName   xml.Name         `xml:"testsuites"`
-	ID        string           `xml:"id,attr"`
-	Name      string           `xml:"name,attr"`
-	Tests     int              `xml:"tests,attr"`
-	Failures  int              `xml:"failures,attr"`
-	Time      int              `xml:"time,attr"`
-	Testsuite []JunitTestSuite `xml:"testsuite"`
-}
-
-type JunitTestSuite struct {
-	ID       string          `xml:"id,attr"`
-	Name     string          `xml:"name,attr"`
-	Tests    int             `xml:"tests,attr"`
-	Failures int             `xml:"failures,attr"`
-	Time     int             `xml:"time,attr"`
-	TestCase []JunitTestCase `xml:"testcase"`
-}
-
-type JunitTestCase struct {
-	ID      string        `xml:"id,attr"`
-	Name    string        `xml:"name,attr"`
-	Time    int           `xml:"time,attr"`
-	Failure *JunitFailure `xml:"failure"`
-}
-
-type JunitFailure struct {
-	Message string `xml:"message,attr"`
-	Type    string `xml:"type,attr"`
-}
+const (
+	DEFAULT_POLL_INTERVAL_SECONDS            int = 30
+	MAX_INT                                  int = int(^uint(0) >> 1)
+	DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES int = 5
+	DEFAULT_THROTTLE_TESTS_AT_ONCE           int = 3
+)
 
 func init() {
-	username := "cli"
-	currentUser, err := user.Current()
-	if err == nil {
-		username = currentUser.Username
-	}
-	runsSubmitCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio containing the tests to run")
-	runsSubmitCmd.Flags().StringVar(&reportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
-	runsSubmitCmd.Flags().StringVar(&reportJsonFilename, "reportjson", "", "json file to record the final results in")
-	runsSubmitCmd.Flags().StringVar(&reportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
-	runsSubmitCmd.Flags().StringVarP(&groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
-	runsSubmitCmd.Flags().StringVar(&requestor, "requestor", username, "the requestor id to be associated with the test runs")
-	runsSubmitCmd.Flags().StringVar(&requestType, "requesttype", "CLI", "the type of request, used to allocate a run name")
-	runsSubmitCmd.Flags().StringVar(&throttleFilename, "throttlefile", "", "a file where the current throttle is stored and monitored, used to dynamically change the throttle")
-	pollFlag = runsSubmitCmd.Flags().Int64("poll", 30, "in seconds, how often the cli will poll the ecosystem for the status of the test runs")
-	progressFlag = runsSubmitCmd.Flags().Int("progress", 5, "in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports")
-	throttle = runsSubmitCmd.Flags().Int("throttle", 3, "how many test runs can be submitted in parallel, 0 or less will disable throttling")
-	submitFlagOverrides = runsSubmitCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
-	trace = runsSubmitCmd.Flags().Bool("trace", false, "Trace to be enabled on the test runs")
-	noExitCodeOnTestFailures = runsSubmitCmd.Flags().Bool("noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
+
+	currentUserName := getCurrentUserName()
+
+	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdParams.portfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.reportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.reportJsonFilename, "reportjson", "", "json file to record the final results in")
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.reportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
+	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdParams.groupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.requestor, "requestor", currentUserName, "the requestor id to be associated with the test runs. Defaults to the current user id")
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.requestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
+
+	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.throttleFileName, "throttlefile", "",
+		"a file where the current throttle is stored. Periodically the throttle value is read from the file used. "+
+			"Someone with edit access to the file can change it which dynamically takes effect. "+
+			"Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). "+
+			"And they can be resumed (un-paused) if the value is set back. "+
+			"This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence."+
+			"Optional. If not specified, no throttle file is used.",
+	)
+
+	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.pollIntervalSeconds, "poll", DEFAULT_POLL_INTERVAL_SECONDS,
+		"Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. "+
+			"Defaults to "+strconv.Itoa(DEFAULT_POLL_INTERVAL_SECONDS)+" seconds. "+
+			"If less than 1, then default value is used.")
+
+	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.progressReportIntervalMinutes, "progress", DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES,
+		"in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. "+
+			"Defaults to "+strconv.Itoa(DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES)+" minutes. "+
+			"If less than 1, then default value is used.")
+
+	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.throttle, "throttle", DEFAULT_THROTTLE_TESTS_AT_ONCE,
+		"how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is "+
+			strconv.Itoa(DEFAULT_THROTTLE_TESTS_AT_ONCE))
+
+	runsSubmitCmd.Flags().StringSliceVar(&runsSubmitCmdParams.overrides, "override", make([]string, 0),
+		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+
+			"Each override is of the form 'name=value'. Multiple instances of this flag can be used. "+
+			"For example --override=prop1=val1 --override=prop2=val2")
+
+	// The trace flag defaults to 'false' if you don't use it.
+	// If you say '--trace' on it's own, it defaults to 'true'
+	// If you say --trace=false or --trace=true you can set the value explicitly.
+	runsSubmitCmd.Flags().BoolVar(&runsSubmitCmdParams.trace, "trace", false, "Trace to be enabled on the test runs")
+	runsSubmitCmd.Flags().Lookup("trace").NoOptDefVal = "true"
+
+	runsSubmitCmd.Flags().BoolVar(&(runsSubmitCmdParams.noExitCodeOnTestFailures), "noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
+
+	// The local flag defaults to 'false' if you don't use it.
+	// If you say '--local' on it's own, it defaults to 'true'
+	// If you say --local=false or --local=true you can set the value explicitly.
+	runsSubmitCmd.Flags().BoolVar(&(runsSubmitCmdParams.isLocal), "local", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
+	localFlag := runsSubmitCmd.Flags().Lookup("trace")
+	localFlag.NoOptDefVal = "true"
+	localFlag.Hidden = true // Currently this flag is hidden from user view until it works.
+
 	utils.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
 
 	runsCmd.AddCommand(runsSubmitCmd)
@@ -130,199 +128,214 @@ func init() {
 
 func executeSubmit(cmd *cobra.Command, args []string) {
 
+	var err error
 	utils.CaptureLog(logFileName)
 
-	log.Println("Galasa CLI - Submit tests")
+	// Operations on the file system will all be relative to the current folder.
+	fileSystem := utils.NewOSFileSystem()
 
-	// Set the poll time
-	if *pollFlag < 1 {
-		*pollFlag = 30
-	}
-	poll := time.Second * time.Duration(*pollFlag)
+	if runsSubmitCmdParams.isLocal {
 
-	// Set the progress time
-	if *progressFlag < 0 {
-		*progressFlag = int(^uint(0) >> 1) // set to maximum size of the int
-	} else if *progressFlag == 0 {
-		*progressFlag = 5
-	}
-	progress := time.Minute * time.Duration(*progressFlag)
+		javaHome := os.Getenv("JAVA_HOME")
 
-	// Set the throttle
-	if *throttle <= 0 {
-		*throttle = int(^uint(0) >> 1) // set to maximum size of the int
-	}
+		embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 
-	// Set the throttle file if required
-	if throttleFilename != "" {
-		sThrottle := strconv.Itoa(*throttle)
-		err := ioutil.WriteFile(throttleFilename, []byte(sThrottle), 0644)
+		err = executeSubmitLocal(fileSystem, embeddedFileSystem, runsSubmitCmdParams, javaHome)
+
+	} else {
+		// the submit is targetting an ecosysystem to run the command.
+
+		// An HTTP client which can communicate with the api server in an ecosystem.
+		var apiClient *galasaapi.APIClient
+		apiClient, err = api.InitialiseAPI(bootstrap)
 		if err != nil {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE, throttleFilename, err.Error())
 			panic(err)
 		}
-		log.Printf("Throttle file created at %v\n", throttleFilename)
+
+		timeService := utils.NewRealTimeService()
+
+		err = executeSubmitRemote(fileSystem, runsSubmitCmdParams, apiClient, timeService)
 	}
 
-	apiClient := api.InitialiseAPI(bootstrap)
-
-	//  Dont mix portfolio and test selection on the same command
-
-	if portfolioFilename != "" {
-		if utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO)
-			panic(err)
-		}
-	} else {
-		if !utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS)
-			panic(err)
-		}
-	}
-
-	// Convert overrides to a map
-	runOverrides := make(map[string]string)
-	for _, override := range *submitFlagOverrides {
-		pos := strings.Index(override, "=")
-		if pos < 1 {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
-			panic(err)
-		}
-		key := override[:pos]
-		value := override[pos+1:]
-		if value == "" {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
-			panic(err)
-		}
-		runOverrides[key] = value
-	}
-
-	// Do we need to ask the RAS for the test structure
-	fetchRas := false
-	if reportYamlFilename != "" {
-		fetchRas = true
-	}
-	if reportJsonFilename != "" {
-		fetchRas = true
-	}
-	if reportJunitFilename != "" {
-		fetchRas = true
-	}
-
-	// Load the portfolio of tests
-	var portfolio utils.Portfolio
-	if portfolioFilename != "" {
-		portfolio = utils.LoadPortfolio(portfolioFilename)
-	} else {
-		testSelection := utils.SelectTests(apiClient, &submitSelectionFlags)
-
-		testOverrides := make(map[string]string)
-		portfolio = utils.NewPortfolio()
-		utils.CreatePortfolio(&testSelection, &testOverrides, &portfolio)
-	}
-
-	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
-		// Empty portfolio
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
-		panic(err)
-	}
-
-	// generate a group name if required
-	if groupName == "" {
-		groupName = satori.NewV4().String()
-	}
-
-	log.Printf("Using group name '%v' for test run submission\n", groupName)
-
-	// Just check if it is already in use,  which is perfectly valid for custom group names
-	uuidCheck, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
 	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
-		panic(err)
-	}
-
-	if uuidCheck.Runs != nil && len(uuidCheck.Runs) > 0 {
-		log.Printf("Group name '%v' is aleady in use\n", groupName)
-	}
-
-	// Build list of runs to submit
-
-	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
-
-	for _, portfolioTest := range portfolio.Classes {
-		newTestrun := TestRun{
-			Bundle:    portfolioTest.Bundle,
-			Class:     portfolioTest.Class,
-			Stream:    portfolioTest.Stream,
-			Status:    "queued",
-			Overrides: make(map[string]string, 0),
-		}
-
-		// load the run overrides
-		for key, value := range runOverrides {
-			newTestrun.Overrides[key] = value
-		}
-
-		// load the assemble overrides, they take precedence on the run overrides
-		for key, value := range portfolioTest.Overrides {
-			newTestrun.Overrides[key] = value
-		}
-
-		readyRuns = append(readyRuns, newTestrun)
-
-		log.Printf("Added test %v/%v/%v to the ready queue\n", newTestrun.Stream, newTestrun.Bundle, newTestrun.Class)
-	}
-
-	//
-	//
-	// Main submit loop
-	//
-	//
-
-	submittedRuns := make(map[string]*TestRun)
-	rerunRuns := make(map[string]*TestRun)
-	finishedRuns := make(map[string]*TestRun)
-	lostRuns := make(map[string]*TestRun)
-
-	nextProgressReport := time.Now().Add(progress)
-	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
-		for len(submittedRuns) < *throttle && len(readyRuns) > 0 {
-			readyRuns = submitRun(apiClient, groupName, readyRuns, submittedRuns, lostRuns, &runOverrides)
-		}
-
-		now := time.Now()
-		if now.After(nextProgressReport) {
-			reportProgress(readyRuns, submittedRuns, finishedRuns, lostRuns)
-			nextProgressReport = now.Add(progress)
-		}
-
-		time.Sleep(poll)
-
-		checkThrottleFile()
-
-		runsFetchCurrentStatus(apiClient, groupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
-	}
-
-	runOk := report(finishedRuns, lostRuns)
-
-	if reportYamlFilename != "" {
-		reportYaml(finishedRuns, lostRuns)
-	}
-	if reportJsonFilename != "" {
-		reportJSON(finishedRuns, lostRuns)
-	}
-	if reportJunitFilename != "" {
-		reportJunit(finishedRuns, lostRuns)
-	}
-
-	if !runOk && *noExitCodeOnTestFailures == false {
-		// Not all runs passed
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED)
+		// Panic. If we could pass an error back we would.
+		// The panic is recovered from in the root command, where
+		// the error is logged/displayed before program exit.
 		panic(err)
 	}
 }
 
-func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, lostRuns map[string]*TestRun, runOverrides *map[string]string) []TestRun {
+func executeSubmitRemote(
+	fileSystem utils.FileSystem,
+	params RunsSubmitCmdParameters,
+	apiClient *galasaapi.APIClient,
+	timeService utils.TimeService) error {
+
+	log.Println("Galasa CLI - Submit tests (Remote)")
+
+	var err error = nil
+
+	err = validateAndCorrectParams(&params, apiClient)
+	if err != nil {
+		return err
+	}
+
+	runOverrides, err := buildOverrideMap(params)
+	if err != nil {
+		return err
+	}
+
+	var portfolio *utils.Portfolio
+	portfolio, err = getPortfolio(fileSystem, params.portfolioFileName, apiClient)
+	if err != nil {
+		return err
+	}
+
+	err = validatePortfolio(portfolio)
+	if err != nil {
+		return err
+	}
+
+	// Build list of runs to submit
+	readyRuns := buildListOfRunsToSubmit(portfolio, runOverrides)
+
+	submittedRuns := make(map[string]*runs.TestRun)
+	rerunRuns := make(map[string]*runs.TestRun)
+	finishedRuns := make(map[string]*runs.TestRun)
+	lostRuns := make(map[string]*runs.TestRun)
+
+	progressReportInterval := time.Minute * time.Duration(params.progressReportIntervalMinutes)
+	throttle := params.throttle
+	fetchRas := isRasDetailNeededForReports(params)
+	pollInterval := time.Second * time.Duration(params.pollIntervalSeconds)
+
+	err = writeThrottleFile(fileSystem, params.throttleFileName, throttle)
+	if err != nil {
+		return err
+	}
+
+	//
+	// Main submit loop
+	//
+	nextProgressReport := timeService.Now().Add(progressReportInterval)
+	isThrottleFileLost := false
+	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
+
+		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
+			readyRuns = submitRun(apiClient, params.groupName, readyRuns, submittedRuns,
+				lostRuns, &runOverrides, params.trace, params.requestor, params.requestType)
+		}
+
+		now := timeService.Now()
+		if now.After(nextProgressReport) {
+			runs.InterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
+			nextProgressReport = now.Add(progressReportInterval)
+		}
+
+		timeService.Sleep(pollInterval)
+
+		throttle, isThrottleFileLost = updateThrottleFromFileIfDifferent(fileSystem, params.throttleFileName, throttle, isThrottleFileLost)
+
+		runsFetchCurrentStatus(apiClient, params.groupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
+	}
+
+	// Generate all the reports summarising the end-results.
+	err = createReports(fileSystem, params, finishedRuns, lostRuns)
+	if err == nil {
+
+		// Fail the command if tests failed, and the user wanted us to fail if tests fail.
+		failureCount := runs.CountTotalFailedRuns(finishedRuns, lostRuns)
+		if failureCount > 0 && !params.noExitCodeOnTestFailures {
+			// Not all runs passed
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED, failureCount)
+		}
+	}
+
+	return err
+}
+
+func writeThrottleFile(fileSystem utils.FileSystem, throttleFileName string, throttle int) error {
+	var err error = nil
+	if throttleFileName != "" {
+		// Throttle filename was specified. Lets use a throttle file.
+		err = fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE, throttleFileName, err.Error())
+		}
+	}
+	return err
+}
+
+func updateThrottleFromFileIfDifferent(
+	fileSystem utils.FileSystem,
+	throttleFileName string,
+	currentThrottle int,
+	wasThrottleFileLostAlready bool) (int, bool) {
+
+	var newThrottle int = currentThrottle
+	var isThrottleFileLost bool = wasThrottleFileLostAlready
+
+	// Only bother with anything here if there is a throttle file specified by the user.
+	if throttleFileName != "" {
+
+		savedThrottle, err := readThrottleFile(fileSystem, throttleFileName)
+		if err != nil {
+			if wasThrottleFileLostAlready {
+				// Don't log it, as we logged it when it was first lost.
+			} else {
+				// We just lost it, so log the fact.
+				log.Printf("Error with throttle file %v\n", err)
+			}
+			// Don't report the throttle file as being lost until after it's been found again.
+			isThrottleFileLost = true
+		} else {
+			isThrottleFileLost = false
+			// Only log something if we are changing the throttle value.
+			if savedThrottle != currentThrottle {
+				log.Printf("Changing throttle from %v to %v\n", currentThrottle, newThrottle)
+			}
+			newThrottle = savedThrottle
+		}
+	}
+	return newThrottle, isThrottleFileLost
+}
+
+const (
+	INT_TYPE_VARIANT_PLAIN_INT = 0
+	INT_TYPE_VARIANT_INT8      = 8
+	INT_TYPE_VARIANT_INT16     = 16
+	INT_TYPE_VARIANT_INT32     = 32
+	INT_TYPE_VARIANT_INT64     = 64
+)
+
+func readThrottleFile(fileSystem utils.FileSystem, throttleFileName string) (int, error) {
+	var savedThrottle int = 0
+	var intermediateThrottle int64
+	contents, err := fileSystem.ReadTextFile(throttleFileName)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_READ, throttleFileName, err.Error())
+	} else {
+		intermediateThrottle, err = strconv.ParseInt(contents, 10, INT_TYPE_VARIANT_PLAIN_INT)
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_INVALID, contents, throttleFileName, err.Error())
+			log.Printf("Throttle file %s contains bad integer value %s returning %s\n", throttleFileName, contents, err.Error())
+		} else {
+			savedThrottle = int(intermediateThrottle)
+		}
+	}
+	return savedThrottle, err
+}
+
+func submitRun(
+	apiClient *galasaapi.APIClient,
+	groupName string,
+	readyRuns []runs.TestRun,
+	submittedRuns map[string]*runs.TestRun,
+	lostRuns map[string]*runs.TestRun,
+	runOverrides *map[string]string,
+	trace bool,
+	requestor string,
+	requestType string) []runs.TestRun {
 
 	if len(readyRuns) < 1 {
 		return readyRuns
@@ -345,7 +358,7 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
 	testRunRequest.SetRequestorType(requestType)
 	testRunRequest.SetRequestor(requestor)
 	testRunRequest.SetTestStream(nextRun.Stream)
-	testRunRequest.SetTrace(*trace)
+	testRunRequest.SetTrace(trace)
 	testRunRequest.SetOverrides(submitOverrides)
 
 	resultGroup, _, err := apiClient.RunsAPIApi.PostSubmitTestRuns(nil, groupName).TestRunRequest(*testRunRequest).Execute()
@@ -371,7 +384,15 @@ func submitRun(apiClient *galasaapi.APIClient, groupName string, readyRuns []Tes
 	return readyRuns
 }
 
-func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, readyRuns []TestRun, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun, fetchRas bool) {
+func runsFetchCurrentStatus(
+	apiClient *galasaapi.APIClient,
+	groupName string,
+	readyRuns []runs.TestRun,
+	submittedRuns map[string]*runs.TestRun,
+	finishedRuns map[string]*runs.TestRun,
+	lostRuns map[string]*runs.TestRun,
+	fetchRas bool) {
+
 	currentGroup, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
 	if err != nil {
 		log.Printf("Received error from group request - %v\n", err)
@@ -379,7 +400,7 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
 	}
 
 	// a copy to find lost runs
-	checkRuns := copyTestRuns(submittedRuns)
+	checkRuns := runs.DeepClone(submittedRuns)
 
 	for _, currentRun := range currentGroup.GetRuns() {
 		runName := currentRun.GetName()
@@ -407,11 +428,11 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
 					if err != nil {
 						log.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
 					} else {
-						checkRun.Tests = make([]TestMethod, 0)
+						checkRun.Tests = make([]runs.TestMethod, 0)
 
 						testStructure := rasRun.GetTestStructure()
 						for _, testMethod := range testStructure.GetMethods() {
-							test := TestMethod{
+							test := runs.TestMethod{
 								Method: testMethod.GetMethodName(),
 								Result: testMethod.GetResult(),
 							}
@@ -441,317 +462,200 @@ func runsFetchCurrentStatus(apiClient *galasaapi.APIClient, groupName string, re
 
 }
 
-func checkThrottleFile() {
-	if throttleFilename == "" {
-		return
+func createReports(fileSystem utils.FileSystem, params RunsSubmitCmdParameters,
+	finishedRuns map[string]*runs.TestRun, lostRuns map[string]*runs.TestRun) error {
+
+	runs.FinalHumanReadableReport(finishedRuns, lostRuns)
+
+	var err error = nil
+
+	if params.reportYamlFilename != "" {
+		err = runs.ReportYaml(fileSystem, params.reportYamlFilename, finishedRuns, lostRuns)
 	}
 
-	bNewThrottle, err := ioutil.ReadFile(throttleFilename)
-	if err != nil {
-		if !lostThrottleFile {
-			lostThrottleFile = true
-			log.Printf("Error with throttle file %v\n", err)
+	if err == nil {
+		if params.reportJsonFilename != "" {
+			err = runs.ReportJSON(fileSystem, params.reportJsonFilename, finishedRuns, lostRuns)
 		}
-		return
 	}
 
-	lostThrottleFile = false
-
-	sNewThrottle := string(bNewThrottle)
-	newThrottle, err := strconv.Atoi(sNewThrottle)
-	if err != nil {
-		log.Printf("Invalid throttle value '%v'\n", sNewThrottle)
-		return
+	if err == nil {
+		if params.reportJunitFilename != "" {
+			err = runs.ReportJunit(fileSystem, params.reportJunitFilename, params.groupName, finishedRuns, lostRuns)
+		}
 	}
 
-	if newThrottle != *throttle {
-		throttle = &newThrottle
-		log.Printf("New throttle set to %v\n", *throttle)
-	}
+	return err
 }
 
-func report(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) bool {
+func isRasDetailNeededForReports(params RunsSubmitCmdParameters) bool {
 
-	resultCounts := make(map[string]int, 0)
-
-	resultCounts["Passed"] = 0
-	resultCounts["Failed"] = 0
-	resultCounts["Passed With Defects"] = 0
-	resultCounts["Failed With Defects"] = 0
-
-	for _, run := range finishedRuns {
-		c, ok := resultCounts[run.Result]
-		if !ok {
-			resultCounts[run.Result] = 1
-		} else {
-			resultCounts[run.Result] = c + 1
-		}
+	// Do we need to ask the RAS for the test structure
+	isRasDetailNeeded := false
+	if params.reportYamlFilename != "" {
+		isRasDetailNeeded = true
+	}
+	if params.reportJsonFilename != "" {
+		isRasDetailNeeded = true
+	}
+	if params.reportJunitFilename != "" {
+		isRasDetailNeeded = true
 	}
 
-	resultCounts["Lost"] = len(lostRuns)
-
-	totalFailed := len(lostRuns)
-
-	log.Println("***")
-	log.Println("*** Final report")
-	log.Println("*** ---------------")
-	log.Println("***")
-	log.Println("*** Passed test runs:-")
-	found := false
-	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Passed") && !strings.HasPrefix(run.Result, "Passed With Defects") {
-			log.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
-			found = true
-		}
-	}
-	if !found {
-		log.Println("***     None")
-	}
-
-	log.Println("***")
-	log.Println("*** Failed test runs:-")
-	found = false
-	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Failed") && !strings.HasPrefix(run.Result, "Failed With Defects") {
-			log.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
-			found = true
-			totalFailed = totalFailed + 1
-		}
-	}
-	if !found {
-		log.Println("***     None")
-	}
-
-	log.Println("***")
-	log.Println("*** Passed With Defects test runs:-")
-	found = false
-	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Passed With Defects") {
-			log.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
-			found = true
-		}
-	}
-	if !found {
-		log.Println("***     None")
-	}
-
-	log.Println("***")
-	log.Println("*** Failed With Defects test runs:-")
-	found = false
-	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Failed With Defects") {
-			log.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
-			found = true
-			totalFailed = totalFailed + 1
-		}
-	}
-	if !found {
-		log.Println("***     None")
-	}
-
-	log.Println("***")
-	log.Println("*** Other test runs:-")
-	found = false
-	for runName, run := range finishedRuns {
-		if !strings.HasPrefix(run.Result, "Passed") && !strings.HasPrefix(run.Result, "Failed") {
-			log.Printf("***     Run %v(%v) - %v/%v/%v\n", runName, run.Result, run.Stream, run.Bundle, run.Class)
-			found = true
-			totalFailed = totalFailed + 1
-		}
-	}
-	if !found {
-		log.Println("***     None")
-	}
-	log.Println("***")
-	log.Print("*** results")
-	resultsSoFar := "*** results "
-	for result, count := range resultCounts {
-		resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", result, count)
-	}
-	log.Println(resultsSoFar)
-
-	if totalFailed > 0 {
-		return false
-	}
-
-	return true
+	return isRasDetailNeeded
 }
 
-func reportProgress(readyRuns []TestRun, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
-	ready := len(readyRuns)
-	submitted := len(submittedRuns)
-	finished := len(finishedRuns)
-	lost := len(lostRuns)
+func buildListOfRunsToSubmit(portfolio *utils.Portfolio, runOverrides map[string]string) []runs.TestRun {
+	readyRuns := make([]runs.TestRun, 0, len(portfolio.Classes))
 
-	resultCounts := make(map[string]int, 0)
+	for _, portfolioTest := range portfolio.Classes {
+		newTestrun := runs.TestRun{
+			Bundle:    portfolioTest.Bundle,
+			Class:     portfolioTest.Class,
+			Stream:    portfolioTest.Stream,
+			Status:    "queued",
+			Overrides: make(map[string]string, 0),
+		}
 
-	for _, run := range finishedRuns {
-		c, ok := resultCounts[run.Result]
-		if !ok {
-			resultCounts[run.Result] = 1
-		} else {
-			resultCounts[run.Result] = c + 1
+		// load the run overrides
+		for key, value := range runOverrides {
+			newTestrun.Overrides[key] = value
+		}
+
+		// load the assemble overrides, they take precedence on the run overrides
+		for key, value := range portfolioTest.Overrides {
+			newTestrun.Overrides[key] = value
+		}
+
+		readyRuns = append(readyRuns, newTestrun)
+
+		log.Printf("Added test %v/%v/%v to the ready queue\n", newTestrun.Stream, newTestrun.Bundle, newTestrun.Class)
+	}
+
+	return readyRuns
+}
+
+func validateAndCorrectParams(params *RunsSubmitCmdParameters, apiClient *galasaapi.APIClient) error {
+
+	var err error = nil
+
+	// Guard against the poll time being less than 1 second
+	if params.pollIntervalSeconds < 1 {
+		log.Printf("poll value is invalid. Less than 1. Defaulting value to %v seconds.\n", DEFAULT_POLL_INTERVAL_SECONDS)
+		params.pollIntervalSeconds = DEFAULT_POLL_INTERVAL_SECONDS
+	}
+
+	// Set the progress time
+	if params.progressReportIntervalMinutes < 0 {
+		params.progressReportIntervalMinutes = MAX_INT
+	} else if params.progressReportIntervalMinutes == 0 {
+		params.progressReportIntervalMinutes = 5
+	}
+
+	// Set the throttle
+	if params.throttle <= 0 {
+		params.throttle = MAX_INT // set to maximum size of the int
+	}
+
+	//  Dont mix portfolio and test selection on the same command
+	if params.portfolioFileName != "" {
+		if utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO)
+		}
+	} else {
+		if !utils.AreSelectionFlagsProvided(&submitSelectionFlags) {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS)
 		}
 	}
 
-	log.Println("***")
-	log.Println("*** Progress report")
-	log.Println("*** ---------------")
-	for runName, run := range submittedRuns {
-		log.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
-	}
-	log.Println("*** ----------------------------------------------------------------------------")
-	log.Printf("*** run status, ready=%v, submitted=%v, finished=%v, lost=%v\n", ready, submitted, finished, lost)
-	log.Printf("*** throttle=%v\n", *throttle)
-	if len(resultCounts) > 0 {
-		resultsSoFar := "*** results so far"
-		for result, count := range resultCounts {
-			resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", result, count)
+	if err == nil {
+		// generate a group name if required
+		if params.groupName == "" {
+			params.groupName = randomGenerator.NewV4().String()
 		}
-		log.Println(resultsSoFar)
+		log.Printf("Using group name '%v' for test run submission\n", params.groupName)
+
+		_, err = checkIfGroupAlreadyInUse(*apiClient, params.groupName)
 	}
-	log.Println("***")
+
+	return err
 }
 
-func copyTestRuns(original map[string]*TestRun) map[string]*TestRun {
-	new := make(map[string]*TestRun)
-	for k, v := range original {
-		new[k] = v
-	}
+func buildOverrideMap(params RunsSubmitCmdParameters) (map[string]string, error) {
+	var err error = nil
 
-	return new
-}
-
-func reportYaml(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
-
-	var testReport TestReport
-	testReport.Tests = make([]TestRun, 0)
-
-	for _, run := range finishedRuns {
-		testReport.Tests = append(testReport.Tests, *run)
-	}
-
-	for _, run := range lostRuns {
-		testReport.Tests = append(testReport.Tests, *run)
-	}
-
-	file, err := os.Create(reportYamlFilename)
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML, reportYamlFilename, err)
-		panic(err)
-	}
-	defer func() {
-		file.Close()
-	}()
-
-	w := bufio.NewWriter(file)
-	defer func() {
-		w.Flush()
-	}()
-
-	encoder := yaml.NewEncoder(w)
-	defer func() {
-		encoder.Close()
-	}()
-
-	encoder.SetIndent(2)
-
-	err = encoder.Encode(&testReport)
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_YAML_ENCODE, reportYamlFilename, err.Error())
-		panic(err)
-	}
-
-	log.Printf("Yaml test report written to %v\n", reportYamlFilename)
-}
-
-func reportJSON(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
-
-	var testReport TestReport
-	testReport.Tests = make([]TestRun, 0)
-
-	for _, run := range finishedRuns {
-		testReport.Tests = append(testReport.Tests, *run)
-	}
-
-	for _, run := range lostRuns {
-		testReport.Tests = append(testReport.Tests, *run)
-	}
-
-	data, err := json.MarshalIndent(&testReport, "", " ")
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL, reportJsonFilename, err.Error())
-		panic(err)
-	}
-
-	err = ioutil.WriteFile(reportJsonFilename, data, 0644)
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_WRITE_FAIL, reportJsonFilename, err.Error())
-		panic(err)
-	}
-
-	log.Printf("Json test report written to %v\n", reportJsonFilename)
-}
-
-func reportJunit(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
-
-	var testSuites JunitTestSuites
-	testSuites.ID = groupName
-	testSuites.Name = "Galasa test run"
-	testSuites.Tests = 0
-	testSuites.Failures = 0
-	testSuites.Time = 0
-	testSuites.Testsuite = make([]JunitTestSuite, 0)
-
-	for _, run := range finishedRuns {
-		var testSuite JunitTestSuite
-
-		testSuite.ID = run.Name
-		testSuite.Name = run.Stream + "/" + run.Bundle + "/" + run.Class
-		testSuite.TestCase = make([]JunitTestCase, 0)
-
-		for _, method := range run.Tests {
-			var testCase JunitTestCase
-			testCase.ID = method.Method
-			testCase.Name = method.Method
-
-			testSuites.Tests = testSuites.Tests + 1
-			testSuite.Tests = testSuite.Tests + 1
-			if !strings.HasPrefix(method.Result, "Passed") {
-				testSuites.Failures = testSuites.Failures + 1
-				testSuite.Failures = testSuite.Failures + 1
-
-				var failure JunitFailure
-				failure.Message = "Failure messages are unavailable at this time"
-				failure.Type = "Unknown"
-
-				testCase.Failure = &failure
-			}
-
-			testSuite.TestCase = append(testSuite.TestCase, testCase)
+	// Convert overrides to a map
+	runOverrides := make(map[string]string)
+	for _, override := range params.overrides {
+		pos := strings.Index(override, "=")
+		if pos < 1 {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
+			return nil, err
 		}
-
-		testSuites.Testsuite = append(testSuites.Testsuite, testSuite)
+		key := override[:pos]
+		value := override[pos+1:]
+		if value == "" {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
+			return nil, err
+		}
+		runOverrides[key] = value
 	}
+	return runOverrides, nil
+}
 
-	for range lostRuns {
-		testSuites.Tests = testSuites.Tests + 1
-		testSuites.Failures = testSuites.Failures + 1
+func getPortfolio(fileSystem utils.FileSystem, portfolioFileName string, apiClient *galasaapi.APIClient) (*utils.Portfolio, error) {
+	// Load the portfolio of tests
+	var portfolio *utils.Portfolio
+	var err error = nil
+
+	if portfolioFileName != "" {
+		portfolio, err = utils.LoadPortfolio(fileSystem, portfolioFileName)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// There is no portfolio file, so create an in-memory portfolio
+		// from the tests we can find from the test selection.
+		testSelection := utils.SelectTests(apiClient, &submitSelectionFlags)
+
+		testOverrides := make(map[string]string)
+		portfolio = utils.NewPortfolio()
+		utils.CreatePortfolio(&testSelection, &testOverrides, portfolio)
 	}
+	return portfolio, nil
+}
 
-	data, err := xml.MarshalIndent(&testSuites, "", "    ")
+func getCurrentUserName() string {
+	userName := "cli"
+	currentUser, err := user.Current()
+	if err == nil {
+		userName = currentUser.Username
+	}
+	return userName
+}
+
+func validatePortfolio(portfolio *utils.Portfolio) error {
+	var err error = nil
+	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
+		// Empty portfolio
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
+	}
+	return err
+}
+
+func checkIfGroupAlreadyInUse(apiClient galasaapi.APIClient, groupName string) (bool, error) {
+	isInUse := false
+	var err error = nil
+	// Just check if it is already in use,  which is perfectly valid for custom group names
+	uuidCheck, _, err := apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
 	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_PREPARE, reportJunitFilename, err.Error())
-		panic(err)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
+	} else {
+
+		if uuidCheck.Runs != nil && len(uuidCheck.Runs) > 0 {
+			log.Printf("Group name '%v' is aleady in use\n", groupName)
+			isInUse = true
+		}
 	}
-
-	prologue := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + string(data))
-
-	err = ioutil.WriteFile(reportJunitFilename, prologue, 0644)
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JUNIT_WRITE_FAIL, reportJunitFilename, err.Error())
-		panic(err)
-	}
-
-	log.Printf("Junit XML test report written to %v\n", reportJunitFilename)
+	return isInUse, err
 }

@@ -45,7 +45,7 @@ task installJarsIntoTemplates(type: Copy) {
     // We want to embed some files into the executable.
     // Copy the files into the go templates folder.
     from layout.buildDirectory.file("dependencies/galasa-boot-"+galasaBootJarVersion+".jar")
-    into layout.buildDirectory.dir("../pkg/cmd/templates/lib")
+    into layout.buildDirectory.dir("../pkg/embedded/templates/galasahome/lib")
     dependsOn downloadDependencies
 }
 

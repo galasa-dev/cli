@@ -7,4 +7,16 @@
  * in the user manual at https://docs.gradle.org/6.9.2/userguide/multi_project_builds.html
  */
 
+pluginManagement {
+    repositories {
+        maven {
+            url = "$sourceMaven"
+        }
+        maven {
+            url "$centralMaven"
+        }
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'cli'

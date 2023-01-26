@@ -4,10 +4,6 @@
 package utils
 
 import (
-	"bufio"
-	"io/ioutil"
-	"os"
-
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
@@ -31,7 +27,7 @@ type PortfolioClass struct {
 	Overrides map[string]string `yaml:"overrides"`
 }
 
-func NewPortfolio() Portfolio {
+func NewPortfolio() *Portfolio {
 	portfolio := Portfolio{
 		APIVersion: "v1alpha",
 		Kind:       "galasa.dev/testPortfolio",
@@ -40,14 +36,16 @@ func NewPortfolio() Portfolio {
 
 	portfolio.Classes = make([]PortfolioClass, 0)
 
-	return portfolio
+	return &portfolio
 }
 
-// Inside the portfolio file, it must carry a format field with this value inside.
-const PORTOLIO_DECLARED_FORMAT_VERSION = "v1alpha"
+const (
+	// Inside the portfolio file, it must carry a format field with this value inside.
+	PORTOLIO_DECLARED_FORMAT_VERSION = "v1alpha"
 
-// Inside the portfolio file, it should claim to be a resource of this kind.
-const PORTFOLIO_DECLARED_RESOURCE_KIND = "galasa.dev/testPortfolio"
+	// Inside the portfolio file, it should claim to be a resource of this kind.
+	PORTFOLIO_DECLARED_RESOURCE_KIND = "galasa.dev/testPortfolio"
+)
 
 func CreatePortfolio(testSelection *TestSelection, testOverrides *map[string]string, portfolio *Portfolio) {
 
@@ -62,53 +60,40 @@ func CreatePortfolio(testSelection *TestSelection, testOverrides *map[string]str
 	}
 }
 
-func WritePortfolio(portfolio Portfolio, filename string) {
-
-	file, err := os.Create(filename)
-	if err != nil {
-		panic(err)
+func WritePortfolio(fileSystem FileSystem, filename string, portfolio *Portfolio) error {
+	bytes, err := yaml.Marshal(&portfolio)
+	if err == nil {
+		err = fileSystem.WriteBinaryFile(filename, bytes)
 	}
-
-	w := bufio.NewWriter(file)
-
-	encoder := yaml.NewEncoder(w)
-	encoder.SetIndent(2)
-
-	err = encoder.Encode(&portfolio)
-	if err != nil {
-		panic(err)
-	}
-	w.Flush()
-	encoder.Close()
-	file.Close()
+	return err
 }
 
-func LoadPortfolio(filename string) Portfolio {
+func LoadPortfolio(fileSystem FileSystem, filename string) (*Portfolio, error) {
 
 	var portfolio Portfolio
 
-	b, err := ioutil.ReadFile(filename)
+	text, err := fileSystem.ReadTextFile(filename)
 	if err != nil {
 		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_OPEN_PORTFOLIO_FILE_FAILED, filename, err.Error())
-		panic(err)
+		return nil, err
 	}
 
-	err = yaml.Unmarshal(b, &portfolio)
+	err = yaml.Unmarshal([]byte(text), &portfolio)
 	if err != nil {
 		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_FORMAT, filename, err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	// Check the portfolio file claims to be the correct format version.
 	if portfolio.APIVersion != PORTOLIO_DECLARED_FORMAT_VERSION {
 		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_FORMAT_VERSION, filename, PORTOLIO_DECLARED_FORMAT_VERSION)
-		panic(err)
+		return nil, err
 	}
 
 	if portfolio.Kind != PORTFOLIO_DECLARED_RESOURCE_KIND {
 		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_RESOURCE_KIND, filename, PORTFOLIO_DECLARED_RESOURCE_KIND)
-		panic(err)
+		return nil, err
 	}
 
-	return portfolio
+	return &portfolio, nil
 }

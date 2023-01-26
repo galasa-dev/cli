@@ -131,10 +131,10 @@ success "OK"
 
 #--------------------------------------------------------------------------
 # Download the dependencies we define in gradle into a local folder
-h2 "Downloading dependencies"
-gradle installJarsIntoTemplates --warning-mode all
-rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
-success "OK"
+# h2 "Downloading dependencies"
+# gradle installJarsIntoTemplates --warning-mode all
+# rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
+# success "OK"
 
 #--------------------------------------------------------------------------
 # Invoke the generator
@@ -212,6 +212,10 @@ galasactl_command="galasactl-${os}-${architecture}"
 info "galasactl command is ${galasactl_command}"
 
 #--------------------------------------------------------------------------
+# Build a portfolio
+# ${BASEDIR}/bin/${galasactl_command} runs prepare --portfolio my.portfolio --bootstrap file:~/.galasa/bootstrap.properties
+
+#--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
 PACKAGE_NAME="dev.galasa.example.banking"
 ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr 
@@ -247,7 +251,7 @@ function run_test {
     TEST_OBR_VERSION=$5
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
-    export BOOT_JAR_PATH=${BASEDIR}/pkg/cmd/templates/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
+    export BOOT_JAR_PATH=${BASEDIR}/pkg/embedded/templates/galasahome/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
 
     export OBR_VERSION="0.26.0"
 
@@ -318,6 +322,8 @@ success "OK"
 
 # Return to the top folder so we can do other things.
 cd ${BASEDIR}
+
+
 
 #--------------------------------------------------------------------------
 # Build the documentation

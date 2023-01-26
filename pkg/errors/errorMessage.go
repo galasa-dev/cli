@@ -33,7 +33,7 @@ type GalasaError struct {
 	message string
 }
 
-func (err *GalasaError) getMessageType() *MessageType {
+func (err *GalasaError) GetMessageType() *MessageType {
 	return err.msgType
 }
 
@@ -43,8 +43,7 @@ func (err *GalasaError) getMessageType() *MessageType {
 func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	template := msgType.Template
 	message := fmt.Sprintf(template, params...) // how to do this with variadic variable ?
-	var galasaError *GalasaError
-	galasaError = new(GalasaError)
+	var galasaError *GalasaError = new(GalasaError)
 	galasaError.msgType = msgType
 	galasaError.message = message
 
@@ -77,7 +76,7 @@ var (
 	GALASA_ERROR_SUBMIT_REPORT_JUNIT_PREPARE    = NewMessageType("GAL1014E: Failed to prepare test report for writing to the junit results file %s. Reason is %s", 1014)
 	GALASA_ERROR_SUBMIT_REPORT_JUNIT_WRITE_FAIL = NewMessageType("GAL1015E: Failed to  write test report junit results file %s. Reason is %s", 1015)
 	GALASA_ERROR_EMPTY_PORTFOLIO                = NewMessageType("GAL1016E: There are no tests in the test porfolio %s", 1016)
-	GALASA_ERROR_TESTS_FAILED                   = NewMessageType("GAL1017E: Not all runs passed %s", 1017)
+	GALASA_ERROR_TESTS_FAILED                   = NewMessageType("GAL1017E: Not all runs passed. %v failed.", 1017)
 	GALASA_ERROR_NO_TESTS_SELECTED              = NewMessageType("GAL1018E: No tests were selected.", 1018)
 	GALASA_ERROR_PREPARE_INVALID_OVERRIDE       = NewMessageType("GAL1019E: Invalid override '%v'", 1019)
 	GALASA_ERROR_OPEN_LOG_FILE_FAILED           = NewMessageType("GAL1020E: Failed to open log file '%s' for writing. Reason is %s", 1020)
@@ -106,4 +105,13 @@ var (
 	GALASA_ERROR_FAILED_TO_READ_FILE            = NewMessageType("GAL1043E: Failed to open file '%s' for reading. Reason is '%s'. Check that you have permissions to read the file and try again.", 1043)
 	GALASA_ERROR_INVALID_PKG_RESERVED_WORD      = NewMessageType("GAL1044E: Invalid Java package name. Package name '%s' contains the reserved java keyword '%s'.", 1044)
 	GALASA_ERROR_INVALID_FEATURE_NAME           = NewMessageType("GAL1045E: Invalid feature name. Feature name '%s' cannot be used as a java package name. '%s'", 1045)
+	GALASA_ERROR_FAILED_TO_FIND_USER_HOME       = NewMessageType("GAL1046E: Failed to determine the home folder of this user. '%s'", 1046)
+	GALASA_ERROR_CREATE_REPORT_YAML_EXISTS      = NewMessageType("GAL1047E: Cannot create the yaml report in file '%s' as that file already exists.", 1047)
+	GALASA_ERROR_THROTTLE_FILE_READ             = NewMessageType("GAL1048E: Failed to read from 'throttle' file '%v'. Reason is '%s'", 1048)
+	GALASA_ERROR_THROTTLE_FILE_INVALID          = NewMessageType("GAL1049E: Invalid value '%v' read from 'throttle' file '%v'. Reason is '%s'", 1049)
+	GALASA_ERROR_JAVA_HOME_NOT_SET              = NewMessageType("GAL1050E: JAVA_HOME environment variable is not set. It must be for when --local flag is used.", 1050)
+	GALASA_ERROR_JAVA_HOME_BIN_PRESENCE_FAIL    = NewMessageType("GAL1051E: Failed to determine if folder '%s' exists. Reason is '%s'", 1051)
+	GALASA_ERROR_JAVA_HOME_BIN_MISSING          = NewMessageType("GAL1052E: Folder '%s' is missing. JAVA_HOME environment variable should refer to a folder which contains a 'bin' folder.", 1052)
+	GALASA_ERROR_JAVA_PROGRAM_PRESENCE_FAIL     = NewMessageType("GAL1053E: Failed to determine if '%s' exists. Reason is '%s'", 1053)
+	GALASA_ERROR_JAVA_PROGRAM_MISSING           = NewMessageType("GAL1054E: Program '%s' should exist. JAVA_HOME has been set incorrectly.", 1054)
 )
