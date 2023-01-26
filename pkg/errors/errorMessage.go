@@ -33,7 +33,7 @@ type GalasaError struct {
 	message string
 }
 
-func (err *GalasaError) getMessageType() *MessageType {
+func (err *GalasaError) GetMessageType() *MessageType {
 	return err.msgType
 }
 
@@ -43,8 +43,7 @@ func (err *GalasaError) getMessageType() *MessageType {
 func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	template := msgType.Template
 	message := fmt.Sprintf(template, params...) // how to do this with variadic variable ?
-	var galasaError *GalasaError
-	galasaError = new(GalasaError)
+	var galasaError *GalasaError = new(GalasaError)
 	galasaError.msgType = msgType
 	galasaError.message = message
 
@@ -77,7 +76,7 @@ var (
 	GALASA_ERROR_SUBMIT_REPORT_JUNIT_PREPARE    = NewMessageType("GAL1014E: Failed to prepare test report for writing to the junit results file %s. Reason is %s", 1014)
 	GALASA_ERROR_SUBMIT_REPORT_JUNIT_WRITE_FAIL = NewMessageType("GAL1015E: Failed to  write test report junit results file %s. Reason is %s", 1015)
 	GALASA_ERROR_EMPTY_PORTFOLIO                = NewMessageType("GAL1016E: There are no tests in the test porfolio %s", 1016)
-	GALASA_ERROR_TESTS_FAILED                   = NewMessageType("GAL1017E: Not all runs passed %s", 1017)
+	GALASA_ERROR_TESTS_FAILED                   = NewMessageType("GAL1017E: Not all runs passed. %v failed.", 1017)
 	GALASA_ERROR_NO_TESTS_SELECTED              = NewMessageType("GAL1018E: No tests were selected.", 1018)
 	GALASA_ERROR_PREPARE_INVALID_OVERRIDE       = NewMessageType("GAL1019E: Invalid override '%v'", 1019)
 	GALASA_ERROR_OPEN_LOG_FILE_FAILED           = NewMessageType("GAL1020E: Failed to open log file '%s' for writing. Reason is %s", 1020)
