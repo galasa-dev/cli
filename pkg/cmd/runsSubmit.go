@@ -21,6 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -135,7 +136,30 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 	utils.CaptureLog(logFileName)
 
-	log.Println("Galasa CLI - Submit tests")
+	if *isLocal {
+		executeSubmitLocal()
+	} else {
+		executeSubmitRemote()
+	}
+}
+
+func executeSubmitLocal() {
+	log.Println("Galasa CLI - Submit tests (Local)")
+
+	// Operations on the file system will all be relative to the current folder.
+	fileSystem := utils.NewOSFileSystem()
+
+	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+
+	// Initialise the ~/.galasa folder with default content if it's not already been initialised.
+	err := utils.InitialiseGalasaHomeFolder(fileSystem, embeddedFileSystem)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func executeSubmitRemote() {
+	log.Println("Galasa CLI - Submit tests (Remote)")
 
 	// Set the poll time
 	if *pollFlag < 1 {

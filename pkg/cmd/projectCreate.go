@@ -7,14 +7,11 @@ import (
 	"log"
 	"strings"
 
+	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
-)
-
-const (
-	GALASA_VERSION = "0.26.0"
 )
 
 // CommonPomParameters holds common substitution parameters a pom.xml file
@@ -108,6 +105,8 @@ func createProject(
 
 	var err error
 
+	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+
 	fileGenerator := utils.NewFileGenerator(fileSystem, embeddedFileSystem)
 
 	// Separate out the feature names from a string into a slice of strings.
@@ -171,7 +170,7 @@ func createParentFolderPom(fileGenerator *utils.FileGenerator, packageName strin
 
 	templateParameters := ParentPomParameters{
 		Coordinates:      MavenCoordinates{ArtifactId: packageName, GroupId: packageName, Name: packageName},
-		GalasaVersion:    GALASA_VERSION,
+		GalasaVersion:    embedded.GetGalasaVersion(),
 		IsOBRRequired:    isOBRRequired,
 		ObrName:          packageName + ".obr",
 		ChildModuleNames: make([]string, len(featureNames))}
@@ -186,7 +185,7 @@ func createParentFolderPom(fileGenerator *utils.FileGenerator, packageName strin
 		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/pom.xml",
 		TemplateParameters:       templateParameters}
 
-	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err
 }
 
@@ -293,7 +292,7 @@ func createTestResourceFolder(
 			EmbeddedTemplateFilePath: templateBundlePath,
 			TemplateParameters:       nil}
 
-		err = fileGenerator.CreateFile(targetFile, forceOverwrite)
+		err = fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	}
 	return err
 }
@@ -319,7 +318,7 @@ func createJavaSourceFile(fileGenerator *utils.FileGenerator, targetSrcFolderPat
 		EmbeddedTemplateFilePath: templateBundlePath,
 		TemplateParameters:       templateParameters}
 
-	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err
 }
 
@@ -343,7 +342,7 @@ func createTestFolderPom(fileGenerator *utils.FileGenerator, targetTestFolderPat
 		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/pom.xml",
 		TemplateParameters:       pomTemplateParameters}
 
-	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err
 }
 
@@ -373,6 +372,6 @@ func createOBRFolderPom(fileGenerator *utils.FileGenerator, targetOBRFolderPath 
 		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/pom.xml",
 		TemplateParameters:       pomTemplateParameters}
 
-	err := fileGenerator.CreateFile(targetFile, forceOverwrite)
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err
 }
