@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -216,6 +217,7 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 
 	text, err := mockFileSystem.ReadTextFile("my.test.pkg/pom.xml")
 	assert.Nil(t, err)
+	assert.True(t, strings.HasPrefix(text, "<?xml"), "pom template is expanding as HTML by accident!")
 	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "parent pom.xml didn't substitute the group id")
 	assert.Contains(t, text, "<artifactId>my.test.pkg</artifactId>", "parent pom.xml didn't substitute the artifact id")
 

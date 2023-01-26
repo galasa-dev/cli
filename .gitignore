@@ -19,4 +19,5 @@ run.sh
 .dependencies
 # Ignore Gradle build output directory
 build
-pkg/cmd/templates/lib/
+pkg/embedded/templates/lib/
+**/*.jar
