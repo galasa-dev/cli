@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -28,6 +29,7 @@ func CountTotalFailedRuns(finishedRuns map[string]*TestRun, lostRuns map[string]
 func FinalHumanReadableReport(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
 	report := FinalHumanReadableReportAsString(finishedRuns, lostRuns)
 	log.Print(report)
+	fmt.Fprint(os.Stdout, report)
 }
 
 func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) string {

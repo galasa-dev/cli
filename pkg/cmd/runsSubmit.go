@@ -82,7 +82,9 @@ func init() {
 			"Someone with edit access to the file can change it which dynamically takes effect. "+
 			"Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). "+
 			"And they can be resumed (un-paused) if the value is set back. "+
-			"This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.")
+			"This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence."+
+			"Optional. If not specified, no throttle file is used.",
+	)
 
 	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.pollIntervalSeconds, "poll", DEFAULT_POLL_INTERVAL_SECONDS,
 		"Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. "+
@@ -245,7 +247,7 @@ func executeSubmitRemote(
 		failureCount := runs.CountTotalFailedRuns(finishedRuns, lostRuns)
 		if failureCount > 0 && !params.noExitCodeOnTestFailures {
 			// Not all runs passed
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED, failureCount)
 		}
 	}
 
@@ -253,9 +255,13 @@ func executeSubmitRemote(
 }
 
 func writeThrottleFile(fileSystem utils.FileSystem, throttleFileName string, throttle int) error {
-	err := fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE, throttleFileName, err.Error())
+	var err error = nil
+	if throttleFileName != "" {
+		// Throttle filename was specified. Lets use a throttle file.
+		err = fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE, throttleFileName, err.Error())
+		}
 	}
 	return err
 }
@@ -267,25 +273,29 @@ func updateThrottleFromFileIfDifferent(
 	wasThrottleFileLostAlready bool) (int, bool) {
 
 	var newThrottle int = currentThrottle
-	var isThrottleFileLost bool = false
+	var isThrottleFileLost bool = wasThrottleFileLostAlready
 
-	savedThrottle, err := readThrottleFile(fileSystem, throttleFileName)
-	if err != nil {
-		if wasThrottleFileLostAlready {
-			// Don't log it, as we logged it when it was first lost.
+	// Only bother with anything here if there is a throttle file specified by the user.
+	if throttleFileName != "" {
+
+		savedThrottle, err := readThrottleFile(fileSystem, throttleFileName)
+		if err != nil {
+			if wasThrottleFileLostAlready {
+				// Don't log it, as we logged it when it was first lost.
+			} else {
+				// We just lost it, so log the fact.
+				log.Printf("Error with throttle file %v\n", err)
+			}
+			// Don't report the throttle file as being lost until after it's been found again.
+			isThrottleFileLost = true
 		} else {
-			// We just lost it, so log the fact.
-			log.Printf("Error with throttle file %v\n", err)
+			isThrottleFileLost = false
+			// Only log something if we are changing the throttle value.
+			if savedThrottle != currentThrottle {
+				log.Printf("Changing throttle from %v to %v\n", currentThrottle, newThrottle)
+			}
+			newThrottle = savedThrottle
 		}
-		// Don't report the throttle file as being lost until after it's been found again.
-		isThrottleFileLost = true
-	} else {
-		isThrottleFileLost = false
-		// Only log something if we are changing the throttle value.
-		if savedThrottle != currentThrottle {
-			log.Printf("Changing throttle from %v to %v\n", currentThrottle, newThrottle)
-		}
-		newThrottle = savedThrottle
 	}
 	return newThrottle, isThrottleFileLost
 }
@@ -452,7 +462,9 @@ func runsFetchCurrentStatus(
 
 }
 
-func createReports(fileSystem utils.FileSystem, params RunsSubmitCmdParameters, finishedRuns map[string]*runs.TestRun, lostRuns map[string]*runs.TestRun) error {
+func createReports(fileSystem utils.FileSystem, params RunsSubmitCmdParameters,
+	finishedRuns map[string]*runs.TestRun, lostRuns map[string]*runs.TestRun) error {
+
 	runs.FinalHumanReadableReport(finishedRuns, lostRuns)
 
 	var err error = nil
@@ -602,7 +614,7 @@ func getPortfolio(fileSystem utils.FileSystem, portfolioFileName string, apiClie
 			return nil, err
 		}
 	} else {
-		// There is no portfolio file, so create an in-memory portfolio 
+		// There is no portfolio file, so create an in-memory portfolio
 		// from the tests we can find from the test selection.
 		testSelection := utils.SelectTests(apiClient, &submitSelectionFlags)
 
