@@ -56,11 +56,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>dev.galasa</groupId>
-			<artifactId>dev.galasa.framework</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa</artifactId>
 			<scope>provided</scope>
 		</dependency>
