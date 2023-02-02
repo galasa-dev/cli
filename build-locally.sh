@@ -58,10 +58,6 @@ function usage {
 Options are:
 -c | --clean : Do a clean build. One of the --clean or --delta flags are mandatory.
 -d | --delta : Do a delta build. One of the --clean or --delta flags are mandatory.
-
-Environment variables used:
-OPENAPI_GENERATOR_CLI_JAR - Optional. The full path to the openapi generator jar.
-    By default, the tool will be downloaded if it's not already found in the 'tools' folder.
 EOF
 }
 
@@ -124,39 +120,46 @@ success "OK"
 
 #--------------------------------------------------------------------------
 # Create a temporary folder which is never checked in.
-h2 "Making sure the tools folder is present."
-mkdir -p dependencies
-rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to ensure the tools folder is present. rc=${rc}" ; exit 1 ; fi
-success "OK"
+function download_dependencies {
+    h2 "Making sure the tools folder is present."
+    mkdir -p dependencies --info
+    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to ensure the tools folder is present. rc=${rc}" ; exit 1 ; fi
+    success "OK"
 
-#--------------------------------------------------------------------------
-# Download the dependencies we define in gradle into a local folder
-# h2 "Downloading dependencies"
-# gradle installJarsIntoTemplates --warning-mode all
-# rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
-# success "OK"
+    #--------------------------------------------------------------------------
+    # Download the dependencies we define in gradle into a local folder
+    h2 "Downloading dependencies"
+    gradle installJarsIntoTemplates --warning-mode all
+    rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
+    success "OK"
+}
+
 
 #--------------------------------------------------------------------------
 # Invoke the generator
-h2 "Generate the openapi client go code..."
-mkdir -p build
-./genapi.sh 2>&1 > build/generate-log.txt
-rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate the code from the yaml file. rc=${rc}" ; exit 1 ; fi
-rm -f build/generate-log.txt
-success "Code generation OK"
+function generate_rest_client {
+    h2 "Generate the openapi client go code..."
+    
+    # Pick up and use the openapi generator we just downloaded.
+    # We don't know which version it is (dictated by the gradle build), but as there
+    # is only one we can just pick the filename up..
+    # Should end up being something like: ${BASEDIR}/build/dependencies/openapi-generator-cli-6.2.0.jar
+    export OPENAPI_GENERATOR_CLI_JAR=$(ls ${BASEDIR}/build/dependencies/openapi-generator-cli*)
+    
+    mkdir -p build
+    ./genapi.sh 2>&1 > build/generate-log.txt
+    rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate the code from the yaml file. rc=${rc}" ; exit 1 ; fi
+    rm -f build/generate-log.txt
+    success "Code generation OK"
 
-#--------------------------------------------------------------------------
-# Invoke the generator again with different parameters
-h2 "Generate the openapi client go code... part II"
-./generate.sh 2>&1 > build/generate-log.txt
-rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate II the code from the yaml file. rc=${rc}" ; exit 1 ; fi
-rm -f build/generate-log.txt
-success "Code generation part II - OK"
-
-#--------------------------------------------------------------------------
-# Invoke unit tests
-# - These are executed within the Makefile currently. 
-#   No need to expose it here as we call the makefile shortly.
+    #--------------------------------------------------------------------------
+    # Invoke the generator again with different parameters
+    h2 "Generate the openapi client go code... part II"
+    ./generate.sh 2>&1 > build/generate-log.txt
+    rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate II the code from the yaml file. rc=${rc}" ; exit 1 ; fi
+    rm -f build/generate-log.txt
+    success "Code generation part II - OK"
+}
 
 
 #--------------------------------------------------------------------------
@@ -164,17 +167,20 @@ success "Code generation part II - OK"
 # Build the executables
 #
 #--------------------------------------------------------------------------
-if [[ "${build_type}" == "clean" ]]; then
-    h2 "Cleaning the binaries out..."
-    make clean
-    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
-    success "Binaries cleaned up - OK"
-fi
+function build_executables {
+    if [[ "${build_type}" == "clean" ]]; then
+        h2 "Cleaning the binaries out..."
+        make clean
+        rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
+        success "Binaries cleaned up - OK"
+    fi
 
-h2 "Building new binaries..."
-make all
-rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
-success "New binaries built - OK"
+    h2 "Building new binaries..."
+    make all
+    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
+    success "New binaries built - OK"
+}
+
 
 
 #--------------------------------------------------------------------------
@@ -184,65 +190,78 @@ success "New binaries built - OK"
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
-h2 "Invoke the tool to create a sample project."
-rm -fr ${BASEDIR}/temp
-mkdir -p ${BASEDIR}/temp
-cd ${BASEDIR}/temp
+function calculate_galasactl_executable {
+    h2 "Calculate the name of the galasactl executable for this machine/os"
 
-raw_os=$(uname -s) # eg: "Darwin"
-os=""
-case $raw_os in
-    Darwin*) 
-        os="darwin" 
-        ;;
-    Windows*)
-        os="windows"
-        ;;
-    Linux*)
-        os="linux"
-        ;;
-    *) 
-        error "Failed to recognise which operating system is in use. $raw_os"
-        exit 1
-esac
+    rm -fr ${BASEDIR}/temp
+    mkdir -p ${BASEDIR}/temp
+    cd ${BASEDIR}/temp
 
-architecture=$(uname -m)
+    raw_os=$(uname -s) # eg: "Darwin"
+    os=""
+    case $raw_os in
+        Darwin*) 
+            os="darwin" 
+            ;;
+        Windows*)
+            os="windows"
+            ;;
+        Linux*)
+            os="linux"
+            ;;
+        *) 
+            error "Failed to recognise which operating system is in use. $raw_os"
+            exit 1
+    esac
 
-galasactl_command="galasactl-${os}-${architecture}"
-info "galasactl command is ${galasactl_command}"
+    architecture=$(uname -m)
 
-#--------------------------------------------------------------------------
-# Build a portfolio
-# ${BASEDIR}/bin/${galasactl_command} runs prepare --portfolio my.portfolio --bootstrap file:~/.galasa/bootstrap.properties
+    export galasactl_command="galasactl-${os}-${architecture}"
+    info "galasactl command is ${galasactl_command}"
+    success "OK"
+}
+
 
 #--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
-PACKAGE_NAME="dev.galasa.example.banking"
-${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr 
-rc=$?
-if [[ "${rc}" != "0" ]]; then
-    error " Failed to create the galasa test project using galasactl command. rc=${rc}"
-    exit 1
-fi
-success "OK"
+function generate_sample_code {
+    h2 "Invoke the tool to create a sample project."
+
+    cd $BASEDIR/temp
+
+    export PACKAGE_NAME="dev.galasa.example.banking"
+    ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr 
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then
+        error " Failed to create the galasa test project using galasactl command. rc=${rc}"
+        exit 1
+    fi
+    success "OK"
+}
+
 
 #--------------------------------------------------------------------------
 # Now build the source it created.
-h2 "Building the sample project we just generated."
-cd ${PACKAGE_NAME}
-mvn clean test install 
-rc=$?
-if [[ "${rc}" != "0" ]]; then
-    error " Failed to build the generated source code which galasactl created."
-    exit 1
-fi
-success "OK"
+function build_generated_source {
+    h2 "Building the sample project we just generated."
+    cd ${BASEDIR}/temp/${PACKAGE_NAME}
+    mvn clean test install 
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then
+        error " Failed to build the generated source code which galasactl created."
+        exit 1
+    fi
+    success "OK"
+}
+
+
 
 #--------------------------------------------------------------------------
 # Execute the tests in Galasa
-h2 "Executing the tests we just built..."
 
-function run_test {
+function run_test_java_minus_jar_method {
+
+    cd $BASEDIR/temp
 
     TEST_BUNDLE=$1
     TEST_JAVA_CLASS=$2
@@ -264,7 +283,7 @@ function run_test {
 
 
 
-    echo "Running the following command..."
+    info "Running the following command..."
     cat << EOF 
 
     java -jar ${BOOT_JAR_PATH} \\
@@ -290,79 +309,191 @@ EOF
     cat jvm-log.txt | grep "Passed - Test class ${TEST_JAVA_CLASS}"
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
-        echo "Failed to run the test"
+        error "Failed to run the test"
         exit 1
     fi
-    echo "Test ran OK"
+    success "Test ran OK"
 }
 
-TEST_BUNDLE=dev.galasa.example.banking.payee
-TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
-TEST_OBR_GROUP_ID=dev.galasa.example.banking
-TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
-TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
-run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+function run_tests_java_minus_jar_method {
+    h2 "Executing the tests we just built..."
 
-TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayeeExtended
-run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+    cd $BASEDIR/temp
 
+    # Run the Payee tests
+    TEST_BUNDLE=dev.galasa.example.banking.payee
+    TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
+    TEST_OBR_GROUP_ID=dev.galasa.example.banking
+    TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
+    TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
-TEST_BUNDLE=dev.galasa.example.banking.account
-TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccount
-TEST_OBR_GROUP_ID=dev.galasa.example.banking
-TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
-TEST_OBR_VERSION=0.0.1-SNAPSHOT
-run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
 
-TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccountExtended
-run_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+    TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayeeExtended
+    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
 
-success "OK"
+    # Run the Account tests
+    TEST_BUNDLE=dev.galasa.example.banking.account
+    TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccount
+    TEST_OBR_GROUP_ID=dev.galasa.example.banking
+    TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
+    TEST_OBR_VERSION=0.0.1-SNAPSHOT
+    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
 
-# Return to the top folder so we can do other things.
-cd ${BASEDIR}
+    TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccountExtended
+    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION   
+ 
+    success "OK"
+}
 
 
 
 #--------------------------------------------------------------------------
+# Build a portfolio
+function build_portfolio {
+    h2 "Building a portfolio file"
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${galasactl_command} runs prepare \
+    --portfolio my.portfolio \
+    --bootstrap file:~/.galasa/bootstrap.properties \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to build a portfolio file"
+        exit 1
+    fi
+    success "Built portfolio OK"
+}
+
+
+#--------------------------------------------------------------------------
+# Initialise Galasa home
+function galasa_home_init {
+    h2 "Initialising galasa home directory"
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${galasactl_command} local init \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to initialise galasa home"
+        exit 1
+    fi
+    success "Galasa home initialised"
+}
+
+
+
+
+#--------------------------------------------------------------------------
+function launch_test_on_ecosystem {
+    h2 "Launching test on an ecosystem..."
+
+    if [[ "${GALASA_BOOTSTRAP}" == "" ]]; then 
+        error "GALASA_BOOTSTRAP environment variable is not set. It should refer to a remote ecosystem"
+        exit 1
+    fi
+
+    # hostname=$(echo -n "${GALASA_BOOTSTRAP}" | sed -e "s/http:\/\///g" | sed -e "s/https:\/\///g" | sed -e "s/.bootstrap//g")
+    # info "Host name for boostrap is ${hostname}"
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${galasactl_command} runs submit \
+    --bootstrap $GALASA_BOOTSTRAP \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '2' because the ecosystem doesn't know about this testcase.
+    if [[ "${rc}" != "2" ]]; then 
+        error "Failed to submit a test to a remote ecosystem, and get Unknown back."
+        exit 1
+    fi
+    success "Submitting test to ecosystem worked OK"
+}
+
+
+
+#--------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+# Return to the top folder so we can do other things.
+cd ${BASEDIR}
+
+#--------------------------------------------------------------------------
 # Build the documentation
-generated_docs_folder=${BASEDIR}/docs/generated
-h2 "Generating documentation"
-info "Documentation will be placed in ${generated_docs_folder}"
-mkdir -p ${generated_docs_folder}
+function generate_galasactl_documentation {
+    generated_docs_folder=${BASEDIR}/docs/generated
+    h2 "Generating documentation"
+    info "Documentation will be placed in ${generated_docs_folder}"
+    mkdir -p ${generated_docs_folder}
 
-# Figure out which type of machine this script is currently running on.
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux)      machine=linux;;
-    Darwin)     machine=darwin;;
-    *)          error "Unknown machine type ${unameOut}"
-                exit 1
-esac
-architecture="$(uname -m)"
+    # Figure out which type of machine this script is currently running on.
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        Linux)      machine=linux;;
+        Darwin)     machine=darwin;;
+        *)          error "Unknown machine type ${unameOut}"
+                    exit 1
+    esac
+    architecture="$(uname -m)"
 
-# Call the documentation generator, which builds .md files
-info "Using program ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} to generate the documentation..."
-${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} ${generated_docs_folder}
-rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to generate documentation. rc=${rc}" ; exit 1 ; fi
+    # Call the documentation generator, which builds .md files
+    info "Using program ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} to generate the documentation..."
+    ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} ${generated_docs_folder}
+    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to generate documentation. rc=${rc}" ; exit 1 ; fi
 
-# The files have a line "###### Auto generated by cobra at 17/12/2022"
-# As we are (currently) checking-in these .md files, we don't want them to show as 
-# changed in git (which compares the content, not timestamps).
-# So lets remove these lines from all the .md files.
-info "Removing lines with date/time in, to limit delta changes in git..."
-mkdir -p ${BASEDIR}/build
-temp_file="${BASEDIR}/build/temp.md"
-for FILE in ${generated_docs_folder}/*; do 
-    mv -f ${FILE} ${temp_file}
-    cat ${temp_file} | grep -v "###### Auto generated by" > ${FILE}
-    rm ${temp_file}
-    success "Processed file ${FILE}"
-done
-success "Documentation generated - OK"
+    # The files have a line "###### Auto generated by cobra at 17/12/2022"
+    # As we are (currently) checking-in these .md files, we don't want them to show as 
+    # changed in git (which compares the content, not timestamps).
+    # So lets remove these lines from all the .md files.
+    info "Removing lines with date/time in, to limit delta changes in git..."
+    mkdir -p ${BASEDIR}/build
+    temp_file="${BASEDIR}/build/temp.md"
+    for FILE in ${generated_docs_folder}/*; do 
+        mv -f ${FILE} ${temp_file}
+        cat ${temp_file} | grep -v "###### Auto generated by" > ${FILE}
+        rm ${temp_file}
+        success "Processed file ${FILE}"
+    done
+    success "Documentation generated - OK"
+}
+
+
+
+download_dependencies
+generate_rest_client
+build_executables
+calculate_galasactl_executable
+galasa_home_init
+
+generate_sample_code
+build_generated_source
+run_tests_java_minus_jar_method
+# build_portfolio
+generate_galasactl_documentation
+launch_test_on_ecosystem
+
 
 #--------------------------------------------------------------------------
 h2 "Use the results.."
 info "Binary executable programs are found in the 'bin' folder."
-ls bin | grep -v "gendocs"
+ls ${BASEDIR}/bin | grep -v "gendocs"
