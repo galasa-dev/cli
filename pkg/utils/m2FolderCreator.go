@@ -5,9 +5,9 @@ package utils
 
 import (
 	"embed"
+	"log"
+	"strings"
 )
-
-//  galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 
 func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS) error {
 
@@ -44,6 +44,12 @@ func createSettingsXMLFile(fileGenerator *FileGenerator, m2Dir string) error {
 	}
 
 	err := fileGenerator.CreateFile(xmlFile, false, false)
-
+	settingsExists, _ := fileGenerator.fileSystem.Exists(targetPath)
+	if settingsExists {
+		content, _ := fileGenerator.fileSystem.ReadTextFile(targetPath)
+		if !(strings.Contains(content, "https://development.galasa.dev/main/maven-repo/obr")) && !(strings.Contains(content, "https://repo.maven.apache.org/maven2")) {
+			log.Printf("~/.m2/settings.xml should contain a Galasa repository, official release at this URL: https://repo.maven.apache.org/maven2, and bleeding edge version of Galasa here: https://development.galasa.dev/main/maven-repo/obr")
+		}
+	}
 	return err
 }
