@@ -14,13 +14,17 @@
              <repositories>
                  <repository>
                      <id>galasa.repo</id>
-                     <url>https://development.galasa.dev/main/maven-repo/obr</url>
+                     <url>https://repo.maven.apache.org/maven2/</url>
+                     <!-- To use the bleeding edge version of galasa, use the development obr
+                     <url>https://development.galasa.dev/main/maven-repo/obr</url> -->
                  </repository>
              </repositories>
              <pluginRepositories>
                  <pluginRepository>
                      <id>galasa.repo</id>
-                     <url>https://development.galasa.dev/main/maven-repo/obr</url>
+                     <url>https://repo.maven.apache.org/maven2/</url>
+                     <!-- To use the bleeding edge version of galasa, use the development obr
+                     <url>https://development.galasa.dev/main/maven-repo/obr</url> -->
                  </pluginRepository>
              </pluginRepositories>
          </profile>
