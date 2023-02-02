@@ -17,7 +17,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1014E: Failed to prepare test report for writing to the junit results file {}. Reason is {}
 - GAL1015E: Failed to  write test report junit results file {}. Reason is {}
 - GAL1016E: There are no tests in the test porfolio {}
-- GAL1017E: Not all runs passed {}
+- GAL1017E: Not all runs passed. {} failed.
 - GAL1018E: No tests were selected.
 - GAL1019E: Invalid override '{}'
 - GAL1020E: Failed to open log file '{}' for writing. Reason is {}
