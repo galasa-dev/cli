@@ -55,3 +55,4 @@ The `galasactl` tool can generate the following errors:
 - GAL1052E: Folder '{}' is missing. JAVA_HOME environment variable should refer to a folder which contains a 'bin' folder.
 - GAL1053E: Failed to determine if '{}' exists. Reason is '{}'
 - GAL1054E: Program '{}' should exist. JAVA_HOME has been set incorrectly.
+- GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'bleeding edge' repository is '{}'
