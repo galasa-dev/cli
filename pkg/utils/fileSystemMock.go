@@ -4,6 +4,8 @@
 package utils
 
 import (
+	"bytes"
+	"log"
 	"os"
 )
 
@@ -19,15 +21,19 @@ type MockFileSystem struct {
 	// Where the in-memory data is kept.
 	data map[string]*Node
 
+	// Collects warnings messages
+	warningMessageBuffer *bytes.Buffer
+
 	// The mock struct contains methods which can be over-ridden on a per-test basis.
 	// The New
-	VirtualFunction_MkdirAll        func(targetFolderPath string) error
-	VirtualFunction_WriteTextFile   func(targetFilePath string, desiredContents string) error
-	VirtualFunction_ReadTextFile    func(filePath string) (string, error)
-	VirtualFunction_Exists          func(path string) (bool, error)
-	VirtualFunction_DirExists       func(path string) (bool, error)
-	VirtualFunction_GetUserHomeDir  func() (string, error)
-	VirtualFunction_WriteBinaryFile func(targetFilePath string, desiredContents []byte) error
+	VirtualFunction_MkdirAll             func(targetFolderPath string) error
+	VirtualFunction_WriteTextFile        func(targetFilePath string, desiredContents string) error
+	VirtualFunction_ReadTextFile         func(filePath string) (string, error)
+	VirtualFunction_Exists               func(path string) (bool, error)
+	VirtualFunction_DirExists            func(path string) (bool, error)
+	VirtualFunction_GetUserHomeDir       func() (string, error)
+	VirtualFunction_WriteBinaryFile      func(targetFilePath string, desiredContents []byte) error
+	VirtualFunction_OutputWarningMessage func(string) error
 }
 
 // NewMockFileSystem creates an implementation of the thin file system layer which delegates
@@ -46,6 +52,8 @@ func NewOverridableMockFileSystem() MockFileSystem {
 	// Allocate the structure
 	mockFileSystem := MockFileSystem{
 		data: make(map[string]*Node)}
+
+	mockFileSystem.warningMessageBuffer = &bytes.Buffer{}
 
 	// Set up functions inside the structure to call the basic/default mock versions...
 	// These can later be over-ridden on a test-by-test basis.
@@ -69,6 +77,9 @@ func NewOverridableMockFileSystem() MockFileSystem {
 	}
 	mockFileSystem.VirtualFunction_WriteBinaryFile = func(path string, content []byte) error {
 		return mockFSWriteBinaryFile(mockFileSystem, path, content)
+	}
+	mockFileSystem.VirtualFunction_OutputWarningMessage = func(message string) error {
+		return mockFSOutputWarningMessage(mockFileSystem, message)
 	}
 
 	return mockFileSystem
@@ -110,6 +121,10 @@ func (fs MockFileSystem) DirExists(path string) (bool, error) {
 
 func (fs MockFileSystem) GetUserHomeDir() (string, error) {
 	return fs.VirtualFunction_GetUserHomeDir()
+}
+
+func (fs MockFileSystem) OutputWarningMessage(message string) error {
+	return fs.VirtualFunction_OutputWarningMessage(message)
 }
 
 //------------------------------------------------------------------------------------
@@ -170,4 +185,20 @@ func mockFSDirExists(fs MockFileSystem, path string) (bool, error) {
 
 func mockFSGetUserHomeDir() (string, error) {
 	return "/User/Home/testuser", nil
+}
+
+func mockFSOutputWarningMessage(fs MockFileSystem, message string) error {
+	log.Printf("Mock warning message collected: %s", message)
+	fs.warningMessageBuffer.WriteString(message)
+	return nil
+}
+
+//------------------------------------------------------------------------------------
+// Extra methods on the mock to allow unit tests to get data out of the mock object.
+//------------------------------------------------------------------------------------
+
+func (fs MockFileSystem) GetAllWarningMessages() string {
+	messages := fs.warningMessageBuffer.String()
+	log.Printf("Mock reading back previously collected warnings messages: %s", messages)
+	return messages
 }
