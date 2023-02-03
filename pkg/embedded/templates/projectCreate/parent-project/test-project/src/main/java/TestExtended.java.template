@@ -9,6 +9,7 @@
 package {{.Package}};
 
 import static org.assertj.core.api.Assertions.*;
+import org.apache.commons.logging.Log;
 
 import dev.galasa.artifact.*;
 import dev.galasa.core.manager.*;
@@ -19,6 +20,10 @@ import dev.galasa.Test;
  */
 @Test
 public class {{.ClassName}} {
+
+	//obtain a reference to the logger
+	@Logger
+	public Log logger;
 
 	// Allows us to access resources packaged within this bundle.
 	@BundleResources
@@ -33,9 +38,11 @@ public class {{.ClassName}} {
 	 */
 	@Test
 	public void simpleSampleTest() {
+		assertThat(logger).isNotNull();
 		assertThat(resources).isNotNull();
 		assertThat(runName).isNotNull();
 		assertThat(runName.trim()).isNotEqualTo("");
+		logger.info("All injected resources are available");
 	}
 
 	@Test
@@ -45,6 +52,7 @@ public class {{.ClassName}} {
 		String resourcePathInBundle = "/textfiles/sampleText.txt";
 
         String textContent = resources.retrieveFileAsString(resourcePathInBundle);
+		logger.info("Retrieved text file content from bundle");
 
         assertThat(textContent.trim()).isEqualTo("This content is read from a bundle resource file.");
     }
