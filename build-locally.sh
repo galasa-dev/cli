@@ -222,9 +222,6 @@ function calculate_galasactl_executable {
 }
 
 
-#--------------------------------------------------------------------------
-# Build a portfolio
-# ${BASEDIR}/bin/${galasactl_command} runs prepare --portfolio my.portfolio --bootstrap file:~/.galasa/bootstrap.properties
 
 #--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
@@ -351,6 +348,12 @@ function run_tests_java_minus_jar_method {
     success "OK"
 }
 
+    # Run the Payee tests
+    TEST_BUNDLE=dev.galasa.example.banking.payee
+    TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
+    TEST_OBR_GROUP_ID=dev.galasa.example.banking
+    TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
+    TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
 #--------------------------------------------------------------------------
@@ -443,6 +446,95 @@ function launch_test_on_ecosystem {
 cd ${BASEDIR}
 
 
+
+#--------------------------------------------------------------------------
+# Build a portfolio
+function build_portfolio {
+    h2 "Building a portfolio file"
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${galasactl_command} runs prepare \
+    --portfolio my.portfolio \
+    --bootstrap file:~/.galasa/bootstrap.properties \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to build a portfolio file"
+        exit 1
+    fi
+    success "Built portfolio OK"
+}
+
+
+#--------------------------------------------------------------------------
+# Initialise Galasa home
+function galasa_home_init {
+    h2 "Initialising galasa home directory"
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${galasactl_command} local init \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to initialise galasa home"
+        exit 1
+    fi
+    success "Galasa home initialised"
+}
+
+
+
+
+#--------------------------------------------------------------------------
+function launch_test_on_ecosystem {
+    h2 "Launching test on an ecosystem..."
+
+    if [[ "${GALASA_BOOTSTRAP}" == "" ]]; then 
+        error "GALASA_BOOTSTRAP environment variable is not set. It should refer to a remote ecosystem"
+        exit 1
+    fi
+
+    # hostname=$(echo -n "${GALASA_BOOTSTRAP}" | sed -e "s/http:\/\///g" | sed -e "s/https:\/\///g" | sed -e "s/.bootstrap//g")
+    # info "Host name for boostrap is ${hostname}"
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${galasactl_command} runs submit \
+    --bootstrap $GALASA_BOOTSTRAP \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '2' because the ecosystem doesn't know about this testcase.
+    if [[ "${rc}" != "2" ]]; then 
+        error "Failed to submit a test to a remote ecosystem, and get Unknown back."
+        exit 1
+    fi
+    success "Submitting test to ecosystem worked OK"
+}
+
+
+
+#--------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+# Return to the top folder so we can do other things.
+cd ${BASEDIR}
 
 #--------------------------------------------------------------------------
 # Build the documentation
