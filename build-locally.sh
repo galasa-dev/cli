@@ -223,6 +223,10 @@ function calculate_galasactl_executable {
 
 
 #--------------------------------------------------------------------------
+# Build a portfolio
+# ${BASEDIR}/bin/${galasactl_command} runs prepare --portfolio my.portfolio --bootstrap file:~/.galasa/bootstrap.properties
+
+#--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
 function generate_sample_code {
     h2 "Invoke the tool to create a sample project."
@@ -437,6 +441,8 @@ function launch_test_on_ecosystem {
 #--------------------------------------------------------------------------
 # Return to the top folder so we can do other things.
 cd ${BASEDIR}
+
+
 
 #--------------------------------------------------------------------------
 # Build the documentation
