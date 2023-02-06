@@ -9,10 +9,7 @@
 //   which is generated from a yaml definition file.
 //   So we need to get hold of a generator tool so we can 
 //
-
 def galasaBootJarVersion = '0.24.0'
-
-
 repositories {
     gradlePluginPortal()
     mavenCentral()
@@ -20,26 +17,21 @@ repositories {
         url "https://development.galasa.dev/main/maven-repo/obr/"
     }
 }
-
 apply plugin: 'java'
-
 dependencies {
     // We need the galasa-boot jar so we can launch tests in a local JVM
     compileClasspath group: 'dev.galasa', name: 'galasa-boot', version: galasaBootJarVersion
-
     // We need the openapi generator to turn a yaml file into go client stubs, 
     // so we can call the api server REST services
-    // https://mvnrepository.com/artifact/org.openapitools/openapi-generator
-    compileClasspath group: 'org.openapitools', name: 'openapi-generator', version: '6.2.1'
+    // https://mvnrepository.com/artifact/org.openapitools/openapi-generator-cli
+    compileClasspath group: 'org.openapitools', name: 'openapi-generator-cli', version: '6.0.1'
 }
-
 task downloadDependencies(type: Copy) {
     // Download the dependencies onto the local disk.
     from configurations.compileClasspath
     into 'build/dependencies'
     dependsOn configurations.compileClasspath
 }
-
 //tasks.register('installJarsIntoTemplates', Copy) {
 task installJarsIntoTemplates(type: Copy) {
     // We want to embed some files into the executable.
@@ -48,7 +40,6 @@ task installJarsIntoTemplates(type: Copy) {
     into layout.buildDirectory.dir("../pkg/embedded/templates/galasahome/lib")
     dependsOn downloadDependencies
 }
-
 description = 'Galasa CLI'
 
 
