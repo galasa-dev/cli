@@ -1,34 +1,119 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package cmd
+package launcher
 
-// import (
-// "errors"
-// "os"
-// "testing"
+import (
+	// 	"os"
+	"testing"
 
-// "github.com/galasa.dev/cli/pkg/embedded"
-// "github.com/galasa.dev/cli/pkg/utils"
-// "github.com/stretchr/testify/assert"
-// )
+	"github.com/galasa.dev/cli/pkg/embedded"
+	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/stretchr/testify/assert"
+	// 	"errors"
+	// 	"github.com/galasa.dev/cli/pkg/embedded"
+	// "github.com/galasa.dev/cli/pkg/utils"
+	// "github.com/stretchr/testify/assert"
+)
 
-func newLocalRunsSubmitCmdParameters() *RunsSubmitCmdParameters {
-	params := RunsSubmitCmdParameters{
-		pollIntervalSeconds:           1,
-		noExitCodeOnTestFailures:      true,
-		progressReportIntervalMinutes: 1,
-		throttle:                      1,
-		trace:                         false,
-		reportYamlFilename:            "a.yaml",
-		reportJsonFilename:            "a.json",
-		reportJunitFilename:           "a.junit.xml",
-		groupName:                     "babe",
-		portfolioFileName:             "small.portfolio",
-		isLocal:                       true,
-	}
-	return &params
+func TestDoNothing(t *testing.T) {
+	assert.True(t, true, "It's true")
 }
+
+func TestCanCreateAJVMLauncher(t *testing.T) {
+
+	env := utils.NewMockEnv()
+	env.EnvVars["JAVA_HOME"] = "/java"
+
+	fileSystem := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+
+	jvmLaunchParams := getBasicJvmLaunchParams()
+
+	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams)
+	if err != nil {
+		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
+	}
+	assert.NotNil(t, launcher, "Launcher reference was nil, shouldn't have been.")
+}
+
+func getBasicJvmLaunchParams() RunsSubmitLocalCmdParameters {
+	return RunsSubmitLocalCmdParameters{
+		Obrs:                nil,
+		RemoteMaven:         "",
+		TargetGalasaVersion: "",
+	}
+}
+
+func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
+
+	env := utils.NewMockEnv()
+	// env.EnvVars["JAVA_HOME"] = "/java"
+
+	fileSystem := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+
+	jvmLaunchParams := getBasicJvmLaunchParams()
+
+	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams)
+	if err == nil {
+		assert.Fail(t, "Constructor should have failed but it did not.")
+	}
+	assert.Nil(t, launcher, "Launcher reference was not nil")
+	assert.Contains(t, err.Error(), "GAL1050E")
+}
+
+// func TestJvmGetsLaunchedWithCorrectSyntax(t *testing.T) {
+
+// 	// Given...
+// 	mockFileSystem := utils.NewOSFileSystem()
+
+// 	var testObrs []MavenCoordinates = []MavenCoordinates{
+// 		{
+// 			GroupId:    "dev.galasa.example.banking",
+// 			ArtifactId: "dev.galasa.example.banking.obr",
+// 			Version:    "0.0.1-SNAPSHOT",
+// 		},
+// 	}
+
+// 	var testLocation TestLocation = TestLocation{
+// 		OSGiBundleName: "dev.galasa.example.banking.payee",
+// 		Class: JavaClassDef{
+// 			PackageName: "dev.galasa.example.banking.payee",
+// 			ClassName:   "TestPayee",
+// 		},
+// 	}
+
+// 	javaHome := os.Getenv("JAVA_HOME")
+
+// 	// remoteMaven := "https://repo.maven.apache.org/maven2"
+// 	remoteMaven := "https://development.galasa.dev/main/maven-repo/obr/"
+
+// 	// When
+// 	err := executeTestInJVM(mockFileSystem, javaHome, testObrs, testLocation, remoteMaven)
+
+// 	// Then
+// 	if err != nil {
+// 		assert.Fail(t, "Expecting no errors but there was one."+err.Error())
+// 	}
+// }
+
+// func newLocalRunsSubmitCmdParameters() *utils.RunsSubmitCmdParameters {
+// 	params := utils.RunsSubmitCmdParameters{
+// 		PollIntervalSeconds:           1,
+// 		NoExitCodeOnTestFailures:      true,
+// 		ProgressReportIntervalMinutes: 1,
+// 		Throttle:                      1,
+// 		Trace:                         false,
+// 		ReportYamlFilename:            "a.yaml",
+// 		ReportJsonFilename:            "a.json",
+// 		ReportJunitFilename:           "a.junit.xml",
+// 		GroupName:                     "babe",
+// 		PortfolioFileName:             "small.portfolio",
+// 		IsLocal:                       true,
+// 	}
+// 	return &params
+// }
 
 // func TestLocalRunFailsIfJavaHomeNotSet(t *testing.T) {
 

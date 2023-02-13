@@ -21,3 +21,4 @@ run.sh
 build
 pkg/embedded/templates/lib/
 **/*.jar
+

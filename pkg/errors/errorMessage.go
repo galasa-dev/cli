@@ -114,6 +114,7 @@ var (
 	GALASA_ERROR_JAVA_HOME_BIN_MISSING          = NewMessageType("GAL1052E: Folder '%s' is missing. JAVA_HOME environment variable should refer to a folder which contains a 'bin' folder.", 1052)
 	GALASA_ERROR_JAVA_PROGRAM_PRESENCE_FAIL     = NewMessageType("GAL1053E: Failed to determine if '%s' exists. Reason is '%s'", 1053)
 	GALASA_ERROR_JAVA_PROGRAM_MISSING           = NewMessageType("GAL1054E: Program '%s' should exist. JAVA_HOME has been set incorrectly.", 1054)
+	GALASA_ERROR_FAILED_TO_READ_BOOTSTRAP_FILE  = NewMessageType("GAL1055E: Failed to read bootstrap file '%s'. Rason is '%s'", 1055)
 
-	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'bleeding edge' repository is '%s'", 1055)
+	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'bleeding edge' repository is '%s'", 2000)
 )

@@ -172,6 +172,23 @@ galasactl runs submit --log -
           --override zos.default.cluster=PLEX2
 ```
 
+## Runs submit local
+
+This command sequence causes the specified tests to be executed within the local JVM server.
+
+### Example : Run a single test in the local JVM.
+```
+galasactl runs submit local --log -
+          --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr
+          --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount
+```
+
+- The --log - parameter indicates that debugging information should be sent to the console.
+- The --obr indicates where the tool can find an OBR which refers to the bundle where all the tests are housed.
+- The --class parameter tells the tool which test class to run. The string is in the format of `<osgi-bundle-id>/<fully-qualified-java-class>`. All the test methods within the class will be run.
+- The `JAVA_HOME` environment variable should be set to refer to the JVM to use in which the test will be launched.
+
+
 
 ## Reference Material
 

@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"runtime"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/spf13/cobra"
@@ -29,6 +30,8 @@ func Execute() {
 	// Catch execution if a panic happens.
 	defer func() {
 		err := recover()
+
+		// Display the error and exit.
 		finalWord(err)
 	}()
 
@@ -37,25 +40,40 @@ func Execute() {
 	finalWord(err)
 }
 
+func logStackTrace() {
+	// Log what the stack is.
+	var stack [4096]byte
+	// Only want the stack trace from the recovered execution thread, not all go routines running.
+	isWantAllStackTraces := false
+	n := runtime.Stack(stack[:], isWantAllStackTraces)
+	log.Printf("%s\n", stack[:n])
+}
+
 func finalWord(obj interface{}) {
-	text, exitCode := extractErrorDetails(obj)
+	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
 	log.Println(text)
 	if exitCode != 0 {
 		fmt.Fprintln(os.Stderr, text)
+	}
+
+	if isStackTraceWanted {
+		logStackTrace()
 	}
 
 	log.Printf("Exit code is %v", exitCode)
 	os.Exit(exitCode)
 }
 
-func extractErrorDetails(obj interface{}) (string, int) {
+func extractErrorDetails(obj interface{}) (string, int, bool) {
 	exitCode := 0
 	errorText := ""
+	var isStackTraceWanted bool = false
 
 	if obj == nil {
 		errorText = "OK"
 	} else {
 		exitCode = 1
+		isStackTraceWanted = true
 
 		// If it's a pointer to a galasa error.
 		galasaErrorPtr, isGalasaError := obj.(*galasaErrors.GalasaError)
@@ -65,6 +83,8 @@ func extractErrorDetails(obj interface{}) (string, int) {
 				// The failure was because some tests failed, rather than the tool or infrastructure failed.
 				exitCode = 2
 			}
+			// Don't log a stack trace for Galasa errors. We know where they come from.
+			isStackTraceWanted = false
 		}
 
 		err, isErrorType := obj.(error)
@@ -81,7 +101,7 @@ func extractErrorDetails(obj interface{}) (string, int) {
 		}
 	}
 
-	return errorText, exitCode
+	return errorText, exitCode, isStackTraceWanted
 }
 
 func IsInstanceOf(objectPtr interface{}, typePtr interface{}) bool {

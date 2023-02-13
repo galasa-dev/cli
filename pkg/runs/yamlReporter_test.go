@@ -24,7 +24,7 @@ func TestYamlReportWorks(t *testing.T) {
 		Status:    "myStatus",
 		Result:    "PASSED",
 		Overrides: make(map[string]string, 1),
-		Tests:     []TestMethod{TestMethod{Method: "method1", Result: "passed"}, TestMethod{Method: "method2", Result: "passed"}}}
+		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
 
 	finishedRunsMap := make(map[string]*TestRun, 1)
 	finishedRunsMap["myTestRun"] = &finishedRuns

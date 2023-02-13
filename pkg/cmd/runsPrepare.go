@@ -9,6 +9,8 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/launcher"
+	"github.com/galasa.dev/cli/pkg/runs"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +28,7 @@ var (
 	prepareFlagOverrides *[]string
 	prepareAppend        *bool
 
-	prepareSelectionFlags = utils.TestSelectionFlags{}
+	prepareSelectionFlags = runs.TestSelectionFlags{}
 )
 
 func init() {
@@ -34,7 +36,7 @@ func init() {
 	prepareFlagOverrides = runsAssembleCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
 	prepareAppend = runsAssembleCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
 	runsAssembleCmd.MarkFlagRequired("portfolio")
-	utils.AddCommandFlags(runsAssembleCmd, &prepareSelectionFlags)
+	runs.AddCommandFlags(runsAssembleCmd, &prepareSelectionFlags)
 
 	runsCmd.AddCommand(runsAssembleCmd)
 }
@@ -47,6 +49,9 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
+
+	// Get the ability to query environment variables.
+	env := utils.NewEnvironment()
 
 	// Convert overrides to a map
 	testOverrides := make(map[string]string)
@@ -66,12 +71,21 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 		testOverrides[key] = value
 	}
 
-	apiClient, err := api.InitialiseAPI(bootstrap)
+	// Load the bootstrap properties.
+	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+	bootstrapData, err := api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
 	if err != nil {
 		panic(err)
 	}
 
-	testSelection := utils.SelectTests(apiClient, &prepareSelectionFlags)
+	// Create an API client
+	launcher := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
+
+	testSelection, err := runs.SelectTests(launcher, &prepareSelectionFlags)
+	if err != nil {
+		panic(err)
+	}
+
 	count := len(testSelection.Classes)
 	if count < 1 {
 		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
@@ -84,19 +98,19 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	var portfolio *utils.Portfolio
+	var portfolio *runs.Portfolio
 	if *prepareAppend {
-		portfolio, err = utils.LoadPortfolio(fileSystem, portfolioFilename)
+		portfolio, err = runs.LoadPortfolio(fileSystem, portfolioFilename)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		portfolio = utils.NewPortfolio()
+		portfolio = runs.NewPortfolio()
 	}
 
-	utils.CreatePortfolio(&testSelection, &testOverrides, portfolio)
+	runs.CreatePortfolio(&testSelection, &testOverrides, portfolio)
 
-	err = utils.WritePortfolio(fileSystem, portfolioFilename, portfolio)
+	err = runs.WritePortfolio(fileSystem, portfolioFilename, portfolio)
 	if err != nil {
 		panic(err)
 	}
