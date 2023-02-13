@@ -20,6 +20,7 @@ type FileSystem interface {
 	Exists(path string) (bool, error)
 	DirExists(path string) (bool, error)
 	GetUserHomeDir() (string, error)
+	OutputWarningMessage(string) error
 }
 
 const (
@@ -110,4 +111,9 @@ func (OSFileSystem) GetUserHomeDir() (string, error) {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_FIND_USER_HOME, err.Error())
 	}
 	return dirName, err
+}
+
+func (OSFileSystem) OutputWarningMessage(message string) error {
+	_, err := os.Stderr.WriteString(message)
+	return err
 }
