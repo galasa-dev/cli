@@ -22,7 +22,13 @@ var (
 		Version: "unknowncliversion-unknowngithash",
 	}
 
+	// The file to which logs are being directed, if any. "" if not.
 	logFileName string
+
+	// We don't trace anything until this flag is true.
+	// This means that any errors which occur in the cobra framework are not
+	// followed by stack traces all the time.
+	isCapturingLogs bool = false
 )
 
 func Execute() {
@@ -46,21 +52,28 @@ func logStackTrace() {
 	// Only want the stack trace from the recovered execution thread, not all go routines running.
 	isWantAllStackTraces := false
 	n := runtime.Stack(stack[:], isWantAllStackTraces)
+
 	log.Printf("%s\n", stack[:n])
 }
 
 func finalWord(obj interface{}) {
 	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
-	log.Println(text)
+	if isCapturingLogs {
+		log.Println(text)
+	}
+
 	if exitCode != 0 {
 		fmt.Fprintln(os.Stderr, text)
 	}
 
-	if isStackTraceWanted {
+	if isStackTraceWanted && isCapturingLogs {
 		logStackTrace()
 	}
 
-	log.Printf("Exit code is %v", exitCode)
+	if isCapturingLogs {
+		log.Printf("Exit code is %v", exitCode)
+	}
+
 	os.Exit(exitCode)
 }
 

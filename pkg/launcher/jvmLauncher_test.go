@@ -16,10 +16,6 @@ import (
 	// "github.com/stretchr/testify/assert"
 )
 
-func TestDoNothing(t *testing.T) {
-	assert.True(t, true, "It's true")
-}
-
 func TestCanCreateAJVMLauncher(t *testing.T) {
 
 	env := utils.NewMockEnv()

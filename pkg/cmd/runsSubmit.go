@@ -84,7 +84,9 @@ func init() {
 func executeSubmit(cmd *cobra.Command, args []string) {
 
 	var err error
+	
 	utils.CaptureLog(logFileName)
+	isCapturingLogs = true
 
 	log.Println("Galasa CLI - Submit tests (Remote)")
 

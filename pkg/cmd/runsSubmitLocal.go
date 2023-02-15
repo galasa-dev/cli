@@ -56,7 +56,9 @@ func init() {
 func executeSubmitLocal(cmd *cobra.Command, args []string) {
 
 	var err error
+
 	utils.CaptureLog(logFileName)
+	isCapturingLogs = true
 
 	log.Println("Galasa CLI - Submit tests (Local)")
 
@@ -67,11 +69,11 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	env := utils.NewEnvironment()
 
 	timeService := utils.NewRealTimeService()
-	var launcherInstance launcher.Launcher = nil
 
 	// the submit is targetting a local JVM
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 
+	var launcherInstance launcher.Launcher
 	launcherInstance, err = launcher.NewJVMLauncher(env, fileSystem, embeddedFileSystem, runsSubmitLocalCmdParams)
 
 	if err == nil {

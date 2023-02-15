@@ -60,6 +60,7 @@ func init() {
 func executeCreateProject(cmd *cobra.Command, args []string) {
 
 	utils.CaptureLog(logFileName)
+	isCapturingLogs = true
 
 	log.Println("Galasa CLI - Create project")
 

@@ -44,6 +44,7 @@ func init() {
 func executeAssemble(cmd *cobra.Command, args []string) {
 
 	utils.CaptureLog(logFileName)
+	isCapturingLogs = true
 
 	log.Println("Galasa CLI - Assemble tests")
 

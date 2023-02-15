@@ -26,6 +26,8 @@ func init() {
 
 func executeEnvInit(cmd *cobra.Command, args []string) {
 	utils.CaptureLog(logFileName)
+	isCapturingLogs = true
+	
 	fileSystem := utils.NewOSFileSystem()
 	err := envInit(fileSystem)
 	if err != nil {

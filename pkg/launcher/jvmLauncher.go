@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"embed"
 	"errors"
-	"fmt"
 	"log"
 	"os/exec"
 	"strings"
@@ -36,16 +35,33 @@ type JvmLauncher struct {
 	env                utils.Environment
 	fileSystem         utils.FileSystem
 	embeddedFileSystem embed.FS
-}
 
-type launchedJvm struct {
-	jvmProcess *exec.Cmd
+	// The collection of tests which are running, or have completed.
+	localTests []*LocalTest
 }
 
 type RunsSubmitLocalCmdParameters struct {
 	Obrs                []string
 	RemoteMaven         string
 	TargetGalasaVersion string
+}
+
+type LocalTest struct {
+	jvmProcess *exec.Cmd
+	stdout     *JVMOutputProcessor
+	stderr     *bytes.Buffer
+
+	reportingChannel chan string
+
+	// What runId is this test using ?
+	// We don't initially know it. This info is extracted from the JVM trace.
+	runId string
+
+	// Where is the RAS folder storing results for this test ?
+	// We don't initially know it. This info is extracted from the JVM trace.
+	rasFolderPath string
+
+	testRun *galasaapi.TestRun
 }
 
 // -----------------------------------------------------------------------------
@@ -74,6 +90,9 @@ func NewJVMLauncher(
 		launcher.env = env
 		launcher.fileSystem = fileSystem
 		launcher.embeddedFileSystem = embeddedFileSystem
+
+		// Make sure the home folder has the boot jar unpacked and ready to invoke.
+		err = utils.InitialiseGalasaHomeFolder(launcher.fileSystem, launcher.embeddedFileSystem)
 	}
 
 	return launcher, err
@@ -99,19 +118,70 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 		groupName, classNames, requestType,
 		requestor, stream, isTraceEnabled)
 
-	utils.InitialiseGalasaHomeFolder(launcher.fileSystem, launcher.embeddedFileSystem)
+	obrs, err := validateObrs(launcher.cmdParams.Obrs)
+
+	testRuns := new(galasaapi.TestRuns)
+
+	isComplete := false
+	testRuns.Complete = &isComplete
+	testRuns.Runs = make([]galasaapi.TestRun, 0)
+
+	if err == nil {
+		for _, classNameUserInput := range classNames {
+
+			var testClassToLaunch *TestLocation
+			testClassToLaunch, err = classNameUserInputToTestClassLocation(classNameUserInput)
+
+			if err == nil {
+				cmd, args, err := getCommandSyntax(launcher.fileSystem, launcher.javaHome, obrs, *testClassToLaunch, launcher.cmdParams.RemoteMaven, launcher.cmdParams.TargetGalasaVersion)
+				if err == nil {
+					log.Printf("Launching command '%s' '%v'\n", cmd, args)
+					localTest := NewLocalTest()
+					err = localTest.launch(cmd, args)
+
+					if err == nil {
+						// The JVM process started. Store away its' details
+						launcher.localTests = append(launcher.localTests, localTest)
+
+						localTest.testRun = new(galasaapi.TestRun)
+						localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+						localTest.testRun.SetStream(stream)
+						localTest.testRun.SetGroup(groupName)
+						localTest.testRun.SetRequestor(requestor)
+						localTest.testRun.SetTrace(isTraceEnabled)
+						localTest.testRun.SetType(requestType)
+						localTest.testRun.SetName(localTest.runId)
+
+						// The test run we started can be returned to the submitter.
+						testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
+					}
+				}
+			}
+
+			if err != nil {
+				break
+			}
+		}
+	}
+
+	return testRuns, err
+}
+
+// We expect a parameter to be of the form:
+// mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr
+// Validate that the --obr parameter(s) passed by the user conform to this convention by splitting the
+// input into pieces.
+func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 
 	var err error = nil
+	obrs := make([]utils.MavenCoordinates, 0)
 
-	// We expect a parameter to be of the form:
-	// mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr
-	var obrs []utils.MavenCoordinates
-	for _, obr := range launcher.cmdParams.Obrs {
+	for _, obr := range obrInputs {
 		parts := strings.Split(obr, "/")
 		if len(parts) <= 0 {
-			err = errors.New("badly formed OBR parameter. " + obr)
+			err = errors.New("badly formed OBR parameter. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr " + obr)
 		} else if len(parts) > 4 {
-			err = errors.New("badly formed OBR parameter. " + obr)
+			err = errors.New("badly formed OBR parameter. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr " + obr)
 		} else {
 			groupId := strings.ReplaceAll(parts[0], "mvn:", "")
 			coordinates := utils.MavenCoordinates{
@@ -124,25 +194,11 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 			obrs = append(obrs, coordinates)
 		}
 	}
-
-	for _, classNameUserInput := range classNames {
-
-		var testClassToLaunch *TestLocation
-		testClassToLaunch, err = classNameUserInputToTestClassLocation(classNameUserInput)
-
-		if err == nil {
-			err = executeTestInJVM(launcher.fileSystem, launcher.javaHome,
-				obrs, testClassToLaunch, launcher.cmdParams.RemoteMaven, launcher.cmdParams.TargetGalasaVersion)
-		}
-
-		if err != nil {
-			break
-		}
-	}
-
-	return nil, err
+	return obrs, err
 }
 
+// User input is expected of the form osgiBundleName/qualifiedJavaClassName
+// So split the two pieces apart to help validate them.
 func classNameUserInputToTestClassLocation(classNameUserInput string) (*TestLocation, error) {
 
 	var err error = nil
@@ -169,12 +225,28 @@ func classNameUserInputToTestClassLocation(classNameUserInput string) (*TestLoca
 func (launcher *JvmLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error) {
 	log.Printf("JvmLauncher: GetRunsByGroup(groupName=%s) entered. ", groupName)
 
-	var isComplete = true
+	var isAllComplete = true
 	var testRuns = galasaapi.TestRuns{
-		Complete: &isComplete,
+		Complete: &isAllComplete,
 		Runs:     []galasaapi.TestRun{},
 	}
 
+	for _, localTest := range launcher.localTests {
+
+		// Update the test status by reading the json file if we can.
+		localTest.updateTestStatusFromRasFile(launcher.fileSystem)
+
+		testName := localTest.testRun.GetName()
+		if localTest.isCompleted() {
+			log.Printf("GetRunsByGroup: localTest %s is complete.\n", testName)
+		} else {
+			log.Printf("GetRunsByGroup: localTest %s is not yet complete.\n", testName)
+			isAllComplete = false
+		}
+		testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
+	}
+
+	log.Printf("JvmLauncher: GetRunsByGroup(groupName=%s) exiting. ", groupName)
 	return &testRuns, nil
 }
 
@@ -197,62 +269,153 @@ func (launcher *JvmLauncher) GetTestCatalog(stream string) (TestCatalog, error) 
 	return nil, nil
 }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Local functions
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// A structure which tells us all we know about a JVM process we launched.
 
-func executeTestInJVM(
-	fileSystem utils.FileSystem,
-	javaHome string,
-	testObrs []utils.MavenCoordinates,
-	testLocation *TestLocation,
-	remoteMaven string,
-	targetGalasaVersion string,
-) error {
-	cmd, args, err := getCommandSyntax(fileSystem, javaHome, testObrs, *testLocation, remoteMaven, targetGalasaVersion)
-	if err == nil {
-		log.Printf("Launching command '%s' '%v'\n", cmd, args)
-		jvmProcess := exec.Command(cmd, args...)
+func NewLocalTest() *LocalTest {
 
-		outStream := bytes.NewBuffer([]byte{})
-		jvmProcess.Stdout = outStream
+	localTest := new(LocalTest)
 
-		errStream := bytes.NewBuffer([]byte{})
-		jvmProcess.Stderr = errStream
+	localTest.jvmProcess = nil
+	localTest.stdout = NewJVMOutputProcessor()
+	localTest.stderr = bytes.NewBuffer([]byte{})
+	localTest.runId = ""
+	localTest.testRun = nil
 
-		err = jvmProcess.Start()
-		if err != nil {
-			log.Printf("Failed to start the JVM. %s\n", err.Error())
-			log.Printf("Failing command is %s %v\n", cmd, args)
-		} else {
+	localTest.reportingChannel = make(chan string, 100)
 
-			// Wait for it to complete.
-			err = jvmProcess.Wait()
-			if err != nil {
-				log.Printf("Failed to wait for the JVM. %s\n", err.Error())
-				log.Printf("Failing command is %s %v\n", cmd, args)
-			} else {
+	return localTest
+}
 
-				log.Printf("jvm standard output is %s\n", outStream.String())
-				log.Printf("jvm error output is %s\n", errStream.String())
+// Launch a test within a JVM.
+// Hang around waiting for the JVM to trace the runID and ras location.
+func (localTest *LocalTest) launch(cmd string, args []string) error {
+	localTest.jvmProcess = exec.Command(cmd, args...)
+	localTest.jvmProcess.Stdout = localTest.stdout
+	localTest.jvmProcess.Stderr = localTest.stderr
 
-				results := summariseJVMOutput(outStream.Bytes())
-				log.Printf("Results: Method passes: %d, fails: %d", results.MethodPasses, results.MethodFails)
+	err := localTest.jvmProcess.Start()
+	if err != nil {
+		log.Printf("Failed to start the JVM. %s\n", err.Error())
+		log.Printf("Failing command is %s %v\n", cmd, args)
+	} else {
+		localTest.runId, err = waitForRunIdAllocation(localTest.stdout)
+		if err == nil {
+
+			localTest.rasFolderPath, err = waitForRasFolderPath(localTest.stdout)
+			if err == nil {
+				log.Printf("JVM test started OK. Spawning a go routine to wait for it to complete.\n")
+				go localTest.waitForCompletion()
 			}
 		}
 	}
 	return err
 }
 
-func summariseJVMOutput(jvmOutput []byte) TestResultsSummary {
-	jvmOutputStr := string(jvmOutput[:])
+// Block this thread until we can gather where the RAS folder is for this test.
+// It is resolved within the JVM, and traced, where we pick it up from.
+func waitForRasFolderPath(outputProcessor *JVMOutputProcessor) (string, error) {
+	var err error = nil
 
-	results := TestResultsSummary{MethodPasses: 0, MethodFails: 0}
+	// BLOCK THREAD !
+	// Wait for the runId to be detected in the JVM output.
+	<-outputProcessor.publishResultChannel
 
-	results.MethodPasses = strings.Count(jvmOutputStr, "*** Passed - Test method ")
-	results.MethodFails = strings.Count(jvmOutputStr, "*** Failed - Test method ")
+	rasFolderPath := outputProcessor.detectedRasFolderPath
 
-	return results
+	if rasFolderPath == "" {
+		// TODO: Better error message please.
+		err = errors.New("rasFolderPath could not be detected")
+	}
+
+	return rasFolderPath, err
+}
+
+// Block this thread until we can gather what the RunId for this test is
+// It is allocated within the JVM, and traced, where we pick it up from.
+func waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
+	var err error = nil
+
+	// BLOCK THREAD !
+	// Wait for the runId to be detected in the JVM output.
+	<-outputProcessor.publishResultChannel
+
+	runId := outputProcessor.detectedRunId
+
+	if runId == "" {
+		// TODO: Better error message please.
+		err = errors.New("runid could not be detected")
+	}
+
+	return runId, err
+}
+
+// This method is called by the launching thread as a go routine.
+// The go routine waits for the JVM to complete, then emits
+// a 'DONE' message which can be recieved by the monitoring thread.
+// This call always blocks waiting for the launched JVM to complete and exit.
+func (localTest *LocalTest) waitForCompletion() error {
+
+	log.Printf("waiting for the JVM to complete within a go routine.\n")
+
+	err := localTest.jvmProcess.Wait()
+	if err != nil {
+		log.Printf("Failed to wait for the JVM test to complete. %s\n", err.Error())
+	} else {
+		log.Printf("JVM has completed. Detected by waiting go routine.\n")
+	}
+
+	// Tell any polling thread that the JVM is complete now.
+	localTest.testRun.SetStatus("finished")
+	localTest.reportingChannel <- "DONE"
+	close(localTest.reportingChannel)
+
+	return err
+}
+
+// If we can find it, read the status report for the test from the
+// ras folder.
+func (localTest *LocalTest) updateTestStatusFromRasFile(fileSystem utils.FileSystem) error {
+
+	var err error = nil
+
+	if localTest.runId == "" || localTest.rasFolderPath == "" {
+		log.Printf("Don't have enough information to find the structure.json in the RAS folder.\n")
+	} else {
+
+		jsonFilePath := localTest.rasFolderPath + "/" + localTest.runId + "/structure.json"
+		log.Printf("Reading latest test status from %s\n", jsonFilePath)
+
+		var testRun *galasaapi.TestRun
+		testRun, err = readTestRunFromJsonFile(fileSystem, jsonFilePath)
+
+		if err == nil {
+			localTest.testRun = testRun
+		}
+	}
+	return err
+}
+
+// This method is called by a thread monitoring the state of the JVM.
+// It can receive messages from the JVM launcher go routine.
+// This call never blocks waiting for anything.
+func (localTest *LocalTest) isCompleted() bool {
+
+	log.Printf("Checking to see if local test is completed...")
+	isComplete := false
+	select {
+	case msg := <-localTest.reportingChannel:
+		log.Printf("Message received from JVM launch thread: %s\n", msg)
+		if msg == "DONE" || msg == "" {
+			isComplete = true
+		}
+	default:
+		log.Printf("No message received from JVM launch thread. Would block. JVM is not finished.")
+		isComplete = false
+	}
+	return isComplete
 }
 
 // getCommandSyntax From the parameters we aim to build a command-line incantation which would launch the test in a JVM...
@@ -343,57 +506,4 @@ func getCommandSyntax(
 	}
 
 	return cmd, args, err
-}
-
-// executeSubmitLocal attempts to launch a JVM locally in which the Galasa framework is booted
-// which will run the test(s) we wish to use. The tests execute locally, but may use values
-// from the Galasa ecosystem, if the bootstrap points to it.
-//
-// JAVA_HOME must be set.
-func executeSubmitLocal(
-	fileSystem utils.FileSystem,
-	embeddedFileSystem embed.FS,
-	javaHome string) error {
-
-	var err error = nil
-
-	err = utils.ValidateJavaHome(fileSystem, javaHome)
-
-	if err == nil {
-		err = utils.InitialiseGalasaHomeFolder(fileSystem, embeddedFileSystem)
-	}
-
-	if err == nil {
-		err = executeTestsInJvm(fileSystem, javaHome)
-	}
-
-	return err
-}
-
-func executeTestsInJvm(fileSystem utils.FileSystem, javaHome string) error {
-	var err error = nil
-
-	// The Output method runs the command, waits for it to finish and collects its standard output. If there were no errors, dateOut will hold bytes with the date info.
-
-	// dateOut, err := dateCmd.Output()
-	// if err != nil {
-	//     panic(err)
-	// }
-	// fmt.Println("> date")
-	// fmt.Println(string(dateOut))
-	// Output and other methods of Command will return *exec.Error if there was a problem executing the command (e.g. wrong path), and *exec.ExitError if the command ran but exited with a non-zero return code.
-
-	_, err = exec.Command("date", "-x").Output()
-	if err != nil {
-		switch e := err.(type) {
-		case *exec.Error:
-			fmt.Println("failed executing:", err)
-		case *exec.ExitError:
-			fmt.Println("command exit rc =", e.ExitCode())
-		default:
-			panic(err)
-		}
-	}
-
-	return err
 }
