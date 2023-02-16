@@ -71,10 +71,10 @@ func init() {
 	// The trace flag defaults to 'false' if you don't use it.
 	// If you say '--trace' on it's own, it defaults to 'true'
 	// If you say --trace=false or --trace=true you can set the value explicitly.
-	runsSubmitCmd.Flags().BoolVar(&runsSubmitCmdParams.Trace, "trace", false, "Trace to be enabled on the test runs")
-	runsSubmitCmd.Flags().Lookup("trace").NoOptDefVal = "true"
+	runsSubmitCmd.PersistentFlags().BoolVar(&runsSubmitCmdParams.Trace, "trace", false, "Trace to be enabled on the test runs")
+	runsSubmitCmd.PersistentFlags().Lookup("trace").NoOptDefVal = "true"
 
-	runsSubmitCmd.Flags().BoolVar(&(runsSubmitCmdParams.NoExitCodeOnTestFailures), "noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
+	runsSubmitCmd.PersistentFlags().BoolVar(&(runsSubmitCmdParams.NoExitCodeOnTestFailures), "noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
 
 	runs.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
 
