@@ -9,6 +9,8 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
+
+	"log"
 )
 
 // On disk, we have a file like this:
@@ -57,40 +59,24 @@ func readTestRunFromJsonFile(
 	if err == nil {
 		var jsonContent string
 		jsonContent, err = fileSystem.ReadTextFile(url.Path)
-		if err == nil {
+		if err == nil && len(jsonContent) > 0 {
 			var f interface{}
 			err = json.Unmarshal([]byte(jsonContent), &f)
 
 			if err == nil {
 				fields := f.(map[string]interface{})
 
-				name := fields["runName"].(string)
-				testRunData.Name = &name
+				testRunData.Name = getStringField(fields, "runName")
+				testRunData.Test = getStringField(fields, "testShortName")
+				testRunData.BundleName = getStringField(fields, "bundle")
+				testRunData.TestName = getStringField(fields, "testName")
+				testRunData.Status = getStringField(fields, "status")
+				testRunData.Result = getStringField(fields, "result")
+				testRunData.Queued = getStringField(fields, "queued")
+				testRunData.Requestor = getStringField(fields, "requestor")
+				testRunData.RasRunId = getStringField(fields, "runName")
 
-				test := fields["testShortName"].(string)
-				testRunData.Test = &test
-
-				bundle := fields["bundle"].(string)
-				testRunData.BundleName = &bundle
-
-				testName := fields["testName"].(string)
-				testRunData.TestName = &testName
-
-				status := fields["status"].(string)
-				testRunData.Status = &status
-
-				result := fields["result"].(string)
-				testRunData.Result = &result
-
-				queued := fields["queued"].(string)
-				testRunData.Queued = &queued
-
-				requestor := fields["requestor"].(string)
-				testRunData.Requestor = &requestor
-
-				rasRunId := fields["runName"].(string)
-				testRunData.RasRunId = &rasRunId
-
+				log.Printf("Test %s status %s result %s\n", *testRunData.Name, *testRunData.Status, *testRunData.Result)
 				// testRunData.Stream = stream
 				// testRunData.Local = isLocal
 				// testRunData.Trace = isTraceEnabled
@@ -100,4 +86,13 @@ func readTestRunFromJsonFile(
 		}
 	}
 	return testRunData, err
+}
+
+func getStringField(fields map[string]interface{}, fieldName string) *string {
+	var strValue = ""
+	value := fields[fieldName]
+	if value != nil {
+		strValue = value.(string)
+	}
+	return &strValue
 }

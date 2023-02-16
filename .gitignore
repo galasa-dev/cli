@@ -10,7 +10,7 @@ junit.xml
 tools/
 build/
 .idea/
-temp/
+temp*/
 run.sh
 **/.DS_Store
 .DS_Store

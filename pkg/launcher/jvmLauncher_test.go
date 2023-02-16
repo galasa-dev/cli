@@ -25,8 +25,9 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	utils.AddJavaRuntimeToMock(fileSystem, "/java")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
+	timeService := utils.NewMockTimeService()
 
-	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams)
+	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams, timeService)
 	if err != nil {
 		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
 	}
@@ -50,8 +51,9 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	utils.AddJavaRuntimeToMock(fileSystem, "/java")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
+	timeService := utils.NewMockTimeService()
 
-	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams)
+	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams, timeService)
 	if err == nil {
 		assert.Fail(t, "Constructor should have failed but it did not.")
 	}

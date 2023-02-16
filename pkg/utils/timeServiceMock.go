@@ -20,6 +20,10 @@ func NewMockTimeService() TimeService {
 	return NewMockTimeServiceAsMock()
 }
 
+func (ts *MockTimeService) Interrupt(message string) {
+	// The mock timing service doesn't know how to be interrupted.
+}
+
 func (ts *MockTimeService) Sleep(duration time.Duration) {
 	// Do not sleep. Just advance the mock now time.
 	ts.MockNow.Add(duration)

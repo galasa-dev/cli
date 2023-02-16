@@ -122,7 +122,8 @@ func executeSubmitRuns(fileSystem utils.FileSystem,
 
 		runsFetchCurrentStatus(launcher, params.GroupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
 
-		if len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 {
+		// Only sleep if there are runs in progress but not yet finished.
+		if len(submittedRuns) > 0 || len(rerunRuns) > 0 {
 			log.Printf("Sleeping for the poll interval of %v seconds\n", params.PollIntervalSeconds)
 			timeService.Sleep(pollInterval)
 			log.Printf("Awake from poll interval sleep of %v seconds\n", params.PollIntervalSeconds)

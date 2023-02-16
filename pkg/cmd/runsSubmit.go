@@ -32,15 +32,15 @@ var (
 
 func init() {
 
-	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdParams.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.ReportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.ReportJsonFilename, "reportjson", "", "json file to record the final results in")
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.ReportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
-	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdParams.GroupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.Requestor, "requestor", "", "the requestor id to be associated with the test runs. Defaults to the current user id.")
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.RequestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
+	runsSubmitCmd.PersistentFlags().StringVarP(&runsSubmitCmdParams.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
+	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
+	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportJsonFilename, "reportjson", "", "json file to record the final results in")
+	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
+	runsSubmitCmd.PersistentFlags().StringVarP(&runsSubmitCmdParams.GroupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
+	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.Requestor, "requestor", "", "the requestor id to be associated with the test runs. Defaults to the current user id.")
+	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.RequestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
 
-	runsSubmitCmd.Flags().StringVar(&runsSubmitCmdParams.ThrottleFileName, "throttlefile", "",
+	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ThrottleFileName, "throttlefile", "",
 		"a file where the current throttle is stored. Periodically the throttle value is read from the file used. "+
 			"Someone with edit access to the file can change it which dynamically takes effect. "+
 			"Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). "+
@@ -49,21 +49,21 @@ func init() {
 			"Optional. If not specified, no throttle file is used.",
 	)
 
-	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.PollIntervalSeconds, "poll", runs.DEFAULT_POLL_INTERVAL_SECONDS,
+	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.PollIntervalSeconds, "poll", runs.DEFAULT_POLL_INTERVAL_SECONDS,
 		"Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. "+
 			"Defaults to "+strconv.Itoa(runs.DEFAULT_POLL_INTERVAL_SECONDS)+" seconds. "+
 			"If less than 1, then default value is used.")
 
-	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.ProgressReportIntervalMinutes, "progress", runs.DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES,
+	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.ProgressReportIntervalMinutes, "progress", runs.DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES,
 		"in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. "+
 			"Defaults to "+strconv.Itoa(runs.DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES)+" minutes. "+
 			"If less than 1, then default value is used.")
 
-	runsSubmitCmd.Flags().IntVar(&runsSubmitCmdParams.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
+	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
 		"how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is "+
 			strconv.Itoa(runs.DEFAULT_THROTTLE_TESTS_AT_ONCE))
 
-	runsSubmitCmd.Flags().StringSliceVar(&runsSubmitCmdParams.Overrides, "override", make([]string, 0),
+	runsSubmitCmd.PersistentFlags().StringSliceVar(&runsSubmitCmdParams.Overrides, "override", make([]string, 0),
 		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+
 			"Each override is of the form 'name=value'. Multiple instances of this flag can be used. "+
 			"For example --override=prop1=val1 --override=prop2=val2")
@@ -84,7 +84,7 @@ func init() {
 func executeSubmit(cmd *cobra.Command, args []string) {
 
 	var err error
-	
+
 	utils.CaptureLog(logFileName)
 	isCapturingLogs = true
 

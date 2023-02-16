@@ -74,7 +74,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 
 	var launcherInstance launcher.Launcher
-	launcherInstance, err = launcher.NewJVMLauncher(env, fileSystem, embeddedFileSystem, runsSubmitLocalCmdParams)
+	launcherInstance, err = launcher.NewJVMLauncher(env, fileSystem, embeddedFileSystem, runsSubmitLocalCmdParams, timeService)
 
 	if err == nil {
 		err = runs.ExecuteSubmitRuns(fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitLocalSelectionFlags)
