@@ -29,20 +29,22 @@ galasactl runs submit local [flags]
 ### Options inherited from parent commands
 
 ```
-  -b, --bootstrap string      Bootstrap URL
-  -g, --group string          the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
-  -l, --log string            File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
-      --override strings      overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
-      --poll int              Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
-  -p, --portfolio string      portfolio containing the tests to run
-      --progress int          in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. Defaults to 5 minutes. If less than 1, then default value is used. (default 5)
-      --reportjson string     json file to record the final results in
-      --reportjunit string    junit xml file to record the final results in
-      --reportyaml string     yaml file to record the final results in
-      --requestor string      the requestor id to be associated with the test runs. Defaults to the current user id.
-      --requesttype string    the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
-      --throttle int          how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is 3 (default 3)
-      --throttlefile string   a file where the current throttle is stored. Periodically the throttle value is read from the file used. Someone with edit access to the file can change it which dynamically takes effect. Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). And they can be resumed (un-paused) if the value is set back. This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.Optional. If not specified, no throttle file is used.
+  -b, --bootstrap string           Bootstrap URL
+  -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
+  -l, --log string                 File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
+      --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
+      --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
+      --poll int                   Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
+  -p, --portfolio string           portfolio containing the tests to run
+      --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. Defaults to 5 minutes. If less than 1, then default value is used. (default 5)
+      --reportjson string          json file to record the final results in
+      --reportjunit string         junit xml file to record the final results in
+      --reportyaml string          yaml file to record the final results in
+      --requestor string           the requestor id to be associated with the test runs. Defaults to the current user id.
+      --requesttype string         the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
+      --throttle int               how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is 3 (default 3)
+      --throttlefile string        a file where the current throttle is stored. Periodically the throttle value is read from the file used. Someone with edit access to the file can change it which dynamically takes effect. Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). And they can be resumed (un-paused) if the value is set back. This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.Optional. If not specified, no throttle file is used.
+      --trace                      Trace to be enabled on the test runs
 ```
 
 ### SEE ALSO

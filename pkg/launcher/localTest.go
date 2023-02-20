@@ -5,19 +5,18 @@ package launcher
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
-	"os/exec"
 
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
 type LocalTest struct {
-	jvmProcess *exec.Cmd
-	stdout     *JVMOutputProcessor
-	stderr     *bytes.Buffer
+	process Process
+	stdout  *JVMOutputProcessor
+	stderr  *bytes.Buffer
 
 	reportingChannel chan string
 
@@ -35,20 +34,27 @@ type LocalTest struct {
 	timeService utils.TimeService
 
 	fileSystem utils.FileSystem
+
+	// Something which can create new processes in the operating system
+	processFactory ProcessFactory
 }
 
 // A structure which tells us all we know about a JVM process we launched.
-func NewLocalTest(timeService utils.TimeService, fileSystem utils.FileSystem) *LocalTest {
+func NewLocalTest(
+	timeService utils.TimeService,
+	fileSystem utils.FileSystem,
+	processFactory ProcessFactory,
+) *LocalTest {
 
 	localTest := new(LocalTest)
 
-	localTest.jvmProcess = nil
 	localTest.stdout = NewJVMOutputProcessor()
 	localTest.stderr = bytes.NewBuffer([]byte{})
 	localTest.runId = ""
 	localTest.testRun = nil
 	localTest.timeService = timeService
 	localTest.fileSystem = fileSystem
+	localTest.processFactory = processFactory
 
 	localTest.reportingChannel = make(chan string, 100)
 
@@ -58,11 +64,12 @@ func NewLocalTest(timeService utils.TimeService, fileSystem utils.FileSystem) *L
 // Launch a test within a JVM.
 // Hang around waiting for the JVM to trace the runID and ras location.
 func (localTest *LocalTest) launch(cmd string, args []string) error {
-	localTest.jvmProcess = exec.Command(cmd, args...)
-	localTest.jvmProcess.Stdout = localTest.stdout
-	localTest.jvmProcess.Stderr = localTest.stderr
 
-	err := localTest.jvmProcess.Start()
+	// Create a new process
+	localTest.process = localTest.processFactory.NewProcess()
+
+	// Start the process
+	err := localTest.process.Start(cmd, args, localTest.stdout, localTest.stderr)
 	if err != nil {
 		log.Printf("Failed to start the JVM. %s\n", err.Error())
 		log.Printf("Failing command is %s %v\n", cmd, args)
@@ -71,7 +78,7 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 		localTest.runId, err = waitForRunIdAllocation(localTest.stdout)
 		if err == nil {
 
-			localTest.rasFolderPath, err = waitForRasFolderPath(localTest.stdout)
+			localTest.rasFolderPath, err = waitForRasFolderPath(localTest.stdout, localTest.runId)
 			if err == nil {
 
 				log.Printf("JVM test started OK. Spawning a go routine to wait for it to complete.\n")
@@ -84,7 +91,7 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 
 // Block this thread until we can gather where the RAS folder is for this test.
 // It is resolved within the JVM, and traced, where we pick it up from.
-func waitForRasFolderPath(outputProcessor *JVMOutputProcessor) (string, error) {
+func waitForRasFolderPath(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
 	var err error = nil
 
 	// BLOCK THREAD !
@@ -94,8 +101,7 @@ func waitForRasFolderPath(outputProcessor *JVMOutputProcessor) (string, error) {
 	rasFolderPath := outputProcessor.detectedRasFolderPath
 
 	if rasFolderPath == "" {
-		// TODO: Better error message please.
-		err = errors.New("rasFolderPath could not be detected")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RAS_FOLDER_NOT_DETECTED, runId)
 	}
 
 	return rasFolderPath, err
@@ -113,8 +119,7 @@ func waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error)
 	runId := outputProcessor.detectedRunId
 
 	if runId == "" {
-		// TODO: Better error message please.
-		err = errors.New("runid could not be detected")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RUN_ID_NOT_DETECTED)
 	}
 
 	return runId, err
@@ -128,7 +133,7 @@ func (localTest *LocalTest) waitForCompletion() error {
 
 	log.Printf("waiting for the JVM to complete within a go routine.\n")
 
-	err := localTest.jvmProcess.Wait()
+	err := localTest.process.Wait()
 	if err != nil {
 		log.Printf("Failed to wait for the JVM test to complete. %s\n", err.Error())
 	} else {

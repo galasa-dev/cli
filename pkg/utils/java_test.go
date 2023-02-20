@@ -60,3 +60,16 @@ func TestNonExistentJavaBinaryHomeIsInValid(t *testing.T) {
 	}
 	assert.Contains(t, err.Error(), "GAL1054E", "Wrong error message")
 }
+
+func TestJavaHomeCanBeValid(t *testing.T) {
+	javaHome := "/java"
+
+	fileSystem := NewMockFileSystem()
+	fileSystem.MkdirAll("/java/bin")
+	AddJavaRuntimeToMock(fileSystem, javaHome)
+
+	err := ValidateJavaHome(fileSystem, javaHome)
+	if err != nil {
+		assert.Fail(t, "Failed validation. Should have passed.")
+	}
+}

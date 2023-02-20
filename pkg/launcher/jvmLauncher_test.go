@@ -27,7 +27,12 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
 
-	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams, timeService)
+	mockProcess := NewMockProcess()
+	mockProcessFactory := NewMockProcessFactory(mockProcess)
+
+	launcher, err := NewJVMLauncher(
+		env, fileSystem, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory)
 	if err != nil {
 		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
 	}
@@ -53,7 +58,12 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
 
-	launcher, err := NewJVMLauncher(env, fileSystem, embedded.GetEmbeddedFileSystem(), jvmLaunchParams, timeService)
+	mockProcess := NewMockProcess()
+	mockProcessFactory := NewMockProcessFactory(mockProcess)
+
+	launcher, err := NewJVMLauncher(
+		env, fileSystem, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory)
 	if err == nil {
 		assert.Fail(t, "Constructor should have failed but it did not.")
 	}
@@ -61,26 +71,67 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	assert.Contains(t, err.Error(), "GAL1050E")
 }
 
-// func TestJvmGetsLaunchedWithCorrectSyntax(t *testing.T) {
+func TestCanCreateJvmLauncher(t *testing.T) {
+	env := utils.NewMockEnv()
+	env.EnvVars["JAVA_HOME"] = "/java"
 
-// 	// Given...
-// 	mockFileSystem := utils.NewOSFileSystem()
+	fileSystem := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fileSystem, "/java")
 
-// 	var testObrs []MavenCoordinates = []MavenCoordinates{
-// 		{
-// 			GroupId:    "dev.galasa.example.banking",
-// 			ArtifactId: "dev.galasa.example.banking.obr",
-// 			Version:    "0.0.1-SNAPSHOT",
-// 		},
-// 	}
+	jvmLaunchParams := getBasicJvmLaunchParams()
+	timeService := utils.NewMockTimeService()
+	mockProcess := NewMockProcess()
+	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
-// 	var testLocation TestLocation = TestLocation{
-// 		OSGiBundleName: "dev.galasa.example.banking.payee",
-// 		Class: JavaClassDef{
-// 			PackageName: "dev.galasa.example.banking.payee",
-// 			ClassName:   "TestPayee",
-// 		},
-// 	}
+	launcher, err := NewJVMLauncher(
+		env, fileSystem, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+}
+
+func TestCanLaunchLocalJvmTest(t *testing.T) {
+	env := utils.NewMockEnv()
+	env.EnvVars["JAVA_HOME"] = "/java"
+
+	fileSystem := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+
+	jvmLaunchParams := getBasicJvmLaunchParams()
+	timeService := utils.NewMockTimeService()
+
+	mockProcess := NewMockProcess()
+	mockProcessFactory := NewMockProcessFactory(mockProcess)
+
+	launcher, err := NewJVMLauncher(
+		env, fileSystem, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+
+	isTraceEnabled := true
+	var overrides map[string]interface{}
+
+	testRuns, err := launcher.SubmitTestRuns(
+		"myGroup",
+		[]string{"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount"},
+		"myRequestType-UnitTest",
+		"myRequestor",
+		"unitTestStream",
+		isTraceEnabled,
+		overrides,
+	)
+	if err != nil {
+		assert.Fail(t, "Launcher should have launched command OK")
+	}
+	assert.NotNil(t, testRuns, "Returned test runs is nil, should have been an object.")
+}
 
 // 	javaHome := os.Getenv("JAVA_HOME")
 

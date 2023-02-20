@@ -39,6 +39,9 @@ type JvmLauncher struct {
 
 	// This timer service can be interrupted when we don't want it to sleep.
 	timeService utils.TimeService
+
+	// A service which can create OS processes.
+	processFactory ProcessFactory
 }
 
 type RunsSubmitLocalCmdParameters struct {
@@ -56,6 +59,7 @@ func NewJVMLauncher(
 	embeddedFileSystem embed.FS,
 	runsSubmitLocalCmdParams RunsSubmitLocalCmdParameters,
 	timeService utils.TimeService,
+	processFactory ProcessFactory,
 ) (*JvmLauncher, error) {
 
 	var (
@@ -74,6 +78,7 @@ func NewJVMLauncher(
 		launcher.env = env
 		launcher.fileSystem = fileSystem
 		launcher.embeddedFileSystem = embeddedFileSystem
+		launcher.processFactory = processFactory
 
 		launcher.timeService = timeService
 
@@ -89,6 +94,18 @@ func NewJVMLauncher(
 //-----------------------------------------------------------------------------
 
 // SubmitTestRuns launch the test runs
+//
+// groupName - The run group ID. Used to group all the TestRuns together so we
+// can query the results later.
+//
+// classNames - An array of strings in the form "<osgi-bundle-id>/<fully-qualified-java-classname>
+// Note: There is no ".class" suffix needed for each entry. That is assumed.
+//
+// requestType - A metadata marker to indicate how the testRun was scheduled.
+// requestor - Who wanted the testRun to launch.
+// stream - The stream the test run is part of
+// isTraceEnabled - True of the trace for the test run should be gathered.
+// overrides - A map of overrides of key-value pairs.
 func (launcher *JvmLauncher) SubmitTestRuns(
 	groupName string,
 	classNames []string,
@@ -125,7 +142,7 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 					launcher.cmdParams.TargetGalasaVersion)
 				if err == nil {
 					log.Printf("Launching command '%s' '%v'\n", cmd, args)
-					localTest := NewLocalTest(launcher.timeService, launcher.fileSystem)
+					localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
 					err = localTest.launch(cmd, args)
 
 					if err == nil {
@@ -278,6 +295,8 @@ func getCommandSyntax(
 
 		args = append(args, "-jar")
 		args = append(args, bootJarPath)
+
+		args = append(args, "-Dfile.encoding=UTF-8")
 
 		var userHome string
 		userHome, err = fileSystem.GetUserHomeDir()

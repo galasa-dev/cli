@@ -73,8 +73,12 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	// the submit is targetting a local JVM
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 
+	// Something which can kick off new operating system processes
+	processFactory := launcher.NewRealProcessFactory()
+
 	var launcherInstance launcher.Launcher
-	launcherInstance, err = launcher.NewJVMLauncher(env, fileSystem, embeddedFileSystem, runsSubmitLocalCmdParams, timeService)
+	launcherInstance, err = launcher.NewJVMLauncher(
+		env, fileSystem, embeddedFileSystem, runsSubmitLocalCmdParams, timeService, processFactory)
 
 	if err == nil {
 		err = runs.ExecuteSubmitRuns(fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitLocalSelectionFlags)

@@ -56,4 +56,6 @@ The `galasactl` tool can generate the following errors:
 - GAL1053E: Failed to determine if '{}' exists. Reason is '{}'
 - GAL1054E: Program '{}' should exist. JAVA_HOME has been set incorrectly.
 - GAL1055E: Failed to read bootstrap file '{}'. Rason is '{}'
+- GAL1056E: The RAS folder path could not be detected in trace output for runId '{}'
+- GAL1057E: The run identifier could not be detected in trace output of the child process
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'bleeding edge' repository is '{}'
