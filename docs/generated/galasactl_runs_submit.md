@@ -28,7 +28,7 @@ galasactl runs submit [flags]
       --reportjson string          json file to record the final results in
       --reportjunit string         junit xml file to record the final results in
       --reportyaml string          yaml file to record the final results in
-      --requestor string           the requestor id to be associated with the test runs. Defaults to the current user id (default "aaronjhaj")
+      --requestor string           the requestor id to be associated with the test runs. Defaults to the current user id (default "mcobbett")
       --requesttype string         the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
   -s, --stream string              test stream to extract the tests from
       --tag strings                tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex

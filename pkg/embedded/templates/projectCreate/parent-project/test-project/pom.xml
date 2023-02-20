@@ -21,5 +21,13 @@
     <name>{{.Coordinates.Name}}</name>
 
     <packaging>bundle</packaging>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
+    </dependencies>
   
 </project>
