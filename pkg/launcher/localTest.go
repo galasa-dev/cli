@@ -19,6 +19,9 @@ type LocalTest struct {
 	stdout  *JVMOutputProcessor
 	stderr  *bytes.Buffer
 
+	// A go channel. Anything waiting for the test to complete will wait on
+	// this channel. When the test completes, a string message is placed
+	// on this channel to wake up any waiting threads.
 	reportingChannel chan string
 
 	// What runId is this test using ?
