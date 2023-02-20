@@ -13,6 +13,7 @@ import (
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
+// A local test which gets run.
 type LocalTest struct {
 	process Process
 	stdout  *JVMOutputProcessor
@@ -28,11 +29,16 @@ type LocalTest struct {
 	// We don't initially know it. This info is extracted from the JVM trace.
 	rasFolderPath string
 
+	// A local test has a "testRun" which reports back to the submitter in the
+	// same way the HTTP submitter reports back. Using common structures.
+	// So the reporting code can all be re-used to summarise the results.
 	testRun *galasaapi.TestRun
 
 	// A time service. When a significant event occurs, we interrupt it.
 	timeService utils.TimeService
 
+	// The file system the local test deposits results onto.
+	// We use this to read the results back to find out if it passed/failed. ...etc.
 	fileSystem utils.FileSystem
 
 	// Something which can create new processes in the operating system

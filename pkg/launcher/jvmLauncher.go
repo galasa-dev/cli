@@ -193,7 +193,11 @@ func (launcher *JvmLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRu
 			localTest.updateTestStatusFromRasFile()
 
 			log.Printf("GetRunsByGroup: localTest %s is not yet complete.\n", testName)
-			isAllComplete = false
+			if localTest.testRun != nil && *localTest.testRun.Status == "finished" {
+				log.Printf("GetRunsByGroup: localTest read status and it is finished.")
+			} else {
+				isAllComplete = false
+			}
 		}
 		testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
 	}
