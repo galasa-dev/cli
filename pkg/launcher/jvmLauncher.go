@@ -13,16 +13,22 @@ import (
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
+// TestLocation the user passes us this information in one string.
+// We split it up into these useful chunks.
 type TestLocation struct {
 	OSGiBundleName         string
 	QualifiedJavaClassName string
 }
 
+// We gather a summary of passes and failures from the
+// test results we read from ras/<runId>/structure.json
 type TestResultsSummary struct {
 	MethodPasses int
 	MethodFails  int
 }
 
+// JvmLauncher can act as a launcher, it's given test cases which need to
+// be executed, and it launches them within a local JVM.
 type JvmLauncher struct {
 	// The fully-qualified path to JAVA_HOME where we can find the bin/java command.
 	javaHome string
@@ -30,8 +36,14 @@ type JvmLauncher struct {
 	// The parameters from the command-line.
 	cmdParams RunsSubmitLocalCmdParameters
 
-	env                utils.Environment
-	fileSystem         utils.FileSystem
+	// An abstraction of the environment, so we can look up things like JAVA_HOME
+	env utils.Environment
+
+	// An abstraction of the file system so we can mock it out easily for unit tests.
+	fileSystem utils.FileSystem
+
+	// A file system so we can get at embedded content if required.
+	// (Like so we can unpack the boot.jar)
 	embeddedFileSystem embed.FS
 
 	// The collection of tests which are running, or have completed.
@@ -44,15 +56,26 @@ type JvmLauncher struct {
 	processFactory ProcessFactory
 }
 
+// These parameters are gathered from the command-line and passed into the laucher.
 type RunsSubmitLocalCmdParameters struct {
-	Obrs                []string
-	RemoteMaven         string
+
+	// A list of OBRs, which we hope one of these contains the tests we want to run.
+	Obrs []string
+
+	// The remote maven repo, eg: maven central, where we can load the galasa uber-obr
+	RemoteMaven string
+
+	// The version of galasa we want to launch. This indicates which uber-obr will be
+	// loaded.
 	TargetGalasaVersion string
 }
 
 // -----------------------------------------------------------------------------
 // Constructors
 // -----------------------------------------------------------------------------
+
+// NewJVMLauncher creates a JVM launcher. Primes it with references to services
+// which can be used to launch JVM servers.
 func NewJVMLauncher(
 	env utils.Environment,
 	fileSystem utils.FileSystem,
@@ -136,7 +159,11 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 			testClassToLaunch, err = classNameUserInputToTestClassLocation(classNameUserInput)
 
 			if err == nil {
-				cmd, args, err := getCommandSyntax(
+				var (
+					cmd  string
+					args []string
+				)
+				cmd, args, err = getCommandSyntax(
 					launcher.fileSystem, launcher.javaHome, obrs,
 					*testClassToLaunch, launcher.cmdParams.RemoteMaven,
 					launcher.cmdParams.TargetGalasaVersion)
@@ -354,8 +381,10 @@ func getCommandSyntax(
 // So split the two pieces apart to help validate them.
 func classNameUserInputToTestClassLocation(classNameUserInput string) (*TestLocation, error) {
 
-	var err error = nil
-	var testClassToLaunch *TestLocation = nil
+	var (
+		err               error         = nil
+		testClassToLaunch *TestLocation = nil
+	)
 
 	parts := strings.Split(classNameUserInput, "/")
 	if len(parts) <= 0 {

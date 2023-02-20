@@ -14,7 +14,7 @@ galasactl runs submit local [flags]
 
 ```
       --bundle strings         bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
-      --class strings          test class names, for building a portfolio when a stream/test catalog is not available. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified.
+      --class strings          test class names, for building a portfolio when a stream/test catalog is not available. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
       --galasaVersion string   the version of galasa you want to use to run your tests. Defaults to 0.26.0 (default "0.26.0")
   -h, --help                   help for local
       --obr strings            The maven coordinates of the obr bundle(s) which refer to your test bundles. The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' Multiple instances of this flag can be used to describe multiple obr bundles.

@@ -14,6 +14,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// A test selection is a collection of tests extracted either from a portfolio, or
+// built using explicit parameters.
+// Much of this code is used by the `runs prepare` and the `runs submit` code.
+// Flags to control the test selection are added to both commands.
+
 type TestSelectionFlags struct {
 	bundles     *[]string
 	packages    *[]string
@@ -34,13 +39,15 @@ type TestClass struct {
 	Stream string
 }
 
+// Adds a ton of flags to a cobra command like 'runs prepare' or 'runs submit'.
+// The flags are consistently added as a result.
 func AddCommandFlags(command *cobra.Command, flags *TestSelectionFlags) {
 	flags.packages = command.Flags().StringSlice("package", make([]string, 0), "packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex")
 	flags.bundles = command.Flags().StringSlice("bundle", make([]string, 0), "bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex")
 	flags.tests = command.Flags().StringSlice("test", make([]string, 0), "test names which will be selected if the name contains this string, or if --regex is specified then matches the regex")
 	flags.tags = command.Flags().StringSlice("tag", make([]string, 0), "tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex")
 	flags.classes = command.Flags().StringSlice("class", make([]string, 0), "test class names, for building a portfolio when a stream/test catalog is not available."+
-		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified.")
+		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
 	command.Flags().StringVarP(&flags.stream, "stream", "s", "", "test stream to extract the tests from")
 	flags.regexSelect = command.Flags().Bool("regex", false, "Test selection is performed by using regex")
 }
@@ -250,7 +257,8 @@ func selectTestsByTag(testCatalog launcher.TestCatalog, testSelection *TestSelec
 		return err
 	}
 
-	regexPatterns, err := convertRegex(flags.tags, *flags.regexSelect)
+	var regexPatterns *[]*regexp.Regexp
+	regexPatterns, err = convertRegex(flags.tags, *flags.regexSelect)
 	availableClasses := testCatalog["classes"].(map[string]interface{})
 
 classSearch:
@@ -325,6 +333,7 @@ func convertRegex(patterns *[]string, regexSelect bool) (*[]*regexp.Regexp, erro
 			r, err = regexp.Compile("\\Q" + selection + "\\E")
 			if err != nil {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SELECTION_REGEX_QUOTED_ERROR, selection, err.Error())
+				break
 			} else {
 				regexPatterns = append(regexPatterns, r)
 			}

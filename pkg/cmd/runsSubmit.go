@@ -98,7 +98,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 	// Read the bootstrap properties.
 	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	bootstrapData, err := api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
+	var bootstrapData *api.BootstrapData
+	bootstrapData, err = api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
 	if err != nil {
 		panic(err)
 	}

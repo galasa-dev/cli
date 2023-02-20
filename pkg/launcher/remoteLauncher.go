@@ -84,7 +84,6 @@ func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error
 
 func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
-	var err error = nil
 	var streams []string
 
 	cpsProperty, _, err := launcher.apiClient.ConfigurationPropertyStoreAPIApi.
@@ -101,38 +100,40 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, error) {
 
+	var err error = nil
 	var testCatalog TestCatalog
+	var cpsProperty *galasaapi.CpsProperty
 
-	cpsProperty, _, err := launcher.apiClient.ConfigurationPropertyStoreAPIApi.GetCpsNamespaceCascadeProperty(nil, "framework", "test.stream."+stream, "location").Execute()
+	cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.GetCpsNamespaceCascadeProperty(
+		nil, "framework", "test.stream."+stream, "location").Execute()
 	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
-		panic(err)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
+	} else if cpsProperty.Value == nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
 	}
 
-	if cpsProperty.Value == nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
-		panic(err)
-	}
+	if err == nil {
+		catalogString := new(strings.Builder)
+		var resp *http.Response
+		resp, err = http.Get(*cpsProperty.Value)
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, *cpsProperty.Value, stream, err)
+		} else {
+			defer resp.Body.Close()
 
-	catalogString := new(strings.Builder)
+			_, err = io.Copy(catalogString, resp.Body)
+			if err != nil {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_COPY_FAILED, *cpsProperty.Value, stream, err)
+			}
+		}
 
-	resp, err := http.Get(*cpsProperty.Value)
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, *cpsProperty.Value, stream, err)
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	_, err = io.Copy(catalogString, resp.Body)
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_COPY_FAILED, *cpsProperty.Value, stream, err)
-		panic(err)
-	}
-
-	err = json.Unmarshal([]byte(catalogString.String()), &testCatalog)
-	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_UNMARSHAL_FAILED, *cpsProperty.Value, stream, err)
-		panic(err)
+		if err == nil {
+			err = json.Unmarshal([]byte(catalogString.String()), &testCatalog)
+			if err != nil {
+				err = galasaErrors.NewGalasaError(
+					galasaErrors.GALASA_ERROR_CATALOG_UNMARSHAL_FAILED, *cpsProperty.Value, stream, err)
+			}
+		}
 	}
 
 	return testCatalog, nil

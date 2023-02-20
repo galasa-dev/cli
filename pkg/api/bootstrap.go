@@ -91,29 +91,32 @@ func LoadBootstrap(fileSystem utils.FileSystem, env utils.Environment,
 		path, err = getDefaultBootstrapPath(fileSystem)
 	}
 
-	// Default the API server to assume it's running locally, natively.
-	defaultApiServerURL := "http://127.0.0.1"
-
-	if strings.HasPrefix(path, "http:") || strings.HasPrefix(path, "https:") {
-		// The path looks like a URL...
-		bootstrap, err = loadBootstrapFromUrl(path, defaultApiServerURL, urlResolutionService)
-	} else {
-		// The path looks like a file...
-		bootstrap, err = loadBootstrapFromFile(path, defaultApiServerURL, fileSystem)
-	}
-
 	if err == nil {
-		// Now we have a collection of boot properties. Find the Api server URL if there is one
-		// to populate the specified field in the structure.
-		if bootstrap.Properties != nil {
-			apiServerUrlFromPropsFile := bootstrap.Properties[BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL]
-			if apiServerUrlFromPropsFile != "" {
-				bootstrap.ApiServerURL = apiServerUrlFromPropsFile
-			}
+
+		// Default the API server to assume it's running locally, natively.
+		defaultApiServerURL := "http://127.0.0.1"
+
+		if strings.HasPrefix(path, "http:") || strings.HasPrefix(path, "https:") {
+			// The path looks like a URL...
+			bootstrap, err = loadBootstrapFromUrl(path, defaultApiServerURL, urlResolutionService)
+		} else {
+			// The path looks like a file...
+			bootstrap, err = loadBootstrapFromFile(path, defaultApiServerURL, fileSystem)
 		}
-	} else {
-		// Don't return any data if there was a failure.
-		bootstrap = nil
+
+		if err == nil {
+			// Now we have a collection of boot properties. Find the Api server URL if there is one
+			// to populate the specified field in the structure.
+			if bootstrap.Properties != nil {
+				apiServerUrlFromPropsFile := bootstrap.Properties[BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL]
+				if apiServerUrlFromPropsFile != "" {
+					bootstrap.ApiServerURL = apiServerUrlFromPropsFile
+				}
+			}
+		} else {
+			// Don't return any data if there was a failure.
+			bootstrap = nil
+		}
 	}
 	return bootstrap, err
 }
@@ -187,7 +190,8 @@ func loadBootstrapFromUrl(path string, defaultApiServerURL string,
 		bootstrap.ApiServerURL = path[:len(path)-10]
 
 		// Use the bootstrap URL to get the bootstrap contents
-		bootstrapContents, err := urlResolutionService.Get(path)
+		var bootstrapContents string
+		bootstrapContents, err = urlResolutionService.Get(path)
 		if err != nil {
 			// Wrap any http error as a galasa error.
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP, path, err.Error())

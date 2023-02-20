@@ -10,6 +10,15 @@ import (
 	"strings"
 )
 
+// JVMOutputProcessor Sometjing which pretends to be an io.Writer interface implementation,
+// and can be placed as stdout or stderr for a JVM process.
+// The JVM process will write out trace statements to stdout, and this object listens to it.
+// We watch the trace data as it arrives, searching for some data we want to extract from
+// the JVM and Galasa framework as it executes.
+// Ideally we'd gather the data in some other way, like in a file to which the properties we
+// need are dumped... but using trace works for now and was quick to implement in the CLI
+// component, rather than demand changes to the framework component also.
+// Items we detect are stored in the structure below as we find them.
 type JVMOutputProcessor struct {
 
 	// The data which the processor has been passed so far.
@@ -28,6 +37,7 @@ type JVMOutputProcessor struct {
 	publishResultChannel chan string
 }
 
+// Create a new JVM processor.
 func NewJVMOutputProcessor() *JVMOutputProcessor {
 	processor := new(JVMOutputProcessor)
 	processor.detectedRunId = ""
@@ -37,6 +47,7 @@ func NewJVMOutputProcessor() *JVMOutputProcessor {
 	return processor
 }
 
+// Some regex expressions we need to use to extract fields from trace strings.
 var (
 	runIdRegex         *regexp.Regexp = regexp.MustCompile(`Allocated Run Name (?P<runid>\S*) to this run`)
 	runIdIndex         int            = runIdRegex.SubexpIndex("runid")
@@ -48,8 +59,11 @@ const (
 	SHUTDOWN_FRAMEWORK_EYE_CATCHER = `d.g.f.Framework - Framework shutdown`
 )
 
+// Part of the io.Writer interface. The JVM process is writing to its' stdout, which
+// we are intercepting and monitoring.
 func (processor *JVMOutputProcessor) Write(bytesToWrite []byte) (int, error) {
 
+	// Store away the trace information anyway for posterity.
 	bytesWrittenCount, err := processor.bytesCollected.Write(bytesToWrite)
 
 	if err == nil {
@@ -103,6 +117,10 @@ func detectRasFolderPath(stringToSearch string) string {
 	return rasFolderPath
 }
 
+// The JVM testcase will contains something like this:
+// "Allocated Run Name <runId> to this run"
+// So we try to extract the <runId> variable and return it.
+// Returning "" if the string to search does not contain that format of string.
 func detectRunId(stringToSearch string) string {
 	var runId string = ""
 
@@ -116,6 +134,8 @@ func detectRunId(stringToSearch string) string {
 	return runId
 }
 
+// Check to see if the input string is an indicator that the JVM is shutting down.
+// If so, it contains the string "d.g.f.Framework - Framework shutdown"
 func detectShutdown(stringToSearch string) bool {
 	return strings.Contains(stringToSearch, SHUTDOWN_FRAMEWORK_EYE_CATCHER)
 }
