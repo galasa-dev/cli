@@ -128,7 +128,7 @@ function download_dependencies {
         rm -fr build/dependencies
     fi
 
-    mkdir -p build/dependencies --info
+    mkdir -p build/dependencies
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to ensure the tools folder is present. rc=${rc}" ; exit 1 ; fi
     success "OK"
 
