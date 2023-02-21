@@ -6,7 +6,11 @@ package utils
 import (
 	"bytes"
 	"log"
+	"math"
+	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // ------------------------------------------------------------------------------------
@@ -21,6 +25,9 @@ type MockFileSystem struct {
 	// Where the in-memory data is kept.
 	data map[string]*Node
 
+	// A source of random numbers. So things are reproduceable.
+	random *rand.Rand
+
 	// Collects warnings messages
 	warningMessageBuffer *bytes.Buffer
 
@@ -34,6 +41,8 @@ type MockFileSystem struct {
 	VirtualFunction_GetUserHomeDir       func() (string, error)
 	VirtualFunction_WriteBinaryFile      func(targetFilePath string, desiredContents []byte) error
 	VirtualFunction_OutputWarningMessage func(string) error
+	VirtualFunction_MkTempDir            func() (string, error)
+	VirtualFunction_DeleteDir            func(path string)
 }
 
 // NewMockFileSystem creates an implementation of the thin file system layer which delegates
@@ -82,12 +91,33 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 		return mockFSOutputWarningMessage(mockFileSystem, message)
 	}
 
+	mockFileSystem.VirtualFunction_MkTempDir = func() (string, error) {
+		return mockFSMkTempDir(mockFileSystem)
+	}
+
+	mockFileSystem.VirtualFunction_DeleteDir = func(pathToDelete string) {
+		mockFSDeleteDir(mockFileSystem, pathToDelete)
+	}
+
+	randomSource := rand.NewSource(13)
+	mockFileSystem.random = rand.New(randomSource)
+
 	return &mockFileSystem
 }
 
 //------------------------------------------------------------------------------------
 // Interface methods...
 //------------------------------------------------------------------------------------
+
+func (fs *MockFileSystem) DeleteDir(pathToDelete string) {
+	// Call the virtual function.
+	fs.VirtualFunction_DeleteDir(pathToDelete)
+}
+
+func (fs *MockFileSystem) MkTempDir() (string, error) {
+	// Call the virtual function.
+	return fs.VirtualFunction_MkTempDir()
+}
 
 func (fs *MockFileSystem) MkdirAll(targetFolderPath string) error {
 	// Call the virtual function.
@@ -127,9 +157,30 @@ func (fs MockFileSystem) OutputWarningMessage(message string) error {
 	return fs.VirtualFunction_OutputWarningMessage(message)
 }
 
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 // Default implementations of the methods...
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {
+
+	// Figure out which entries we are going to delete.
+	var keysToRemove []string = make([]string, 0)
+	for key, _ := range fs.data {
+		if strings.HasPrefix(key, pathToDelete) {
+			keysToRemove = append(keysToRemove, key)
+		}
+	}
+
+	// Delete the entries we want to
+	for _, keyToRemove := range keysToRemove {
+		delete(fs.data, keyToRemove)
+	}
+}
+
+func mockFSMkTempDir(fs MockFileSystem) (string, error) {
+	tempFolderPath := "/tmp" + strconv.Itoa(fs.random.Intn(math.MaxInt))
+	err := fs.MkdirAll(tempFolderPath)
+	return tempFolderPath, err
+}
 
 func mockFSMkdirAll(fs MockFileSystem, targetFolderPath string) error {
 	nodeToAdd := Node{content: []byte(""), isDir: true}

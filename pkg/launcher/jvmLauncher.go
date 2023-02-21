@@ -144,60 +144,120 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 		groupName, classNames, requestType,
 		requestor, stream, isTraceEnabled)
 
-	obrs, err := validateObrs(launcher.cmdParams.Obrs)
-
 	testRuns := new(galasaapi.TestRuns)
 
-	isComplete := false
-	testRuns.Complete = &isComplete
-	testRuns.Runs = make([]galasaapi.TestRun, 0)
-
+	obrs, err := validateObrs(launcher.cmdParams.Obrs)
 	if err == nil {
-		for _, classNameUserInput := range classNames {
 
-			var testClassToLaunch *TestLocation
-			testClassToLaunch, err = classNameUserInputToTestClassLocation(classNameUserInput)
+		var (
+			overridesFilePath   string
+			temporaryFolderPath string
+		)
+		temporaryFolderPath, overridesFilePath, err = prepareTempFiles(launcher.fileSystem, overrides)
+		if err == nil {
 
-			if err == nil {
-				var (
-					cmd  string
-					args []string
-				)
-				cmd, args, err = getCommandSyntax(
-					launcher.fileSystem, launcher.javaHome, obrs,
-					*testClassToLaunch, launcher.cmdParams.RemoteMaven,
-					launcher.cmdParams.TargetGalasaVersion)
+			defer func() {
+				deleteTempFiles(launcher.fileSystem, temporaryFolderPath)
+			}()
+
+			isComplete := false
+			testRuns.Complete = &isComplete
+			testRuns.Runs = make([]galasaapi.TestRun, 0)
+
+			for _, classNameUserInput := range classNames {
+
+				var testClassToLaunch *TestLocation
+				testClassToLaunch, err = classNameUserInputToTestClassLocation(classNameUserInput)
+
 				if err == nil {
-					log.Printf("Launching command '%s' '%v'\n", cmd, args)
-					localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
-					err = localTest.launch(cmd, args)
-
+					var (
+						cmd  string
+						args []string
+					)
+					cmd, args, err = getCommandSyntax(
+						launcher.fileSystem, launcher.javaHome, obrs,
+						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
+						launcher.cmdParams.TargetGalasaVersion, overridesFilePath)
 					if err == nil {
-						// The JVM process started. Store away its' details
-						launcher.localTests = append(launcher.localTests, localTest)
+						log.Printf("Launching command '%s' '%v'\n", cmd, args)
+						localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
+						err = localTest.launch(cmd, args)
 
-						localTest.testRun = new(galasaapi.TestRun)
-						localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
-						localTest.testRun.SetStream(stream)
-						localTest.testRun.SetGroup(groupName)
-						localTest.testRun.SetRequestor(requestor)
-						localTest.testRun.SetTrace(isTraceEnabled)
-						localTest.testRun.SetType(requestType)
-						localTest.testRun.SetName(localTest.runId)
+						if err == nil {
+							// The JVM process started. Store away its' details
+							launcher.localTests = append(launcher.localTests, localTest)
 
-						// The test run we started can be returned to the submitter.
-						testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
+							localTest.testRun = new(galasaapi.TestRun)
+							localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+							localTest.testRun.SetStream(stream)
+							localTest.testRun.SetGroup(groupName)
+							localTest.testRun.SetRequestor(requestor)
+							localTest.testRun.SetTrace(isTraceEnabled)
+							localTest.testRun.SetType(requestType)
+							localTest.testRun.SetName(localTest.runId)
+
+							// The test run we started can be returned to the submitter.
+							testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
+						}
 					}
 				}
-			}
 
-			if err != nil {
-				break
+				if err != nil {
+					break
+				}
 			}
 		}
 	}
 
 	return testRuns, err
+}
+
+func deleteTempFiles(fileSystem utils.FileSystem, temporaryFolderPath string) {
+	fileSystem.DeleteDir(temporaryFolderPath)
+}
+
+func prepareTempFiles(
+	fileSystem utils.FileSystem,
+	overrides map[string]interface{},
+) (string, string, error) {
+
+	var (
+		temporaryFolderPath string = ""
+		overridesFilePath   string = ""
+		err                 error
+	)
+
+	overrides, err = addStandardProperties(fileSystem, overrides)
+
+	// Create a temporary folder
+	if err == nil {
+		temporaryFolderPath, err = fileSystem.MkTempDir()
+		if err == nil {
+
+			// Write the properties to a file
+			overridesFilePath = temporaryFolderPath + "overrides.properties"
+			err = utils.WritePropertiesFile(fileSystem, overridesFilePath, overrides)
+
+			// Clean up the temporary folder if we failed to create the props file.
+			if err != nil {
+				fileSystem.DeleteDir(temporaryFolderPath)
+			}
+		}
+	}
+
+	return temporaryFolderPath, overridesFilePath, err
+}
+
+func addStandardProperties(fileSystem utils.FileSystem, overrides map[string]interface{}) (map[string]interface{}, error) {
+	// Set the ras location to be local disk always.
+	homePath, err := fileSystem.GetUserHomeDir()
+	if err == nil {
+		const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
+		rasPathUri := "file://" + homePath + utils.FILE_SYSTEM_PATH_SEPARATOR + ".galasa" +
+			utils.FILE_SYSTEM_PATH_SEPARATOR + "ras"
+		overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
+	}
+	return overrides, err
 }
 
 func (launcher *JvmLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error) {
@@ -313,6 +373,7 @@ func getCommandSyntax(
 	testLocation TestLocation,
 	remoteMaven string,
 	galasaVersionToRun string,
+	overridesFilePath string,
 ) (string, []string, error) {
 
 	var cmd string = ""
@@ -350,8 +411,7 @@ func getCommandSyntax(
 
 		// --overrides file:${HOME}/.galasa/overrides.properties
 		args = append(args, "--overrides")
-		overridesPath := "file:" + userHome + utils.FILE_SYSTEM_PATH_SEPARATOR +
-			".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR + "overrides.properties"
+		overridesPath := "file:" + overridesFilePath
 		args = append(args, overridesPath)
 
 		for _, obrCoordinate := range testObrs {

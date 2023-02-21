@@ -21,6 +21,8 @@ type FileSystem interface {
 	DirExists(path string) (bool, error)
 	GetUserHomeDir() (string, error)
 	OutputWarningMessage(string) error
+	MkTempDir() (string, error)
+	DeleteDir(path string)
 }
 
 const (
@@ -40,9 +42,18 @@ func NewOSFileSystem() FileSystem {
 	return new(OSFileSystem)
 }
 
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 // Interface methods...
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+func (osFS *OSFileSystem) MkTempDir() (string, error) {
+	const DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS = ""
+	tempFolderPath, err := os.MkdirTemp(DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS, "galasa-*")
+	return tempFolderPath, err
+}
+
+func (osFS *OSFileSystem) DeleteDir(path string) {
+	os.RemoveAll(path)
+}
 
 func (osFS *OSFileSystem) MkdirAll(targetFolderPath string) error {
 	err := os.MkdirAll(targetFolderPath, 0755)

@@ -99,7 +99,7 @@ public class TestLongRunningAccount {
 	 */
 	@Test
 	public void simpleSampleTest() throws Exception {
-        int secondsToSleep = 20;
+        int secondsToSleep = 60;
         Thread.sleep(secondsToSleep*1000);
 		assertThat(core).isNotNull();
 	}
