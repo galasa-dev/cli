@@ -13,7 +13,7 @@ galasactl project create [flags]
 ### Options
 
 ```
-      --features string   A comma-separated list of features you are testing. Defaults to "test". These must be able to form parts of a java package name. For example: "payee,account" (default "main")
+      --features string   A comma-separated list of features you are testing. These must be able to form parts of a java package name. For example: "payee,account" (default "feature1")
       --force             Force-overwrite files which already exist.
   -h, --help              help for create
       --obr               An OSGi Object Bundle Resource (OBR) project is needed.
