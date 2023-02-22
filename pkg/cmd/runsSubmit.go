@@ -63,6 +63,11 @@ func init() {
 		"how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is "+
 			strconv.Itoa(runs.DEFAULT_THROTTLE_TESTS_AT_ONCE))
 
+	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.OverrideFilePath, "overridefile", "",
+		"path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder. "+
+			"Overrides from --override options will take precedence over properties in this property file. "+
+			"A file path of '-' disables reading any properties file.")
+
 	runsSubmitCmd.PersistentFlags().StringSliceVar(&runsSubmitCmdParams.Overrides, "override", make([]string, 0),
 		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+
 			"Each override is of the form 'name=value'. Multiple instances of this flag can be used. "+

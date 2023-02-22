@@ -28,12 +28,12 @@ func ExecuteSubmitRuns(
 
 	var err error = nil
 
-	err = validateAndCorrectParams(&params, launcher, testSelectionFlags)
+	err = validateAndCorrectParams(fileSystem, &params, launcher, testSelectionFlags)
 	if err != nil {
 		return err
 	}
 
-	runOverrides, err := buildOverrideMap(params)
+	runOverrides, err := buildOverrideMap(fileSystem, params)
 	if err != nil {
 		return err
 	}
@@ -410,8 +410,12 @@ func buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]strin
 	return readyRuns
 }
 
-func validateAndCorrectParams(params *utils.RunsSubmitCmdParameters, launcher launcher.Launcher,
-	submitSelectionFlags *TestSelectionFlags) error {
+func validateAndCorrectParams(
+	fs utils.FileSystem,
+	params *utils.RunsSubmitCmdParameters,
+	launcher launcher.Launcher,
+	submitSelectionFlags *TestSelectionFlags,
+) error {
 
 	var err error = nil
 
@@ -454,29 +458,105 @@ func validateAndCorrectParams(params *utils.RunsSubmitCmdParameters, launcher la
 		_, err = checkIfGroupAlreadyInUse(launcher, params.GroupName)
 	}
 
+	if err == nil {
+		// Correct the default overrideFile path if it wasn't specified.
+		if params.OverrideFilePath == "" {
+			var home string
+			home, err = fs.GetUserHomeDir()
+			if err == nil {
+				params.OverrideFilePath = home + utils.FILE_SYSTEM_PATH_SEPARATOR +
+					".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR +
+					"overrides.properties"
+			}
+		}
+	}
+
+	tildaExpandAllPaths(fs, params)
+
 	return err
 }
 
-func buildOverrideMap(params utils.RunsSubmitCmdParameters) (map[string]string, error) {
+func tildaExpandAllPaths(fs utils.FileSystem, params *utils.RunsSubmitCmdParameters) error {
+	var err error = nil
+
+	if err == nil {
+		params.OverrideFilePath, err = utils.TildaExpansion(fs, params.OverrideFilePath)
+	}
+
+	if err == nil {
+		params.PortfolioFileName, err = utils.TildaExpansion(fs, params.PortfolioFileName)
+	}
+
+	if err == nil {
+		params.ReportJsonFilename, err = utils.TildaExpansion(fs, params.ReportJsonFilename)
+	}
+
+	if err == nil {
+		params.ReportJunitFilename, err = utils.TildaExpansion(fs, params.ReportJunitFilename)
+	}
+
+	if err == nil {
+		params.ReportYamlFilename, err = utils.TildaExpansion(fs, params.ReportYamlFilename)
+	}
+
+	if err == nil {
+		params.ThrottleFileName, err = utils.TildaExpansion(fs, params.ThrottleFileName)
+	}
+	return err
+}
+
+func buildOverrideMap(fileSystem utils.FileSystem, commandParameters utils.RunsSubmitCmdParameters) (map[string]string, error) {
+
+	runOverrides, err := loadOverrideFile(fileSystem, commandParameters.OverrideFilePath)
+
+	if err == nil {
+		runOverrides, err = addOverridesFromCmdLine(runOverrides, commandParameters.Overrides)
+	}
+
+	return runOverrides, err
+}
+
+func loadOverrideFile(fileSystem utils.FileSystem, overrideFilePath string) (map[string]string, error) {
+
+	var (
+		overrides utils.JavaProperties
+		err       error = nil
+	)
+
+	if overrideFilePath == "-" {
+		// Don't read properties from a file.
+		overrides = make(map[string]string)
+	} else {
+		overrides, err = utils.ReadPropertiesFile(fileSystem, overrideFilePath)
+	}
+
+	return overrides, err
+}
+
+func addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string) (map[string]string, error) {
 	var err error = nil
 
 	// Convert overrides to a map
-	runOverrides := make(map[string]string)
-	for _, override := range params.Overrides {
+	for _, override := range commandLineOverrides {
 		pos := strings.Index(override, "=")
 		if pos < 1 {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
-			return nil, err
+			break
 		}
 		key := override[:pos]
 		value := override[pos+1:]
 		if value == "" {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
-			return nil, err
+			break
 		}
-		runOverrides[key] = value
+		overrides[key] = value
 	}
-	return runOverrides, nil
+
+	// Discard overrides if there was an error.
+	if err != nil {
+		overrides = nil
+	}
+	return overrides, nil
 }
 
 func getPortfolio(fileSystem utils.FileSystem, portfolioFileName string, launcher launcher.Launcher, submitSelectionFlags *TestSelectionFlags) (*Portfolio, error) {

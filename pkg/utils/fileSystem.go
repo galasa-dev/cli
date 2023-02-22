@@ -6,6 +6,7 @@ package utils
 import (
 	"errors"
 	"os"
+	pathUtils "path"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
@@ -28,6 +29,20 @@ type FileSystem interface {
 const (
 	FILE_SYSTEM_PATH_SEPARATOR string = string(os.PathSeparator)
 )
+
+// TildaExpansion If a file starts with a tilda '~' character, expand it
+// to the home folder of the user on this file system.
+func TildaExpansion(fileSystem FileSystem, path string) (string, error) {
+	var err error = nil
+	if path != "" {
+		if path[0] == '~' {
+			var userHome string
+			userHome, err = fileSystem.GetUserHomeDir()
+			path = pathUtils.Join(userHome, path[1:])
+		}
+	}
+	return path, err
+}
 
 //------------------------------------------------------------------------------------
 // The implementation of the real os-delegating variant of the FileSystem interface

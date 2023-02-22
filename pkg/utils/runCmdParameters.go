@@ -21,4 +21,5 @@ type RunsSubmitCmdParameters struct {
 	RequestType                   string
 	ThrottleFileName              string
 	PortfolioFileName             string
+	OverrideFilePath              string
 }

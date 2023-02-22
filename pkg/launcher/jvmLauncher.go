@@ -272,24 +272,28 @@ func (launcher *JvmLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRu
 	for _, localTest := range launcher.localTests {
 
 		testName := localTest.testRun.GetName()
+
 		if localTest.isCompleted() {
 			log.Printf("GetRunsByGroup: localTest %s is complete.\n", testName)
 		} else {
-
-			// Update the test status by reading the json file if we can.
-			localTest.updateTestStatusFromRasFile()
-
-			if localTest.isCompleted() {
-				log.Printf("GetRunsByGroup: localTest %s is not yet complete.\n", testName)
-			} else {
-				log.Printf("GetRunsByGroup: localTest read status and it is finished.")
-				isAllComplete = false
-			}
+			log.Printf("GetRunsByGroup: localTest %s is not yet complete.\n", testName)
+			isAllComplete = false
 		}
-		testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
+
+		var testRun *galasaapi.TestRun
+		if localTest.testRun != nil {
+			testRun = localTest.testRun
+		} else {
+			testRun = createSimulatedTestRun(testName)
+		}
+
+		testRuns.Runs = append(testRuns.Runs, *testRun)
 	}
 
-	log.Printf("JvmLauncher: GetRunsByGroup(groupName=%s) exiting. ", groupName)
+	log.Printf("JvmLauncher: GetRunsByGroup(groupName=%s) exiting. isComplete:%v testRuns returned:%v\n", groupName, *testRuns.Complete, len(testRuns.Runs))
+	for _, testRun := range testRuns.Runs {
+		log.Printf("JvmLauncher: GetRunsByGroup test name:%s status:%s result:%s\n", *testRun.Name, *testRun.Status, *testRun.Result)
+	}
 	return &testRuns, nil
 }
 

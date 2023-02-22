@@ -6,7 +6,6 @@ package api
 import (
 	"io"
 	"net/http"
-	pathUtils "path"
 	"strings"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -125,7 +124,7 @@ func cleanPath(fileSystem utils.FileSystem, path string) (string, error) {
 	var err error = nil
 	if path != "" {
 		path = removeLeadingFileColon(path)
-		path, err = tildaExpansion(fileSystem, path)
+		path, err = utils.TildaExpansion(fileSystem, path)
 	}
 	return path, err
 }
@@ -133,16 +132,6 @@ func cleanPath(fileSystem utils.FileSystem, path string) (string, error) {
 func removeLeadingFileColon(path string) string {
 	path = strings.TrimPrefix(path, "file:")
 	return path
-}
-
-func tildaExpansion(fileSystem utils.FileSystem, path string) (string, error) {
-	var err error = nil
-	if path[0] == '~' {
-		var userHome string
-		userHome, err = fileSystem.GetUserHomeDir()
-		path = pathUtils.Join(userHome, path[1:])
-	}
-	return path, err
 }
 
 func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem utils.FileSystem) (*BootstrapData, error) {

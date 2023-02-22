@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 )
@@ -71,7 +72,10 @@ func WritePropertiesFile(fs FileSystem, path string, properties map[string]inter
 	}
 
 	// Write it all out to a file.
-	err = fs.WriteTextFile(path, buff.String())
+	contents := buff.String()
+	err = fs.WriteTextFile(path, contents)
+
+	log.Printf("Properties file %s written containing this:\n%s", path, contents)
 
 	return err
 }

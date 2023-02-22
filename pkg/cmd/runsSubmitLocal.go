@@ -36,12 +36,12 @@ func init() {
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.RemoteMaven, "remoteMaven",
 		"https://repo.maven.apache.org/maven2",
 		"the url of the remote maven where galasa bundles can be loaded from. "+
-			"Defaults to maven central https://repo.maven.apache.org/maven2")
+			"Defaults to maven central.")
 
 	currentGalasaVersion := embedded.GetGalasaVersion()
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.TargetGalasaVersion, "galasaVersion",
 		currentGalasaVersion,
-		"the version of galasa you want to use to run your tests. Defaults to "+currentGalasaVersion)
+		"the version of galasa you want to use to run your tests.")
 
 	runsSubmitLocalCmd.Flags().StringSliceVar(&runsSubmitLocalCmdParams.Obrs, "obr", make([]string, 0),
 		"The maven coordinates of the obr bundle(s) which refer to your test bundles. "+
