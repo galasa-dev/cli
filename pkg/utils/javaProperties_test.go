@@ -27,3 +27,24 @@ func TestCanCreateAPropsFileAndReadItBack(t *testing.T) {
 	assert.Equal(t, propsGotBack["d"], "e")
 }
 
+func TestCanCreateReadAPropsFileBackWithCommentsIgnored(t *testing.T) {
+
+	fs := NewMockFileSystem()
+
+	text := `
+
+# A comment line.
+
+a = b
+
+
+= Invalid. should be ignored.
+	`
+	fs.WriteTextFile("myPropsFile.properties", text)
+
+	propsGotBack, err := ReadPropertiesFile(fs, "myPropsFile.properties")
+
+	assert.Nil(t, err)
+	assert.Contains(t, propsGotBack, "a")
+	assert.Equal(t, propsGotBack["a"], "b")
+}

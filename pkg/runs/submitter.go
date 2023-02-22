@@ -565,7 +565,7 @@ func getPortfolio(fileSystem utils.FileSystem, portfolioFileName string, launche
 	var err error = nil
 
 	if portfolioFileName != "" {
-		portfolio, err = LoadPortfolio(fileSystem, portfolioFileName)
+		portfolio, err = ReadPortfolio(fileSystem, portfolioFileName)
 	} else {
 		// There is no portfolio file, so create an in-memory portfolio
 		// from the tests we can find from the test selection.
@@ -575,7 +575,7 @@ func getPortfolio(fileSystem utils.FileSystem, portfolioFileName string, launche
 		if err == nil {
 			testOverrides := make(map[string]string)
 			portfolio = NewPortfolio()
-			CreatePortfolio(&testSelection, &testOverrides, portfolio)
+			AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
 		}
 	}
 	return portfolio, err
