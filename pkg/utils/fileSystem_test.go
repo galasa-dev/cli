@@ -4,6 +4,7 @@
 package utils
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,4 +24,101 @@ func TestTildaExpansionWhenFilenameNormalBlankReturnsBlank(t *testing.T) {
 	pathGotBack, err := TildaExpansion(fs, pathIn)
 	assert.Nil(t, err)
 	assert.Equal(t, pathGotBack, "normal")
+}
+
+func TestCanCreateTempFolder(t *testing.T) {
+	fs := NewOSFileSystem()
+	path, err := fs.MkTempDir()
+	assert.Nil(t, err)
+	defer func() {
+		fs.DeleteDir(path)
+	}()
+	assert.NotNil(t, path)
+}
+
+func TestCanWriteAndReadTempTextFile(t *testing.T) {
+	fs := NewOSFileSystem()
+	tempFolderPath, _ := fs.MkTempDir()
+	defer func() {
+		fs.DeleteDir(tempFolderPath)
+	}()
+	textFilePath := tempFolderPath + FILE_SYSTEM_PATH_SEPARATOR + "textFile.txt"
+	content := "hello\nworld\n"
+	err := fs.WriteTextFile(textFilePath, content)
+	assert.Nil(t, err)
+	textGotBack, err := fs.ReadTextFile(textFilePath)
+	assert.Nil(t, err)
+	assert.Equal(t, content, textGotBack)
+}
+
+func TestCanDeleteFilesAndTheyGo(t *testing.T) {
+	fs := NewOSFileSystem()
+	tempFolderPath, _ := fs.MkTempDir()
+	exists, err := fs.DirExists(tempFolderPath)
+	assert.Nil(t, err)
+	assert.True(t, exists)
+
+	// Now delete it
+	fs.DeleteDir((tempFolderPath))
+
+	exists, err = fs.DirExists(tempFolderPath)
+	assert.Nil(t, err)
+	assert.False(t, exists)
+}
+
+func TestCanOutputWarningMessageDoesntBlowUp(t *testing.T) {
+	fs := NewOSFileSystem()
+	fs.OutputWarningMessage("hello")
+}
+
+func TestGetUserHomeDirReturnsSomething(t *testing.T) {
+	fs := NewOSFileSystem()
+	homeDirPath, err := fs.GetUserHomeDir()
+	assert.Nil(t, err)
+	assert.NotEmpty(t, homeDirPath)
+	assert.True(t, strings.HasPrefix(homeDirPath, FILE_SYSTEM_PATH_SEPARATOR))
+}
+
+func TestMkAllDirCreatesNestOfFoldersOk(t *testing.T) {
+	fs := NewOSFileSystem()
+	tempFolderPath, _ := fs.MkTempDir()
+	defer func() {
+		fs.DeleteDir(tempFolderPath)
+	}()
+	nestedFolderPath := tempFolderPath + FILE_SYSTEM_PATH_SEPARATOR +
+		"a" + FILE_SYSTEM_PATH_SEPARATOR + "b"
+
+	// When we create the next of folders.
+	err := fs.MkdirAll(nestedFolderPath)
+	assert.Nil(t, err)
+
+	exists, err := fs.DirExists(nestedFolderPath)
+	assert.Nil(t, err)
+	assert.True(t, exists)
+
+}
+
+func TestCreatedFileExists(t *testing.T) {
+	fs := NewOSFileSystem()
+	tempFolderPath, _ := fs.MkTempDir()
+	defer func() {
+		fs.DeleteDir(tempFolderPath)
+	}()
+	textFilePath := tempFolderPath + FILE_SYSTEM_PATH_SEPARATOR + "textFile.txt"
+	content := "hello\nworld\n"
+	err := fs.WriteTextFile(textFilePath, content)
+	assert.Nil(t, err)
+
+	// When we check for the file's existence...
+	exists, err := fs.Exists(textFilePath)
+	assert.Nil(t, err)
+	assert.True(t, exists)
+
+	// Now when we delete it
+	fs.DeleteDir(tempFolderPath)
+
+	exists, err = fs.Exists(textFilePath)
+	assert.Nil(t, err)
+	assert.False(t, exists)
+
 }

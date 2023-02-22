@@ -183,9 +183,9 @@ echo "my.file.based.property = 23" > ${BASEDIR}/temp/extra-overrides.properties
 ${GALASACTL} runs submit local \
 --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
 --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
---override my.property=HELLO \
---overridefile ${BASEDIR}/temp/extra-overrides.properties \
---log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+# --override my.property=HELLO \
+# --overridefile ${BASEDIR}/temp/extra-overrides.properties 
+# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
 
 
 
