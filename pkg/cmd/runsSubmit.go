@@ -50,7 +50,7 @@ func init() {
 	)
 
 	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.PollIntervalSeconds, "poll", runs.DEFAULT_POLL_INTERVAL_SECONDS,
-		"Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. "+
+		"Optional. The interval time in seconds between successive polls of the test runs status. "+
 			"Defaults to "+strconv.Itoa(runs.DEFAULT_POLL_INTERVAL_SECONDS)+" seconds. "+
 			"If less than 1, then default value is used.")
 
