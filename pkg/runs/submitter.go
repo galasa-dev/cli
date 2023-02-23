@@ -112,10 +112,13 @@ func executeSubmitRuns(fileSystem utils.FileSystem,
 				lostRuns, &runOverrides, params.Trace, params.Requestor, params.RequestType)
 		}
 
-		now := timeService.Now()
-		if now.After(nextProgressReport) {
-			InterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
-			nextProgressReport = now.Add(progressReportInterval)
+		// Only do progress reporting if the user didn't disable it.
+		if params.ProgressReportIntervalMinutes > 0 {
+			now := timeService.Now()
+			if now.After(nextProgressReport) {
+				InterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
+				nextProgressReport = now.Add(progressReportInterval)
+			}
 		}
 
 		throttle, isThrottleFileLost = updateThrottleFromFileIfDifferent(fileSystem, params.ThrottleFileName, throttle, isThrottleFileLost)
@@ -421,11 +424,9 @@ func validateAndCorrectParams(params *utils.RunsSubmitCmdParameters, launcher la
 		params.PollIntervalSeconds = DEFAULT_POLL_INTERVAL_SECONDS
 	}
 
-	// Set the progress time
-	if params.ProgressReportIntervalMinutes < 0 {
-		params.ProgressReportIntervalMinutes = MAX_INT
-	} else if params.ProgressReportIntervalMinutes == 0 {
-		params.ProgressReportIntervalMinutes = 5
+	// Set the progress reporting interval time
+	if params.ProgressReportIntervalMinutes <= 0 {
+		params.ProgressReportIntervalMinutes = 0
 	}
 
 	// Set the throttle

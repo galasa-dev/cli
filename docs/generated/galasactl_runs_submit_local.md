@@ -36,7 +36,7 @@ galasactl runs submit local [flags]
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
       --poll int                   Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
   -p, --portfolio string           portfolio containing the tests to run
-      --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. Defaults to 5 minutes. If less than 1, then default value is used. (default 5)
+      --progress int               in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting. (default 5)
       --reportjson string          json file to record the final results in
       --reportjunit string         junit xml file to record the final results in
       --reportyaml string          yaml file to record the final results in

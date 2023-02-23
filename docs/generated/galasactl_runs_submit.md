@@ -22,7 +22,7 @@ galasactl runs submit [flags]
       --package strings            packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
       --poll int                   Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
   -p, --portfolio string           portfolio containing the tests to run
-      --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. Defaults to 5 minutes. If less than 1, then default value is used. (default 5)
+      --progress int               in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting. (default 5)
       --regex                      Test selection is performed by using regex
       --reportjson string          json file to record the final results in
       --reportjunit string         junit xml file to record the final results in
