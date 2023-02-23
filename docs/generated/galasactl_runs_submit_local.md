@@ -1,0 +1,53 @@
+## galasactl runs submit local
+
+submit a list of tests to be run on a local java virtual machine (JVM)
+
+### Synopsis
+
+Submit a list of tests to a local JVM, monitor them and wait for them to complete
+
+```
+galasactl runs submit local [flags]
+```
+
+### Options
+
+```
+      --bundle strings         bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
+      --class strings          test class names, for building a portfolio when a stream/test catalog is not available. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
+      --galasaVersion string   the version of galasa you want to use to run your tests. Defaults to 0.26.0 (default "0.26.0")
+  -h, --help                   help for local
+      --obr strings            The maven coordinates of the obr bundle(s) which refer to your test bundles. The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' Multiple instances of this flag can be used to describe multiple obr bundles.
+      --package strings        packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
+      --regex                  Test selection is performed by using regex
+      --remoteMaven string     the url of the remote maven where galasa bundles can be loaded from. Defaults to maven central https://repo.maven.apache.org/maven2 (default "https://repo.maven.apache.org/maven2")
+  -s, --stream string          test stream to extract the tests from
+      --tag strings            tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex
+      --test strings           test names which will be selected if the name contains this string, or if --regex is specified then matches the regex
+```
+
+### Options inherited from parent commands
+
+```
+  -b, --bootstrap string           Bootstrap URL
+  -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
+  -l, --log string                 File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
+      --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
+      --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
+      --poll int                   Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
+  -p, --portfolio string           portfolio containing the tests to run
+      --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. Defaults to 5 minutes. If less than 1, then default value is used. (default 5)
+      --reportjson string          json file to record the final results in
+      --reportjunit string         junit xml file to record the final results in
+      --reportyaml string          yaml file to record the final results in
+      --requestor string           the requestor id to be associated with the test runs. Defaults to the current user id.
+      --requesttype string         the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
+      --throttle int               how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is 3 (default 3)
+      --throttlefile string        a file where the current throttle is stored. Periodically the throttle value is read from the file used. Someone with edit access to the file can change it which dynamically takes effect. Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). And they can be resumed (un-paused) if the value is set back. This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.Optional. If not specified, no throttle file is used.
+      --trace                      Trace to be enabled on the test runs
+```
+
+### SEE ALSO
+
+* [galasactl runs submit](galasactl_runs_submit.md)	 - submit a list of tests to the ecosystem
+

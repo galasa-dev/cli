@@ -27,3 +27,10 @@ func DeepClone(original map[string]*TestRun) map[string]*TestRun {
 
 	return new
 }
+
+const (
+	DEFAULT_POLL_INTERVAL_SECONDS            int = 30
+	MAX_INT                                  int = int(^uint(0) >> 1)
+	DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES int = 5
+	DEFAULT_THROTTLE_TESTS_AT_ONCE           int = 3
+)

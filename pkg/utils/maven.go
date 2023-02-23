@@ -1,7 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package runs
+package utils
 
 type MavenCoordinates struct {
 	GroupId    string

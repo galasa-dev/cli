@@ -2,31 +2,27 @@
  * Copyright contributors to the Galasa project
  */
 
-package utils
+package runs
 
 import (
+	"log"
 	"strings"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/launcher"
 )
 
-func FetchTestStreams(apiClient *galasaapi.APIClient) []string {
-	cpsProperty, _, err := apiClient.ConfigurationPropertyStoreAPIApi.GetCpsNamespaceCascadeProperty(nil, "framework", "test", "streams").Execute()
-	if err != nil {
-		panic(err)
-	}
-
-	if cpsProperty.Value == nil {
-		return make([]string, 0)
-	}
-
-	return strings.Split(*cpsProperty.Value, ",")
+func GetStreams(launcher launcher.Launcher) ([]string, error) {
+	log.Println("Getting streams list.")
+	streams, err := launcher.GetStreams()
+	return streams, err
 }
 
 func ValidateStream(streams []string, stream string) error {
+	log.Println("Validating streams list.")
 	for _, s := range streams {
 		if s == stream {
+			log.Println("Stream is found in the list of valid streams.")
 			return nil
 		}
 	}
