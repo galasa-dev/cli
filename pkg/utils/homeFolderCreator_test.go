@@ -4,7 +4,10 @@
 package utils
 
 import (
+	"strings"
 	"testing"
+
+	"log"
 
 	"github.com/galasa.dev/cli/pkg/embedded"
 	"github.com/stretchr/testify/assert"
@@ -64,4 +67,17 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 func assertFolderExists(t *testing.T, mockFileSystem FileSystem, path string, message string) {
 	isExist, _ := mockFileSystem.DirExists(path)
 	assert.True(t, isExist, message)
+}
+
+func TestCanGetGalasaBootJarPath(t *testing.T) {
+
+	fs := NewMockFileSystem()
+	path, err := GetGalasaBootJarPath(fs)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, path)
+	log.Printf("path got back is '%s'", path)
+	assert.True(t, strings.HasPrefix(path, "/User/Home/testuser/.galasa/lib/"))
+	assert.True(t, strings.HasSuffix(path, ".jar"))
+	assert.Contains(t, path, "galasa-boot-")
 }

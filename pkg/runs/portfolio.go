@@ -48,7 +48,7 @@ const (
 	PORTFOLIO_DECLARED_RESOURCE_KIND = "galasa.dev/testPortfolio"
 )
 
-func CreatePortfolio(testSelection *TestSelection, testOverrides *map[string]string, portfolio *Portfolio) {
+func AddClassesToPortfolio(testSelection *TestSelection, testOverrides *map[string]string, portfolio *Portfolio) {
 
 	for _, selectedClass := range testSelection.Classes {
 		portfolioClass := PortfolioClass{
@@ -69,7 +69,7 @@ func WritePortfolio(fileSystem utils.FileSystem, filename string, portfolio *Por
 	return err
 }
 
-func LoadPortfolio(fileSystem utils.FileSystem, filename string) (*Portfolio, error) {
+func ReadPortfolio(fileSystem utils.FileSystem, filename string) (*Portfolio, error) {
 
 	var portfolio Portfolio
 

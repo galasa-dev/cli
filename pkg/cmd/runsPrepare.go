@@ -101,7 +101,7 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
 	var portfolio *runs.Portfolio
 	if *prepareAppend {
-		portfolio, err = runs.LoadPortfolio(fileSystem, portfolioFilename)
+		portfolio, err = runs.ReadPortfolio(fileSystem, portfolioFilename)
 		if err != nil {
 			panic(err)
 		}
@@ -109,7 +109,7 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 		portfolio = runs.NewPortfolio()
 	}
 
-	runs.CreatePortfolio(&testSelection, &testOverrides, portfolio)
+	runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
 
 	err = runs.WritePortfolio(fileSystem, portfolioFilename, portfolio)
 	if err != nil {

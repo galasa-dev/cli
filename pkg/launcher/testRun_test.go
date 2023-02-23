@@ -55,3 +55,12 @@ func TestCanReadJsonTestRunFileOk(t *testing.T) {
 	assert.Equal(t, "dev.galasa.example.banking.account", *testRun.BundleName, "bad bundle name.")
 
 }
+
+func TestCanCreateSimulatedTestRun(t *testing.T) {
+	testRun := createSimulatedTestRun("runId58")
+	assert.NotNil(t, testRun)
+	assert.Equal(t, testRun.GetName(), "runId58")
+	assert.NotNil(t, testRun.GetRasRunId())
+	assert.NotNil(t, testRun.GetResult())
+	assert.NotNil(t, testRun.GetStatus())
+}

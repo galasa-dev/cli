@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"runtime"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/spf13/cobra"
@@ -46,16 +45,6 @@ func Execute() {
 	finalWord(err)
 }
 
-func logStackTrace() {
-	// Log what the stack is.
-	var stack [4096]byte
-	// Only want the stack trace from the recovered execution thread, not all go routines running.
-	isWantAllStackTraces := false
-	n := runtime.Stack(stack[:], isWantAllStackTraces)
-
-	log.Printf("%s\n", stack[:n])
-}
-
 func finalWord(obj interface{}) {
 	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
 	if isCapturingLogs {
@@ -67,7 +56,7 @@ func finalWord(obj interface{}) {
 	}
 
 	if isStackTraceWanted && isCapturingLogs {
-		logStackTrace()
+		galasaErrors.LogStackTrace()
 	}
 
 	if isCapturingLogs {

@@ -99,7 +99,7 @@ public class TestLongRunningAccount {
 	 */
 	@Test
 	public void simpleSampleTest() throws Exception {
-        int secondsToSleep = 20;
+        int secondsToSleep = 60;
         Thread.sleep(secondsToSleep*1000);
 		assertThat(core).isNotNull();
 	}
@@ -152,72 +152,69 @@ mvn clean test install
 # Run the test
 #-------------------------------------------------------------------------
 
-function submit_local_test {
-
-    TEST_BUNDLE=$1
-    TEST_JAVA_CLASS=$2
-    TEST_OBR_GROUP_ID=$3
-    TEST_OBR_ARTIFACT_ID=$4
-    TEST_OBR_VERSION=$5
-
-    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.24.0/
-    export BOOT_JAR_VERSION="0.24.0"
-
-    export OBR_VERSION="0.25.0"
-
-    export M2_PATH=$(cd ~/.m2 ; pwd)
-    export BOOT_JAR_PATH=~/.galasa/lib/${OBR_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
-
-    
-
-
-    # Local .m2 content over-rides these anyway...
-    # use development version of the OBR
-    export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
-    # else go to maven central
-    #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
-
-    export GALASACTL="${BASEDIR}/bin/galasactl-darwin-arm64"
-
-    ${GALASACTL} runs submit local \
-    --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestFailingAccount \
-    --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
-    --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestLongRunningAccount \
-    --throttle 7 \
-    --requesttype MikeCLI \
-    --poll 10 \
-    --progress 1 \
-    --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
-
-    # --reportjson myreport.json \
-    # --reportyaml myreport.yaml \
-
-    
-    # --noexitcodeontestfailures \
-
-    # --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
-    # --galasaVersion 0.25.0 \
-
-    rc=$?
-    if [[ "${rc}" != "0" ]]; then 
-        echo "Failed to run the test"
-        exit 1
-    fi
-    echo "Test ran OK"
-}
-
-
-# Run the Payee tests.
 export TEST_BUNDLE=dev.galasa.example.banking.payee
 export TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
 export TEST_OBR_GROUP_ID=dev.galasa.example.banking
 export TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
 export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
-submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.24.0/
+export BOOT_JAR_VERSION="0.24.0"
+
+export OBR_VERSION="0.26.0"
+
+export M2_PATH=$(cd ~/.m2 ; pwd)
+export BOOT_JAR_PATH=~/.galasa/lib/${OBR_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
+
+    
+
+
+# Local .m2 content over-rides these anyway...
+# use development version of the OBR
+export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
+# else go to maven central
+#export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
+
+export GALASACTL="${BASEDIR}/bin/galasactl-darwin-arm64"
+
+echo "my.file.based.property = 23" > ${BASEDIR}/temp/extra-overrides.properties
+
+${GALASACTL} runs submit local \
+--obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
+--class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+# --override my.property=HELLO \
+# --overridefile ${BASEDIR}/temp/extra-overrides.properties 
+# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+
+
+
+# --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
+# --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestFailingAccount \
+# --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
+# --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
+# --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestLongRunningAccount \
+# --throttle 7 \
+# --requesttype MikeCLI \
+# --poll 10 \
+# --progress 1 \
+# 
+
+# --reportjson myreport.json \
+# --reportyaml myreport.yaml \
+
+
+# --noexitcodeontestfailures \
+
+# --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
+# --galasaVersion 0.25.0 \
+
+rc=$?
+if [[ "${rc}" != "0" ]]; then 
+    echo "Failed to run the test"
+    exit 1
+fi
+echo "Test ran OK"
+
 
     

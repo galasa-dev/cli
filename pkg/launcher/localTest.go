@@ -153,7 +153,6 @@ func (localTest *LocalTest) waitForCompletion() error {
 	localTest.updateTestStatusFromRasFile()
 
 	// Tell any polling thread that the JVM is complete now.
-	localTest.testRun.SetStatus("finished")
 	localTest.reportingChannel <- "DONE"
 	close(localTest.reportingChannel)
 
@@ -174,7 +173,7 @@ func (localTest *LocalTest) updateTestStatusFromRasFile() error {
 	} else {
 
 		jsonFilePath := localTest.rasFolderPath + "/" + localTest.runId + "/structure.json"
-		log.Printf("Reading latest test status from %s\n", jsonFilePath)
+		log.Printf("Reading latest test status from '%s'\n", jsonFilePath)
 
 		var testRun *galasaapi.TestRun
 		testRun, err = readTestRunFromJsonFile(localTest.fileSystem, jsonFilePath)
@@ -206,9 +205,16 @@ func (localTest *LocalTest) isCompleted() bool {
 			if msg == "DONE" || msg == "" {
 				isComplete = true
 			}
+
 		default:
 			// log.Printf("No message received from JVM launch thread. Would block. JVM is not finished.")
 			isComplete = false
+		}
+
+		localTest.updateTestStatusFromRasFile()
+		if localTest.testRun != nil && localTest.testRun.GetStatus() == "finished" {
+			// The test is already complete.
+			isComplete = true
 		}
 	}
 	return isComplete

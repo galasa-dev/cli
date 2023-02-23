@@ -6,6 +6,7 @@ package utils
 import (
 	"errors"
 	"os"
+	pathUtils "path"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
@@ -21,11 +22,27 @@ type FileSystem interface {
 	DirExists(path string) (bool, error)
 	GetUserHomeDir() (string, error)
 	OutputWarningMessage(string) error
+	MkTempDir() (string, error)
+	DeleteDir(path string)
 }
 
 const (
 	FILE_SYSTEM_PATH_SEPARATOR string = string(os.PathSeparator)
 )
+
+// TildaExpansion If a file starts with a tilda '~' character, expand it
+// to the home folder of the user on this file system.
+func TildaExpansion(fileSystem FileSystem, path string) (string, error) {
+	var err error = nil
+	if path != "" {
+		if path[0] == '~' {
+			var userHome string
+			userHome, err = fileSystem.GetUserHomeDir()
+			path = pathUtils.Join(userHome, path[1:])
+		}
+	}
+	return path, err
+}
 
 //------------------------------------------------------------------------------------
 // The implementation of the real os-delegating variant of the FileSystem interface
@@ -40,9 +57,18 @@ func NewOSFileSystem() FileSystem {
 	return new(OSFileSystem)
 }
 
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 // Interface methods...
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+func (osFS *OSFileSystem) MkTempDir() (string, error) {
+	const DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS = ""
+	tempFolderPath, err := os.MkdirTemp(DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS, "galasa-*")
+	return tempFolderPath, err
+}
+
+func (osFS *OSFileSystem) DeleteDir(path string) {
+	os.RemoveAll(path)
+}
 
 func (osFS *OSFileSystem) MkdirAll(targetFolderPath string) error {
 	err := os.MkdirAll(targetFolderPath, 0755)

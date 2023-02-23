@@ -6,6 +6,7 @@ package runs
 import (
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/launcher"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -81,47 +82,70 @@ func TestUpdateThrottleFromFileIfDifferentDoesntChangeIfFileMissing(t *testing.T
 	assert.True(t, isLost)
 }
 
-/*
-func TestCanSubmitSmallPortfolio(t *testing.T) {
-	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+func TestOverridesReadFromOverridesFile(t *testing.T) {
 
-	portfolioText := ` Some portfolio text. tbd.
-	`
+	fileProps := make(map[string]interface{})
+	fileProps["c"] = "d"
 
-	mockFileSystem.WriteTextFile("small.portfolio", portfolioText)
+	fs := utils.NewMockFileSystem()
+	utils.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
 
-	params := RunsSubmitCmdParameters{
-		pollIntervalSeconds:           1,
-		noExitCodeOnTestFailures:      true,
-		progressReportIntervalMinutes: 1,
-		throttle:                      1,
-		trace:                         false,
-		reportYamlFilename:            "a.yaml",
-		reportJsonFilename:            "a.json",
-		reportJunitFilename:           "a.junit.xml",
-		groupName:                     "babe",
-		portfolioFileName:             "small.portfolio",
-		isLocal:					   false,
+	commandParameters := utils.RunsSubmitCmdParameters{
+		Overrides:        []string{"a=b"},
+		OverrideFilePath: "/tmp/temp.properties",
 	}
 
-	mockTimeService := utils.NewMockTimeServiceAsMock()
+	overrides, err := buildOverrideMap(fs, commandParameters)
 
-	apiClient := &galasaapi.APIClient{}
-
-	// RunsAPIApi.On("GetRunsByGroup",nil, groupName).Return(nil)
-
-	// When ...
-	err := executeSubmitRemote(
-		mockFileSystem,
-		params,
-		apiClient,
-		mockTimeService)
-
-	// Then...
-	if err != nil {
-		assert.Fail(t, "Not expecting error "+err.Error())
-	}
-	assert.Fail(t, "Exiting.")
+	assert.Nil(t, err)
+	assert.NotNil(t, overrides)
+	assert.Contains(t, overrides, "a", "command-line override wasn't used.")
+	assert.Equal(t, overrides["a"], "b", "command-line override not passed correctly.")
+	assert.Contains(t, overrides, "c", "file-based override wasn't used")
+	assert.Equal(t, overrides["c"], "d", "file-based override value wasn't passed correctly.")
 }
-*/
+
+func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
+
+	fs := utils.NewMockFileSystem()
+
+	commandParameters := utils.RunsSubmitCmdParameters{
+		Overrides:        []string{"a=b"},
+		OverrideFilePath: "-",
+	}
+
+	overrides, err := buildOverrideMap(fs, commandParameters)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, overrides)
+	assert.Contains(t, overrides, "a", "command-line override wasn't used.")
+	assert.Equal(t, overrides["a"], "b", "command-line override not passed correctly.")
+}
+
+func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
+
+	fs := utils.NewMockFileSystem()
+
+	commandParameters := &utils.RunsSubmitCmdParameters{
+		Overrides:        []string{"a=b"},
+		OverrideFilePath: "",
+	}
+
+	regexSelectValue := false
+	submitSelectionFlags := &TestSelectionFlags{
+		bundles:     new([]string),
+		packages:    new([]string),
+		tests:       new([]string),
+		tags:        new([]string),
+		classes:     new([]string),
+		stream:      "myStream",
+		regexSelect: &regexSelectValue,
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	err := validateAndCorrectParams(fs, commandParameters, mockLauncher, submitSelectionFlags)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, commandParameters.OverrideFilePath)
+}

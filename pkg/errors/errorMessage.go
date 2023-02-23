@@ -47,6 +47,9 @@ func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	galasaError.msgType = msgType
 	galasaError.message = message
 
+
+	LogStackTrace()
+
 	return galasaError
 }
 
