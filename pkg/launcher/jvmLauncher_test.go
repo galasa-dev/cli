@@ -258,4 +258,5 @@ func TestCanCreateTempPropsFile(t *testing.T) {
 	overridesGotBack, err := utils.ReadPropertiesFile(fs, tempPropsFile)
 	assert.Nil(t, err)
 	assert.Contains(t, overridesGotBack, "framework.resultarchive.store")
+	assert.Contains(t, overridesGotBack, "framework.request.type.LOCAL.prefix")
 }
