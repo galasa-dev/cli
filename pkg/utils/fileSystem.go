@@ -37,14 +37,14 @@ type OSFileSystem struct {
 // NewOSFileSystem creates an implementation of the thin file system layer which delegates
 // to the real os package calls.
 func NewOSFileSystem() FileSystem {
-	return OSFileSystem{}
+	return new(OSFileSystem)
 }
 
 //------------------------------------------------------------------------------------
 // Interface methods...
 //------------------------------------------------------------------------------------
 
-func (osFS OSFileSystem) MkdirAll(targetFolderPath string) error {
+func (osFS *OSFileSystem) MkdirAll(targetFolderPath string) error {
 	err := os.MkdirAll(targetFolderPath, 0755)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_CREATE_FOLDERS, targetFolderPath, err.Error())
@@ -52,7 +52,7 @@ func (osFS OSFileSystem) MkdirAll(targetFolderPath string) error {
 	return err
 }
 
-func (osFS OSFileSystem) WriteBinaryFile(targetFilePath string, desiredContents []byte) error {
+func (osFS *OSFileSystem) WriteBinaryFile(targetFilePath string, desiredContents []byte) error {
 	err := os.WriteFile(targetFilePath, desiredContents, 0644)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
@@ -60,13 +60,13 @@ func (osFS OSFileSystem) WriteBinaryFile(targetFilePath string, desiredContents 
 	return err
 }
 
-func (osFS OSFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
+func (osFS *OSFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
 	bytes := []byte(desiredContents)
 	err := osFS.WriteBinaryFile(targetFilePath, bytes)
 	return err
 }
 
-func (OSFileSystem) ReadTextFile(filePath string) (string, error) {
+func (*OSFileSystem) ReadTextFile(filePath string) (string, error) {
 	text := ""
 	bytes, err := os.ReadFile(filePath)
 	if err != nil {
@@ -77,7 +77,7 @@ func (OSFileSystem) ReadTextFile(filePath string) (string, error) {
 	return text, err
 }
 
-func (OSFileSystem) Exists(path string) (bool, error) {
+func (*OSFileSystem) Exists(path string) (bool, error) {
 	isExists := true
 	_, err := os.Stat(path)
 	if err != nil {
@@ -90,7 +90,7 @@ func (OSFileSystem) Exists(path string) (bool, error) {
 	return isExists, err
 }
 
-func (OSFileSystem) DirExists(path string) (bool, error) {
+func (*OSFileSystem) DirExists(path string) (bool, error) {
 	isDirExists := true
 	metadata, err := os.Stat(path)
 	if err != nil {
@@ -105,7 +105,7 @@ func (OSFileSystem) DirExists(path string) (bool, error) {
 	return isDirExists, err
 }
 
-func (OSFileSystem) GetUserHomeDir() (string, error) {
+func (*OSFileSystem) GetUserHomeDir() (string, error) {
 	dirName, err := os.UserHomeDir()
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_FIND_USER_HOME, err.Error())

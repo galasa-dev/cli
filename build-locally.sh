@@ -122,7 +122,13 @@ success "OK"
 # Create a temporary folder which is never checked in.
 function download_dependencies {
     h2 "Making sure the tools folder is present."
-    mkdir -p dependencies --info
+
+    if [[ "${build_type}" == "clean" ]]; then
+        h2 "Cleaning the dependencies out..."
+        rm -fr build/dependencies
+    fi
+
+    mkdir -p build/dependencies
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to ensure the tools folder is present. rc=${rc}" ; exit 1 ; fi
     success "OK"
 
@@ -146,6 +152,12 @@ function generate_rest_client {
     # Should end up being something like: ${BASEDIR}/build/dependencies/openapi-generator-cli-6.2.0.jar
     export OPENAPI_GENERATOR_CLI_JAR=$(ls ${BASEDIR}/build/dependencies/openapi-generator-cli*)
     
+
+    if [[ "${build_type}" == "clean" ]]; then
+        h2 "Cleaning the generated code out..."
+        rm -fr ${BASEDIR}/pkg/galasaapi
+    fi
+
     mkdir -p build
     ./genapi.sh 2>&1 > build/generate-log.txt
     rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate the code from the yaml file. rc=${rc}" ; exit 1 ; fi
@@ -221,8 +233,6 @@ function calculate_galasactl_executable {
     success "OK"
 }
 
-
-
 #--------------------------------------------------------------------------
 # Invoke the galasactl command to create a project.
 function generate_sample_code {
@@ -239,7 +249,6 @@ function generate_sample_code {
     fi
     success "OK"
 }
-
 
 #--------------------------------------------------------------------------
 # Now build the source it created.
@@ -317,19 +326,23 @@ EOF
 }
 
 
-function run_tests_java_minus_jar_method {
-    h2 "Executing the tests we just built..."
 
-    cd $BASEDIR/temp
 
-    # Run the Payee tests
-    TEST_BUNDLE=dev.galasa.example.banking.payee
-    TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
-    TEST_OBR_GROUP_ID=dev.galasa.example.banking
-    TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
-    TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
-    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+
+#--------------------------------------------------------------------------
+# Build a portfolio
+function build_portfolio {
+    h2 "Building a portfolio file"
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${galasactl_command} runs prepare \
+    --portfolio my.portfolio \
+    --bootstrap file:~/.galasa/bootstrap.properties \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+    --log -"
 
     TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayeeExtended
     run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
@@ -348,13 +361,6 @@ function run_tests_java_minus_jar_method {
     success "OK"
 }
 
-    # Run the Payee tests
-    TEST_BUNDLE=dev.galasa.example.banking.payee
-    TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
-    TEST_OBR_GROUP_ID=dev.galasa.example.banking
-    TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
-    TEST_OBR_VERSION=0.0.1-SNAPSHOT
-
 
 #--------------------------------------------------------------------------
 # Build a portfolio
@@ -447,31 +453,6 @@ cd ${BASEDIR}
 
 
 
-#--------------------------------------------------------------------------
-# Build a portfolio
-function build_portfolio {
-    h2 "Building a portfolio file"
-
-    cd ${BASEDIR}/temp
-
-    cmd="${BASEDIR}/bin/${galasactl_command} runs prepare \
-    --portfolio my.portfolio \
-    --bootstrap file:~/.galasa/bootstrap.properties \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
-    --log -"
-
-    info "Command is: $cmd"
-
-    $cmd
-    rc=$?
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to build a portfolio file"
-        exit 1
-    fi
-    success "Built portfolio OK"
-}
-
 
 #--------------------------------------------------------------------------
 # Initialise Galasa home
@@ -493,8 +474,6 @@ function galasa_home_init {
     fi
     success "Galasa home initialised"
 }
-
-
 
 
 #--------------------------------------------------------------------------
@@ -527,14 +506,6 @@ function launch_test_on_ecosystem {
     fi
     success "Submitting test to ecosystem worked OK"
 }
-
-
-
-#--------------------------------------------------------------------------
-
-#--------------------------------------------------------------------------
-# Return to the top folder so we can do other things.
-cd ${BASEDIR}
 
 #--------------------------------------------------------------------------
 # Build the documentation
@@ -575,21 +546,87 @@ function generate_galasactl_documentation {
     success "Documentation generated - OK"
 }
 
+#--------------------------------------------------------------------------
+# Run test using the galasactl locally in a JVM
+function submit_local_test {
 
+    h2 "Submitting a local test using galasactl in a local JVM"
+
+    cd ${BASEDIR}/temp/*banking
+
+    BUNDLE=$1
+    JAVA_CLASS=$2
+    OBR_GROUP_ID=$3
+    OBR_ARTIFACT_ID=$4
+    OBR_VERSION=$5
+
+    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.24.0/
+    export BOOT_JAR_VERSION="0.24.0"
+
+    export GALASA_VERSION="0.26.0"
+
+    export M2_PATH=$(cd ~/.m2 ; pwd)
+    export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
+
+
+    # Local .m2 content over-rides these anyway...
+    # use development version of the OBR
+    export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
+    # else go to maven central
+    #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
+
+    export GALASACTL="${BASEDIR}/bin/galasactl-darwin-arm64"
+
+    ${GALASACTL} runs submit local \
+    --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
+    --class ${BUNDLE}/${JAVA_CLASS} \
+    --throttle 1 \
+    --requesttype MikeCLI \
+    --poll 10 \
+    --progress 1 \
+    --log - 2>&1 | tee ${BASEDIR}/temp/local-run-log.txt
+
+    # --reportjson myreport.json \
+    # --reportyaml myreport.yaml \
+
+    
+    # --noexitcodeontestfailures \
+
+    # --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
+    # --galasaVersion 0.25.0 \
+
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to run the test"
+        exit 1
+    fi
+    success "Test ran OK"
+}
+
+function run_test_locally_using_galasactl {
+
+    # Run the Payee tests.
+    export TEST_BUNDLE=dev.galasa.example.banking.payee
+    export TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
+    export TEST_OBR_GROUP_ID=dev.galasa.example.banking
+    export TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
+    export TEST_OBR_VERSION=0.0.1-SNAPSHOT
+
+    submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+}
 
 download_dependencies
 generate_rest_client
 build_executables
 calculate_galasactl_executable
 galasa_home_init
-
 generate_sample_code
 build_generated_source
 run_tests_java_minus_jar_method
+run_test_locally_using_galasactl
 # build_portfolio
 generate_galasactl_documentation
 launch_test_on_ecosystem
-
 
 #--------------------------------------------------------------------------
 h2 "Use the results.."

@@ -50,8 +50,8 @@ func init() {
 
 	cmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
 	cmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	cmd.Flags().StringVar(&featureNamesCommaSeparated, "features", "main",
-		"A comma-separated list of features you are testing. Defaults to \"test\". "+
+	cmd.Flags().StringVar(&featureNamesCommaSeparated, "features", "feature1",
+		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
 	parentCommand.AddCommand(cmd)
@@ -60,6 +60,7 @@ func init() {
 func executeCreateProject(cmd *cobra.Command, args []string) {
 
 	utils.CaptureLog(logFileName)
+	isCapturingLogs = true
 
 	log.Println("Galasa CLI - Create project")
 

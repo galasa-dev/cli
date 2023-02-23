@@ -1,13 +1,10 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package cmd
+package runs
 
 import (
 	"testing"
-
-	// "github.com/stretchr/testify/mock"
-	// "github.com/galasa.dev/cli/pkg/galasaapi"
 
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -112,7 +109,7 @@ func TestCanSubmitSmallPortfolio(t *testing.T) {
 
 	apiClient := &galasaapi.APIClient{}
 
-	// RunsAPIApi.On("GetRunsGroup",nil, groupName).Return(nil)
+	// RunsAPIApi.On("GetRunsByGroup",nil, groupName).Return(nil)
 
 	// When ...
 	err := executeSubmitRemote(

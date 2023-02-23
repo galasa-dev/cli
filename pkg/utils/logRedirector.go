@@ -16,7 +16,7 @@ import (
  * specified file, or if the file name is "-" or empty, the log information won't be
  * re-directed, but will appear on stderr.
  */
-func CaptureLog(logFileName string) *os.File {
+func CaptureLog(logFileName string ) *os.File {
 
 	var logFile = os.Stderr
 

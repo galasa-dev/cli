@@ -1,10 +1,11 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package utils
+package runs
 
 import (
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -60,7 +61,7 @@ func CreatePortfolio(testSelection *TestSelection, testOverrides *map[string]str
 	}
 }
 
-func WritePortfolio(fileSystem FileSystem, filename string, portfolio *Portfolio) error {
+func WritePortfolio(fileSystem utils.FileSystem, filename string, portfolio *Portfolio) error {
 	bytes, err := yaml.Marshal(&portfolio)
 	if err == nil {
 		err = fileSystem.WriteBinaryFile(filename, bytes)
@@ -68,7 +69,7 @@ func WritePortfolio(fileSystem FileSystem, filename string, portfolio *Portfolio
 	return err
 }
 
-func LoadPortfolio(fileSystem FileSystem, filename string) (*Portfolio, error) {
+func LoadPortfolio(fileSystem utils.FileSystem, filename string) (*Portfolio, error) {
 
 	var portfolio Portfolio
 

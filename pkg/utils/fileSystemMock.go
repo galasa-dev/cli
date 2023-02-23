@@ -47,7 +47,7 @@ func NewMockFileSystem() FileSystem {
 // NewOverridableMockFileSystem creates an implementation of the thin file system layer which delegates
 // to delegates to a memory map, but because the MockFileSystem is returned (rather than a FileSystem)
 // it means the caller can set up different virtual functions, to change the behaviour.
-func NewOverridableMockFileSystem() MockFileSystem {
+func NewOverridableMockFileSystem() *MockFileSystem {
 
 	// Allocate the structure
 	mockFileSystem := MockFileSystem{
@@ -82,44 +82,44 @@ func NewOverridableMockFileSystem() MockFileSystem {
 		return mockFSOutputWarningMessage(mockFileSystem, message)
 	}
 
-	return mockFileSystem
+	return &mockFileSystem
 }
 
 //------------------------------------------------------------------------------------
 // Interface methods...
 //------------------------------------------------------------------------------------
 
-func (fs MockFileSystem) MkdirAll(targetFolderPath string) error {
+func (fs *MockFileSystem) MkdirAll(targetFolderPath string) error {
 	// Call the virtual function.
 	return fs.VirtualFunction_MkdirAll(targetFolderPath)
 }
 
-func (fs MockFileSystem) WriteBinaryFile(targetFilePath string, desiredContents []byte) error {
+func (fs *MockFileSystem) WriteBinaryFile(targetFilePath string, desiredContents []byte) error {
 	return fs.VirtualFunction_WriteBinaryFile(targetFilePath, desiredContents)
 }
 
 // WriteTextFile writes a string to a text file
-func (fs MockFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
+func (fs *MockFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
 	// Call the virtual function.
 	return fs.VirtualFunction_WriteTextFile(targetFilePath, desiredContents)
 }
 
-func (fs MockFileSystem) ReadTextFile(filePath string) (string, error) {
+func (fs *MockFileSystem) ReadTextFile(filePath string) (string, error) {
 	// Call the virtual function.
 	return fs.VirtualFunction_ReadTextFile(filePath)
 }
 
-func (fs MockFileSystem) Exists(path string) (bool, error) {
+func (fs *MockFileSystem) Exists(path string) (bool, error) {
 	// Call the virtual function.
 	return fs.VirtualFunction_Exists(path)
 }
 
-func (fs MockFileSystem) DirExists(path string) (bool, error) {
+func (fs *MockFileSystem) DirExists(path string) (bool, error) {
 	// Call the virtual function.
 	return fs.VirtualFunction_DirExists(path)
 }
 
-func (fs MockFileSystem) GetUserHomeDir() (string, error) {
+func (fs *MockFileSystem) GetUserHomeDir() (string, error) {
 	return fs.VirtualFunction_GetUserHomeDir()
 }
 

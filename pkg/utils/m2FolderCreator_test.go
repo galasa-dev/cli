@@ -93,7 +93,7 @@ func checkThatDifferentSettingsXmlFileContentsCauseFailure(t *testing.T, setting
 	assert.Equal(t, warningMessagesCaptured, "", "Warnings issued but they should not have been !")
 }
 
-func newMockFSContainingSettingsXml(settingsXmlContents string) MockFileSystem {
+func newMockFSContainingSettingsXml(settingsXmlContents string) *MockFileSystem {
 	mockFileSystem := NewOverridableMockFileSystem()
 	homeDir, _ := mockFileSystem.GetUserHomeDir()
 	m2Dir := homeDir + "/.m2"

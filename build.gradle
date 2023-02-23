@@ -23,7 +23,7 @@ dependencies {
     compileClasspath group: 'dev.galasa', name: 'galasa-boot', version: galasaBootJarVersion
     // We need the openapi generator to turn a yaml file into go client stubs, 
     // so we can call the api server REST services
-    // https://mvnrepository.com/artifact/org.openapitools/openapi-generator-cli
+    // https://mvnrepository.com/artifact/org.openapitools/openapi-generator
     compileClasspath group: 'org.openapitools', name: 'openapi-generator-cli', version: '6.0.1'
 }
 task downloadDependencies(type: Copy) {
