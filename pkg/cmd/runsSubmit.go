@@ -50,14 +50,12 @@ func init() {
 	)
 
 	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.PollIntervalSeconds, "poll", runs.DEFAULT_POLL_INTERVAL_SECONDS,
-		"Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. "+
+		"Optional. The interval time in seconds between successive polls of the test runs status. "+
 			"Defaults to "+strconv.Itoa(runs.DEFAULT_POLL_INTERVAL_SECONDS)+" seconds. "+
 			"If less than 1, then default value is used.")
 
 	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.ProgressReportIntervalMinutes, "progress", runs.DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES,
-		"in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. "+
-			"Defaults to "+strconv.Itoa(runs.DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES)+" minutes. "+
-			"If less than 1, then default value is used.")
+		"in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting.")
 
 	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
 		"how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is "+

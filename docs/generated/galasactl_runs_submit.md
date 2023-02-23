@@ -21,9 +21,9 @@ galasactl runs submit [flags]
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
       --overridefile string        path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder. Overrides from --override options will take precedence over properties in this property file. A file path of '-' disables reading any properties file.
       --package strings            packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
-      --poll int                   Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
+      --poll int                   Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
   -p, --portfolio string           portfolio containing the tests to run
-      --progress int               in minutes, how often the cli will report the overall progress of the test runs, -1 or less will disable progress reports. Defaults to 5 minutes. If less than 1, then default value is used. (default 5)
+      --progress int               in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting. (default 5)
       --regex                      Test selection is performed by using regex
       --reportjson string          json file to record the final results in
       --reportjunit string         junit xml file to record the final results in
