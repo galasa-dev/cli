@@ -20,7 +20,7 @@ galasactl runs submit [flags]
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
       --package strings            packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
-      --poll int                   Optional. The interval time in seconds between successive polls of the ecosystem for the status of the test runs. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
+      --poll int                   Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
   -p, --portfolio string           portfolio containing the tests to run
       --progress int               in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting. (default 5)
       --regex                      Test selection is performed by using regex

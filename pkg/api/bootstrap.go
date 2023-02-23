@@ -118,6 +118,11 @@ func LoadBootstrap(fileSystem utils.FileSystem, env utils.Environment,
 			bootstrap = nil
 		}
 	}
+
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_BOOTSTRAP_FILE, path, err.Error())
+	}
+
 	return bootstrap, err
 }
 
