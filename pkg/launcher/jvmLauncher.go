@@ -257,6 +257,12 @@ func addStandardProperties(fileSystem utils.FileSystem, overrides map[string]int
 			utils.FILE_SYSTEM_PATH_SEPARATOR + "ras"
 		overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
 	}
+
+	if err == nil {
+		// Force the launched runs to use the "L" prefix in their runids.
+		const OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX = "framework.request.type.LOCAL.prefix"
+		overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
+	}
 	return overrides, err
 }
 
