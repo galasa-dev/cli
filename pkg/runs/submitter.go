@@ -460,20 +460,37 @@ func validateAndCorrectParams(
 	}
 
 	if err == nil {
-		// Correct the default overrideFile path if it wasn't specified.
-		if params.OverrideFilePath == "" {
-			var home string
-			home, err = fs.GetUserHomeDir()
-			if err == nil {
-				params.OverrideFilePath = home + utils.FILE_SYSTEM_PATH_SEPARATOR +
-					".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR +
-					"overrides.properties"
-			}
-		}
+		err = correctOverrideFilePathParameter(fs, params)
 	}
 
 	tildaExpandAllPaths(fs, params)
 
+	return err
+}
+
+func correctOverrideFilePathParameter(fs utils.FileSystem, params *utils.RunsSubmitCmdParameters) error {
+	var err error
+	// Correct the default overrideFile path if it wasn't specified.
+	if params.OverrideFilePath == "" {
+		var home string
+		home, err = fs.GetUserHomeDir()
+		if err == nil {
+			params.OverrideFilePath = home + utils.FILE_SYSTEM_PATH_SEPARATOR +
+				".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR +
+				"overrides.properties"
+			var isFileThere bool
+			isFileThere, err = fs.Exists(params.OverrideFilePath)
+			if err == nil {
+				if !isFileThere {
+					// The flag wasn't specified.
+					// And we don't have an overrides file to read from the .galasa folder.
+					// So treat this the same as the user not wanting to use an override file.
+					// If the file existed, then we'd want to use it.
+					params.OverrideFilePath = "-"
+				}
+			}
+		}
+	}
 	return err
 }
 
@@ -508,9 +525,11 @@ func tildaExpandAllPaths(fs utils.FileSystem, params *utils.RunsSubmitCmdParamet
 
 func buildOverrideMap(fileSystem utils.FileSystem, commandParameters utils.RunsSubmitCmdParameters) (map[string]string, error) {
 
-	runOverrides, err := loadOverrideFile(fileSystem, commandParameters.OverrideFilePath)
-
-	if err == nil {
+	path := commandParameters.OverrideFilePath
+	runOverrides, err := loadOverrideFile(fileSystem, path)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE, path, err.Error())
+	} else {
 		runOverrides, err = addOverridesFromCmdLine(runOverrides, commandParameters.Overrides)
 	}
 

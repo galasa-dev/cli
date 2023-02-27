@@ -485,6 +485,9 @@ function launch_test_on_ecosystem {
         exit 1
     fi
 
+    rm -fr ~/galasa-old
+    mv ~/.galasa ~/galasa-old
+
     # hostname=$(echo -n "${GALASA_BOOTSTRAP}" | sed -e "s/http:\/\///g" | sed -e "s/https:\/\///g" | sed -e "s/.bootstrap//g")
     # info "Host name for boostrap is ${hostname}"
 
@@ -505,6 +508,8 @@ function launch_test_on_ecosystem {
         exit 1
     fi
     success "Submitting test to ecosystem worked OK"
+
+    mv ~/.galasa-old ~/.galasa
 }
 
 #--------------------------------------------------------------------------
@@ -593,7 +598,7 @@ function submit_local_test {
     # --noexitcodeontestfailures \
 
     # --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
-    # --galasaVersion 0.25.0 \
+    # --galasaVersion 0.26.0 \
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
