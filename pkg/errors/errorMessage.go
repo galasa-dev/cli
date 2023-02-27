@@ -47,7 +47,6 @@ func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	galasaError.msgType = msgType
 	galasaError.message = message
 
-
 	LogStackTrace()
 
 	return galasaError
@@ -121,6 +120,8 @@ var (
 	GALASA_ERROR_RAS_FOLDER_NOT_DETECTED        = NewMessageType("GAL1056E: The RAS folder path could not be detected in trace output for runId '%s'", 1056)
 	GALASA_ERROR_RUN_ID_NOT_DETECTED            = NewMessageType("GAL1057E: The run identifier could not be detected in trace output of the child process", 1057)
 	GALASA_ERROR_FAILED_TO_LOAD_BOOTSTRAP_FILE  = NewMessageType("GAL1058E: Failed to load bootstrap file '%s'. Reason is '%s'", 1058)
+	GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE  = NewMessageType("GAL1059E: Failed to load overrides file '%s'. Reason is '%s'", 1059)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'bleeding edge' repository is '%s'", 2000)
 )

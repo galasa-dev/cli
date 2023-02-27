@@ -59,4 +59,5 @@ The `galasactl` tool can generate the following errors:
 - GAL1056E: The RAS folder path could not be detected in trace output for runId '{}'
 - GAL1057E: The run identifier could not be detected in trace output of the child process
 - GAL1058E: Failed to load bootstrap file '{}'. Reason is '{}'
+- GAL1059E: Failed to load overrides file '{}'. Reason is '{}'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'bleeding edge' repository is '{}'

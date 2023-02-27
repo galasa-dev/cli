@@ -105,7 +105,28 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 	assert.Equal(t, overrides["c"], "d", "file-based override value wasn't passed correctly.")
 }
 
-func TestOverridesWithoutOverridesFile(t *testing.T) {
+func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
+
+	fileProps := make(map[string]interface{})
+	fileProps["c"] = "d"
+
+	fs := utils.NewMockFileSystem()
+	utils.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
+
+	commandParameters := utils.RunsSubmitCmdParameters{
+		Overrides:        []string{"a=b"},
+		OverrideFilePath: "/tmp/temp.wrong.file.properties",
+	}
+
+	overrides, err := buildOverrideMap(fs, commandParameters)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, overrides)
+
+	assert.Contains(t, err.Error(), "GAL1059")
+}
+
+func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.T) {
 
 	fs := utils.NewMockFileSystem()
 
@@ -114,11 +135,38 @@ func TestOverridesWithoutOverridesFile(t *testing.T) {
 		OverrideFilePath: "",
 	}
 
-	// Make sure it doesn't blow up if there is no .galasa folder
-	overrides, err := buildOverrideMap(fs, commandParameters)
+	err := correctOverrideFilePathParameter(fs, &commandParameters)
 
-	assert.Nil(t, err)
-	assert.NotNil(t, overrides)
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+	// We expect the default behaviour with missing command-line parameter, and missing overrides file in ~/.galasa to
+	// result in an ignored overrideFilePath.
+	assert.Equal(t, commandParameters.OverrideFilePath, "-")
+}
+
+func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testing.T) {
+
+	fs := utils.NewMockFileSystem()
+
+	// A dummy overrides file in .galasa
+	home, _ := fs.GetUserHomeDir()
+	path := home + utils.FILE_SYSTEM_PATH_SEPARATOR + ".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR + "overrides.properties"
+	fileProps := make(map[string]interface{})
+	fileProps["c"] = "d"
+	utils.WritePropertiesFile(fs, path, fileProps)
+
+	commandParameters := utils.RunsSubmitCmdParameters{
+		Overrides:        []string{"a=b"},
+		OverrideFilePath: "",
+	}
+
+	err := correctOverrideFilePathParameter(fs, &commandParameters)
+
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+	assert.Equal(t, commandParameters.OverrideFilePath, path, "Wrong path of overrides file set. Expected %s", path)
 }
 
 func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
@@ -132,7 +180,9 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
 	overrides, err := buildOverrideMap(fs, commandParameters)
 
-	assert.Nil(t, err)
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
 	assert.NotNil(t, overrides)
 	assert.Contains(t, overrides, "a", "command-line override wasn't used.")
 	assert.Equal(t, overrides["a"], "b", "command-line override not passed correctly.")

@@ -19,7 +19,7 @@ galasactl runs submit [flags]
   -h, --help                       help for submit
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
-      --overridefile string        path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder. Overrides from --override options will take precedence over properties in this property file. A file path of '-' disables reading any properties file.
+      --overridefile string        path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. Overrides from --override options will take precedence over properties in this property file. A file path of '-' disables reading any properties file.
       --package strings            packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
       --poll int                   Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
   -p, --portfolio string           portfolio containing the tests to run

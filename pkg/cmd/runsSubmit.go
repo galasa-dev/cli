@@ -62,7 +62,7 @@ func init() {
 			strconv.Itoa(runs.DEFAULT_THROTTLE_TESTS_AT_ONCE))
 
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.OverrideFilePath, "overridefile", "",
-		"path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder. "+
+		"path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. "+
 			"Overrides from --override options will take precedence over properties in this property file. "+
 			"A file path of '-' disables reading any properties file.")
 
