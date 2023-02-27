@@ -528,7 +528,18 @@ func loadOverrideFile(fileSystem utils.FileSystem, overrideFilePath string) (map
 		// Don't read properties from a file.
 		overrides = make(map[string]string)
 	} else {
-		overrides, err = utils.ReadPropertiesFile(fileSystem, overrideFilePath)
+		var isFileThere bool
+		isFileThere, err = fileSystem.Exists(overrideFilePath)
+		if err == nil {
+			if !isFileThere {
+				// The overrides file is not present in ~/.galasa, perhaps because the tool is launching a
+				// remote test, and in such cases ~/.galasa may not exist... which is OK.
+				// It just means we don't have properties from that location.
+				overrides = make(map[string]string)
+			} else {
+				overrides, err = utils.ReadPropertiesFile(fileSystem, overrideFilePath)
+			}
+		}
 	}
 
 	return overrides, err

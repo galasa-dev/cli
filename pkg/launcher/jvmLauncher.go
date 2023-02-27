@@ -373,7 +373,7 @@ func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 //	    --remotemaven https://development.galasa.dev/main/maven-repo/obr/ \
 //	    --bootstrap file:/Users/mcobbett/.galasa/bootstrap.properties \
 //	    --overrides file:/Users/mcobbett/.galasa/overrides.properties \
-//	    --obr mvn:dev.galasa/dev.galasa.uber.obr/0.25.0/obr \
+//	    --obr mvn:dev.galasa/dev.galasa.uber.obr/0.26.0/obr \
 //	    --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
 //	    --test dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee
 func getCommandSyntax(

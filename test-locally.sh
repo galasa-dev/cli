@@ -99,7 +99,7 @@ public class TestLongRunningAccount {
 	 */
 	@Test
 	public void simpleSampleTest() throws Exception {
-        int secondsToSleep = 60;
+        int secondsToSleep = 20;
         Thread.sleep(secondsToSleep*1000);
 		assertThat(core).isNotNull();
 	}
@@ -182,18 +182,23 @@ echo "my.file.based.property = 23" > ${BASEDIR}/temp/extra-overrides.properties
 
 ${GALASACTL} runs submit local \
 --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
+--class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestLongRunningAccount \
 --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+--class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
+--class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestFailingAccount \
+--class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
+--class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
+--log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+
 # --override my.property=HELLO \
 # --overridefile ${BASEDIR}/temp/extra-overrides.properties 
-# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
 
-
-
+# --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
 # --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
 # --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestFailingAccount \
 # --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
 # --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
-# --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestLongRunningAccount \
+
 # --throttle 7 \
 # --requesttype MikeCLI \
 # --poll 10 \
@@ -207,7 +212,7 @@ ${GALASACTL} runs submit local \
 # --noexitcodeontestfailures \
 
 # --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
-# --galasaVersion 0.25.0 \
+# --galasaVersion 0.26.0 \
 
 rc=$?
 if [[ "${rc}" != "0" ]]; then 

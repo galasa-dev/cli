@@ -105,6 +105,22 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 	assert.Equal(t, overrides["c"], "d", "file-based override value wasn't passed correctly.")
 }
 
+func TestOverridesWithoutOverridesFile(t *testing.T) {
+
+	fs := utils.NewMockFileSystem()
+
+	commandParameters := utils.RunsSubmitCmdParameters{
+		Overrides:        []string{"a=b"},
+		OverrideFilePath: "",
+	}
+
+	// Make sure it doesn't blow up if there is no .galasa folder
+	overrides, err := buildOverrideMap(fs, commandParameters)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, overrides)
+}
+
 func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
 	fs := utils.NewMockFileSystem()
