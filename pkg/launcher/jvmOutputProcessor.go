@@ -72,6 +72,12 @@ func (processor *JVMOutputProcessor) Write(bytesToWrite []byte) (int, error) {
 		// "d.g.f.FrameworkInitialisation - Allocated Run Name U525 to this run"
 		stringToSearch := string(bytesToWrite)
 
+		if processor.detectedRunId != "" {
+			log.Printf("JVM output: (runid:%s) : %s\n", processor.detectedRunId, stringToSearch)
+		} else {
+			log.Printf("JVM output: %s\n", stringToSearch)
+		}
+
 		isAlertable := false
 
 		runId := detectRunId(stringToSearch)

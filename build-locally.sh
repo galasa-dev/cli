@@ -94,6 +94,9 @@ if [[ "${build_type}" == "" ]]; then
     exit 1  
 fi
 
+#--------------------------------------------------------------------------
+h1 "Building the CLI component"
+#--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
 # Check that the ../framework is present.
@@ -113,8 +116,8 @@ success "OK"
 
 #--------------------------------------------------------------------------
 h2 "Setting versions of things."
-# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.24.0/
-export BOOT_JAR_VERSION="0.24.0"
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
+export BOOT_JAR_VERSION="0.26.0"
 info "BOOT_JAR_VERSION=${BOOT_JAR_VERSION}"
 success "OK"
 
@@ -127,6 +130,9 @@ function download_dependencies {
         h2 "Cleaning the dependencies out..."
         rm -fr build/dependencies
     fi
+
+    info "Making sure the boot jar we embed is a fresh one from maven."
+    rm -fr pkg/embedded/templates/galasahome/lib/*.jar
 
     mkdir -p build/dependencies
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to ensure the tools folder is present. rc=${rc}" ; exit 1 ; fi
@@ -155,7 +161,7 @@ function generate_rest_client {
 
     if [[ "${build_type}" == "clean" ]]; then
         h2 "Cleaning the generated code out..."
-        rm -fr ${BASEDIR}/pkg/galasaapi
+        rm -fr ${BASEDIR}/pkg/galasaapi/*
     fi
 
     mkdir -p build
@@ -485,8 +491,8 @@ function launch_test_on_ecosystem {
         exit 1
     fi
 
-    rm -fr ~/galasa-old
-    mv ~/.galasa ~/galasa-old
+    rm -fr ~/.galasa-old
+    mv ~/.galasa ~/.galasa-old
 
     # hostname=$(echo -n "${GALASA_BOOTSTRAP}" | sed -e "s/http:\/\///g" | sed -e "s/https:\/\///g" | sed -e "s/.bootstrap//g")
     # info "Host name for boostrap is ${hostname}"
@@ -565,8 +571,8 @@ function submit_local_test {
     OBR_ARTIFACT_ID=$4
     OBR_VERSION=$5
 
-    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.24.0/
-    export BOOT_JAR_VERSION="0.24.0"
+    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
+    export BOOT_JAR_VERSION="0.26.0"
 
     export GALASA_VERSION="0.26.0"
 

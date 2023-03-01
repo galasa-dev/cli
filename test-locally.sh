@@ -159,8 +159,8 @@ export TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
 export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
-# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.24.0/
-export BOOT_JAR_VERSION="0.24.0"
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
+export BOOT_JAR_VERSION="0.26.0"
 
 export OBR_VERSION="0.26.0"
 
@@ -188,6 +188,8 @@ ${GALASACTL} runs submit local \
 --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestFailingAccount \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
+--remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
+--galasaVersion 0.26.0 \
 --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
 
 # --override my.property=HELLO \
@@ -211,8 +213,7 @@ ${GALASACTL} runs submit local \
 
 # --noexitcodeontestfailures \
 
-# --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
-# --galasaVersion 0.26.0 \
+
 
 rc=$?
 if [[ "${rc}" != "0" ]]; then 
