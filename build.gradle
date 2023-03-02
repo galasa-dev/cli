@@ -9,13 +9,14 @@
 //   which is generated from a yaml definition file.
 //   So we need to get hold of a generator tool so we can 
 //
-def galasaBootJarVersion = '0.24.0'
+def galasaBootJarVersion = '0.26.0'
 repositories {
     gradlePluginPortal()
     mavenCentral()
     maven {
         url "https://development.galasa.dev/main/maven-repo/obr/"
     }
+    mavenLocal()
 }
 apply plugin: 'java'
 dependencies {

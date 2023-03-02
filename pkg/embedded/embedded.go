@@ -23,5 +23,5 @@ func GetGalasaVersion() string {
 
 func GetBootJarVersion() string {
 	// Ideally, the build process would create something which go embeds, and we can read and return here.
-	return "0.24.0"
+	return "0.26.0"
 }
