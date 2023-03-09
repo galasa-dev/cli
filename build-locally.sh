@@ -233,6 +233,9 @@ function calculate_galasactl_executable {
     esac
 
     architecture=$(uname -m)
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
 
     export galasactl_command="galasactl-${os}-${architecture}"
     info "galasactl command is ${galasactl_command}"
@@ -535,6 +538,9 @@ function generate_galasactl_documentation {
                     exit 1
     esac
     architecture="$(uname -m)"
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
 
     # Call the documentation generator, which builds .md files
     info "Using program ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} to generate the documentation..."

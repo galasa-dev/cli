@@ -15,7 +15,9 @@ galasactl project create [flags]
 ```
       --features string   A comma-separated list of features you are testing. These must be able to form parts of a java package name. For example: "payee,account" (default "feature1")
       --force             Force-overwrite files which already exist.
+      --gradle            Create a Galasa testproject using gradle
   -h, --help              help for create
+      --maven             Create a Galasa test project using maven (default)
       --obr               An OSGi Object Bundle Resource (OBR) project is needed.
       --package string    Java package name for tests we create. Forms part of the project name, maven/gradle group/artifact ID, and OSGi bundle name. It may reflect the name of your organisation or company, the department, function or application under test. For example: dev.galasa.banking.example
 ```

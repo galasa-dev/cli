@@ -35,6 +35,8 @@ var (
 	force                      bool
 	isOBRProjectRequired       bool
 	featureNamesCommaSeparated string
+	maven                      bool
+	gradle                     bool
 )
 
 func init() {
@@ -54,6 +56,8 @@ func init() {
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
+	cmd.Flags().BoolVar(&maven, "maven", false, "Create a Galasa test project using maven (default)")
+	cmd.Flags().BoolVar(&gradle, "gradle", false, "Create a Galasa testproject using gradle")
 	parentCommand.AddCommand(cmd)
 }
 
@@ -67,7 +71,7 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
-	err := createProject(fileSystem, packageName, featureNamesCommaSeparated, isOBRProjectRequired, force)
+	err := createProject(fileSystem, packageName, featureNamesCommaSeparated, isOBRProjectRequired, force, maven, gradle)
 
 	// Convey the error to the top level.
 	// Tried doing this with RunE: entry, passing back the error, but we always
@@ -80,11 +84,28 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 
 // createProject will create the following artifacts in the specified file system:
 //
+// Maven Build
+//
 //		. - All files are relative to the current directory.
 //		└── packageName - The parent package
 //			├── pom.xml - The parent pom.
 //	 		├── packageName.test - The tests project.
 //	  		│   └── pom.xml
+//	  		│   └── src
+//	  		│       └── main
+//	  		│           └── java
+//	  		│               └── packageName - There will be multiple nested folders if there are dots ('.') in the package name
+//	  		│                   └── SampleTest.java - Contains an example Galasa testcase
+//	  		└── packageName.obr - The OBR project. (only if the --obr option is used).
+//	    	 	 └── pom.xml
+//
+// Gradle Build
+//
+//		. - All files are relative to the current directory.
+//		└── packageName - The parent package
+//			├── settings.gradle - Gradle seetings file
+//	 		├── packageName.test - The tests project.
+//	  		│   └── build.gradle
 //	  		│   └── src
 //	  		│       └── main
 //	  		│           └── java
@@ -100,15 +121,28 @@ func createProject(
 	packageName string,
 	featureNamesCommaSeparated string,
 	isOBRProjectRequired bool,
-	forceOverwrite bool) error {
+	forceOverwrite bool,
+	maven bool,
+	gradle bool) error {
 
 	log.Printf("Creating project using packageName:%s\n", packageName)
 
 	var err error
 
+	var mavenbld bool
+
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 
 	fileGenerator := utils.NewFileGenerator(fileSystem, embeddedFileSystem)
+
+	// If no maven/gradle flag is set then default to maven build
+	if (maven) == false && (gradle == false) {
+		mavenbld := true
+	} else if maven == true {
+		mavenbld := true
+	} else if gradle == true {
+		mavenbld := false
+	}
 
 	// Separate out the feature names from a string into a slice of strings.
 	var featureNames []string
@@ -121,7 +155,7 @@ func createProject(
 			parentProjectFolder := packageName
 			err = fileGenerator.CreateFolder(parentProjectFolder)
 			if err == nil {
-				err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
+				err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite, mavenbld)
 				if err == nil {
 					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite)
 					if err == nil {

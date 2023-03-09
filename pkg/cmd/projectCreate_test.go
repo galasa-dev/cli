@@ -18,10 +18,12 @@ func TestCanCreateProjectFailsIfPackageNameInvalid(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
 
 	// When ...
 	err := createProject(mockFileSystem, "very.INVALID_PACKAGE_NAME.very",
-		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -35,9 +37,11 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -133,6 +137,8 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
 
 	// Over-ride the default MkdirAll function so that it fails...
 	mockFileSystem.VirtualFunction_MkdirAll = func(targetFolderPath string) error {
@@ -140,7 +146,7 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -154,6 +160,8 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
 
 	// Over-ride the default WriteTextFile function so that it fails...
 	mockFileSystem.VirtualFunction_WriteTextFile = func(targetFilePath string, desiredContents string) error {
@@ -161,7 +169,7 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -175,13 +183,15 @@ func TestCreateProjectPomFileAlreadyExistsNoForceOverwrite(t *testing.T) {
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
 	mockFileSystem.WriteTextFile(testPackageName+"/pom.xml", "dummy test pom.xml")
 
 	// When ...
-	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -196,13 +206,15 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 	forceOverwrite := true
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
 	mockFileSystem.WriteTextFile(testPackageName+"/pom.xml", "dummy test pom.xml")
 
 	// When ...
-	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -229,9 +241,11 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := true
 	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -267,10 +281,12 @@ func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "account,payee"
+	maven := false
+	gradle := false
 
 	// When ...
 	err := createProject(mockFileSystem, testPackageName,
-		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -292,10 +308,12 @@ func TestCreateProjectWithInvalidFeaturesFails(t *testing.T) {
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "Account"
+	maven := false
+	gradle := false
 
 	// When ...
 	err := createProject(mockFileSystem, testPackageName,
-		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite)
+		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
 
 	// Then...
 	// Should have created a folder for the parent package.
