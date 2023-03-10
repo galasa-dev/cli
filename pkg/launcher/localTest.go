@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"strings"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
@@ -30,7 +31,8 @@ type LocalTest struct {
 
 	// Where is the RAS folder storing results for this test ?
 	// We don't initially know it. This info is extracted from the JVM trace.
-	rasFolderPath string
+	// eg: file:///C:/temp/ras
+	rasFolderPathUrl string
 
 	// A local test has a "testRun" which reports back to the submitter in the
 	// same way the HTTP submitter reports back. Using common structures.
@@ -87,7 +89,7 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 		localTest.runId, err = waitForRunIdAllocation(localTest.stdout)
 		if err == nil {
 
-			localTest.rasFolderPath, err = waitForRasFolderPath(localTest.stdout, localTest.runId)
+			localTest.rasFolderPathUrl, err = waitForRasFolderPathUrl(localTest.stdout, localTest.runId)
 			if err == nil {
 
 				log.Printf("JVM test started OK. Spawning a go routine to wait for it to complete.\n")
@@ -100,20 +102,20 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 
 // Block this thread until we can gather where the RAS folder is for this test.
 // It is resolved within the JVM, and traced, where we pick it up from.
-func waitForRasFolderPath(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
+func waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
 	var err error = nil
 
 	// BLOCK THREAD !
 	// Wait for the runId to be detected in the JVM output.
 	<-outputProcessor.publishResultChannel
 
-	rasFolderPath := outputProcessor.detectedRasFolderPath
+	rasFolderPathUrl := outputProcessor.detectedRasFolderPathUrl
 
-	if rasFolderPath == "" {
+	if rasFolderPathUrl == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RAS_FOLDER_NOT_DETECTED, runId)
 	}
 
-	return rasFolderPath, err
+	return rasFolderPathUrl, err
 }
 
 // Block this thread until we can gather what the RunId for this test is
@@ -168,11 +170,11 @@ func (localTest *LocalTest) updateTestStatusFromRasFile() error {
 
 	var err error = nil
 
-	if localTest.runId == "" || localTest.rasFolderPath == "" {
+	if localTest.runId == "" || localTest.rasFolderPathUrl == "" {
 		log.Printf("Don't have enough information to find the structure.json in the RAS folder.\n")
 	} else {
 
-		jsonFilePath := localTest.rasFolderPath + "/" + localTest.runId + "/structure.json"
+		jsonFilePath := strings.TrimPrefix(localTest.rasFolderPathUrl, "file:///") + "/" + localTest.runId + "/structure.json"
 		log.Printf("Reading latest test status from '%s'\n", jsonFilePath)
 
 		var testRun *galasaapi.TestRun

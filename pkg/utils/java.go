@@ -50,7 +50,8 @@ func checkJavaHomeBinJavaProgram(fileSystem FileSystem, javaHome string) error {
 	var err error = nil
 
 	// Check that the program $JAVA_HOME/bin/java exists
-	javaProgramPath := javaHome + FILE_SYSTEM_PATH_SEPARATOR + "bin" + FILE_SYSTEM_PATH_SEPARATOR + "java"
+	javaProgramPath := javaHome + FILE_SYSTEM_PATH_SEPARATOR + "bin" +
+		FILE_SYSTEM_PATH_SEPARATOR + "java" + fileSystem.GetExecutableExtension()
 	var isProgramThere bool
 	isProgramThere, err = fileSystem.Exists(javaProgramPath)
 	if err != nil {

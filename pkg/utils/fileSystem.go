@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	pathUtils "path"
+	"runtime"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
@@ -24,6 +25,10 @@ type FileSystem interface {
 	OutputWarningMessage(string) error
 	MkTempDir() (string, error)
 	DeleteDir(path string)
+
+	// Returns the normal extension used for executable files.
+	// ie: The .exe suffix in windows, or "" in unix-like systems.
+	GetExecutableExtension() string
 }
 
 const (
@@ -60,6 +65,14 @@ func NewOSFileSystem() FileSystem {
 // ------------------------------------------------------------------------------------
 // Interface methods...
 // ------------------------------------------------------------------------------------
+func (osFS *OSFileSystem) GetExecutableExtension() string {
+	var extension string = ""
+	if runtime.GOOS == "windows" {
+		extension = ".exe"
+	}
+	return extension
+}
+
 func (osFS *OSFileSystem) MkTempDir() (string, error) {
 	const DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS = ""
 	tempFolderPath, err := os.MkdirTemp(DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS, "galasa-*")

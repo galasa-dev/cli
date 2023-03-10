@@ -6,6 +6,7 @@ package api
 import (
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -59,11 +60,16 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 
 // getDefaultBootstrapPath - Work out where the boostrap file can normally be found.
 func getDefaultBootstrapPath(fileSystem utils.FileSystem) (string, error) {
-	var path string
+	var path string = ""
 	home, err := fileSystem.GetUserHomeDir()
 	if err == nil {
-		path = home + utils.FILE_SYSTEM_PATH_SEPARATOR + ".galasa" +
-			utils.FILE_SYSTEM_PATH_SEPARATOR + "bootstrap.properties"
+		// Turn the path into a URL
+		// This may involve changing the direction of slash characters.
+		baseUrl, err := url.Parse("file:///")
+		if err == nil {
+			fullUrl := baseUrl.JoinPath(strings.ReplaceAll(home, "\\", "/"), ".galasa", "bootstrap.properties")
+			path = fullUrl.String()
+		}
 	}
 	return path, err
 }
@@ -135,7 +141,7 @@ func cleanPath(fileSystem utils.FileSystem, path string) (string, error) {
 }
 
 func removeLeadingFileColon(path string) string {
-	path = strings.TrimPrefix(path, "file:")
+	path = strings.TrimPrefix(path, "file://")
 	return path
 }
 

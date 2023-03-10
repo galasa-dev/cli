@@ -182,7 +182,7 @@ func TestBootstrapExpandsFileColonPath(t *testing.T) {
 
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
-	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "file:/my.bootstrap.properties"
+	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "file:///my.bootstrap.properties"
 
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
 	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, bootstrapPath, mockUrlResolutionService)

@@ -73,3 +73,17 @@ func TestJavaHomeCanBeValid(t *testing.T) {
 		assert.Fail(t, "Failed validation. Should have passed.")
 	}
 }
+
+func TestJavaHomeCanBeValidOnWindows(t *testing.T) {
+	javaHome := "/java"
+
+	// Create the java.exe in the file system...
+	fileSystem := NewOverridableMockFileSystem()
+	fileSystem.SetExecutableExtension(".exe")
+	AddJavaRuntimeToMock(fileSystem, javaHome)
+
+	err := ValidateJavaHome(fileSystem, javaHome)
+	if err != nil {
+		assert.Fail(t, "Failed validation. Should have passed.")
+	}
+}

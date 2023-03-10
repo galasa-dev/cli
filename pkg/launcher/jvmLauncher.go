@@ -249,19 +249,29 @@ func prepareTempFiles(
 }
 
 func addStandardProperties(fileSystem utils.FileSystem, overrides map[string]interface{}) (map[string]interface{}, error) {
+
 	// Set the ras location to be local disk always.
 	homePath, err := fileSystem.GetUserHomeDir()
 	if err == nil {
 		const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
-		rasPathUri := "file://" + homePath + utils.FILE_SYSTEM_PATH_SEPARATOR + ".galasa" +
-			utils.FILE_SYSTEM_PATH_SEPARATOR + "ras"
-		overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
+
+		// Only set this property if it's not already set by the user, or in the users' override file.
+		_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE]
+		if !isPropAlreadySet {
+			rasPathUri := "file:///" + strings.ReplaceAll(homePath, "\\", "/") + "/.galasa/ras"
+			overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
+		}
 	}
 
 	if err == nil {
 		// Force the launched runs to use the "L" prefix in their runids.
 		const OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX = "framework.request.type.LOCAL.prefix"
-		overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
+
+		// Only set this property if it's not already set by the user, or in the users' override file.
+		_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX]
+		if !isPropAlreadySet {
+			overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
+		}
 	}
 	return overrides, err
 }
@@ -403,10 +413,10 @@ func getCommandSyntax(
 		var userHome string
 		userHome, err = fileSystem.GetUserHomeDir()
 
-		// --localmaven file:${M2_PATH}/repository/
+		// --localmaven file://${M2_PATH}/repository/
+		// Note: URLs always have forward-slashes
 		args = append(args, "--localmaven")
-		localMavenPath := "file:" + userHome + utils.FILE_SYSTEM_PATH_SEPARATOR +
-			".m2" + utils.FILE_SYSTEM_PATH_SEPARATOR + "repository"
+		localMavenPath := "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.m2/repository"
 		args = append(args, localMavenPath)
 
 		// --remotemaven $REMOTE_MAVEN
@@ -415,13 +425,14 @@ func getCommandSyntax(
 
 		// --bootstrap file:${HOME}/.galasa/bootstrap.properties
 		args = append(args, "--bootstrap")
-		bootstrapPath := "file:" + userHome + utils.FILE_SYSTEM_PATH_SEPARATOR +
-			".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR + "bootstrap.properties"
+		bootstrapPath := "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.galasa/bootstrap.properties"
 		args = append(args, bootstrapPath)
 
 		// --overrides file:${HOME}/.galasa/overrides.properties
 		args = append(args, "--overrides")
-		overridesPath := "file:" + overridesFilePath
+		// Note: We turn the file path provided into a URL so slashes always
+		// go the same way.
+		overridesPath := "file:///" + strings.ReplaceAll(overridesFilePath, "\\", "/")
 		args = append(args, overridesPath)
 
 		for _, obrCoordinate := range testObrs {

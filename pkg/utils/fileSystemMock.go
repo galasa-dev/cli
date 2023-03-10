@@ -31,6 +31,8 @@ type MockFileSystem struct {
 	// Collects warnings messages
 	warningMessageBuffer *bytes.Buffer
 
+	executableExtension string
+
 	// The mock struct contains methods which can be over-ridden on a per-test basis.
 	// The New
 	VirtualFunction_MkdirAll             func(targetFolderPath string) error
@@ -63,6 +65,8 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 		data: make(map[string]*Node)}
 
 	mockFileSystem.warningMessageBuffer = &bytes.Buffer{}
+
+	mockFileSystem.executableExtension = ""
 
 	// Set up functions inside the structure to call the basic/default mock versions...
 	// These can later be over-ridden on a test-by-test basis.
@@ -108,6 +112,14 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 //------------------------------------------------------------------------------------
 // Interface methods...
 //------------------------------------------------------------------------------------
+
+func (fs *MockFileSystem) GetExecutableExtension() string {
+	return fs.executableExtension
+}
+
+func (fs *MockFileSystem) SetExecutableExtension(newExtension string) {
+	fs.executableExtension = newExtension
+}
 
 func (fs *MockFileSystem) DeleteDir(pathToDelete string) {
 	// Call the virtual function.
