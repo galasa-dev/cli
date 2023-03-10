@@ -18,7 +18,7 @@ func TestCanCreateProjectFailsIfPackageNameInvalid(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
-	maven := false
+	maven := true
 	gradle := false
 
 	// When ...
@@ -37,7 +37,7 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
-	maven := false
+	maven := true
 	gradle := false
 
 	// When ...
@@ -49,56 +49,94 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 		assert.Fail(t, "Golden path should not return an error. %s", err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired)
-	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test")
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
-func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.FileSystem, isObrProjectRequired bool) {
+func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool) {
 	parentFolderExists, err := mockFileSystem.DirExists("my.test.pkg")
 	assert.Nil(t, err)
 	assert.True(t, parentFolderExists, "Parent folder was not created.")
 
-	parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.pkg/pom.xml")
-	assert.Nil(t, err)
-	assert.True(t, parentPomXmlFileExists, "Parent folder pom.xml was not created.")
+	if isMaven {
+		parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.pkg/pom.xml")
+		assert.Nil(t, err)
+		assert.True(t, parentPomXmlFileExists, "Parent folder pom.xml was not created.")
+	
+		text, err := mockFileSystem.ReadTextFile("my.test.pkg/pom.xml")
+		assert.Nil(t, err)
+		assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "parent pom.xml didn't substitute the group id")
+		assert.Contains(t, text, "<artifactId>my.test.pkg</artifactId>", "parent pom.xml didn't substitute the artifact id")
+	
+		assert.Contains(t, text, "<module>my.test.pkg.test</module>", "parent pom.xml didn't have a test module included")
 
-	text, err := mockFileSystem.ReadTextFile("my.test.pkg/pom.xml")
-	assert.Nil(t, err)
-	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "parent pom.xml didn't substitute the group id")
-	assert.Contains(t, text, "<artifactId>my.test.pkg</artifactId>", "parent pom.xml didn't substitute the artifact id")
+		if isObrProjectRequired {
+			assert.Contains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml didn't have an obr module included")
+		} else {
+			assert.NotContains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml should not have an obr module included")
+		}
+	}
 
-	assert.Contains(t, text, "<module>my.test.pkg.test</module>", "parent pom.xml didn't have a test module included")
+	if isGradle {
+		parentSettingsGradleFileExists, err := mockFileSystem.Exists("my.test.pkg/settings.gradle")
+		assert.Nil(t, err)
+		assert.True(t, parentSettingsGradleFileExists, "Parent folder settings.gradle was not created.")
+	
+		text, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
+		assert.Nil(t, err)
+		assert.Contains(t, text, "include 'my.test.pkg.test'", "parent settings.gradle didn't have a test module included")
+		
+		if isObrProjectRequired {
+			assert.Contains(t, text, "include 'my.test.pkg.obr'", "parent settings.gradle didn't have an obr module included")
+		} else {
+			assert.NotContains(t, text, "include 'my.test.pkg.obr'", "parent settings.gradle should not have an obr module included")
 
-	if isObrProjectRequired {
-		assert.Contains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml didn't have an obr module included")
-	} else {
-		assert.NotContains(t, text, "<module>my.test.pkg.obr</module>", "parent pom.xml should not have an obr module included")
-
-		// Make sure the OBR folder does not exist.
-		expectedObrFolderPath := packageName + "/" + packageName + ".obr"
-		var obrFolderExists bool
-		obrFolderExists, _ = mockFileSystem.DirExists(expectedObrFolderPath)
-		assert.False(t, obrFolderExists, "OBR folder exists, when it should not!")
-
-		// OBR should not be mentioned in the parent pom.xml
+			// Make sure the OBR folder does not exist.
+			expectedObrFolderPath := packageName + "/" + packageName + ".obr"
+			var obrFolderExists bool
+			obrFolderExists, _ = mockFileSystem.DirExists(expectedObrFolderPath)
+			assert.False(t, obrFolderExists, "OBR folder exists, when it should not!")
+		}
 	}
 }
 
-func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.FileSystem, featureName string) {
+func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.FileSystem, featureName string, isMaven bool, isGradle bool) {
 
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg." + featureName)
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test"+featureName+" folder was not created.")
 
-	expectedPomFilePath := "my.test.pkg/my.test.pkg." + featureName + "/pom.xml"
-	testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
-	assert.Nil(t, err)
-	assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created for feature."+featureName)
+	if isMaven {
+		expectedPomFilePath := "my.test.pkg/my.test.pkg." + featureName + "/pom.xml"
+		testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
+		assert.Nil(t, err)
+		assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created for feature." + featureName)
 
-	text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
-	assert.Nil(t, err)
-	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
-	assert.Contains(t, text, "<artifactId>my.test.pkg.test</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
+		text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
+		assert.Nil(t, err)
+		assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
+		assert.Contains(t, text, "<artifactId>my.test.pkg.test</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
+	}
+	
+	if isGradle {
+		expectedBuildGradleFilePath := "my.test.pkg/my.test.pkg." + featureName + "/build.gradle"
+		testBuildGradleFileExists, err := mockFileSystem.Exists(expectedBuildGradleFilePath)
+		assert.Nil(t, err)
+		assert.True(t, testBuildGradleFileExists, "Test folder build.gradle was not created for feature." + featureName)
+
+		expectedBndFilePath := "my.test.pkg/my.test.pkg." + featureName + "/bnd.bnd"
+		testBndFileExists, err := mockFileSystem.Exists(expectedBndFilePath)
+		assert.Nil(t, err)
+		assert.True(t, testBndFileExists, "Test folder bnd.bnd was not created for feature." + featureName)
+
+		buildGradleText, err := mockFileSystem.ReadTextFile(expectedBuildGradleFilePath)
+		assert.Nil(t, err)
+		assert.Contains(t, buildGradleText, "group = 'my.test.pkg'", "Test folder build.gradle didn't substitute the group id")
+
+		bndFileText, err := mockFileSystem.ReadTextFile(expectedBndFilePath)
+		assert.Nil(t, err)
+		assert.Contains(t, bndFileText, "Bundle-Name: my.test.pkg", "Test folder bnd.bnd didn't substitute the bundle name")
+	}
 
 	testSrcFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.test/src/main/java/my/test/pkg/test")
 	assert.Nil(t, err)
@@ -137,7 +175,7 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
-	maven := false
+	maven := true
 	gradle := false
 
 	// Over-ride the default MkdirAll function so that it fails...
@@ -160,7 +198,7 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
-	maven := false
+	maven := true
 	gradle := false
 
 	// Over-ride the default WriteTextFile function so that it fails...
@@ -183,7 +221,7 @@ func TestCreateProjectPomFileAlreadyExistsNoForceOverwrite(t *testing.T) {
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "test"
-	maven := false
+	maven := true
 	gradle := false
 
 	// Create a pom.xml file already...
@@ -206,7 +244,7 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 	forceOverwrite := true
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "test"
-	maven := false
+	maven := true
 	gradle := false
 
 	// Create a pom.xml file already...
@@ -241,7 +279,7 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	forceOverwrite := true
 	isObrProjectRequired := true
 	featureNamesCommandSeparatedList := "test"
-	maven := false
+	maven := true
 	gradle := false
 
 	// When ...
@@ -253,25 +291,38 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired)
-	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test")
-	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
+	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
 
-func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.FileSystem) {
+func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.FileSystem, isMaven bool, isGradle bool) {
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.obr")
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test folder was not created.")
 
-	expectedPomFilePath := "my.test.pkg/my.test.pkg.obr/pom.xml"
-	testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
-	assert.Nil(t, err)
-	assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created.")
+	if isMaven {
+		expectedPomFilePath := "my.test.pkg/my.test.pkg.obr/pom.xml"
+		testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
+		assert.Nil(t, err)
+		assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created.")
+	
+		text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
+		assert.Nil(t, err)
+		assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
+		assert.Contains(t, text, "<artifactId>my.test.pkg.obr</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
+	}
 
-	text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
-	assert.Nil(t, err)
-	assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
-	assert.Contains(t, text, "<artifactId>my.test.pkg.obr</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
+	if isGradle {
+		expectedBuildGradleFilePath := "my.test.pkg/my.test.pkg.obr/build.gradle"
+		testBuildGradleFileExists, err := mockFileSystem.Exists(expectedBuildGradleFilePath)
+		assert.Nil(t, err)
+		assert.True(t, testBuildGradleFileExists, "Test folder build.gradle was not created.")
+	
+		text, err := mockFileSystem.ReadTextFile(expectedBuildGradleFilePath)
+		assert.Nil(t, err)
+		assert.Contains(t, text, "group = 'my.test.pkg'", "Test folder build.gradle didn't substitute the group id")
+	}
 }
 
 func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
@@ -281,7 +332,7 @@ func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "account,payee"
-	maven := false
+	maven := true
 	gradle := false
 
 	// When ...
@@ -308,7 +359,7 @@ func TestCreateProjectWithInvalidFeaturesFails(t *testing.T) {
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
 	featureNamesCommandSeparatedList := "Account"
-	maven := false
+	maven := true
 	gradle := false
 
 	// When ...
@@ -320,4 +371,94 @@ func TestCreateProjectWithInvalidFeaturesFails(t *testing.T) {
 	assert.NotNil(t, err, "err should have been set!")
 	assert.Contains(t, err.Error(), "GAL1045E")
 
+}
+
+func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := true
+	isObrProjectRequired := false
+	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := true
+
+	// When ...
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	if err != nil {
+		assert.Fail(t, "Creating a Maven project should not return an error. %s", err.Error())
+	}
+
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
+}
+
+func TestCanCreateGradleProjectWithOBR(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := true
+	isObrProjectRequired := true
+	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := true
+
+	// When ...
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
+	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
+}
+
+func TestCanCreateMavenAndGradleProject(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := true
+	isObrProjectRequired := false
+	featureNamesCommandSeparatedList := "test"
+	maven := true
+	gradle := true
+
+	// When ...
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
+}
+
+func TestCreateProjectDefaultsToMavenProject(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := true
+	isObrProjectRequired := false
+	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := false
+	expectMaven := true
+
+	// When ...
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, expectMaven, gradle)
+	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", expectMaven, gradle)
 }
