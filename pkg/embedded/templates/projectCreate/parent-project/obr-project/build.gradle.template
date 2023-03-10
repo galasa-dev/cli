@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'dev.galasa.obr' version '0.15.0'
 }
 
@@ -10,4 +11,12 @@ dependencies {
 {{- range $module := .Modules }}
     bundle project(':{{ $module.Name }}')
 {{- end }}
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
 }

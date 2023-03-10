@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'biz.aQute.bnd.builder' version '6.4.0'
 }
 
@@ -24,4 +25,12 @@ dependencies {
     implementation 'dev.galasa:dev.galasa.artifact.manager'
     implementation 'commons-logging:commons-logging'
     implementation 'org.assertj:assertj-core'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
 }
