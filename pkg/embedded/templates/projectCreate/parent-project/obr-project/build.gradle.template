@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'base'
     id 'maven-publish'
     id 'dev.galasa.obr' version '0.15.0'
 }
@@ -13,10 +13,15 @@ dependencies {
 {{- end }}
 }
 
+def obrFile = file('build/galasa.obr')
+artifacts {
+    archives obrFile
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
-            from components.java
+            artifact obrFile
         }
     }
 }
