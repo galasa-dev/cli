@@ -5,7 +5,6 @@ package launcher
 
 import (
 	"embed"
-	"errors"
 	"log"
 	"strings"
 
@@ -483,10 +482,12 @@ func classNameUserInputToTestClassLocation(classNameUserInput string) (*TestLoca
 	)
 
 	parts := strings.Split(classNameUserInput, "/")
-	if len(parts) <= 0 {
-		err = errors.New("error! - Bad class format. Should be osgiBundleName/qualifiedJavaClassName - slash is missing. not handled yet")
+	if len(parts) < 2 {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_CLASS_INPUT_NO_SLASH, classNameUserInput)
 	} else if len(parts) > 2 {
-		err = errors.New("error - too many segments. Not handled yet")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_CLASS_TOO_MANY_SLASHES, classNameUserInput)
+	} else if strings.HasSuffix(parts[1], ".class") {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_CLASS_SUFFIX_FOUND, classNameUserInput)
 	} else {
 		osgiBundleName := parts[0]
 		qualifiedJavaClassName := parts[1]

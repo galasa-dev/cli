@@ -419,7 +419,12 @@ func TestSingleValidObrIsValid(t *testing.T) {
 	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr"}
 	mavenCoordinates, err := validateObrs(obrInputs)
 	assert.Nil(t, err)
+	assert.Len(t, mavenCoordinates, 1)
 	assert.NotNil(t, mavenCoordinates)
+	assert.Equal(t, mavenCoordinates[0].ArtifactId, "dev.galasa.example.banking.obr")
+	assert.Equal(t, mavenCoordinates[0].Classifier, "obr")
+	assert.Equal(t, mavenCoordinates[0].GroupId, "dev.galasa.example.banking")
+	assert.Equal(t, mavenCoordinates[0].Version, "0.0.1-SNAPSHOT")
 }
 
 func TestSingleObrIsInvalidTooFewPartsWithSlashSeparator(t *testing.T) {
@@ -456,4 +461,37 @@ func TestSingleObrIsInvalidTooManyPartsWithMissingObrSuffix(t *testing.T) {
 	assert.NotNil(t, mavenCoordinates)
 	assert.Len(t, mavenCoordinates, 0)
 	assert.Contains(t, err.Error(), "GAL1063E")
+}
+
+func TestValidClassInputGetsSplitCorrectly(t *testing.T) {
+	userInput := "myBundle/myClass"
+	testLocation, err := classNameUserInputToTestClassLocation(userInput)
+	assert.NotNil(t, testLocation)
+	assert.Nil(t, err)
+	assert.Equal(t, testLocation.OSGiBundleName, "myBundle")
+	assert.Equal(t, testLocation.QualifiedJavaClassName, "myClass")
+}
+
+func TestInvalidClassInputNoSlashGetsError(t *testing.T) {
+	userInput := "myBundleNoSlashmyClass"
+	testLocation, err := classNameUserInputToTestClassLocation(userInput)
+	assert.Nil(t, testLocation)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1064E")
+}
+
+func TestInvalidClassInputManySlashesGetsError(t *testing.T) {
+	userInput := "myBundle/With/More/Slashes/Class"
+	testLocation, err := classNameUserInputToTestClassLocation(userInput)
+	assert.Nil(t, testLocation)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1065E")
+}
+
+func TestInvalidClassInputWithClassSuffixGetsError(t *testing.T) {
+	userInput := "myBundle/myClass.class"
+	testLocation, err := classNameUserInputToTestClassLocation(userInput)
+	assert.Nil(t, testLocation)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1066E")
 }

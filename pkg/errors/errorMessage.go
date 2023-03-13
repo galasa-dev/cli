@@ -125,6 +125,9 @@ var (
 	GALASA_ERROR_INVALID_OBR_TOO_MANY_PARTS     = NewMessageType("GAL1061E: Badly formed OBR parameter '%s'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.", 1061)
 	GALASA_ERROR_INVALID_OBR_NO_MVN_PREFIX      = NewMessageType("GAL1062E: Badly formed OBR parameter '%s'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with a 'mvn:' prefix.", 1062)
 	GALASA_ERROR_INVALID_OBR_NO_OBR_SUFFIX      = NewMessageType("GAL1063E: Badly formed OBR parameter '%s'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with an '/obr' suffix.", 1063)
+	GALASA_ERROR_INVALID_CLASS_INPUT_NO_SLASH   = NewMessageType("GAL1064E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. No slash found.", 1064)
+	GALASA_ERROR_INVALID_CLASS_TOO_MANY_SLASHES = NewMessageType("GAL1065E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Too many slashes found.", 1065)
+	GALASA_ERROR_INVALID_CLASS_SUFFIX_FOUND     = NewMessageType("GAL1066E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.", 1066)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'bleeding edge' repository is '%s'", 2000)
