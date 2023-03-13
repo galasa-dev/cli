@@ -121,6 +121,10 @@ var (
 	GALASA_ERROR_RUN_ID_NOT_DETECTED            = NewMessageType("GAL1057E: The run identifier could not be detected in trace output of the child process", 1057)
 	GALASA_ERROR_FAILED_TO_LOAD_BOOTSTRAP_FILE  = NewMessageType("GAL1058E: Failed to load bootstrap file '%s'. Reason is '%s'", 1058)
 	GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE  = NewMessageType("GAL1059E: Failed to load overrides file '%s'. Reason is '%s'", 1059)
+	GALASA_ERROR_INVALID_OBR_NOT_ENOUGH_PARTS   = NewMessageType("GAL1060E: Badly formed OBR parameter '%s'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.", 1060)
+	GALASA_ERROR_INVALID_OBR_TOO_MANY_PARTS     = NewMessageType("GAL1061E: Badly formed OBR parameter '%s'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.", 1061)
+	GALASA_ERROR_INVALID_OBR_NO_MVN_PREFIX      = NewMessageType("GAL1062E: Badly formed OBR parameter '%s'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with a 'mvn:' prefix.", 1062)
+	GALASA_ERROR_INVALID_OBR_NO_OBR_SUFFIX      = NewMessageType("GAL1063E: Badly formed OBR parameter '%s'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with an '/obr' suffix.", 1063)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'bleeding edge' repository is '%s'", 2000)

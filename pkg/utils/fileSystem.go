@@ -29,11 +29,11 @@ type FileSystem interface {
 	// Returns the normal extension used for executable files.
 	// ie: The .exe suffix in windows, or "" in unix-like systems.
 	GetExecutableExtension() string
-}
 
-const (
-	FILE_SYSTEM_PATH_SEPARATOR string = string(os.PathSeparator)
-)
+	// GetPathSeparator returns the file path separator specific
+	// to this operating system.
+	GetFilePathSeparator() string
+}
 
 // TildaExpansion If a file starts with a tilda '~' character, expand it
 // to the home folder of the user on this file system.
@@ -65,6 +65,11 @@ func NewOSFileSystem() FileSystem {
 // ------------------------------------------------------------------------------------
 // Interface methods...
 // ------------------------------------------------------------------------------------
+
+func (osFS *OSFileSystem) GetFilePathSeparator() string {
+	return string(os.PathSeparator)
+}
+
 func (osFS *OSFileSystem) GetExecutableExtension() string {
 	var extension string = ""
 	if runtime.GOOS == "windows" {

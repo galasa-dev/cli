@@ -42,7 +42,7 @@ func TestCanWriteAndReadTempTextFile(t *testing.T) {
 	defer func() {
 		fs.DeleteDir(tempFolderPath)
 	}()
-	textFilePath := tempFolderPath + FILE_SYSTEM_PATH_SEPARATOR + "textFile.txt"
+	textFilePath := tempFolderPath + fs.GetFilePathSeparator() + "textFile.txt"
 	content := "hello\nworld\n"
 	err := fs.WriteTextFile(textFilePath, content)
 	assert.Nil(t, err)
@@ -76,7 +76,7 @@ func TestGetUserHomeDirReturnsSomething(t *testing.T) {
 	homeDirPath, err := fs.GetUserHomeDir()
 	assert.Nil(t, err)
 	assert.NotEmpty(t, homeDirPath)
-	assert.True(t, strings.HasPrefix(homeDirPath, FILE_SYSTEM_PATH_SEPARATOR))
+	assert.True(t, strings.HasPrefix(homeDirPath, fs.GetFilePathSeparator()))
 }
 
 func TestMkAllDirCreatesNestOfFoldersOk(t *testing.T) {
@@ -85,8 +85,8 @@ func TestMkAllDirCreatesNestOfFoldersOk(t *testing.T) {
 	defer func() {
 		fs.DeleteDir(tempFolderPath)
 	}()
-	nestedFolderPath := tempFolderPath + FILE_SYSTEM_PATH_SEPARATOR +
-		"a" + FILE_SYSTEM_PATH_SEPARATOR + "b"
+	nestedFolderPath := tempFolderPath + fs.GetFilePathSeparator() +
+		"a" + fs.GetFilePathSeparator() + "b"
 
 	// When we create the next of folders.
 	err := fs.MkdirAll(nestedFolderPath)
@@ -104,7 +104,7 @@ func TestCreatedFileExists(t *testing.T) {
 	defer func() {
 		fs.DeleteDir(tempFolderPath)
 	}()
-	textFilePath := tempFolderPath + FILE_SYSTEM_PATH_SEPARATOR + "textFile.txt"
+	textFilePath := tempFolderPath + fs.GetFilePathSeparator() + "textFile.txt"
 	content := "hello\nworld\n"
 	err := fs.WriteTextFile(textFilePath, content)
 	assert.Nil(t, err)

@@ -60,4 +60,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1057E: The run identifier could not be detected in trace output of the child process
 - GAL1058E: Failed to load bootstrap file '{}'. Reason is '{}'
 - GAL1059E: Failed to load overrides file '{}'. Reason is '{}'
+- GAL1060E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.
+- GAL1061E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.
+- GAL1062E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with a 'mvn:' prefix.
+- GAL1063E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with an '/obr' suffix.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'bleeding edge' repository is '{}'

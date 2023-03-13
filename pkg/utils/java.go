@@ -30,7 +30,7 @@ func ValidateJavaHome(fileSystem FileSystem, javaHome string) error {
 	}
 
 	if err == nil {
-		javaHome = sanitiseJavaHome(javaHome)
+		javaHome = sanitiseJavaHome(fileSystem, javaHome)
 	}
 
 	if err == nil {
@@ -50,8 +50,9 @@ func checkJavaHomeBinJavaProgram(fileSystem FileSystem, javaHome string) error {
 	var err error = nil
 
 	// Check that the program $JAVA_HOME/bin/java exists
-	javaProgramPath := javaHome + FILE_SYSTEM_PATH_SEPARATOR + "bin" +
-		FILE_SYSTEM_PATH_SEPARATOR + "java" + fileSystem.GetExecutableExtension()
+	separator := fileSystem.GetFilePathSeparator()
+	javaProgramPath := javaHome + separator + "bin" +
+		separator + "java" + fileSystem.GetExecutableExtension()
 	var isProgramThere bool
 	isProgramThere, err = fileSystem.Exists(javaProgramPath)
 	if err != nil {
@@ -66,13 +67,13 @@ func checkJavaHomeBinJavaProgram(fileSystem FileSystem, javaHome string) error {
 
 // sanitiseJavaHome Massage the javaHome value to make it more valid.
 // - strip off trailing path separators
-func sanitiseJavaHome(initialJavaHome string) string {
+func sanitiseJavaHome(fs FileSystem, initialJavaHome string) string {
 
 	result := initialJavaHome
 
 	// If the JAVA_HOME ends in a slash, strip it off.
 	lastCharacter := initialJavaHome[len(initialJavaHome)-1:]
-	if lastCharacter == FILE_SYSTEM_PATH_SEPARATOR {
+	if lastCharacter == fs.GetFilePathSeparator() {
 		// Last character is a file separator. Strip it off.
 		result = initialJavaHome[0 : len(initialJavaHome)-1]
 	}
@@ -82,7 +83,7 @@ func sanitiseJavaHome(initialJavaHome string) string {
 // checkJavaHomeBinFolderExists Checks that the $JAVA_HOME/bin folder exists.
 func checkJavaHomeBinFolderExists(fileSystem FileSystem, javaHome string) error {
 	var err error = nil
-	javaBinFolder := javaHome + FILE_SYSTEM_PATH_SEPARATOR + "bin"
+	javaBinFolder := javaHome + fileSystem.GetFilePathSeparator() + "bin"
 	var isBinFolderThere bool
 	isBinFolderThere, err = fileSystem.DirExists(javaBinFolder)
 	if err != nil {

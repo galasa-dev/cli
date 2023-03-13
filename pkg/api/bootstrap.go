@@ -67,6 +67,7 @@ func getDefaultBootstrapPath(fileSystem utils.FileSystem) (string, error) {
 		// This may involve changing the direction of slash characters.
 		baseUrl, err := url.Parse("file:///")
 		if err == nil {
+			// All URLs have forward-facing slashes.
 			fullUrl := baseUrl.JoinPath(strings.ReplaceAll(home, "\\", "/"), ".galasa", "bootstrap.properties")
 			path = fullUrl.String()
 		}

@@ -260,3 +260,200 @@ func TestCanCreateTempPropsFile(t *testing.T) {
 	assert.Contains(t, overridesGotBack, "framework.resultarchive.store")
 	assert.Contains(t, overridesGotBack, "framework.request.type.LOCAL.prefix")
 }
+
+func getDefaultCommandSyntaxTestParameters() (*utils.MockFileSystem,
+	string,
+	[]utils.MavenCoordinates,
+	TestLocation,
+	string,
+	string,
+	string,
+	bool,
+) {
+	fs := utils.NewOverridableMockFileSystem()
+	javaHome := "my_java_home"
+	testObrs := make([]utils.MavenCoordinates, 0)
+	testObrs = append(
+		testObrs,
+		utils.MavenCoordinates{
+			GroupId:    "myGroup",
+			ArtifactId: "myArtifact",
+			Version:    "0.2",
+			Classifier: "myClassifier",
+		},
+	)
+	testLocation := TestLocation{
+		OSGiBundleName:         "myTestBundle",
+		QualifiedJavaClassName: "myClass",
+	}
+	remoteMaven := "myRemoteMaven"
+	galasaVersionToRun := "0.99.0"
+	overridesFilePath := "C:/myFolder/myOverrides.props"
+	isTraceEnabled := true
+
+	return fs, javaHome, testObrs, testLocation,
+		remoteMaven, galasaVersionToRun, overridesFilePath, isTraceEnabled
+}
+
+func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
+
+	fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled = true
+
+	cmd, args, err := getCommandSyntax(
+		fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+	)
+
+	assert.NotNil(t, cmd)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Contains(t, args, "--trace")
+}
+
+func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
+	fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled = false
+
+	cmd, args, err := getCommandSyntax(
+		fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+	)
+
+	assert.NotNil(t, cmd)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.NotContains(t, args, "--trace")
+}
+
+func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
+	fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled := getDefaultCommandSyntaxTestParameters()
+
+	javaHome = "myJavaHome"
+	fs.SetFilePathSeparator("/")
+
+	cmd, args, err := getCommandSyntax(
+		fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+	)
+
+	assert.NotNil(t, cmd)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Equal(t, cmd, "myJavaHome/bin/java")
+}
+
+func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
+	fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled := getDefaultCommandSyntaxTestParameters()
+
+	javaHome = "myJavaHome"
+	fs.SetFilePathSeparator("\\")
+	fs.SetExecutableExtension(".exe")
+
+	cmd, args, err := getCommandSyntax(
+		fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+	)
+
+	assert.NotNil(t, cmd)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Equal(t, cmd, "myJavaHome\\bin\\java")
+}
+
+func TestSingleValidObrIsValid(t *testing.T) {
+	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr"}
+	mavenCoordinates, err := validateObrs(obrInputs)
+	assert.Nil(t, err)
+	assert.NotNil(t, mavenCoordinates)
+}
+
+func TestSingleObrIsInvalidTooFewPartsWithSlashSeparator(t *testing.T) {
+	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOTobr"}
+	mavenCoordinates, err := validateObrs(obrInputs)
+	assert.NotNil(t, err)
+	assert.NotNil(t, mavenCoordinates)
+	assert.Len(t, mavenCoordinates, 0)
+	assert.Contains(t, err.Error(), "GAL1060E")
+}
+
+func TestSingleObrIsInvalidTooManyPartsWithSlashSeparator(t *testing.T) {
+	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT//obr"}
+	mavenCoordinates, err := validateObrs(obrInputs)
+	assert.NotNil(t, err)
+	assert.NotNil(t, mavenCoordinates)
+	assert.Len(t, mavenCoordinates, 0)
+	assert.Contains(t, err.Error(), "GAL1061E")
+}
+
+func TestSingleObrIsInvalidTooManyPartsWithMissingMvnPrefix(t *testing.T) {
+	obrInputs := []string{"dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr"}
+	mavenCoordinates, err := validateObrs(obrInputs)
+	assert.NotNil(t, err)
+	assert.NotNil(t, mavenCoordinates)
+	assert.Len(t, mavenCoordinates, 0)
+	assert.Contains(t, err.Error(), "GAL1062E")
+}
+
+func TestSingleObrIsInvalidTooManyPartsWithMissingObrSuffix(t *testing.T) {
+	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/mysuffix"}
+	mavenCoordinates, err := validateObrs(obrInputs)
+	assert.NotNil(t, err)
+	assert.NotNil(t, mavenCoordinates)
+	assert.Len(t, mavenCoordinates, 0)
+	assert.Contains(t, err.Error(), "GAL1063E")
+}

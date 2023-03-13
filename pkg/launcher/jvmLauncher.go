@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
@@ -177,7 +178,8 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 					cmd, args, err = getCommandSyntax(
 						launcher.fileSystem, launcher.javaHome, obrs,
 						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
-						launcher.cmdParams.TargetGalasaVersion, overridesFilePath)
+						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
+						isTraceEnabled)
 					if err == nil {
 						log.Printf("Launching command '%s' '%v'\n", cmd, args)
 						localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
@@ -346,10 +348,14 @@ func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 
 	for _, obr := range obrInputs {
 		parts := strings.Split(obr, "/")
-		if len(parts) <= 0 {
-			err = errors.New("badly formed OBR parameter. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr " + obr)
+		if len(parts) < 4 {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NOT_ENOUGH_PARTS, obr)
 		} else if len(parts) > 4 {
-			err = errors.New("badly formed OBR parameter. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr " + obr)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_TOO_MANY_PARTS, obr)
+		} else if !strings.HasPrefix(parts[0], "mvn:") {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NO_MVN_PREFIX, obr)
+		} else if parts[3] != "obr" {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NO_OBR_SUFFIX, obr)
 		} else {
 			groupId := strings.ReplaceAll(parts[0], "mvn:", "")
 			coordinates := utils.MavenCoordinates{
@@ -394,6 +400,7 @@ func getCommandSyntax(
 	remoteMaven string,
 	galasaVersionToRun string,
 	overridesFilePath string,
+	isTraceEnabled bool,
 ) (string, []string, error) {
 
 	var cmd string = ""
@@ -402,8 +409,12 @@ func getCommandSyntax(
 	bootJarPath, err := utils.GetGalasaBootJarPath(fileSystem)
 	if err == nil {
 
-		cmd = javaHome + utils.FILE_SYSTEM_PATH_SEPARATOR + "bin" +
-			utils.FILE_SYSTEM_PATH_SEPARATOR + "java"
+		separator := fileSystem.GetFilePathSeparator()
+
+		// Note: Even in windows, when the java executable is called 'java.exe'
+		// You don't need to add the '.exe' extension it seems.
+		cmd = javaHome + separator + "bin" +
+			separator + "java"
 
 		args = append(args, "-jar")
 		args = append(args, bootJarPath)
@@ -452,6 +463,10 @@ func getCommandSyntax(
 		// --test ${TEST_BUNDLE}/${TEST_JAVA_CLASS}
 		args = append(args, "--test")
 		args = append(args, testLocation.OSGiBundleName+"/"+testLocation.QualifiedJavaClassName)
+
+		if isTraceEnabled {
+			args = append(args, "--trace")
+		}
 
 	}
 
