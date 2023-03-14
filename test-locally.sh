@@ -213,8 +213,12 @@ ${GALASACTL} runs submit local \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
 --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
---galasaVersion 0.26.0 \
---log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+--galasaVersion 0.27.0 
+# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+
+# --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestLongRunningAccount \
+# \
+# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
 
 # --override my.property=HELLO \
 # --overridefile ${BASEDIR}/temp/extra-overrides.properties 
@@ -240,6 +244,7 @@ ${GALASACTL} runs submit local \
 
 
 rc=$?
+echo "Exit code detected by calling script is ${rc}"
 if [[ "${rc}" != "0" ]]; then 
     echo "Failed to run the test"
     exit 1

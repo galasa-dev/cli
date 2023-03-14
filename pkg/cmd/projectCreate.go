@@ -42,8 +42,8 @@ var (
 	force                      bool
 	isOBRProjectRequired       bool
 	featureNamesCommaSeparated string
-	maven                      bool
-	gradle                     bool
+	useMaven                   bool
+	useGradle                  bool
 )
 
 func init() {
@@ -63,8 +63,13 @@ func init() {
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
-	cmd.Flags().BoolVar(&maven, "maven", false, "Create a Galasa test project using Maven (default).")
-	cmd.Flags().BoolVar(&gradle, "gradle", false, "Create a Galasa test project using Gradle.")
+
+	cmd.Flags().BoolVar(&useMaven, "maven", false, "Generate maven build artifacts. "+
+		"Can be used in addition to the --gradle flag. "+
+		"If this flag is not used, and the gradle option is not used, then behaviour of this flag defaults to true.")
+	cmd.Flags().BoolVar(&useGradle, "gradle", false, "Generate gradle build artifacts. "+
+		"Can be used in addition to the --maven flag.")
+
 	parentCommand.AddCommand(cmd)
 }
 
@@ -78,7 +83,8 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
-	err := createProject(fileSystem, packageName, featureNamesCommaSeparated, isOBRProjectRequired, force, maven, gradle)
+	err := createProject(fileSystem, packageName, featureNamesCommaSeparated,
+		isOBRProjectRequired, force, useMaven, useGradle)
 
 	// Convey the error to the top level.
 	// Tried doing this with RunE: entry, passing back the error, but we always
@@ -165,7 +171,7 @@ func createProject(
 				if useGradle {
 					err = createParentFolderSettingsGradle(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
 				}
-				
+
 				if err == nil {
 					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite, useDefault, useGradle)
 					if err == nil {
@@ -251,7 +257,7 @@ func createParentFolderSettingsGradle(
 		ChildModuleNames []string
 	}
 
-	templateParameters := ParentGradleParameters {
+	templateParameters := ParentGradleParameters{
 		Coordinates:      GradleCoordinates{GroupId: packageName, Name: packageName},
 		IsOBRRequired:    isOBRRequired,
 		ObrName:          packageName + ".obr",
@@ -470,8 +476,8 @@ func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolder
 	}
 
 	gradleProjectTemplateParameters := TestGradleParameters{
-		Parent:      GradleCoordinates{GroupId: packageName, Name: packageName},
-		Coordinates: GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
+		Parent:        GradleCoordinates{GroupId: packageName, Name: packageName},
+		Coordinates:   GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
 		GalasaVersion: embedded.GetGalasaVersion()}
 
 	buildGradleFile := utils.GeneratedFileDef{
@@ -481,7 +487,7 @@ func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolder
 		TemplateParameters:       gradleProjectTemplateParameters}
 
 	err := fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
-	
+
 	if err == nil {
 		bndFile := utils.GeneratedFileDef{
 			FileType:                 "bnd",
@@ -490,7 +496,7 @@ func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolder
 			TemplateParameters:       gradleProjectTemplateParameters}
 		err = fileGenerator.CreateFile(bndFile, forceOverwrite, true)
 	}
-	
+
 	return err
 }
 
