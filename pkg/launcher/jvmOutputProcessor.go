@@ -29,7 +29,7 @@ type JVMOutputProcessor struct {
 
 	// The location of the RAS folder for this test.
 	// "" if it isn't known yet.
-	detectedRasFolderPath string
+	detectedRasFolderPathUrl string
 
 	// The channel that goroutines can wait on until the processor
 	// has detected something of interest, or the buffer is closed.
@@ -43,7 +43,7 @@ func NewJVMOutputProcessor() *JVMOutputProcessor {
 	processor.detectedRunId = ""
 	processor.bytesCollected = bytes.NewBuffer([]byte{})
 	processor.publishResultChannel = make(chan string, 10)
-	processor.detectedRasFolderPath = ""
+	processor.detectedRasFolderPathUrl = ""
 	return processor
 }
 
@@ -86,9 +86,9 @@ func (processor *JVMOutputProcessor) Write(bytesToWrite []byte) (int, error) {
 			isAlertable = true
 		}
 
-		rasFolderPath := detectRasFolderPath(stringToSearch)
-		if rasFolderPath != "" {
-			processor.detectedRasFolderPath = rasFolderPath
+		rasFolderPathUrl := detectRasFolderPath(stringToSearch)
+		if rasFolderPathUrl != "" {
+			processor.detectedRasFolderPathUrl = rasFolderPathUrl
 			isAlertable = true
 		}
 

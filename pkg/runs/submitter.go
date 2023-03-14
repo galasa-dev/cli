@@ -475,9 +475,7 @@ func correctOverrideFilePathParameter(fs utils.FileSystem, params *utils.RunsSub
 		var home string
 		home, err = fs.GetUserHomeDir()
 		if err == nil {
-			params.OverrideFilePath = home + utils.FILE_SYSTEM_PATH_SEPARATOR +
-				".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR +
-				"overrides.properties"
+			params.OverrideFilePath = strings.ReplaceAll(home, "\\", "/") + "/.galasa/overrides.properties"
 			var isFileThere bool
 			isFileThere, err = fs.Exists(params.OverrideFilePath)
 			if err == nil {

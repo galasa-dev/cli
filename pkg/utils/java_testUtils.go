@@ -4,6 +4,10 @@
 package utils
 
 func AddJavaRuntimeToMock(fileSystem FileSystem, baseJavaFolderName string) {
-	fileSystem.MkdirAll(baseJavaFolderName + "/bin")
-	fileSystem.WriteBinaryFile(baseJavaFolderName+"/bin/java", []byte("some random content pretending to be a JRE program"))
+	separator := fileSystem.GetFilePathSeparator()
+	fileSystem.MkdirAll(baseJavaFolderName + separator + "bin")
+	fileSystem.WriteBinaryFile(baseJavaFolderName+separator+
+		"bin"+separator+"java"+fileSystem.GetExecutableExtension(),
+		[]byte("some random content pretending to be a JRE program"),
+	)
 }

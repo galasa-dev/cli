@@ -626,6 +626,13 @@ function run_test_locally_using_galasactl {
     submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
 }
 
+
+function test_on_windows {
+    WINDOWS_HOST="cics-galasa-test"
+    scp ${BASEDIR}/bin/galasactl-windows-amd64.exe ${WINDOWS_HOST}:galasactl.exe
+    ssh ${WINDOWS_HOST} ./galasactl.exe runs submit local  --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr  --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount --log -
+}
+
 download_dependencies
 generate_rest_client
 build_executables
@@ -638,6 +645,7 @@ run_test_locally_using_galasactl
 # build_portfolio
 generate_galasactl_documentation
 launch_test_on_ecosystem
+# test_on_windows
 
 #--------------------------------------------------------------------------
 h2 "Use the results.."

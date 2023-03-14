@@ -25,7 +25,7 @@ func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS) erro
 
 	userHomeDir, err = fileSystem.GetUserHomeDir()
 	if err == nil {
-		m2Dir := userHomeDir + FILE_SYSTEM_PATH_SEPARATOR + ".m2"
+		m2Dir := userHomeDir + fileSystem.GetFilePathSeparator() + ".m2"
 		err = fileGenerator.CreateFolder(m2Dir)
 
 		if err == nil {
@@ -38,7 +38,7 @@ func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS) erro
 
 func createSettingsXMLFile(fileGenerator *FileGenerator, fileSystem FileSystem, m2Dir string) error {
 
-	targetPath := m2Dir + FILE_SYSTEM_PATH_SEPARATOR + "settings.xml"
+	targetPath := m2Dir + fileSystem.GetFilePathSeparator() + "settings.xml"
 
 	xmlFile := GeneratedFileDef{
 		FileType:                 "xml",

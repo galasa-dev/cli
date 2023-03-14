@@ -151,7 +151,8 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 
 	// A dummy overrides file in .galasa
 	home, _ := fs.GetUserHomeDir()
-	path := home + utils.FILE_SYSTEM_PATH_SEPARATOR + ".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR + "overrides.properties"
+	separator := fs.GetFilePathSeparator()
+	path := home + separator + ".galasa" + separator + "overrides.properties"
 	fileProps := make(map[string]interface{})
 	fileProps["c"] = "d"
 	utils.WritePropertiesFile(fs, path, fileProps)

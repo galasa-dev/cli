@@ -58,8 +58,7 @@ func init() {
 		"in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting.")
 
 	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdParams.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
-		"how many test runs can be submitted in parallel, 0 or less will disable throttling. Default is "+
-			strconv.Itoa(runs.DEFAULT_THROTTLE_TESTS_AT_ONCE))
+		"how many test runs can be submitted in parallel, 0 or less will disable throttling. 1 causes tests to be run sequentially.")
 
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.OverrideFilePath, "overridefile", "",
 		"path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. "+

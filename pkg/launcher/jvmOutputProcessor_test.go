@@ -33,7 +33,7 @@ func TestJvmOutputProcessorSignalsWhenRunIdFound(t *testing.T) {
 	assert.Equal(t, "ALERT", msg, "unexpected message received from the output detector.")
 }
 
-func TestJvmOutputProcessorCollectsRasFolderPath(t *testing.T) {
+func TestJvmOutputProcessorCollectsRasFolderPathUrl(t *testing.T) {
 	processorToTest := NewJVMOutputProcessor()
 	expectedLocation := "file:///Users/mcobbett/.galasa/ras"
 
@@ -48,8 +48,8 @@ func TestJvmOutputProcessorCollectsRasFolderPath(t *testing.T) {
 	assert.Equal(t, "ALERT", msg, "unexpected message received from the output detector.")
 
 	// And the RAS location should be known.
-	assert.NotEmpty(t, processorToTest.detectedRasFolderPath, "RAS folder path was not detected in simulated JVM trace output")
-	assert.Equal(t, expectedLocation, processorToTest.detectedRasFolderPath, "Wrong RAS folder path parsed from trace outpout")
+	assert.NotEmpty(t, processorToTest.detectedRasFolderPathUrl, "RAS folder path was not detected in simulated JVM trace output")
+	assert.Equal(t, expectedLocation, processorToTest.detectedRasFolderPathUrl, "Wrong RAS folder path parsed from trace outpout")
 }
 
 func TestJvmOutputProcessorCanDetectAFrameworkShutdown(t *testing.T) {
