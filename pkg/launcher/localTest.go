@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
@@ -76,25 +77,22 @@ func NewLocalTest(
 // Hang around waiting for the JVM to trace the runID and ras location.
 func (localTest *LocalTest) launch(cmd string, args []string) error {
 
-	// Create a new process
+	// Create a new process, so we can track it and all we know about it.
 	localTest.process = localTest.processFactory.NewProcess()
 
-	// Start the process
+	// Start the process so it invokes the command.
 	err := localTest.process.Start(cmd, args, localTest.stdout, localTest.stderr)
 	if err != nil {
 		log.Printf("Failed to start the JVM. %s\n", err.Error())
 		log.Printf("Failing command is %s %v\n", cmd, args)
 	} else {
 
-		localTest.runId, err = waitForRunIdAllocation(localTest.stdout)
+		log.Printf("JVM test started. Spawning a go routine to wait for it to complete.\n")
+		go localTest.waitForCompletion()
+
+		localTest.runId, err = localTest.waitForRunIdAllocation(localTest.stdout)
 		if err == nil {
-
-			localTest.rasFolderPathUrl, err = waitForRasFolderPathUrl(localTest.stdout, localTest.runId)
-			if err == nil {
-
-				log.Printf("JVM test started OK. Spawning a go routine to wait for it to complete.\n")
-				go localTest.waitForCompletion()
-			}
+			localTest.rasFolderPathUrl, err = localTest.waitForRasFolderPathUrl(localTest.stdout, localTest.runId)
 		}
 	}
 	return err
@@ -102,14 +100,28 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 
 // Block this thread until we can gather where the RAS folder is for this test.
 // It is resolved within the JVM, and traced, where we pick it up from.
-func waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
+func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
 	var err error = nil
+	rasFolderPathUrl := ""
 
-	// BLOCK THREAD !
-	// Wait for the runId to be detected in the JVM output.
-	<-outputProcessor.publishResultChannel
+	// Wait for the ras location to be detected in the JVM output.
+	isDoneWaiting := false
 
-	rasFolderPathUrl := outputProcessor.detectedRasFolderPathUrl
+	for !isDoneWaiting {
+		select {
+		case <-outputProcessor.publishResultChannel:
+			rasFolderPathUrl = outputProcessor.detectedRasFolderPathUrl
+			isDoneWaiting = true
+		default:
+			// No ras path available yet.
+			if localTest.isCompleted() {
+				// Completed before the ras location was available.
+				isDoneWaiting = true
+			} else {
+				localTest.timeService.Sleep(time.Duration(time.Second))
+			}
+		}
+	}
 
 	if rasFolderPathUrl == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RAS_FOLDER_NOT_DETECTED, runId)
@@ -120,14 +132,29 @@ func waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) 
 
 // Block this thread until we can gather what the RunId for this test is
 // It is allocated within the JVM, and traced, where we pick it up from.
-func waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
+func (localTest *LocalTest) waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
 	var err error = nil
+	var runId string = ""
 
-	// BLOCK THREAD !
 	// Wait for the runId to be detected in the JVM output.
-	<-outputProcessor.publishResultChannel
+	isDoneWaiting := false
 
-	runId := outputProcessor.detectedRunId
+	for !isDoneWaiting {
+		select {
+		case <-outputProcessor.publishResultChannel:
+			// We have a RunId
+			runId = outputProcessor.detectedRunId
+			isDoneWaiting = true
+		default:
+			// No runid available yet.
+			if localTest.isCompleted() {
+				// Completed before the runId was available.
+				isDoneWaiting = true
+			} else {
+				localTest.timeService.Sleep(time.Duration(time.Second))
+			}
+		}
+	}
 
 	if runId == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RUN_ID_NOT_DETECTED)

@@ -644,7 +644,7 @@ run_tests_java_minus_jar_method
 run_test_locally_using_galasactl
 # build_portfolio
 generate_galasactl_documentation
-# launch_test_on_ecosystem
+launch_test_on_ecosystem
 # test_on_windows
 
 #--------------------------------------------------------------------------
