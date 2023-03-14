@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	pathUtils "path"
+	"runtime"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
@@ -24,11 +25,15 @@ type FileSystem interface {
 	OutputWarningMessage(string) error
 	MkTempDir() (string, error)
 	DeleteDir(path string)
-}
 
-const (
-	FILE_SYSTEM_PATH_SEPARATOR string = string(os.PathSeparator)
-)
+	// Returns the normal extension used for executable files.
+	// ie: The .exe suffix in windows, or "" in unix-like systems.
+	GetExecutableExtension() string
+
+	// GetPathSeparator returns the file path separator specific
+	// to this operating system.
+	GetFilePathSeparator() string
+}
 
 // TildaExpansion If a file starts with a tilda '~' character, expand it
 // to the home folder of the user on this file system.
@@ -60,6 +65,19 @@ func NewOSFileSystem() FileSystem {
 // ------------------------------------------------------------------------------------
 // Interface methods...
 // ------------------------------------------------------------------------------------
+
+func (osFS *OSFileSystem) GetFilePathSeparator() string {
+	return string(os.PathSeparator)
+}
+
+func (osFS *OSFileSystem) GetExecutableExtension() string {
+	var extension string = ""
+	if runtime.GOOS == "windows" {
+		extension = ".exe"
+	}
+	return extension
+}
+
 func (osFS *OSFileSystem) MkTempDir() (string, error) {
 	const DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS = ""
 	tempFolderPath, err := os.MkdirTemp(DEFAULT_TEMP_FOLDER_PATH_FOR_THIS_OS, "galasa-*")

@@ -41,7 +41,8 @@ func init() {
 	currentGalasaVersion := embedded.GetGalasaVersion()
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.TargetGalasaVersion, "galasaVersion",
 		currentGalasaVersion,
-		"the version of galasa you want to use to run your tests.")
+		"the version of galasa you want to use to run your tests. "+
+			"This should match the version of the galasa obr you built your test bundles against.")
 
 	runsSubmitLocalCmd.Flags().StringSliceVar(&runsSubmitLocalCmdParams.Obrs, "obr", make([]string, 0),
 		"The maven coordinates of the obr bundle(s) which refer to your test bundles. "+

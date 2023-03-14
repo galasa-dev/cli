@@ -5,10 +5,10 @@ package launcher
 
 import (
 	"embed"
-	"errors"
 	"log"
 	"strings"
 
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
@@ -177,7 +177,8 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 					cmd, args, err = getCommandSyntax(
 						launcher.fileSystem, launcher.javaHome, obrs,
 						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
-						launcher.cmdParams.TargetGalasaVersion, overridesFilePath)
+						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
+						isTraceEnabled)
 					if err == nil {
 						log.Printf("Launching command '%s' '%v'\n", cmd, args)
 						localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
@@ -249,19 +250,29 @@ func prepareTempFiles(
 }
 
 func addStandardProperties(fileSystem utils.FileSystem, overrides map[string]interface{}) (map[string]interface{}, error) {
+
 	// Set the ras location to be local disk always.
 	homePath, err := fileSystem.GetUserHomeDir()
 	if err == nil {
 		const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
-		rasPathUri := "file://" + homePath + utils.FILE_SYSTEM_PATH_SEPARATOR + ".galasa" +
-			utils.FILE_SYSTEM_PATH_SEPARATOR + "ras"
-		overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
+
+		// Only set this property if it's not already set by the user, or in the users' override file.
+		_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE]
+		if !isPropAlreadySet {
+			rasPathUri := "file:///" + strings.ReplaceAll(homePath, "\\", "/") + "/.galasa/ras"
+			overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
+		}
 	}
 
 	if err == nil {
 		// Force the launched runs to use the "L" prefix in their runids.
 		const OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX = "framework.request.type.LOCAL.prefix"
-		overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
+
+		// Only set this property if it's not already set by the user, or in the users' override file.
+		_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX]
+		if !isPropAlreadySet {
+			overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
+		}
 	}
 	return overrides, err
 }
@@ -336,10 +347,14 @@ func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 
 	for _, obr := range obrInputs {
 		parts := strings.Split(obr, "/")
-		if len(parts) <= 0 {
-			err = errors.New("badly formed OBR parameter. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr " + obr)
+		if len(parts) < 4 {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NOT_ENOUGH_PARTS, obr)
 		} else if len(parts) > 4 {
-			err = errors.New("badly formed OBR parameter. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr " + obr)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_TOO_MANY_PARTS, obr)
+		} else if !strings.HasPrefix(parts[0], "mvn:") {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NO_MVN_PREFIX, obr)
+		} else if parts[3] != "obr" {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NO_OBR_SUFFIX, obr)
 		} else {
 			groupId := strings.ReplaceAll(parts[0], "mvn:", "")
 			coordinates := utils.MavenCoordinates{
@@ -384,6 +399,7 @@ func getCommandSyntax(
 	remoteMaven string,
 	galasaVersionToRun string,
 	overridesFilePath string,
+	isTraceEnabled bool,
 ) (string, []string, error) {
 
 	var cmd string = ""
@@ -392,8 +408,12 @@ func getCommandSyntax(
 	bootJarPath, err := utils.GetGalasaBootJarPath(fileSystem)
 	if err == nil {
 
-		cmd = javaHome + utils.FILE_SYSTEM_PATH_SEPARATOR + "bin" +
-			utils.FILE_SYSTEM_PATH_SEPARATOR + "java"
+		separator := fileSystem.GetFilePathSeparator()
+
+		// Note: Even in windows, when the java executable is called 'java.exe'
+		// You don't need to add the '.exe' extension it seems.
+		cmd = javaHome + separator + "bin" +
+			separator + "java"
 
 		args = append(args, "-jar")
 		args = append(args, bootJarPath)
@@ -403,10 +423,10 @@ func getCommandSyntax(
 		var userHome string
 		userHome, err = fileSystem.GetUserHomeDir()
 
-		// --localmaven file:${M2_PATH}/repository/
+		// --localmaven file://${M2_PATH}/repository/
+		// Note: URLs always have forward-slashes
 		args = append(args, "--localmaven")
-		localMavenPath := "file:" + userHome + utils.FILE_SYSTEM_PATH_SEPARATOR +
-			".m2" + utils.FILE_SYSTEM_PATH_SEPARATOR + "repository"
+		localMavenPath := "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.m2/repository"
 		args = append(args, localMavenPath)
 
 		// --remotemaven $REMOTE_MAVEN
@@ -415,13 +435,14 @@ func getCommandSyntax(
 
 		// --bootstrap file:${HOME}/.galasa/bootstrap.properties
 		args = append(args, "--bootstrap")
-		bootstrapPath := "file:" + userHome + utils.FILE_SYSTEM_PATH_SEPARATOR +
-			".galasa" + utils.FILE_SYSTEM_PATH_SEPARATOR + "bootstrap.properties"
+		bootstrapPath := "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.galasa/bootstrap.properties"
 		args = append(args, bootstrapPath)
 
 		// --overrides file:${HOME}/.galasa/overrides.properties
 		args = append(args, "--overrides")
-		overridesPath := "file:" + overridesFilePath
+		// Note: We turn the file path provided into a URL so slashes always
+		// go the same way.
+		overridesPath := "file:///" + strings.ReplaceAll(overridesFilePath, "\\", "/")
 		args = append(args, overridesPath)
 
 		for _, obrCoordinate := range testObrs {
@@ -442,6 +463,10 @@ func getCommandSyntax(
 		args = append(args, "--test")
 		args = append(args, testLocation.OSGiBundleName+"/"+testLocation.QualifiedJavaClassName)
 
+		if isTraceEnabled {
+			args = append(args, "--trace")
+		}
+
 	}
 
 	return cmd, args, err
@@ -457,10 +482,12 @@ func classNameUserInputToTestClassLocation(classNameUserInput string) (*TestLoca
 	)
 
 	parts := strings.Split(classNameUserInput, "/")
-	if len(parts) <= 0 {
-		err = errors.New("error! - Bad class format. Should be osgiBundleName/qualifiedJavaClassName - slash is missing. not handled yet")
+	if len(parts) < 2 {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_CLASS_INPUT_NO_SLASH, classNameUserInput)
 	} else if len(parts) > 2 {
-		err = errors.New("error - too many segments. Not handled yet")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_CLASS_TOO_MANY_SLASHES, classNameUserInput)
+	} else if strings.HasSuffix(parts[1], ".class") {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_CLASS_SUFFIX_FOUND, classNameUserInput)
 	} else {
 		osgiBundleName := parts[0]
 		qualifiedJavaClassName := parts[1]

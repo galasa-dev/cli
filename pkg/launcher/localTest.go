@@ -7,6 +7,8 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
@@ -30,7 +32,8 @@ type LocalTest struct {
 
 	// Where is the RAS folder storing results for this test ?
 	// We don't initially know it. This info is extracted from the JVM trace.
-	rasFolderPath string
+	// eg: file:///C:/temp/ras
+	rasFolderPathUrl string
 
 	// A local test has a "testRun" which reports back to the submitter in the
 	// same way the HTTP submitter reports back. Using common structures.
@@ -74,25 +77,22 @@ func NewLocalTest(
 // Hang around waiting for the JVM to trace the runID and ras location.
 func (localTest *LocalTest) launch(cmd string, args []string) error {
 
-	// Create a new process
+	// Create a new process, so we can track it and all we know about it.
 	localTest.process = localTest.processFactory.NewProcess()
 
-	// Start the process
+	// Start the process so it invokes the command.
 	err := localTest.process.Start(cmd, args, localTest.stdout, localTest.stderr)
 	if err != nil {
 		log.Printf("Failed to start the JVM. %s\n", err.Error())
 		log.Printf("Failing command is %s %v\n", cmd, args)
 	} else {
 
-		localTest.runId, err = waitForRunIdAllocation(localTest.stdout)
+		log.Printf("JVM test started. Spawning a go routine to wait for it to complete.\n")
+		go localTest.waitForCompletion()
+
+		localTest.runId, err = localTest.waitForRunIdAllocation(localTest.stdout)
 		if err == nil {
-
-			localTest.rasFolderPath, err = waitForRasFolderPath(localTest.stdout, localTest.runId)
-			if err == nil {
-
-				log.Printf("JVM test started OK. Spawning a go routine to wait for it to complete.\n")
-				go localTest.waitForCompletion()
-			}
+			localTest.rasFolderPathUrl, err = localTest.waitForRasFolderPathUrl(localTest.stdout, localTest.runId)
 		}
 	}
 	return err
@@ -100,32 +100,61 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 
 // Block this thread until we can gather where the RAS folder is for this test.
 // It is resolved within the JVM, and traced, where we pick it up from.
-func waitForRasFolderPath(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
+func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
 	var err error = nil
+	rasFolderPathUrl := ""
 
-	// BLOCK THREAD !
-	// Wait for the runId to be detected in the JVM output.
-	<-outputProcessor.publishResultChannel
+	// Wait for the ras location to be detected in the JVM output.
+	isDoneWaiting := false
 
-	rasFolderPath := outputProcessor.detectedRasFolderPath
+	for !isDoneWaiting {
+		select {
+		case <-outputProcessor.publishResultChannel:
+			rasFolderPathUrl = outputProcessor.detectedRasFolderPathUrl
+			isDoneWaiting = true
+		default:
+			// No ras path available yet.
+			if localTest.isCompleted() {
+				// Completed before the ras location was available.
+				isDoneWaiting = true
+			} else {
+				localTest.timeService.Sleep(time.Duration(time.Second))
+			}
+		}
+	}
 
-	if rasFolderPath == "" {
+	if rasFolderPathUrl == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RAS_FOLDER_NOT_DETECTED, runId)
 	}
 
-	return rasFolderPath, err
+	return rasFolderPathUrl, err
 }
 
 // Block this thread until we can gather what the RunId for this test is
 // It is allocated within the JVM, and traced, where we pick it up from.
-func waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
+func (localTest *LocalTest) waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
 	var err error = nil
+	var runId string = ""
 
-	// BLOCK THREAD !
 	// Wait for the runId to be detected in the JVM output.
-	<-outputProcessor.publishResultChannel
+	isDoneWaiting := false
 
-	runId := outputProcessor.detectedRunId
+	for !isDoneWaiting {
+		select {
+		case <-outputProcessor.publishResultChannel:
+			// We have a RunId
+			runId = outputProcessor.detectedRunId
+			isDoneWaiting = true
+		default:
+			// No runid available yet.
+			if localTest.isCompleted() {
+				// Completed before the runId was available.
+				isDoneWaiting = true
+			} else {
+				localTest.timeService.Sleep(time.Duration(time.Second))
+			}
+		}
+	}
 
 	if runId == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RUN_ID_NOT_DETECTED)
@@ -168,11 +197,11 @@ func (localTest *LocalTest) updateTestStatusFromRasFile() error {
 
 	var err error = nil
 
-	if localTest.runId == "" || localTest.rasFolderPath == "" {
+	if localTest.runId == "" || localTest.rasFolderPathUrl == "" {
 		log.Printf("Don't have enough information to find the structure.json in the RAS folder.\n")
 	} else {
 
-		jsonFilePath := localTest.rasFolderPath + "/" + localTest.runId + "/structure.json"
+		jsonFilePath := strings.TrimPrefix(localTest.rasFolderPathUrl, "file:///") + "/" + localTest.runId + "/structure.json"
 		log.Printf("Reading latest test status from '%s'\n", jsonFilePath)
 
 		var testRun *galasaapi.TestRun
