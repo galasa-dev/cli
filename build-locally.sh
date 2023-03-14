@@ -233,6 +233,9 @@ function calculate_galasactl_executable {
     esac
 
     architecture=$(uname -m)
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
 
     export galasactl_command="galasactl-${os}-${architecture}"
     info "galasactl command is ${galasactl_command}"
@@ -247,7 +250,7 @@ function generate_sample_code {
     cd $BASEDIR/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
-    ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr 
+    ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr --maven --gradle
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to create the galasa test project using galasactl command. rc=${rc}"
@@ -257,8 +260,8 @@ function generate_sample_code {
 }
 
 #--------------------------------------------------------------------------
-# Now build the source it created.
-function build_generated_source {
+# Now build the source it created using maven
+function build_generated_source_maven {
     h2 "Building the sample project we just generated."
     cd ${BASEDIR}/temp/${PACKAGE_NAME}
     mvn clean test install 
@@ -270,7 +273,19 @@ function build_generated_source {
     success "OK"
 }
 
-
+#--------------------------------------------------------------------------
+# Now build the source it created using gradle
+function build_generated_source_gradle {
+    h2 "Building the sample project we just generated."
+    cd ${BASEDIR}/temp/${PACKAGE_NAME}
+    gradle build publishToMavenLocal
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then
+        error " Failed to build the generated source code which galasactl created."
+        exit 1
+    fi
+    success "OK"
+}
 
 #--------------------------------------------------------------------------
 # Execute the tests in Galasa
@@ -535,6 +550,9 @@ function generate_galasactl_documentation {
                     exit 1
     esac
     architecture="$(uname -m)"
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
 
     # Call the documentation generator, which builds .md files
     info "Using program ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} to generate the documentation..."
@@ -570,6 +588,7 @@ function submit_local_test {
     OBR_GROUP_ID=$3
     OBR_ARTIFACT_ID=$4
     OBR_VERSION=$5
+    LOG_FILE=$6
 
     # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
     export BOOT_JAR_VERSION="0.26.0"
@@ -595,7 +614,7 @@ function submit_local_test {
     --requesttype MikeCLI \
     --poll 10 \
     --progress 1 \
-    --log - 2>&1 | tee ${BASEDIR}/temp/local-run-log.txt
+    --log ${LOG_FILE}
 
     # --reportjson myreport.json \
     # --reportyaml myreport.yaml \
@@ -615,7 +634,8 @@ function submit_local_test {
 }
 
 function run_test_locally_using_galasactl {
-
+    export LOG_FILE=$1
+    
     # Run the Payee tests.
     export TEST_BUNDLE=dev.galasa.example.banking.payee
     export TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
@@ -623,9 +643,9 @@ function run_test_locally_using_galasactl {
     export TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
     export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
-    submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
-}
 
+    submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION $LOG_FILE
+}
 
 function test_on_windows {
     WINDOWS_HOST="cics-galasa-test"
@@ -633,18 +653,33 @@ function test_on_windows {
     ssh ${WINDOWS_HOST} ./galasactl.exe runs submit local  --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr  --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount --log -
 }
 
+function cleanup_local_maven_repo {
+    rm -fr ~/.m2/repository/dev/galasa/example
+}
+
 download_dependencies
 generate_rest_client
 build_executables
 calculate_galasactl_executable
 galasa_home_init
+
 generate_sample_code
-build_generated_source
-run_tests_java_minus_jar_method
-run_test_locally_using_galasactl
+
+# Gradle ...
+cleanup_local_maven_repo
+build_generated_source_gradle
+run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
+
+# Maven ...
+cleanup_local_maven_repo
+build_generated_source_maven
+run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-maven.txt
+
+# run_tests_java_minus_jar_method
 # build_portfolio
 generate_galasactl_documentation
-launch_test_on_ecosystem
+
+# launch_test_on_ecosystem
 # test_on_windows
 
 #--------------------------------------------------------------------------

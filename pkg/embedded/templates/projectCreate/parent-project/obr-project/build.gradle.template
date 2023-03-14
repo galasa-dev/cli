@@ -1,0 +1,27 @@
+plugins {
+    id 'base'
+    id 'maven-publish'
+    id 'dev.galasa.obr' version '0.15.0'
+}
+
+group = '{{ .Parent.GroupId }}'
+version = '0.0.1-SNAPSHOT'
+
+dependencies {
+{{- range $module := .Modules }}
+    bundle project(':{{ $module.Name }}')
+{{- end }}
+}
+
+def obrFile = file('build/galasa.obr')
+artifacts {
+    archives obrFile
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact obrFile
+        }
+    }
+}

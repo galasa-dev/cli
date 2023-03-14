@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'biz.aQute.bnd.builder' version '6.4.0'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    // To use the bleeding edge version of galasa, use the development obr
+    // maven {
+    //   url = 'https://development.galasa.dev/main/maven-repo/obr'
+    // }
+}
+
+group = '{{ .Parent.GroupId }}'
+version = '0.0.1-SNAPSHOT'
+
+dependencies {
+    implementation platform('dev.galasa:galasa-bom:{{.GalasaVersion}}')
+
+    implementation 'dev.galasa:dev.galasa'
+    implementation 'dev.galasa:dev.galasa.framework'
+    implementation 'dev.galasa:dev.galasa.core.manager'
+    implementation 'dev.galasa:dev.galasa.artifact.manager'
+    implementation 'commons-logging:commons-logging'
+    implementation 'org.assertj:assertj-core'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}

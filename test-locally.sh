@@ -61,10 +61,35 @@ mkdir -p temp
 # rm -fr ~/.galasa/*
 
 #-------------------------------------------------------------------------
+# Set galasactl version to use
+#-------------------------------------------------------------------------
+raw_os=$(uname -s) # eg: "Darwin"
+os=""
+
+case $raw_os in
+    Darwin*) 
+        os="darwin" 
+        ;;
+	Linux*)
+    	os="linux"
+        ;;
+    *) 
+        error "Failed to recognise which operating system is in use. $raw_os"
+        exit 1
+esac
+
+architecture=$(uname -m)
+if [[ "${architecture}" == "x86_64" ]]; then
+    architecture="amd64"
+fi
+
+export GALASACTL="${BASEDIR}/bin/galasactl-${os}-${architecture}"
+
+#-------------------------------------------------------------------------
 # Run tool, generate source
 #-------------------------------------------------------------------------
 cd temp
-../bin/galasactl-darwin-arm64 project create --package dev.galasa.example.banking --features payee,account --obr --log -
+${GALASACTL} project create --package dev.galasa.example.banking --features payee,account --obr --log -
 rc=$?
 if [[ "${rc}" != "0" ]]; then 
     error "Failed. rc=${rc}"
@@ -176,7 +201,6 @@ export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
 # else go to maven central
 #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
 
-export GALASACTL="${BASEDIR}/bin/galasactl-darwin-arm64"
 
 echo "my.file.based.property = 23" > ${BASEDIR}/temp/extra-overrides.properties
 
@@ -189,8 +213,12 @@ ${GALASACTL} runs submit local \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
 --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
---galasaVersion 0.26.0 \
---log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+--galasaVersion 0.27.0 
+# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+
+# --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestLongRunningAccount \
+# \
+# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
 
 # --override my.property=HELLO \
 # --overridefile ${BASEDIR}/temp/extra-overrides.properties 
@@ -216,6 +244,7 @@ ${GALASACTL} runs submit local \
 
 
 rc=$?
+echo "Exit code detected by calling script is ${rc}"
 if [[ "${rc}" != "0" ]]; then 
     echo "Failed to run the test"
     exit 1

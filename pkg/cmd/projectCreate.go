@@ -14,12 +14,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CommonPomParameters holds common substitution parameters a pom.xml file
+// MavenCoordinates holds common substitution parameters a pom.xml file
 // template uses.
 type MavenCoordinates struct {
 	GroupId    string
 	ArtifactId string
 	Name       string
+}
+
+// GradleCoordinates holds common substitution parameters .gradle file
+// templates use.
+type GradleCoordinates struct {
+	GroupId string
+	Name    string
 }
 
 var (
@@ -35,6 +42,8 @@ var (
 	force                      bool
 	isOBRProjectRequired       bool
 	featureNamesCommaSeparated string
+	useMaven                   bool
+	useGradle                  bool
 )
 
 func init() {
@@ -54,6 +63,13 @@ func init() {
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
+
+	cmd.Flags().BoolVar(&useMaven, "maven", false, "Generate maven build artifacts. "+
+		"Can be used in addition to the --gradle flag. "+
+		"If this flag is not used, and the gradle option is not used, then behaviour of this flag defaults to true.")
+	cmd.Flags().BoolVar(&useGradle, "gradle", false, "Generate gradle build artifacts. "+
+		"Can be used in addition to the --maven flag.")
+
 	parentCommand.AddCommand(cmd)
 }
 
@@ -67,7 +83,8 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
-	err := createProject(fileSystem, packageName, featureNamesCommaSeparated, isOBRProjectRequired, force)
+	err := createProject(fileSystem, packageName, featureNamesCommaSeparated,
+		isOBRProjectRequired, force, useMaven, useGradle)
 
 	// Convey the error to the top level.
 	// Tried doing this with RunE: entry, passing back the error, but we always
@@ -79,6 +96,8 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 }
 
 // createProject will create the following artifacts in the specified file system:
+//
+// Maven Build
 //
 //		. - All files are relative to the current directory.
 //		└── packageName - The parent package
@@ -93,6 +112,22 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 //	  		└── packageName.obr - The OBR project. (only if the --obr option is used).
 //	    	 	 └── pom.xml
 //
+// Gradle Build
+//
+//		. - All files are relative to the current directory.
+//		└── packageName - The parent package
+//			├── settings.gradle - Gradle settings file
+//	 		├── packageName.test - The tests project.
+//	  		│   └── build.gradle
+//	  		│   └── bnd.bnd - the test project's OSGi bundle file
+//	  		│   └── src
+//	  		│       └── main
+//	  		│           └── java
+//	  		│               └── packageName - There will be multiple nested folders if there are dots ('.') in the package name
+//	  		│                   └── SampleTest.java - Contains an example Galasa testcase
+//	  		└── packageName.obr - The OBR project. (only if the --obr option is used).
+//	    	 	 └── build.gradle
+//
 // isOBRProjectRequired - Controls whether the optional OBR project is going to be created.
 // featureNamesCommaSeparated - eg: kettle,toaster. Causes a kettle and toaster project to be created with a sample test in.
 func createProject(
@@ -100,11 +135,19 @@ func createProject(
 	packageName string,
 	featureNamesCommaSeparated string,
 	isOBRProjectRequired bool,
-	forceOverwrite bool) error {
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool) error {
 
 	log.Printf("Creating project using packageName:%s\n", packageName)
 
 	var err error
+
+	// By default, create a Maven project unless --gradle is the only flag set
+	useDefault := true
+	if useGradle && !useMaven {
+		useDefault = false
+	}
 
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 
@@ -121,12 +164,19 @@ func createProject(
 			parentProjectFolder := packageName
 			err = fileGenerator.CreateFolder(parentProjectFolder)
 			if err == nil {
-				err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
+				if useDefault {
+					err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
+				}
+
+				if useGradle {
+					err = createParentFolderSettingsGradle(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
+				}
+
 				if err == nil {
-					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite)
+					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite, useDefault, useGradle)
 					if err == nil {
 						if isOBRProjectRequired {
-							err = createOBRProject(fileGenerator, packageName, featureNames, forceOverwrite)
+							err = createOBRProject(fileGenerator, packageName, featureNames, forceOverwrite, useDefault, useGradle)
 						}
 					}
 				}
@@ -156,6 +206,7 @@ func separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated strin
 	return featureNames, err
 }
 
+// Creates a pom.xml file in the parent project folder for Maven projects.
 func createParentFolderPom(fileGenerator *utils.FileGenerator, packageName string, featureNames []string, isOBRRequired bool, forceOverwrite bool) error {
 
 	type ParentPomParameters struct {
@@ -190,11 +241,55 @@ func createParentFolderPom(fileGenerator *utils.FileGenerator, packageName strin
 	return err
 }
 
+// Creates the settings.gradle file in the parent project folder for Gradle projects.
+func createParentFolderSettingsGradle(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+	featureNames []string,
+	isOBRRequired bool,
+	forceOverwrite bool) error {
+
+	type ParentGradleParameters struct {
+		Coordinates GradleCoordinates
+
+		IsOBRRequired    bool
+		ObrName          string
+		ChildModuleNames []string
+	}
+
+	templateParameters := ParentGradleParameters{
+		Coordinates:      GradleCoordinates{GroupId: packageName, Name: packageName},
+		IsOBRRequired:    isOBRRequired,
+		ObrName:          packageName + ".obr",
+		ChildModuleNames: make([]string, len(featureNames))}
+
+	// Populate the child module names
+	for index, featureName := range featureNames {
+		templateParameters.ChildModuleNames[index] = packageName + "." + featureName
+	}
+
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 "gradle",
+		TargetFilePath:           packageName + "/settings.gradle",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/settings.gradle.template",
+		TemplateParameters:       templateParameters}
+
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
+	return err
+}
+
 // createTestProjects - creates a number of projects, each of whichh containing tests which test a feature.
-func createTestProjects(fileGenerator *utils.FileGenerator, packageName string, featureNames []string, forceOverwrite bool) error {
+func createTestProjects(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+	featureNames []string,
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool) error {
+
 	var err error = nil
 	for _, featureName := range featureNames {
-		err = createTestProject(fileGenerator, packageName, featureName, forceOverwrite)
+		err = createTestProject(fileGenerator, packageName, featureName, forceOverwrite, useMaven, useGradle)
 		if err != nil {
 			break
 		}
@@ -207,7 +302,9 @@ func createTestProject(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
 	featureName string,
-	forceOverwrite bool) error {
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool) error {
 
 	targetFolderPath := packageName + "/" + packageName + "." + featureName
 	log.Printf("Creating tests project %s\n", targetFolderPath)
@@ -215,7 +312,13 @@ func createTestProject(
 	// Create the base test folder
 	err := fileGenerator.CreateFolder(targetFolderPath)
 	if err == nil {
-		err = createTestFolderPom(fileGenerator, targetFolderPath, packageName, featureName, forceOverwrite)
+		if useMaven {
+			err = createTestFolderPom(fileGenerator, targetFolderPath, packageName, featureName, forceOverwrite)
+		}
+
+		if useGradle {
+			err = createTestFolderGradle(fileGenerator, targetFolderPath, packageName, featureName, forceOverwrite)
+		}
 	}
 
 	if err == nil {
@@ -232,14 +335,27 @@ func createTestProject(
 	return err
 }
 
-func createOBRProject(fileGenerator *utils.FileGenerator, packageName string, featureNames []string, forceOverwrite bool) error {
+func createOBRProject(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+	featureNames []string,
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool) error {
+
 	targetFolderPath := packageName + "/" + packageName + ".obr"
 	log.Printf("Creating obr project %s\n", targetFolderPath)
 
 	// Create the base test folder
 	err := fileGenerator.CreateFolder(targetFolderPath)
 	if err == nil {
-		err = createOBRFolderPom(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
+		if useMaven {
+			err = createOBRFolderPom(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
+		}
+
+		if useGradle {
+			err = createOBRFolderBuildGradle(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
+		}
 	}
 
 	if err == nil {
@@ -323,6 +439,7 @@ func createJavaSourceFile(fileGenerator *utils.FileGenerator, targetSrcFolderPat
 	return err
 }
 
+// Creates a pom.xml file in a Maven test project directory.
 func createTestFolderPom(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
 	packageName string, featureName string, forceOverwrite bool) error {
 
@@ -347,6 +464,43 @@ func createTestFolderPom(fileGenerator *utils.FileGenerator, targetTestFolderPat
 	return err
 }
 
+// Creates a build.gradle and a bnd.bnd file in a Gradle test project directory.
+func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
+	packageName string, featureName string, forceOverwrite bool) error {
+
+	type TestGradleParameters struct {
+		Parent      GradleCoordinates
+		Coordinates GradleCoordinates
+		// Version of Galasa we are targetting
+		GalasaVersion string
+	}
+
+	gradleProjectTemplateParameters := TestGradleParameters{
+		Parent:        GradleCoordinates{GroupId: packageName, Name: packageName},
+		Coordinates:   GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
+		GalasaVersion: embedded.GetGalasaVersion()}
+
+	buildGradleFile := utils.GeneratedFileDef{
+		FileType:                 "gradle",
+		TargetFilePath:           targetTestFolderPath + "/build.gradle",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/build.gradle.template",
+		TemplateParameters:       gradleProjectTemplateParameters}
+
+	err := fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
+
+	if err == nil {
+		bndFile := utils.GeneratedFileDef{
+			FileType:                 "bnd",
+			TargetFilePath:           targetTestFolderPath + "/bnd.bnd",
+			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/bnd.bnd",
+			TemplateParameters:       gradleProjectTemplateParameters}
+		err = fileGenerator.CreateFile(bndFile, forceOverwrite, true)
+	}
+
+	return err
+}
+
+// Creates a pom.xml file in an OBR project directory.
 func createOBRFolderPom(fileGenerator *utils.FileGenerator, targetOBRFolderPath string, packageName string,
 	featureNames []string, forceOverwrite bool) error {
 
@@ -372,6 +526,37 @@ func createOBRFolderPom(fileGenerator *utils.FileGenerator, targetOBRFolderPath 
 		TargetFilePath:           targetOBRFolderPath + "/pom.xml",
 		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/pom.xml",
 		TemplateParameters:       pomTemplateParameters}
+
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
+	return err
+}
+
+// Creates a build.gradle file in an OBR project directory.
+func createOBRFolderBuildGradle(fileGenerator *utils.FileGenerator, targetOBRFolderPath string, packageName string,
+	featureNames []string, forceOverwrite bool) error {
+
+	type OBRGradleParameters struct {
+		Parent      GradleCoordinates
+		Coordinates GradleCoordinates
+		Modules     []GradleCoordinates
+	}
+
+	buildGradleTemplateParameters := OBRGradleParameters{
+		Parent:      GradleCoordinates{GroupId: packageName, Name: packageName},
+		Coordinates: GradleCoordinates{GroupId: packageName, Name: packageName + ".obr"},
+		Modules:     make([]GradleCoordinates, len(featureNames))}
+
+	// Populate the list of modules.
+	for index, featureName := range featureNames {
+		buildGradleTemplateParameters.Modules[index] = GradleCoordinates{
+			GroupId: packageName, Name: packageName + "." + featureName}
+	}
+
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 "gradle",
+		TargetFilePath:           targetOBRFolderPath + "/build.gradle",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/build.gradle.template",
+		TemplateParameters:       buildGradleTemplateParameters}
 
 	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err
