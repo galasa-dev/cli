@@ -8,7 +8,7 @@ Most commands will need a reference to the Galasa bootstrap file or url.  This c
 The syntax is documented in generated documentation [here](docs/generated/galasactl.md)
 
 
-## Creating example project
+## Creating an example project
 
 `galasactl` can be used to create near-empty test projects to lay-down an initial structure 
 prior to fleshing out with more tests. This can provide a boost to productivity when 
@@ -40,6 +40,26 @@ Create a folder tree which has two bundles, each aiming to test different featur
 galasactl project create --package dev.galasa.example.banking --features payee,account --obr --log -
 ```
 
+
+
+### Building the example project
+
+Maven and Gradle are both build tools, which read metadata from files which guide how the code within a module should be built. Maven and Gradle use different formats for these build files.
+
+By Default, the `galasactl project create` generates a project which includes a maven build mechanism. The `--maven` flag being present also explicitly tells the tool to generate maven build artifacts (`pom.xml` files).
+
+To create a project which includes a Gradle build mechanism, add the `--gradle` flag. This tells the tool to add generated artifacts which direct a Gradle build.
+
+You can use the `--maven` and `--gradle` flags together to produce a project which contains both maven and gradle build infrastructure files.
+
+Create a folder tree which can be built using either maven or gradle:
+```
+galasactl project create --package dev.galasa.example.banking --features payee,account --obr --gradle --maven
+```
+
+To build a project with maven artifacts, use `mvn clean install`
+
+To build a project with gradle artifacts, use `gradle build publishToMavenLocal`
 
 
 ## runs prepare
