@@ -1,6 +1,6 @@
-# Galasa cli
+# Galasa CLI
 
-The Galasa cli is used to interact with the Galasa ecosystem or local development environment.
+The Galasa command line interface (Galasa CLI) is used to interact with the Galasa ecosystem or local development environment.
 
 Most commands will need a reference to the Galasa bootstrap file or url.  This can be provided with the `--bootstrap` flag or the `GALASA_BOOTSTRAP`environment variable.
 
@@ -46,20 +46,20 @@ galasactl project create --package dev.galasa.example.banking --features payee,a
 
 Maven and Gradle are both build tools, which read metadata from files which guide how the code within a module should be built. Maven and Gradle use different formats for these build files.
 
-By Default, the `galasactl project create` generates a project which includes a maven build mechanism. The `--maven` flag being present also explicitly tells the tool to generate maven build artifacts (`pom.xml` files).
+By default, the `galasactl project create` generates a project which includes a Maven build mechanism. The `--maven` flag being present also explicitly tells the tool to generate Maven build artifacts (`pom.xml` files).
 
 To create a project which includes a Gradle build mechanism, add the `--gradle` flag. This tells the tool to add generated artifacts which direct a Gradle build.
 
-You can use the `--maven` and `--gradle` flags together to produce a project which contains both maven and gradle build infrastructure files.
+You can use the `--maven` and `--gradle` flags together to produce a project which contains both Maven and Gradle build infrastructure files.
 
-Create a folder tree which can be built using either maven or gradle:
+Create a folder tree which can be built using either Maven or Gradle:
 ```
 galasactl project create --package dev.galasa.example.banking --features payee,account --obr --gradle --maven
 ```
 
-To build a project with maven artifacts, use `mvn clean install`
+To build a project with Maven artifacts, use `mvn clean install`
 
-To build a project with gradle artifacts, use `gradle build publishToMavenLocal`
+To build a project with Gradle artifacts, use `gradle build publishToMavenLocal`
 
 
 ## runs prepare
