@@ -144,9 +144,10 @@ func createProject(
 	var err error
 
 	// By default, create a Maven project unless --gradle is the only flag set
-	useDefault := true
 	if useGradle && !useMaven {
-		useDefault = false
+		useMaven = false
+	} else {
+		useMaven = true
 	}
 
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
@@ -164,26 +165,48 @@ func createProject(
 			parentProjectFolder := packageName
 			err = fileGenerator.CreateFolder(parentProjectFolder)
 			if err == nil {
-				if useDefault {
+				if useMaven {
 					err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
 				}
+			}
 
+			if err == nil {
 				if useGradle {
 					err = createParentFolderSettingsGradle(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
 				}
+			}
 
+			if err == nil {
+				err = createGitIgnoreFile(packageName, fileGenerator, forceOverwrite)
+			}
+
+			if err == nil {
+				err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite, useMaven, useGradle)
 				if err == nil {
-					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite, useDefault, useGradle)
-					if err == nil {
-						if isOBRProjectRequired {
-							err = createOBRProject(fileGenerator, packageName, featureNames, forceOverwrite, useDefault, useGradle)
-						}
+					if isOBRProjectRequired {
+						err = createOBRProject(fileGenerator, packageName, featureNames, forceOverwrite, useMaven, useGradle)
 					}
 				}
 			}
 		}
 	}
 
+	return err
+}
+
+func createGitIgnoreFile(
+	packageName string,
+	fileGenerator *utils.FileGenerator,
+	forceOverwrite bool,
+) error {
+
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 ".gitignore",
+		TargetFilePath:           packageName + "/.gitignore",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/gitignore-template",
+		TemplateParameters:       nil}
+
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err
 }
 
