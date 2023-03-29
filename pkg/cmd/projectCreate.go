@@ -161,34 +161,60 @@ func createProject(
 	if err == nil {
 		err = utils.ValidateJavaPackageName(packageName)
 		if err == nil {
+
 			// Create the parent folder
 			parentProjectFolder := packageName
 			err = fileGenerator.CreateFolder(parentProjectFolder)
+
 			if err == nil {
-				if useMaven {
-					err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
-				}
+				err = createParentFolderContents(
+					fileGenerator, packageName, featureNames, isOBRProjectRequired,
+					forceOverwrite, useMaven, useGradle)
 			}
 
 			if err == nil {
-				if useGradle {
-					err = createParentFolderSettingsGradle(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
-				}
-			}
-
-			if err == nil {
-				err = createGitIgnoreFile(packageName, fileGenerator, forceOverwrite)
-			}
-
-			if err == nil {
-				err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite, useMaven, useGradle)
+				err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite,
+					useMaven, useGradle)
 				if err == nil {
 					if isOBRProjectRequired {
-						err = createOBRProject(fileGenerator, packageName, featureNames, forceOverwrite, useMaven, useGradle)
+						err = createOBRProject(fileGenerator, packageName, featureNames,
+							forceOverwrite, useMaven, useGradle)
 					}
 				}
 			}
 		}
+	}
+
+	return err
+}
+
+func createParentFolderContents(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+	featureNames []string,
+	isOBRProjectRequired bool,
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool,
+) error {
+	var err error = nil
+
+	if err == nil {
+		if useMaven {
+			err = createParentFolderPom(fileGenerator, packageName, featureNames,
+				isOBRProjectRequired, forceOverwrite)
+		}
+	}
+
+	if err == nil {
+		if useGradle {
+			err = createParentFolderSettingsGradle(fileGenerator, packageName,
+				featureNames, isOBRProjectRequired, forceOverwrite)
+		}
+	}
+
+	if err == nil {
+		err = createGitIgnoreFile(packageName, fileGenerator, forceOverwrite)
 	}
 
 	return err
