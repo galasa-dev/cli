@@ -605,9 +605,7 @@ function submit_local_test {
     # else go to maven central
     #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
 
-    export GALASACTL="${BASEDIR}/bin/galasactl-darwin-arm64"
-
-    ${GALASACTL} runs submit local \
+    ${BASEDIR}/bin/${galasactl_command} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
     --class ${BUNDLE}/${JAVA_CLASS} \
     --throttle 1 \
