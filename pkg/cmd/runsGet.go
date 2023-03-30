@@ -46,20 +46,20 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	log.Println("Galasa CLI - Get info about a run")
 
 	// Operations on the file system will all be relative to the current folder.
-	// fileSystem := utils.NewOSFileSystem()
+	fileSystem := utils.NewOSFileSystem()
 
 	// Get the ability to query environment variables.
-	// env := utils.NewEnvironment()
+	env := utils.NewEnvironment()
 
 	// Read the bootstrap properties.
-	// var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	// var bootstrapData *api.BootstrapData
-	// bootstrapData, err = api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+	var bootstrapData *api.BootstrapData
+	bootstrapData, err = api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
+	if err != nil {
+		panic(err)
+	}
 
-	apiServerUrl := "http://galasa-cicsk8s.hursley.ibm.com" //bootstrapData.ApiServerURL
+	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API sever is at '%s'\n", apiServerUrl)
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
