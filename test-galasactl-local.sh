@@ -106,6 +106,7 @@ fi
 function galasa_home_init {
     h2 "Initialising galasa home directory"
 
+    mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
     cmd="${BASEDIR}/bin/${binary} local init \
