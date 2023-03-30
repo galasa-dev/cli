@@ -65,10 +65,16 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	apiClient := api.InitialiseAPI(apiServerUrl)
 
+	var testRunNames *galasaapi.ResultNames.testRunNames
 	var testRunDetail *galasaapi.Run
 
-	testRunDetail, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, runId).Execute()
+	testRunNames, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunIDsByName(nil, runId).Execute()
 
+	if err == nil {
+		testRunDetail, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, testRunNames).Execute()
+	}else{
+
+	}
 	if err == nil {
 
 		results := testRunDetail.GetTestStructure()
