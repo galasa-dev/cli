@@ -57,7 +57,7 @@ note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" 
 # Functions
 #-----------------------------------------------------------------------------------------                   
 function usage {
-    info "Syntax: test-galasactl-local.sh [OPTIONS]"
+    info "Syntax: test-galasactl-local.sh --binary [OPTIONS]"
     cat << EOF
 Options are:
 galasactl-darwin-amd64 : Use the galasactl-darwin-amd64 binary
@@ -75,15 +75,8 @@ binary=""
 
 while [ "$1" != "" ]; do
     case $1 in
-        galasactl-darwin-amd64 )          binary="galasactl-darwin-amd64"
-                                          ;;
-        galasactl-darwin-arm64 )          binary="galasactl-darwin-arm64"
-                                          ;;
-        galasactl-linux-amd64 )           binary="galasactl-linux-amd64"
-                                          ;;
-        galasactl-linux-s390x )           binary="galasactl-linux-s390x"
-                                          ;;
-        galasactl-windows-amd64.exe )     binary="galasactl-windows-amd64.exe"
+        --binary )                        shift
+                                          binary="$1"
                                           ;;
         -h | --help )                     usage
                                           exit
@@ -95,7 +88,23 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [[ "${binary}" == "" ]]; then
+if [[ "${binary}" != "" ]]; then
+    case ${binary} in
+        galasactl-darwin-amd64 )            echo "Using the galasactl-darwin-amd64 binary"
+                                            ;;
+        galasactl-darwin-arm64 )            echo "Using the galasactl-darwin-arm64 binary"
+                                            ;;
+        galasactl-linux-amd64 )             echo "Using the galasactl-linux-amd64 binary"
+                                            ;;
+        galasactl-linux-s390x )             echo "Using the galasactl-linux-s390x binary"
+                                            ;;
+        galasactl-windows-amd64.exe )       echo "Using the galasactl-windows-amd64.exe binary"
+                                            ;;
+        * )                                 error "Unrecognised galasactl binary ${binary}"
+                                            usage
+                                            exit 1
+    esac
+else
     error "Need to specify which binary of galasactl to use."
     usage
     exit 1  
@@ -131,7 +140,7 @@ function generate_sample_code {
     cd $BASEDIR/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
-    ${BASEDIR}/bin/galasactl-darwin-amd64 project create --package ${PACKAGE_NAME} --features payee,account --obr --maven --gradle --force
+    ${BASEDIR}/bin/${binary} project create --package ${PACKAGE_NAME} --features payee,account --obr --maven --gradle --force
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to create the galasa test project using galasactl command. rc=${rc}"
@@ -181,14 +190,12 @@ function submit_local_test {
     OBR_GROUP_ID=$3
     OBR_ARTIFACT_ID=$4
     OBR_VERSION=$5
-    LOG_FILE=$6
 
     # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
     export BOOT_JAR_VERSION="0.26.0"
 
     export GALASA_VERSION="0.26.0"
 
-    export M2_PATH=$(cd ~/.m2 ; pwd)
     export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
 
 
