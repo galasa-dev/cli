@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
 # This script tests the 'galasactl runs submit' command against a test that is in our ecosystem's testcatalog already
