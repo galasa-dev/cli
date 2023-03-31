@@ -137,7 +137,7 @@ function galasa_home_init {
 function generate_sample_code {
     h2 "Invoke the tool to create a sample project."
 
-    cd $BASEDIR/temp
+    cd ${BASEDIR}/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
     ${BASEDIR}/bin/${binary} project create --package ${PACKAGE_NAME} --features payee,account --obr --maven --gradle --force

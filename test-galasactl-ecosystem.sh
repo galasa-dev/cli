@@ -129,6 +129,7 @@ fi
 function launch_test_on_ecosystem_with_portfolio {
     h2 "Building a portfolio..."
 
+    mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
     cmd="${BASEDIR}/bin/${binary} runs prepare \
