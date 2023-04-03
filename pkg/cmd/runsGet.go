@@ -40,6 +40,19 @@ func init() {
 }
 
 func executeRunsGet(cmd *cobra.Command, args []string) {
+
+	runJsons := GetRunDetails()
+
+	switch output {
+	case "summary":
+		SummaryOutput(runJsons)
+	default:
+		log.Println("unsupported output type")
+	}
+
+}
+
+func GetRunDetails() []string {
 	var err error
 
 	utils.CaptureLog(logFileName)
@@ -81,11 +94,18 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 				status := results.GetStatus()
 				result := results.GetResult()
 				log.Printf("runname:'%s' status:'%s' result:'%s'\n", runname, status, result)
+				// return list
 			} else {
 				log.Printf("Failed to get the details of the runname '%s'. List Item '%d' \n Server Id: '%s' \n Reason: %s", runname, indx, val, err.Error())
+				//Panic(err)
 			}
 		}
 	} else {
 		log.Printf("Failed to get the details of the runname '%s'. Reason: %s", runname, err.Error())
+		//Panic(err)
 	}
+}
+
+func SummaryOutput([]string) {
+	log.Println("Summary output")
 }
