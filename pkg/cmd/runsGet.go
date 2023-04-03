@@ -14,27 +14,27 @@ import (
 )
 
 // Objective: Allow the user to do this:
-//    run get --runID 12345
+//    run get --runname 12345
 // And then show the results in a human-readable form.
 
 var (
 	runsGetCmd = &cobra.Command{
 		Use:   "get",
-		Short: "Get the details of a test runid which ran or is running.",
-		Long:  "Get the details of a test runid which ran or is running, displaying the results to the caller",
+		Short: "Get the details of a test runname which ran or is running.",
+		Long:  "Get the details of a test runname which ran or is running, displaying the results to the caller",
 		Args:  cobra.NoArgs,
 		Run:   executeRunsGet,
 	}
 
 	// Variables set by cobra's command-line parsing.
-	runId  string
-	output string
+	runname string
+	output  string
 )
 
 func init() {
-	runsGetCmd.PersistentFlags().StringVar(&runId, "runid", "", "the runid of the test run we want information about")
+	runsGetCmd.PersistentFlags().StringVar(&runname, "runname", "", "the runname of the test run we want information about")
 	runsGetCmd.PersistentFlags().StringVar(&output, "output", "summary", "output format for the data returned (default : summary)")
-	runsGetCmd.MarkPersistentFlagRequired("runid")
+	runsGetCmd.MarkPersistentFlagRequired("runname")
 
 	runsCmd.AddCommand(runsGetCmd)
 }
@@ -67,25 +67,25 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	apiClient := api.InitialiseAPI(apiServerUrl)
 
-	var testRunNames []string
+	var testRunIDs []string
 	var testRunDetail *galasaapi.Run
 
-	testRunNames, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunIDsByName(nil, runId).Execute()
+	testRunIDs, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunIDsByName(nil, runname).Execute()
 
 	if err == nil {
-		for indx, val := range testRunNames {
+		for indx, val := range testRunIDs {
 			testRunDetail, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, val).Execute()
 
 			if err == nil {
 				results := testRunDetail.GetTestStructure()
 				status := results.GetStatus()
 				result := results.GetResult()
-				log.Printf("Runid:'%s' status:'%s' result:'%s'\n", runId, status, result)
+				log.Printf("runname:'%s' status:'%s' result:'%s'\n", runname, status, result)
 			} else {
-				log.Printf("Failed to get the details of the runid '%s'. List Item '%d' \n Server Id: '%s' \n Reason: %s", runId, indx, val, err.Error())
+				log.Printf("Failed to get the details of the runname '%s'. List Item '%d' \n Server Id: '%s' \n Reason: %s", runname, indx, val, err.Error())
 			}
 		}
 	} else {
-		log.Printf("Failed to get the details of the runid '%s'. Reason: %s", runId, err.Error())
+		log.Printf("Failed to get the details of the runname '%s'. Reason: %s", runname, err.Error())
 	}
 }
