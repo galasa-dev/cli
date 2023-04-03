@@ -1,9 +1,12 @@
+
+// This section tells gradle which gradle plugins to use to build this project.
 plugins {
     id 'java'
     id 'maven-publish'
     id 'biz.aQute.bnd.builder' version '6.4.0'
 }
 
+// This section tells gradle where it should look for any dependencies
 repositories {
     mavenLocal()
     mavenCentral()
@@ -13,9 +16,13 @@ repositories {
     // }
 }
 
+// Set the variables which will control what the built OSGi bundle will be called
+// and the name it will be published under in the maven repository.
 group = '{{ .Parent.GroupId }}'
 version = '0.0.1-SNAPSHOT'
 
+// What are the dependencies of the test code ? 
+// When more managers and dependencies are added, this list will need to grow.
 dependencies {
     implementation platform('dev.galasa:galasa-bom:{{.GalasaVersion}}')
 
@@ -27,6 +34,8 @@ dependencies {
     implementation 'org.assertj:assertj-core'
 }
 
+// Tell gradle to publish the built OSGi bundles as maven artifacts on the 
+// local maven repository.
 publishing {
     publications {
         maven(MavenPublication) {
