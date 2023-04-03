@@ -214,7 +214,7 @@ func createParentFolderContents(
 	}
 
 	if err == nil {
-		err = createGitIgnoreFile(packageName, fileGenerator, forceOverwrite)
+		err = createGitIgnoreFile(packageName, fileGenerator, forceOverwrite, useMaven, useGradle)
 	}
 
 	return err
@@ -224,13 +224,26 @@ func createGitIgnoreFile(
 	packageName string,
 	fileGenerator *utils.FileGenerator,
 	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool,
 ) error {
+
+	type GitIgnoreParameters struct {
+		IsMavenUsed  bool
+		IsGradleUsed bool
+	}
+
+	templateParameters := GitIgnoreParameters{
+		IsMavenUsed:  useMaven,
+		IsGradleUsed: useGradle,
+	}
 
 	targetFile := utils.GeneratedFileDef{
 		FileType:                 ".gitignore",
 		TargetFilePath:           packageName + "/.gitignore",
 		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/gitignore-template",
-		TemplateParameters:       nil}
+		TemplateParameters:       templateParameters,
+	}
 
 	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err

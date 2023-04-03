@@ -211,10 +211,6 @@ function build_executables {
 function calculate_galasactl_executable {
     h2 "Calculate the name of the galasactl executable for this machine/os"
 
-    rm -fr ${BASEDIR}/temp
-    mkdir -p ${BASEDIR}/temp
-    cd ${BASEDIR}/temp
-
     raw_os=$(uname -s) # eg: "Darwin"
     os=""
     case $raw_os in
@@ -247,10 +243,12 @@ function calculate_galasactl_executable {
 function generate_sample_code {
     h2 "Invoke the tool to create a sample project."
 
+    BUILD_SYSTEM_FLAGS=$*
+
     cd $BASEDIR/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
-    ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr --maven --gradle
+    ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr ${BUILD_SYSTEM_FLAGS}
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to create the galasa test project using galasactl command. rc=${rc}"
@@ -657,23 +655,45 @@ function cleanup_local_maven_repo {
     rm -fr ~/.m2/repository/dev/galasa/example
 }
 
+function cleanup_temp {
+    rm -fr ${BASEDIR}/temp
+    mkdir -p ${BASEDIR}/temp
+    cd ${BASEDIR}/temp
+}
+
 download_dependencies
 generate_rest_client
 build_executables
+
+cleanup_temp
 calculate_galasactl_executable
 galasa_home_init
 
-generate_sample_code
 
 # Gradle ...
+cleanup_temp
+generate_sample_code --gradle
 cleanup_local_maven_repo
 build_generated_source_gradle
 run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
 
 # Maven ...
+cleanup_temp
+generate_sample_code --maven
 cleanup_local_maven_repo
 build_generated_source_maven
 run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-maven.txt
+
+# Both Gradle and Maven ...
+cleanup_temp
+generate_sample_code --maven --gradle
+cleanup_local_maven_repo
+build_generated_source_maven
+run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-maven.txt
+cleanup_local_maven_repo
+build_generated_source_gradle
+run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
+
 
 # run_tests_java_minus_jar_method
 # build_portfolio
