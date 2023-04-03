@@ -27,11 +27,13 @@ var (
 	}
 
 	// Variables set by cobra's command-line parsing.
-	runId string
+	runId  string
+	output string
 )
 
 func init() {
 	runsGetCmd.PersistentFlags().StringVar(&runId, "runid", "", "the runid of the test run we want information about")
+	runsGetCmd.PersistentFlags().StringVar(&output, "output", "summary", "output format for the data returned (default : summary)")
 	runsGetCmd.MarkPersistentFlagRequired("runid")
 
 	runsCmd.AddCommand(runsGetCmd)
@@ -65,23 +67,24 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	apiClient := api.InitialiseAPI(apiServerUrl)
 
-	var testRunNames *galasaapi.ResultNames.testRunNames
+	var testRunNames []string
 	var testRunDetail *galasaapi.Run
 
 	testRunNames, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunIDsByName(nil, runId).Execute()
 
 	if err == nil {
-		testRunDetail, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, testRunNames).Execute()
-	}else{
+		for indx, val := range testRunNames {
+			testRunDetail, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, val).Execute()
 
-	}
-	if err == nil {
-
-		results := testRunDetail.GetTestStructure()
-		status := results.GetStatus()
-		result := results.GetResult()
-
-		log.Printf("Runid:'%s' status:'%s' result:'%s'\n", runId, status, result)
+			if err == nil {
+				results := testRunDetail.GetTestStructure()
+				status := results.GetStatus()
+				result := results.GetResult()
+				log.Printf("Runid:'%s' status:'%s' result:'%s'\n", runId, status, result)
+			} else {
+				log.Printf("Failed to get the details of the runid '%s'. List Item '%d' \n Server Id: '%s' \n Reason: %s", runId, indx, val, err.Error())
+			}
+		}
 	} else {
 		log.Printf("Failed to get the details of the runid '%s'. Reason: %s", runId, err.Error())
 	}
