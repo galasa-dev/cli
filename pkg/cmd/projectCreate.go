@@ -241,7 +241,7 @@ func createGitIgnoreFile(
 	targetFile := utils.GeneratedFileDef{
 		FileType:                 ".gitignore",
 		TargetFilePath:           packageName + "/.gitignore",
-		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/gitignore-template",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/git-ignore.template",
 		TemplateParameters:       templateParameters,
 	}
 
