@@ -383,7 +383,7 @@ func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 //
 // For example:
 //
-//	java -jar /Users/mcobbett/builds/galasa/code/external/galasa-dev/cli/pkg/embedded/templates/galasahome/lib/galasa-boot-0.26.0.jar \
+//	java -jar /Users/mcobbett/builds/galasa/code/external/galasa-dev/cli/pkg/embedded/templates/galasahome/lib/galasa-boot-0.27.0.jar \
 //	    --localmaven file:/Users/mcobbett/.m2/repository/ \
 //	    --remotemaven https://development.galasa.dev/main/maven-repo/obr/ \
 //	    --bootstrap file:/Users/mcobbett/.galasa/bootstrap.properties \

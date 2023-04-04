@@ -9,7 +9,7 @@
 //   which is generated from a yaml definition file.
 //   So we need to get hold of a generator tool so we can 
 //
-def galasaBootJarVersion = '0.26.0'
+def galasaBootJarVersion = '0.27.0'
 repositories {
     gradlePluginPortal()
     mavenCentral()

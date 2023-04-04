@@ -116,8 +116,8 @@ success "OK"
 
 #--------------------------------------------------------------------------
 h2 "Setting versions of things."
-# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
-export BOOT_JAR_VERSION="0.26.0"
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
+export BOOT_JAR_VERSION="0.27.0"
 info "BOOT_JAR_VERSION=${BOOT_JAR_VERSION}"
 success "OK"
 
@@ -141,7 +141,7 @@ function download_dependencies {
     #--------------------------------------------------------------------------
     # Download the dependencies we define in gradle into a local folder
     h2 "Downloading dependencies"
-    gradle installJarsIntoTemplates --warning-mode all
+    gradle --warning-mode all --info --debug installJarsIntoTemplates 
     rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
     success "OK"
 }
@@ -588,10 +588,10 @@ function submit_local_test {
     OBR_VERSION=$5
     LOG_FILE=$6
 
-    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
-    export BOOT_JAR_VERSION="0.26.0"
+    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
+    export BOOT_JAR_VERSION="0.27.0"
 
-    export GALASA_VERSION="0.26.0"
+    export GALASA_VERSION="0.27.0"
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
     export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
@@ -625,7 +625,7 @@ function submit_local_test {
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to run the test"
+        error "Failed to run the test. Log is in ${LOG_FILE}"
         exit 1
     fi
     success "Test ran OK"
@@ -665,13 +665,15 @@ download_dependencies
 generate_rest_client
 build_executables
 
+export GALASA_HOME=${BASEDIR}/temp/home
 cleanup_temp
 calculate_galasactl_executable
-galasa_home_init
+
 
 
 # Gradle ...
 cleanup_temp
+galasa_home_init
 generate_sample_code --gradle
 cleanup_local_maven_repo
 build_generated_source_gradle
@@ -679,6 +681,7 @@ run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
 
 # Maven ...
 cleanup_temp
+galasa_home_init
 generate_sample_code --maven
 cleanup_local_maven_repo
 build_generated_source_maven
@@ -686,6 +689,7 @@ run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-maven.txt
 
 # Both Gradle and Maven ...
 cleanup_temp
+galasa_home_init
 generate_sample_code --maven --gradle
 cleanup_local_maven_repo
 build_generated_source_maven
