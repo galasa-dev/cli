@@ -18,9 +18,15 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 	// Given...
 	mockFileSystem := NewMockFileSystem()
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	mockEnv := NewMockEnv()
+	galasaHome, err := NewGalasaHome(mockFileSystem, mockEnv)
+
+	if err != nil {
+		assert.Fail(t, "Errored when it shouldn't have! "+err.Error())
+	}
 
 	// When ...
-	err := InitialiseGalasaHomeFolder(mockFileSystem, embeddedFileSystem)
+	err = InitialiseGalasaHomeFolder(galasaHome, mockFileSystem, embeddedFileSystem)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -29,7 +35,7 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 	}
 
 	// Check the home folder has been created.
-	homeDir, _ := mockFileSystem.GetUserHomeDir()
+	homeDir, _ := mockFileSystem.GetUserHomeDirPath()
 	galasaHomeDir := homeDir + "/.galasa"
 	assertFolderExists(t, mockFileSystem, galasaHomeDir, "Didn't create "+galasaHomeDir+" folder in home directory.")
 
@@ -72,7 +78,9 @@ func assertFolderExists(t *testing.T, mockFileSystem FileSystem, path string, me
 func TestCanGetGalasaBootJarPath(t *testing.T) {
 
 	fs := NewMockFileSystem()
-	path, err := GetGalasaBootJarPath(fs)
+	mockEnv := NewMockEnv()
+	galasaHome, _ := NewGalasaHome(fs, mockEnv)
+	path, err := GetGalasaBootJarPath(fs, galasaHome)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, path)

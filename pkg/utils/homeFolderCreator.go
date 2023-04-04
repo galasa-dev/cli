@@ -11,42 +11,37 @@ import (
 
 //  galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 
-func InitialiseGalasaHomeFolder(fileSystem FileSystem, embeddedFileSystem embed.FS) error {
+func InitialiseGalasaHomeFolder(home GalasaHome, fileSystem FileSystem, embeddedFileSystem embed.FS) error {
 
 	var err error
-	var userHomeDir string
 
 	fileGenerator := NewFileGenerator(fileSystem, embeddedFileSystem)
 
-	userHomeDir, err = fileSystem.GetUserHomeDir()
+	galasaHomeDir := home.GetNativeFolderPath()
+	err = fileGenerator.CreateFolder(galasaHomeDir)
+
 	if err == nil {
-		galasaHomeDir := userHomeDir + fileSystem.GetFilePathSeparator() + ".galasa"
-		err = fileGenerator.CreateFolder(galasaHomeDir)
+		err = createLibDirAndContent(fileGenerator, galasaHomeDir+fileSystem.GetFilePathSeparator()+"lib")
+	}
 
-		if err == nil {
-			err = createLibDirAndContent(fileGenerator, galasaHomeDir+fileSystem.GetFilePathSeparator()+"lib")
-		}
+	if err == nil {
+		err = createBootstrapPropertiesFile(fileGenerator, galasaHomeDir)
+	}
 
-		if err == nil {
-			err = createBootstrapPropertiesFile(fileGenerator, galasaHomeDir)
-		}
+	if err == nil {
+		err = createOverridesPropertiesFile(fileGenerator, galasaHomeDir)
+	}
 
-		if err == nil {
-			err = createOverridesPropertiesFile(fileGenerator, galasaHomeDir)
-		}
+	if err == nil {
+		err = createCPSPropertiesFile(fileGenerator, galasaHomeDir)
+	}
 
-		if err == nil {
-			err = createCPSPropertiesFile(fileGenerator, galasaHomeDir)
-		}
+	if err == nil {
+		err = createDSSPropertiesFile(fileGenerator, galasaHomeDir)
+	}
 
-		if err == nil {
-			err = createDSSPropertiesFile(fileGenerator, galasaHomeDir)
-		}
-
-		if err == nil {
-			err = createCredentialsPropertiesFile(fileGenerator, galasaHomeDir)
-		}
-
+	if err == nil {
+		err = createCredentialsPropertiesFile(fileGenerator, galasaHomeDir)
 	}
 
 	return err
@@ -165,20 +160,20 @@ func createLibDirAndContent(fileGenerator *FileGenerator, galasaLibDir string) e
 	return err
 }
 
-func GetGalasaBootJarPath(fs FileSystem) (string, error) {
+func GetGalasaBootJarPath(fs FileSystem, home GalasaHome) (string, error) {
 	var galasaBootJarPath string = ""
-	var userHomeDir, err = fs.GetUserHomeDir()
-	if err == nil {
-		galasaVersion := embedded.GetGalasaVersion()
-		bootJarVersion := embedded.GetBootJarVersion()
+	var err error = nil
+	var galasaHomePath = home.GetNativeFolderPath()
 
-		separator := fs.GetFilePathSeparator()
+	galasaVersion := embedded.GetGalasaVersion()
+	bootJarVersion := embedded.GetBootJarVersion()
 
-		galasaBootJarPath = userHomeDir +
-			separator + ".galasa" +
-			separator + "lib" +
-			separator + galasaVersion +
-			separator + "galasa-boot-" + bootJarVersion + ".jar"
-	}
+	separator := fs.GetFilePathSeparator()
+
+	galasaBootJarPath = galasaHomePath +
+		separator + "lib" +
+		separator + galasaVersion +
+		separator + "galasa-boot-" + bootJarVersion + ".jar"
+
 	return galasaBootJarPath, err
 }

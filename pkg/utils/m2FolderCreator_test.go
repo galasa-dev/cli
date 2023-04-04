@@ -28,7 +28,7 @@ func TestCanCreateM2FolderAndSettingsXML(t *testing.T) {
 	}
 
 	// Check the home folder has been created.
-	homeDir, _ := mockFileSystem.GetUserHomeDir()
+	homeDir, _ := mockFileSystem.GetUserHomeDirPath()
 	m2Dir := homeDir + "/.m2"
 	assertFolderExists(t, mockFileSystem, m2Dir, "Didn't create "+m2Dir+" folder in home directory.")
 
@@ -95,7 +95,7 @@ func checkThatDifferentSettingsXmlFileContentsCauseFailure(t *testing.T, setting
 
 func newMockFSContainingSettingsXml(settingsXmlContents string) *MockFileSystem {
 	mockFileSystem := NewOverridableMockFileSystem()
-	homeDir, _ := mockFileSystem.GetUserHomeDir()
+	homeDir, _ := mockFileSystem.GetUserHomeDirPath()
 	m2Dir := homeDir + "/.m2"
 	mockFileSystem.WriteTextFile(m2Dir+"/settings.xml", settingsXmlContents)
 	return mockFileSystem

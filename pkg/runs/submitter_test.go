@@ -129,13 +129,18 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.T) {
 
 	fs := utils.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	galasaHome, err := utils.NewGalasaHome(fs, env)
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "",
 	}
 
-	err := correctOverrideFilePathParameter(fs, &commandParameters)
+	err = correctOverrideFilePathParameter(galasaHome, fs, &commandParameters)
 
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
@@ -148,9 +153,14 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testing.T) {
 
 	fs := utils.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	galasaHome, err := utils.NewGalasaHome(fs, env)
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
 
 	// A dummy overrides file in .galasa
-	home, _ := fs.GetUserHomeDir()
+	home, _ := fs.GetUserHomeDirPath()
 	separator := fs.GetFilePathSeparator()
 	path := home + separator + ".galasa" + separator + "overrides.properties"
 	fileProps := make(map[string]interface{})
@@ -162,7 +172,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 		OverrideFilePath: "",
 	}
 
-	err := correctOverrideFilePathParameter(fs, &commandParameters)
+	err = correctOverrideFilePathParameter(galasaHome, fs, &commandParameters)
 
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
@@ -192,6 +202,11 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
 	fs := utils.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	galasaHome, err := utils.NewGalasaHome(fs, env)
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
 
 	commandParameters := &utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
@@ -211,7 +226,8 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
 	mockLauncher := launcher.NewMockLauncher()
 
-	err := validateAndCorrectParams(fs, commandParameters, mockLauncher, submitSelectionFlags)
+	err = validateAndCorrectParams(galasaHome, fs, commandParameters,
+		mockLauncher, submitSelectionFlags)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, commandParameters.OverrideFilePath)

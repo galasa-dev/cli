@@ -20,6 +20,7 @@ import (
 )
 
 func ExecuteSubmitRuns(
+	galasaHome utils.GalasaHome,
 	fileSystem utils.FileSystem,
 	params utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
@@ -28,7 +29,7 @@ func ExecuteSubmitRuns(
 
 	var err error = nil
 
-	err = validateAndCorrectParams(fileSystem, &params, launcher, testSelectionFlags)
+	err = validateAndCorrectParams(galasaHome, fileSystem, &params, launcher, testSelectionFlags)
 	if err != nil {
 		return err
 	}
@@ -414,6 +415,7 @@ func buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]strin
 }
 
 func validateAndCorrectParams(
+	galasaHome utils.GalasaHome,
 	fs utils.FileSystem,
 	params *utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
@@ -460,7 +462,7 @@ func validateAndCorrectParams(
 	}
 
 	if err == nil {
-		err = correctOverrideFilePathParameter(fs, params)
+		err = correctOverrideFilePathParameter(galasaHome, fs, params)
 	}
 
 	tildaExpandAllPaths(fs, params)
@@ -468,24 +470,25 @@ func validateAndCorrectParams(
 	return err
 }
 
-func correctOverrideFilePathParameter(fs utils.FileSystem, params *utils.RunsSubmitCmdParameters) error {
+func correctOverrideFilePathParameter(
+	galasaHome utils.GalasaHome,
+	fs utils.FileSystem,
+	params *utils.RunsSubmitCmdParameters,
+) error {
 	var err error
 	// Correct the default overrideFile path if it wasn't specified.
 	if params.OverrideFilePath == "" {
-		var home string
-		home, err = fs.GetUserHomeDir()
+
+		params.OverrideFilePath = galasaHome.GetUrlFolderPath() + "/overrides.properties"
+		var isFileThere bool
+		isFileThere, err = fs.Exists(params.OverrideFilePath)
 		if err == nil {
-			params.OverrideFilePath = strings.ReplaceAll(home, "\\", "/") + "/.galasa/overrides.properties"
-			var isFileThere bool
-			isFileThere, err = fs.Exists(params.OverrideFilePath)
-			if err == nil {
-				if !isFileThere {
-					// The flag wasn't specified.
-					// And we don't have an overrides file to read from the .galasa folder.
-					// So treat this the same as the user not wanting to use an override file.
-					// If the file existed, then we'd want to use it.
-					params.OverrideFilePath = "-"
-				}
+			if !isFileThere {
+				// The flag wasn't specified.
+				// And we don't have an overrides file to read from the .galasa folder.
+				// So treat this the same as the user not wanting to use an override file.
+				// If the file existed, then we'd want to use it.
+				params.OverrideFilePath = "-"
 			}
 		}
 	}

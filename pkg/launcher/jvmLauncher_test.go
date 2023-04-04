@@ -234,17 +234,21 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 func TestJvmLauncherSetsRASStoreOverride(t *testing.T) {
 	overrides := make(map[string]interface{})
 	fs := utils.NewMockFileSystem()
-	overridesGotBack, err := addStandardProperties(fs, overrides)
-	assert.Nil(t, err)
+	env := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(fs, env)
+
+	overridesGotBack := addStandardOverrideProperties(galasaHome, fs, overrides)
 	assert.Contains(t, overridesGotBack, "framework.resultarchive.store")
 }
 
 func TestCanCreateTempPropsFile(t *testing.T) {
 	overrides := make(map[string]interface{})
 	fs := utils.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(fs, env)
 
 	// When
-	tempFolder, tempPropsFile, err := prepareTempFiles(fs, overrides)
+	tempFolder, tempPropsFile, err := prepareTempFiles(galasaHome, fs, overrides)
 
 	// Then the temp folder should exist.
 	assert.Nil(t, err)
@@ -261,7 +265,10 @@ func TestCanCreateTempPropsFile(t *testing.T) {
 	assert.Contains(t, overridesGotBack, "framework.request.type.LOCAL.prefix")
 }
 
-func getDefaultCommandSyntaxTestParameters() (*utils.MockFileSystem,
+func getDefaultCommandSyntaxTestParameters() (
+	utils.Environment,
+	utils.GalasaHome,
+	*utils.MockFileSystem,
 	string,
 	[]utils.MavenCoordinates,
 	TestLocation,
@@ -291,13 +298,16 @@ func getDefaultCommandSyntaxTestParameters() (*utils.MockFileSystem,
 	overridesFilePath := "C:/myFolder/myOverrides.props"
 	isTraceEnabled := true
 
-	return fs, javaHome, testObrs, testLocation,
+	env := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(fs, env)
+
+	return env, galasaHome, fs, javaHome, testObrs, testLocation,
 		remoteMaven, galasaVersionToRun, overridesFilePath, isTraceEnabled
 }
 
 func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -309,6 +319,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 	isTraceEnabled = true
 
 	cmd, args, err := getCommandSyntax(
+		galasaHome,
 		fs, javaHome,
 		testObrs,
 		testLocation,
@@ -326,7 +337,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 }
 
 func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -338,7 +349,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 	isTraceEnabled = false
 
 	cmd, args, err := getCommandSyntax(
-		fs, javaHome,
+		galasaHome, fs, javaHome,
 		testObrs,
 		testLocation,
 		remoteMaven,
@@ -355,7 +366,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 }
 
 func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -368,7 +379,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 	fs.SetFilePathSeparator("/")
 
 	cmd, args, err := getCommandSyntax(
-		fs, javaHome,
+		galasaHome, fs, javaHome,
 		testObrs,
 		testLocation,
 		remoteMaven,
@@ -385,7 +396,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 }
 
 func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -399,7 +410,7 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 	fs.SetExecutableExtension(".exe")
 
 	cmd, args, err := getCommandSyntax(
-		fs, javaHome,
+		galasaHome, fs, javaHome,
 		testObrs,
 		testLocation,
 		remoteMaven,

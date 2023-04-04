@@ -42,6 +42,9 @@ type JvmLauncher struct {
 	// An abstraction of the file system so we can mock it out easily for unit tests.
 	fileSystem utils.FileSystem
 
+	// A location galasa can call home
+	galasaHome utils.GalasaHome
+
 	// A file system so we can get at embedded content if required.
 	// (Like so we can unpack the boot.jar)
 	embeddedFileSystem embed.FS
@@ -95,18 +98,26 @@ func NewJVMLauncher(
 	err = utils.ValidateJavaHome(fileSystem, javaHome)
 
 	if err == nil {
-		launcher = new(JvmLauncher)
-		launcher.javaHome = javaHome
-		launcher.cmdParams = runsSubmitLocalCmdParams
-		launcher.env = env
-		launcher.fileSystem = fileSystem
-		launcher.embeddedFileSystem = embeddedFileSystem
-		launcher.processFactory = processFactory
+		var galasaHome utils.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env)
+		if err == nil {
+			launcher = new(JvmLauncher)
+			launcher.javaHome = javaHome
+			launcher.cmdParams = runsSubmitLocalCmdParams
+			launcher.env = env
+			launcher.fileSystem = fileSystem
+			launcher.embeddedFileSystem = embeddedFileSystem
+			launcher.processFactory = processFactory
+			launcher.galasaHome = galasaHome
+			launcher.timeService = timeService
 
-		launcher.timeService = timeService
-
-		// Make sure the home folder has the boot jar unpacked and ready to invoke.
-		err = utils.InitialiseGalasaHomeFolder(launcher.fileSystem, launcher.embeddedFileSystem)
+			// Make sure the home folder has the boot jar unpacked and ready to invoke.
+			err = utils.InitialiseGalasaHomeFolder(
+				launcher.galasaHome,
+				launcher.fileSystem,
+				launcher.embeddedFileSystem,
+			)
+		}
 	}
 
 	return launcher, err
@@ -146,6 +157,7 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 
 	testRuns := new(galasaapi.TestRuns)
 
+	var obrs []utils.MavenCoordinates
 	obrs, err := validateObrs(launcher.cmdParams.Obrs)
 	if err == nil {
 
@@ -153,7 +165,8 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 			overridesFilePath   string
 			temporaryFolderPath string
 		)
-		temporaryFolderPath, overridesFilePath, err = prepareTempFiles(launcher.fileSystem, overrides)
+		temporaryFolderPath, overridesFilePath, err = prepareTempFiles(
+			launcher.galasaHome, launcher.fileSystem, overrides)
 		if err == nil {
 
 			defer func() {
@@ -174,7 +187,7 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 						cmd  string
 						args []string
 					)
-					cmd, args, err = getCommandSyntax(
+					cmd, args, err = getCommandSyntax(launcher.galasaHome,
 						launcher.fileSystem, launcher.javaHome, obrs,
 						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
 						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
@@ -218,6 +231,7 @@ func deleteTempFiles(fileSystem utils.FileSystem, temporaryFolderPath string) {
 }
 
 func prepareTempFiles(
+	galasaHome utils.GalasaHome,
 	fileSystem utils.FileSystem,
 	overrides map[string]interface{},
 ) (string, string, error) {
@@ -225,56 +239,70 @@ func prepareTempFiles(
 	var (
 		temporaryFolderPath string = ""
 		overridesFilePath   string = ""
-		err                 error
+		err                 error  = nil
 	)
 
-	overrides, err = addStandardProperties(fileSystem, overrides)
-
 	// Create a temporary folder
+	temporaryFolderPath, err = fileSystem.MkTempDir()
 	if err == nil {
-		temporaryFolderPath, err = fileSystem.MkTempDir()
-		if err == nil {
+		overridesFilePath, err = createTemporaryOverridesFile(
+			temporaryFolderPath, galasaHome, fileSystem, overrides)
+	}
 
-			// Write the properties to a file
-			overridesFilePath = temporaryFolderPath + "overrides.properties"
-			err = utils.WritePropertiesFile(fileSystem, overridesFilePath, overrides)
-
-			// Clean up the temporary folder if we failed to create the props file.
-			if err != nil {
-				fileSystem.DeleteDir(temporaryFolderPath)
-			}
-		}
+	// Clean up the temporary folder if we failed to create the props file.
+	if err != nil {
+		fileSystem.DeleteDir(temporaryFolderPath)
 	}
 
 	return temporaryFolderPath, overridesFilePath, err
 }
 
-func addStandardProperties(fileSystem utils.FileSystem, overrides map[string]interface{}) (map[string]interface{}, error) {
+// createTemporaryOverridesFile Gathers up all the overrides properties and puts
+// them into a temporary file in a temporary folder.
+//
+// Returns:
+// - the full path to the new overrides file
+// - error if there was one.
+func createTemporaryOverridesFile(
+	temporaryFolderPath string,
+	galasaHome utils.GalasaHome,
+	fileSystem utils.FileSystem,
+	overrides map[string]interface{},
+) (string, error) {
+	overrides = addStandardOverrideProperties(galasaHome, fileSystem, overrides)
+
+	// Write the properties to a file
+	overridesFilePath := temporaryFolderPath + "overrides.properties"
+	err := utils.WritePropertiesFile(fileSystem, overridesFilePath, overrides)
+	return overridesFilePath, err
+}
+
+func addStandardOverrideProperties(
+	galasaHome utils.GalasaHome,
+	fileSystem utils.FileSystem,
+	overrides map[string]interface{},
+) map[string]interface{} {
 
 	// Set the ras location to be local disk always.
-	homePath, err := fileSystem.GetUserHomeDir()
-	if err == nil {
-		const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
+	const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
 
-		// Only set this property if it's not already set by the user, or in the users' override file.
-		_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE]
-		if !isPropAlreadySet {
-			rasPathUri := "file:///" + strings.ReplaceAll(homePath, "\\", "/") + "/.galasa/ras"
-			overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
-		}
+	// Only set this property if it's not already set by the user, or in the users' override file.
+	_, isRasPropAlreadySet := overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE]
+	if !isRasPropAlreadySet {
+		rasPathUri := "file:///" + galasaHome.GetUrlFolderPath() + "/ras"
+		overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
 	}
 
-	if err == nil {
-		// Force the launched runs to use the "L" prefix in their runids.
-		const OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX = "framework.request.type.LOCAL.prefix"
+	// Force the launched runs to use the "L" prefix in their runids.
+	const OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX = "framework.request.type.LOCAL.prefix"
 
-		// Only set this property if it's not already set by the user, or in the users' override file.
-		_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX]
-		if !isPropAlreadySet {
-			overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
-		}
+	// Only set this property if it's not already set by the user, or in the users' override file.
+	_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX]
+	if !isPropAlreadySet {
+		overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
 	}
-	return overrides, err
+
+	return overrides
 }
 
 func (launcher *JvmLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error) {
@@ -392,6 +420,7 @@ func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 //	    --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
 //	    --test dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee
 func getCommandSyntax(
+	galasaHome utils.GalasaHome,
 	fileSystem utils.FileSystem,
 	javaHome string,
 	testObrs []utils.MavenCoordinates,
@@ -405,7 +434,7 @@ func getCommandSyntax(
 	var cmd string = ""
 	var args []string = make([]string, 0)
 
-	bootJarPath, err := utils.GetGalasaBootJarPath(fileSystem)
+	bootJarPath, err := utils.GetGalasaBootJarPath(fileSystem, galasaHome)
 	if err == nil {
 
 		separator := fileSystem.GetFilePathSeparator()
@@ -421,7 +450,7 @@ func getCommandSyntax(
 		args = append(args, "-Dfile.encoding=UTF-8")
 
 		var userHome string
-		userHome, err = fileSystem.GetUserHomeDir()
+		userHome, err = fileSystem.GetUserHomeDirPath()
 
 		// --localmaven file://${M2_PATH}/repository/
 		// Note: URLs always have forward-slashes
@@ -435,7 +464,7 @@ func getCommandSyntax(
 
 		// --bootstrap file:${HOME}/.galasa/bootstrap.properties
 		args = append(args, "--bootstrap")
-		bootstrapPath := "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.galasa/bootstrap.properties"
+		bootstrapPath := "file:///" + galasaHome.GetUrlFolderPath() + "/bootstrap.properties"
 		args = append(args, bootstrapPath)
 
 		// --overrides file:${HOME}/.galasa/overrides.properties

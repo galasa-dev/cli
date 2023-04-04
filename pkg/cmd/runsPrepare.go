@@ -54,6 +54,11 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env)
+	if err != nil {
+		panic(err)
+	}
+
 	// Convert overrides to a map
 	testOverrides := make(map[string]string)
 	for _, override := range *prepareFlagOverrides {
@@ -74,7 +79,8 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
 	// Load the bootstrap properties.
 	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	bootstrapData, err := api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
+	bootstrapData, err := api.LoadBootstrap(
+		galasaHome, fileSystem, env, bootstrap, urlService)
 	if err != nil {
 		panic(err)
 	}

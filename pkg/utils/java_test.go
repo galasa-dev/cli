@@ -80,6 +80,7 @@ func TestJavaHomeCanBeValidOnWindows(t *testing.T) {
 	// Create the java.exe in the file system...
 	fileSystem := NewOverridableMockFileSystem()
 	fileSystem.SetExecutableExtension(".exe")
+
 	AddJavaRuntimeToMock(fileSystem, javaHome)
 
 	err := ValidateJavaHome(fileSystem, javaHome)
