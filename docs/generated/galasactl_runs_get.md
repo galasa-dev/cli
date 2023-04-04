@@ -1,10 +1,10 @@
 ## galasactl runs get
 
-Get the details of a test runid which ran or is running.
+Get the details of a test runname which ran or is running.
 
 ### Synopsis
 
-Get the details of a test runid which ran or is running, displaying the results to the caller
+Get the details of a test runname which ran or is running, displaying the results to the caller
 
 ```
 galasactl runs get [flags]
@@ -13,8 +13,9 @@ galasactl runs get [flags]
 ### Options
 
 ```
-  -h, --help           help for get
-      --runid string   the runid of the test run we want information about
+  -h, --help             help for get
+      --output string    output format for the data returned (default : summary) (default "summary")
+      --runname string   the runname of the test run we want information about
 ```
 
 ### Options inherited from parent commands
