@@ -47,7 +47,7 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	case "summary":
 		SummaryOutput(runJsons)
 	default:
-		log.Println("unsupported output type")
+		log.Println("unsupported output type:'%s'", output)
 	}
 
 }
@@ -82,7 +82,7 @@ func GetRunDetails() []string {
 
 	var testRunIDs []string
 	var testRunDetail *galasaapi.Run
-
+	var resultsList []string
 	testRunIDs, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunIDsByName(nil, runname).Execute()
 
 	if err == nil {
@@ -94,16 +94,17 @@ func GetRunDetails() []string {
 				status := results.GetStatus()
 				result := results.GetResult()
 				log.Printf("runname:'%s' status:'%s' result:'%s'\n", runname, status, result)
-				// return list
+				resultsList = append(resultsList, result)
 			} else {
 				log.Printf("Failed to get the details of the runname '%s'. List Item '%d' \n Server Id: '%s' \n Reason: %s", runname, indx, val, err.Error())
-				//Panic(err)
+				panic(err)
 			}
 		}
 	} else {
 		log.Printf("Failed to get the details of the runname '%s'. Reason: %s", runname, err.Error())
-		//Panic(err)
+		panic(err)
 	}
+	return resultsList
 }
 
 func SummaryOutput([]string) {
