@@ -19,19 +19,22 @@ type galasaHomeImpl struct {
 	env  Environment
 }
 
-func NewGalasaHome(fs FileSystem, env Environment) (GalasaHome, error) {
+func NewGalasaHome(fs FileSystem, env Environment, cmdFlagGalasaHome string) (GalasaHome, error) {
 	var err error = nil
 	var homeData *galasaHomeImpl = nil
 
-	galasaHomePath := env.GetEnv("GALASA_HOME")
+	galasaHomePath := cmdFlagGalasaHome
 	if galasaHomePath == "" {
-		var userHome string
-		userHome, err = fs.GetUserHomeDirPath()
-		if err == nil {
-			galasaHomePath = userHome + fs.GetFilePathSeparator() + ".galasa"
+		galasaHomePath = env.GetEnv("GALASA_HOME")
+		if galasaHomePath == "" {
+			var userHome string
+			userHome, err = fs.GetUserHomeDirPath()
+			if err == nil {
+				galasaHomePath = userHome + fs.GetFilePathSeparator() + ".galasa"
+			}
+		} else {
+			err = validateUserHomeDir(galasaHomePath, fs)
 		}
-	} else {
-		err = validateUserHomeDir(galasaHomePath, fs)
 	}
 
 	if err == nil {

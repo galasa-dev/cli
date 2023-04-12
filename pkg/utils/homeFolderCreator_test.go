@@ -19,7 +19,7 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 	mockFileSystem := NewMockFileSystem()
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 	mockEnv := NewMockEnv()
-	galasaHome, err := NewGalasaHome(mockFileSystem, mockEnv)
+	galasaHome, err := NewGalasaHome(mockFileSystem, mockEnv, "")
 
 	if err != nil {
 		assert.Fail(t, "Errored when it shouldn't have! "+err.Error())
@@ -79,7 +79,7 @@ func TestCanGetGalasaBootJarPath(t *testing.T) {
 
 	fs := NewMockFileSystem()
 	mockEnv := NewMockEnv()
-	galasaHome, _ := NewGalasaHome(fs, mockEnv)
+	galasaHome, _ := NewGalasaHome(fs, mockEnv, "")
 	path, err := GetGalasaBootJarPath(fs, galasaHome)
 
 	assert.Nil(t, err)

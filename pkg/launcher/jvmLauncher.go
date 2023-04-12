@@ -86,6 +86,7 @@ func NewJVMLauncher(
 	runsSubmitLocalCmdParams RunsSubmitLocalCmdParameters,
 	timeService utils.TimeService,
 	processFactory ProcessFactory,
+	galasaHome utils.GalasaHome,
 ) (*JvmLauncher, error) {
 
 	var (
@@ -98,26 +99,22 @@ func NewJVMLauncher(
 	err = utils.ValidateJavaHome(fileSystem, javaHome)
 
 	if err == nil {
-		var galasaHome utils.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env)
-		if err == nil {
-			launcher = new(JvmLauncher)
-			launcher.javaHome = javaHome
-			launcher.cmdParams = runsSubmitLocalCmdParams
-			launcher.env = env
-			launcher.fileSystem = fileSystem
-			launcher.embeddedFileSystem = embeddedFileSystem
-			launcher.processFactory = processFactory
-			launcher.galasaHome = galasaHome
-			launcher.timeService = timeService
+		launcher = new(JvmLauncher)
+		launcher.javaHome = javaHome
+		launcher.cmdParams = runsSubmitLocalCmdParams
+		launcher.env = env
+		launcher.fileSystem = fileSystem
+		launcher.embeddedFileSystem = embeddedFileSystem
+		launcher.processFactory = processFactory
+		launcher.galasaHome = galasaHome
+		launcher.timeService = timeService
 
-			// Make sure the home folder has the boot jar unpacked and ready to invoke.
-			err = utils.InitialiseGalasaHomeFolder(
-				launcher.galasaHome,
-				launcher.fileSystem,
-				launcher.embeddedFileSystem,
-			)
-		}
+		// Make sure the home folder has the boot jar unpacked and ready to invoke.
+		err = utils.InitialiseGalasaHomeFolder(
+			launcher.galasaHome,
+			launcher.fileSystem,
+			launcher.embeddedFileSystem,
+		)
 	}
 
 	return launcher, err
@@ -451,6 +448,9 @@ func getCommandSyntax(
 
 		var userHome string
 		userHome, err = fileSystem.GetUserHomeDirPath()
+
+		nativeGalasaHomeFolderPath := galasaHome.GetNativeFolderPath()
+		args = append(args, `-DGALASA_HOME="`+nativeGalasaHomeFolderPath+`"`)
 
 		// --localmaven file://${M2_PATH}/repository/
 		// Note: URLs always have forward-slashes

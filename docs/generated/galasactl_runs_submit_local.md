@@ -30,6 +30,7 @@ galasactl runs submit local [flags]
 
 ```
   -b, --bootstrap string           Bootstrap URL
+      --galasahome string          Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
   -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
   -l, --log string                 File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails

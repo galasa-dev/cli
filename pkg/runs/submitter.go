@@ -25,7 +25,8 @@ func ExecuteSubmitRuns(
 	params utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
 	timeService utils.TimeService,
-	testSelectionFlags *TestSelectionFlags) error {
+	testSelectionFlags *TestSelectionFlags,
+) error {
 
 	var err error = nil
 

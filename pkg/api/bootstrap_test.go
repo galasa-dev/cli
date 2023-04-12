@@ -27,7 +27,7 @@ func TestCanReadPropertiesInRemoteHttpBoostrap(t *testing.T) {
 
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	bootstrapData, err := LoadBootstrap(galasaHome, mockFileSystem, mockEnvironment, "http://my.fake.server/dummy-url/bootstrap", mockUrlResolutionService)
 
@@ -48,7 +48,7 @@ func TestCanReadPropertiesInLocalFileBoostrap(t *testing.T) {
 
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	bootstrapData, err := LoadBootstrap(
 		galasaHome, mockFileSystem, mockEnvironment, "my-bootstrap-file",
@@ -76,7 +76,7 @@ func TestCanReadRemoteApiServerUrlFromLocalFileBoostrap(t *testing.T) {
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
 
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	bootstrapData, err := LoadBootstrap(galasaHome,
 		mockFileSystem, mockEnvironment,
@@ -105,7 +105,7 @@ func TestCanReadLocalBootstrapFileFromDefaultPlace(t *testing.T) {
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
 
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
 	bootstrapData, err := LoadBootstrap(galasaHome,
@@ -139,7 +139,7 @@ func TestBootstrapFromEnvVarGetsUsed(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "/my.bootstrap.properties"
 
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
 	bootstrapData, err := LoadBootstrap(
@@ -171,7 +171,7 @@ func TestBootstrapExpandsTildaPathToHome(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "~/my.bootstrap.properties"
 
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
 	bootstrapData, err := LoadBootstrap(
@@ -203,7 +203,7 @@ func TestBootstrapExpandsFileColonPath(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "file:///my.bootstrap.properties"
 
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
 	bootstrapData, err := LoadBootstrap(

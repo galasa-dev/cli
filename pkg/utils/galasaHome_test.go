@@ -15,7 +15,7 @@ func TestDefaultHomePathTakenFromFileSystem(t *testing.T) {
 	env := NewMockEnv()
 
 	// When
-	galasaHome, err := NewGalasaHome(fs, env)
+	galasaHome, err := NewGalasaHome(fs, env, "")
 
 	// Then
 	assert.Nil(t, err)
@@ -30,7 +30,7 @@ func TestHomePathTakenFromEnvVarIfSet(t *testing.T) {
 	env.SetEnv("GALASA_HOME", "AnyWhereIwantItToBe")
 
 	// When
-	galasaHome, err := NewGalasaHome(fs, env)
+	galasaHome, err := NewGalasaHome(fs, env, "")
 
 	// Then
 	assert.Nil(t, err)

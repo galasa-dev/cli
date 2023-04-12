@@ -16,7 +16,7 @@ func TestCanCreateGalasaHomeFolderWhenNotAlreadyInitialised(t *testing.T) {
 	homeDir, _ := mockFileSystem.GetUserHomeDirPath()
 	galasaDir := homeDir + "/.galasa/"
 	m2Dir := homeDir + "/.m2/"
-	err := localEnvInit(mockFileSystem, mockEnv)
+	err := localEnvInit(mockFileSystem, mockEnv, "")
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
@@ -41,7 +41,7 @@ func TestCanCreateGalasaHomeFolderWhenAlreadyInitialised(t *testing.T) {
 	mockFileSystem.WriteTextFile(m2Dir+"settings.xml", "")
 
 	mockEnv := utils.NewMockEnv()
-	err := localEnvInit(mockFileSystem, mockEnv)
+	err := localEnvInit(mockFileSystem, mockEnv, "")
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}

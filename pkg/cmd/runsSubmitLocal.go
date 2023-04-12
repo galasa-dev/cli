@@ -70,7 +70,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	env := utils.NewEnvironment()
 
 	// Work out where galasa home is, only once.
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env)
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
 	if err != nil {
 		panic(err)
 	}
@@ -87,7 +87,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	launcherInstance, err = launcher.NewJVMLauncher(
 		env, fileSystem, embeddedFileSystem,
 		runsSubmitLocalCmdParams, timeService,
-		processFactory)
+		processFactory, galasaHome)
 
 	if err == nil {
 		err = runs.ExecuteSubmitRuns(

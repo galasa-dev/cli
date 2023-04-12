@@ -31,15 +31,15 @@ func executeEnvInit(cmd *cobra.Command, args []string) {
 	fileSystem := utils.NewOSFileSystem()
 	env := utils.NewEnvironment()
 
-	err := localEnvInit(fileSystem, env)
+	err := localEnvInit(fileSystem, env, CmdParamGalasaHomePath)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func localEnvInit(fileSystem utils.FileSystem, env utils.Environment) error {
+func localEnvInit(fileSystem utils.FileSystem, env utils.Environment, cmdFlagGalasaHome string) error {
 
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env)
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, cmdFlagGalasaHome)
 	if err == nil {
 		embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 		err = utils.InitialiseGalasaHomeFolder(galasaHome, fileSystem, embeddedFileSystem)

@@ -130,7 +130,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 
 	fs := utils.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(fs, env)
+	galasaHome, err := utils.NewGalasaHome(fs, env, "")
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
@@ -154,7 +154,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 
 	fs := utils.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(fs, env)
+	galasaHome, err := utils.NewGalasaHome(fs, env, "")
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
@@ -203,7 +203,7 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
 	fs := utils.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(fs, env)
+	galasaHome, err := utils.NewGalasaHome(fs, env, "")
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}

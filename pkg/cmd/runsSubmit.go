@@ -98,7 +98,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env)
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
 	if err != nil {
 		panic(err)
 	}
