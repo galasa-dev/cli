@@ -138,8 +138,8 @@ galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package test.package.one
-          --override zos.default.lpar=MV2C
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPAR
+          --override zos.default.cluster=MYPLEXCLUSTER
 ```
 
 Building a portfolio over mulitple selections and overrides:-
@@ -149,16 +149,16 @@ galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package test.package.one
-          --override zos.default.lpar=MV2C
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPAR
+          --override zos.default.cluster=MYPLEXCLUSTER
 
 galasactl runs prepare
           --portfolio test.yaml
           --append
           --stream inttests
           --package test.package.two
-          --override zos.default.lpar=MV2D
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPARB
+          --override zos.default.cluster=MYPLEXCLUSTER
 ```
 
 ## runs submit
@@ -203,8 +203,8 @@ Providing overrides for all tests during this run, note, overrides in the portfo
 ```
 galasactl runs submit --log -
           --portfolio test.yaml
-          --override zos.default.lpar=MV2C
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPAR
+          --override zos.default.cluster=MYPLEXCLUSTERA
 ```
 
 ## Runs submit local
