@@ -13,6 +13,8 @@ Most commands will need a reference to the Galasa bootstrap file or url.  This c
 
 This value can be overridden using the `GALASA_HOME` environment variable.
 
+The `--galasahome` command-line flag can override the `GALASA_HOME` environment variable on a call-by-call basis.
+
 Note: If you change this to a non-existent and/or non-initialised folder path, then 
 you will have to create and re-initialise the folder using the `galasactl local init` command again. That command will respect the `GALASA_HOME` variable and will create the folder and initialise it were it not to exist.
 
