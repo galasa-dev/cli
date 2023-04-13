@@ -1,8 +1,10 @@
 #!/bin/bash
 
+echo "Running script test-galasactl-local.sh"
+
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
 # This script tests the 'galasactl project create' and 'galasactl runs submit local' commands
-# Pre-requesite: the CLI must have been built first so the binaries are present in the /bin directory
+# Pre-requesite: the CLI must have been built first so the binaries are present in the ./bin directory
 
 
 # Where is this script executing from ?
@@ -57,7 +59,7 @@ note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" 
 # Functions
 #-----------------------------------------------------------------------------------------                   
 function usage {
-    info "Syntax: test-galasactl-local.sh --binary [OPTIONS]"
+    info "Syntax: test-galasactl-local.sh --binary [OPTIONS] --buildTool [BUILD_TOOL]"
     cat << EOF
 Options are:
 galasactl-darwin-amd64 : Use the galasactl-darwin-amd64 binary
@@ -65,6 +67,8 @@ galasactl-darwin-arm64 : Use the galasactl-darwin-arm64 binary
 galasactl-linux-amd64 : Use the galasactl-linux-amd64 binary
 galasactl-linux-s390x : Use the galasactl-linux-s390x binary
 galasactl-windows-amd64.exe : Use the galasactl-windows-amd64.exe binary
+
+Build tool must be either 'maven' or 'gradle'.
 EOF
 }
 
@@ -72,11 +76,15 @@ EOF
 # Process parameters
 #-----------------------------------------------------------------------------------------                   
 binary=""
+buildTool=""
 
 while [ "$1" != "" ]; do
     case $1 in
         --binary )                        shift
                                           binary="$1"
+                                          ;;
+        --buildTool )                     shift
+                                          buildTool="$1"
                                           ;;
         -h | --help )                     usage
                                           exit
@@ -110,15 +118,32 @@ else
     exit 1  
 fi
 
+if [[ "${buildTool}" != "" ]]; then
+    case ${buildTool} in
+        maven  )            echo "Using Maven"
+                            ;;
+        gradle )            echo "Using Gradle"
+                            ;;
+        * )                 error "Unrecognised build tool ${buildTool}"
+                            usage
+                            exit 1
+    esac
+else
+    error "Need to specify which build tool to use to build the generated project."
+    usage
+    exit 1  
+fi
+
 #--------------------------------------------------------------------------
 # Initialise Galasa home
 function galasa_home_init {
     h2 "Initialising galasa home directory"
 
+    rm -rf ${BASEDIR}/temp
     mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
-    cmd="${BASEDIR}/bin/${binary} local init \
+    cmd="${BASEDIR}/bin/${binary} local init --development \
     --log -"
 
     info "Command is: $cmd"
@@ -140,7 +165,7 @@ function generate_sample_code {
     cd ${BASEDIR}/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
-    ${BASEDIR}/bin/${binary} project create --package ${PACKAGE_NAME} --features payee,account --obr --maven --gradle --force
+    ${BASEDIR}/bin/${binary} project create --package ${PACKAGE_NAME} --features payee --obr --${buildTool} --force --development --log -
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to create the galasa test project using galasactl command. rc=${rc}"
@@ -150,25 +175,17 @@ function generate_sample_code {
 }
 
 #--------------------------------------------------------------------------
-# Now build the source it created using maven
-function build_generated_source_maven {
+# Now build the source it created
+function build_generated_source {
     h2 "Building the sample project we just generated."
     cd ${BASEDIR}/temp/${PACKAGE_NAME}
-    mvn clean test install 
-    rc=$?
-    if [[ "${rc}" != "0" ]]; then
-        error " Failed to build the generated source code which galasactl created."
-        exit 1
-    fi
-    success "OK"
-}
 
-#--------------------------------------------------------------------------
-# Now build the source it created using gradle
-function build_generated_source_gradle {
-    h2 "Building the sample project we just generated."
-    cd ${BASEDIR}/temp/${PACKAGE_NAME}
-    gradle build publishToMavenLocal
+    if [[ "${buildTool}" == "maven" ]]; then
+        mvn clean test install
+    elif [[ "${buildTool}" == "gradle" ]]; then
+        gradle clean build publishToMavenLocal
+    fi
+
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to build the generated source code which galasactl created."
@@ -198,17 +215,13 @@ function submit_local_test {
 
     export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
 
-
-    # Local .m2 content over-rides these anyway...
-    # use development version of the OBR
     export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
-    # else go to maven central
-    #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
 
     export GALASACTL="${BASEDIR}/bin/${binary}"
 
     ${GALASACTL} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
+    --remoteMaven ${REMOTE_MAVEN} \
     --class ${BUNDLE}/${JAVA_CLASS} \
     --throttle 1 \
     --requesttype automated-test \
@@ -218,9 +231,6 @@ function submit_local_test {
 
     # Uncomment this if testing that a test that should fail, fails
     # --noexitcodeontestfailures \
-
-    # --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
-    # --galasaVersion 0.26.0 \
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -254,13 +264,12 @@ galasa_home_init
 # Generate sample project ...
 generate_sample_code
 
-# Maven ...
-cleanup_local_maven_repo
-build_generated_source_maven
-run_test_locally_using_galasactl
+if [[ "${buildTool}" == "maven" ]]; then
+    cleanup_local_maven_repo
+    build_generated_source
+elif [[ "${buildTool}" == "gradle" ]]; then
+    cleanup_local_maven_repo
+    build_generated_source
+fi
 
-# Gradle ...
-cleanup_local_maven_repo
-build_generated_source_gradle
 run_test_locally_using_galasactl
-
