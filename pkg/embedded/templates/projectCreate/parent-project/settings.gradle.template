@@ -4,10 +4,19 @@ pluginManagement {
     repositories {
         mavenLocal()
         mavenCentral()
+
+        {{- if .IsDevelopment }}
+        // To use the bleeding edge version of galasa's obr plugin, use the development obr
+        maven {
+            url 'https://development.galasa.dev/main/maven-repo/obr'
+        }
+        {{- else }}
         // To use the bleeding edge version of galasa's obr plugin, use the development obr
         // maven {
-        //    url = 'https://development.galasa.dev/main/maven-repo/obr'
+        //    url 'https://development.galasa.dev/main/maven-repo/obr'
         // }
+        {{- end }}
+
         gradlePluginPortal()
     }
 }

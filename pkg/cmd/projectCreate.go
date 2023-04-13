@@ -44,6 +44,7 @@ var (
 	featureNamesCommaSeparated string
 	useMaven                   bool
 	useGradle                  bool
+	isDevelopmentProjectCreate bool
 )
 
 func init() {
@@ -56,6 +57,8 @@ func init() {
 		"the department, function or application under test. "+
 		"For example: dev.galasa.banking.example")
 	cmd.MarkFlagRequired("package")
+
+	cmd.Flags().BoolVar(&isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
 	cmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
 	cmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
@@ -84,7 +87,7 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 	fileSystem := utils.NewOSFileSystem()
 
 	err := createProject(fileSystem, packageName, featureNamesCommaSeparated,
-		isOBRProjectRequired, force, useMaven, useGradle)
+		isOBRProjectRequired, force, useMaven, useGradle, isDevelopmentProjectCreate)
 
 	// Convey the error to the top level.
 	// Tried doing this with RunE: entry, passing back the error, but we always
@@ -130,6 +133,7 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 //
 // isOBRProjectRequired - Controls whether the optional OBR project is going to be created.
 // featureNamesCommaSeparated - eg: kettle,toaster. Causes a kettle and toaster project to be created with a sample test in.
+// isDevelopment - if true, the user wants to use bleeding-edge versions of galasa code and maven repositories.
 func createProject(
 	fileSystem utils.FileSystem,
 	packageName string,
@@ -137,7 +141,9 @@ func createProject(
 	isOBRProjectRequired bool,
 	forceOverwrite bool,
 	useMaven bool,
-	useGradle bool) error {
+	useGradle bool,
+	isDevelopment bool,
+) error {
 
 	log.Printf("Creating project using packageName:%s\n", packageName)
 
@@ -169,7 +175,7 @@ func createProject(
 			if err == nil {
 				err = createParentFolderContents(
 					fileGenerator, packageName, featureNames, isOBRProjectRequired,
-					forceOverwrite, useMaven, useGradle)
+					forceOverwrite, useMaven, useGradle, isDevelopment)
 			}
 
 			if err == nil {
@@ -196,6 +202,7 @@ func createParentFolderContents(
 	forceOverwrite bool,
 	useMaven bool,
 	useGradle bool,
+	isDevelopment bool,
 ) error {
 	var err error = nil
 
@@ -209,7 +216,7 @@ func createParentFolderContents(
 	if err == nil {
 		if useGradle {
 			err = createParentFolderSettingsGradle(fileGenerator, packageName,
-				featureNames, isOBRProjectRequired, forceOverwrite)
+				featureNames, isOBRProjectRequired, forceOverwrite, isDevelopment)
 		}
 	}
 
@@ -269,7 +276,13 @@ func separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated strin
 }
 
 // Creates a pom.xml file in the parent project folder for Maven projects.
-func createParentFolderPom(fileGenerator *utils.FileGenerator, packageName string, featureNames []string, isOBRRequired bool, forceOverwrite bool) error {
+func createParentFolderPom(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+	featureNames []string,
+	isOBRRequired bool,
+	forceOverwrite bool,
+) error {
 
 	type ParentPomParameters struct {
 		Coordinates MavenCoordinates
@@ -287,7 +300,8 @@ func createParentFolderPom(fileGenerator *utils.FileGenerator, packageName strin
 		GalasaVersion:    embedded.GetGalasaVersion(),
 		IsOBRRequired:    isOBRRequired,
 		ObrName:          packageName + ".obr",
-		ChildModuleNames: make([]string, len(featureNames))}
+		ChildModuleNames: make([]string, len(featureNames)),
+	}
 	// Populate the child module names
 	for index, featureName := range featureNames {
 		templateParameters.ChildModuleNames[index] = packageName + "." + featureName
@@ -309,7 +323,9 @@ func createParentFolderSettingsGradle(
 	packageName string,
 	featureNames []string,
 	isOBRRequired bool,
-	forceOverwrite bool) error {
+	forceOverwrite bool,
+	isDevelopment bool,
+) error {
 
 	type ParentGradleParameters struct {
 		Coordinates GradleCoordinates
@@ -317,13 +333,16 @@ func createParentFolderSettingsGradle(
 		IsOBRRequired    bool
 		ObrName          string
 		ChildModuleNames []string
+		IsDevelopment    bool
 	}
 
 	templateParameters := ParentGradleParameters{
 		Coordinates:      GradleCoordinates{GroupId: packageName, Name: packageName},
 		IsOBRRequired:    isOBRRequired,
 		ObrName:          packageName + ".obr",
-		ChildModuleNames: make([]string, len(featureNames))}
+		ChildModuleNames: make([]string, len(featureNames)),
+		IsDevelopment:    isDevelopment,
+	}
 
 	// Populate the child module names
 	for index, featureName := range featureNames {

@@ -17,9 +17,13 @@ var (
 		Args:  cobra.NoArgs,
 		Run:   executeEnvInit,
 	}
+
+	isDevelopmentLocalInit bool
 )
 
 func init() {
+	localInitCmd.Flags().BoolVar(&isDevelopmentLocalInit, "development", false, "Use bleeding-edge galasa versions and repositories.")
+
 	parentCommand := localCmd
 	parentCommand.AddCommand(localInitCmd)
 }
@@ -31,20 +35,25 @@ func executeEnvInit(cmd *cobra.Command, args []string) {
 	fileSystem := utils.NewOSFileSystem()
 	env := utils.NewEnvironment()
 
-	err := localEnvInit(fileSystem, env, CmdParamGalasaHomePath)
+	err := localEnvInit(fileSystem, env, CmdParamGalasaHomePath, isDevelopmentLocalInit)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func localEnvInit(fileSystem utils.FileSystem, env utils.Environment, cmdFlagGalasaHome string) error {
+func localEnvInit(
+	fileSystem utils.FileSystem,
+	env utils.Environment,
+	cmdFlagGalasaHome string,
+	isDevelopment bool,
+) error {
 
 	galasaHome, err := utils.NewGalasaHome(fileSystem, env, cmdFlagGalasaHome)
 	if err == nil {
 		embeddedFileSystem := embedded.GetEmbeddedFileSystem()
 		err = utils.InitialiseGalasaHomeFolder(galasaHome, fileSystem, embeddedFileSystem)
 		if err == nil {
-			err = utils.InitialiseM2Folder(fileSystem, embeddedFileSystem)
+			err = utils.InitialiseM2Folder(fileSystem, embeddedFileSystem, isDevelopment)
 		}
 	}
 	return err

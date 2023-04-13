@@ -16,7 +16,7 @@ const (
 	MAVEN_REPO_URL_MAVEN_CENTRAL        = "https://repo.maven.apache.org/maven2"
 )
 
-func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS) error {
+func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS, isDevelopment bool) error {
 
 	var err error
 	var userHomeDir string
@@ -29,22 +29,35 @@ func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS) erro
 		err = fileGenerator.CreateFolder(m2Dir)
 
 		if err == nil {
-			err = createSettingsXMLFile(fileGenerator, fileSystem, m2Dir)
+			err = createSettingsXMLFile(fileGenerator, fileSystem, m2Dir, isDevelopment)
 		}
 	}
 
 	return err
 }
 
-func createSettingsXMLFile(fileGenerator *FileGenerator, fileSystem FileSystem, m2Dir string) error {
+func createSettingsXMLFile(
+	fileGenerator *FileGenerator,
+	fileSystem FileSystem,
+	m2Dir string,
+	isDevelopment bool,
+) error {
 
 	targetPath := m2Dir + fileSystem.GetFilePathSeparator() + "settings.xml"
+
+	type M2SettingsXmlTemplateParams struct {
+		IsDevelopment bool
+	}
+
+	templateParameters := M2SettingsXmlTemplateParams{
+		IsDevelopment: isDevelopment,
+	}
 
 	xmlFile := GeneratedFileDef{
 		FileType:                 "xml",
 		TargetFilePath:           targetPath,
 		EmbeddedTemplateFilePath: "templates/m2/settings.xml",
-		TemplateParameters:       nil,
+		TemplateParameters:       templateParameters,
 	}
 
 	settingsFileExists, err := fileSystem.Exists(targetPath)

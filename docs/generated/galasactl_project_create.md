@@ -13,6 +13,7 @@ galasactl project create [flags]
 ### Options
 
 ```
+      --development       Use bleeding-edge galasa versions and repositories.
       --features string   A comma-separated list of features you are testing. These must be able to form parts of a java package name. For example: "payee,account" (default "feature1")
       --force             Force-overwrite files which already exist.
       --gradle            Generate gradle build artifacts. Can be used in addition to the --maven flag.
