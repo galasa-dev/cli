@@ -661,9 +661,22 @@ function cleanup_temp {
     cd ${BASEDIR}/temp
 }
 
+# The steps to build the CLI
 download_dependencies
 generate_rest_client
 build_executables
+generate_galasactl_documentation
+
+
+# Now the steps to test it.
+
+h2 "Setting up GALASA_HOME"
+export GALASA_HOME=${BASEDIR}/temp/.galasa
+success "GALASA_HOME is set to be ${GALASA_HOME}"
+
+calculate_galasactl_executable
+galasa_home_init
+
 
 export GALASA_HOME=${BASEDIR}/temp/home
 cleanup_temp
@@ -701,7 +714,7 @@ run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
 
 # run_tests_java_minus_jar_method
 # build_portfolio
-generate_galasactl_documentation
+
 
 # launch_test_on_ecosystem
 # test_on_windows
