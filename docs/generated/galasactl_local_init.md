@@ -13,7 +13,8 @@ galasactl local init [flags]
 ### Options
 
 ```
-  -h, --help   help for init
+      --development   Use bleeding-edge galasa versions and repositories.
+  -h, --help          help for init
 ```
 
 ### Options inherited from parent commands

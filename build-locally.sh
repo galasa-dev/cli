@@ -248,7 +248,7 @@ function generate_sample_code {
     cd $BASEDIR/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
-    ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr ${BUILD_SYSTEM_FLAGS}
+    ${BASEDIR}/bin/${galasactl_command} project create --development --package ${PACKAGE_NAME} --features payee,account --obr ${BUILD_SYSTEM_FLAGS}
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to create the galasa test project using galasactl command. rc=${rc}"

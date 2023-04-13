@@ -20,10 +20,11 @@ func TestCanCreateProjectFailsIfPackageNameInvalid(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// When ...
 	err := createProject(mockFileSystem, "very.INVALID_PACKAGE_NAME.very",
-		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -39,9 +40,12 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -181,6 +185,7 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// Over-ride the default MkdirAll function so that it fails...
 	mockFileSystem.VirtualFunction_MkdirAll = func(targetFolderPath string) error {
@@ -188,7 +193,9 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -204,6 +211,7 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// Over-ride the default WriteTextFile function so that it fails...
 	mockFileSystem.VirtualFunction_WriteTextFile = func(targetFilePath string, desiredContents string) error {
@@ -211,7 +219,9 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	}
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	assert.NotNil(t, err, "Sumulated error didn't bubble up to the top.")
@@ -227,13 +237,16 @@ func TestCreateProjectPomFileAlreadyExistsNoForceOverwrite(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
 	mockFileSystem.WriteTextFile(testPackageName+"/pom.xml", "dummy test pom.xml")
 
 	// When ...
-	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, testPackageName, featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -250,13 +263,16 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// Create a pom.xml file already...
 	mockFileSystem.MkdirAll(testPackageName)
 	mockFileSystem.WriteTextFile(testPackageName+"/pom.xml", "dummy test pom.xml")
 
 	// When ...
-	err := createProject(mockFileSystem, testPackageName, featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, testPackageName, featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -285,9 +301,12 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -338,10 +357,13 @@ func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
 	featureNamesCommandSeparatedList := "account,payee"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// When ...
-	err := createProject(mockFileSystem, testPackageName,
-		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, testPackageName,
+		featureNamesCommandSeparatedList, isObrProjectRequired,
+		forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -365,10 +387,12 @@ func TestCreateProjectWithInvalidFeaturesFails(t *testing.T) {
 	featureNamesCommandSeparatedList := "Account"
 	maven := true
 	gradle := false
+	isDevelopment := false
 
 	// When ...
 	err := createProject(mockFileSystem, testPackageName,
-		featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+		featureNamesCommandSeparatedList, isObrProjectRequired,
+		forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -385,9 +409,11 @@ func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := false
 	gradle := true
+	isDevelopment := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -407,9 +433,12 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := false
 	gradle := true
+	isDevelopment := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -430,9 +459,12 @@ func TestCanCreateMavenAndGradleProject(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := true
 	gradle := true
+	isDevelopment := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -453,9 +485,12 @@ func TestCreateProjectDefaultsToMavenProject(t *testing.T) {
 	maven := false
 	gradle := false
 	expectMaven := true
+	isDevelopment := false
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList, isObrProjectRequired, forceOverwrite, maven, gradle)
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -465,4 +500,56 @@ func TestCreateProjectDefaultsToMavenProject(t *testing.T) {
 
 	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, expectMaven, gradle)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", expectMaven, gradle)
+}
+
+func TestCanCreateGradleProjectNonDevelopmentModeGeneratesCommentedOutMavenRepoReference(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := true
+	isObrProjectRequired := true
+	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := true
+	isDevelopment := false
+
+	// When ...
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	text, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
+	assert.Nil(t, err)
+	assert.Contains(t, text, "//    url 'https://development.galasa.dev/main/maven-repo/obr'", "parent settings.gradle didn't have a commented-out bleeding edge repo ref.")
+}
+
+func TestCanCreateGradleProjectDevelopmentModeGeneratesMavenRepoReference(t *testing.T) {
+	// Given...
+	mockFileSystem := utils.NewMockFileSystem()
+	forceOverwrite := true
+	isObrProjectRequired := true
+	featureNamesCommandSeparatedList := "test"
+	maven := false
+	gradle := true
+	isDevelopment := true
+
+	// When ...
+	err := createProject(
+		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
+
+	// Then...
+	// Should have created a folder for the parent package.
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	text, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
+	assert.Nil(t, err)
+	assert.Contains(t, text, "           url 'https://development.galasa.dev/main/maven-repo/obr'", "parent settings.gradle didn't have a commented-out bleeding edge repo ref.")
 }

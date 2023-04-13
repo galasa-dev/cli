@@ -23,6 +23,20 @@ you will have to create and re-initialise the folder using the `galasactl local 
 The syntax is documented in generated documentation [here](docs/generated/galasactl.md)
 
 
+## Setting up your environment
+Run this command to set up your environment for future calls to the galasactl tooling.
+```
+galasactl local init
+```
+
+If you wish to build content which depends on the very latest/bleeding-edge of galasa code, 
+add the `--development` flag. This will set things up to include the maven repositories 
+in any new {HOME}/.m2/settings.xml file, if that doesn't already exist.
+
+This command respects the GALASA_HOME environment variable, and will set up a number of files
+there, or in {HOME}/.galasa otherwise.
+
+
 ## Creating an example project
 
 `galasactl` can be used to create near-empty test projects to lay-down an initial structure 
@@ -56,7 +70,6 @@ galasactl project create --package dev.galasa.example.banking --features payee,a
 ```
 
 
-
 ### Building the example project
 
 Maven and Gradle are both build tools, which read metadata from files which guide how the code within a module should be built. Maven and Gradle use different formats for these build files.
@@ -76,6 +89,7 @@ To build a project with Maven artifacts, use `mvn clean install`
 
 To build a project with Gradle artifacts, use `gradle build publishToMavenLocal`
 
+If you wish the generated code to depend upon the very latest/bleeding-edge of galasa code, then add the `--development` flag. This will add extra settings to the `settings.gradle` file.
 
 ## runs prepare
 
