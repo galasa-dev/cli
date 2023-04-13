@@ -9,7 +9,7 @@
 //   which is generated from a yaml definition file.
 //   So we need to get hold of a generator tool so we can 
 //
-def galasaBootJarVersion = '0.26.0'
+def galasaBootJarVersion = '0.27.0'
 repositories {
     gradlePluginPortal()
     mavenCentral()
@@ -25,7 +25,7 @@ dependencies {
     // We need the openapi generator to turn a yaml file into go client stubs, 
     // so we can call the api server REST services
     // https://mvnrepository.com/artifact/org.openapitools/openapi-generator
-    implementation 'org.openapitools:openapi-generator-cli:6.0.1'
+    implementation 'org.openapitools:openapi-generator-cli:6.1.0'
 }
 task downloadDependencies(type: Copy) {
     // Download the dependencies onto the local disk.

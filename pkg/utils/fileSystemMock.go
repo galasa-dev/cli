@@ -42,7 +42,7 @@ type MockFileSystem struct {
 	VirtualFunction_ReadTextFile         func(filePath string) (string, error)
 	VirtualFunction_Exists               func(path string) (bool, error)
 	VirtualFunction_DirExists            func(path string) (bool, error)
-	VirtualFunction_GetUserHomeDir       func() (string, error)
+	VirtualFunction_GetUserHomeDirPath   func() (string, error)
 	VirtualFunction_WriteBinaryFile      func(targetFilePath string, desiredContents []byte) error
 	VirtualFunction_OutputWarningMessage func(string) error
 	VirtualFunction_MkTempDir            func() (string, error)
@@ -89,7 +89,7 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 	mockFileSystem.VirtualFunction_DirExists = func(path string) (bool, error) {
 		return mockFSDirExists(mockFileSystem, path)
 	}
-	mockFileSystem.VirtualFunction_GetUserHomeDir = func() (string, error) {
+	mockFileSystem.VirtualFunction_GetUserHomeDirPath = func() (string, error) {
 		return mockFSGetUserHomeDir()
 	}
 	mockFileSystem.VirtualFunction_WriteBinaryFile = func(path string, content []byte) error {
@@ -173,8 +173,8 @@ func (fs *MockFileSystem) DirExists(path string) (bool, error) {
 	return fs.VirtualFunction_DirExists(path)
 }
 
-func (fs *MockFileSystem) GetUserHomeDir() (string, error) {
-	return fs.VirtualFunction_GetUserHomeDir()
+func (fs *MockFileSystem) GetUserHomeDirPath() (string, error) {
+	return fs.VirtualFunction_GetUserHomeDirPath()
 }
 
 func (fs MockFileSystem) OutputWarningMessage(message string) error {

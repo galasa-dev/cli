@@ -23,7 +23,7 @@ func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS) erro
 
 	fileGenerator := NewFileGenerator(fileSystem, embeddedFileSystem)
 
-	userHomeDir, err = fileSystem.GetUserHomeDir()
+	userHomeDir, err = fileSystem.GetUserHomeDirPath()
 	if err == nil {
 		m2Dir := userHomeDir + fileSystem.GetFilePathSeparator() + ".m2"
 		err = fileGenerator.CreateFolder(m2Dir)

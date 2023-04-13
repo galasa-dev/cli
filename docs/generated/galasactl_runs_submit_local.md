@@ -15,7 +15,7 @@ galasactl runs submit local [flags]
 ```
       --bundle strings         bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
       --class strings          test class names, for building a portfolio when a stream/test catalog is not available. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
-      --galasaVersion string   the version of galasa you want to use to run your tests. This should match the version of the galasa obr you built your test bundles against. (default "0.26.0")
+      --galasaVersion string   the version of galasa you want to use to run your tests. This should match the version of the galasa obr you built your test bundles against. (default "0.27.0")
   -h, --help                   help for local
       --obr strings            The maven coordinates of the obr bundle(s) which refer to your test bundles. The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' Multiple instances of this flag can be used to describe multiple obr bundles.
       --package strings        packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
@@ -30,6 +30,7 @@ galasactl runs submit local [flags]
 
 ```
   -b, --bootstrap string           Bootstrap URL
+      --galasahome string          Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
   -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
   -l, --log string                 File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails

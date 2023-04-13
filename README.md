@@ -2,7 +2,22 @@
 
 The Galasa command line interface (Galasa CLI) is used to interact with the Galasa ecosystem or local development environment.
 
-Most commands will need a reference to the Galasa bootstrap file or url.  This can be provided with the `--bootstrap` flag or the `GALASA_BOOTSTRAP`environment variable.
+
+## Environment variables
+
+### GALASA_BOOTSTRAP
+Most commands will need a reference to the Galasa bootstrap file or url.  This can be provided with the `--bootstrap` flag or the `GALASA_BOOTSTRAP` environment variable. If both are provided, the explicit flag takes precedence.
+
+### GALASA_HOME
+`galasactl` commands assume that `${HOME}/.galasa` is a folder which is writeable, and contains property files, and storage for test results which are run using local JVMs.
+
+This value can be overridden using the `GALASA_HOME` environment variable.
+
+The `--galasahome` command-line flag can override the `GALASA_HOME` environment variable on a call-by-call basis.
+
+Note: If you change this to a non-existent and/or non-initialised folder path, then 
+you will have to create and re-initialise the folder using the `galasactl local init` command again. That command will respect the `GALASA_HOME` variable and will create the folder and initialise it were it not to exist.
+
 
 ## Syntax
 The syntax is documented in generated documentation [here](docs/generated/galasactl.md)
@@ -123,8 +138,8 @@ galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package test.package.one
-          --override zos.default.lpar=MV2C
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPAR
+          --override zos.default.cluster=MYPLEXCLUSTER
 ```
 
 Building a portfolio over mulitple selections and overrides:-
@@ -134,16 +149,16 @@ galasactl runs prepare
           --portfolio test.yaml
           --stream inttests
           --package test.package.one
-          --override zos.default.lpar=MV2C
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPAR
+          --override zos.default.cluster=MYPLEXCLUSTER
 
 galasactl runs prepare
           --portfolio test.yaml
           --append
           --stream inttests
           --package test.package.two
-          --override zos.default.lpar=MV2D
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPARB
+          --override zos.default.cluster=MYPLEXCLUSTER
 ```
 
 ## runs submit
@@ -188,8 +203,8 @@ Providing overrides for all tests during this run, note, overrides in the portfo
 ```
 galasactl runs submit --log -
           --portfolio test.yaml
-          --override zos.default.lpar=MV2C
-          --override zos.default.cluster=PLEX2
+          --override zos.default.lpar=MYLPAR
+          --override zos.default.cluster=MYPLEXCLUSTERA
 ```
 
 ## Runs submit local

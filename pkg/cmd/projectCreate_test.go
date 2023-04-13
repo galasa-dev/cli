@@ -62,12 +62,16 @@ func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.Fil
 		parentPomXmlFileExists, err := mockFileSystem.Exists("my.test.pkg/pom.xml")
 		assert.Nil(t, err)
 		assert.True(t, parentPomXmlFileExists, "Parent folder pom.xml was not created.")
-	
+
+		gitIgnoreFileExists, err := mockFileSystem.Exists("my.test.pkg/.gitignore")
+		assert.Nil(t, err)
+		assert.True(t, gitIgnoreFileExists, "Parent folder .gitignore was not created.")
+
 		text, err := mockFileSystem.ReadTextFile("my.test.pkg/pom.xml")
 		assert.Nil(t, err)
 		assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "parent pom.xml didn't substitute the group id")
 		assert.Contains(t, text, "<artifactId>my.test.pkg</artifactId>", "parent pom.xml didn't substitute the artifact id")
-	
+
 		assert.Contains(t, text, "<module>my.test.pkg.test</module>", "parent pom.xml didn't have a test module included")
 
 		if isObrProjectRequired {
@@ -81,11 +85,11 @@ func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.Fil
 		parentSettingsGradleFileExists, err := mockFileSystem.Exists("my.test.pkg/settings.gradle")
 		assert.Nil(t, err)
 		assert.True(t, parentSettingsGradleFileExists, "Parent folder settings.gradle was not created.")
-	
+
 		text, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
 		assert.Nil(t, err)
 		assert.Contains(t, text, "include 'my.test.pkg.test'", "parent settings.gradle didn't have a test module included")
-		
+
 		if isObrProjectRequired {
 			assert.Contains(t, text, "include 'my.test.pkg.obr'", "parent settings.gradle didn't have an obr module included")
 		} else {
@@ -110,24 +114,24 @@ func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.Fil
 		expectedPomFilePath := "my.test.pkg/my.test.pkg." + featureName + "/pom.xml"
 		testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
 		assert.Nil(t, err)
-		assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created for feature." + featureName)
+		assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created for feature."+featureName)
 
 		text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
 		assert.Nil(t, err)
 		assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
 		assert.Contains(t, text, "<artifactId>my.test.pkg.test</artifactId>", "Test folder pom.xml didn't substitute the artifact id")
 	}
-	
+
 	if isGradle {
 		expectedBuildGradleFilePath := "my.test.pkg/my.test.pkg." + featureName + "/build.gradle"
 		testBuildGradleFileExists, err := mockFileSystem.Exists(expectedBuildGradleFilePath)
 		assert.Nil(t, err)
-		assert.True(t, testBuildGradleFileExists, "Test folder build.gradle was not created for feature." + featureName)
+		assert.True(t, testBuildGradleFileExists, "Test folder build.gradle was not created for feature."+featureName)
 
 		expectedBndFilePath := "my.test.pkg/my.test.pkg." + featureName + "/bnd.bnd"
 		testBndFileExists, err := mockFileSystem.Exists(expectedBndFilePath)
 		assert.Nil(t, err)
-		assert.True(t, testBndFileExists, "Test folder bnd.bnd was not created for feature." + featureName)
+		assert.True(t, testBndFileExists, "Test folder bnd.bnd was not created for feature."+featureName)
 
 		buildGradleText, err := mockFileSystem.ReadTextFile(expectedBuildGradleFilePath)
 		assert.Nil(t, err)
@@ -306,7 +310,7 @@ func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.File
 		testPomXmlFileExists, err := mockFileSystem.Exists(expectedPomFilePath)
 		assert.Nil(t, err)
 		assert.True(t, testPomXmlFileExists, "Test folder pom.xml was not created.")
-	
+
 		text, err := mockFileSystem.ReadTextFile(expectedPomFilePath)
 		assert.Nil(t, err)
 		assert.Contains(t, text, "<groupId>my.test.pkg</groupId>", "Test folder pom.xml didn't substitute the group id")
@@ -318,7 +322,7 @@ func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.File
 		testBuildGradleFileExists, err := mockFileSystem.Exists(expectedBuildGradleFilePath)
 		assert.Nil(t, err)
 		assert.True(t, testBuildGradleFileExists, "Test folder build.gradle was not created.")
-	
+
 		text, err := mockFileSystem.ReadTextFile(expectedBuildGradleFilePath)
 		assert.Nil(t, err)
 		assert.Contains(t, text, "group = 'my.test.pkg'", "Test folder build.gradle didn't substitute the group id")

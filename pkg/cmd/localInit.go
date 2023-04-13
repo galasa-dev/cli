@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	envInitCmd = &cobra.Command{
+	localInitCmd = &cobra.Command{
 		Use:   "init",
 		Short: "Initialises Galasa home folder",
 		Long:  "Initialises Galasa home folder in home directory with all the properties files",
@@ -21,25 +21,31 @@ var (
 
 func init() {
 	parentCommand := localCmd
-	parentCommand.AddCommand(envInitCmd)
+	parentCommand.AddCommand(localInitCmd)
 }
 
 func executeEnvInit(cmd *cobra.Command, args []string) {
 	utils.CaptureLog(logFileName)
 	isCapturingLogs = true
-	
+
 	fileSystem := utils.NewOSFileSystem()
-	err := envInit(fileSystem)
+	env := utils.NewEnvironment()
+
+	err := localEnvInit(fileSystem, env, CmdParamGalasaHomePath)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func envInit(fileSystem utils.FileSystem) error {
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
-	err := utils.InitialiseGalasaHomeFolder(fileSystem, embeddedFileSystem)
+func localEnvInit(fileSystem utils.FileSystem, env utils.Environment, cmdFlagGalasaHome string) error {
+
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, cmdFlagGalasaHome)
 	if err == nil {
-		err = utils.InitialiseM2Folder(fileSystem, embeddedFileSystem)
+		embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+		err = utils.InitialiseGalasaHomeFolder(galasaHome, fileSystem, embeddedFileSystem)
+		if err == nil {
+			err = utils.InitialiseM2Folder(fileSystem, embeddedFileSystem)
+		}
 	}
 	return err
 }

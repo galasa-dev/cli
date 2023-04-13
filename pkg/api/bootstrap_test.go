@@ -27,8 +27,9 @@ func TestCanReadPropertiesInRemoteHttpBoostrap(t *testing.T) {
 
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, "http://my.fake.server/dummy-url/bootstrap", mockUrlResolutionService)
+	bootstrapData, err := LoadBootstrap(galasaHome, mockFileSystem, mockEnvironment, "http://my.fake.server/dummy-url/bootstrap", mockUrlResolutionService)
 
 	if err != nil {
 		assert.Fail(t, "Loading bootstrap failed when it should have worked. error:%s", err.Error())
@@ -47,8 +48,11 @@ func TestCanReadPropertiesInLocalFileBoostrap(t *testing.T) {
 
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, "my-bootstrap-file", mockUrlResolutionService)
+	bootstrapData, err := LoadBootstrap(
+		galasaHome, mockFileSystem, mockEnvironment, "my-bootstrap-file",
+		mockUrlResolutionService)
 
 	if err != nil {
 		assert.Fail(t, "Loading bootstrap failed when it should have worked. error:%s", err.Error())
@@ -72,7 +76,11 @@ func TestCanReadRemoteApiServerUrlFromLocalFileBoostrap(t *testing.T) {
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
 
-	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, "my-bootstrap-file", mockUrlResolutionService)
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	bootstrapData, err := LoadBootstrap(galasaHome,
+		mockFileSystem, mockEnvironment,
+		"my-bootstrap-file", mockUrlResolutionService)
 
 	if err != nil {
 		assert.Fail(t, "Loading bootstrap failed when it should have worked. error:%s", err.Error())
@@ -84,7 +92,7 @@ func TestCanReadRemoteApiServerUrlFromLocalFileBoostrap(t *testing.T) {
 func TestCanReadLocalBootstrapFileFromDefaultPlace(t *testing.T) {
 	// Given...
 	mockFileSystem := utils.NewMockFileSystem()
-	home, _ := mockFileSystem.GetUserHomeDir()
+	home, _ := mockFileSystem.GetUserHomeDirPath()
 	mockFileSystem.WriteTextFile(
 		home+"/.galasa/bootstrap.properties",
 		"a=b\n"+
@@ -97,8 +105,11 @@ func TestCanReadLocalBootstrapFileFromDefaultPlace(t *testing.T) {
 	// Empty environment variables.
 	mockEnvironment := utils.NewMockEnv()
 
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
-	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, bootstrapPath, mockUrlResolutionService)
+	bootstrapData, err := LoadBootstrap(galasaHome,
+		mockFileSystem, mockEnvironment, bootstrapPath, mockUrlResolutionService)
 
 	if err != nil {
 		assert.Fail(t, "Loading bootstrap failed when it should have worked. error:%s", err.Error())
@@ -128,8 +139,12 @@ func TestBootstrapFromEnvVarGetsUsed(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "/my.bootstrap.properties"
 
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
-	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, bootstrapPath, mockUrlResolutionService)
+	bootstrapData, err := LoadBootstrap(
+		galasaHome, mockFileSystem, mockEnvironment,
+		bootstrapPath, mockUrlResolutionService)
 
 	if err != nil {
 		assert.Fail(t, "Loading bootstrap failed when it should have worked. error:%s", err.Error())
@@ -156,8 +171,12 @@ func TestBootstrapExpandsTildaPathToHome(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "~/my.bootstrap.properties"
 
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
-	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, bootstrapPath, mockUrlResolutionService)
+	bootstrapData, err := LoadBootstrap(
+		galasaHome, mockFileSystem, mockEnvironment,
+		bootstrapPath, mockUrlResolutionService)
 
 	if err != nil {
 		assert.Fail(t, "Loading bootstrap failed when it should have worked. error:%s", err.Error())
@@ -184,8 +203,15 @@ func TestBootstrapExpandsFileColonPath(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockEnvironment.EnvVars["GALASA_BOOTSTRAP"] = "file:///my.bootstrap.properties"
 
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
 	var bootstrapPath = "" // Causes the default file in .galasa to be read.
-	bootstrapData, err := LoadBootstrap(mockFileSystem, mockEnvironment, bootstrapPath, mockUrlResolutionService)
+	bootstrapData, err := LoadBootstrap(
+		galasaHome,
+		mockFileSystem,
+		mockEnvironment,
+		bootstrapPath,
+		mockUrlResolutionService)
 
 	if err != nil {
 		assert.Fail(t, "Loading bootstrap failed when it should have worked. error:%s", err.Error())
