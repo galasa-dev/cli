@@ -17,9 +17,10 @@ func TestCanCreateM2FolderAndSettingsXML(t *testing.T) {
 	// Given...
 	mockFileSystem := NewMockFileSystem()
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	isDevelopment := false
 
 	// When ...
-	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem)
+	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -28,7 +29,7 @@ func TestCanCreateM2FolderAndSettingsXML(t *testing.T) {
 	}
 
 	// Check the home folder has been created.
-	homeDir, _ := mockFileSystem.GetUserHomeDir()
+	homeDir, _ := mockFileSystem.GetUserHomeDirPath()
 	m2Dir := homeDir + "/.m2"
 	assertFolderExists(t, mockFileSystem, m2Dir, "Didn't create "+m2Dir+" folder in home directory.")
 
@@ -46,8 +47,10 @@ func TestWhenM2SettingsExistButReposNotPresentYouGetAWarningAboutRequiredReposYo
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	isDevelopment := false
+
 	// When ...
-	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem)
+	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -80,8 +83,10 @@ func checkThatDifferentSettingsXmlFileContentsCauseFailure(t *testing.T, setting
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	isDevelopment := false
+
 	// When ...
-	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem)
+	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem, isDevelopment)
 
 	// Then...
 	// Should have created a folder for the parent package.
@@ -95,7 +100,7 @@ func checkThatDifferentSettingsXmlFileContentsCauseFailure(t *testing.T, setting
 
 func newMockFSContainingSettingsXml(settingsXmlContents string) *MockFileSystem {
 	mockFileSystem := NewOverridableMockFileSystem()
-	homeDir, _ := mockFileSystem.GetUserHomeDir()
+	homeDir, _ := mockFileSystem.GetUserHomeDirPath()
 	m2Dir := homeDir + "/.m2"
 	mockFileSystem.WriteTextFile(m2Dir+"/settings.xml", settingsXmlContents)
 	return mockFileSystem
@@ -108,13 +113,14 @@ func TestWhenM2SettingsExistCheckFailsErrorGetsReturned(t *testing.T) {
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	isDevelopment := false
 
 	mockFileSystem.VirtualFunction_Exists = func(targetFolderPath string) (bool, error) {
 		return false, errors.New("Simulated Exists() method failure")
 	}
 
 	// When ...
-	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem)
+	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem, isDevelopment)
 
 	// Then...
 
@@ -132,13 +138,14 @@ func TestWhenM2SettingsReadTextFileFailsErrorGetsReturned(t *testing.T) {
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	isDevelopment := false
 
 	mockFileSystem.VirtualFunction_ReadTextFile = func(targetFolderPath string) (string, error) {
 		return "", errors.New("Simulated Exists() method failure")
 	}
 
 	// When ...
-	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem)
+	err := InitialiseM2Folder(mockFileSystem, embeddedFileSystem, isDevelopment)
 
 	// Then...
 

@@ -69,6 +69,12 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
+	// Work out where galasa home is, only once.
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+	if err != nil {
+		panic(err)
+	}
+
 	timeService := utils.NewRealTimeService()
 
 	// the submit is targetting a local JVM
@@ -79,10 +85,19 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 
 	var launcherInstance launcher.Launcher
 	launcherInstance, err = launcher.NewJVMLauncher(
-		env, fileSystem, embeddedFileSystem, runsSubmitLocalCmdParams, timeService, processFactory)
+		env, fileSystem, embeddedFileSystem,
+		runsSubmitLocalCmdParams, timeService,
+		processFactory, galasaHome)
 
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitLocalSelectionFlags)
+		err = runs.ExecuteSubmitRuns(
+			galasaHome,
+			fileSystem,
+			runsSubmitCmdParams,
+			launcherInstance,
+			timeService,
+			&submitLocalSelectionFlags,
+		)
 	}
 
 	if err != nil {

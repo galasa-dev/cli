@@ -28,6 +28,9 @@ var (
 	// This means that any errors which occur in the cobra framework are not
 	// followed by stack traces all the time.
 	isCapturingLogs bool = false
+
+	// The path to GALASA_HOME. Over-rides the environment variable.
+	CmdParamGalasaHomePath string
 )
 
 func Execute() {
@@ -117,4 +120,10 @@ func init() {
 			"Specify \"-\" to log to stderr. "+
 			"Defaults to not logging.")
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+	RootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
+		"Path to a folder where Galasa will read and write files and configuration settings. "+
+			"The default is '${HOME}/.galasa'. "+
+			"This overrides the GALASA_HOME environment variable which may be set instead.",
+	)
 }
