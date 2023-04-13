@@ -523,9 +523,14 @@ func TestCanCreateGradleProjectNonDevelopmentModeGeneratesCommentedOutMavenRepoR
 		assert.Fail(t, err.Error())
 	}
 
-	text, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
+	settingsGradleText, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
 	assert.Nil(t, err)
-	assert.Contains(t, text, "//    url 'https://development.galasa.dev/main/maven-repo/obr'", "parent settings.gradle didn't have a commented-out bleeding edge repo ref.")
+	assert.Contains(t, settingsGradleText, "//    url 'https://development.galasa.dev/main/maven-repo/obr'", "parent settings.gradle didn't have a commented-out bleeding edge repo ref.")
+
+	buildGradleText, err := mockFileSystem.ReadTextFile("my.test.pkg/my.test.pkg.test/build.gradle")
+	assert.Nil(t, err)
+	assert.Contains(t, buildGradleText, "//    url 'https://development.galasa.dev/main/maven-repo/obr'", "child build.gradle didn't have a commented-out bleeding edge repo ref.")
+
 }
 
 func TestCanCreateGradleProjectDevelopmentModeGeneratesMavenRepoReference(t *testing.T) {
@@ -549,7 +554,11 @@ func TestCanCreateGradleProjectDevelopmentModeGeneratesMavenRepoReference(t *tes
 		assert.Fail(t, err.Error())
 	}
 
-	text, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
+	settingsGradleText, err := mockFileSystem.ReadTextFile("my.test.pkg/settings.gradle")
 	assert.Nil(t, err)
-	assert.Contains(t, text, "           url 'https://development.galasa.dev/main/maven-repo/obr'", "parent settings.gradle didn't have a commented-out bleeding edge repo ref.")
+	assert.Contains(t, settingsGradleText, "           url 'https://development.galasa.dev/main/maven-repo/obr'", "parent settings.gradle didn't have an uncommented bleeding edge repo ref.")
+
+	buildGradleText, err := mockFileSystem.ReadTextFile("my.test.pkg/my.test.pkg.test/build.gradle")
+	assert.Nil(t, err)
+	assert.Contains(t, buildGradleText, "       url 'https://development.galasa.dev/main/maven-repo/obr'", "child build.gradle didn't have an uncommented bleeding edge repo ref.")
 }
