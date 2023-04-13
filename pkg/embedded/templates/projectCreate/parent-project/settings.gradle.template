@@ -1,3 +1,5 @@
+
+// Tell gradle where it should look to find the plugins and dependencies it needs to build.
 pluginManagement {
     repositories {
         mavenLocal()
@@ -10,6 +12,7 @@ pluginManagement {
     }
 }
 
+// Tell gradle to build the sub-projects in child folders
 {{- range $componentName := .ChildModuleNames }}
 include '{{ $componentName }}'
 {{- end }}

@@ -18,10 +18,10 @@ func GetEmbeddedFileSystem() embed.FS {
 
 func GetGalasaVersion() string {
 	// Ideally, the build process would create something which go embeds, and we can read and return here.
-	return "0.26.0"
+	return "0.27.0"
 }
 
 func GetBootJarVersion() string {
 	// Ideally, the build process would create something which go embeds, and we can read and return here.
-	return "0.26.0"
+	return "0.27.0"
 }

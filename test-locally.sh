@@ -184,10 +184,10 @@ export TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
 export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
-# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
-export BOOT_JAR_VERSION="0.26.0"
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
+export BOOT_JAR_VERSION="0.27.0"
 
-export OBR_VERSION="0.26.0"
+export OBR_VERSION="0.27.0"
 
 export M2_PATH=$(cd ~/.m2 ; pwd)
 export BOOT_JAR_PATH=~/.galasa/lib/${OBR_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar

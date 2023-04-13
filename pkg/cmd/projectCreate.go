@@ -144,9 +144,10 @@ func createProject(
 	var err error
 
 	// By default, create a Maven project unless --gradle is the only flag set
-	useDefault := true
 	if useGradle && !useMaven {
-		useDefault = false
+		useMaven = false
+	} else {
+		useMaven = true
 	}
 
 	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
@@ -160,30 +161,91 @@ func createProject(
 	if err == nil {
 		err = utils.ValidateJavaPackageName(packageName)
 		if err == nil {
+
 			// Create the parent folder
 			parentProjectFolder := packageName
 			err = fileGenerator.CreateFolder(parentProjectFolder)
+
 			if err == nil {
-				if useDefault {
-					err = createParentFolderPom(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
-				}
+				err = createParentFolderContents(
+					fileGenerator, packageName, featureNames, isOBRProjectRequired,
+					forceOverwrite, useMaven, useGradle)
+			}
 
-				if useGradle {
-					err = createParentFolderSettingsGradle(fileGenerator, packageName, featureNames, isOBRProjectRequired, forceOverwrite)
-				}
-
+			if err == nil {
+				err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite,
+					useMaven, useGradle)
 				if err == nil {
-					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite, useDefault, useGradle)
-					if err == nil {
-						if isOBRProjectRequired {
-							err = createOBRProject(fileGenerator, packageName, featureNames, forceOverwrite, useDefault, useGradle)
-						}
+					if isOBRProjectRequired {
+						err = createOBRProject(fileGenerator, packageName, featureNames,
+							forceOverwrite, useMaven, useGradle)
 					}
 				}
 			}
 		}
 	}
 
+	return err
+}
+
+func createParentFolderContents(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+	featureNames []string,
+	isOBRProjectRequired bool,
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool,
+) error {
+	var err error = nil
+
+	if err == nil {
+		if useMaven {
+			err = createParentFolderPom(fileGenerator, packageName, featureNames,
+				isOBRProjectRequired, forceOverwrite)
+		}
+	}
+
+	if err == nil {
+		if useGradle {
+			err = createParentFolderSettingsGradle(fileGenerator, packageName,
+				featureNames, isOBRProjectRequired, forceOverwrite)
+		}
+	}
+
+	if err == nil {
+		err = createGitIgnoreFile(packageName, fileGenerator, forceOverwrite, useMaven, useGradle)
+	}
+
+	return err
+}
+
+func createGitIgnoreFile(
+	packageName string,
+	fileGenerator *utils.FileGenerator,
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool,
+) error {
+
+	type GitIgnoreParameters struct {
+		IsMavenUsed  bool
+		IsGradleUsed bool
+	}
+
+	templateParameters := GitIgnoreParameters{
+		IsMavenUsed:  useMaven,
+		IsGradleUsed: useGradle,
+	}
+
+	targetFile := utils.GeneratedFileDef{
+		FileType:                 ".gitignore",
+		TargetFilePath:           packageName + "/.gitignore",
+		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/git-ignore.template",
+		TemplateParameters:       templateParameters,
+	}
+
+	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
 	return err
 }
 
