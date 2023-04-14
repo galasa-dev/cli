@@ -21,7 +21,7 @@ type FileSystem interface {
 	WriteBinaryFile(targetFilePath string, desiredContents []byte) error
 	Exists(path string) (bool, error)
 	DirExists(path string) (bool, error)
-	GetUserHomeDir() (string, error)
+	GetUserHomeDirPath() (string, error)
 	OutputWarningMessage(string) error
 	MkTempDir() (string, error)
 	DeleteDir(path string)
@@ -42,7 +42,7 @@ func TildaExpansion(fileSystem FileSystem, path string) (string, error) {
 	if path != "" {
 		if path[0] == '~' {
 			var userHome string
-			userHome, err = fileSystem.GetUserHomeDir()
+			userHome, err = fileSystem.GetUserHomeDirPath()
 			path = pathUtils.Join(userHome, path[1:])
 		}
 	}
@@ -149,7 +149,7 @@ func (*OSFileSystem) DirExists(path string) (bool, error) {
 	return isDirExists, err
 }
 
-func (*OSFileSystem) GetUserHomeDir() (string, error) {
+func (*OSFileSystem) GetUserHomeDirPath() (string, error) {
 	dirName, err := os.UserHomeDir()
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_FIND_USER_HOME, err.Error())

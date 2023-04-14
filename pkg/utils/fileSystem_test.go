@@ -73,7 +73,7 @@ func TestCanOutputWarningMessageDoesntBlowUp(t *testing.T) {
 
 func TestGetUserHomeDirReturnsSomething(t *testing.T) {
 	fs := NewOSFileSystem()
-	homeDirPath, err := fs.GetUserHomeDir()
+	homeDirPath, err := fs.GetUserHomeDirPath()
 	assert.Nil(t, err)
 	assert.NotEmpty(t, homeDirPath)
 	assert.True(t, strings.HasPrefix(homeDirPath, fs.GetFilePathSeparator()))

@@ -116,8 +116,8 @@ success "OK"
 
 #--------------------------------------------------------------------------
 h2 "Setting versions of things."
-# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
-export BOOT_JAR_VERSION="0.26.0"
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
+export BOOT_JAR_VERSION="0.27.0"
 info "BOOT_JAR_VERSION=${BOOT_JAR_VERSION}"
 success "OK"
 
@@ -141,7 +141,7 @@ function download_dependencies {
     #--------------------------------------------------------------------------
     # Download the dependencies we define in gradle into a local folder
     h2 "Downloading dependencies"
-    gradle installJarsIntoTemplates --warning-mode all
+    gradle --warning-mode all --info --debug installJarsIntoTemplates 
     rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
     success "OK"
 }
@@ -211,10 +211,6 @@ function build_executables {
 function calculate_galasactl_executable {
     h2 "Calculate the name of the galasactl executable for this machine/os"
 
-    rm -fr ${BASEDIR}/temp
-    mkdir -p ${BASEDIR}/temp
-    cd ${BASEDIR}/temp
-
     raw_os=$(uname -s) # eg: "Darwin"
     os=""
     case $raw_os in
@@ -247,10 +243,12 @@ function calculate_galasactl_executable {
 function generate_sample_code {
     h2 "Invoke the tool to create a sample project."
 
+    BUILD_SYSTEM_FLAGS=$*
+
     cd $BASEDIR/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
-    ${BASEDIR}/bin/${galasactl_command} project create --package ${PACKAGE_NAME} --features payee,account --obr --maven --gradle
+    ${BASEDIR}/bin/${galasactl_command} project create --development --package ${PACKAGE_NAME} --features payee,account --obr ${BUILD_SYSTEM_FLAGS}
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to create the galasa test project using galasactl command. rc=${rc}"
@@ -590,10 +588,10 @@ function submit_local_test {
     OBR_VERSION=$5
     LOG_FILE=$6
 
-    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
-    export BOOT_JAR_VERSION="0.26.0"
+    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
+    export BOOT_JAR_VERSION="0.27.0"
 
-    export GALASA_VERSION="0.26.0"
+    export GALASA_VERSION="0.27.0"
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
     export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
@@ -625,7 +623,7 @@ function submit_local_test {
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to run the test"
+        error "Failed to run the test. Log is in ${LOG_FILE}"
         exit 1
     fi
     success "Test ran OK"
@@ -655,27 +653,66 @@ function cleanup_local_maven_repo {
     rm -fr ~/.m2/repository/dev/galasa/example
 }
 
+function cleanup_temp {
+    rm -fr ${BASEDIR}/temp
+    mkdir -p ${BASEDIR}/temp
+    cd ${BASEDIR}/temp
+}
+
+# The steps to build the CLI
 download_dependencies
 generate_rest_client
 build_executables
+generate_galasactl_documentation
+
+
+# Now the steps to test it.
+
+h2 "Setting up GALASA_HOME"
+export GALASA_HOME=${BASEDIR}/temp/.galasa
+success "GALASA_HOME is set to be ${GALASA_HOME}"
+
 calculate_galasactl_executable
 galasa_home_init
 
-generate_sample_code
+
+export GALASA_HOME=${BASEDIR}/temp/home
+cleanup_temp
+calculate_galasactl_executable
+
+
 
 # Gradle ...
+cleanup_temp
+galasa_home_init
+generate_sample_code --gradle
 cleanup_local_maven_repo
 build_generated_source_gradle
 run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
 
 # Maven ...
+cleanup_temp
+galasa_home_init
+generate_sample_code --maven
 cleanup_local_maven_repo
 build_generated_source_maven
 run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-maven.txt
 
+# Both Gradle and Maven ...
+cleanup_temp
+galasa_home_init
+generate_sample_code --maven --gradle
+cleanup_local_maven_repo
+build_generated_source_maven
+run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-maven.txt
+cleanup_local_maven_repo
+build_generated_source_gradle
+run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
+
+
 # run_tests_java_minus_jar_method
 # build_portfolio
-generate_galasactl_documentation
+
 
 # launch_test_on_ecosystem
 # test_on_windows

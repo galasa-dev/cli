@@ -1,6 +1,8 @@
 bin/
 vendor/
-pkg/galasaapi/
+
+
+
 p*.yaml
 r*.yaml
 r*.json
@@ -10,15 +12,25 @@ junit.xml
 tools/
 build/
 .idea/
-temp*/
+
+# The temporary file we use for build-FV tests locally.
+temp/
 run.sh
+
+# Mac metadata files on a desktop.
 **/.DS_Store
 .DS_Store
+
 # Ignore Gradle project-specific cache directory
 .gradle
 .dependencies
+
 # Ignore Gradle build output directory
 build
+
+# Don't check-in the boot jar which is embedded in local builds.
 pkg/embedded/templates/lib/
 **/*.jar
 
+# The galasaapi package is generated.
+pkg/galasaapi/

@@ -17,8 +17,10 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fileSystem := utils.NewMockFileSystem()
-	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+	fs := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fs, "/java")
+
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
@@ -27,8 +29,8 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	launcher, err := NewJVMLauncher(
-		env, fileSystem, embedded.GetEmbeddedFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory)
+		env, fs, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 	if err != nil {
 		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
 	}
@@ -48,8 +50,10 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	env := utils.NewMockEnv()
 	// env.EnvVars["JAVA_HOME"] = "/java"
 
-	fileSystem := utils.NewMockFileSystem()
-	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+	fs := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fs, "/java")
+
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
@@ -58,8 +62,8 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	launcher, err := NewJVMLauncher(
-		env, fileSystem, embedded.GetEmbeddedFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory)
+		env, fs, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 	if err == nil {
 		assert.Fail(t, "Constructor should have failed but it did not.")
 	}
@@ -71,17 +75,18 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fileSystem := utils.NewMockFileSystem()
-	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+	fs := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fs, "/java")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	launcher, err := NewJVMLauncher(
-		env, fileSystem, embedded.GetEmbeddedFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory)
+		env, fs, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -94,8 +99,10 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fileSystem := utils.NewMockFileSystem()
-	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+	fs := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fs, "/java")
+
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
@@ -104,8 +111,8 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	launcher, err := NewJVMLauncher(
-		env, fileSystem, embedded.GetEmbeddedFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory)
+		env, fs, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -139,8 +146,10 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fileSystem := utils.NewMockFileSystem()
-	utils.AddJavaRuntimeToMock(fileSystem, "/java")
+	fs := utils.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fs, "/java")
+
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
@@ -149,8 +158,8 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	launcher, err := NewJVMLauncher(
-		env, fileSystem, embedded.GetEmbeddedFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory)
+		env, fs, embedded.GetEmbeddedFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 	if err != nil {
 		assert.Fail(t, "Launcher should have launched command OK")
 	}
@@ -213,7 +222,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 		  }
 		]
 	}`
-	fileSystem.WriteTextFile("/temp/ras/L12345/structure.json", structureJsonContent)
+	fs.WriteTextFile("/temp/ras/L12345/structure.json", structureJsonContent)
 
 	// When...
 	testRuns, err := launcher.GetRunsByGroup("myGroup")
@@ -234,17 +243,21 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 func TestJvmLauncherSetsRASStoreOverride(t *testing.T) {
 	overrides := make(map[string]interface{})
 	fs := utils.NewMockFileSystem()
-	overridesGotBack, err := addStandardProperties(fs, overrides)
-	assert.Nil(t, err)
+	env := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
+
+	overridesGotBack := addStandardOverrideProperties(galasaHome, fs, overrides)
 	assert.Contains(t, overridesGotBack, "framework.resultarchive.store")
 }
 
 func TestCanCreateTempPropsFile(t *testing.T) {
 	overrides := make(map[string]interface{})
 	fs := utils.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	// When
-	tempFolder, tempPropsFile, err := prepareTempFiles(fs, overrides)
+	tempFolder, tempPropsFile, err := prepareTempFiles(galasaHome, fs, overrides)
 
 	// Then the temp folder should exist.
 	assert.Nil(t, err)
@@ -261,7 +274,10 @@ func TestCanCreateTempPropsFile(t *testing.T) {
 	assert.Contains(t, overridesGotBack, "framework.request.type.LOCAL.prefix")
 }
 
-func getDefaultCommandSyntaxTestParameters() (*utils.MockFileSystem,
+func getDefaultCommandSyntaxTestParameters() (
+	utils.Environment,
+	utils.GalasaHome,
+	*utils.MockFileSystem,
 	string,
 	[]utils.MavenCoordinates,
 	TestLocation,
@@ -291,13 +307,16 @@ func getDefaultCommandSyntaxTestParameters() (*utils.MockFileSystem,
 	overridesFilePath := "C:/myFolder/myOverrides.props"
 	isTraceEnabled := true
 
-	return fs, javaHome, testObrs, testLocation,
+	env := utils.NewMockEnv()
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
+
+	return env, galasaHome, fs, javaHome, testObrs, testLocation,
 		remoteMaven, galasaVersionToRun, overridesFilePath, isTraceEnabled
 }
 
 func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -309,6 +328,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 	isTraceEnabled = true
 
 	cmd, args, err := getCommandSyntax(
+		galasaHome,
 		fs, javaHome,
 		testObrs,
 		testLocation,
@@ -326,7 +346,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 }
 
 func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -338,7 +358,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 	isTraceEnabled = false
 
 	cmd, args, err := getCommandSyntax(
-		fs, javaHome,
+		galasaHome, fs, javaHome,
 		testObrs,
 		testLocation,
 		remoteMaven,
@@ -355,7 +375,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 }
 
 func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -368,7 +388,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 	fs.SetFilePathSeparator("/")
 
 	cmd, args, err := getCommandSyntax(
-		fs, javaHome,
+		galasaHome, fs, javaHome,
 		testObrs,
 		testLocation,
 		remoteMaven,
@@ -385,7 +405,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 }
 
 func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
-	fs,
+	_, galasaHome, fs,
 		javaHome,
 		testObrs,
 		testLocation,
@@ -399,7 +419,7 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 	fs.SetExecutableExtension(".exe")
 
 	cmd, args, err := getCommandSyntax(
-		fs, javaHome,
+		galasaHome, fs, javaHome,
 		testObrs,
 		testLocation,
 		remoteMaven,
@@ -494,4 +514,35 @@ func TestInvalidClassInputWithClassSuffixGetsError(t *testing.T) {
 	assert.Nil(t, testLocation)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1066E")
+}
+
+func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
+
+	_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled = true
+
+	cmd, args, err := getCommandSyntax(
+		galasaHome,
+		fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+	)
+
+	assert.NotNil(t, cmd)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Contains(t, args, `-DGALASA_HOME="/User/Home/testuser/.galasa"`)
 }
