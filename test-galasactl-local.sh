@@ -165,7 +165,13 @@ function generate_sample_code {
     cd ${BASEDIR}/temp
 
     export PACKAGE_NAME="dev.galasa.example.banking"
-    ${BASEDIR}/bin/${binary} project create --package ${PACKAGE_NAME} --features payee --obr --${buildTool} --force --development --log -
+
+    if [[ "${buildTool}" == "maven" ]]; then
+        ${BASEDIR}/bin/${binary} project create --package ${PACKAGE_NAME} --features payee --obr --maven --force --development --log -
+    elif [[ "${buildTool}" == "gradle" ]]; then
+        ${BASEDIR}/bin/${binary} project create --package ${PACKAGE_NAME} --features payee --obr --gradle --force --development --log -
+    fi
+
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to create the galasa test project using galasactl command. rc=${rc}"
@@ -256,12 +262,7 @@ galasa_home_init
 # Generate sample project ...
 generate_sample_code
 
-if [[ "${buildTool}" == "maven" ]]; then
-    cleanup_local_maven_repo
-    build_generated_source
-elif [[ "${buildTool}" == "gradle" ]]; then
-    cleanup_local_maven_repo
-    build_generated_source
-fi
+cleanup_local_maven_repo
+build_generated_source
 
 run_test_locally_using_galasactl
