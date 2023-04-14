@@ -89,7 +89,7 @@ To build a project with Maven artifacts, use `mvn clean install`
 
 To build a project with Gradle artifacts, use `gradle build publishToMavenLocal`
 
-If you wish the generated code to depend upon the very latest/bleeding-edge of galasa code, then add the `--development` flag. This will add extra settings to the `settings.gradle` file of the parent and the `build.gradle` file of the child test project.
+If you wish the generated code to depend upon the very latest/bleeding-edge of galasa code, then add the `--development` flag. This will add extra settings to the `settings.gradle` file of the parent and the `build.gradle` file of any of the child test projects.
 
 ## runs prepare
 
