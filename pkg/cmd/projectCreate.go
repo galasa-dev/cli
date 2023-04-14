@@ -180,7 +180,7 @@ func createProject(
 
 			if err == nil {
 				err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite,
-					useMaven, useGradle)
+					useMaven, useGradle, isDevelopment)
 				if err == nil {
 					if isOBRProjectRequired {
 						err = createOBRProject(fileGenerator, packageName, featureNames,
@@ -366,11 +366,13 @@ func createTestProjects(
 	featureNames []string,
 	forceOverwrite bool,
 	useMaven bool,
-	useGradle bool) error {
+	useGradle bool,
+	isDevelopment bool,
+) error {
 
 	var err error = nil
 	for _, featureName := range featureNames {
-		err = createTestProject(fileGenerator, packageName, featureName, forceOverwrite, useMaven, useGradle)
+		err = createTestProject(fileGenerator, packageName, featureName, forceOverwrite, useMaven, useGradle, isDevelopment)
 		if err != nil {
 			break
 		}
@@ -385,7 +387,9 @@ func createTestProject(
 	featureName string,
 	forceOverwrite bool,
 	useMaven bool,
-	useGradle bool) error {
+	useGradle bool,
+	isDevelopment bool,
+) error {
 
 	targetFolderPath := packageName + "/" + packageName + "." + featureName
 	log.Printf("Creating tests project %s\n", targetFolderPath)
@@ -398,7 +402,7 @@ func createTestProject(
 		}
 
 		if useGradle {
-			err = createTestFolderGradle(fileGenerator, targetFolderPath, packageName, featureName, forceOverwrite)
+			err = createTestFolderGradle(fileGenerator, targetFolderPath, packageName, featureName, forceOverwrite, isDevelopment)
 		}
 	}
 
@@ -547,19 +551,21 @@ func createTestFolderPom(fileGenerator *utils.FileGenerator, targetTestFolderPat
 
 // Creates a build.gradle and a bnd.bnd file in a Gradle test project directory.
 func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
-	packageName string, featureName string, forceOverwrite bool) error {
+	packageName string, featureName string, forceOverwrite bool, isDevelopment bool) error {
 
 	type TestGradleParameters struct {
 		Parent      GradleCoordinates
 		Coordinates GradleCoordinates
 		// Version of Galasa we are targetting
 		GalasaVersion string
+		IsDevelopment bool
 	}
 
 	gradleProjectTemplateParameters := TestGradleParameters{
 		Parent:        GradleCoordinates{GroupId: packageName, Name: packageName},
 		Coordinates:   GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
-		GalasaVersion: embedded.GetGalasaVersion()}
+		GalasaVersion: embedded.GetGalasaVersion(),
+		IsDevelopment: isDevelopment}
 
 	buildGradleFile := utils.GeneratedFileDef{
 		FileType:                 "gradle",
