@@ -59,30 +59,23 @@ note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" 
 # Functions
 #-----------------------------------------------------------------------------------------                   
 function usage {
-    info "Syntax: test-galasactl-local.sh --binary [OPTIONS] --buildTool [BUILD_TOOL]"
+    info "Syntax: test-galasactl-local.sh [flags]"
     cat << EOF
-Options are:
-galasactl-darwin-amd64 : Use the galasactl-darwin-amd64 binary
-galasactl-darwin-arm64 : Use the galasactl-darwin-arm64 binary
-galasactl-linux-amd64 : Use the galasactl-linux-amd64 binary
-galasactl-linux-s390x : Use the galasactl-linux-s390x binary
-galasactl-windows-amd64.exe : Use the galasactl-windows-amd64.exe binary
+Optional flags are:
+--buildTool maven: Use Maven to build the generated project.
+--buildTool gradle: Use Gradle to build the generated project.
 
-Build tool must be either 'maven' or 'gradle'.
+If neither are specified, defaults to Maven.
 EOF
 }
 
 #-----------------------------------------------------------------------------------------                   
 # Process parameters
-#-----------------------------------------------------------------------------------------                   
-binary=""
+#-----------------------------------------------------------------------------------------              
 buildTool=""
 
 while [ "$1" != "" ]; do
     case $1 in
-        --binary )                        shift
-                                          binary="$1"
-                                          ;;
         --buildTool )                     shift
                                           buildTool="$1"
                                           ;;
@@ -96,27 +89,6 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [[ "${binary}" != "" ]]; then
-    case ${binary} in
-        galasactl-darwin-amd64 )            echo "Using the galasactl-darwin-amd64 binary"
-                                            ;;
-        galasactl-darwin-arm64 )            echo "Using the galasactl-darwin-arm64 binary"
-                                            ;;
-        galasactl-linux-amd64 )             echo "Using the galasactl-linux-amd64 binary"
-                                            ;;
-        galasactl-linux-s390x )             echo "Using the galasactl-linux-s390x binary"
-                                            ;;
-        galasactl-windows-amd64.exe )       echo "Using the galasactl-windows-amd64.exe binary"
-                                            ;;
-        * )                                 error "Unrecognised galasactl binary ${binary}"
-                                            usage
-                                            exit 1
-    esac
-else
-    error "Need to specify which binary of galasactl to use."
-    usage
-    exit 1  
-fi
 
 if [[ "${buildTool}" != "" ]]; then
     case ${buildTool} in
@@ -129,10 +101,40 @@ if [[ "${buildTool}" != "" ]]; then
                             exit 1
     esac
 else
-    error "Need to specify which build tool to use to build the generated project."
-    usage
-    exit 1  
+    export buildTool="maven"
+    info "No build tool specified so defaulting to Maven." 
 fi
+
+#--------------------------------------------------------------------------
+function calculate_galasactl_executable {
+    h2 "Calculate the name of the galasactl executable for this machine/os"
+
+    raw_os=$(uname -s) # eg: "Darwin"
+    os=""
+    case $raw_os in
+        Darwin*) 
+            os="darwin" 
+            ;;
+        Windows*)
+            os="windows"
+            ;;
+        Linux*)
+            os="linux"
+            ;;
+        *) 
+            error "Failed to recognise which operating system is in use. $raw_os"
+            exit 1
+    esac
+
+    architecture=$(uname -m)
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
+
+    export binary="galasactl-${os}-${architecture}"
+    info "galasactl binary is ${binary}"
+    success "OK"
+}
 
 #--------------------------------------------------------------------------
 # Initialise Galasa home
@@ -255,6 +257,8 @@ function run_test_locally_using_galasactl {
 function cleanup_local_maven_repo {
     rm -fr ~/.m2/repository/dev/galasa/example
 }
+
+calculate_galasactl_executable
 
 # Initialise Galasa home ...
 galasa_home_init

@@ -59,14 +59,8 @@ note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" 
 # Functions
 #-----------------------------------------------------------------------------------------                   
 function usage {
-    info "Syntax: test-galasactl-ecosystem.sh --binary [OPTIONS] --bootstrap [BOOTSTRAP]"
+    info "Syntax: test-galasactl-ecosystem.sh --bootstrap [BOOTSTRAP]"
     cat << EOF
-Options are:
-galasactl-darwin-amd64 : Use the galasactl-darwin-amd64 binary
-galasactl-darwin-arm64 : Use the galasactl-darwin-arm64 binary
-galasactl-linux-amd64 : Use the galasactl-linux-amd64 binary
-galasactl-linux-s390x : Use the galasactl-linux-s390x binary
-galasactl-windows-amd64.exe : Use the galasactl-windows-amd64.exe binary
 
 Bootstrap must refer to a remote ecosystem.
 EOF
@@ -75,14 +69,10 @@ EOF
 #-----------------------------------------------------------------------------------------                   
 # Process parameters
 #-----------------------------------------------------------------------------------------                   
-binary=""
 bootstrap=""
 
 while [ "$1" != "" ]; do
     case $1 in
-        --binary )                        shift
-                                          binary="$1"
-                                          ;;
         --bootstrap )                     shift
                                           bootstrap="$1"
                                           ;;
@@ -96,28 +86,6 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [[ "${binary}" != "" ]]; then
-    case ${binary} in
-        galasactl-darwin-amd64 )            echo "Using the galasactl-darwin-amd64 binary"
-                                            ;;
-        galasactl-darwin-arm64 )            echo "Using the galasactl-darwin-arm64 binary"
-                                            ;;
-        galasactl-linux-amd64 )             echo "Using the galasactl-linux-amd64 binary"
-                                            ;;
-        galasactl-linux-s390x )             echo "Using the galasactl-linux-s390x binary"
-                                            ;;
-        galasactl-windows-amd64.exe )       echo "Using the galasactl-windows-amd64.exe binary"
-                                            ;;
-        * )                                 error "Unrecognised galasactl binary ${binary}"
-                                            usage
-                                            exit 1
-    esac
-else
-    error "Need to specify which binary of galasactl to use."
-    usage
-    exit 1  
-fi
-
 # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
 if [[ "${bootstrap}" != "" ]]; then
     echo "Running tests against ecosystem bootstrap ${bootstrap}"
@@ -126,6 +94,37 @@ else
     usage
     exit 1  
 fi
+
+#--------------------------------------------------------------------------
+function calculate_galasactl_executable {
+    h2 "Calculate the name of the galasactl executable for this machine/os"
+
+    raw_os=$(uname -s) # eg: "Darwin"
+    os=""
+    case $raw_os in
+        Darwin*) 
+            os="darwin" 
+            ;;
+        Windows*)
+            os="windows"
+            ;;
+        Linux*)
+            os="linux"
+            ;;
+        *) 
+            error "Failed to recognise which operating system is in use. $raw_os"
+            exit 1
+    esac
+
+    architecture=$(uname -m)
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
+
+    export binary="galasactl-${os}-${architecture}"
+    info "galasactl binary is ${binary}"
+    success "OK"
+}
 
 #--------------------------------------------------------------------------
 function launch_test_on_ecosystem_with_portfolio {
@@ -259,6 +258,8 @@ function launch_test_from_unknown_portfolio {
     fi
     success "Unknown portfolio could not be read. galasactl reported this error correctly."
 }
+
+calculate_galasactl_executable
 
 # Launch test on ecosystem from a portfolio ...
 launch_test_on_ecosystem_with_portfolio
