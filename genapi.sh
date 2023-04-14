@@ -34,8 +34,7 @@ java -jar ${OPENAPI_GENERATOR_CLI_JAR} generate \
 -g go \
 -o pkg/galasaapi \
 --additional-properties=packageName=galasaapi \
---additional-properties=isGoSubmodule=true \
---skip-validate-spec
+--additional-properties=isGoSubmodule=true 
 
 rc=$?
 if [[ "${rc}" != "0" ]]; then

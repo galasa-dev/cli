@@ -34,8 +34,7 @@ java -jar ${OPENAPI_GENERATOR_CLI_JAR} generate \
 -i ${OPENAPI_YAML_FILE} \
 -g go \
 -o pkg/galasaapi \
---additional-properties=packageName=galasaapi \
---skip-validate-spec
+--additional-properties=packageName=galasaapi
 
 rm pkg/galasaapi/go.mod
 rm pkg/galasaapi/go.sum
