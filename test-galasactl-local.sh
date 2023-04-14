@@ -208,13 +208,6 @@ function submit_local_test {
     OBR_ARTIFACT_ID=$4
     OBR_VERSION=$5
 
-    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
-    export BOOT_JAR_VERSION="0.26.0"
-
-    export GALASA_VERSION="0.26.0"
-
-    export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
-
     export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
 
     export GALASACTL="${BASEDIR}/bin/${binary}"
@@ -241,7 +234,6 @@ function submit_local_test {
 }
 
 function run_test_locally_using_galasactl {
-    export LOG_FILE=$1
     
     # Run the Payee tests.
     export TEST_BUNDLE=dev.galasa.example.banking.payee
@@ -251,7 +243,7 @@ function run_test_locally_using_galasactl {
     export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
-    submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION $LOG_FILE
+    submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
 }
 
 function cleanup_local_maven_repo {
