@@ -591,9 +591,9 @@ function submit_local_test {
     LOG_FILE=$6
 
     # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.26.0/
-    export BOOT_JAR_VERSION="0.26.0"
+    export BOOT_JAR_VERSION="0.27.0"
 
-    export GALASA_VERSION="0.26.0"
+    export GALASA_VERSION="0.27.0"
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
     export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
@@ -625,7 +625,7 @@ function submit_local_test {
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to run the test"
+        error "Failed to run the test. See details in log file ${LOG_FILE}"
         exit 1
     fi
     success "Test ran OK"

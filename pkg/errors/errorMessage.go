@@ -137,6 +137,8 @@ var (
 	GALASA_ERROR_INVALID_CLASS_INPUT_NO_SLASH   = NewMessageType("GAL1064E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. No slash found.", 1064, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_CLASS_TOO_MANY_SLASHES = NewMessageType("GAL1065E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Too many slashes found.", 1065, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_CLASS_SUFFIX_FOUND     = NewMessageType("GAL1066E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.", 1066, STACK_TRACE_WANTED)
+	GALASA_ERROR_INVALID_OUTPUT_FORMAT          = NewMessageType("GAL1067E: Unsupported value '%s' for parameter --output. Supported values are: 'summary'.", 1067, STACK_TRACE_WANTED)
+	GALASA_ERROR_QUERY_RUNS_FAILED              = NewMessageType("GAL1068E: Could not query run results. Reason: '%s'", 1068, STACK_TRACE_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'bleeding edge' repository is '%s'", 2000, STACK_TRACE_WANTED)

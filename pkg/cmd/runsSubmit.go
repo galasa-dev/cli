@@ -102,18 +102,17 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 	var bootstrapData *api.BootstrapData
 	bootstrapData, err = api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
-	if err != nil {
-		panic(err)
-	}
-
-	timeService := utils.NewRealTimeService()
-	var launcherInstance launcher.Launcher = nil
-
-	// The launcher we are going to use to start/monitor tests.
-	launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
-
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitSelectionFlags)
+
+		timeService := utils.NewRealTimeService()
+		var launcherInstance launcher.Launcher = nil
+
+		// The launcher we are going to use to start/monitor tests.
+		launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
+
+		if err == nil {
+			err = runs.ExecuteSubmitRuns(fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitSelectionFlags)
+		}
 	}
 
 	if err != nil {
