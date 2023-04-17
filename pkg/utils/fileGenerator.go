@@ -121,10 +121,20 @@ func (generator *FileGenerator) checkAllowedToWrite(targetFilePath string, force
 	return isAllowed, err
 }
 
+type BlankTemplateParameters struct{}
+
+// substituteParametersIntoTemplate renders the golang template into a string
 func (generator *FileGenerator) substituteParametersIntoTemplate(template *template.Template, templateParameters interface{}) (string, error) {
-	// Render the golang template into a string
 	var buffer bytes.Buffer
 	fileContents := ""
+
+	if templateParameters == nil {
+		// Template substitution blows up if there are no template
+		// parameters. So create a blank set of template parameters
+		// to keep the substitution engine happy.
+		templateParameters = BlankTemplateParameters{}
+	}
+
 	err := template.Execute(&buffer, templateParameters)
 	if err == nil {
 		fileContents = buffer.String()

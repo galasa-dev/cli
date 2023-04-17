@@ -59,26 +59,30 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 }
 
 // getDefaultBootstrapPath - Work out where the boostrap file can normally be found.
-func getDefaultBootstrapPath(fileSystem utils.FileSystem) (string, error) {
+func getDefaultBootstrapPath(galasaHome utils.GalasaHome) (string, error) {
 	var path string = ""
-	home, err := fileSystem.GetUserHomeDir()
+
+	// Turn the path into a URL
+	// This may involve changing the direction of slash characters.
+	baseUrl, err := url.Parse("file:///")
 	if err == nil {
-		// Turn the path into a URL
-		// This may involve changing the direction of slash characters.
-		baseUrl, err := url.Parse("file:///")
-		if err == nil {
-			// All URLs have forward-facing slashes.
-			fullUrl := baseUrl.JoinPath(strings.ReplaceAll(home, "\\", "/"), ".galasa", "bootstrap.properties")
-			path = fullUrl.String()
-		}
+		// All URLs have forward-facing slashes.
+		fullUrl := baseUrl.JoinPath(galasaHome.GetUrlFolderPath(), "bootstrap.properties")
+		path = fullUrl.String()
 	}
+
 	return path, err
 }
 
 // loadBootstrap - Loads the contents of a bootstrap file into memory.
 // bootstrapPath - Where do we find the bootstrap contents from ? This can be a URL must end in /bootstrap
-func LoadBootstrap(fileSystem utils.FileSystem, env utils.Environment,
-	bootstrapPath string, urlResolutionService UrlResolutionService) (*BootstrapData, error) {
+func LoadBootstrap(
+	galasaHome utils.GalasaHome,
+	fileSystem utils.FileSystem,
+	env utils.Environment,
+	bootstrapPath string,
+	urlResolutionService UrlResolutionService,
+) (*BootstrapData, error) {
 
 	var err error = nil
 
@@ -94,7 +98,7 @@ func LoadBootstrap(fileSystem utils.FileSystem, env utils.Environment,
 
 	// If it's still not clear, use the default bootstrap.properties in the ${HOME}/.galasa folder.
 	if path == "" {
-		path, err = getDefaultBootstrapPath(fileSystem)
+		path, err = getDefaultBootstrapPath(galasaHome)
 	}
 
 	if err == nil {

@@ -54,10 +54,15 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+	if err != nil {
+		panic(err)
+	}
+
 	// Read the bootstrap properties.
 	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
+	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
 	if err != nil {
 		panic(err)
 	}

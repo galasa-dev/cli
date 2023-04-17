@@ -98,11 +98,18 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+	if err != nil {
+		panic(err)
+	}
+
 	// Read the bootstrap properties.
 	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
-	if err == nil {
+	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
+	if err != nil {
+		panic(err)
+	}
 
 		timeService := utils.NewRealTimeService()
 		var launcherInstance launcher.Launcher = nil
@@ -110,9 +117,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 		// The launcher we are going to use to start/monitor tests.
 		launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
 
-		if err == nil {
-			err = runs.ExecuteSubmitRuns(fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitSelectionFlags)
-		}
+	if err == nil {
+		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitSelectionFlags)
 	}
 
 	if err != nil {
