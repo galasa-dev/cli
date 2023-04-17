@@ -623,7 +623,7 @@ function submit_local_test {
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to run the test. Log is in ${LOG_FILE}"
+        error "Failed to run the test. See details in log file ${LOG_FILE}"
         exit 1
     fi
     success "Test ran OK"

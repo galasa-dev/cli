@@ -6,11 +6,10 @@ package cmd
 import (
 	"log"
 
-	"github.com/spf13/cobra"
-
 	"github.com/galasa.dev/cli/pkg/api"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/runs"
 	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 )
 
 // Objective: Allow the user to do this:
@@ -27,36 +26,21 @@ var (
 	}
 
 	// Variables set by cobra's command-line parsing.
-	runname string
-	output  string
+	runName            string
+	outputFormatString string
 )
 
 func init() {
-	runsGetCmd.PersistentFlags().StringVar(&runname, "runname", "", "the runname of the test run we want information about")
-	runsGetCmd.PersistentFlags().StringVar(&output, "output", "summary", "output format for the data returned (default : summary)")
+	runsGetCmd.PersistentFlags().StringVar(&runName, "runname", "", "the name of the test run we want information about")
+	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "output", "summary", "output format for the data returned. Supported formats are: summary")
 	runsGetCmd.MarkPersistentFlagRequired("runname")
 
-	runsCmd.AddCommand(runsGetCmd)
+	parentCommand := runsCmd
+	parentCommand.AddCommand(runsGetCmd)
 }
 
 func executeRunsGet(cmd *cobra.Command, args []string) {
 
-	runJsons, err := GetRunDetails()
-
-	if err != nil {
-		panic(err)
-	}
-
-	switch output {
-	case "summary":
-		SummaryOutput(runJsons)
-	default:
-		log.Printf("unsupported output type:'%s'", output)
-	}
-
-}
-
-func GetRunDetails() ([]string, error) {
 	var err error
 
 	utils.CaptureLog(logFileName)
@@ -70,47 +54,29 @@ func GetRunDetails() ([]string, error) {
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(fileSystem, env, bootstrap, urlService)
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
 	if err != nil {
 		panic(err)
 	}
 
+	// Read the bootstrap properties.
+	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+	var bootstrapData *api.BootstrapData
+	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
+	if err != nil {
+		panic(err)
+	}
+
+	var console = utils.NewRealConsole()
+
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API sever is at '%s'\n", apiServerUrl)
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
-	apiClient := api.InitialiseAPI(apiServerUrl)
+	timeService := utils.NewRealTimeService()
 
-	var testRunIDs []string
-	var testRunDetail *galasaapi.Run
-	var resultsList []string
-	testRunIDs, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunIDsByName(nil, runname).Execute()
-
-	if err == nil {
-		for indx, val := range testRunIDs {
-			testRunDetail, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, val).Execute()
-
-			if err == nil {
-				results := testRunDetail.GetTestStructure()
-				status := results.GetStatus()
-				result := results.GetResult()
-				log.Printf("runname:'%s' status:'%s' result:'%s'\n", runname, status, result)
-				resultsList = append(resultsList, result)
-			} else {
-				log.Printf("Failed to get the details of the runname '%s'. List Item '%d' \n Server Id: '%s' \n Reason: %s", runname, indx, val, err.Error())
-				panic(err)
-			}
-		}
-	} else {
-		log.Printf("Failed to get the details of the runname '%s'. Reason: %s", runname, err.Error())
+	// Call to process the command in a unit-testable way.
+	err = runs.GetRuns(runName, outputFormatString, timeService, console, apiServerUrl)
+	if err != nil {
 		panic(err)
 	}
-	return resultsList, err
-}
-
-func SummaryOutput([]string) {
-	log.Println("Summary output")
 }
