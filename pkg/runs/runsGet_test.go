@@ -15,6 +15,40 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	RUN_U456 = `{
+		"runId": "xxx876xxx",
+		"testStructure": {
+			"runName": "U456",
+			"bundle": "myBundleId",	
+			"testName": "myTestPackage.MyTestName",
+			"testShortName": "MyTestName",	
+			"requestor": "unitTesting",
+			"status" : "Finished",
+			"result" : "Passed",
+			"queued" : null,	
+			"startTime": "now",
+			"endTime": "now",
+			"methods": [{
+				"className": "myTestPackage.MyTestName",
+				"methodName": "myTestMethodName",	
+				"type": "test",	
+				"status": "Done",	
+				"result": "Success",
+				"startTime": null,
+				"endTime": null,	
+				"runLogStart":null,	
+				"runLogEnd":null,	
+				"befores":[]
+			}]
+		},
+		"artifacts": [{
+			"artifactPath": "myPathToArtifact1",	
+			"contentType":	"application/json"
+		}]
+	}`
+)
+
 // ------------------------------------------------------------------
 // Testing that the output format string passed by the user on the command-line
 // is valid and supported.
@@ -61,37 +95,7 @@ func TestRunsGetOfRunIdWhichExistsProducesExpectedSummary(t *testing.T) {
 			"pageSize": 1,
 			"numPages": 1,	
 			"amountOfRuns": 1,
-			"runs": [{
-				"runId": "xxx876xxx",
-				"testStructure": {
-					"runName": "U456",
-					"bundle": "myBundleId",	
-					"testName": "myTestPackage.MyTestName",
-					"testShortName": "MyTestName",	
-					"requestor": "unitTesting",
-					"status" : "Finished",
-					"result" : "Passed",
-					"queued" : null,	
-					"startTime": "now",
-					"endTime": "now",
-					"methods": [{
-						"className": "myTestPackage.MyTestName",
-						"methodName": "myTestMethodName",	
-						"type": "test",	
-						"status": "Done",	
-						"result": "Success",
-						"startTime": null,
-						"endTime": null,	
-						"runLogStart":null,	
-						"runLogEnd":null,	
-						"befores":[]
-					}]
-				},
-				"artifacts": [{
-					"artifactPath": "myPathToArtifact1",	
-					"contentType":	"application/json"
-				}]
-			}]
+			"runs":[` + RUN_U456 + `]
 		}`))
 	}))
 	defer server.Close()
