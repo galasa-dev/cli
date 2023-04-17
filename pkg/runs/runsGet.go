@@ -41,6 +41,7 @@ func GetRuns(
 	var err error
 	var outputFormat OutputFormat
 
+	// TODO: Should we validate the runname? Can we ?
 	outputFormat, err = validateOutputFormatFlagValue(outputFormatString)
 	if err == nil {
 		var runJson []galasaapi.Run
@@ -79,6 +80,7 @@ func validateOutputFormatFlagValue(outputFormatString string) (OutputFormat, err
 
 	switch outputFormatString {
 	case "summary":
+		outputFormat = OUTPUT_FORMAT_SUMMARY
 
 	default:
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormat)
@@ -128,9 +130,9 @@ func GetRunsFromRestApi(
 
 				// Copy the results from this page into our bigger list of results.
 				runsOnThisPage := runData.GetRuns()
-				for _, run := range runsOnThisPage {
-					results = append(results, run)
-				}
+				// Add all the runs into our set of results.
+				// Note: The ... syntax means 'all of the array', so they all get appended at once.
+				results = append(results, runsOnThisPage...)
 
 				// Have we processed the last page ?
 				if pageNumberWanted == runData.GetNumPages() {
@@ -141,8 +143,4 @@ func GetRunsFromRestApi(
 	}
 
 	return results, err
-}
-
-func SummaryOutput(console utils.Console, text string) {
-	console.WriteString(text)
 }
