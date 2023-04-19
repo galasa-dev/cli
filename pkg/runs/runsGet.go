@@ -63,14 +63,68 @@ func writeOutput(outputText string, console utils.Console) error {
 	return err
 }
 
-func renderRuns(format OutputFormat, runs []galasaapi.Run) (string, error) {
+// func renderRuns(format OutputFormat, runs []galasaapi.Run) (string, error) {
+// 	var err error = nil
+// 	buff := strings.Builder{}
+// 	for _, run := range runs {
+// 		line := fmt.Sprintf("%s %s %s\n", run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult())
+// 		buff.WriteString(line)
+// 	}
+// 	result := buff.String()
+// 	return result, err
+// }
+
+func renderRuns(outputFormat OutputFormat, runs []galasaapi.Run) (string, error) {
+	var err error = nil
+	var formattedOutput string
+	//can switch on the output format in the future. Currently this is all for outputFormat = 'summary'
+	switch outputFormat {
+	case 0:
+		//outputFormat = 'summary'
+		var output [][]string
+		var headers = []string{"RunName", "Status", "Result", "ShortTestName"}
+		output = append(output, headers)
+		for _, run := range runs {
+			var line []string
+			line = append(line, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestShortName())
+			output = append(output, line)
+		}
+		formattedOutput, err = formatSummaryConsole(output, runs)
+
+	// case 1:
+	// 	//outputFormat = 'raw'
+	// case 2:
+	// 	//outputFormat = 'detailed'
+	default:
+		//outputFormat = 'summary'
+	}
+
+	return formattedOutput, err
+
+}
+
+func formatSummaryConsole(table [][]string, runs []galasaapi.Run) (string, error) {
 	var err error = nil
 	buff := strings.Builder{}
-	for _, run := range runs {
-		line := fmt.Sprintf("%s %s %s\n", run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult())
+	columnLengths := make([]int, len(table[0]))
+	for _, row := range table {
+		for i, val := range row {
+			if len(val) > columnLengths[i] {
+				columnLengths[i] = len(val)
+			}
+		}
+	}
+
+	for _, row := range table {
+		var line string = "\n"
+		for j, val := range row {
+			line += fmt.Sprintf("%-*s ", columnLengths[j], val)
+		}
 		buff.WriteString(line)
 	}
+	buff.WriteString("\n")
 	result := buff.String()
+
 	return result, err
 }
 
@@ -83,7 +137,7 @@ func validateOutputFormatFlagValue(outputFormatString string) (OutputFormat, err
 		outputFormat = OUTPUT_FORMAT_SUMMARY
 
 	default:
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormat)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString)
 	}
 
 	return outputFormat, err
