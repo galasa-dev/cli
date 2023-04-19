@@ -4,6 +4,7 @@
 package runs
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -48,21 +49,21 @@ const (
 		}]
 	}`
 
-	RUN_C123 = `{
+	RUN_U456_v2 = `{
 		"runId": "xxx543xxx",
 		"testStructure": {
-			"runName": "C123",
-			"bundle": "myBundleId",	
-			"testName": "myTestPackage.MyTestName2",
-			"testShortName": "MyTestName2",	
-			"requestor": "unitTesting",
-			"status" : "Submitted",
-			"result" : "UNKNOWN",
+			"runName": "U456",
+			"bundle": "myBun2",	
+			"testName": "myTestPackage.MyTest2",
+			"testShortName": "MyTestName22",	
+			"requestor": "unitTesting22",
+			"status" : "Finished",
+			"result" : "LongResultString",
 			"queued" : null,	
 			"startTime": "now",
 			"endTime": "now",
 			"methods": [{
-				"className": "myTestPackage.MyTestName2",
+				"className": "myTestPackage22.MyTestName2",
 				"methodName": "myTestMethodName",	
 				"type": "test",	
 				"status": "Done",	
@@ -105,41 +106,18 @@ func TestOutputFormatGarbageStringValidationGivesError(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 
 	// Given ...
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if r.URL.Path != "/ras/run" {
-			t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
-		}
-		if r.Header.Get("Accept") != "application/json" {
-			t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		values := r.URL.Query()
-		pageRequestedStr := values.Get("page")
-		pageRequested, _ := strconv.Atoi(pageRequestedStr)
-		assert.Equal(t, pageRequested, 1)
-
-		w.Write([]byte(`
-		{
-			"pageNumber": 1,
-			"pageSize": 1,
-			"numPages": 1,	
-			"amountOfRuns": 1,
-			"runs":[` + RUN_U456 + `]
-		}`))
-	}))
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
 
+	outputFormat := "summary"
 	mockConsole := utils.NewMockConsole()
-	runName := "U456"
-	outputFormatString := "summary"
+
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormatString, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect
@@ -147,45 +125,22 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 		assert.Fail(t, "Failed with an error when we expected it to pass. Error is "+err.Error())
 	} else {
 		textGotBack := mockConsole.ReadText()
-		assert.Contains(t, textGotBack, "U456")
-		want := "" +
-			"\nRunName Status   Result ShortTestName " +
-			"\nU456    Finished Passed MyTestName    \n"
+		assert.Contains(t, textGotBack, runName)
+		want := "\n" +
+			"RunName Status   Result ShortTestName\n" +
+			"U456    Finished Passed MyTestName\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
 
-func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
+func TestRunsGetOfRunNameWhichDoesNotExistProducesEmptyPage(t *testing.T) {
 	// Given ...
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if r.URL.Path != "/ras/run" {
-			t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
-		}
-		if r.Header.Get("Accept") != "application/json" {
-			t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-
-		values := r.URL.Query()
-		pageRequestedStr := values.Get("page")
-		pageRequested, _ := strconv.Atoi(pageRequestedStr)
-		assert.Equal(t, pageRequested, 1)
-
-		w.Write([]byte(`
-		{
-			"pageNumber": 1,
-			"pageSize": 1,
-			"numPages": 1,	
-			"amountOfRuns": 0,
-			"runs":[` + RUN_C123 + `]
-		}`))
-	}))
+	runName := "garbage"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	runName := "garbage"
+
 	outputFormatString := "summary"
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -196,16 +151,19 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 	// Then...
 	// We expect
 
-	if err == nil {
-		assert.Fail(t, "Garbage runname value should have given 404 error.")
+	if err != nil {
+		assert.Fail(t, "Garbage runname value should not have failed "+err.Error())
+	} else {
+		textGotBack := mockConsole.ReadText()
+		want := "\n" +
+			"RunName Status Result ShortTestName\n"
+		assert.Equal(t, textGotBack, want)
 	}
-	assert.Contains(t, err.Error(), "GAL1068")
-	assert.Contains(t, err.Error(), "404")
 
 }
 
-func TestRunsGetOfRunNameWhichExistsAmongstMultipleRunsProducesExpectedSummary(t *testing.T) {
-	// Given ...
+func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultStrings ...string) *httptest.Server {
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		if r.URL.Path != "/ras/run" {
@@ -215,38 +173,44 @@ func TestRunsGetOfRunNameWhichExistsAmongstMultipleRunsProducesExpectedSummary(t
 			t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(status)
 
 		values := r.URL.Query()
 		pageRequestedStr := values.Get("page")
-		runnameURL := values.Get("runname")
+		runNameQueryParameter := values.Get("runname")
 		pageRequested, _ := strconv.Atoi(pageRequestedStr)
 		assert.Equal(t, pageRequested, 1)
 
-		if runnameURL == "C123" {
-			w.Write([]byte(`
-			{
-				"pageNumber": 1,
-				"pageSize": 1,
-				"numPages": 1,	
-				"amountOfRuns": 1,
-				"runs":[` + RUN_C123 + `]
-			}`))
-		} else {
-			w.Write([]byte(`
+		assert.Equal(t, runNameQueryParameter, runName)
+
+		combinedRunResultStrings := ""
+		for index, runResult := range runResultStrings {
+			if index > 0 {
+				combinedRunResultStrings += ","
+			}
+			combinedRunResultStrings += runResult
+		}
+
+		w.Write([]byte(fmt.Sprintf(`
 		{
 			"pageNumber": 1,
 			"pageSize": 1,
-			"numPages": 1,	
-			"amountOfRuns": 2,
-			"runs":[` + RUN_U456 + "," + RUN_C123 + `]
-		}`))
-		}
+			"numPages": 1,
+			"amountOfRuns": %d,
+			"runs":[ %s ]
+		}`, len(runResultStrings), combinedRunResultStrings)))
 	}))
+
+	return server
+}
+
+func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
+	// Given ...
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456, RUN_U456_v2)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	runName := "C123"
 	outputFormatString := "summary"
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -260,10 +224,11 @@ func TestRunsGetOfRunNameWhichExistsAmongstMultipleRunsProducesExpectedSummary(t
 		assert.Fail(t, "Failed with an error when we expected it to pass. Error is "+err.Error())
 	} else {
 		textGotBack := mockConsole.ReadText()
-		assert.Contains(t, textGotBack, "C123")
-		want := "" +
-			"\nRunName Status    Result  ShortTestName " +
-			"\nC123    Submitted UNKNOWN MyTestName2   \n"
+		assert.Contains(t, textGotBack, runName)
+		want := "\n" +
+			"RunName Status   Result           ShortTestName\n" +
+			"U456    Finished Passed           MyTestName\n" +
+			"U456    Finished LongResultString MyTestName22\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }

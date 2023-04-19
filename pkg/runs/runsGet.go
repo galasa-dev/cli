@@ -5,14 +5,13 @@ package runs
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/runs/formatters"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
@@ -79,53 +78,21 @@ func renderRuns(outputFormat OutputFormat, runs []galasaapi.Run) (string, error)
 	var formattedOutput string
 	//can switch on the output format in the future. Currently this is all for outputFormat = 'summary'
 	switch outputFormat {
-	case 0:
+	case OUTPUT_FORMAT_SUMMARY:
 		//outputFormat = 'summary'
-		var output [][]string
-		var headers = []string{"RunName", "Status", "Result", "ShortTestName"}
-		output = append(output, headers)
-		for _, run := range runs {
-			var line []string
-			line = append(line, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestShortName())
-			output = append(output, line)
-		}
-		formattedOutput, err = formatSummaryConsole(output, runs)
+		formatter := formatters.NewSummaryFormatter()
+		formattedOutput, err = formatter.FormatRuns(runs)
 
-	// case 1:
-	// 	//outputFormat = 'raw'
-	// case 2:
-	// 	//outputFormat = 'detailed'
+		// case 1:
+		// 	//outputFormat = 'raw'
+		// case 2:
+		// 	//outputFormat = 'detailed'
 	default:
-		//outputFormat = 'summary'
+		// Programming error. Should have validated all the output formats we support.
 	}
 
 	return formattedOutput, err
 
-}
-
-func formatSummaryConsole(table [][]string, runs []galasaapi.Run) (string, error) {
-	var err error = nil
-	buff := strings.Builder{}
-	columnLengths := make([]int, len(table[0]))
-	for _, row := range table {
-		for i, val := range row {
-			if len(val) > columnLengths[i] {
-				columnLengths[i] = len(val)
-			}
-		}
-	}
-
-	for _, row := range table {
-		var line string = "\n"
-		for j, val := range row {
-			line += fmt.Sprintf("%-*s ", columnLengths[j], val)
-		}
-		buff.WriteString(line)
-	}
-	buff.WriteString("\n")
-	result := buff.String()
-
-	return result, err
 }
 
 func validateOutputFormatFlagValue(outputFormatString string) (OutputFormat, error) {
