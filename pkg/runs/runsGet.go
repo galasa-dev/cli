@@ -10,8 +10,8 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/runs/formatters"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 

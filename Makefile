@@ -11,12 +11,12 @@ gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darw
 
 tests: galasactl-source
 	mkdir -p build
-	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/runs/formatters ./pkg/...
+	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/formatters ./pkg/...
 	go tool cover -html=build/coverage.out -o build/coverage.html
 	go tool cover -func=build/coverage.out > build/coverage.txt
 	cat build/coverage.txt
 
-galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/launcher/*.go ./pkg/runs/formatters/*.go
+galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/launcher/*.go ./pkg/formatters/*.go
 
 # when the gradle stuff works, we can rely on this jar being here: ./pkg/embedded/templates/galasahome/lib/*.jar 
 
