@@ -62,6 +62,7 @@ func writeOutput(outputText string, console utils.Console) error {
 	return err
 }
 
+// Displays the retrieved runs based on a given output format (e.g. summary, detailed, etc.).
 func renderRuns(outputFormat OutputFormat, runs []galasaapi.Run) (string, error) {
 	var err error = nil
 	var formattedOutput string
@@ -80,6 +81,7 @@ func renderRuns(outputFormat OutputFormat, runs []galasaapi.Run) (string, error)
 
 }
 
+// Ensures the user has provided a valid output format as part of the "runs get" command.
 func validateOutputFormatFlagValue(outputFormatString string) (OutputFormat, error) {
 	var err error
 	var outputFormat OutputFormat
@@ -95,6 +97,8 @@ func validateOutputFormatFlagValue(outputFormatString string) (OutputFormat, err
 	return outputFormat, err
 }
 
+// Retrieves test runs from the ecosystem API that match a given runName.
+// Multiple test runs can be returned as the runName is not unique.
 func GetRunsFromRestApi(
 	runName string,
 	outputFormat OutputFormat,
