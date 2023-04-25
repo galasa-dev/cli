@@ -23,6 +23,7 @@ Assembles, submits and monitors test runs in Galasa Ecosystem
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
+* [galasactl runs get](galasactl_runs_get.md)	 - Get the details of a test runname which ran or is running.
 * [galasactl runs prepare](galasactl_runs_prepare.md)	 - prepares a list of tests
 * [galasactl runs submit](galasactl_runs_submit.md)	 - submit a list of tests to the ecosystem
 

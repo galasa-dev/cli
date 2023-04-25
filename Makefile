@@ -1,9 +1,6 @@
 #
-# Licensed Materials - Property of IBM
+# Copyright contributors to the Galasa project
 #
-# (c) Copyright IBM Corp. 2021.
-#
-
 all: tests galasactl gendocs-galasactl
 
 galasactl: bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasactl-darwin-amd64 bin/galasactl-darwin-arm64 bin/galasactl-linux-s390x
@@ -14,12 +11,12 @@ gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darw
 
 tests: galasactl-source
 	mkdir -p build
-	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs ./pkg/...
+	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/formatters ./pkg/...
 	go tool cover -html=build/coverage.out -o build/coverage.html
 	go tool cover -func=build/coverage.out > build/coverage.txt
 	cat build/coverage.txt
 
-galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/launcher/*.go
+galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/launcher/*.go ./pkg/formatters/*.go
 
 # when the gradle stuff works, we can rely on this jar being here: ./pkg/embedded/templates/galasahome/lib/*.jar 
 

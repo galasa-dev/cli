@@ -111,11 +111,11 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	timeService := utils.NewRealTimeService()
-	var launcherInstance launcher.Launcher = nil
+		timeService := utils.NewRealTimeService()
+		var launcherInstance launcher.Launcher = nil
 
-	// The launcher we are going to use to start/monitor tests.
-	launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
+		// The launcher we are going to use to start/monitor tests.
+		launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
 
 	if err == nil {
 		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitSelectionFlags)

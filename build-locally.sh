@@ -603,9 +603,7 @@ function submit_local_test {
     # else go to maven central
     #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
 
-    export GALASACTL="${BASEDIR}/bin/${galasactl_command}"
-
-    ${GALASACTL} runs submit local \
+    ${BASEDIR}/bin/${galasactl_command} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
     --class ${BUNDLE}/${JAVA_CLASS} \
     --throttle 1 \
@@ -625,7 +623,7 @@ function submit_local_test {
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to run the test. Log is in ${LOG_FILE}"
+        error "Failed to run the test. See details in log file ${LOG_FILE}"
         exit 1
     fi
     success "Test ran OK"
