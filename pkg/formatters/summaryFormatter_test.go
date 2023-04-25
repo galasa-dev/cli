@@ -20,8 +20,7 @@ func TestSummaryFormatterNoDataReturnsHeadersOnly(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "\n" +
-		"RunName Status Result ShortTestName\n"
+	expectedFormattedOutput := "RunName Status Result ShortTestName\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -63,7 +62,7 @@ func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "\n" +
+	expectedFormattedOutput :=
 		"RunName Status   Result             ShortTestName\n" +
 		"U456    Finished MyLongResultString MyTestName\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
@@ -80,7 +79,7 @@ func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "\n" +
+	expectedFormattedOutput :=
 		"RunName Status   Result ShortTestName\n" +
 		"U456    Finished Short  MyTestName\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
@@ -98,7 +97,7 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "\n" +
+	expectedFormattedOutput :=
 		"RunName     Status     Result             ShortTestName\n" +
 		"LongRunName LongStatus Short              TestName\n" +
 		"U456        short      MyLongResultString MyTestName\n"

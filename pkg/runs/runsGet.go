@@ -62,17 +62,6 @@ func writeOutput(outputText string, console utils.Console) error {
 	return err
 }
 
-// func renderRuns(format OutputFormat, runs []galasaapi.Run) (string, error) {
-// 	var err error = nil
-// 	buff := strings.Builder{}
-// 	for _, run := range runs {
-// 		line := fmt.Sprintf("%s %s %s\n", run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult())
-// 		buff.WriteString(line)
-// 	}
-// 	result := buff.String()
-// 	return result, err
-// }
-
 func renderRuns(outputFormat OutputFormat, runs []galasaapi.Run) (string, error) {
 	var err error = nil
 	var formattedOutput string
@@ -83,10 +72,6 @@ func renderRuns(outputFormat OutputFormat, runs []galasaapi.Run) (string, error)
 		formatter := formatters.NewSummaryFormatter()
 		formattedOutput, err = formatter.FormatRuns(runs)
 
-		// case 1:
-		// 	//outputFormat = 'raw'
-		// case 2:
-		// 	//outputFormat = 'detailed'
 	default:
 		// Programming error. Should have validated all the output formats we support.
 	}

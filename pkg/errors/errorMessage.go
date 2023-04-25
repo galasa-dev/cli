@@ -141,5 +141,5 @@ var (
 	GALASA_ERROR_QUERY_RUNS_FAILED              = NewMessageType("GAL1068E: Could not query run results. Reason: '%s'", 1068, STACK_TRACE_WANTED)
 
 	// Warnings...
-	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'bleeding edge' repository is '%s'", 2000, STACK_TRACE_WANTED)
+	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 )

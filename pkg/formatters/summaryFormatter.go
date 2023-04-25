@@ -43,7 +43,6 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
 
 	columnLengths := calculateMaxLengthOfEachColumn(table)
 
-	buff.WriteString("\n")
 	for _, row := range table {
 		for column, val := range row {
 
