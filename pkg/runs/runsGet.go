@@ -114,7 +114,7 @@ func GetRunsFromRestApi(
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	toTime := timeService.Now().UTC()
+	toTime := timeService.Now()
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 
