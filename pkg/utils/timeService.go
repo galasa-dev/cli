@@ -86,6 +86,7 @@ func (ts *timeService) hasBeenInterrupted() bool {
 	return isInterrupted
 }
 
+// Retrieves the current time, with the location set to UTC.
 func (ts *timeService) Now() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
