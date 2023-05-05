@@ -87,13 +87,16 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 
 	var err error
 
-	utils.CaptureLog(logFileName)
+	// Operations on the file system will all be relative to the current folder.
+	fileSystem := utils.NewOSFileSystem()
+
+	err = utils.CaptureLog(fileSystem, logFileName)
+	if err != nil {
+		panic(err)
+	}
 	isCapturingLogs = true
 
 	log.Println("Galasa CLI - Submit tests (Remote)")
-
-	// Operations on the file system will all be relative to the current folder.
-	fileSystem := utils.NewOSFileSystem()
 
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
@@ -111,11 +114,11 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-		timeService := utils.NewRealTimeService()
-		var launcherInstance launcher.Launcher = nil
+	timeService := utils.NewRealTimeService()
+	var launcherInstance launcher.Launcher = nil
 
-		// The launcher we are going to use to start/monitor tests.
-		launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
+	// The launcher we are going to use to start/monitor tests.
+	launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
 
 	if err == nil {
 		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitSelectionFlags)

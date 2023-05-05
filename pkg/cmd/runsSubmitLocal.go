@@ -56,15 +56,18 @@ func init() {
 
 func executeSubmitLocal(cmd *cobra.Command, args []string) {
 
-	var err error
-
-	utils.CaptureLog(logFileName)
-	isCapturingLogs = true
-
-	log.Println("Galasa CLI - Submit tests (Local)")
+	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
+
+	err = utils.CaptureLog(fileSystem, logFileName)
+	if err != nil {
+		panic(err)
+	}
+	isCapturingLogs = true
+
+	log.Println("Galasa CLI - Submit tests (Local)")
 
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()

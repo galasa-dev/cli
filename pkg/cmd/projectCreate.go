@@ -78,15 +78,20 @@ func init() {
 
 func executeCreateProject(cmd *cobra.Command, args []string) {
 
-	utils.CaptureLog(logFileName)
-	isCapturingLogs = true
-
-	log.Println("Galasa CLI - Create project")
+	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
-	err := createProject(fileSystem, packageName, featureNamesCommaSeparated,
+	err = utils.CaptureLog(fileSystem, logFileName)
+	if err != nil {
+		panic(err)
+	}
+	isCapturingLogs = true
+
+	log.Println("Galasa CLI - Create project")
+
+	err = createProject(fileSystem, packageName, featureNamesCommaSeparated,
 		isOBRProjectRequired, force, useMaven, useGradle, isDevelopmentProjectCreate)
 
 	// Convey the error to the top level.

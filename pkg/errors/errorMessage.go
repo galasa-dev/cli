@@ -90,7 +90,7 @@ var (
 	GALASA_ERROR_TESTS_FAILED                   = NewMessageType("GAL1017E: Not all runs passed. %v failed.", 1017, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_NO_TESTS_SELECTED              = NewMessageType("GAL1018E: No tests were selected.", 1018, STACK_TRACE_WANTED)
 	GALASA_ERROR_PREPARE_INVALID_OVERRIDE       = NewMessageType("GAL1019E: Invalid override '%v'", 1019, STACK_TRACE_WANTED)
-	GALASA_ERROR_OPEN_LOG_FILE_FAILED           = NewMessageType("GAL1020E: Failed to open log file '%s' for writing. Reason is %s", 1020, STACK_TRACE_WANTED)
+	GALASA_ERROR_OPEN_LOG_FILE_FAILED           = NewMessageType("GAL1020E: Failed to open log file '%s' for writing. Reason is %s", 1020, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_OPEN_PORTFOLIO_FILE_FAILED     = NewMessageType("GAL1021E: Failed to open portfolio file '%s' for reading. Reason is %s", 1021, STACK_TRACE_WANTED)
 	GALASA_ERROR_PORTFOLIO_BAD_FORMAT           = NewMessageType("GAL1022E: Failed to read portfolio file '%s' because the content is in the wrong format. Reason is %s", 1022, STACK_TRACE_WANTED)
 	GALASA_ERROR_PORTFOLIO_BAD_FORMAT_VERSION   = NewMessageType("GAL1023E: Failed to read portfolio file '%s' because the content are not using format '%s'.", 1023, STACK_TRACE_WANTED)
@@ -139,6 +139,7 @@ var (
 	GALASA_ERROR_INVALID_CLASS_SUFFIX_FOUND     = NewMessageType("GAL1066E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.", 1066, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_OUTPUT_FORMAT          = NewMessageType("GAL1067E: Unsupported value '%s' for parameter --output. Supported values are: 'summary'.", 1067, STACK_TRACE_WANTED)
 	GALASA_ERROR_QUERY_RUNS_FAILED              = NewMessageType("GAL1068E: Could not query run results. Reason: '%s'", 1068, STACK_TRACE_WANTED)
+	GALASA_ERROR_LOG_FILE_IS_A_FOLDER           = NewMessageType("GAL1069E: Could not open log file for writing. '%s' is a directory, the --log parameter should refer to a file path (existing or not), or '-' (the console)", 1069, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
