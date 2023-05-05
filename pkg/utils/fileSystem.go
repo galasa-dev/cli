@@ -5,6 +5,7 @@ package utils
 
 import (
 	"errors"
+	"io"
 	"os"
 	pathUtils "path"
 	"runtime"
@@ -25,6 +26,9 @@ type FileSystem interface {
 	OutputWarningMessage(string) error
 	MkTempDir() (string, error)
 	DeleteDir(path string)
+
+	// Creates a file in the file system if it can.
+	Create(path string) (io.Writer, error)
 
 	// Returns the normal extension used for executable files.
 	// ie: The .exe suffix in windows, or "" in unix-like systems.
@@ -65,6 +69,11 @@ func NewOSFileSystem() FileSystem {
 // ------------------------------------------------------------------------------------
 // Interface methods...
 // ------------------------------------------------------------------------------------
+
+func (osFS *OSFileSystem) Create(path string) (io.Writer, error) {
+	fileWriter, err := os.Create(path)
+	return fileWriter, err
+}
 
 func (osFS *OSFileSystem) GetFilePathSeparator() string {
 	return string(os.PathSeparator)

@@ -4,9 +4,9 @@
 package utils
 
 import (
+	"io"
 	"io/ioutil"
 	"log"
-	"os"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
@@ -16,9 +16,9 @@ import (
  * specified file, or if the file name is "-" or empty, the log information won't be
  * re-directed, but will appear on stderr.
  */
-func CaptureLog(logFileName string ) *os.File {
+func CaptureLog(fileSystem FileSystem, logFileName string) error {
 
-	var logFile = os.Stderr
+	var err error
 
 	// Send the log to a file
 	if logFileName == "-" {
@@ -29,18 +29,45 @@ func CaptureLog(logFileName string ) *os.File {
 			log.SetOutput(ioutil.Discard)
 		} else {
 
-			// The user has set the logFileName using the --log xxxx syntax
-			// Note: If the file exists, it gets truncated.
-			// Default permissions are 0666
-			f, err := os.Create(logFileName)
+			var isLogFileExisting bool
+
+			isLogFileExisting, err = fileSystem.Exists(logFileName)
 			if err == nil {
-				log.SetOutput(f)
-			} else {
-				err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_OPEN_LOG_FILE_FAILED, logFileName, err.Error())
-				panic(err)
+
+				if isLogFileExisting {
+					// We are going to try to create the log file, causing it to truncate...
+					var isDir bool
+					isDir, err = fileSystem.DirExists(logFileName)
+					if err == nil {
+						if isDir {
+							err = galasaErrors.NewGalasaError(
+								galasaErrors.GALASA_ERROR_LOG_FILE_IS_A_FOLDER,
+								logFileName,
+							)
+						}
+					}
+				}
+
+				if err == nil {
+
+					// The user has set the logFileName using the --log xxxx syntax
+					// Note: If the file exists, it gets truncated.
+					// Default permissions are 0666
+					var f io.Writer
+					f, err = fileSystem.Create(logFileName)
+					if err == nil {
+						log.SetOutput(f)
+					} else {
+						err = galasaErrors.NewGalasaError(
+							galasaErrors.GALASA_ERROR_OPEN_LOG_FILE_FAILED,
+							logFileName,
+							err.Error(),
+						)
+					}
+				}
 			}
 		}
 	}
 
-	return logFile
+	return err
 }
