@@ -29,13 +29,21 @@ func init() {
 }
 
 func executeEnvInit(cmd *cobra.Command, args []string) {
-	utils.CaptureLog(logFileName)
+
+	var err error = nil
+
+	// Operations on the file system will all be relative to the current folder.
+	fileSystem := utils.NewOSFileSystem()
+
+	err = utils.CaptureLog(fileSystem, logFileName)
+	if err != nil {
+		panic(err)
+	}
 	isCapturingLogs = true
 
-	fileSystem := utils.NewOSFileSystem()
 	env := utils.NewEnvironment()
 
-	err := localEnvInit(fileSystem, env, CmdParamGalasaHomePath, isDevelopmentLocalInit)
+	err = localEnvInit(fileSystem, env, CmdParamGalasaHomePath, isDevelopmentLocalInit)
 	if err != nil {
 		panic(err)
 	}

@@ -69,4 +69,5 @@ The `galasactl` tool can generate the following errors:
 - GAL1066E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.
 - GAL1067E: Unsupported value '{}' for parameter --output. Supported values are: 'summary'.
 - GAL1068E: Could not query run results. Reason: '{}'
+- GAL1069E: Could not open log file for writing. '{}' is a directory, the --log parameter should refer to a file path (existing or not), or '-' (the console)
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'

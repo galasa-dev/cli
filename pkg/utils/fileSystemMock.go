@@ -5,6 +5,8 @@ package utils
 
 import (
 	"bytes"
+	"errors"
+	"io"
 	"log"
 	"math"
 	"math/rand"
@@ -47,6 +49,7 @@ type MockFileSystem struct {
 	VirtualFunction_OutputWarningMessage func(string) error
 	VirtualFunction_MkTempDir            func() (string, error)
 	VirtualFunction_DeleteDir            func(path string)
+	VirtualFunction_Create               func(path string) (io.Writer, error)
 }
 
 // NewMockFileSystem creates an implementation of the thin file system layer which delegates
@@ -74,6 +77,11 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 
 	// Set up functions inside the structure to call the basic/default mock versions...
 	// These can later be over-ridden on a test-by-test basis.
+
+	mockFileSystem.VirtualFunction_Create = func(path string) (io.Writer, error) {
+		return mockFSCreate(mockFileSystem, path)
+	}
+
 	mockFileSystem.VirtualFunction_MkdirAll = func(targetFolderPath string) error {
 		return mockFSMkdirAll(mockFileSystem, targetFolderPath)
 	}
@@ -124,6 +132,10 @@ func (fs *MockFileSystem) SetExecutableExtension(newExtension string) {
 //------------------------------------------------------------------------------------
 // Interface methods...
 //------------------------------------------------------------------------------------
+
+func (fs *MockFileSystem) Create(path string) (io.Writer, error) {
+	return fs.Create(path)
+}
 
 func (fs *MockFileSystem) GetFilePathSeparator() string {
 	return fs.filePathSeparator
@@ -184,6 +196,13 @@ func (fs MockFileSystem) OutputWarningMessage(message string) error {
 // ------------------------------------------------------------------------------------
 // Default implementations of the methods...
 // ------------------------------------------------------------------------------------
+
+func mockFSCreate(fs MockFileSystem, path string) (io.Writer, error) {
+	var writer io.Writer = nil
+	err := errors.New("Not implemented")
+	return writer, err
+}
+
 func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {
 
 	// Figure out which entries we are going to delete.
