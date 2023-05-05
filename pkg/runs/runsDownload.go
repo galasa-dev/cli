@@ -38,7 +38,7 @@ func DownloadArtifacts(
 					for _, artifact := range artifacts {
 						data, err := GetFileFromRestApi(artifact.ArtifactPath())
 						if err == nil {
-							err = WriteFileToFileSystem(fileSystem, data.filename, data.bytearray)
+							err = WriteFileToFileSystem(fileSystem, *data[0].TestStructure.RunName, data[0].byteStream)
 						}
 					}
 				}
