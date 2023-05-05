@@ -11,13 +11,6 @@ import (
 )
 
 // -----------------------------------------------------
-// RunsFormatter - implementations can take a collection of run results
-// and turn them into a string for display to the user.
-type RunsFormatter interface {
-	FormatRuns(runs []galasaapi.Run) (string, error)
-}
-
-// -----------------------------------------------------
 // Summary format.
 type SummaryFormatter struct {
 }
@@ -27,10 +20,16 @@ func NewSummaryFormatter() RunsFormatter {
 }
 
 func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
+	var result string = ""
 	var err error = nil
+
+	if len(runs) < 1 {
+		return result, err
+	}
+
 	var table [][]string
 
-	var headers = []string{"RunName", "Status", "Result", "ShortTestName"}
+	var headers = []string{"name", "status", "result", "test-name"}
 
 	table = append(table, headers)
 	for _, run := range runs {
@@ -57,19 +56,7 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
 		}
 		buff.WriteString("\n")
 	}
-	result := buff.String()
+	result = buff.String()
 
 	return result, err
-}
-
-func calculateMaxLengthOfEachColumn(table [][]string) []int {
-	columnLengths := make([]int, len(table[0]))
-	for _, row := range table {
-		for i, val := range row {
-			if len(val) > columnLengths[i] {
-				columnLengths[i] = len(val)
-			}
-		}
-	}
-	return columnLengths
 }
