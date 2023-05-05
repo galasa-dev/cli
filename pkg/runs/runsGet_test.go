@@ -128,7 +128,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 		assert.Contains(t, textGotBack, runName)
 		want :=
 			"RunName Status   Result ShortTestName\n" +
-			"U456    Finished Passed MyTestName\n"
+				"U456    Finished Passed MyTestName\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
@@ -226,19 +226,19 @@ func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 		assert.Contains(t, textGotBack, runName)
 		want :=
 			"RunName Status   Result           ShortTestName\n" +
-			"U456    Finished Passed           MyTestName\n" +
-			"U456    Finished LongResultString MyTestName22\n"
+				"U456    Finished Passed           MyTestName\n" +
+				"U456    Finished LongResultString MyTestName22\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
 
 func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 
-    // Given...
-    server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
-        writer.WriteHeader(http.StatusInternalServerError)
-    }))
-    defer server.Close()
+	// Given...
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+		writer.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
 
 	runName := "garbage"
 	mockConsole := utils.NewMockConsole()
@@ -246,9 +246,9 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 
-    // When...
-    err := GetRuns(runName, outputFormatString, mockTimeService, mockConsole, apiServerUrl)
+	// When...
+	err := GetRuns(runName, outputFormatString, mockTimeService, mockConsole, apiServerUrl)
 
-    // Then...
+	// Then...
 	assert.Contains(t, err.Error(), "GAL1068")
 }

@@ -74,9 +74,8 @@ func executeRunsDownload(cmd *cobra.Command, args []string) {
 	log.Printf("The API sever is at '%s'\n", apiServerUrl)
 
 	timeService := utils.NewRealTimeService()
-
 	// Call to process the command in a unit-testable way.
-	err = runs.DownloadArtifacts(runName, timeService, console, apiServerUrl)
+	err = runs.DownloadArtifacts(runName, fileSystem, timeService, console, apiServerUrl)
 	if err != nil {
 		panic(err)
 	}

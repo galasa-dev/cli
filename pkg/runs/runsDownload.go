@@ -18,6 +18,7 @@ import (
 // but in a unit-testable manner.
 func DownloadArtifacts(
 	runName string,
+	fileSystem utils.FileSystem,
 	timeService utils.TimeService,
 	console utils.Console,
 	apiServerUrl string,
@@ -34,12 +35,17 @@ func DownloadArtifacts(
 			for _, run := range runJson {
 				artifacts, err = GetArtifactIDsFromRestApi(run.GetRunId(), apiServerUrl)
 				if err == nil {
-
+					for _, artifact := range artifacts {
+						data, err := GetFileFromRestApi(artifact.ArtifactPath())
+						if err == nil {
+							err = WriteFileToFileSystem(fileSystem, data.filename, data.bytearray)
+						}
+					}
 				}
 			}
 		}
 	}
-
+	// href="../galasa_artifacts/0cff27025c9666fda73b82ab710011e9/%2Fframework%2Fcps_record.properties"
 	return err
 }
 
@@ -56,7 +62,6 @@ func GetArtifactIDsFromRestApi(
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	toTime := timeService.Now()
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 
@@ -67,8 +72,7 @@ func GetArtifactIDsFromRestApi(
 		log.Printf("Requesting page '%d' ", pageNumberWanted)
 		runData, httpResponse, err = restClient.ResultArchiveStoreAPIApi.
 			GetRasSearchRuns(context).
-			To(toTime).
-			Runname(runName).
+			Runname(runID).
 			Page(pageNumberWanted).
 			Sort("to:desc").
 			Execute()
@@ -97,12 +101,16 @@ func GetArtifactIDsFromRestApi(
 	return results, err
 }
 
+func WriteFileToFileSystem(fileSystem utils.FileSystem, filename string, byteStream []byte) error {
+	var err error = nil
+	err = fileSystem.WriteBinaryFile(filename, byteStream)
+	return err
+}
+
 // Retrieves test runs from the ecosystem API that match a given runName.
 // Multiple test runs can be returned as the runName is not unique.
 func GetFileFromRestApi(
-	runName string,
-	outputFormat OutputFormat,
-	timeService utils.TimeService,
+	artifactId string,
 	apiServerUrl string,
 ) ([]galasaapi.Run, error) {
 
@@ -113,8 +121,6 @@ func GetFileFromRestApi(
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
-
-	toTime := timeService.Now()
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 
