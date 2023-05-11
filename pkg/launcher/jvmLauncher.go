@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -57,6 +58,9 @@ type JvmLauncher struct {
 
 	// A service which can create OS processes.
 	processFactory ProcessFactory
+
+	// A map of bootstrap properties
+	bootstrapProps utils.JavaProperties
 }
 
 // These parameters are gathered from the command-line and passed into the laucher.
@@ -80,6 +84,7 @@ type RunsSubmitLocalCmdParameters struct {
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
 func NewJVMLauncher(
+	bootstrapProps utils.JavaProperties,
 	env utils.Environment,
 	fileSystem utils.FileSystem,
 	embeddedFileSystem embed.FS,
@@ -108,6 +113,7 @@ func NewJVMLauncher(
 		launcher.processFactory = processFactory
 		launcher.galasaHome = galasaHome
 		launcher.timeService = timeService
+		launcher.bootstrapProps = bootstrapProps
 
 		// Make sure the home folder has the boot jar unpacked and ready to invoke.
 		err = utils.InitialiseGalasaHomeFolder(
@@ -184,11 +190,14 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 						cmd  string
 						args []string
 					)
-					cmd, args, err = getCommandSyntax(launcher.galasaHome,
+					cmd, args, err = getCommandSyntax(
+						launcher.bootstrapProps,
+						launcher.galasaHome,
 						launcher.fileSystem, launcher.javaHome, obrs,
 						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
 						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
-						isTraceEnabled)
+						isTraceEnabled,
+					)
 					if err == nil {
 						log.Printf("Launching command '%s' '%v'\n", cmd, args)
 						localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
@@ -417,6 +426,7 @@ func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 //	    --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
 //	    --test dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee
 func getCommandSyntax(
+	bootstrapProperties utils.JavaProperties,
 	galasaHome utils.GalasaHome,
 	fileSystem utils.FileSystem,
 	javaHome string,
@@ -494,6 +504,20 @@ func getCommandSyntax(
 
 		if isTraceEnabled {
 			args = append(args, "--trace")
+		}
+
+		// Append all the java launch properties explicitly spelt-out in the boostrap file.
+
+		jvmLaunchOptions, isOptionsPresent := bootstrapProperties[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS]
+		if isOptionsPresent {
+			// strip off the leading and trailing whitespace.
+			jvmLaunchOptions = strings.Trim(jvmLaunchOptions, " \t\n\r")
+
+			// Split based on commas
+			launchOptionParts := strings.Split(jvmLaunchOptions, ",")
+
+			// Add each piece to the list of args returned.
+			args = append(args, launchOptionParts...)
 		}
 
 	}

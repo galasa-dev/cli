@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL string = "framework.api.server.url"
+	BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL    string = "framework.api.server.url"
+	BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS string = "framework.jvm.local.launch.options"
 )
 
 type BootstrapData struct {

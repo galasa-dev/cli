@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/embedded"
 	"github.com/galasa.dev/cli/pkg/launcher"
 	"github.com/galasa.dev/cli/pkg/runs"
@@ -78,6 +79,14 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	// Read the bootstrap properties.
+	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+	var bootstrapData *api.BootstrapData
+	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
+	if err != nil {
+		panic(err)
+	}
+
 	timeService := utils.NewRealTimeService()
 
 	// the submit is targetting a local JVM
@@ -88,7 +97,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 
 	var launcherInstance launcher.Launcher
 	launcherInstance, err = launcher.NewJVMLauncher(
-		env, fileSystem, embeddedFileSystem,
+		bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
 		runsSubmitLocalCmdParams, timeService,
 		processFactory, galasaHome)
 
