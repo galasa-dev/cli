@@ -15,16 +15,17 @@ func TestSummaryFormatterNoDataReturnsHeadersOnly(t *testing.T) {
 	formatter := NewSummaryFormatter()
 	// No data to format...
 	runs := make([]galasaapi.Run, 0)
+	apiServerURL := ""
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs)
+	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput := ""
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func createRunForSummary(runName string, testShortName string, status string, result string) galasaapi.Run {
+func createRunForSummary(runName string, testName string, status string, result string) galasaapi.Run {
 	//run1Id := "ar"
 	//bundle := ""
 	//testName := ""
@@ -36,7 +37,7 @@ func createRunForSummary(runName string, testShortName string, status string, re
 		RunName: &runName,
 		//Bundle:        &bundle,
 		//TestName:      &testName,
-		TestShortName: &testShortName,
+		TestName: &testName,
 		//Requestor:     &requestor,
 		Status: &status,
 		Result: &result,
@@ -57,9 +58,10 @@ func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 	runs := make([]galasaapi.Run, 0)
 	run1 := createRunForSummary("U456", "MyTestName", "Finished", "MyLongResultString")
 	runs = append(runs, run1)
+	apiServerURL := ""
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs)
+	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -74,9 +76,10 @@ func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 	runs := make([]galasaapi.Run, 0)
 	run1 := createRunForSummary("U456", "MyTestName", "Finished", "Short")
 	runs = append(runs, run1)
+	apiServerURL := ""
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs)
+	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -92,9 +95,10 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 	run1 := createRunForSummary("LongRunName", "TestName", "LongStatus", "Short")
 	run2 := createRunForSummary("U456", "MyTestName", "short", "MyLongResultString")
 	runs = append(runs, run1, run2)
+	apiServerURL := ""
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs)
+	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=

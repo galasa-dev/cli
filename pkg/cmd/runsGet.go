@@ -31,9 +31,9 @@ var (
 )
 
 func init() {
-	runsGetCmd.PersistentFlags().StringVar(&runName, "runname", "", "the name of the test run we want information about")
-	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "output", "summary", "output format for the data returned. Supported formats are: summary")
-	runsGetCmd.MarkPersistentFlagRequired("runname")
+	runsGetCmd.PersistentFlags().StringVar(&runName, "name", "", "the name of the test run we want information about")
+	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: summary")
+	runsGetCmd.MarkPersistentFlagRequired("name")
 
 	parentCommand := runsCmd
 	parentCommand.AddCommand(runsGetCmd)

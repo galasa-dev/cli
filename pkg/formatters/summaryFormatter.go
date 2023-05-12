@@ -12,6 +12,10 @@ import (
 
 // -----------------------------------------------------
 // Summary format.
+const (
+	SUMMARY_FORMATTER_NAME = "summary"
+)
+
 type SummaryFormatter struct {
 }
 
@@ -19,7 +23,11 @@ func NewSummaryFormatter() RunsFormatter {
 	return new(SummaryFormatter)
 }
 
-func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
+func (*SummaryFormatter) GetName() string {
+	return SUMMARY_FORMATTER_NAME
+}
+
+func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error) {
 	var result string = ""
 	var err error = nil
 
@@ -34,7 +42,7 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
 	table = append(table, headers)
 	for _, run := range runs {
 		var line []string
-		line = append(line, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestShortName())
+		line = append(line, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestName())
 		table = append(table, line)
 	}
 
@@ -57,6 +65,5 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
 		buff.WriteString("\n")
 	}
 	result = buff.String()
-
 	return result, err
 }

@@ -11,7 +11,8 @@ import (
 // RunsFormatter - implementations can take a collection of run results
 // and turn them into a string for display to the user.
 type RunsFormatter interface {
-	FormatRuns(runs []galasaapi.Run) (string, error)
+	FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error)
+	GetName() string
 }
 
 func calculateMaxLengthOfEachColumn(table [][]string) []int {
