@@ -156,7 +156,7 @@ function launch_test_on_ecosystem_with_portfolio {
     cd ${BASEDIR}/temp
 
     cmd="${BASEDIR}/bin/${binary} runs submit \
-    --bootstrap $bootstrap \
+    --bootstrap ${bootstrap} \
     --portfolio portfolio.yaml \
     --throttle 1 \
     --poll 10 \
@@ -164,9 +164,8 @@ function launch_test_on_ecosystem_with_portfolio {
     --noexitcodeontestfailures \
     --log -"
 
-    info "Command is: $cmd"
+    $cmd | tee runs-submit-output.txt # Store the output of galasactl runs submit to use later
 
-    $cmd
     rc=$?
     # We expect a return code of '0' because the ecosystem should be able to run this test.
     # We have specified the flag --noexitcodeontestfailures so that we still receive a return code '0' even if the test fails,
@@ -176,6 +175,41 @@ function launch_test_on_ecosystem_with_portfolio {
         exit 1
     fi
     success "Submitting test to ecosystem worked OK"
+}
+
+#--------------------------------------------------------------------------
+function get_result_with_runname {
+    h2 "Querying the result of the test we just ran..."
+
+    cd ${BASEDIR}/temp
+
+    # Get the RunName from the output of galasactl runs submit
+    cat runs-submit-output.txt | grep -o "Run.*-" | tail -1  > line.txt # Gets the line from the last part of the output stream the RunName is found in
+    sed 's/Run //; s/ -//' line.txt > runname.txt # Get just the RunName from the line
+    runname=`cat runname.txt`
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --runname ${runname} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    $cmd | grep "${runname}" # Checks the RunName can be found in the output from galasactl runs get
+    rc=$?
+    # We expect a return code of '0' because the ecosystem should be able to find this test as we just ran it.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to query the result of run ${runname} in the remote ecosystem."
+        exit 1
+    fi
+    success "Querying the result of a run in the ecosystem worked OK"
+
+    # The test above just checks that some output was found from galasactl runs get.
+    # TO DO - Get the Result of the run from the output of galasactl runs submit as well as the RunName, and make sure the Result is correct too
+}
+
+#--------------------------------------------------------------------------
+function get_result_with_runname_detailed_view {
+
 }
 
 #--------------------------------------------------------------------------
@@ -264,8 +298,12 @@ calculate_galasactl_executable
 # Launch test on ecosystem from a portfolio ...
 launch_test_on_ecosystem_with_portfolio
 
+# Query the result ...
+get_result_with_runname
+get_result_with_runname_detailed_view
+
 # Launch test on ecosystem without a portfolio ...
-# NOTE - Potential bug found with this command so commenting out for now
+# NOTE - Bug found with this command so commenting out for now
 # launch_test_on_ecosystem_without_portfolio
 
 # Attempt to create a test portfolio with an unknown test ...

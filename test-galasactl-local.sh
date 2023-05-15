@@ -176,10 +176,22 @@ function generate_sample_code {
 
     rc=$?
     if [[ "${rc}" != "0" ]]; then
-        error " Failed to create the galasa test project using galasactl command. rc=${rc}"
+        error "Failed to create the galasa test project using galasactl command. rc=${rc}"
         exit 1
     fi
-    success "OK"
+    success "Project created OK"
+
+    h2 "Checking the the .gitignore file was generated"
+
+    gitignorefile=${BASEDIR}/temp/${PACKAGE_NAME}/.gitignore
+
+    check_file_exists $gitignorefile
+}
+
+#--------------------------------------------------------------------------
+# Clear the local maven repository
+function cleanup_local_maven_repo {
+    rm -fr ~/.m2/repository/dev/galasa/example
 }
 
 #--------------------------------------------------------------------------
@@ -199,7 +211,7 @@ function build_generated_source {
         error " Failed to build the generated source code which galasactl created."
         exit 1
     fi
-    success "OK"
+    success "Generated project built OK"
 }
 
 #--------------------------------------------------------------------------
@@ -238,7 +250,7 @@ function submit_local_test {
         error "Failed to run the test"
         exit 1
     fi
-    success "Test ran OK"
+    success "Local test ran with galasactl runs submit OK"
 }
 
 function run_test_locally_using_galasactl {
@@ -254,8 +266,51 @@ function run_test_locally_using_galasactl {
     submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
 }
 
-function cleanup_local_maven_repo {
-    rm -fr ~/.m2/repository/dev/galasa/example
+#--------------------------------------------------------------------------
+# Override the galasahome location and check galasactl local init works there
+function override_galasa_home {
+    h2 "Overriding Galasa home and initialising workspace"
+
+    cd ${BASEDIR}/temp
+    mkdir -p galasa_home
+
+    cmd="${BASEDIR}/bin/${binary} local init \
+    --galasahome ${BASEDIR}/temp/galasa_home
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '0'.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to initialise Galasa home in the specified directory."
+        exit 1
+    fi
+
+    bootstrapproperties=${BASEDIR}/temp/galasa_home/bootstrap.properties
+    cpsproperties=${BASEDIR}/temp/galasa_home/cps.properties
+    credentialsproperties=${BASEDIR}/temp/galasa_home/credentials.properties
+    dssproperties=${BASEDIR}/temp/galasa_home/dss.properties
+    overridesproperties=${BASEDIR}/temp/galasa_home/overrides.properties
+
+    check_file_exists $bootstrapproperties
+    check_file_exists $cpsproperties
+    check_file_exists $credentialsproperties
+    check_file_exists $dssproperties
+    check_file_exists $overridesproperties
+}
+
+function check_file_exists {
+    filetocheck=$1
+
+    if test -f "$filetocheck"; then
+        echo "${filetocheck} exists"
+    else 
+        error "Failed to create the expected file ${filetocheck}"
+        exit 1
+    fi
+    success "${filetocheck} exists OK"
 }
 
 calculate_galasactl_executable
@@ -270,3 +325,5 @@ cleanup_local_maven_repo
 build_generated_source
 
 run_test_locally_using_galasactl
+
+override_galasa_home
