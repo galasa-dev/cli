@@ -189,7 +189,7 @@ function get_result_with_runname {
     runname=`cat runname.txt`
 
     cmd="${BASEDIR}/bin/${binary} runs get \
-    --runname ${runname} \
+    --name ${runname} \
     --bootstrap ${bootstrap}"
 
     info "Command is: $cmd"
