@@ -5,6 +5,7 @@ package formatters
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,7 @@ import (
 // Detailed format.
 const (
 	DETAILS_FORMATTER_NAME = "details"
+	DATE_FORMAT            = "2006-01-02 15:04:05"
 )
 
 type DetailsFormatter struct {
@@ -41,9 +43,9 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	buff := strings.Builder{}
 
 	for i, run := range runs {
-		var duration string
-		var startTimeString string
-		var endTimeString string
+		var duration string = ""
+		var startTimeString string = ""
+		var endTimeString string = ""
 		startTimeStringRaw := run.TestStructure.GetStartTime()
 		endTimeStringRaw := run.TestStructure.GetEndTime()
 
@@ -54,9 +56,9 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 			}
 		}
 
-		startTime, err := time.Parse("2006-01-02 15:04:05", startTimeString)
+		startTime, err := time.Parse(DATE_FORMAT, startTimeString)
 		if err == nil {
-			endTime, err := time.Parse("2006-01-02 15:04:05", endTimeString)
+			endTime, err := time.Parse(DATE_FORMAT, endTimeString)
 			if err == nil {
 				duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
 			}
@@ -79,38 +81,9 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 		writeTableToBuff(&buff, table)
 
 		buff.WriteString("\n")
-		var methodTable [][]string
-		var headers = []string{"method", "type", "status", "result", "start-time", "end-time", "duration(ms)"}
-		methodTable = append(methodTable, headers)
 
-		for _, method := range run.TestStructure.Methods {
-			var duration string
-			startTimeStringRaw := method.GetStartTime()
-			startTimeString := formatTime(startTimeStringRaw)
-
-			endTimeStringRaw := method.GetEndTime()
-			endTimeString := formatTime(endTimeStringRaw)
-
-			startTime, err := time.Parse("2006-01-02 15:04:05", startTimeString)
-			if err == nil {
-				endTime, err := time.Parse("2006-01-02 15:04:05", endTimeString)
-				if err == nil {
-					duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-				}
-			}
-			var line []string
-			line = append(line,
-				method.GetMethodName(),
-				method.GetType(),
-				method.GetStatus(),
-				method.GetResult(),
-				startTimeString,
-				endTimeString,
-				duration,
-			)
-			methodTable = append(methodTable, line)
-		}
-
+		methodTable := initialiseMethodTable()
+		methodTable = writeMethodsToTable(run.TestStructure.GetMethods(), methodTable)
 		writeTableToBuff(&buff, methodTable)
 
 		if i < len(runs)-1 {
@@ -120,8 +93,54 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	}
 
 	result = buff.String()
-
+	log.Print(result)
 	return result, err
+}
+
+func initialiseMethodTable() [][]string {
+	var methodTable [][]string
+	var headers = []string{"method", "type", "status", "result", "start-time", "end-time", "duration(ms)"}
+	methodTable = append(methodTable, headers)
+
+	return methodTable
+}
+
+func writeMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]string) [][]string {
+	for _, method := range methods {
+		var duration string = ""
+		var startTimeString string = ""
+		var endTimeString string = ""
+		startTimeStringRaw := method.GetStartTime()
+		endTimeStringRaw := method.GetEndTime()
+
+		if len(startTimeStringRaw) > 0 {
+			startTimeString = formatTime(startTimeStringRaw)
+			if len(endTimeStringRaw) > 0 {
+				endTimeString = formatTime(endTimeStringRaw)
+			}
+		}
+
+		startTime, err := time.Parse(DATE_FORMAT, startTimeString)
+		if err == nil {
+			endTime, err := time.Parse(DATE_FORMAT, endTimeString)
+			if err == nil {
+				duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
+			}
+		}
+		var line []string
+		line = append(line,
+			method.GetMethodName(),
+			method.GetType(),
+			method.GetStatus(),
+			method.GetResult(),
+			startTimeString,
+			endTimeString,
+			duration,
+		)
+		methodTable = append(methodTable, line)
+	}
+
+	return methodTable
 }
 
 func writeTableToBuff(buff *strings.Builder, table [][]string) {
