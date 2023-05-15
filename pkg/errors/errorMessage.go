@@ -4,6 +4,7 @@
 package errors
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -54,6 +55,20 @@ func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	}
 
 	return galasaError
+}
+
+type APIError struct {
+	errorCode    int
+	errorMessage string
+}
+
+func ThrowAPIError(errorStr string) *GalasaError {
+	var err APIError
+	json.Unmarshal([]byte(errorStr), &err)
+	errorAPI := new(GalasaError)
+	errorAPI.msgType = NewMessageType("API Error Occured when trying to access endpoint", err.errorCode, STACK_TRACE_NOT_WANTED)
+	errorAPI.message = err.errorMessage
+	return errorAPI
 }
 
 // Render a galasa error into a string, so the GalasaError structure can be used

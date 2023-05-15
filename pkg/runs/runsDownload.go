@@ -5,8 +5,12 @@ package runs
 
 import (
 	"context"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"strings"
+	"io/ioutil"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -26,74 +30,59 @@ func DownloadArtifacts(
 
 	var err error
 	var runJson []galasaapi.Run
-	var artifacts []galasaapi.Artifact
+	var artifacts []string
 
 	if err == nil {
 
 		runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
 		if err == nil {
 			for _, run := range runJson {
-				artifacts, err = GetArtifactIDsFromRestApi(run.GetRunId(), apiServerUrl)
+				runId := run.GetRunId()
+				artifacts, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
 				if err == nil {
 					for _, artifact := range artifacts {
-						data, err := GetFileFromRestApi(artifact.ArtifactPath())
+						data, err := GetFileFromRestApi(runId, artifact, apiServerUrl)
 						if err == nil {
-							err = WriteFileToFileSystem(fileSystem, *data[0].TestStructure.RunName, data[0].byteStream)
+							err = WriteFileToFileSystem(fileSystem, strings.Split(artifact, "/")[len(strings.Split(artifact, "/"))-1], data)
 						}
 					}
 				}
 			}
 		}
 	}
-	// href="../galasa_artifacts/0cff27025c9666fda73b82ab710011e9/%2Fframework%2Fcps_record.properties"
+	// href="/ras/runs/0cff27025c9666fda73b82ab710011e9/files/artifacts/framework/cps_record.properties"
 	return err
 }
 
-func GetArtifactIDsFromRestApi(
-	runID string,
+func GetArtifactPathsFromRestApi(
+	runId string,
 	apiServerUrl string,
-) ([]galasaapi.Artifact, error) {
+) ([]string, error) {
 
 	var err error = nil
-	var results []galasaapi.Run = make([]galasaapi.Run, 0)
+	var results []string
 
 	var context context.Context = nil
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	var pageNumberWanted int32 = 1
-	gotAllResults := false
+	var runData []galasaapi.ArtifactIndexEntry
+	var httpResponse *http.Response
+	runData, httpResponse, err = restClient.ResultArchiveStoreAPIApi.
+	GetRasRunArtifactList(context, runId).
+		Execute()
 
-	for (!gotAllResults) && (err == nil) {
-
-		var runData *galasaapi.RunResults
-		var httpResponse *http.Response
-		log.Printf("Requesting page '%d' ", pageNumberWanted)
-		runData, httpResponse, err = restClient.ResultArchiveStoreAPIApi.
-			GetRasSearchRuns(context).
-			Runname(runID).
-			Page(pageNumberWanted).
-			Sort("to:desc").
-			Execute()
-
-		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+	} else {
+		if httpResponse.StatusCode != HTTP_STATUS_CODE_OK {
+			body, _  := io.ReadAll(httpResponse.Body)
+			bodyStr := string(body)
+			err = galasaErrors.ThrowAPIError(bodyStr)
 		} else {
-			if httpResponse.StatusCode != HTTP_STATUS_CODE_OK {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-			} else {
-
-				// Copy the results from this page into our bigger list of results.
-				runsOnThisPage := runData.GetRuns()
-				// Add all the runs into our set of results.
-				// Note: The ... syntax means 'all of the array', so they all get appended at once.
-				results = append(results, runsOnThisPage...)
-
-				// Have we processed the last page ?
-				if pageNumberWanted == runData.GetNumPages() {
-					gotAllResults = true
-				}
+			for _, artifact := range runData {
+				results = append(results, artifact.GetPath())
 			}
 		}
 	}
@@ -110,53 +99,41 @@ func WriteFileToFileSystem(fileSystem utils.FileSystem, filename string, byteStr
 // Retrieves test runs from the ecosystem API that match a given runName.
 // Multiple test runs can be returned as the runName is not unique.
 func GetFileFromRestApi(
-	artifactId string,
+	runId string,
+	artifactPath string,
 	apiServerUrl string,
-) ([]galasaapi.Run, error) {
+) ([]byte, error) {
 
 	var err error = nil
-	var results []galasaapi.Run = make([]galasaapi.Run, 0)
+	var result os.File 
 
 	var context context.Context = nil
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
-	var pageNumberWanted int32 = 1
-	gotAllResults := false
 
-	for (!gotAllResults) && (err == nil) {
 
-		var runData *galasaapi.RunResults
-		var httpResponse *http.Response
-		log.Printf("Requesting page '%d' ", pageNumberWanted)
-		runData, httpResponse, err = restClient.ResultArchiveStoreAPIApi.
-			GetRasSearchRuns(context).
-			To(toTime).
-			Runname(runName).
-			Page(pageNumberWanted).
-			Sort("to:desc").
-			Execute()
+	var httpResponse *http.Response
+	result, httpResponse, err = restClient.ResultArchiveStoreAPIApi.
+		GetRasRunArtifactByPath(context, runId, artifactPath).
+		Execute()
+	size , _ := result.Stat()
 
-		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-		} else {
-			if httpResponse.StatusCode != HTTP_STATUS_CODE_OK {
+	var resultbyte []byte = make([]byte, size.Size()) 
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+	} else {
+		if httpResponse.StatusCode != HTTP_STATUS_CODE_OK {
+			body, _  := io.ReadAll(httpResponse.Body)
+			bodyStr := string(body)
+			err = galasaErrors.ThrowAPIError(bodyStr)
+		}else{
+			readbytes , err := result.Read(resultbyte)
+			if readbytes != int(size.Size()) || err !=nil{
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-			} else {
-
-				// Copy the results from this page into our bigger list of results.
-				runsOnThisPage := runData.GetRuns()
-				// Add all the runs into our set of results.
-				// Note: The ... syntax means 'all of the array', so they all get appended at once.
-				results = append(results, runsOnThisPage...)
-
-				// Have we processed the last page ?
-				if pageNumberWanted == runData.GetNumPages() {
-					gotAllResults = true
-				}
 			}
 		}
 	}
 
-	return results, err
+	return resultbyte, err
 }

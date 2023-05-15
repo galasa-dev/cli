@@ -157,12 +157,13 @@ func TestRunsDownloadOfRunNameWhichDoesNotExistDisplaysNoArtifactsToDownload(t *
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	if err != nil {
@@ -187,9 +188,11 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
+	mockFileSystem := utils.NewMockFileSystem()
+
 
 	// When...
-	err := DownloadArtifacts(runName, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1068")

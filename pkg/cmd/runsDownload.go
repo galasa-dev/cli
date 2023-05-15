@@ -13,8 +13,8 @@ import (
 )
 
 // Objective: Allow the user to do this:
-//    run get --runname 12345
-// And then show the results in a human-readable form.
+//    run download --name 12345
+// And then galasactl downloads the artifacts for the given run.
 
 var (
 	runsDownloadCmd = &cobra.Command{
@@ -30,8 +30,8 @@ var (
 )
 
 func init() {
-	runsDownloadCmd.PersistentFlags().StringVar(&runNameDownload, "runname", "", "the name of the test run we want information about")
-	runsDownloadCmd.MarkPersistentFlagRequired("runname")
+	runsDownloadCmd.PersistentFlags().StringVar(&runNameDownload, "name", "", "the name of the test run we want information about")
+	runsDownloadCmd.MarkPersistentFlagRequired("name")
 
 	parentCommand := runsCmd
 	parentCommand.AddCommand(runsDownloadCmd)
