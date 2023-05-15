@@ -208,9 +208,9 @@ function get_result_with_runname {
 }
 
 #--------------------------------------------------------------------------
-function get_result_with_runname_detailed_view {
+# function get_result_with_runname_detailed_view {
 
-}
+# }
 
 #--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
