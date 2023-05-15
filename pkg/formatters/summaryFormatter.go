@@ -11,14 +11,11 @@ import (
 )
 
 // -----------------------------------------------------
-// RunsFormatter - implementations can take a collection of run results
-// and turn them into a string for display to the user.
-type RunsFormatter interface {
-	FormatRuns(runs []galasaapi.Run) (string, error)
-}
-
-// -----------------------------------------------------
 // Summary format.
+const (
+	SUMMARY_FORMATTER_NAME = "summary"
+)
+
 type SummaryFormatter struct {
 }
 
@@ -26,16 +23,26 @@ func NewSummaryFormatter() RunsFormatter {
 	return new(SummaryFormatter)
 }
 
-func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
+func (*SummaryFormatter) GetName() string {
+	return SUMMARY_FORMATTER_NAME
+}
+
+func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error) {
+	var result string = ""
 	var err error = nil
+
+	if len(runs) < 1 {
+		return result, err
+	}
+
 	var table [][]string
 
-	var headers = []string{"RunName", "Status", "Result", "ShortTestName"}
+	var headers = []string{"name", "status", "result", "test-name"}
 
 	table = append(table, headers)
 	for _, run := range runs {
 		var line []string
-		line = append(line, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestShortName())
+		line = append(line, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestName())
 		table = append(table, line)
 	}
 
@@ -57,19 +64,6 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run) (string, error) {
 		}
 		buff.WriteString("\n")
 	}
-	result := buff.String()
-
+	result = buff.String()
 	return result, err
-}
-
-func calculateMaxLengthOfEachColumn(table [][]string) []int {
-	columnLengths := make([]int, len(table[0]))
-	for _, row := range table {
-		for i, val := range row {
-			if len(val) > columnLengths[i] {
-				columnLengths[i] = len(val)
-			}
-		}
-	}
-	return columnLengths
 }

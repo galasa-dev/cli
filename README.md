@@ -221,7 +221,7 @@ galasactl runs submit --log -
           --override zos.default.cluster=MYPLEXCLUSTERA
 ```
 
-## Runs submit local
+## runs submit local
 
 This command sequence causes the specified tests to be executed within the local JVM server.
 
@@ -244,6 +244,18 @@ galasactl runs submit local --log -
 
 - The `--throttle 1` option would mean all your tests run sequentially. A higher throttle value means that local tests run in parallel.
 
+
+## runs get
+This command retrieves information about a historic run on an ecosystem.
+Several formats are supported including: 'summary', 'details' 
+```
+galasactl runs get --name C1234 --format details
+```
+For a complete list of supported formatters try running the command with a known to be bad formatter name. For example:
+```
+galasactl runs get --name C1234 --format badFormatterName
+```
+For a complete list of supported parameters see [here](./docs/generated/galasactl_runs_get.md)
 
 ## Reference Material
 
