@@ -43,47 +43,14 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	buff := strings.Builder{}
 
 	for i, run := range runs {
-		var duration string = ""
-		var startTimeString string = ""
-		var endTimeString string = ""
-		startTimeStringRaw := run.TestStructure.GetStartTime()
-		endTimeStringRaw := run.TestStructure.GetEndTime()
 
-		if len(startTimeStringRaw) > 0 {
-			startTimeString = formatTime(startTimeStringRaw)
-			if len(endTimeStringRaw) > 0 {
-				endTimeString = formatTime(endTimeStringRaw)
-			}
-		}
-
-		startTime, err := time.Parse(DATE_FORMAT, startTimeString)
-		if err == nil {
-			endTime, err := time.Parse(DATE_FORMAT, endTimeString)
-			if err == nil {
-				duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-			}
-		}
-
-		var table = [][]string{
-			{"name", ":  " + run.TestStructure.GetRunName()},
-			{"status", ":  " + run.TestStructure.GetStatus()},
-			{"result", ":  " + run.TestStructure.GetResult()},
-			{"queued-time", ":  " + formatTime(run.TestStructure.GetQueued())},
-			{"start-time", ":  " + startTimeString},
-			{"end-time", ":  " + endTimeString},
-			{"duration(ms)", ":  " + duration},
-			{"test-name", ":  " + run.TestStructure.GetTestName()},
-			{"requestor", ":  " + run.TestStructure.GetRequestor()},
-			{"bundle", ":  " + run.TestStructure.GetBundle()},
-			{"run-log", ":  " + apiServerUrl + "/ras/run/" + run.GetRunId() + "/runlog"},
-		}
-
-		writeTableToBuff(&buff, table)
+		coreDetailsTable := tabulateCoreRunDetails(run, apiServerUrl)
+		writeTableToBuff(&buff, coreDetailsTable)
 
 		buff.WriteString("\n")
 
 		methodTable := initialiseMethodTable()
-		methodTable = writeMethodsToTable(run.TestStructure.GetMethods(), methodTable)
+		methodTable = tabulateRunMethodsToTable(run.TestStructure.GetMethods(), methodTable)
 		writeTableToBuff(&buff, methodTable)
 
 		if i < len(runs)-1 {
@@ -97,6 +64,44 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	return result, err
 }
 
+func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
+	var duration string = ""
+	var startTimeString string = ""
+	var endTimeString string = ""
+	startTimeStringRaw := run.TestStructure.GetStartTime()
+	endTimeStringRaw := run.TestStructure.GetEndTime()
+
+	if len(startTimeStringRaw) > 0 {
+		startTimeString = formatTime(startTimeStringRaw)
+		if len(endTimeStringRaw) > 0 {
+			endTimeString = formatTime(endTimeStringRaw)
+		}
+	}
+
+	startTime, err := time.Parse(DATE_FORMAT, startTimeString)
+	if err == nil {
+		endTime, err := time.Parse(DATE_FORMAT, endTimeString)
+		if err == nil {
+			duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
+		}
+	}
+
+	var table = [][]string{
+		{"name", ":  " + run.TestStructure.GetRunName()},
+		{"status", ":  " + run.TestStructure.GetStatus()},
+		{"result", ":  " + run.TestStructure.GetResult()},
+		{"queued-time", ":  " + formatTime(run.TestStructure.GetQueued())},
+		{"start-time", ":  " + startTimeString},
+		{"end-time", ":  " + endTimeString},
+		{"duration(ms)", ":  " + duration},
+		{"test-name", ":  " + run.TestStructure.GetTestName()},
+		{"requestor", ":  " + run.TestStructure.GetRequestor()},
+		{"bundle", ":  " + run.TestStructure.GetBundle()},
+		{"run-log", ":  " + apiServerUrl + "/ras/run/" + run.GetRunId() + "/runlog"},
+	}
+	return table
+}
+
 func initialiseMethodTable() [][]string {
 	var methodTable [][]string
 	var headers = []string{"method", "type", "status", "result", "start-time", "end-time", "duration(ms)"}
@@ -105,7 +110,7 @@ func initialiseMethodTable() [][]string {
 	return methodTable
 }
 
-func writeMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]string) [][]string {
+func tabulateRunMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]string) [][]string {
 	for _, method := range methods {
 		var duration string = ""
 		var startTimeString string = ""
