@@ -99,7 +99,9 @@ fi
 # Constants
 #-----------------------------------------------------------------------------------------   
 export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"   
-export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_CLASS_SHORT}" 
+export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}" 
+export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="2"
+export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
 
 
 #--------------------------------------------------------------------------
@@ -259,7 +261,7 @@ function runs_get_check_summary_format_output {
 
     # Check that we got 2 lines out... one for the headers, on for the 1 line of test data.
     line_count=$(cat $output_file | wc -l | xargs)
-    expected_line_count="2"
+    expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then 
         error "line count is wrong. expected ${expected_line_count} got ${line_count}"
         exit 1
@@ -288,11 +290,11 @@ function runs_get_check_details_format_output {
 
 
     # Check that the full test name is output and formatted
-    cat $output_file | grep "test-name    :  ${GALASA_TEST_NAME_LONG}"
+    cat $output_file | grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}"
     rc=$?
     # We expect a return code of '0' because the ecosystem should be able to find this test as we just ran it.
     if [[ "${rc}" != "0" ]]; then 
-        error ""
+        error "Did not find ${GALASA_TEST_NAME_LONG} in details output"
         exit 1
     fi
 
@@ -311,8 +313,8 @@ function runs_get_check_details_format_output {
     done  
 
     #check methods start on line 13 - implies other test details have outputted 
-    line_count=$(grep -n "method" $output_file | head -n1 | sed 's/:.*//')
-    expected_line_count="13"
+    line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time[[:space:]]*end-time[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
+    expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then 
         # We expect a return code of '0' because the method header should be output on line 13.
         error "line count is wrong. expected methods to start on ${expected_line_count} got ${line_count}"
