@@ -5,7 +5,6 @@ package formatters
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -60,7 +59,7 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	}
 
 	result = buff.String()
-	log.Print(result)
+
 	return result, err
 }
 
