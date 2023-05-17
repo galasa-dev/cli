@@ -37,10 +37,16 @@ func GetRuns(
 		runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
 		if err == nil {
 			var outputText string
-			outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
-			if err == nil {
-				err = writeOutput(outputText, console)
+			if chosenFormatter.GetName() != "summary" {
+				runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
 			}
+			if err == nil {
+				outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
+				if err == nil {
+					err = writeOutput(outputText, console)
+				}
+			}
+
 		}
 	}
 
@@ -97,6 +103,31 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 	}
 
 	return chosenFormatter, err
+}
+
+func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiServerUrl string) ([]galasaapi.Run, error) {
+	var err error = nil
+	var runsDetails []galasaapi.Run = make([]galasaapi.Run, 0)
+	restClient := api.InitialiseAPI(apiServerUrl)
+	var context context.Context = nil
+	var details *galasaapi.Run
+	var httpResponse *http.Response
+
+	for _, run := range runs {
+		runid := run.GetRunId()
+		details, httpResponse, err = restClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).Execute()
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+		} else {
+			if httpResponse.StatusCode != http.StatusOK {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+			} else {
+				runsDetails = append(runsDetails, *details)
+			}
+		}
+	}
+
+	return runsDetails, err
 }
 
 // Retrieves test runs from the ecosystem API that match a given runName.

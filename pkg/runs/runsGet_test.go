@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/formatters"
@@ -167,39 +168,57 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if r.URL.Path != "/ras/run" {
-			t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
-		}
-		if r.Header.Get("Accept") != "application/json" {
-			t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-
-		values := r.URL.Query()
-		pageRequestedStr := values.Get("page")
-		runNameQueryParameter := values.Get("runname")
-		pageRequested, _ := strconv.Atoi(pageRequestedStr)
-		assert.Equal(t, pageRequested, 1)
-
-		assert.Equal(t, runNameQueryParameter, runName)
-
-		combinedRunResultStrings := ""
-		for index, runResult := range runResultStrings {
-			if index > 0 {
-				combinedRunResultStrings += ","
+		if strings.Contains(r.URL.Path, "/ras/run/") {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(status)
+			combinedRunResultStrings := ""
+			for index, runResult := range runResultStrings {
+				if index > 0 {
+					combinedRunResultStrings += ","
+				}
+				combinedRunResultStrings += runResult
 			}
-			combinedRunResultStrings += runResult
+
+			w.Write([]byte(fmt.Sprintf(`
+				%s 
+			`, combinedRunResultStrings)))
+
+		} else {
+			if r.URL.Path != "/ras/run" {
+				t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
+			}
+			if r.Header.Get("Accept") != "application/json" {
+				t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(status)
+
+			values := r.URL.Query()
+			pageRequestedStr := values.Get("page")
+			runNameQueryParameter := values.Get("runname")
+			pageRequested, _ := strconv.Atoi(pageRequestedStr)
+			assert.Equal(t, pageRequested, 1)
+
+			assert.Equal(t, runNameQueryParameter, runName)
+
+			combinedRunResultStrings := ""
+			for index, runResult := range runResultStrings {
+				if index > 0 {
+					combinedRunResultStrings += ","
+				}
+				combinedRunResultStrings += runResult
+			}
+
+			w.Write([]byte(fmt.Sprintf(`
+			 {
+				 "pageNumber": 1,
+				 "pageSize": 1,
+				 "numPages": 1,
+				 "amountOfRuns": %d,
+				 "runs":[ %s ]
+			 }`, len(runResultStrings), combinedRunResultStrings)))
 		}
 
-		w.Write([]byte(fmt.Sprintf(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": %d,
-			 "runs":[ %s ]
-		 }`, len(runResultStrings), combinedRunResultStrings)))
 	}))
 
 	return server
