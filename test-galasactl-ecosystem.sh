@@ -95,6 +95,15 @@ else
     exit 1  
 fi
 
+#-----------------------------------------------------------------------------------------                   
+# Constants
+#-----------------------------------------------------------------------------------------   
+export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"   
+export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}" 
+export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="2"
+export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
+
+
 #--------------------------------------------------------------------------
 function calculate_galasactl_executable {
     h2 "Calculate the name of the galasactl executable for this machine/os"
@@ -128,6 +137,7 @@ function calculate_galasactl_executable {
 
 #--------------------------------------------------------------------------
 function launch_test_on_ecosystem_with_portfolio {
+
     h2 "Building a portfolio..."
 
     mkdir -p ${BASEDIR}/temp
@@ -137,7 +147,7 @@ function launch_test_on_ecosystem_with_portfolio {
     --bootstrap $bootstrap \
     --stream inttests \
     --portfolio portfolio.yaml \
-    --test local.CoreLocalJava11Ubuntu \
+    --test ${GALASA_TEST_NAME_SHORT} \
     --log -"
 
     info "Command is: $cmd"
@@ -156,7 +166,7 @@ function launch_test_on_ecosystem_with_portfolio {
     cd ${BASEDIR}/temp
 
     cmd="${BASEDIR}/bin/${binary} runs submit \
-    --bootstrap $bootstrap \
+    --bootstrap ${bootstrap} \
     --portfolio portfolio.yaml \
     --throttle 1 \
     --poll 10 \
@@ -164,9 +174,8 @@ function launch_test_on_ecosystem_with_portfolio {
     --noexitcodeontestfailures \
     --log -"
 
-    info "Command is: $cmd"
+    $cmd | tee runs-submit-output.txt # Store the output of galasactl runs submit to use later
 
-    $cmd
     rc=$?
     # We expect a return code of '0' because the ecosystem should be able to run this test.
     # We have specified the flag --noexitcodeontestfailures so that we still receive a return code '0' even if the test fails,
@@ -176,6 +185,143 @@ function launch_test_on_ecosystem_with_portfolio {
         exit 1
     fi
     success "Submitting test to ecosystem worked OK"
+}
+
+#--------------------------------------------------------------------------
+function get_result_with_runname {
+    h2 "Querying the result of the test we just ran..."
+
+    cd ${BASEDIR}/temp
+
+    # Get the RunName from the output of galasactl runs submit
+    cat runs-submit-output.txt | grep -o "Run.*-" | tail -1  > line.txt # Gets the line from the last part of the output stream the RunName is found in
+    sed 's/Run //; s/ -//' line.txt > runname.txt # Get just the RunName from the line
+    runname=$(cat runname.txt)
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --name ${runname} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    $cmd | grep "${runname}" # Checks the RunName can be found in the output from galasactl runs get
+    rc=$?
+    # We expect a return code of '0' because the ecosystem should be able to find this test as we just ran it.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to query the result of run ${runname} in the remote ecosystem."
+        exit 1
+    fi
+    success "Querying the result of a run in the ecosystem worked OK"
+
+    # The test above just checks that some output was found from galasactl runs get.
+    # TO DO - Get the Result of the run from the output of galasactl runs submit as well as the RunName, and make sure the Result is correct too
+    export RUN_NAME=${runname}
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_summary_format_output {
+    h2 "Performing runs get with summary format..."
+
+    run_name=$1
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --name ${run_name} \
+    --format summary \
+    --bootstrap ${bootstrap} "
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    # Check that the full test name is output
+    cat $output_file | grep "${GALASA_TEST_NAME_LONG}"
+    rc=$?
+    # We expect a return code of '0' because the test name should be output.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find ${GALASA_TEST_NAME_LONG} in summary output"
+        exit 1
+    fi
+
+    # Check headers
+    headers=("name" "status" "result" "test-name")
+
+    for header in "${headers[@]}"
+    do
+        cat $output_file | grep "$header"
+        rc=$?
+        # We expect a return code of '0' because the header name should be output.
+        if [[ "${rc}" != "0" ]]; then 
+            error "Did not find header $header in summary output"
+            exit 1
+        fi
+    done    
+
+    # Check that we got 2 lines out... one for the headers, on for the 1 line of test data.
+    line_count=$(cat $output_file | wc -l | xargs)
+    expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT
+    if [[ "${line_count}" != "${expected_line_count}" ]]; then 
+        error "line count is wrong. expected ${expected_line_count} got ${line_count}"
+        exit 1
+    fi
+
+    success "galasactl runs get --format summary seemed to work"
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_details_format_output {
+    h2 "Performing runs get with details format..."
+
+    run_name=$1
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --name ${run_name} \
+    --format details \
+    --bootstrap ${bootstrap} "
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+
+    # Check that the full test name is output and formatted
+    cat $output_file | grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}"
+    rc=$?
+    # We expect a return code of '0' because the ecosystem should be able to find this test as we just ran it.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find ${GALASA_TEST_NAME_LONG} in details output"
+        exit 1
+    fi
+
+    # Check method headers
+    headers=("method" "type" "status" "result" "start-time" "end-time" "duration(ms)")
+
+    for header in "${headers[@]}"
+    do
+        cat $output_file | grep "$header" $output_file
+        rc=$?
+        # We expect a return code of '0' because the header name should be output.
+        if [[ "${rc}" != "0" ]]; then 
+            error "Did not find header $header in details output"
+            exit 1
+        fi
+    done  
+
+    #check methods start on line 13 - implies other test details have outputted 
+    line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time[[:space:]]*end-time[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
+    expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT
+    if [[ "${line_count}" != "${expected_line_count}" ]]; then 
+        # We expect a return code of '0' because the method header should be output on line 13.
+        error "line count is wrong. expected methods to start on ${expected_line_count} got ${line_count}"
+        exit 1
+    fi
+
+    success "galasactl runs get --format details seemed to work"
 }
 
 #--------------------------------------------------------------------------
@@ -264,8 +410,13 @@ calculate_galasactl_executable
 # Launch test on ecosystem from a portfolio ...
 launch_test_on_ecosystem_with_portfolio
 
+# Query the result ... setting RUN_NAME to hold the one which galasa allocated
+get_result_with_runname 
+runs_get_check_summary_format_output  $RUN_NAME
+runs_get_check_details_format_output  $RUN_NAME
+
 # Launch test on ecosystem without a portfolio ...
-# NOTE - Potential bug found with this command so commenting out for now
+# NOTE - Bug found with this command so commenting out for now
 # launch_test_on_ecosystem_without_portfolio
 
 # Attempt to create a test portfolio with an unknown test ...

@@ -13,9 +13,9 @@ galasactl runs get [flags]
 ### Options
 
 ```
-  -h, --help             help for get
-      --output string    output format for the data returned. Supported formats are: summary (default "summary")
-      --runname string   the name of the test run we want information about
+      --format string   output format for the data returned. Supported formats are: summary (default "summary")
+  -h, --help            help for get
+      --name string     the name of the test run we want information about
 ```
 
 ### Options inherited from parent commands
