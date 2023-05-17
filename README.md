@@ -262,9 +262,9 @@ The port value itself must be an unsigned integer.
 Your IDE would typically need to be configured to connect to the same port the testcase is using.
 
 The 'mode' used to control the connection from the local JVM to the debugger can be `listen` or `attach`.
-- `listen` configured into the galasactl configuration means that the JVM launching pauses opens a port and pauses to listen for traffic on that port, 
+- `listen` configured into the galasactl configuration means that the JVM launching opens a port and pauses to listen for traffic on that port, 
 waiting for a JDB debugger to connect to that port.
-- `attach` configured into the galasactl configuration means that the JVM launching attepts to attach to the debug port, which has previously been opened
+- `attach` configured into the galasactl configuration means that the JVM launching attempts to attach to the debug port, which has previously been opened
 by the JDB debugger.
 
 Configure the debug mode like this:
