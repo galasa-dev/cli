@@ -6,9 +6,11 @@ package launcher
 import (
 	"embed"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/errors"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -75,7 +77,24 @@ type RunsSubmitLocalCmdParameters struct {
 	// The version of galasa we want to launch. This indicates which uber-obr will be
 	// loaded.
 	TargetGalasaVersion string
+
+	// Should the JVM be launched in debug mode ?
+	IsDebugEnabled bool
+
+	// When launched in debug mode, which port should the JVM use to talk to the Java
+	// debugger ? This port is either listened on, or attached to depending on the
+	// DebugMode field.
+	DebugPort uint32
+
+	// A string indicating whether the test JVM should 'attach' to the debug port
+	// to talk to the Java debugger (JDB), or whether it should 'listen' on a port
+	// ready for the JDB to attach to.
+	DebugMode string
 }
+
+const (
+	DEBUG_PORT_DEFAULT uint32 = 2970
+)
 
 // -----------------------------------------------------------------------------
 // Constructors
@@ -197,6 +216,9 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
 						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
 						isTraceEnabled,
+						launcher.cmdParams.IsDebugEnabled,
+						launcher.cmdParams.DebugPort,
+						launcher.cmdParams.DebugMode,
 					)
 					if err == nil {
 						log.Printf("Launching command '%s' '%v'\n", cmd, args)
@@ -436,12 +458,25 @@ func getCommandSyntax(
 	galasaVersionToRun string,
 	overridesFilePath string,
 	isTraceEnabled bool,
+	isDebugEnabled bool,
+	debugPort uint32,
+	debugMode string,
 ) (string, []string, error) {
 
 	var cmd string = ""
 	var args []string = make([]string, 0)
+	var err error
+	var bootJarPath string
 
-	bootJarPath, err := utils.GetGalasaBootJarPath(fileSystem, galasaHome)
+	// Gather any variable values we need to.
+	debugMode, err = calculateDebugMode(debugMode, bootstrapProperties)
+	if err == nil {
+		debugPort, err = calculateDebugPort(debugPort, bootstrapProperties)
+		if err == nil {
+			bootJarPath, err = utils.GetGalasaBootJarPath(fileSystem, galasaHome)
+		}
+	}
+
 	if err == nil {
 
 		separator := fileSystem.GetFilePathSeparator()
@@ -450,6 +485,10 @@ func getCommandSyntax(
 		// You don't need to add the '.exe' extension it seems.
 		cmd = javaHome + separator + "bin" +
 			separator + "java"
+
+		args = appendArgsDebugOptions(args, isDebugEnabled, debugMode, debugPort)
+
+		args = appendArgsBootstrapJvmLaunchOptions(args, bootstrapProperties)
 
 		args = append(args, "-jar")
 		args = append(args, bootJarPath)
@@ -506,23 +545,121 @@ func getCommandSyntax(
 			args = append(args, "--trace")
 		}
 
-		// Append all the java launch properties explicitly spelt-out in the boostrap file.
-
-		jvmLaunchOptions, isOptionsPresent := bootstrapProperties[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS]
-		if isOptionsPresent {
-			// strip off the leading and trailing whitespace.
-			jvmLaunchOptions = strings.Trim(jvmLaunchOptions, " \t\n\r")
-
-			// Split based on commas
-			launchOptionParts := strings.Split(jvmLaunchOptions, ",")
-
-			// Add each piece to the list of args returned.
-			args = append(args, launchOptionParts...)
-		}
-
 	}
 
 	return cmd, args, err
+}
+
+func appendArgsDebugOptions(args []string, isDebugEnabled bool, debugMode string, debugPort uint32) []string {
+
+	if isDebugEnabled {
+		var buff strings.Builder
+
+		buff.WriteString("-agentlib:jdwp=transport=dt_socket,address=*:")
+		buff.WriteString(strconv.FormatUint(uint64(debugPort), 10))
+		buff.WriteString(",server=")
+		if debugMode == "listen" {
+			buff.WriteString("y")
+		} else {
+			buff.WriteString("n")
+		}
+		buff.WriteString(",suspend=y")
+
+		args = append(args, buff.String())
+	}
+
+	return args
+}
+
+func appendArgsBootstrapJvmLaunchOptions(args []string, bootstrapProperties utils.JavaProperties) []string {
+	// Append all the java launch properties explicitly spelt-out in the boostrap file.
+	// The framework.jvm.local.launch.options bootstrap file property can add parameters to the commmand-line.
+	// For example -Xmx80m and similar parameters.
+	// Use a space-separated list of options and the JVM gets launched with those in front.
+	jvmLaunchOptions, isOptionsPresent := bootstrapProperties[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS]
+	if isOptionsPresent {
+		// strip off the leading and trailing whitespace.
+		jvmLaunchOptions = strings.Trim(jvmLaunchOptions, " \t\n\r")
+
+		// Split based on commas
+		launchOptionParts := strings.Split(jvmLaunchOptions, api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS_SEPARATOR)
+
+		// Add each piece to the list of args returned.
+		args = append(args, launchOptionParts...)
+	}
+
+	return args
+}
+
+func calculateDebugPort(debugPort uint32, bootstrapProperties utils.JavaProperties) (uint32, error) {
+	var err error
+
+	if debugPort == 0 {
+		// Debug port was not set on the command-line.
+
+		// Look in the bootstrap properties for a value.
+		bootstrapPropsValue, isPresent := bootstrapProperties[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT]
+		if isPresent {
+			// Not specified on command line. Use value in bootstrap property instead.
+			var debugPortU64 uint64
+			debugPortU64, err = strconv.ParseUint(bootstrapPropsValue, 10, 32)
+			if err != nil {
+				err = errors.NewGalasaError(
+					errors.GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_PORT_VALUE,
+					bootstrapPropsValue,
+					api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT,
+					strconv.FormatUint(uint64(DEBUG_PORT_DEFAULT), 10),
+				)
+			} else {
+				// Bootstrap property value is good.
+				debugPort = uint32(debugPortU64)
+			}
+		} else {
+			// Not specified on command-linem, nothing in bootstrap property.
+			debugPort = DEBUG_PORT_DEFAULT
+		}
+	}
+	return debugPort, err
+}
+
+func calculateDebugMode(debugMode string, bootstrapProperties utils.JavaProperties) (string, error) {
+	var err error
+
+	if debugMode == "" {
+		// The value hasn't been set on the command-line.
+
+		// Look in the bootstrap properties for a value.
+		bootstrapPropsValue, isPresent := bootstrapProperties[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE]
+		if isPresent {
+			debugMode = bootstrapPropsValue
+			err = checkDebugModeValueIsValid(debugMode, errors.GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_MODE_VALUE)
+		} else {
+			// Default to 'listen'
+			debugMode = "listen"
+		}
+	}
+
+	if err == nil {
+		err = checkDebugModeValueIsValid(debugMode, errors.GALASA_ERROR_ARG_BAD_DEBUG_MODE_VALUE)
+	}
+
+	return debugMode, err
+}
+
+func checkDebugModeValueIsValid(debugMode string, errorMessageIfInvalid *errors.MessageType) error {
+	var err error = nil
+
+	lowerCaseDebugMode := strings.ToLower(debugMode)
+
+	switch lowerCaseDebugMode {
+	case "listen":
+	case "attach":
+		break
+	default:
+		err = errors.NewGalasaError(errorMessageIfInvalid, debugMode, api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE)
+	}
+
+	return err
 }
 
 // User input is expected of the form osgiBundleName/qualifiedJavaClassName

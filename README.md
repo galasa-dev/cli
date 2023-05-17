@@ -245,6 +245,42 @@ galasactl runs submit local --log -
 - The `--throttle 1` option would mean all your tests run sequentially. A higher throttle value means that local tests run in parallel.
 
 
+### Debugging a single test which runs in the local JVM
+The `galasactl runs submit local` command has an option `--debug` which causes the test to be launched in 'debug mode'.
+The test will attempt to connect with a JDB java debugger based on some configuration parameters.
+
+The 'port' used to connect the testcase to the java debugger needs to be configured.
+- The default value is 2970
+- The above value can be overridden by adding the optional property `framework.jvm.local.launch.debug.port` into the `bootstrap.properties` file.
+  - For example: `framework.jvm.local.launch.debug.port=2971`
+  - This parameter is ignored if the `--debug` argument isn't supplied to the `galasactl runs submit local` command.
+- The above value can be overridden by using the optional argument `--debugPort` to the `galasactl runs submit local` command.
+
+The port value itself must be an unsigned integer.
+
+Your IDE would typically need to be configured to connect to the same port the testcase is using.
+
+The 'mode' used to control the connection from the local JVM to the debugger can be `listen` or `attach`.
+- `listen` configured into the galasactl configuration means that the JVM launching pauses opens a port and pauses to listen for traffic on that port, 
+waiting for a JDB debugger to connect to that port.
+- `attach` configured into the galasactl configuration means that the JVM launching attepts to attach to the debug port, which has previously been opened
+by the JDB debugger.
+
+Configure the debug mode like this:
+- The default value is `listen`.
+- The above default value can be overridden by adding the optional property `framework.jvm.local.launch.debug.mode` into the `bootstrap.properties` file.
+  - For example: `framework.jvm.local.launch.debug.mode=attach`
+- The above value can be overridden by using the optional argument `--debugMode` to the `galasactl runs submit local` command.
+
+Your IDE would typically need to be configured with the opposite type of connection mode in order to attach the JDB debugger to the running Galasa test.
+For example: If your `galasactl` is configured to `listen`, then start the test first, and configure your IDE to attach to the same port.
+If your `galasactl` is configured to `attach`, then start your JDB debugger first, so it is there waiting for the testcase to attach to the debug port when 
+the testcase is launched.
+
+To configure the different IDEs to connect to a local testcase in `--debug` mode, follow these instructions:
+- For Microsoft vscode see [here](./docs/vscode/debug_in_vscode.md)
+
+
 ## Reference Material
 
 ### Syntax

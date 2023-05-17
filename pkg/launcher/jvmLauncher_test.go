@@ -5,9 +5,11 @@ package launcher
 
 import (
 	"log"
+	"strconv"
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/api"
+
 	"github.com/galasa.dev/cli/pkg/embedded"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -345,6 +347,9 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 		_ := getDefaultCommandSyntaxTestParameters()
 
 	isTraceEnabled := true
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
 
 	cmd, args, err := getCommandSyntax(
 		bootstrapProps,
@@ -356,6 +361,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 		galasaVersionToRun,
 		overridesFilePath,
 		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
 	)
 
 	assert.NotNil(t, cmd)
@@ -376,6 +382,9 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 		_ := getDefaultCommandSyntaxTestParameters()
 
 	isTraceEnabled := false
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
 
 	cmd, args, err := getCommandSyntax(
 		bootstrapProps, galasaHome, fs, javaHome,
@@ -385,6 +394,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 		galasaVersionToRun,
 		overridesFilePath,
 		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
 	)
 
 	assert.NotNil(t, cmd)
@@ -406,6 +416,9 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 
 	javaHome := "myJavaHome"
 	fs.SetFilePathSeparator("/")
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
 
 	cmd, args, err := getCommandSyntax(
 		bootstrapProps, galasaHome, fs, javaHome,
@@ -415,6 +428,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 		galasaVersionToRun,
 		overridesFilePath,
 		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
 	)
 
 	assert.NotNil(t, cmd)
@@ -438,6 +452,10 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 	fs.SetFilePathSeparator("\\")
 	fs.SetExecutableExtension(".exe")
 
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
+
 	cmd, args, err := getCommandSyntax(
 		bootstrapProps, galasaHome, fs, javaHome,
 		testObrs,
@@ -446,6 +464,7 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 		galasaVersionToRun,
 		overridesFilePath,
 		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
 	)
 
 	assert.NotNil(t, cmd)
@@ -548,6 +567,9 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 		_ := getDefaultCommandSyntaxTestParameters()
 
 	isTraceEnabled := true
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
 
 	cmd, args, err := getCommandSyntax(
 		bootstrapProps,
@@ -559,6 +581,9 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 		galasaVersionToRun,
 		overridesFilePath,
 		isTraceEnabled,
+		isDebugEnabled,
+		debugPort,
+		debugMode,
 	)
 
 	assert.NotNil(t, cmd)
@@ -579,6 +604,9 @@ func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {
 		_ := getDefaultCommandSyntaxTestParameters()
 
 	isTraceEnabled := false
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
 
 	cmd, args, err := getCommandSyntax(
 		bootstrapProps, galasaHome, fs, javaHome,
@@ -588,6 +616,7 @@ func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {
 		galasaVersionToRun,
 		overridesFilePath,
 		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
 	)
 
 	assert.NotNil(t, cmd)
@@ -608,8 +637,11 @@ func TestCommandIncludesTwoFlagsFromBootstrapProperties(t *testing.T) {
 		overridesFilePath,
 		_ := getDefaultCommandSyntaxTestParameters()
 
-	bootstrapProps[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS] = "-Xmx40m,-Xms20m"
+	bootstrapProps[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS] = "-Xmx40m -Xms20m"
 	isTraceEnabled := false
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
 
 	cmd, args, err := getCommandSyntax(
 		bootstrapProps, galasaHome, fs, javaHome,
@@ -619,6 +651,7 @@ func TestCommandIncludesTwoFlagsFromBootstrapProperties(t *testing.T) {
 		galasaVersionToRun,
 		overridesFilePath,
 		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
 	)
 
 	assert.NotNil(t, cmd)
@@ -627,4 +660,302 @@ func TestCommandIncludesTwoFlagsFromBootstrapProperties(t *testing.T) {
 
 	assert.Contains(t, args, "-Xmx40m")
 	assert.Contains(t, args, "-Xms20m")
+}
+
+func TestCommandIncludesDefaultDebugPortAndMode(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := ""
+
+	command, args, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, command)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Contains(t, args, "-agentlib:jdwp=transport=dt_socket,address=*:"+strconv.FormatUint(uint64(DEBUG_PORT_DEFAULT), 10)+",server=y,suspend=y")
+}
+
+func TestCommandDrawsValidDebugPortFromBootstrap(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := ""
+
+	bootstrapProps[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT] = "345"
+
+	command, args, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, command)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Contains(t, args, "-agentlib:jdwp=transport=dt_socket,address=*:345,server=y,suspend=y")
+}
+
+func TestCommandDrawsInvalidDebugPortFromBootstrap(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := ""
+
+	bootstrapProps[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT] = "-456"
+
+	_, _, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, err)
+
+	assert.Contains(t, err.Error(), "-456")
+	assert.Contains(t, err.Error(), api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT)
+	assert.Contains(t, err.Error(), "GAL1072E")
+}
+
+func TestCommandDrawsValidDebugModeFromBootstrap(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := ""
+
+	bootstrapProps[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE] = "attach"
+
+	command, args, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, command)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Contains(
+		t,
+		args,
+		"-agentlib:jdwp=transport=dt_socket,address=*:"+
+			strconv.FormatUint(uint64(DEBUG_PORT_DEFAULT), 10)+
+			",server=n,suspend=y",
+	)
+}
+
+func TestCommandDrawsInvalidDebugModeFromBootstrap(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := ""
+
+	bootstrapProps[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE] = "shout" //  << Invalid !
+
+	_, _, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, err)
+
+	assert.Contains(t, err.Error(), "shout")
+	assert.Contains(t, err.Error(), api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE)
+	assert.Contains(t, err.Error(), "GAL1070E")
+}
+
+func TestCommandDrawsValidDebugModeListenFromCommandLine(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := "listen"
+
+	command, args, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, command)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Contains(
+		t,
+		args,
+		"-agentlib:jdwp=transport=dt_socket,address=*:"+
+			strconv.FormatUint(uint64(DEBUG_PORT_DEFAULT), 10)+
+			",server=y,suspend=y",
+	)
+}
+
+func TestCommandDrawsValidDebugModeAttachFromCommandLine(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := "attach"
+
+	command, args, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, command)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	assert.Contains(
+		t,
+		args,
+		"-agentlib:jdwp=transport=dt_socket,address=*:"+
+			strconv.FormatUint(uint64(DEBUG_PORT_DEFAULT), 10)+
+			",server=n,suspend=y",
+	)
+}
+
+func TestCommandDrawsInvalidDebugModeFromCommandLine(t *testing.T) {
+	bootstrapProps,
+		_, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := false
+	isDebugEnabled := true // <<<< Debug is turned on. No overrides to debugPort in either boostrap or explicit command option.
+	var debugPort uint32 = 0
+	debugMode := "invalidMode"
+
+	_, _, err := getCommandSyntax(
+		bootstrapProps, galasaHome, fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		isTraceEnabled,
+		isDebugEnabled, debugPort, debugMode,
+	)
+
+	assert.NotNil(t, err)
+
+	assert.Contains(t, err.Error(), "invalidMode")
+	assert.Contains(t, err.Error(), api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE)
+	assert.Contains(t, err.Error(), "GAL1071E")
 }
