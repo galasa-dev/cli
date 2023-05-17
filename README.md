@@ -244,6 +244,7 @@ galasactl runs submit local --log -
 
 - The `--throttle 1` option would mean all your tests run sequentially. A higher throttle value means that local tests run in parallel.
 
+To configure a JVM with special options, such as `-Xms20m` and other JVM options, you can set the optional parameter `framework.jvm.local.launch.options` in your bootstrap properties to hold a space-separated list of extra options which will be used when the JVM running your test in a local JVM is launched.
 
 ### Debugging a single test which runs in the local JVM
 The `galasactl runs submit local` command has an option `--debug` which causes the test to be launched in 'debug mode'.
