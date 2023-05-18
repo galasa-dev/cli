@@ -168,7 +168,16 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if strings.Contains(r.URL.Path, "/ras/run/") {
+		if strings.Contains(r.URL.Path, "/ras/runs/") {
+			if r.Header.Get("Accept") != "application/json" {
+				t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
+			}
+			urlParts := strings.Split(r.URL.Path, "/")
+			runid := urlParts[3]
+			for _, runResult := range runResultStrings {
+				assert.Contains(t, runResult, runid)
+			}
+
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
 			combinedRunResultStrings := ""
@@ -184,8 +193,8 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 			`, combinedRunResultStrings)))
 
 		} else {
-			if r.URL.Path != "/ras/run" {
-				t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
+			if r.URL.Path != "/ras/runs" {
+				t.Errorf("Expected to request '/ras/runs', got: %s", r.URL.Path)
 			}
 			if r.Header.Get("Accept") != "application/json" {
 				t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
@@ -335,4 +344,26 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 
 	assert.NotNil(t, result)
 	assert.Equal(t, result, "'first', 'second'")
+}
+
+func TestAPIInternalErrorIsHandledOk(t *testing.T) {
+	// Given ...
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusInternalServerError, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "details"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "500")
+	assert.ErrorContains(t, err, "GAL1068")
 }

@@ -33,15 +33,15 @@ func GetRuns(
 	validFormatters := createFormatters()
 	chosenFormatter, err := validateOutputFormatFlagValue(outputFormatString, validFormatters)
 	if err == nil {
-		var runJson []galasaapi.Run
-		runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
+		var runJsonArray []galasaapi.Run
+		runJsonArray, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
 		if err == nil {
 			var outputText string
 			if chosenFormatter.GetName() != "summary" {
-				runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
+				runJsonArray, err = GetRunDetailsFromRasSearchRuns(runJsonArray, apiServerUrl)
 			}
 			if err == nil {
-				outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
+				outputText, err = chosenFormatter.FormatRuns(runJsonArray, apiServerUrl)
 				if err == nil {
 					err = writeOutput(outputText, console)
 				}
