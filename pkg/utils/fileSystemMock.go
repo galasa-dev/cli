@@ -5,7 +5,6 @@ package utils
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"log"
 	"math"
@@ -134,7 +133,7 @@ func (fs *MockFileSystem) SetExecutableExtension(newExtension string) {
 //------------------------------------------------------------------------------------
 
 func (fs *MockFileSystem) Create(path string) (io.Writer, error) {
-	return fs.Create(path)
+	return fs.VirtualFunction_Create(path)
 }
 
 func (fs *MockFileSystem) GetFilePathSeparator() string {
@@ -198,9 +197,10 @@ func (fs MockFileSystem) OutputWarningMessage(message string) error {
 // ------------------------------------------------------------------------------------
 
 func mockFSCreate(fs MockFileSystem, path string) (io.Writer, error) {
-	var writer io.Writer = nil
-	err := errors.New("Not implemented")
-	return writer, err
+	nodeToAdd := Node{content: nil, isDir: false}
+	fs.data[path] = &nodeToAdd
+	writer := NewOverridableMockFile(&fs, path)
+	return writer, nil
 }
 
 func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {

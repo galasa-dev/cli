@@ -25,7 +25,7 @@ dependencies {
     // We need the openapi generator to turn a yaml file into go client stubs, 
     // so we can call the api server REST services
     // https://mvnrepository.com/artifact/org.openapitools/openapi-generator
-    implementation 'org.openapitools:openapi-generator-cli:6.1.0'
+    implementation 'org.openapitools:openapi-generator-cli:6.6.0'
 }
 task downloadDependencies(type: Copy) {
     // Download the dependencies onto the local disk.

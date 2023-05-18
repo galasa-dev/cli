@@ -165,7 +165,7 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if r.URL.Path != "/ras/run" {
+		if r.URL.Path != "/ras/runs" {
 			t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
 		}
 		if r.Header.Get("Accept") != "application/json" {
