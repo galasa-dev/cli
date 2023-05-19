@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
@@ -55,9 +56,7 @@ func DownloadArtifacts(
 }
 
 // Retrieves the paths of all artifacts for a given test run using its runId.
-func GetArtifactPathsFromRestApi(
-	runId string,
-	apiServerUrl string) ([]string, error) {
+func GetArtifactPathsFromRestApi(runId string, apiServerUrl string) ([]string, error) {
 
 	var err error = nil
 	var artifactPaths []string
@@ -99,7 +98,7 @@ func WriteArtifactToFileSystem(
 
 	pathParts := strings.Split(artifactPath, "/")
 	fileName := pathParts[len(pathParts) - 1]
-	targetFilePath := runDirectory + fileSystem.GetFilePathSeparator() + fileName
+	targetFilePath := filepath.Join(runDirectory, fileName)
 
 	// Check if a new file should be created or if an existing one should be overwritten.
 	fileExists, err := fileSystem.Exists(targetFilePath)
@@ -113,7 +112,7 @@ func WriteArtifactToFileSystem(
 
 		// Set up the directory structure and artifact file on the host's file system
 		var newFile io.Writer = nil
-		newFile, err = CreateEmptyArtifactFile(fileSystem, runDirectory, targetFilePath)
+		newFile, err = CreateEmptyArtifactFile(fileSystem, targetFilePath)
 		if err == nil {
 			log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
 
@@ -145,18 +144,17 @@ func WriteArtifactToFileSystem(
 	return err
 }
 
-// Creates the directory structure to the artifact that will be written.
-func CreateEmptyArtifactFile(
-	fileSystem utils.FileSystem,
-	runDirectory string,
-	targetFilePath string) (io.Writer, error) {
+// Creates an empty file representing an artifact that is being written. Any parent directories that do not exist
+// will be created. Returns the empty file that was created or an error if any file creation operations failed. 
+func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string) (io.Writer, error) {
 	
 	var err error = nil
 	var newFile io.Writer = nil
 
-	err = fileSystem.MkdirAll(runDirectory)
+	targetDirectoryPath := filepath.Dir(targetFilePath)
+	err = fileSystem.MkdirAll(targetDirectoryPath)
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_CREATE_FOLDERS, runDirectory, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_CREATE_FOLDERS, targetDirectoryPath, err.Error())
 	} else {
 		newFile, err = fileSystem.Create(targetFilePath)
 		if err != nil {
@@ -167,10 +165,7 @@ func CreateEmptyArtifactFile(
 }
 
 // Retrieves an artifact for a given test run using its runId from the ecosystem API.
-func GetFileFromRestApi(
-	runId string,
-	artifactPath string,
-	apiServerUrl string) (*os.File, error) {
+func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (*os.File, error) {
 
 	var err error = nil
 	log.Printf("Downloading artifact '%s' from API server", artifactPath)
