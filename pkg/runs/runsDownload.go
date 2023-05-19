@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"context"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -24,29 +25,26 @@ func DownloadArtifacts(
 	fileSystem utils.FileSystem,
 	timeService utils.TimeService,
 	console utils.Console,
-	apiServerUrl string,
-) error {
+	apiServerUrl string) error {
 
 	var err error = nil
 	var runs []galasaapi.Run
 	var artifactPaths []string
 
+	runs, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
 	if err == nil {
-		runs, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
-		if err == nil {
-			for _, run := range runs {
-				runId := run.GetRunId()
-				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
-				if err == nil {
-					for _, artifactPath := range artifactPaths {
-						artifactData, err := GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+		for _, run := range runs {
+			runId := run.GetRunId()
+			artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
+			if err == nil {
+				for _, artifactPath := range artifactPaths {
+					artifactData, err := GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+					if err != nil {
+						return err
+					} else {
+						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
 						if err != nil {
 							return err
-						} else {
-							err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
-							if err != nil {
-								return err
-							}
 						}
 					}
 				}
@@ -59,11 +57,11 @@ func DownloadArtifacts(
 // Retrieves the paths of all artifacts for a given test run using its runId.
 func GetArtifactPathsFromRestApi(
 	runId string,
-	apiServerUrl string,
-) ([]string, error) {
+	apiServerUrl string) ([]string, error) {
 
 	var err error = nil
 	var artifactPaths []string
+	log.Println("Retrieving artifact paths for the given run")
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
@@ -80,8 +78,9 @@ func GetArtifactPathsFromRestApi(
 			artifactPaths = append(artifactPaths, artifact.GetPath())
 		}
 	}
-
 	defer httpResponse.Body.Close()
+	log.Printf("%v artifact path(s) found", len(artifactPaths))
+
 	return artifactPaths, err
 }
 
@@ -99,47 +98,72 @@ func WriteArtifactToFileSystem(
 	bufferCapacity := 1024
 
 	pathParts := strings.Split(artifactPath, "/")
-	fileName := pathParts[len(pathParts)-1]
-	filePath := runDirectory + "/" + fileName
+	fileName := pathParts[len(pathParts) - 1]
+	targetFilePath := runDirectory + fileSystem.GetFilePathSeparator() + fileName
 
 	// Check if a new file should be created or if an existing one should be overwritten.
-	fileExists, err := fileSystem.Exists(filePath)
+	fileExists, err := fileSystem.Exists(targetFilePath)
 	if err == nil {
 		if fileExists && !shouldOverwrite {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, filePath)
 
-		} else {
-			err = fileSystem.MkdirAll(runDirectory)
-			if err == nil {
-				newFile, err := fileSystem.Create(filePath)
-				if err == nil {
+			// The --force flag was not provided, throw an error.
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
+			return err
+		}
 
-					// Set up a byte buffer to gradually read the downloaded file to avoid out-of-memory issues.
-					reader := bufio.NewReader(fileDownloaded)
-					buffer := make([]byte, bufferCapacity)
+		// Set up the directory structure and artifact file on the host's file system
+		var newFile io.Writer = nil
+		newFile, err = CreateEmptyArtifactFile(fileSystem, runDirectory, targetFilePath)
+		if err == nil {
+			log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
 
-					// Read a chunk of the downloaded file into the buffer and write the buffer's contents to the
-					// newly-created file.
-					for {
-						bytesRead, err := reader.Read(buffer)
-						if err != nil {
-							if err == io.EOF {
-								// There was nothing to read.
-								break
-							}
-							return err
-						}
+			// Set up a byte buffer to gradually read the downloaded file to avoid out-of-memory issues.
+			reader := bufio.NewReader(fileDownloaded)
+			buffer := make([]byte, bufferCapacity)
 
-						_, err = newFile.Write(buffer[:bytesRead])
-						if err != nil {
-							return err
-						}
+			// Read a chunk of the downloaded file into the buffer and write the buffer's contents to the
+			// newly-created file.
+			for {
+				bytesRead, err := reader.Read(buffer)
+				if err != nil {
+					if err == io.EOF {
+						// There was nothing else to read.
+						log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
+						break
 					}
+					return err
+				}
+
+				_, err = newFile.Write(buffer[:bytesRead])
+				if err != nil {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
+					return err
 				}
 			}
 		}
 	}
 	return err
+}
+
+// Creates the directory structure to the artifact that will be written.
+func CreateEmptyArtifactFile(
+	fileSystem utils.FileSystem,
+	runDirectory string,
+	targetFilePath string) (io.Writer, error) {
+	
+	var err error = nil
+	var newFile io.Writer = nil
+
+	err = fileSystem.MkdirAll(runDirectory)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_CREATE_FOLDERS, runDirectory, err.Error())
+	} else {
+		newFile, err = fileSystem.Create(targetFilePath)
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
+		}
+	}
+	return newFile, err
 }
 
 // Retrieves an artifact for a given test run using its runId from the ecosystem API.
@@ -149,6 +173,7 @@ func GetFileFromRestApi(
 	apiServerUrl string) (*os.File, error) {
 
 	var err error = nil
+	log.Printf("Downloading artifact '%s' from API server", artifactPath)
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
@@ -159,6 +184,8 @@ func GetFileFromRestApi(
 
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
+	} else {
+		log.Printf("Downloaded artifact '%s' from API server OK", artifactPath)
 	}
 
 	defer httpResponse.Body.Close()

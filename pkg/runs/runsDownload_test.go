@@ -4,7 +4,9 @@
 package runs
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -226,6 +228,92 @@ func NewRunsDownloadServletMock(
 //------------------------------------------------------------------
 // Test methods
 //------------------------------------------------------------------
+
+func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId := "xxx543xxx"
+	forceDownload := false
+
+	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyTxtArtifact}, []string{RUN_U27})
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewOverridableMockFileSystem()
+
+	mockFile := utils.MockFile{}
+	mockFile.VirtualFunction_Write = func(content []byte) (int, error) {
+		return 0, errors.New("simulating failed file write")
+	}
+
+	mockFileSystem.VirtualFunction_Create = func(path string) (io.Writer, error) {
+		return &mockFile, nil
+	}
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...)
+	assert.Contains(t, err.Error(), "GAL1042")
+}
+
+func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId := "xxx543xxx"
+	forceDownload := false
+
+	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyTxtArtifact}, []string{RUN_U27})
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewOverridableMockFileSystem()
+
+	mockFileSystem.VirtualFunction_Create = func(path string) (io.Writer, error) {
+		return nil, errors.New("simulating failed folder creation")
+	}
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...)
+	assert.Contains(t, err.Error(), "GAL1042")
+}
+
+func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId := "xxx543xxx"
+	forceDownload := false
+
+	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyTxtArtifact}, []string{RUN_U27})
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewOverridableMockFileSystem()
+
+	mockFileSystem.VirtualFunction_MkdirAll = func(path string) error {
+		return errors.New("simulating failed folder creation")
+	}
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...)
+	assert.Contains(t, err.Error(), "GAL1041")
+}
 
 func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t *testing.T) {
 	// Given ...
