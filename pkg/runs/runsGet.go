@@ -36,20 +36,40 @@ func GetRuns(
 	// Validate that if both FROM and TO are specified, FROM is older than TO
 	// Validate that the time unit is either 'w', 'd', 'h'
 
+	// Make a map of how many hours for each unit so can compare from and to values
+	var timeUnits = make(map[string]int)
+	timeUnits["w"] = 168
+	timeUnits["d"] = 24
+
 	regex := "(([0-9]+)([a-zA-Z])):(([0-9]+)([a-zA-Z]))"
 	re := regexp.MustCompile(regex)
 
 	submatches := re.FindAllStringSubmatch(age, -1)
 
-	from := submatches[0] // expecting something like 14d which will then break down into further matches
-	if len(submatches) > 1 {
-		to := submatches[1] // same as above
+	var fromValue int
+	var toValue int
+
+	fromString := submatches[0] // expecting something like 14d which will then break down into further matches
+	fromValue, err := getValueAsInt(fromString[1])
+	if err == nil {
+		fromValue = fromValue * timeUnits[fromString[2]]
 	}
 
-	var timeUnits = make(map[string]int)
-	// Make a map of how many hours for each unit
+	// If the user has also specified a TO age
+	if len(submatches) > 1 {
+		toString := submatches[1] // same as above
+		toValue, err := getValueAsInt(toString[1])
+		if err == nil {
+			toValue = toValue * timeUnits[toString[2]]
+		}
+	}
 
-	validateAgeString(age)
+	// FROM value has to be bigger than TO value
+	if fromValue >= toValue {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
+	}
+
+	// validateAgeString(age)
 
 	// TODO: Should we validate the runname? Can we ?
 	validFormatters := createFormatters()
@@ -69,53 +89,13 @@ func GetRuns(
 	return err
 }
 
-func getFromValue() {
-
-}
-
-func validateAgeString(ageString string) error {
-	var err error = nil
-
-	splitString := strings.Split(ageString, ":")
-	if len(splitString) > 1 { // The user has specified a FROM:TO age string
-		from, err := validateAgeValue(splitString[0])
-		if err == nil {
-			to, err := validateAgeValue(splitString[1])
-			if err == nil {
-				if from <= to {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, ageString)
-				}
-			}
-		}
-	} else { // The user has specified just a FROM age string
-		_, err = validateAgeValue(ageString)
-	}
-
-	return err
-}
-
-func validateAgeValue(value string) (int, error) {
-	var time int
-	var err error = nil
-
-	if timeAsString, found := strings.CutSuffix(value, "w"); found {
-		if time, err = strconv.Atoi(timeAsString); err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
-		}
-		time = time * 168 // Get a week as the number of hours
-	} else if timeAsString, found := strings.CutSuffix(value, "d"); found {
-		if time, err = strconv.Atoi(timeAsString); err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
-		}
-		time = time * 24 // Get a day as the number of hours
-	} else if timeAsString, found := strings.CutSuffix(value, "h"); found {
-		if time, err = strconv.Atoi(timeAsString); err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
-		}
-	} else {
+func getValueAsInt(value string) (int, error) {
+	var age int
+	var err error
+	if age, err = strconv.Atoi(value); err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
 	}
-	return time, err
+	return age, err
 }
 
 func createFormatters() map[string]formatters.RunsFormatter {
