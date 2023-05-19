@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -32,11 +33,12 @@ func GetRuns(
 	apiServerUrl string,
 ) error {
 
-	// TODO: validate the age parameter
-	// Validate that if both FROM and TO are specified, FROM is older than TO
+	// Validate the age parameter
 	// Validate that the time unit is either 'w', 'd', 'h'
+	// Validate that if both FROM and TO are specified, FROM is older than TO
 
 	// Make a map of how many hours for each unit so can compare from and to values consistently
+	// Can be extended to support other units
 	var timeUnits = make(map[string]int)
 	timeUnits["w"] = 168
 	timeUnits["d"] = 24
@@ -47,35 +49,39 @@ func GetRuns(
 
 	submatches := re.FindAllStringSubmatch(age, -1)
 
-	var fromValue int
-	var toValue int
+	var fromAge int
+	var toAge int
 
-	fromString := submatches[0] // expecting something like 14d which will then break down into further matches
-	fromValue, err := getValueAsInt(fromString[1])
-	if err == nil {
-		fromValue = fromValue * timeUnits[fromString[2]]
+	from := submatches[0] // expecting something like 14d which will then break down into further matches, 0 is 14d, 1 is 14, 2 is d
+	fromAge, err := getValueAsInt(from[1])
+	if err == nil && fromAge != 0 {
+		fromAge = fromAge * timeUnits[from[2]]
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
 	}
 
 	// If the user has also specified a TO age
 	if len(submatches) > 1 {
-		toString := submatches[1]
-		toValue, err := getValueAsInt(toString[1])
-		if err == nil {
-			toValue = toValue * timeUnits[toString[2]]
+		to := submatches[1]
+		toAge, err = getValueAsInt(to[1])
+		if err == nil && toAge != 0 {
+			toAge = toAge * timeUnits[to[2]]
+
+			// FROM value has to be bigger than TO value
+			if fromAge <= toAge {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
+			}
 		}
 	}
 
-	// FROM value has to be bigger than TO value
-	if fromValue >= toValue {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
-	}
+	// TODO: put the above in a function?
 
 	// TODO: Should we validate the runname? Can we ?
 	validFormatters := createFormatters()
 	chosenFormatter, err := validateOutputFormatFlagValue(outputFormatString, validFormatters)
 	if err == nil {
 		var runJson []galasaapi.Run
-		runJson, err = GetRunsFromRestApi(runName, age, timeService, apiServerUrl)
+		runJson, err = GetRunsFromRestApi(runName, fromAge, toAge, timeService, apiServerUrl)
 		if err == nil {
 			var outputText string
 			outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
@@ -153,7 +159,8 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 // Multiple test runs can be returned as the runName is not unique.
 func GetRunsFromRestApi(
 	runName string,
-	age string,
+	fromAgeHours int,
+	toAgeHours int,
 	timeService utils.TimeService,
 	apiServerUrl string,
 ) ([]galasaapi.Run, error) {
@@ -166,9 +173,15 @@ func GetRunsFromRestApi(
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	// TODO: get actual from time from age string
-	fromTime := timeService.Now()
-	toTime := timeService.Now()
+	now := timeService.Now()
+	fromTime := now.Add(-(time.Duration(fromAgeHours) * time.Hour)) // Add a minus, so subtract
+
+	var toTime time.Time
+	if toAgeHours == 0 { // a TO age wasn't provided so default to now
+		toTime = now
+	} else {
+		toTime = now.Add(-(time.Duration(toAgeHours) * time.Hour)) // Add a minus, so subtract
+	}
 
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
