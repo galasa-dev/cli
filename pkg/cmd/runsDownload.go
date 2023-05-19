@@ -13,14 +13,14 @@ import (
 )
 
 // Objective: Allow the user to do this:
-//    run download --name 12345
+//    runs download --name U123 [--force]
 // And then galasactl downloads the artifacts for the given run.
 
 var (
 	runsDownloadCmd = &cobra.Command{
 		Use:   "download",
-		Short: "Download the artifacts of a test runname which ran.",
-		Long:  "Download the artifacts of a test runname which ran and storing them in the current working directory",
+		Short: "Download the artifacts of a test run which ran.",
+		Long:  "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
 		Args:  cobra.NoArgs,
 		Run:   executeRunsDownload,
 	}
