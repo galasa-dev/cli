@@ -257,7 +257,7 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
-	// Then...)
+	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
 }
 
@@ -284,7 +284,7 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
-	// Then...)
+	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
 }
 
@@ -311,7 +311,7 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
-	// Then...)
+	// Then...
 	assert.Contains(t, err.Error(), "GAL1041")
 }
 
