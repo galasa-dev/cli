@@ -36,10 +36,11 @@ func GetRuns(
 	// Validate that if both FROM and TO are specified, FROM is older than TO
 	// Validate that the time unit is either 'w', 'd', 'h'
 
-	// Make a map of how many hours for each unit so can compare from and to values
+	// Make a map of how many hours for each unit so can compare from and to values consistently
 	var timeUnits = make(map[string]int)
 	timeUnits["w"] = 168
 	timeUnits["d"] = 24
+	timeUnits["h"] = 1
 
 	regex := "(([0-9]+)([a-zA-Z])):(([0-9]+)([a-zA-Z]))"
 	re := regexp.MustCompile(regex)
@@ -57,7 +58,7 @@ func GetRuns(
 
 	// If the user has also specified a TO age
 	if len(submatches) > 1 {
-		toString := submatches[1] // same as above
+		toString := submatches[1]
 		toValue, err := getValueAsInt(toString[1])
 		if err == nil {
 			toValue = toValue * timeUnits[toString[2]]
@@ -68,8 +69,6 @@ func GetRuns(
 	if fromValue >= toValue {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
 	}
-
-	// validateAgeString(age)
 
 	// TODO: Should we validate the runname? Can we ?
 	validFormatters := createFormatters()
