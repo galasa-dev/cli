@@ -1,10 +1,10 @@
 ## galasactl runs download
 
-Download the artifacts of a test runname which ran.
+Download the artifacts of a test run which ran.
 
 ### Synopsis
 
-Download the artifacts of a test runname which ran and storing them in the current working directory
+Download the artifacts of a test run which ran and store them in a directory within the current working directory
 
 ```
 galasactl runs download [flags]
