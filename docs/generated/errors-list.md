@@ -67,7 +67,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1064E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. No slash found.
 - GAL1065E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Too many slashes found.
 - GAL1066E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.
-- GAL1067E: Unsupported value '{}' for parameter --output. Supported values are: 'summary'.
+- GAL1067E: Unsupported value '{}' for parameter --format. Supported values are: {}
 - GAL1068E: Could not query run results. Reason: '{}'
 - GAL1069E: Could not open log file for writing. '{}' is a directory, the --log parameter should refer to a file path (existing or not), or '-' (the console)
 - GAL1070E: Could not get run artifacts. Reason: '{}'

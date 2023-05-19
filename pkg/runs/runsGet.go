@@ -7,6 +7,8 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"sort"
+	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -16,16 +18,6 @@ import (
 )
 
 // ---------------------------------------------------
-// As close as we can get to an enum in Go...
-type OutputFormat int64
-
-const (
-	OUTPUT_FORMAT_SUMMARY = OutputFormat(0)
-)
-
-const (
-	HTTP_STATUS_CODE_OK = 200
-)
 
 // GetRuns - performs all the logic to implement the `galasactl runs get` command,
 // but in a unit-testable manner.
@@ -37,17 +29,15 @@ func GetRuns(
 	apiServerUrl string,
 ) error {
 
-	var err error
-	var outputFormat OutputFormat
-
 	// TODO: Should we validate the runname? Can we ?
-	outputFormat, err = validateOutputFormatFlagValue(outputFormatString)
+	validFormatters := createFormatters()
+	chosenFormatter, err := validateOutputFormatFlagValue(outputFormatString, validFormatters)
 	if err == nil {
 		var runJson []galasaapi.Run
 		runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
 		if err == nil {
 			var outputText string
-			outputText, err = renderRuns(outputFormat, runJson)
+			outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
 			if err == nil {
 				err = writeOutput(outputText, console)
 			}
@@ -57,44 +47,56 @@ func GetRuns(
 	return err
 }
 
+func createFormatters() map[string]formatters.RunsFormatter {
+	validFormatters := make(map[string]formatters.RunsFormatter, 0)
+	summaryFormatter := formatters.NewSummaryFormatter()
+	validFormatters[summaryFormatter.GetName()] = summaryFormatter
+
+	detailedFormatter := formatters.NewDetailsFormatter()
+	validFormatters[detailedFormatter.GetName()] = detailedFormatter
+
+	return validFormatters
+}
+
 func writeOutput(outputText string, console utils.Console) error {
 	err := console.WriteString(outputText)
 	return err
 }
 
-// Displays the retrieved runs based on a given output format (e.g. summary, detailed, etc.).
-func renderRuns(outputFormat OutputFormat, runs []galasaapi.Run) (string, error) {
-	var err error = nil
-	var formattedOutput string
-	//can switch on the output format in the future. Currently this is all for outputFormat = 'summary'
-	switch outputFormat {
-	case OUTPUT_FORMAT_SUMMARY:
-		//outputFormat = 'summary'
-		formatter := formatters.NewSummaryFormatter()
-		formattedOutput, err = formatter.FormatRuns(runs)
+// getFormatterNamesString builds a string of comma separated, quoted formatter names
+func getFormatterNamesString(validFormatters map[string]formatters.RunsFormatter) string {
+	// extract names into a sorted slice
+	names := make([]string, 0, len(validFormatters))
+	for name := range validFormatters {
+		names = append(names, name)
+	}
+	sort.Strings(names)
 
-	default:
-		// Programming error. Should have validated all the output formats we support.
+	// render list of sorted names into string
+	formatterNames := strings.Builder{}
+
+	for count, formatterName := range names {
+
+		if count != 0 {
+			formatterNames.WriteString(", ")
+		}
+		formatterNames.WriteString("'" + formatterName + "'")
 	}
 
-	return formattedOutput, err
-
+	return formatterNames.String()
 }
 
 // Ensures the user has provided a valid output format as part of the "runs get" command.
-func validateOutputFormatFlagValue(outputFormatString string) (OutputFormat, error) {
+func validateOutputFormatFlagValue(outputFormatString string, validFormatters map[string]formatters.RunsFormatter) (formatters.RunsFormatter, error) {
 	var err error
-	var outputFormat OutputFormat
 
-	switch outputFormatString {
-	case "summary":
-		outputFormat = OUTPUT_FORMAT_SUMMARY
+	chosenFormatter, isPresent := validFormatters[outputFormatString]
 
-	default:
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString)
+	if !isPresent {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString, getFormatterNamesString(validFormatters))
 	}
 
-	return outputFormat, err
+	return chosenFormatter, err
 }
 
 // Retrieves test runs from the ecosystem API that match a given runName.
@@ -133,7 +135,7 @@ func GetRunsFromRestApi(
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 		} else {
-			if httpResponse.StatusCode != HTTP_STATUS_CODE_OK {
+			if httpResponse.StatusCode != http.StatusOK {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 			} else {
 
