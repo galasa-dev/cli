@@ -7,7 +7,9 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
@@ -23,18 +25,38 @@ import (
 // but in a unit-testable manner.
 func GetRuns(
 	runName string,
+	age string,
 	outputFormatString string,
 	timeService utils.TimeService,
 	console utils.Console,
 	apiServerUrl string,
 ) error {
 
+	// TODO: validate the age parameter
+	// Validate that if both FROM and TO are specified, FROM is older than TO
+	// Validate that the time unit is either 'w', 'd', 'h'
+
+	regex := "(([0-9]+)([a-zA-Z])):(([0-9]+)([a-zA-Z]))"
+	re := regexp.MustCompile(regex)
+
+	submatches := re.FindAllStringSubmatch(age, -1)
+
+	from := submatches[0] // expecting something like 14d which will then break down into further matches
+	if len(submatches) > 1 {
+		to := submatches[1] // same as above
+	}
+
+	var timeUnits = make(map[string]int)
+	// Make a map of how many hours for each unit
+
+	validateAgeString(age)
+
 	// TODO: Should we validate the runname? Can we ?
 	validFormatters := createFormatters()
 	chosenFormatter, err := validateOutputFormatFlagValue(outputFormatString, validFormatters)
 	if err == nil {
 		var runJson []galasaapi.Run
-		runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
+		runJson, err = GetRunsFromRestApi(runName, age, timeService, apiServerUrl)
 		if err == nil {
 			var outputText string
 			outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
@@ -45,6 +67,55 @@ func GetRuns(
 	}
 
 	return err
+}
+
+func getFromValue() {
+
+}
+
+func validateAgeString(ageString string) error {
+	var err error = nil
+
+	splitString := strings.Split(ageString, ":")
+	if len(splitString) > 1 { // The user has specified a FROM:TO age string
+		from, err := validateAgeValue(splitString[0])
+		if err == nil {
+			to, err := validateAgeValue(splitString[1])
+			if err == nil {
+				if from <= to {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, ageString)
+				}
+			}
+		}
+	} else { // The user has specified just a FROM age string
+		_, err = validateAgeValue(ageString)
+	}
+
+	return err
+}
+
+func validateAgeValue(value string) (int, error) {
+	var time int
+	var err error = nil
+
+	if timeAsString, found := strings.CutSuffix(value, "w"); found {
+		if time, err = strconv.Atoi(timeAsString); err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
+		}
+		time = time * 168 // Get a week as the number of hours
+	} else if timeAsString, found := strings.CutSuffix(value, "d"); found {
+		if time, err = strconv.Atoi(timeAsString); err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
+		}
+		time = time * 24 // Get a day as the number of hours
+	} else if timeAsString, found := strings.CutSuffix(value, "h"); found {
+		if time, err = strconv.Atoi(timeAsString); err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
+		}
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
+	}
+	return time, err
 }
 
 func createFormatters() map[string]formatters.RunsFormatter {
@@ -103,6 +174,7 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 // Multiple test runs can be returned as the runName is not unique.
 func GetRunsFromRestApi(
 	runName string,
+	age string,
 	timeService utils.TimeService,
 	apiServerUrl string,
 ) ([]galasaapi.Run, error) {
@@ -115,7 +187,10 @@ func GetRunsFromRestApi(
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
+	// TODO: get actual from time from age string
+	fromTime := timeService.Now()
 	toTime := timeService.Now()
+
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 
@@ -126,6 +201,7 @@ func GetRunsFromRestApi(
 		log.Printf("Requesting page '%d' ", pageNumberWanted)
 		runData, httpResponse, err = restClient.ResultArchiveStoreAPIApi.
 			GetRasSearchRuns(context).
+			From(fromTime).
 			To(toTime).
 			Runname(runName).
 			Page(pageNumberWanted).
