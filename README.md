@@ -252,8 +252,8 @@ The test will attempt to connect with a JDB java debugger based on some configur
 
 The 'port' used to connect the testcase to the java debugger needs to be configured.
 - The default value is 2970
-- The above value can be overridden by adding the optional property `framework.jvm.local.launch.debug.port` into the `bootstrap.properties` file.
-  - For example: `framework.jvm.local.launch.debug.port=2971`
+- The above value can be overridden by adding the optional property `galasactl.jvm.local.launch.debug.port` into the `bootstrap.properties` file.
+  - For example: `galasactl.jvm.local.launch.debug.port=2971`
   - This parameter is ignored if the `--debug` argument isn't supplied to the `galasactl runs submit local` command.
 - The above value can be overridden by using the optional argument `--debugPort` to the `galasactl runs submit local` command.
 
@@ -269,8 +269,8 @@ by the JDB debugger.
 
 Configure the debug mode like this:
 - The default value is `listen`.
-- The above default value can be overridden by adding the optional property `framework.jvm.local.launch.debug.mode` into the `bootstrap.properties` file.
-  - For example: `framework.jvm.local.launch.debug.mode=attach`
+- The above default value can be overridden by adding the optional property `galasactl.jvm.local.launch.debug.mode` into the `bootstrap.properties` file.
+  - For example: `galasactl.jvm.local.launch.debug.mode=attach`
 - The above value can be overridden by using the optional argument `--debugMode` to the `galasactl runs submit local` command.
 
 Your IDE would typically need to be configured with the opposite type of connection mode in order to attach the JDB debugger to the running Galasa test.
