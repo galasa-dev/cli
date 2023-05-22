@@ -101,7 +101,7 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 			"test-name    :  dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor    :  galasa\n" +
 			"bundle       :  dev.galasa\n" +
-			"run-log      :  https://127.0.0.1/ras/run/cbd-123/runlog\n" +
+			"run-log      :  https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 1000\n"
@@ -138,7 +138,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"test-name    :  dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor    :  galasa\n" +
 			"bundle       :  dev.galasa\n" +
-			"run-log      :  https://127.0.0.1/ras/run/cbd-123/runlog\n" +
+			"run-log      :  https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 1000\n" +
@@ -155,7 +155,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"test-name    :  dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor    :  galasa\n" +
 			"bundle       :  dev.galasa\n" +
-			"run-log      :  https://127.0.0.1/ras/run/cbd-456/runlog\n" +
+			"run-log      :  https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
 			"\n" +
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 1000\n" +
@@ -172,7 +172,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"test-name    :  dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor    :  galasa\n" +
 			"bundle       :  dev.galasa\n" +
-			"run-log      :  https://127.0.0.1/ras/run/cbd-789/runlog\n" +
+			"run-log      :  https://127.0.0.1/ras/runs/cbd-789/runlog\n" +
 			"\n" +
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 1000\n"
@@ -207,7 +207,7 @@ func TestNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) {
 			"test-name    :  dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor    :  galasa\n" +
 			"bundle       :  dev.galasa\n" +
-			"run-log      :  https://127.0.0.1/ras/run/cbd-123/runlog\n" +
+			"run-log      :  https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 1000\n"
@@ -242,7 +242,7 @@ func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 			"test-name    :  dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor    :  galasa\n" +
 			"bundle       :  dev.galasa\n" +
-			"run-log      :  https://127.0.0.1/ras/run/cbd-123/runlog\n" +
+			"run-log      :  https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time          end-time duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38          \n"
