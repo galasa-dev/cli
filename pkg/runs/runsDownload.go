@@ -92,7 +92,7 @@ func WriteArtifactToFileSystem(
 
 	pathParts := strings.Split(artifactPath, "/")
 	fileName := pathParts[len(pathParts) - 1]
-	targetFilePath := filepath.Join(runDirectory, fileName)
+	targetFilePath := filepath.Join(runDirectory, artifactPath)
 
 	// Check if a new file should be created or if an existing one should be overwritten.
 	fileExists, err := fileSystem.Exists(targetFilePath)
@@ -108,7 +108,7 @@ func WriteArtifactToFileSystem(
 			if err == nil {
 				log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
 	
-				err = WriteToFile(fileDownloaded, newFile, targetFilePath)
+				err = TransferContent(fileDownloaded, newFile, targetFilePath)
 				if err == nil {
 					log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
 				}
@@ -120,7 +120,7 @@ func WriteArtifactToFileSystem(
 
 // Writes the contents of a given source file into a given target file using a buffer
 // to read and write the contents in chunks.
-func WriteToFile(sourceFile io.Reader, targetFile io.Writer, targetFilePath string) error {
+func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath string) error {
 	var err error = nil
 
 	// Set buffer capacity to 1KB

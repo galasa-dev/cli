@@ -319,8 +319,8 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockConsole := utils.NewMockConsole()
 	
 	mockFileSystem := utils.NewMockFileSystem()
-	mockFileSystem.WriteTextFile(runName + "/dummy.txt", "dummy text file")
-	mockFileSystem.WriteTextFile(runName + "/run.log", "dummy log")
+	mockFileSystem.WriteTextFile(runName + dummyTxtArtifact.path, "dummy text file")
+	mockFileSystem.WriteTextFile(runName + dummyRunLog.path, "dummy log")
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
@@ -328,10 +328,10 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	// Then...
 	assert.Nil(t, err)
 
-	downloadedTxtArtifactContents, err := mockFileSystem.ReadTextFile(runName + "/dummy.txt")
+	downloadedTxtArtifactContents, err := mockFileSystem.ReadTextFile(runName + dummyTxtArtifact.path)
 	assert.Nil(t, err)
 
-	downloadedRunLogContents, err := mockFileSystem.ReadTextFile(runName + "/run.log")
+	downloadedRunLogContents, err := mockFileSystem.ReadTextFile(runName + dummyRunLog.path)
 	assert.Nil(t, err)
 
 	assert.Equal(t, dummyTxtArtifact.path, downloadedTxtArtifactContents)
@@ -372,10 +372,13 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	runId := "xxx543xxx"
 	forceDownload := false
 
+	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
+	dummyGzArtifact := NewMockArtifact("/artifacts/dummy.gz", "application/x-gzip", 342)
+	dummyRunLogArtifact := NewMockArtifact("/run.log", "text/plain", 203)
 	mockArtifacts := []MockArtifact{
-		*NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024),
-		*NewMockArtifact("/artifacts/dummy.gz", "application/x-gzip", 342),
-		*NewMockArtifact("/run.log", "text/plain", 203),
+		*dummyTxtArtifact,
+		*dummyGzArtifact,
+		*dummyRunLogArtifact,
 	}
 	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, mockArtifacts, []string{RUN_U27})
 	defer server.Close()
@@ -390,9 +393,9 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + "/dummy.txt")
-	downloadedGzArtifactExists, _ := mockFileSystem.Exists(runName + "/dummy.gz")
-	downloadedRunLogArtifactExists, _ := mockFileSystem.Exists(runName + "/run.log")
+	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.path)
+	downloadedGzArtifactExists, _ := mockFileSystem.Exists(runName + dummyGzArtifact.path)
+	downloadedRunLogArtifactExists, _ := mockFileSystem.Exists(runName + dummyRunLogArtifact.path)
 
 	assert.Nil(t, err)
 	assert.True(t, downloadedTxtArtifactExists)
@@ -420,7 +423,7 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + "/dummy.txt")
+	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + dummyArtifact.path)
 
 	assert.Nil(t, err)
 	assert.True(t, downloadedArtifactExists)
