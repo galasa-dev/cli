@@ -170,7 +170,7 @@ func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) 
 	var err error = nil
 	log.Printf("Downloading artifact '%s' from API server", artifactPath)
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
+	// A HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
 	fileDownloaded, httpResponse, err := restClient.ResultArchiveStoreAPIApi.
