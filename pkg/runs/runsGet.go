@@ -17,6 +17,10 @@ import (
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
+var (
+	validFormatters = createFormatters()
+)
+
 // ---------------------------------------------------
 
 // GetRuns - performs all the logic to implement the `galasactl runs get` command,
@@ -29,24 +33,31 @@ func GetRuns(
 	apiServerUrl string,
 ) error {
 
-	// TODO: Should we validate the runname? Can we ?
-	validFormatters := createFormatters()
-	chosenFormatter, err := validateOutputFormatFlagValue(outputFormatString, validFormatters)
+	// Validate the runName as best we can without contacting the ecosystem.
+	err := ValidateRunName(runName)
+
 	if err == nil {
-		var runJsonArray []galasaapi.Run
-		runJsonArray, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
+
+		var chosenFormatter formatters.RunsFormatter
+		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
-			var outputText string
-			if chosenFormatter.GetName() != "summary" {
-				runJsonArray, err = GetRunDetailsFromRasSearchRuns(runJsonArray, apiServerUrl)
-			}
+			var runJson []galasaapi.Run
+			runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
 			if err == nil {
-				outputText, err = chosenFormatter.FormatRuns(runJsonArray, apiServerUrl)
+
+				// Some formatters need extra fields filled-in so they can be displayed.
+				if chosenFormatter.IsNeedingDetails() {
+					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
+				}
+
 				if err == nil {
-					err = writeOutput(outputText, console)
+					var outputText string
+					outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
+					if err == nil {
+						err = writeOutput(outputText, console)
+					}
 				}
 			}
-
 		}
 	}
 

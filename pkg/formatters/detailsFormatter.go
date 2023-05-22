@@ -31,6 +31,10 @@ func (*DetailsFormatter) GetName() string {
 	return DETAILS_FORMATTER_NAME
 }
 
+func (*DetailsFormatter) IsNeedingDetails() bool {
+	return true
+}
+
 func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error) {
 	var result string = ""
 	var err error = nil
