@@ -39,14 +39,10 @@ func DownloadArtifacts(
 			artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
 			if err == nil {
 				for _, artifactPath := range artifactPaths {
-					artifactData, err := GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
-					if err != nil {
-						return err
-					} else {
+					var artifactData *os.File
+					artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+					if err == nil {
 						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
-						if err != nil {
-							return err
-						}
 					}
 				}
 			}
@@ -107,36 +103,37 @@ func WriteArtifactToFileSystem(
 
 			// The --force flag was not provided, throw an error.
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
-			return err
-		}
-
-		// Set up the directory structure and artifact file on the host's file system
-		var newFile io.Writer = nil
-		newFile, err = CreateEmptyArtifactFile(fileSystem, targetFilePath)
-		if err == nil {
-			log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
-
-			// Set up a byte buffer to gradually read the downloaded file to avoid out-of-memory issues.
-			reader := bufio.NewReader(fileDownloaded)
-			buffer := make([]byte, bufferCapacity)
-
-			// Read a chunk of the downloaded file into the buffer and write the buffer's contents to the
-			// newly-created file.
-			for {
-				bytesRead, err := reader.Read(buffer)
-				if err != nil {
-					if err == io.EOF {
-						// There was nothing else to read.
-						log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
+		} else {
+			// Set up the directory structure and artifact file on the host's file system
+			var newFile io.Writer = nil
+			newFile, err = CreateEmptyArtifactFile(fileSystem, targetFilePath)
+			if err == nil {
+				log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
+	
+				// Set up a byte buffer to gradually read the downloaded file to avoid out-of-memory issues.
+				reader := bufio.NewReader(fileDownloaded)
+				buffer := make([]byte, bufferCapacity)
+	
+				// Read a chunk of the downloaded file into the buffer and write the buffer's contents to the
+				// newly-created file.
+				for {
+					var bytesRead int
+					bytesRead, err = reader.Read(buffer)
+					if err != nil {
+						if err == io.EOF {
+							// There was nothing else to read.
+							log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
+							err = nil
+							break
+						}
 						break
 					}
-					return err
-				}
-
-				_, err = newFile.Write(buffer[:bytesRead])
-				if err != nil {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
-					return err
+	
+					_, err = newFile.Write(buffer[:bytesRead])
+					if err != nil {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
+						break
+					}
 				}
 			}
 		}
