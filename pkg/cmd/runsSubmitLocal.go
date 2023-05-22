@@ -5,9 +5,11 @@ package cmd
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
+	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/embedded"
 	"github.com/galasa.dev/cli/pkg/launcher"
 	"github.com/galasa.dev/cli/pkg/runs"
@@ -49,6 +51,28 @@ func init() {
 			"The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' "+
 			"Multiple instances of this flag can be used to describe multiple obr bundles.")
 
+	runsSubmitLocalCmd.Flags().Uint32Var(&runsSubmitLocalCmdParams.DebugPort, "debugPort", 0,
+		"The port to use when the --debug option causes the testcase to connect to a java debugger. "+
+			"The default value used is "+strconv.FormatUint(uint64(launcher.DEBUG_PORT_DEFAULT), 10)+" which can be "+
+			"overridden by the '"+api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT+"' property in the bootstrap file, "+
+			"which in turn can be overridden by this explicit parameter on the galasactl command.",
+	)
+
+	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.DebugMode, "debugMode", "",
+		"The mode to use when the --debug option causes the testcase to connect to a Java debugger. "+
+			"Valid values are 'listen' or 'attach'. "+
+			"'listen' means the testcase JVM will pause on startup, waiting for the Java debugger to connect to the debug port "+
+			"(see the --debugPort option). "+
+			"'attach' means the testcase JVM will pause on startup, trying to attach to a java debugger which is listening on the debug port. "+
+			"The default value is 'listen' but can be overridden by the '"+api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE+"' property in the bootstrap file, "+
+			"which in turn can be overridden by this explicit parameter on the galasactl command.",
+	)
+
+	runsSubmitLocalCmd.Flags().BoolVar(&runsSubmitLocalCmdParams.IsDebugEnabled, "debug", false,
+		"When set (or true) the debugger pauses on startup and tries to connect to a Java debugger. "+
+			"The connection is established using the --debugMode and --debugPort values.",
+	)
+
 	runs.AddCommandFlags(runsSubmitLocalCmd, &submitLocalSelectionFlags)
 
 	runsSubmitCmd.AddCommand(runsSubmitLocalCmd)
@@ -78,6 +102,14 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	// Read the bootstrap properties.
+	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+	var bootstrapData *api.BootstrapData
+	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
+	if err != nil {
+		panic(err)
+	}
+
 	timeService := utils.NewRealTimeService()
 
 	// the submit is targetting a local JVM
@@ -88,7 +120,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 
 	var launcherInstance launcher.Launcher
 	launcherInstance, err = launcher.NewJVMLauncher(
-		env, fileSystem, embeddedFileSystem,
+		bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
 		runsSubmitLocalCmdParams, timeService,
 		processFactory, galasaHome)
 

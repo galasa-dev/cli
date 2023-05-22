@@ -174,6 +174,7 @@ function launch_test_on_ecosystem_with_portfolio {
     --noexitcodeontestfailures \
     --log -"
 
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     $cmd | tee runs-submit-output.txt # Store the output of galasactl runs submit to use later
 
     rc=$?
@@ -194,8 +195,15 @@ function get_result_with_runname {
     cd ${BASEDIR}/temp
 
     # Get the RunName from the output of galasactl runs submit
-    cat runs-submit-output.txt | grep -o "Run.*-" | tail -1  > line.txt # Gets the line from the last part of the output stream the RunName is found in
-    sed 's/Run //; s/ -//' line.txt > runname.txt # Get just the RunName from the line
+
+    # Gets the line from the last part of the output stream the RunName is found in
+    cat runs-submit-output.txt | grep -o "Run.*-" | tail -1  > line.txt 
+
+    # Get just the RunName from the line. 
+    # There is a line in the output like this:
+    #   Run C6967 - inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
+    # Environment failure of the test results in "C6976(EnvFail)" ... so the '('...')' part needs removing also.
+    sed 's/Run //; s/ -//; s/[(].*[)]//;' line.txt > runname.txt 
     runname=$(cat runname.txt)
 
     cmd="${BASEDIR}/bin/${binary} runs get \

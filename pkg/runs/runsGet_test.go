@@ -167,8 +167,8 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if r.URL.Path != "/ras/run" {
-			t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
+		if r.URL.Path != "/ras/runs" {
+			t.Errorf("Expected to request '/ras/runs', got: %s", r.URL.Path)
 		}
 		if r.Header.Get("Accept") != "application/json" {
 			t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
@@ -299,7 +299,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 				"test-name    :  myTestPackage.MyTestName\n" +
 				"requestor    :  unitTesting\n" +
 				"bundle       :  myBundleId\n" +
-				"run-log      :  " + apiServerUrl + "/ras/run/xxx876xxx/runlog\n" +
+				"run-log      :  " + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n" +
 				"\n" +
 				"method           type status result  start-time          end-time            duration(ms)\n" +
 				"myTestMethodName test Done   Success 2023-05-10 06:00:13 2023-05-10 06:03:11 178000\n"
