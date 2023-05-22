@@ -81,22 +81,6 @@ const (
 			 "contentType":	"application/json"
 		 }]
 	}`
-
-	ROOT_ARTIFACTS = `{
-		"path": "/run.log",
-		"contentType": "text/plain",
-		"size": 2048
-	},
-	{
-		"path": "/structure.json",
-		"contentType": "application/json",
-		"size": 24
-	},
-	{
-		"path": "/artifacts.properties",
-		"contentType": "text/plain",
-		"size": 80
-	}`
 )
 
 type MockArtifact struct {
