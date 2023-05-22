@@ -38,7 +38,7 @@ func DownloadArtifacts(
 			artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
 			if err == nil {
 				for _, artifactPath := range artifactPaths {
-					var artifactData io.ReadWriter
+					var artifactData io.Reader
 					artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 					if err == nil {
 						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
@@ -85,11 +85,10 @@ func WriteArtifactToFileSystem(
 	fileSystem utils.FileSystem,
 	runDirectory string,
 	artifactPath string,
-	fileDownloaded io.ReadWriter,
+	fileDownloaded io.Reader,
 	shouldOverwrite bool) error {
 
 	var err error = nil
-	bufferCapacity := 1024
 
 	pathParts := strings.Split(artifactPath, "/")
 	fileName := pathParts[len(pathParts) - 1]
@@ -109,32 +108,42 @@ func WriteArtifactToFileSystem(
 			if err == nil {
 				log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
 	
-				// Set up a byte buffer to gradually read the downloaded file to avoid out-of-memory issues.
-				reader := bufio.NewReader(fileDownloaded)
-				buffer := make([]byte, bufferCapacity)
-	
-				// Read a chunk of the downloaded file into the buffer and write the buffer's contents to the
-				// newly-created file.
-				for {
-					var bytesRead int
-					bytesRead, err = reader.Read(buffer)
-					if err != nil {
-						if err == io.EOF {
-							// There was nothing else to read.
-							log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
-							err = nil
-							break
-						}
-						break
-					}
-	
-					_, err = newFile.Write(buffer[:bytesRead])
-					if err != nil {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
-						break
-					}
+				err = WriteToFile(fileDownloaded, newFile, targetFilePath)
+				if err == nil {
+					log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
 				}
 			}
+		}
+	}
+	return err
+}
+
+// Writes the contents of a given source file into a given target file using a buffer
+// to read and write the contents in chunks.
+func WriteToFile(sourceFile io.Reader, targetFile io.Writer, targetFilePath string) error {
+	var err error = nil
+
+	// Set buffer capacity to 1KB
+	bufferCapacity := 1024
+
+	// Set up a byte buffer to gradually read the downloaded file to avoid out-of-memory issues.
+	reader := bufio.NewReader(sourceFile)
+	buffer := make([]byte, bufferCapacity)
+	for {
+		var bytesRead int
+		bytesRead, err = reader.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				// There was nothing else to read.
+				err = nil
+			}
+			break
+		}
+
+		_, err = targetFile.Write(buffer[:bytesRead])
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
+			break
 		}
 	}
 	return err
@@ -161,7 +170,7 @@ func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string)
 }
 
 // Retrieves an artifact for a given test run using its runId from the ecosystem API.
-func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (io.ReadWriter, error) {
+func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (io.Reader, error) {
 
 	var err error = nil
 	log.Printf("Downloading artifact '%s' from API server", artifactPath)
@@ -179,6 +188,6 @@ func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) 
 		log.Printf("Downloaded artifact '%s' from API server OK", artifactPath)
 	}
 
-	defer httpResponse.Body.Close()
+	httpResponse.Body.Close()
 	return fileDownloaded, err
 }
