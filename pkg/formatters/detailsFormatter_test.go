@@ -79,11 +79,14 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 	apiServerUrl := "https://127.0.0.1"
 
 	methods := make([]galasaapi.TestMethod, 0)
-	method1 := createMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
+	method1 := createMethod("testCoreIvtTest", "test", "finished", "passed",
+		"2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
 	methods = append(methods, method1)
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953", "2023-05-05T06:00:15.654565Z", methods)
+	run1 := createRunForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa",
+		"dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z",
+		"2023-05-05T06:00:14.496953", "2023-05-05T06:00:15.654565Z", methods)
 	runs = append(runs, run1)
 
 	// When...

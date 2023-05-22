@@ -96,7 +96,7 @@ func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
 		{"test-name", ":  " + run.TestStructure.GetTestName()},
 		{"requestor", ":  " + run.TestStructure.GetRequestor()},
 		{"bundle", ":  " + run.TestStructure.GetBundle()},
-		{"run-log", ":  " + apiServerUrl + "/ras/run/" + run.GetRunId() + "/runlog"},
+		{"run-log", ":  " + apiServerUrl + "/ras/runs/" + run.GetRunId() + "/runlog"},
 	}
 	return table
 }
