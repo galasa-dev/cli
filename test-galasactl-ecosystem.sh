@@ -203,7 +203,7 @@ function get_result_with_runname {
     # There is a line in the output like this:
     #   Run C6967 - inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
     # Environment failure of the test results in "C6976(EnvFail)" ... so the '('...')' part needs removing also.
-    sed 's/Run //; s/ -//; s/\(.*)//;' line.txt > runname.txt 
+    sed 's/Run //; s/ -//; s/\(.*\)//;' line.txt > runname.txt 
     runname=$(cat runname.txt)
 
     cmd="${BASEDIR}/bin/${binary} runs get \
