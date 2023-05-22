@@ -8,7 +8,6 @@ import (
 	"context"
 	"io"
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -39,7 +38,7 @@ func DownloadArtifacts(
 			artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
 			if err == nil {
 				for _, artifactPath := range artifactPaths {
-					var artifactData *os.File
+					var artifactData io.ReadWriter
 					artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 					if err == nil {
 						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
@@ -86,7 +85,7 @@ func WriteArtifactToFileSystem(
 	fileSystem utils.FileSystem,
 	runDirectory string,
 	artifactPath string,
-	fileDownloaded *os.File,
+	fileDownloaded io.ReadWriter,
 	shouldOverwrite bool) error {
 
 	var err error = nil
@@ -162,7 +161,7 @@ func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string)
 }
 
 // Retrieves an artifact for a given test run using its runId from the ecosystem API.
-func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (*os.File, error) {
+func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (io.ReadWriter, error) {
 
 	var err error = nil
 	log.Printf("Downloading artifact '%s' from API server", artifactPath)
