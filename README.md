@@ -280,6 +280,8 @@ the testcase is launched.
 
 To configure the different IDEs to connect to a local testcase in `--debug` mode, follow these instructions:
 - For Microsoft vscode see [here](./docs/vscode/debug_in_vscode.md)
+- For IntelliJ see [here](./docs/intellij/debug_in_intellij.md)
+- For Eclipse see [here](./docs/eclipse/debug_in_eclipse.md)
 
 
 ## runs get
