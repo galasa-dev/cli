@@ -194,6 +194,7 @@ function build_executables {
     fi
 
     h2 "Building new binaries..."
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     make all | tee ${BASEDIR}/build/compile-log.txt
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}. See log at ${BASEDIR}/build/compile-log.txt" ; exit 1 ; fi
     success "New binaries built - OK"
@@ -326,6 +327,7 @@ function run_test_java_minus_jar_method {
 
 EOF
 
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
     java -jar ${BOOT_JAR_PATH} \
     --localmaven file:${M2_PATH}/repository/ \
@@ -667,6 +669,7 @@ function cleanup_temp {
 download_dependencies
 generate_rest_client
 build_executables
+
 generate_galasactl_documentation
 
 
