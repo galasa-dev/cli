@@ -194,8 +194,9 @@ function build_executables {
     fi
 
     h2 "Building new binaries..."
-    make all
-    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+    make all | tee ${BASEDIR}/build/compile-log.txt
+    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}. See log at ${BASEDIR}/build/compile-log.txt" ; exit 1 ; fi
     success "New binaries built - OK"
 }
 
@@ -326,6 +327,7 @@ function run_test_java_minus_jar_method {
 
 EOF
 
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
     java -jar ${BOOT_JAR_PATH} \
     --localmaven file:${M2_PATH}/repository/ \
@@ -480,6 +482,8 @@ function galasa_home_init {
 
     cd ${BASEDIR}/temp
 
+    export GALASA_HOME=${BASEDIR}/temp/home
+
     cmd="${BASEDIR}/bin/${galasactl_command} local init \
     --log -"
 
@@ -594,7 +598,7 @@ function submit_local_test {
     export GALASA_VERSION="0.27.0"
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
-    export BOOT_JAR_PATH=~/.galasa/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
+    export BOOT_JAR_PATH=${GALASA_HOME}/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
 
 
     # Local .m2 content over-rides these anyway...
@@ -602,6 +606,8 @@ function submit_local_test {
     export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
     # else go to maven central
     #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
+
+    unset GALASA_BOOTSTRAP
 
     ${BASEDIR}/bin/${galasactl_command} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
@@ -663,6 +669,7 @@ function cleanup_temp {
 download_dependencies
 generate_rest_client
 build_executables
+
 generate_galasactl_documentation
 
 

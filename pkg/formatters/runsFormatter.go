@@ -20,6 +20,12 @@ const (
 type RunsFormatter interface {
 	FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error)
 	GetName() string
+
+	// IsNeedingDetails - Does this formatter require all of the detailed fields to be filled-in,
+	// so they can be displayed ? True if so, false otherwise.
+	// The caller may need to make sure such things are gathered before calling, and some
+	// formatters may not need all the detail.
+	IsNeedingDetails() bool
 }
 
 func calculateMaxLengthOfEachColumn(table [][]string) []int {

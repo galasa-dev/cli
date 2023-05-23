@@ -9,14 +9,20 @@ galasactl: bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasac
 # When executed, the .md produced contain up-to-date information on tool syntax.
 gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darwin-amd64 bin/gendocs-galasactl-linux-amd64
 
-tests: galasactl-source
+tests: galasactl-source build/coverage.txt build/coverage.html
+	
+build/coverage.out : galasactl-source
 	mkdir -p build
-	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/formatters ./pkg/...
+	go test -v -cover -coverprofile=build/coverage.out -coverpkg ./pkg/cmd,./pkg/formatters,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs ./pkg/...
+
+build/coverage.html : build/coverage.out
 	go tool cover -html=build/coverage.out -o build/coverage.html
+
+build/coverage.txt : build/coverage.out
 	go tool cover -func=build/coverage.out > build/coverage.txt
 	cat build/coverage.txt
 
-galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/launcher/*.go ./pkg/formatters/*.go
+galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/formatters/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/launcher/*.go
 
 # when the gradle stuff works, we can rely on this jar being here: ./pkg/embedded/templates/galasahome/lib/*.jar 
 
@@ -45,5 +51,7 @@ bin/gendocs-galasactl-darwin-amd64 : galasactl-source
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/gendocs-galasactl-darwin-amd64 ./cmd/gendocs-galasactl
 
 clean:
-	rm -rf bin
+	rm -fr bin/galasactl*
+	rm -fr build/*
+	rm -fr build/coverage*
 
