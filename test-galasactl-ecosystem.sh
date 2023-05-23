@@ -174,6 +174,7 @@ function launch_test_on_ecosystem_with_portfolio {
     --noexitcodeontestfailures \
     --log -"
 
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     $cmd | tee runs-submit-output.txt # Store the output of galasactl runs submit to use later
 
     rc=$?
@@ -194,8 +195,15 @@ function get_result_with_runname {
     cd ${BASEDIR}/temp
 
     # Get the RunName from the output of galasactl runs submit
-    cat runs-submit-output.txt | grep -o "Run.*-" | tail -1  > line.txt # Gets the line from the last part of the output stream the RunName is found in
-    sed 's/Run //; s/ -//' line.txt > runname.txt # Get just the RunName from the line
+
+    # Gets the line from the last part of the output stream the RunName is found in
+    cat runs-submit-output.txt | grep -o "Run.*-" | tail -1  > line.txt 
+
+    # Get just the RunName from the line. 
+    # There is a line in the output like this:
+    #   Run C6967 - inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
+    # Environment failure of the test results in "C6976(EnvFail)" ... so the '('...')' part needs removing also.
+    sed 's/Run //; s/ -//; s/[(].*[)]//;' line.txt > runname.txt 
     runname=$(cat runname.txt)
 
     cmd="${BASEDIR}/bin/${binary} runs get \
@@ -237,7 +245,7 @@ function runs_get_check_summary_format_output {
     $cmd | tee $output_file
 
     # Check that the full test name is output
-    cat $output_file | grep "${GALASA_TEST_NAME_LONG}"
+    cat $output_file | grep "${GALASA_TEST_NAME_LONG}" -q
     rc=$?
     # We expect a return code of '0' because the test name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -250,7 +258,7 @@ function runs_get_check_summary_format_output {
 
     for header in "${headers[@]}"
     do
-        cat $output_file | grep "$header"
+        cat $output_file | grep "$header" -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then 
@@ -290,7 +298,7 @@ function runs_get_check_details_format_output {
 
 
     # Check that the full test name is output and formatted
-    cat $output_file | grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}"
+    cat $output_file | grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}" -q
     rc=$?
     # We expect a return code of '0' because the ecosystem should be able to find this test as we just ran it.
     if [[ "${rc}" != "0" ]]; then 
@@ -303,7 +311,7 @@ function runs_get_check_details_format_output {
 
     for header in "${headers[@]}"
     do
-        cat $output_file | grep "$header" $output_file
+        cat $output_file | grep "$header" -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then 

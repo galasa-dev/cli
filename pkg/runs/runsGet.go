@@ -20,6 +20,10 @@ import (
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
+var (
+	validFormatters = createFormatters()
+)
+
 // ---------------------------------------------------
 
 // GetRuns - performs all the logic to implement the `galasactl runs get` command,
@@ -33,6 +37,33 @@ func GetRuns(
 	apiServerUrl string,
 ) error {
 
+	// Validate the runName as best we can without contacting the ecosystem.
+	err := ValidateRunName(runName)
+
+	if err == nil {
+
+		var chosenFormatter formatters.RunsFormatter
+		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
+		if err == nil {
+			var runJson []galasaapi.Run
+			runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
+			if err == nil {
+
+				// Some formatters need extra fields filled-in so they can be displayed.
+				if chosenFormatter.IsNeedingDetails() {
+					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
+				}
+
+				if err == nil {
+					var outputText string
+					outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
+					if err == nil {
+						err = writeOutput(outputText, console)
+					}
+				}
+			}
+		}
+	}
 	// Validate the age parameter
 	// Validate that the time unit is either 'w', 'd', 'h'
 	// Validate that if both FROM and TO are specified, FROM is older than TO
@@ -53,7 +84,7 @@ func GetRuns(
 	var toAge int
 
 	from := submatches[0] // expecting something like 14d which will then break down into further matches, 0 is 14d, 1 is 14, 2 is d
-	fromAge, err := getValueAsInt(from[1])
+	fromAge, err = getValueAsInt(from[1])
 	if err == nil && fromAge != 0 {
 		fromAge = fromAge * timeUnits[from[2]]
 	} else {
@@ -155,6 +186,31 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 	return chosenFormatter, err
 }
 
+func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiServerUrl string) ([]galasaapi.Run, error) {
+	var err error = nil
+	var runsDetails []galasaapi.Run = make([]galasaapi.Run, 0)
+	restClient := api.InitialiseAPI(apiServerUrl)
+	var context context.Context = nil
+	var details *galasaapi.Run
+	var httpResponse *http.Response
+
+	for _, run := range runs {
+		runid := run.GetRunId()
+		details, httpResponse, err = restClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).Execute()
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+		} else {
+			if httpResponse.StatusCode != http.StatusOK {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+			} else {
+				runsDetails = append(runsDetails, *details)
+			}
+		}
+	}
+
+	return runsDetails, err
+}
+
 // Retrieves test runs from the ecosystem API that match a given runName.
 // Multiple test runs can be returned as the runName is not unique.
 func GetRunsFromRestApi(
@@ -204,7 +260,9 @@ func GetRunsFromRestApi(
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 		} else {
 			if httpResponse.StatusCode != http.StatusOK {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+				httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
+				errString := err.Error() + httpError
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
 			} else {
 
 				// Copy the results from this page into our bigger list of results.

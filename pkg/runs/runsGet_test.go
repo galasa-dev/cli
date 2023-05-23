@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/formatters"
@@ -136,7 +137,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 	}
 }
 
-func TestRunsGetOfRunNameWhichDoesNotExistProducesEmptyPage(t *testing.T) {
+func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 	// Given ...
 	runName := "garbage"
 	age := "24h"
@@ -155,53 +156,85 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesEmptyPage(t *testing.T) {
 	// Then...
 	// We expect
 
+	assert.NotNil(t, err, "Garbage runname value should not have failed.")
 	if err != nil {
-		assert.Fail(t, "Garbage runname value should not have failed "+err.Error())
-	} else {
-		textGotBack := mockConsole.ReadText()
-		want := ""
-		assert.Equal(t, textGotBack, want)
+		assert.ErrorContains(t, err, "GAL1075E")
+		assert.ErrorContains(t, err, runName)
 	}
 
+}
+
+func ConfigureServerForDetailsEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, status int, runResultStrings ...string) {
+	if r.Header.Get("Accept") != "application/json" {
+		t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
+	}
+	urlParts := strings.Split(r.URL.Path, "/")
+	runid := urlParts[3]
+	for _, runResult := range runResultStrings {
+		assert.Contains(t, runResult, runid)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	combinedRunResultStrings := ""
+	for index, runResult := range runResultStrings {
+		if index > 0 {
+			combinedRunResultStrings += ","
+		}
+		combinedRunResultStrings += runResult
+	}
+
+	w.Write([]byte(fmt.Sprintf(`
+		%s 
+	`, combinedRunResultStrings)))
+}
+
+func ConfigureServerForRasRunsEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, runName string, status int, runResultStrings ...string) {
+	if r.URL.Path != "/ras/runs" {
+		t.Errorf("Expected to request '/ras/runs', got: %s", r.URL.Path)
+	}
+	if r.Header.Get("Accept") != "application/json" {
+		t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	values := r.URL.Query()
+	pageRequestedStr := values.Get("page")
+	runNameQueryParameter := values.Get("runname")
+	pageRequested, _ := strconv.Atoi(pageRequestedStr)
+	assert.Equal(t, pageRequested, 1)
+
+	assert.Equal(t, runNameQueryParameter, runName)
+
+	combinedRunResultStrings := ""
+	for index, runResult := range runResultStrings {
+		if index > 0 {
+			combinedRunResultStrings += ","
+		}
+		combinedRunResultStrings += runResult
+	}
+
+	w.Write([]byte(fmt.Sprintf(`
+	 {
+		 "pageNumber": 1,
+		 "pageSize": 1,
+		 "numPages": 1,
+		 "amountOfRuns": %d,
+		 "runs":[ %s ]
+	 }`, len(runResultStrings), combinedRunResultStrings)))
 }
 
 func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultStrings ...string) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if r.URL.Path != "/ras/run" {
-			t.Errorf("Expected to request '/ras/run', got: %s", r.URL.Path)
-		}
-		if r.Header.Get("Accept") != "application/json" {
-			t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-
-		values := r.URL.Query()
-		pageRequestedStr := values.Get("page")
-		runNameQueryParameter := values.Get("runname")
-		pageRequested, _ := strconv.Atoi(pageRequestedStr)
-		assert.Equal(t, pageRequested, 1)
-
-		assert.Equal(t, runNameQueryParameter, runName)
-
-		combinedRunResultStrings := ""
-		for index, runResult := range runResultStrings {
-			if index > 0 {
-				combinedRunResultStrings += ","
-			}
-			combinedRunResultStrings += runResult
+		if strings.Contains(r.URL.Path, "/ras/runs/") {
+			ConfigureServerForDetailsEndpoint(t, w, r, status, runResultStrings...)
+		} else {
+			ConfigureServerForRasRunsEndpoint(t, w, r, runName, status, runResultStrings...)
 		}
 
-		w.Write([]byte(fmt.Sprintf(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": %d,
-			 "runs":[ %s ]
-		 }`, len(runResultStrings), combinedRunResultStrings)))
 	}))
 
 	return server
@@ -256,7 +289,7 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 	err := GetRuns(runName, age, outputFormatString, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	assert.Contains(t, err.Error(), "GAL1068")
+	assert.Contains(t, err.Error(), "GAL1075")
 
 }
 
@@ -304,7 +337,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 				"test-name    :  myTestPackage.MyTestName\n" +
 				"requestor    :  unitTesting\n" +
 				"bundle       :  myBundleId\n" +
-				"run-log      :  " + apiServerUrl + "/ras/run/xxx876xxx/runlog\n" +
+				"run-log      :  " + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n" +
 				"\n" +
 				"method           type status result  start-time          end-time            duration(ms)\n" +
 				"myTestMethodName test Done   Success 2023-05-10 06:00:13 2023-05-10 06:03:11 178000\n"
@@ -321,4 +354,26 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 
 	assert.NotNil(t, result)
 	assert.Equal(t, result, "'first', 'second'")
+}
+
+func TestAPIInternalErrorIsHandledOk(t *testing.T) {
+	// Given ...
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusInternalServerError, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "details"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "500")
+	assert.ErrorContains(t, err, "GAL1068")
 }
