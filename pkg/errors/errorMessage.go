@@ -146,6 +146,8 @@ var (
 	GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED    = NewMessageType("GAL1073E: Could not get run artifacts. Reason: '%s'", 1073, STACK_TRACE_WANTED)
 	GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED    = NewMessageType("GAL1074E: Could not download artifact '%s'. Reason: '%s'", 1074, STACK_TRACE_WANTED)
 
+	GALASA_ERROR_INVALID_RUN_NAME = NewMessageType("GAL1075E: run name '%s' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.", 1075, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 )

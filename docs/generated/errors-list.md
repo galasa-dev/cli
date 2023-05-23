@@ -75,4 +75,5 @@ The `galasactl` tool can generate the following errors:
 - GAL1072E: Invalid value '{}' detected for optional property '{}' in bootstrap properties. Valid values must be a non-zero positive integer, for a port number. Only used when --debug flag is set. Defaults to '{}'. Can be overridden with the --debugPort flag.
 - GAL1073E: Could not get run artifacts. Reason: '{}'
 - GAL1074E: Could not download artifact '{}'. Reason: '{}'
+- GAL1075E: run name '{}' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
