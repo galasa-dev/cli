@@ -144,6 +144,8 @@ var (
 	GALASA_ERROR_ARG_BAD_DEBUG_MODE_VALUE       = NewMessageType("GAL1071E: Invalid value '%s' detected for optional --debugMode argument. Valid values are 'listen' or 'attach'. Only used when --debug flag is set. Defaults to 'listen'. Default can be set with an optional property '%s' in bootstrap properties.", 1071, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_PORT_VALUE = NewMessageType("GAL1072E: Invalid value '%s' detected for optional property '%s' in bootstrap properties. Valid values must be a non-zero positive integer, for a port number. Only used when --debug flag is set. Defaults to '%s'. Can be overridden with the --debugPort flag.", 1072, STACK_TRACE_NOT_WANTED)
 
+	GALASA_ERROR_INVALID_RUN_NAME = NewMessageType("GAL1075E: run name '%s' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.", 1075, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 )
