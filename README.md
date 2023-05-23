@@ -294,7 +294,28 @@ For a complete list of supported formatters try running the command with a known
 ```
 galasactl runs get --name C1234 --format badFormatterName
 ```
-For a complete list of supported parameters see [here](./docs/generated/galasactl_runs_get.md)
+For a complete list of supported parameters see [here](./docs/generated/galasactl_runs_get.md).
+
+## runs download
+
+This command downloads all artifacts for a test run that are stored in an ecosystem's RAS.
+The artifacts are stored in a directory within the working directory where the command is executed. The name of the created directory corresponds to the run name that was provided (e.g. `./C123/...`).
+
+### Examples
+
+All artifacts for a run named "C1234" can be downloaded to a directory named "C1234" in the current working directory using the following command:
+
+```
+galasactl runs download --name C1234
+```
+
+If a run directory named "C1234" already exists, artifacts stored within the directory can be overwritten with the `--force` flag as follows:
+
+```
+galasactl runs download --name C1234 --force
+```
+
+A complete list of supported parameters for the `runs download` command is available [here](./docs/generated/galasactl_runs_download.md).
 
 ## Reference Material
 
