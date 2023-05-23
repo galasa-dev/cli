@@ -311,7 +311,7 @@ function runs_get_check_details_format_output {
 
     for header in "${headers[@]}"
     do
-        cat $output_file | grep "$header" $output_file -q
+        cat $output_file | grep "$header" -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then 
