@@ -327,7 +327,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 				"test-name    :  myTestPackage.MyTestName\n" +
 				"requestor    :  unitTesting\n" +
 				"bundle       :  myBundleId\n" +
-				"run-log      :  " + apiServerUrl + "/ras/run/xxx876xxx/runlog\n" +
+				"run-log      :  " + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n" +
 				"\n" +
 				"method           type status result  start-time          end-time            duration(ms)\n" +
 				"myTestMethodName test Done   Success 2023-05-10 06:00:13 2023-05-10 06:03:11 178000\n"

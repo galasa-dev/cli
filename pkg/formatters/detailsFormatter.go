@@ -22,11 +22,15 @@ const (
 type DetailsFormatter struct {
 }
 
+// -----------------------------------------------------
+// Constructors
 func NewDetailsFormatter() RunsFormatter {
 	return new(DetailsFormatter)
 
 }
 
+// -----------------------------------------------------
+// Functions in the RunsFormatter interface
 func (*DetailsFormatter) GetName() string {
 	return DETAILS_FORMATTER_NAME
 }
@@ -67,6 +71,8 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	return result, err
 }
 
+// -----------------------------------------------------
+// Internal functions
 func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
 	var duration string = ""
 	var startTimeString string = ""
@@ -100,7 +106,7 @@ func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
 		{"test-name", ":  " + run.TestStructure.GetTestName()},
 		{"requestor", ":  " + run.TestStructure.GetRequestor()},
 		{"bundle", ":  " + run.TestStructure.GetBundle()},
-		{"run-log", ":  " + apiServerUrl + "/ras/run/" + run.GetRunId() + "/runlog"},
+		{"run-log", ":  " + apiServerUrl + "/ras/runs/" + run.GetRunId() + "/runlog"},
 	}
 	return table
 }
