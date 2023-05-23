@@ -180,7 +180,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) {
+func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) {
 	formatter := NewDetailsFormatter()
 	apiServerUrl := "https://127.0.0.1"
 

@@ -5,9 +5,7 @@ package formatters
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 )
@@ -16,7 +14,6 @@ import (
 // Detailed format.
 const (
 	DETAILS_FORMATTER_NAME = "details"
-	DATE_FORMAT            = "2006-01-02 15:04:05"
 )
 
 type DetailsFormatter struct {
@@ -77,13 +74,7 @@ func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
 		}
 	}
 
-	startTime, err := time.Parse(DATE_FORMAT, startTimeString)
-	if err == nil {
-		endTime, err := time.Parse(DATE_FORMAT, endTimeString)
-		if err == nil {
-			duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-		}
-	}
+	duration = calculateDurationMilliseconds(startTimeString, endTimeString)
 
 	var table = [][]string{
 		{"name", ":  " + run.TestStructure.GetRunName()},
@@ -124,13 +115,8 @@ func tabulateRunMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]s
 			}
 		}
 
-		startTime, err := time.Parse(DATE_FORMAT, startTimeString)
-		if err == nil {
-			endTime, err := time.Parse(DATE_FORMAT, endTimeString)
-			if err == nil {
-				duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-			}
-		}
+		duration = calculateDurationMilliseconds(startTimeString, endTimeString)
+
 		var line []string
 		line = append(line,
 			method.GetMethodName(),
@@ -164,9 +150,4 @@ func writeTableToBuff(buff *strings.Builder, table [][]string) {
 		}
 		buff.WriteString("\n")
 	}
-}
-
-func formatTime(rawTime string) string {
-	formattedTimeString := rawTime[0:10] + " " + rawTime[11:19]
-	return formattedTimeString
 }

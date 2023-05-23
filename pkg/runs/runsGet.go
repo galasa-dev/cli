@@ -55,6 +55,9 @@ func createFormatters() map[string]formatters.RunsFormatter {
 	detailedFormatter := formatters.NewDetailsFormatter()
 	validFormatters[detailedFormatter.GetName()] = detailedFormatter
 
+	rawFormatter := formatters.NewRawFormatter()
+	validFormatters[rawFormatter.GetName()] = rawFormatter
+
 	return validFormatters
 }
 

@@ -317,3 +317,32 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 	assert.NotNil(t, result)
 	assert.Equal(t, result, "'first', 'second'")
 }
+
+func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
+
+	// Given ...
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	if err != nil {
+		assert.Fail(t, "Failed with an error when we expected it to pass. Error is "+err.Error())
+	} else {
+		textGotBack := mockConsole.ReadText()
+		assert.Contains(t, textGotBack, runName)
+		want := "U456|Finished|Passed|2023-05-10 06:00:13|2023-05-10 06:00:36|2023-05-10 06:02:53|137000|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog"
+
+		assert.Equal(t, textGotBack, want)
+	}
+}
