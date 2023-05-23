@@ -14,7 +14,17 @@ import (
 )
 
 const (
-	BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL string = "framework.api.server.url"
+	BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL              string = "framework.api.server.url"
+	BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS           string = "galasactl.jvm.local.launch.options"
+	BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS_SEPARATOR string = " "
+
+	// A uint32 value, says which port will be used when the testcase JVM connects to a Java Debugger.
+	BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT string = "galasactl.jvm.local.launch.debug.port"
+	// When the JVM connects to a Java Debugger, should it :
+	// 'listen' on the debug port, waiting for the java debugger to connect,
+	// or
+	// 'attach' to the debug port, which already has the java debugger set up.
+	BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE string = "galasactl.jvm.local.launch.debug.mode"
 )
 
 type BootstrapData struct {

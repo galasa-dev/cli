@@ -461,7 +461,7 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	assert.Contains(t, err.Error(), "GAL1071")
+	assert.Contains(t, err.Error(), "GAL1074")
 }
 
 func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
@@ -491,5 +491,5 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	assert.Contains(t, err.Error(), "GAL1070")
+	assert.Contains(t, err.Error(), "GAL1073")
 }

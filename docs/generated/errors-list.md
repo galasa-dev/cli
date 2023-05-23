@@ -70,6 +70,9 @@ The `galasactl` tool can generate the following errors:
 - GAL1067E: Unsupported value '{}' for parameter --format. Supported values are: {}
 - GAL1068E: Could not query run results. Reason: '{}'
 - GAL1069E: Could not open log file for writing. '{}' is a directory, the --log parameter should refer to a file path (existing or not), or '-' (the console)
-- GAL1070E: Could not get run artifacts. Reason: '{}'
-- GAL1071E: Could not download artifact '{}'. Reason: '{}'
+- GAL1070E: Invalid value '{}' detected for optional property '{}' in bootstrap properties. Valid values are 'listen' or 'attach'. Only used when --debug flag is set. Defaults to 'listen'. Can be overridden with the --debugMode flag.
+- GAL1071E: Invalid value '{}' detected for optional --debugMode argument. Valid values are 'listen' or 'attach'. Only used when --debug flag is set. Defaults to 'listen'. Default can be set with an optional property '{}' in bootstrap properties.
+- GAL1072E: Invalid value '{}' detected for optional property '{}' in bootstrap properties. Valid values must be a non-zero positive integer, for a port number. Only used when --debug flag is set. Defaults to '{}'. Can be overridden with the --debugPort flag.
+- GAL1073E: Could not get run artifacts. Reason: '{}'
+- GAL1074E: Could not download artifact '{}'. Reason: '{}'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
