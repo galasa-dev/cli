@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
@@ -178,7 +179,9 @@ func GetRunsFromRestApi(
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 		} else {
 			if httpResponse.StatusCode != http.StatusOK {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+				httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
+				errString := err.Error() + httpError
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
 			} else {
 
 				// Copy the results from this page into our bigger list of results.

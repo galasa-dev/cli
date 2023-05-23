@@ -245,7 +245,7 @@ function runs_get_check_summary_format_output {
     $cmd | tee $output_file
 
     # Check that the full test name is output
-    cat $output_file | grep "${GALASA_TEST_NAME_LONG}"
+    cat $output_file | grep "${GALASA_TEST_NAME_LONG}" -q
     rc=$?
     # We expect a return code of '0' because the test name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -258,7 +258,7 @@ function runs_get_check_summary_format_output {
 
     for header in "${headers[@]}"
     do
-        cat $output_file | grep "$header"
+        cat $output_file | grep "$header" -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then 
@@ -298,7 +298,7 @@ function runs_get_check_details_format_output {
 
 
     # Check that the full test name is output and formatted
-    cat $output_file | grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}"
+    cat $output_file | grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}" -q
     rc=$?
     # We expect a return code of '0' because the ecosystem should be able to find this test as we just ran it.
     if [[ "${rc}" != "0" ]]; then 
@@ -311,7 +311,7 @@ function runs_get_check_details_format_output {
 
     for header in "${headers[@]}"
     do
-        cat $output_file | grep "$header" $output_file
+        cat $output_file | grep "$header" $output_file -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then 
