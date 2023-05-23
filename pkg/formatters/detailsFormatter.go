@@ -6,6 +6,7 @@ package formatters
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 )
@@ -72,27 +73,34 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 // Internal functions
 func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
 	var duration string = ""
-	var startTimeString string = ""
-	var endTimeString string = ""
+	var startTimeStringReadable string = ""
+	var endTimeStringReadable string = ""
+
+	var startTimeForDuration time.Time
+	var endTimeForDuration time.Time
+
 	startTimeStringRaw := run.TestStructure.GetStartTime()
 	endTimeStringRaw := run.TestStructure.GetEndTime()
 
 	if len(startTimeStringRaw) > 0 {
-		startTimeString = formatTime(startTimeStringRaw)
-		if len(endTimeStringRaw) > 0 {
-			endTimeString = formatTime(endTimeStringRaw)
-		}
-	}
+		startTimeStringReadable = formatTimeReadable(startTimeStringRaw)
+		startTimeForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
 
-	duration = calculateDurationMilliseconds(startTimeString, endTimeString)
+		if len(endTimeStringRaw) > 0 {
+			endTimeStringReadable = formatTimeReadable(endTimeStringRaw)
+			endTimeForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
+			duration = calculateDurationMilliseconds(startTimeForDuration, endTimeForDuration)
+		}
+
+	}
 
 	var table = [][]string{
 		{"name", ":  " + run.TestStructure.GetRunName()},
 		{"status", ":  " + run.TestStructure.GetStatus()},
 		{"result", ":  " + run.TestStructure.GetResult()},
-		{"queued-time", ":  " + formatTime(run.TestStructure.GetQueued())},
-		{"start-time", ":  " + startTimeString},
-		{"end-time", ":  " + endTimeString},
+		{"queued-time", ":  " + formatTimeReadable(run.TestStructure.GetQueued())},
+		{"start-time", ":  " + startTimeStringReadable},
+		{"end-time", ":  " + endTimeStringReadable},
 		{"duration(ms)", ":  " + duration},
 		{"test-name", ":  " + run.TestStructure.GetTestName()},
 		{"requestor", ":  " + run.TestStructure.GetRequestor()},
@@ -113,19 +121,24 @@ func initialiseMethodTable() [][]string {
 func tabulateRunMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]string) [][]string {
 	for _, method := range methods {
 		var duration string = ""
-		var startTimeString string = ""
-		var endTimeString string = ""
+		var startTimeStringReadable string = ""
+		var endTimeStringReadable string = ""
+
+		var startTimeForDuration time.Time
+		var endTimeForDuration time.Time
+
 		startTimeStringRaw := method.GetStartTime()
 		endTimeStringRaw := method.GetEndTime()
 
 		if len(startTimeStringRaw) > 0 {
-			startTimeString = formatTime(startTimeStringRaw)
+			startTimeStringReadable = formatTimeReadable(startTimeStringRaw)
+			startTimeForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
 			if len(endTimeStringRaw) > 0 {
-				endTimeString = formatTime(endTimeStringRaw)
+				endTimeStringReadable = formatTimeReadable(endTimeStringRaw)
+				endTimeForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
+				duration = calculateDurationMilliseconds(startTimeForDuration, endTimeForDuration)
 			}
 		}
-
-		duration = calculateDurationMilliseconds(startTimeString, endTimeString)
 
 		var line []string
 		line = append(line,
@@ -133,8 +146,8 @@ func tabulateRunMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]s
 			method.GetType(),
 			method.GetStatus(),
 			method.GetResult(),
-			startTimeString,
-			endTimeString,
+			startTimeStringReadable,
+			endTimeStringReadable,
 			duration,
 		)
 		methodTable = append(methodTable, line)

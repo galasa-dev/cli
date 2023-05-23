@@ -104,6 +104,7 @@ func TestOutputFormatGarbageStringValidationGivesError(t *testing.T) {
 	assert.Contains(t, err.Error(), "'garbage'")
 	assert.Contains(t, err.Error(), "'summary'")
 	assert.Contains(t, err.Error(), "'details'")
+	assert.Contains(t, err.Error(), "'raw'")
 }
 
 func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
@@ -328,14 +329,14 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 				"queued-time  :  2023-05-10 06:00:13\n" +
 				"start-time   :  2023-05-10 06:00:36\n" +
 				"end-time     :  2023-05-10 06:02:53\n" +
-				"duration(ms) :  137000\n" +
+				"duration(ms) :  137664\n" +
 				"test-name    :  myTestPackage.MyTestName\n" +
 				"requestor    :  unitTesting\n" +
 				"bundle       :  myBundleId\n" +
 				"run-log      :  " + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n" +
 				"\n" +
 				"method           type status result  start-time          end-time            duration(ms)\n" +
-				"myTestMethodName test Done   Success 2023-05-10 06:00:13 2023-05-10 06:03:11 178000\n"
+				"myTestMethodName test Done   Success 2023-05-10 06:00:13 2023-05-10 06:03:11 178628\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
@@ -395,8 +396,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 	} else {
 		textGotBack := mockConsole.ReadText()
 		assert.Contains(t, textGotBack, runName)
-		want := "U456|Finished|Passed|2023-05-10 06:00:13|2023-05-10 06:00:36|2023-05-10 06:02:53|137000|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog"
-
+		want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }

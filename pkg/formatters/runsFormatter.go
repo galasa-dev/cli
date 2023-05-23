@@ -4,6 +4,7 @@
 package formatters
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -40,20 +41,34 @@ func calculateMaxLengthOfEachColumn(table [][]string) []int {
 	return columnLengths
 }
 
-func formatTime(rawTime string) string {
+func formatTimeReadable(rawTime string) string {
 	formattedTimeString := rawTime[0:10] + " " + rawTime[11:19]
 	return formattedTimeString
 }
 
-func calculateDurationMilliseconds(startTimeString string, endTimeString string) string {
-	var duration string = ""
-
-	startTime, err := time.Parse(DATE_FORMAT, startTimeString)
-	if err == nil {
-		endTime, err := time.Parse(DATE_FORMAT, endTimeString)
-		if err == nil {
-			duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-		}
+func formatTimeForDurationCalculation(rawTime string) time.Time {
+	parsedTime, err := time.Parse(time.RFC3339, rawTime)
+	if err != nil {
+		fmt.Println(err)
 	}
+	return parsedTime
+}
+
+func calculateDurationMilliseconds(start time.Time, end time.Time) string {
+	duration := strconv.FormatInt(end.Sub(start).Milliseconds(), 10)
+
 	return duration
 }
+
+// func calculateDurationMilliseconds(startTimeString string, endTimeString string) string {
+// 	var duration string = ""
+
+// 	startTime, err := time.Parse(DATE_FORMAT, startTimeString)
+// 	if err == nil {
+// 		endTime, err := time.Parse(DATE_FORMAT, endTimeString)
+// 		if err == nil {
+// 			duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
+// 		}
+// 	}
+// 	return duration
+// }
