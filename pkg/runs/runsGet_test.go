@@ -131,8 +131,8 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 		textGotBack := mockConsole.ReadText()
 		assert.Contains(t, textGotBack, runName)
 		want :=
-			"name status   result test-name\n" +
-				"U456 Finished Passed myTestPackage.MyTestName\n"
+			"submitted-time      name status   result test-name\n" +
+				"2023-05-10 06:00:13 U456 Finished Passed myTestPackage.MyTestName\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
@@ -261,9 +261,9 @@ func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 		textGotBack := mockConsole.ReadText()
 		assert.Contains(t, textGotBack, runName)
 		want :=
-			"name status   result           test-name\n" +
-				"U456 Finished Passed           myTestPackage.MyTestName\n" +
-				"U456 Finished LongResultString myTestPackage.MyTest2\n"
+			"submitted-time      name status   result           test-name\n" +
+				"2023-05-10 06:00:13 U456 Finished Passed           myTestPackage.MyTestName\n" +
+				"2023-05-10 06:00:13 U456 Finished LongResultString myTestPackage.MyTest2\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
@@ -323,17 +323,17 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 		textGotBack := mockConsole.ReadText()
 		assert.Contains(t, textGotBack, runName)
 		want :=
-			"name         :  U456\n" +
-				"status       :  Finished\n" +
-				"result       :  Passed\n" +
-				"queued-time  :  2023-05-10 06:00:13\n" +
-				"start-time   :  2023-05-10 06:00:36\n" +
-				"end-time     :  2023-05-10 06:02:53\n" +
-				"duration(ms) :  137664\n" +
-				"test-name    :  myTestPackage.MyTestName\n" +
-				"requestor    :  unitTesting\n" +
-				"bundle       :  myBundleId\n" +
-				"run-log      :  " + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n" +
+			"name           :  U456\n" +
+				"status         :  Finished\n" +
+				"result         :  Passed\n" +
+				"submitted-time :  2023-05-10 06:00:13\n" +
+				"start-time     :  2023-05-10 06:00:36\n" +
+				"end-time       :  2023-05-10 06:02:53\n" +
+				"duration(ms)   :  137664\n" +
+				"test-name      :  myTestPackage.MyTestName\n" +
+				"requestor      :  unitTesting\n" +
+				"bundle         :  myBundleId\n" +
+				"run-log        :  " + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n" +
 				"\n" +
 				"method           type status result  start-time          end-time            duration(ms)\n" +
 				"myTestMethodName test Done   Success 2023-05-10 06:00:13 2023-05-10 06:03:11 178628\n"

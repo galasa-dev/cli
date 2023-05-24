@@ -83,7 +83,7 @@ func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
 		{"name", ":  " + run.TestStructure.GetRunName()},
 		{"status", ":  " + run.TestStructure.GetStatus()},
 		{"result", ":  " + run.TestStructure.GetResult()},
-		{"queued-time", ":  " + formatTimeReadable(run.TestStructure.GetQueued())},
+		{"submitted-time", ":  " + formatTimeReadable(run.TestStructure.GetQueued())},
 		{"start-time", ":  " + startTimeStringReadable},
 		{"end-time", ":  " + endTimeStringReadable},
 		{"duration(ms)", ":  " + duration},
