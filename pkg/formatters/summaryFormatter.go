@@ -42,6 +42,13 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	var table [][]string
 
 	var headers = []string{"submitted-time", "name", "status", "result", "test-name"}
+	// var results = []string{"Passed", "Failed", "EnvFail", ""}
+	// runResult := run.TestStructure.GetResult()
+	// for _, result := range results{
+	// 	if runResult == result{
+
+	// 	}
+	// }
 
 	table = append(table, headers)
 	for _, run := range runs {

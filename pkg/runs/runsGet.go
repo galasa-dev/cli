@@ -243,26 +243,36 @@ func getTimesFromAge(age string) (int, int, error) {
 	var fromAge int
 	var toAge int
 
-	from := submatches[0] // expecting something like 14d which will then break down into further matches, 0 is 14d, 1 is 14, 2 is d
-	fromAge, err = getValueAsInt(from[1])
-	if err == nil && fromAge != 0 {
-		fromAge = fromAge * timeUnits[from[2]]
-	} else {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
-	}
-	// If the user has also specified a TO age
-	if len(submatches) > 1 {
-		to := submatches[1]
-		toAge, err = getValueAsInt(to[1])
-		if err == nil && toAge != 0 {
-			toAge = toAge * timeUnits[to[2]]
+	if len(submatches) != 0 {
+		from := submatches[0] // Expecting something like 14d which will then break down into further matches: Index 0 is 14d, index 1 is 14, index 2 is d
+		fromAge, err = getValueAsInt(from[1])
+		if err == nil {
+			if fromAge != 0 {
+				fromAge = fromAge * timeUnits[from[2]]
+			} else {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FROM_AGE_NOT_SPECIFIED, fromAge)
+			}
 
-			// FROM value has to be bigger than TO value
-			if fromAge <= toAge {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
+			// The user has also specified a to age
+			if len(submatches) > 1 {
+				to := submatches[1]
+				toAge, err = getValueAsInt(to[1])
+				if err == nil {
+					if toAge != 0 {
+						toAge = toAge * timeUnits[to[2]]
+
+						// From value has to be bigger than to value
+						if fromAge <= toAge {
+							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FROM_AGE_SMALLER_THAN_TO_AGE, age)
+						}
+					}
+				}
 			}
 		}
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
 	}
+
 	return fromAge, toAge, err
 }
 
@@ -270,7 +280,7 @@ func getValueAsInt(value string) (int, error) {
 	var age int
 	var err error
 	if age, err = strconv.Atoi(value); err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_OR_TO_PARAMETER, value)
 	}
 	return age, err
 }

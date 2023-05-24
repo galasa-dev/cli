@@ -78,9 +78,87 @@ const (
 		 "artifacts": [{
 			 "artifactPath": "myPathToArtifact1",	
 			 "contentType":	"application/json"
-		 }]
-	 }`
+			 }]
+			 }`
 )
+
+func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultStrings ...string) *httptest.Server {
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if strings.Contains(r.URL.Path, "/ras/runs/") {
+			ConfigureServerForDetailsEndpoint(t, w, r, status, runResultStrings...)
+		} else {
+			ConfigureServerForRasRunsEndpoint(t, w, r, runName, status, runResultStrings...)
+		}
+
+	}))
+
+	return server
+}
+
+func ConfigureServerForDetailsEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, status int, runResultStrings ...string) {
+	if r.Header.Get("Accept") != "application/json" {
+		t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
+	}
+	urlParts := strings.Split(r.URL.Path, "/")
+	runid := urlParts[3]
+	for _, runResult := range runResultStrings {
+		assert.Contains(t, runResult, runid)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	combinedRunResultStrings := ""
+	for index, runResult := range runResultStrings {
+		if index > 0 {
+			combinedRunResultStrings += ","
+		}
+		combinedRunResultStrings += runResult
+	}
+
+	w.Write([]byte(fmt.Sprintf(`
+			%s 
+		`, combinedRunResultStrings)))
+}
+
+func ConfigureServerForRasRunsEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, runName string, status int, runResultStrings ...string) {
+	if r.URL.Path != "/ras/runs" {
+		t.Errorf("Expected to request '/ras/runs', got: %s", r.URL.Path)
+	}
+	if r.Header.Get("Accept") != "application/json" {
+		t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	values := r.URL.Query()
+	pageRequestedStr := values.Get("page")
+	runNameQueryParameter := values.Get("runname")
+	//	fromTime, _ := time.Parse(time.RFC3339, values.Get("from"))
+	//	toTime, _ := time.Parse(time.RFC3339, values.Get("to"))
+	pageRequested, _ := strconv.Atoi(pageRequestedStr)
+	assert.Equal(t, pageRequested, 1)
+
+	assert.Equal(t, runNameQueryParameter, runName)
+
+	combinedRunResultStrings := ""
+	for index, runResult := range runResultStrings {
+		if index > 0 {
+			combinedRunResultStrings += ","
+		}
+		combinedRunResultStrings += runResult
+	}
+
+	w.Write([]byte(fmt.Sprintf(`
+		 {
+			 "pageNumber": 1,
+			 "pageSize": 1,
+			 "numPages": 1,
+			 "amountOfRuns": %d,
+			 "runs":[ %s ]
+		 }`, len(runResultStrings), combinedRunResultStrings)))
+}
 
 // ------------------------------------------------------------------
 // Testing that the output format string passed by the user on the command-line
@@ -163,82 +241,6 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 		assert.ErrorContains(t, err, runName)
 	}
 
-}
-
-func ConfigureServerForDetailsEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, status int, runResultStrings ...string) {
-	if r.Header.Get("Accept") != "application/json" {
-		t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
-	}
-	urlParts := strings.Split(r.URL.Path, "/")
-	runid := urlParts[3]
-	for _, runResult := range runResultStrings {
-		assert.Contains(t, runResult, runid)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	combinedRunResultStrings := ""
-	for index, runResult := range runResultStrings {
-		if index > 0 {
-			combinedRunResultStrings += ","
-		}
-		combinedRunResultStrings += runResult
-	}
-
-	w.Write([]byte(fmt.Sprintf(`
-		%s 
-	`, combinedRunResultStrings)))
-}
-
-func ConfigureServerForRasRunsEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, runName string, status int, runResultStrings ...string) {
-	if r.URL.Path != "/ras/runs" {
-		t.Errorf("Expected to request '/ras/runs', got: %s", r.URL.Path)
-	}
-	if r.Header.Get("Accept") != "application/json" {
-		t.Errorf("Expected Accept: application/json header, got: %s", r.Header.Get("Accept"))
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-
-	values := r.URL.Query()
-	pageRequestedStr := values.Get("page")
-	runNameQueryParameter := values.Get("runname")
-	pageRequested, _ := strconv.Atoi(pageRequestedStr)
-	assert.Equal(t, pageRequested, 1)
-
-	assert.Equal(t, runNameQueryParameter, runName)
-
-	combinedRunResultStrings := ""
-	for index, runResult := range runResultStrings {
-		if index > 0 {
-			combinedRunResultStrings += ","
-		}
-		combinedRunResultStrings += runResult
-	}
-
-	w.Write([]byte(fmt.Sprintf(`
-	 {
-		 "pageNumber": 1,
-		 "pageSize": 1,
-		 "numPages": 1,
-		 "amountOfRuns": %d,
-		 "runs":[ %s ]
-	 }`, len(runResultStrings), combinedRunResultStrings)))
-}
-
-func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultStrings ...string) *httptest.Server {
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if strings.Contains(r.URL.Path, "/ras/runs/") {
-			ConfigureServerForDetailsEndpoint(t, w, r, status, runResultStrings...)
-		} else {
-			ConfigureServerForRasRunsEndpoint(t, w, r, runName, status, runResultStrings...)
-		}
-
-	}))
-
-	return server
 }
 
 func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
@@ -399,12 +401,128 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 
 	// Then...
 	// We expect
-	if err != nil {
-		assert.Fail(t, "Failed with an error when we expected it to pass. Error is "+err.Error())
-	} else {
-		textGotBack := mockConsole.ReadText()
-		assert.Contains(t, textGotBack, runName)
-		want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog\n"
-		assert.Equal(t, textGotBack, want)
-	}
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, runName)
+	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog\n"
+	assert.Equal(t, textGotBack, want)
+}
+
+func TestRunsGetWithFromAndToAge(t *testing.T) {
+
+	// Given
+	age := "5d:12h"
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Equal(t, textGotBack, "")
+}
+
+func TestRunsGetWithJustFromAge(t *testing.T) {
+
+	// Given
+	age := "20d"
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, runName)
+	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog\n"
+	assert.Equal(t, textGotBack, want)
+}
+
+func TestRunsGetWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
+
+	// Given
+	age := ""
+	runName := ""
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	assert.Error(t, err)
+	// assert.ErrorContains(t, ) // What error would we get back here?
+}
+
+func TestRunsGetWithBadlyFormedFromAndToParameter(t *testing.T) {
+
+	// Given
+	age := "bad:form"
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1079")
+}
+
+func TestRunsGetWithOlderToAgeThanFromAge(t *testing.T) {
+
+	// Given
+	age := "1d:3d"
+	runName := "U456"
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// We expect
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1077")
 }

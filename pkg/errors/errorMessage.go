@@ -148,7 +148,11 @@ var (
 
 	GALASA_ERROR_INVALID_RUN_NAME = NewMessageType("GAL1075E: run name '%s' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.", 1075, STACK_TRACE_NOT_WANTED)
 
-	GALASA_ERROR_INVALID_AGE = NewMessageType("GAL1076E: Badly formed age parameter '%s'. Expected it to be of the form FROM:TO or FROM with the time units of 'w' (week), 'd' (day), or 'h' (hour).", 1076, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_FROM_OR_TO_PARAMETER = NewMessageType("GAL1076E: Badly formed from or to value '%s' specified in the age parameter. The value could not be converted into an integer value.", 1076, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FROM_AGE_SMALLER_THAN_TO_AGE = NewMessageType("GAL1077E: Invalid value '%s' detected for age parameter. The from value must be older than the to value.", 1077, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FROM_AGE_NOT_SPECIFIED       = NewMessageType("GAL1078E: No from value has been specified or a value of 0 has been given in '%s'. A from value must be specified if using the age parameter.", 1078, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_AGE_PARAMETER        = NewMessageType("GAL1079E: Badly formed age parameter '%s' specified. Age of the tests should be specified in FROM:TO or FROM format with the units w (weeks), d (days) or h (hours).", 1078, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 )
