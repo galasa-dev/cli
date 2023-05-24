@@ -102,6 +102,7 @@ export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"
 export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}" 
 export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="2"
 export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
+export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
 
 
 #--------------------------------------------------------------------------
@@ -333,6 +334,44 @@ function runs_get_check_details_format_output {
 }
 
 #--------------------------------------------------------------------------
+function runs_get_check_raw_format_output {
+    h2 "Performing runs get with raw format..."
+
+    run_name=$1
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --name ${run_name} \
+    --format raw \
+    --bootstrap ${bootstrap} "
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    # Check that the full test name is output
+    cat $output_file | grep "${GALASA_TEST_NAME_LONG}" -q
+    rc=$?
+    # We expect a return code of '0' because the test name should be output.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find ${GALASA_TEST_NAME_LONG} in raw output"
+        exit 1
+    fi  
+
+    # Check that we got 10 pipes
+    pipe_count=$(grep -o "|" $output_file | wc -l | xargs)
+    expected_pipe_count=$GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT
+    if [[ "${pipe_count}" != "${expected_pipe_count}" ]]; then 
+        error "pipe count is wrong. expected ${expected_pipe_count} got ${pipe_count}"
+        exit 1
+    fi
+
+    success "galasactl runs get --format raw seemed to work"
+}
+
+#--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
     h2 "Launching test on an ecosystem..."
 
@@ -422,6 +461,7 @@ launch_test_on_ecosystem_with_portfolio
 get_result_with_runname 
 runs_get_check_summary_format_output  $RUN_NAME
 runs_get_check_details_format_output  $RUN_NAME
+runs_get_check_raw_format_output  $RUN_NAME
 
 # Launch test on ecosystem without a portfolio ...
 # NOTE - Bug found with this command so commenting out for now

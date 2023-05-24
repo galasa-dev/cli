@@ -27,7 +27,7 @@ func (*RawFormatter) GetName() string {
 	return RAW_FORMATTER_NAME
 }
 
-func (*RawFormatter) IsNeedingDetails() bool {
+func (*RawFormatter) IsNeedingMethodDetails() bool {
 	return false
 }
 

@@ -33,7 +33,7 @@ func (*DetailsFormatter) GetName() string {
 	return DETAILS_FORMATTER_NAME
 }
 
-func (*DetailsFormatter) IsNeedingDetails() bool {
+func (*DetailsFormatter) IsNeedingMethodDetails() bool {
 	return true
 }
 

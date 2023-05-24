@@ -47,7 +47,7 @@ func GetRuns(
 			if err == nil {
 
 				// Some formatters need extra fields filled-in so they can be displayed.
-				if chosenFormatter.IsNeedingDetails() {
+				if chosenFormatter.IsNeedingMethodDetails() {
 					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
 				}
 

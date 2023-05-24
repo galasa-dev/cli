@@ -26,7 +26,7 @@ type RunsFormatter interface {
 	// so they can be displayed ? True if so, false otherwise.
 	// The caller may need to make sure such things are gathered before calling, and some
 	// formatters may not need all the detail.
-	IsNeedingDetails() bool
+	IsNeedingMethodDetails() bool
 }
 
 func calculateMaxLengthOfEachColumn(table [][]string) []int {
@@ -59,16 +59,3 @@ func calculateDurationMilliseconds(start time.Time, end time.Time) string {
 
 	return duration
 }
-
-// func calculateDurationMilliseconds(startTimeString string, endTimeString string) string {
-// 	var duration string = ""
-
-// 	startTime, err := time.Parse(DATE_FORMAT, startTimeString)
-// 	if err == nil {
-// 		endTime, err := time.Parse(DATE_FORMAT, endTimeString)
-// 		if err == nil {
-// 			duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-// 		}
-// 	}
-// 	return duration
-// }
