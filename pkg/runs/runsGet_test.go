@@ -110,7 +110,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 
 	// Given ...
 	runName := "U456"
-	age := "24h"
+	age := "2d:24h"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
 
@@ -358,6 +358,7 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 
 func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	// Given ...
+	age := "24h"
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusInternalServerError, runName, RUN_U456)
 	defer server.Close()
@@ -369,7 +370,7 @@ func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect
