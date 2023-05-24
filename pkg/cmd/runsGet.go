@@ -27,13 +27,14 @@ var (
 
 	// Variables set by cobra's command-line parsing.
 	runName            string
+	age                string
 	outputFormatString string
 )
 
 func init() {
 	runsGetCmd.PersistentFlags().StringVar(&runName, "name", "", "the name of the test run we want information about")
+	runsGetCmd.PersistentFlags().StringVar(&age, "age", "", "the age of the test run(s) we want information about. Supported formats are: --age FROM, --age FROM:TO. Supported units are days, weeks and hours. Examples: --age 1d, --age 6h:1h")
 	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: summary")
-	runsGetCmd.MarkPersistentFlagRequired("name")
 
 	parentCommand := runsCmd
 	parentCommand.AddCommand(runsGetCmd)
@@ -78,7 +79,7 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	timeService := utils.NewRealTimeService()
 
 	// Call to process the command in a unit-testable way.
-	err = runs.GetRuns(runName, outputFormatString, timeService, console, apiServerUrl)
+	err = runs.GetRuns(runName, age, outputFormatString, timeService, console, apiServerUrl)
 	if err != nil {
 		panic(err)
 	}

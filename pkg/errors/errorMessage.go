@@ -148,6 +148,7 @@ var (
 
 	GALASA_ERROR_INVALID_RUN_NAME = NewMessageType("GAL1075E: run name '%s' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.", 1075, STACK_TRACE_NOT_WANTED)
 
+	GALASA_ERROR_INVALID_AGE = NewMessageType("GAL1076E: Badly formed age parameter '%s'. Expected it to be of the form FROM:TO or FROM with the time units of 'w' (week), 'd' (day), or 'h' (hour).", 1076, STACK_TRACE_NOT_WANTED)
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 )

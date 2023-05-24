@@ -111,6 +111,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 
 	// Given ...
 	runName := "U456"
+	age := "2d:24h"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
 
@@ -121,7 +122,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect
@@ -139,18 +140,19 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 
 func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 	// Given ...
+	age := "2d:24h"
 	runName := "garbage"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
 
-	outputFormatString := "summary"
+	outputFormat := "summary"
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormatString, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect
@@ -241,17 +243,18 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 
 func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 	// Given ...
+	age := "2d:24h"
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456, RUN_U456_v2)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	outputFormatString := "summary"
+	outputFormat := "summary"
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormatString, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect
@@ -276,14 +279,15 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 	}))
 	defer server.Close()
 
+	age := "2d:24h"
 	runName := "garbage"
 	mockConsole := utils.NewMockConsole()
-	outputFormatString := "summary"
+	outputFormat := "summary"
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormatString, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1075")
@@ -302,6 +306,7 @@ func TestOutputFormatDetailsValidatesOk(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 
 	// Given ...
+	age := "2d:24h"
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
@@ -313,7 +318,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect
@@ -354,6 +359,7 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 
 func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	// Given ...
+	age := "2d:24h"
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusInternalServerError, runName, RUN_U456)
 	defer server.Close()
@@ -365,7 +371,7 @@ func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect
@@ -377,6 +383,7 @@ func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 
 	// Given ...
+	age := "2d:24h"
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
@@ -388,7 +395,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
 	// We expect

@@ -7,9 +7,11 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -28,40 +30,44 @@ var (
 // but in a unit-testable manner.
 func GetRuns(
 	runName string,
+	age string,
 	outputFormatString string,
 	timeService utils.TimeService,
 	console utils.Console,
 	apiServerUrl string,
 ) error {
 
+	var err error
+	var fromAge int
+	var toAge int
 	// Validate the runName as best we can without contacting the ecosystem.
-	err := ValidateRunName(runName)
+	err = ValidateRunName(runName)
 
 	if err == nil {
-
-		var chosenFormatter formatters.RunsFormatter
-		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
+		fromAge, toAge, err = getTimesFromAge(age)
 		if err == nil {
-			var runJson []galasaapi.Run
-			runJson, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
+			var chosenFormatter formatters.RunsFormatter
+			chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 			if err == nil {
-
-				// Some formatters need extra fields filled-in so they can be displayed.
-				if chosenFormatter.IsNeedingMethodDetails() {
-					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
-				}
-
+				var runJson []galasaapi.Run
+				runJson, err = GetRunsFromRestApi(runName, fromAge, toAge, timeService, apiServerUrl)
 				if err == nil {
-					var outputText string
-					outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
+					// Some formatters need extra fields filled-in so they can be displayed.
+					if chosenFormatter.IsNeedingMethodDetails() {
+						runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
+					}
+
 					if err == nil {
-						err = writeOutput(outputText, console)
+						var outputText string
+						outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
+						if err == nil {
+							err = writeOutput(outputText, console)
+						}
 					}
 				}
 			}
 		}
 	}
-
 	return err
 }
 
@@ -149,6 +155,8 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiServerUrl string) (
 // Multiple test runs can be returned as the runName is not unique.
 func GetRunsFromRestApi(
 	runName string,
+	fromAgeHours int,
+	toAgeHours int,
 	timeService utils.TimeService,
 	apiServerUrl string,
 ) ([]galasaapi.Run, error) {
@@ -161,7 +169,11 @@ func GetRunsFromRestApi(
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	toTime := timeService.Now()
+	now := timeService.Now()
+	fromTime := now.Add(-(time.Duration(fromAgeHours) * time.Hour)) // Add a minus, so subtract
+
+	toTime := now.Add(-(time.Duration(toAgeHours) * time.Hour)) // Add a minus, so subtract
+
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 
@@ -170,13 +182,19 @@ func GetRunsFromRestApi(
 		var runData *galasaapi.RunResults
 		var httpResponse *http.Response
 		log.Printf("Requesting page '%d' ", pageNumberWanted)
-		runData, httpResponse, err = restClient.ResultArchiveStoreAPIApi.
-			GetRasSearchRuns(context).
-			To(toTime).
-			Runname(runName).
-			Page(pageNumberWanted).
-			Sort("to:desc").
-			Execute()
+		apicall := restClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context)
+		if fromAgeHours != 0 {
+			apicall = apicall.From(fromTime)
+		}
+		if toAgeHours != 0 {
+			apicall = apicall.To(toTime)
+		}
+		if runName != "" {
+			apicall = apicall.Runname(runName)
+		}
+		apicall = apicall.Page(pageNumberWanted)
+		apicall = apicall.Sort("to:desc")
+		runData, httpResponse, err = apicall.Execute()
 
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
@@ -202,4 +220,57 @@ func GetRunsFromRestApi(
 	}
 
 	return results, err
+}
+
+func getTimesFromAge(age string) (int, int, error) {
+	// Validate the age parameter
+	// Validate that the time unit is either 'w', 'd', 'h'
+	// Validate that if both FROM and TO are specified, FROM is older than TO
+
+	// Make a map of how many hours for each unit so can compare from and to values consistently
+	// Can be extended to support other units
+	var timeUnits = make(map[string]int)
+	timeUnits["w"] = 168
+	timeUnits["d"] = 24
+	timeUnits["h"] = 1
+
+	regex := "([0-9]+)([dhw])"
+	re := regexp.MustCompile(regex)
+
+	submatches := re.FindAllStringSubmatch(age, -1)
+
+	var err error
+	var fromAge int
+	var toAge int
+
+	from := submatches[0] // expecting something like 14d which will then break down into further matches, 0 is 14d, 1 is 14, 2 is d
+	fromAge, err = getValueAsInt(from[1])
+	if err == nil && fromAge != 0 {
+		fromAge = fromAge * timeUnits[from[2]]
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
+	}
+	// If the user has also specified a TO age
+	if len(submatches) > 1 {
+		to := submatches[1]
+		toAge, err = getValueAsInt(to[1])
+		if err == nil && toAge != 0 {
+			toAge = toAge * timeUnits[to[2]]
+
+			// FROM value has to be bigger than TO value
+			if fromAge <= toAge {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, age)
+			}
+		}
+	}
+	return fromAge, toAge, err
+}
+
+func getValueAsInt(value string) (int, error) {
+	var age int
+	var err error
+	if age, err = strconv.Atoi(value); err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE, value)
+	}
+	return age, err
 }
