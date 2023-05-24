@@ -47,7 +47,7 @@ func GetRuns(
 			if err == nil {
 
 				// Some formatters need extra fields filled-in so they can be displayed.
-				if chosenFormatter.IsNeedingDetails() {
+				if chosenFormatter.IsNeedingMethodDetails() {
 					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
 				}
 
@@ -72,6 +72,9 @@ func createFormatters() map[string]formatters.RunsFormatter {
 
 	detailedFormatter := formatters.NewDetailsFormatter()
 	validFormatters[detailedFormatter.GetName()] = detailedFormatter
+
+	rawFormatter := formatters.NewRawFormatter()
+	validFormatters[rawFormatter.GetName()] = rawFormatter
 
 	return validFormatters
 }

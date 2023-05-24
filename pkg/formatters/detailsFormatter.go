@@ -5,9 +5,7 @@ package formatters
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 )
@@ -16,7 +14,6 @@ import (
 // Detailed format.
 const (
 	DETAILS_FORMATTER_NAME = "details"
-	DATE_FORMAT            = "2006-01-02 15:04:05"
 )
 
 type DetailsFormatter struct {
@@ -35,7 +32,7 @@ func (*DetailsFormatter) GetName() string {
 	return DETAILS_FORMATTER_NAME
 }
 
-func (*DetailsFormatter) IsNeedingDetails() bool {
+func (*DetailsFormatter) IsNeedingMethodDetails() bool {
 	return true
 }
 
@@ -74,34 +71,21 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 // -----------------------------------------------------
 // Internal functions
 func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
-	var duration string = ""
-	var startTimeString string = ""
-	var endTimeString string = ""
 	startTimeStringRaw := run.TestStructure.GetStartTime()
 	endTimeStringRaw := run.TestStructure.GetEndTime()
 
-	if len(startTimeStringRaw) > 0 {
-		startTimeString = formatTime(startTimeStringRaw)
-		if len(endTimeStringRaw) > 0 {
-			endTimeString = formatTime(endTimeStringRaw)
-		}
-	}
+	startTimeStringReadable := getReadableTime(startTimeStringRaw)
+	endTimeStringReadable := getReadableTime(endTimeStringRaw)
 
-	startTime, err := time.Parse(DATE_FORMAT, startTimeString)
-	if err == nil {
-		endTime, err := time.Parse(DATE_FORMAT, endTimeString)
-		if err == nil {
-			duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-		}
-	}
+	duration := getDuration(startTimeStringRaw, endTimeStringRaw)
 
 	var table = [][]string{
 		{"name", ":  " + run.TestStructure.GetRunName()},
 		{"status", ":  " + run.TestStructure.GetStatus()},
 		{"result", ":  " + run.TestStructure.GetResult()},
-		{"queued-time", ":  " + formatTime(run.TestStructure.GetQueued())},
-		{"start-time", ":  " + startTimeString},
-		{"end-time", ":  " + endTimeString},
+		{"queued-time", ":  " + formatTimeReadable(run.TestStructure.GetQueued())},
+		{"start-time", ":  " + startTimeStringReadable},
+		{"end-time", ":  " + endTimeStringReadable},
 		{"duration(ms)", ":  " + duration},
 		{"test-name", ":  " + run.TestStructure.GetTestName()},
 		{"requestor", ":  " + run.TestStructure.GetRequestor()},
@@ -121,34 +105,22 @@ func initialiseMethodTable() [][]string {
 
 func tabulateRunMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]string) [][]string {
 	for _, method := range methods {
-		var duration string = ""
-		var startTimeString string = ""
-		var endTimeString string = ""
 		startTimeStringRaw := method.GetStartTime()
 		endTimeStringRaw := method.GetEndTime()
 
-		if len(startTimeStringRaw) > 0 {
-			startTimeString = formatTime(startTimeStringRaw)
-			if len(endTimeStringRaw) > 0 {
-				endTimeString = formatTime(endTimeStringRaw)
-			}
-		}
+		startTimeStringReadable := getReadableTime(startTimeStringRaw)
+		endTimeStringReadable := getReadableTime(endTimeStringRaw)
 
-		startTime, err := time.Parse(DATE_FORMAT, startTimeString)
-		if err == nil {
-			endTime, err := time.Parse(DATE_FORMAT, endTimeString)
-			if err == nil {
-				duration = strconv.FormatInt(endTime.Sub(startTime).Milliseconds(), 10)
-			}
-		}
+		duration := getDuration(startTimeStringRaw, endTimeStringRaw)
+
 		var line []string
 		line = append(line,
 			method.GetMethodName(),
 			method.GetType(),
 			method.GetStatus(),
 			method.GetResult(),
-			startTimeString,
-			endTimeString,
+			startTimeStringReadable,
+			endTimeStringReadable,
 			duration,
 		)
 		methodTable = append(methodTable, line)
@@ -174,9 +146,4 @@ func writeTableToBuff(buff *strings.Builder, table [][]string) {
 		}
 		buff.WriteString("\n")
 	}
-}
-
-func formatTime(rawTime string) string {
-	formattedTimeString := rawTime[0:10] + " " + rawTime[11:19]
-	return formattedTimeString
 }

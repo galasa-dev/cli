@@ -27,7 +27,7 @@ func (*SummaryFormatter) GetName() string {
 	return SUMMARY_FORMATTER_NAME
 }
 
-func (*SummaryFormatter) IsNeedingDetails() bool {
+func (*SummaryFormatter) IsNeedingMethodDetails() bool {
 	return false
 }
 
