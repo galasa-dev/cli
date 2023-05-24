@@ -5,7 +5,6 @@ package formatters
 
 import (
 	"strings"
-	"time"
 
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 )
@@ -37,22 +36,10 @@ func (*RawFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (stri
 	buff := strings.Builder{}
 
 	for _, run := range runs {
-
-		var duration string = ""
-
-		var startTimeStringForDuration time.Time
-		var endTimeStringForDuration time.Time
-
 		startTimeStringRaw := run.TestStructure.GetStartTime()
 		endTimeStringRaw := run.TestStructure.GetEndTime()
 
-		if len(startTimeStringRaw) > 0 {
-			startTimeStringForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
-			if len(endTimeStringRaw) > 0 {
-				endTimeStringForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
-				duration = calculateDurationMilliseconds(startTimeStringForDuration, endTimeStringForDuration)
-			}
-		}
+		duration := getDuration(startTimeStringRaw, endTimeStringRaw)
 
 		runLog := apiServerUrl + "/ras/run/" + run.GetRunId() + "/runlog"
 

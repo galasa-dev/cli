@@ -59,3 +59,27 @@ func calculateDurationMilliseconds(start time.Time, end time.Time) string {
 
 	return duration
 }
+
+func getDuration(startTimeStringRaw string, endTimeStringRaw string) string {
+	var duration string = ""
+
+	var startTimeStringForDuration time.Time
+	var endTimeStringForDuration time.Time
+
+	if len(startTimeStringRaw) > 0 {
+		startTimeStringForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
+		if len(endTimeStringRaw) > 0 {
+			endTimeStringForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
+			duration = calculateDurationMilliseconds(startTimeStringForDuration, endTimeStringForDuration)
+		}
+	}
+	return duration
+}
+
+func getReadableTime(timeStringRaw string) string {
+	var timeStringReadable string = ""
+	if len(timeStringRaw) > 0 {
+		timeStringReadable = formatTimeReadable(timeStringRaw)
+	}
+	return timeStringReadable
+}

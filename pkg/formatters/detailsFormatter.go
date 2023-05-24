@@ -6,7 +6,6 @@ package formatters
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 )
@@ -72,27 +71,13 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 // -----------------------------------------------------
 // Internal functions
 func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
-	var duration string = ""
-	var startTimeStringReadable string = ""
-	var endTimeStringReadable string = ""
-
-	var startTimeForDuration time.Time
-	var endTimeForDuration time.Time
-
 	startTimeStringRaw := run.TestStructure.GetStartTime()
 	endTimeStringRaw := run.TestStructure.GetEndTime()
 
-	if len(startTimeStringRaw) > 0 {
-		startTimeStringReadable = formatTimeReadable(startTimeStringRaw)
-		startTimeForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
+	startTimeStringReadable := getReadableTime(startTimeStringRaw)
+	endTimeStringReadable := getReadableTime(endTimeStringRaw)
 
-		if len(endTimeStringRaw) > 0 {
-			endTimeStringReadable = formatTimeReadable(endTimeStringRaw)
-			endTimeForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
-			duration = calculateDurationMilliseconds(startTimeForDuration, endTimeForDuration)
-		}
-
-	}
+	duration := getDuration(startTimeStringRaw, endTimeStringRaw)
 
 	var table = [][]string{
 		{"name", ":  " + run.TestStructure.GetRunName()},
@@ -120,25 +105,13 @@ func initialiseMethodTable() [][]string {
 
 func tabulateRunMethodsToTable(methods []galasaapi.TestMethod, methodTable [][]string) [][]string {
 	for _, method := range methods {
-		var duration string = ""
-		var startTimeStringReadable string = ""
-		var endTimeStringReadable string = ""
-
-		var startTimeForDuration time.Time
-		var endTimeForDuration time.Time
-
 		startTimeStringRaw := method.GetStartTime()
 		endTimeStringRaw := method.GetEndTime()
 
-		if len(startTimeStringRaw) > 0 {
-			startTimeStringReadable = formatTimeReadable(startTimeStringRaw)
-			startTimeForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
-			if len(endTimeStringRaw) > 0 {
-				endTimeStringReadable = formatTimeReadable(endTimeStringRaw)
-				endTimeForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
-				duration = calculateDurationMilliseconds(startTimeForDuration, endTimeForDuration)
-			}
-		}
+		startTimeStringReadable := getReadableTime(startTimeStringRaw)
+		endTimeStringReadable := getReadableTime(endTimeStringRaw)
+
+		duration := getDuration(startTimeStringRaw, endTimeStringRaw)
 
 		var line []string
 		line = append(line,
