@@ -41,12 +41,14 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 
 	var table [][]string
 
-	var headers = []string{"name", "status", "result", "test-name"}
+	var headers = []string{"submitted-time", "name", "status", "result", "test-name"}
 
 	table = append(table, headers)
 	for _, run := range runs {
 		var line []string
-		line = append(line, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestName())
+		submittedTime := run.TestStructure.GetQueued()
+		submittedTimeReadable := formatTimeReadable(submittedTime)
+		line = append(line, submittedTimeReadable, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestName())
 		table = append(table, line)
 	}
 

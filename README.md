@@ -286,7 +286,7 @@ To configure the different IDEs to connect to a local testcase in `--debug` mode
 
 ## runs get
 This command retrieves information about a historic run on an ecosystem.
-Several formats are supported including: 'summary', 'details' 
+Several formats are supported including: 'summary', 'details', 'raw' 
 ```
 galasactl runs get --name C1234 --format details
 ```

@@ -255,7 +255,7 @@ function runs_get_check_summary_format_output {
     fi
 
     # Check headers
-    headers=("name" "status" "result" "test-name")
+    headers=("submitted-time" "name" "status" "result" "test-name")
 
     for header in "${headers[@]}"
     do

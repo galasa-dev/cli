@@ -25,7 +25,7 @@ func TestSummaryFormatterNoDataReturnsHeadersOnly(t *testing.T) {
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func createRunForSummary(runName string, testName string, status string, result string) galasaapi.Run {
+func createRunForSummary(queued string, runName string, testName string, status string, result string) galasaapi.Run {
 	//run1Id := "ar"
 	//bundle := ""
 	//testName := ""
@@ -41,7 +41,7 @@ func createRunForSummary(runName string, testName string, status string, result 
 		//Requestor:     &requestor,
 		Status: &status,
 		Result: &result,
-		// Queued:        &queued,
+		Queued: &queued,
 		// StartTime:     &startTime,
 		// EndTime:       &endTime,
 	}
@@ -56,7 +56,7 @@ func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForSummary("U456", "MyTestName", "Finished", "MyLongResultString")
+	run1 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "Finished", "MyLongResultString")
 	runs = append(runs, run1)
 	apiServerURL := ""
 
@@ -65,8 +65,8 @@ func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name status   result             test-name\n" +
-			"U456 Finished MyLongResultString MyTestName\n"
+		"submitted-time      name status   result             test-name\n" +
+			"2023-05-04 10:55:29 U456 Finished MyLongResultString MyTestName\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -74,7 +74,7 @@ func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForSummary("U456", "MyTestName", "Finished", "Short")
+	run1 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "Finished", "Short")
 	runs = append(runs, run1)
 	apiServerURL := ""
 
@@ -83,8 +83,8 @@ func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name status   result test-name\n" +
-			"U456 Finished Short  MyTestName\n"
+		"submitted-time      name status   result test-name\n" +
+			"2023-05-04 10:55:29 U456 Finished Short  MyTestName\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -92,8 +92,8 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForSummary("LongRunName", "TestName", "LongStatus", "Short")
-	run2 := createRunForSummary("U456", "MyTestName", "short", "MyLongResultString")
+	run1 := createRunForSummary("2023-05-04T10:45:29.545323Z", "LongRunName", "TestName", "LongStatus", "Short")
+	run2 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "short", "MyLongResultString")
 	runs = append(runs, run1, run2)
 	apiServerURL := ""
 
@@ -102,8 +102,8 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name        status     result             test-name\n" +
-			"LongRunName LongStatus Short              TestName\n" +
-			"U456        short      MyLongResultString MyTestName\n"
+		"submitted-time      name        status     result             test-name\n" +
+			"2023-05-04 10:45:29 LongRunName LongStatus Short              TestName\n" +
+			"2023-05-04 10:55:29 U456        short      MyLongResultString MyTestName\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
