@@ -82,6 +82,21 @@ const (
 			 }`
 )
 
+func NewRunsGetServletMockQuery(t *testing.T, status int, runName string, runResultStrings ...string) (string , *httptest.Server) {
+	var query string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if strings.Contains(r.URL.Path, "/ras/runs/") {
+			ConfigureServerForDetailsEndpoint(t, w, r, status, runResultStrings...)
+		} else {
+			ConfigureServerForRasRunsEndpoint(t, w, r, runName, status, runResultStrings...)
+		}
+		query = r.URL.RawQuery
+	}))
+
+	return  query, server
+}
+
 func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultStrings ...string) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -135,13 +150,10 @@ func ConfigureServerForRasRunsEndpoint(t *testing.T, w http.ResponseWriter, r *h
 	values := r.URL.Query()
 	pageRequestedStr := values.Get("page")
 	runNameQueryParameter := values.Get("runname")
-	//	fromTime, _ := time.Parse(time.RFC3339, values.Get("from"))
-	//	toTime, _ := time.Parse(time.RFC3339, values.Get("to"))
 	pageRequested, _ := strconv.Atoi(pageRequestedStr)
 	assert.Equal(t, pageRequested, 1)
 
 	assert.Equal(t, runNameQueryParameter, runName)
-
 	combinedRunResultStrings := ""
 	for index, runResult := range runResultStrings {
 		if index > 0 {
@@ -410,93 +422,63 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 
 func TestRunsGetWithFromAndToAge(t *testing.T) {
 
-	// Given
+	// Given ...
 	age := "5d:12h"
-	runName := "U456"
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
-	defer server.Close()
 
-	outputFormat := "raw"
-	mockConsole := utils.NewMockConsole()
-
-	apiServerUrl := server.URL
-	mockTimeService := utils.NewMockTimeService()
-
-	// When...
-	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
-
+	//When ...
+	from, to , err := getTimesFromAge(age)
+	
 	// Then...
 	// We expect
+	// from = 5*24 = 120
+	// to   = 12*1 = 12
 	assert.Nil(t, err)
-	textGotBack := mockConsole.ReadText()
-	assert.Equal(t, textGotBack, "")
+	assert.NotNil(t,from)
+	assert.NotNil(t,to)
+	assert.EqualValues(t, 120 ,from)
+	assert.EqualValues(t, 12 ,to)
 }
 
 func TestRunsGetWithJustFromAge(t *testing.T) {
 
 	// Given
 	age := "20d"
-	runName := "U456"
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
-	defer server.Close()
 
-	outputFormat := "raw"
-	mockConsole := utils.NewMockConsole()
-
-	apiServerUrl := server.URL
-	mockTimeService := utils.NewMockTimeService()
-
-	// When...
-	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	// When
+	from, to, err := getTimesFromAge(age)
 
 	// Then...
 	// We expect
+	// from = 20*24    = 480
+	// to not provided = 0
 	assert.Nil(t, err)
-	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, runName)
-	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog\n"
-	assert.Equal(t, textGotBack, want)
+	assert.NotNil(t, from)
+	assert.NotNil(t, to)
+	assert.EqualValues(t, 480, from)
+	assert.EqualValues(t, 0, to)
 }
 
 func TestRunsGetWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 
 	// Given
 	age := ""
-	runName := ""
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
-	defer server.Close()
 
-	outputFormat := "raw"
-	mockConsole := utils.NewMockConsole()
-
-	apiServerUrl := server.URL
-	mockTimeService := utils.NewMockTimeService()
-
-	// When...
-	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	// When
+	_, _, err := getTimesFromAge(age)
 
 	// Then...
 	// We expect
 	assert.Error(t, err)
-	// assert.ErrorContains(t, ) // What error would we get back here?
+	assert.ErrorContains(t, err, "GAL1079")
 }
 
 func TestRunsGetWithBadlyFormedFromAndToParameter(t *testing.T) {
 
 	// Given
 	age := "bad:form"
-	runName := "U456"
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
-	defer server.Close()
-
-	outputFormat := "raw"
-	mockConsole := utils.NewMockConsole()
-
-	apiServerUrl := server.URL
-	mockTimeService := utils.NewMockTimeService()
-
-	// When...
-	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	
+	// When 
+	_, _, err := getTimesFromAge(age)
 
 	// Then...
 	// We expect
@@ -508,18 +490,9 @@ func TestRunsGetWithOlderToAgeThanFromAge(t *testing.T) {
 
 	// Given
 	age := "1d:3d"
-	runName := "U456"
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
-	defer server.Close()
-
-	outputFormat := "raw"
-	mockConsole := utils.NewMockConsole()
-
-	apiServerUrl := server.URL
-	mockTimeService := utils.NewMockTimeService()
-
-	// When...
-	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	
+	// When
+	_, _, err := getTimesFromAge(age)
 
 	// Then...
 	// We expect
