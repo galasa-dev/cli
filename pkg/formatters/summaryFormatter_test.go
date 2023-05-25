@@ -21,7 +21,7 @@ func TestSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "Total:0 Passed:0 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+	expectedFormattedOutput := "Total:0 Passed:0 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -68,7 +68,7 @@ func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 		"submitted-time      name status   result             test-name\n" +
 			"2023-05-04 10:55:29 U456 Finished MyLongResultString MyTestName\n" +
 			"\n" +
-			"Total:1 Passed:0 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+			"Total:1 Passed:0 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -88,7 +88,7 @@ func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 		"submitted-time      name status   result test-name\n" +
 			"2023-05-04 10:55:29 U456 Finished Short  MyTestName\n" +
 			"\n" +
-			"Total:1 Passed:0 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+			"Total:1 Passed:0 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -110,7 +110,7 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 			"2023-05-04 10:45:29 LongRunName LongStatus Short              TestName\n" +
 			"2023-05-04 10:55:29 U456        short      MyLongResultString MyTestName\n" +
 			"\n" +
-			"Total:2 Passed:0 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+			"Total:2 Passed:0 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -142,6 +142,6 @@ func TestSummaryFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"2023-05-04 10:55:29 L789 Finished Passed With Defects MyTestName5\n" +
 			"2023-05-04 10:55:29 C111 Finished Failed              MyTestName6\n" +
 			"\n" +
-			"Total:7 Passed:1 PassedWithDefects:1 Failed:2 EnvFail:3 FailedWithDefects:0\n"
+			"Total:7 Passed:1 PassedWithDefects:1 Failed:2 FailedWithDefects:0 EnvFail:3\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
