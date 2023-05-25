@@ -40,8 +40,15 @@ func GetRuns(
 	var err error
 	var fromAge int
 	var toAge int
-	// Validate the runName as best we can without contacting the ecosystem.
-	err = ValidateRunName(runName)
+	
+	if (runName == "") && (age == "") {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_RUNNAME_OR_AGE_SPECIFIED)
+	}
+
+	if (err == nil) && (runName != "") {
+		// Validate the runName as best we can without contacting the ecosystem.
+		err = ValidateRunName(runName)
+	}
 
 	if err == nil {
 		fromAge, toAge, err = getTimesFromAge(age)

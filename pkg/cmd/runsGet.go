@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/galasa.dev/cli/pkg/api"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/runs"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -45,10 +44,6 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 
 	var err error
 
-	if (runName == "") && (age == "") {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_RUNNAME_OR_AGE_SPECIFIED)
-		panic(err)
-	}
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := utils.NewOSFileSystem()
 
