@@ -133,13 +133,12 @@ func getReadableTime(timeStringRaw string) string {
 // Functions for result report
 func generateResultTotalsReport(resultsCount map[string]int) string {
 	var resultString string = ""
-	// var resultPossibiles = []string{RUN_RESULT_TOTAL, RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_ENVFAIL, RUN_RESULT_FAILED_WITH_DEFECTS}
 	for count, label := range RESULT_LABELS {
 		if count != 0 {
 			resultString += " "
 		}
-		resultPossibilityNoSpaces := strings.ReplaceAll(label, " ", "")
-		resultString += resultPossibilityNoSpaces + ":" + strconv.Itoa(resultsCount[label])
+		resultLabelNoSpaces := strings.ReplaceAll(label, " ", "")
+		resultString += resultLabelNoSpaces + ":" + strconv.Itoa(resultsCount[label])
 	}
 
 	return resultString
