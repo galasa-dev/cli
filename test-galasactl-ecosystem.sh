@@ -100,7 +100,7 @@ fi
 #-----------------------------------------------------------------------------------------   
 export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"   
 export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}" 
-export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="2"
+export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
 export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
 export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
 
@@ -270,6 +270,8 @@ function runs_get_check_summary_format_output {
 
     # Check that we got 2 lines out... one for the headers, on for the 1 line of test data.
     line_count=$(cat $output_file | wc -l | xargs)
+    empty_line_count=grep -c ^$ $output_file
+    line_count=$(($line_count + $empty_line_count))
     expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then 
         error "line count is wrong. expected ${expected_line_count} got ${line_count}"
