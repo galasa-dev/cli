@@ -373,23 +373,23 @@ function runs_get_check_raw_format_output {
     success "galasactl runs get --format raw seemed to work"
 }
 
-function runs_get_check_summary_format_output_with_valid_age_param {
-    h2 "Performing runs get with summary format providing an age parameter with a 'from' value..."
+# function runs_get_check_summary_format_output_with_valid_age_param {
+#     h2 "Performing runs get with summary format providing an age parameter with a 'from' value..."
 
-    run_name=$1
-}
+#     run_name=$1
+# }
 
-function runs_get_check_summary_format_output_with_invalid_age_param {
+# function runs_get_check_summary_format_output_with_invalid_age_param {
 
-}
+# }
 
-function runs_get_check_summary_format_output_with_no_runname_and_no_age_param {
+# function runs_get_check_summary_format_output_with_no_runname_and_no_age_param {
 
-}
+# }
 
-function runs_get_check_summary_format_output_with_badly_formed_age_param {
+# function runs_get_check_summary_format_output_with_badly_formed_age_param {
 
-}
+# }
 
 #--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
