@@ -243,7 +243,7 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 
 func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 	// Given ...
-	age := "2d:24h"
+	age := ""
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456, RUN_U456_v2)
 	defer server.Close()
@@ -281,7 +281,7 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	age := "2d:24h"
+	age := ""
 	runName := "garbage"
 	mockConsole := utils.NewMockConsole()
 	outputFormat := "summary"
@@ -307,7 +307,7 @@ func TestOutputFormatDetailsValidatesOk(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 
 	// Given ...
-	age := "2d:24h"
+	age := ""
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
@@ -362,7 +362,7 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 
 func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	// Given ...
-	age := "2d:24h"
+	age := ""
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusInternalServerError, runName, RUN_U456)
 	defer server.Close()
@@ -386,7 +386,7 @@ func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 
 	// Given ...
-	age := "2d:24h"
+	age := ""
 	runName := "U456"
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
@@ -667,3 +667,4 @@ func TestRunsGetURLQueryWithBadlyFormedFromAndToParameterReturnsError(t *testing
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "1079")
 }
+
