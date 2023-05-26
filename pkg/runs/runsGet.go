@@ -40,7 +40,7 @@ func GetRuns(
 	var err error
 	var fromAge int
 	var toAge int
-	
+
 	if (runName == "") && (age == "") {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_RUNNAME_OR_AGE_SPECIFIED)
 	}
@@ -49,27 +49,28 @@ func GetRuns(
 		// Validate the runName as best we can without contacting the ecosystem.
 		err = ValidateRunName(runName)
 	}
+	
+	if (err == nil) && (age != "") {
+		fromAge, toAge, err = getTimesFromAge(age)
+	}
 
 	if err == nil {
-		fromAge, toAge, err = getTimesFromAge(age)
+		var chosenFormatter formatters.RunsFormatter
+		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
-			var chosenFormatter formatters.RunsFormatter
-			chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
+			var runJson []galasaapi.Run
+			runJson, err = GetRunsFromRestApi(runName, fromAge, toAge, timeService, apiServerUrl)
 			if err == nil {
-				var runJson []galasaapi.Run
-				runJson, err = GetRunsFromRestApi(runName, fromAge, toAge, timeService, apiServerUrl)
-				if err == nil {
-					// Some formatters need extra fields filled-in so they can be displayed.
-					if chosenFormatter.IsNeedingMethodDetails() {
-						runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
-					}
+				// Some formatters need extra fields filled-in so they can be displayed.
+				if chosenFormatter.IsNeedingMethodDetails() {
+					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
+				}
 
+				if err == nil {
+					var outputText string
+					outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
 					if err == nil {
-						var outputText string
-						outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
-						if err == nil {
-							err = writeOutput(outputText, console)
-						}
+						err = writeOutput(outputText, console)
 					}
 				}
 			}
