@@ -70,7 +70,7 @@ func TestDetailsFormatterNoDataReturnsTotalsCountAllZeros(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "Total:0 Passed:0 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+	expectedFormattedOutput := "Total:0 Passed:0 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -109,7 +109,7 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -182,7 +182,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:3 Passed:2 PassedWithDefects:0 Failed:1 EnvFail:0 FailedWithDefects:0\n"
+			"Total:3 Passed:2 PassedWithDefects:0 Failed:1 FailedWithDefects:0 EnvFail:0\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -219,7 +219,7 @@ func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) 
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -256,7 +256,7 @@ func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 			"method          type status   result start-time          end-time duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38          \n" +
 			"\n" +
-			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 EnvFail:0 FailedWithDefects:0\n"
+			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -401,7 +401,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:7 Passed:2 PassedWithDefects:1 Failed:2 EnvFail:1 FailedWithDefects:1\n"
+			"Total:7 Passed:2 PassedWithDefects:1 Failed:2 FailedWithDefects:1 EnvFail:1\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
