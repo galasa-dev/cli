@@ -134,7 +134,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 			"submitted-time      name status   result test-name\n" +
 				"2023-05-10 06:00:13 U456 Finished Passed myTestPackage.MyTestName\n" +
 				"\n" +
-				"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
+				"Total:1 Passed:1\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
@@ -267,7 +267,7 @@ func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 				"2023-05-10 06:00:13 U456 Finished Passed           myTestPackage.MyTestName\n" +
 				"2023-05-10 06:00:13 U456 Finished LongResultString myTestPackage.MyTest2\n" +
 				"\n" +
-				"Total:2 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
+				"Total:2 Passed:1\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }
@@ -342,7 +342,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 				"method           type status result  start-time          end-time            duration(ms)\n" +
 				"myTestMethodName test Done   Success 2023-05-10 06:00:13 2023-05-10 06:03:11 178628\n" +
 				"\n" +
-				"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
+				"Total:1 Passed:1\n"
 		assert.Equal(t, textGotBack, want)
 	}
 }

@@ -70,7 +70,7 @@ func TestDetailsFormatterNoDataReturnsTotalsCountAllZeros(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "Total:0 Passed:0 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
+	expectedFormattedOutput := "Total:0\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -109,7 +109,7 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
+			"Total:1 Passed:1\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -182,7 +182,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:3 Passed:2 PassedWithDefects:0 Failed:1 FailedWithDefects:0 EnvFail:0\n"
+			"Total:3 Passed:2 Failed:1\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -219,7 +219,7 @@ func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) 
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
+			"Total:1 Passed:1\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -256,7 +256,7 @@ func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 			"method          type status   result start-time          end-time duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38          \n" +
 			"\n" +
-			"Total:1 Passed:1 PassedWithDefects:0 Failed:0 FailedWithDefects:0 EnvFail:0\n"
+			"Total:1 Passed:1\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -277,7 +277,9 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 	run5 := createRunForDetails("cbd-67890", "C456", "UNKNOWN", "EnvFail", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
 	run6 := createRunForDetails("cbd-98765", "C789", "Finished", "Failed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
 	run7 := createRunForDetails("cbd-543210", "L111", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	runs = append(runs, run1, run2, run3, run4, run5, run6, run7)
+	run8 := createRunForDetails("cbd-222", "L222", "Building", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", methods)
+	run9 := createRunForDetails("cbd-333", "L333", "Generating", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", methods)
+	runs = append(runs, run1, run2, run3, run4, run5, run6, run7, run8, run9)
 
 	// When...
 	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
@@ -401,7 +403,41 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"method          type status   result start-time          end-time            duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
-			"Total:7 Passed:2 PassedWithDefects:1 Failed:2 FailedWithDefects:1 EnvFail:1\n"
+			"---" +
+			"\n\n" +
+			"name           : L222\n" +
+			"status         : Building\n" +
+			"result         : \n" +
+			"submitted-time : 2023-05-04 10:55:29\n" +
+			"start-time     : 2023-05-05 06:00:14\n" +
+			"end-time       : \n" +
+			"duration(ms)   : \n" +
+			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor      : galasa\n" +
+			"bundle         : dev.galasa\n" +
+			"run-log        : https://127.0.0.1/ras/runs/cbd-222/runlog\n" +
+			"\n" +
+			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
+			"\n" +
+			"---" +
+			"\n\n" +
+			"name           : L333\n" +
+			"status         : Generating\n" +
+			"result         : \n" +
+			"submitted-time : 2023-05-04 10:55:29\n" +
+			"start-time     : 2023-05-05 06:00:14\n" +
+			"end-time       : \n" +
+			"duration(ms)   : \n" +
+			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor      : galasa\n" +
+			"bundle         : dev.galasa\n" +
+			"run-log        : https://127.0.0.1/ras/runs/cbd-333/runlog\n" +
+			"\n" +
+			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
+			"\n" +
+			"Total:9 Passed:2 PassedWithDefects:1 Failed:2 FailedWithDefects:1 EnvFail:1 Active:2\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
