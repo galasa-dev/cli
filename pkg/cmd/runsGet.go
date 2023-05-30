@@ -33,8 +33,9 @@ var (
 
 func init() {
 	runsGetCmd.PersistentFlags().StringVar(&runName, "name", "", "the name of the test run we want information about")
-	runsGetCmd.PersistentFlags().StringVar(&age, "age", "", "the age of the test run(s) we want information about. Supported formats are: --age FROM, --age FROM:TO. Supported units are days, weeks and hours. Examples: --age 1d, --age 6h:1h")
-	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: summary")
+	runsGetCmd.PersistentFlags().StringVar(&age, "age", "", "the age of the test run(s) we want information about. Supported formats are: 'FROM' or 'FROM:TO', where FROM and TO are each ages,"+
+		" made up of an integer and a time-unit qualifier. Supported time-units are days('d'), weeks('w') and hours ('h'). If missing, the TO part is defaulted to '0h'. Examples: '--age 1d' , '--age 6h:1h' ")
+	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: 'summary', 'details' or 'raw'")
 
 	parentCommand := runsCmd
 	parentCommand.AddCommand(runsGetCmd)

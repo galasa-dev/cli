@@ -22,6 +22,20 @@ import (
 
 var (
 	validFormatters = createFormatters()
+
+	// Make a map of how many hours for each unit so can compare from and to values consistently
+	// Can be extended to support other units
+	timeUnits = map[string]int{
+		"w": 168,
+		"d": 24,
+		"h": 1,
+	}
+
+	// When parsing the '--age' parameter value....
+	// (^[\\D]*) - matches any leading garbage, which is non-digits. Should be empty.
+	// ([0-9]+) - matches any digit sequence. Should be an integer.
+	// (.*) - matches any time unit. Should be a valid time unit from our map above.
+	agePartRegex *regexp.Regexp = regexp.MustCompile(`(^[\D]*)([0-9]+)(.*)`)
 )
 
 // ---------------------------------------------------
@@ -235,53 +249,89 @@ func getTimesFromAge(age string) (int, int, error) {
 	// Validate that the time unit is either 'w', 'd', 'h'
 	// Validate that if both FROM and TO are specified, FROM is older than TO
 
-	// Make a map of how many hours for each unit so can compare from and to values consistently
-	// Can be extended to support other units
-	var timeUnits = make(map[string]int)
-	timeUnits["w"] = 168
-	timeUnits["d"] = 24
-	timeUnits["h"] = 1
-
-	regex := "([0-9]+)([dhw])"
-	re := regexp.MustCompile(regex)
-
-	submatches := re.FindAllStringSubmatch(age, -1)
-
 	var err error
 	var fromAge int
-	var toAge int
+	var toAge int = 0
 
-	if len(submatches) != 0 {
-		from := submatches[0] // Expecting something like 14d which will then break down into further matches: Index 0 is 14d, index 1 is 14, index 2 is d
-		fromAge, err = getValueAsInt(from[1])
-		if err == nil {
-			if fromAge != 0 {
-				fromAge = fromAge * timeUnits[from[2]]
-			} else {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FROM_AGE_NOT_SPECIFIED, fromAge)
+	ageParts := strings.Split(age, ":")
+
+	if len(ageParts) > 2 {
+		// Too many colons.
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
+	} else {
+		// No colons !... only 'from' time specified.
+		fromPart := ageParts[0]
+		if !agePartRegex.MatchString(fromPart) {
+			// Invalid from part.
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
+		} else {
+			fromAge, err = getHoursFromAgePart(fromPart, age)
+
+			if fromAge == 0 {
+				// 'from' can't be 0 hours.
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
 			}
+		}
 
-			// The user has also specified a to age
-			if len(submatches) > 1 {
-				to := submatches[1]
-				toAge, err = getValueAsInt(to[1])
-				if err == nil {
-					if toAge != 0 {
-						toAge = toAge * timeUnits[to[2]]
+		if (err == nil) && (len(ageParts) > 1) {
+			// One colon, indicates there is a 'to' part.
+			toPart := ageParts[1]
+			toAge, err = getHoursFromAgePart(toPart, age)
+			if err == nil {
+				// From value must be bigger than to value
+				if toAge > 0 && fromAge <= toAge {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FROM_AGE_SMALLER_THAN_TO_AGE, age)
+				}
+			}
+		}
+	}
 
-						// From value has to be bigger than to value
-						if fromAge <= toAge {
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FROM_AGE_SMALLER_THAN_TO_AGE, age)
-						}
+	return fromAge, toAge, err
+}
+
+// getHoursFromAgePart - Input value is '15d' or '14h' for example.
+func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) {
+	var err error
+	var hours int = 0
+	var duration int
+
+	// Separate the integer part from time unit part.
+	// Expecting something like 14d which will then break down into further matches: Index 0 is 14d, index 1 is 14, index 2 is d
+	durationPart := agePartRegex.FindStringSubmatch(agePart)
+	leadingGarbage := durationPart[1]
+	durationNumber := durationPart[2]
+	durationUnitStr := durationPart[3]
+
+	if leadingGarbage != "" {
+		// Some leading garbage prior to the 'FROM' field. It must be empty.
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue)
+	} else {
+
+		if len(durationPart) == 0 {
+			// Invalid from. It must be some time in the past.
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue)
+		} else {
+			// we can extract the integer part now
+
+			duration, err = getValueAsInt(durationNumber)
+			if err == nil {
+				if duration < 0 {
+					// Number part of the duration can't be negative.
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue)
+				} else {
+
+					hoursMultiplier, isRecognisedTimeUnit := timeUnits[durationUnitStr]
+					if !isRecognisedTimeUnit {
+						// Bad time unit.
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue)
+					} else {
+						hours = duration * hoursMultiplier
 					}
 				}
 			}
 		}
-	} else {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
 	}
-
-	return fromAge, toAge, err
+	return hours, err
 }
 
 func getValueAsInt(value string) (int, error) {

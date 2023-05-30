@@ -450,7 +450,7 @@ func TestRunsGetWithJustFromAge(t *testing.T) {
 func TestRunsGetWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 
 	// Given
-	age := ""
+	age := "0h"
 
 	// When
 	_, _, err := getTimesFromAge(age)
@@ -458,7 +458,7 @@ func TestRunsGetWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 	// Then...
 	// We expect
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1079")
+	assert.ErrorContains(t, err, "GAL1078")
 }
 
 func TestRunsGetWithBadlyFormedFromAndToParameter(t *testing.T) {
@@ -472,7 +472,7 @@ func TestRunsGetWithBadlyFormedFromAndToParameter(t *testing.T) {
 	// Then...
 	// We expect
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1079")
+	assert.ErrorContains(t, err, "GAL1078")
 }
 
 func TestRunsGetWithOlderToAgeThanFromAge(t *testing.T) {
@@ -593,7 +593,7 @@ func TestRunsGetURLQueryWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 
 	// Then ...
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "1080")
+	assert.ErrorContains(t, err, "1079")
 }
 
 func TestRunsGetURLQueryWithOlderToAgeThanFromAgeReturnsError(t *testing.T) {
@@ -665,6 +665,85 @@ func TestRunsGetURLQueryWithBadlyFormedFromAndToParameterReturnsError(t *testing
 
 	// Then ...
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "1079")
+	assert.ErrorContains(t, err, "GAL1078")
 }
 
+// Fine-grained tests for validating and extracting age parameter values.age
+func TestAgeWithMissingColonGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("3d2d")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1078")
+}
+
+func TestAgeWithTwoColonGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("3d::2d")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1078")
+}
+
+func TestAgeWithExtraColonAfterToPartGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("3d:2d:")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1078")
+}
+
+func TestAgeWithExtraGarbageAfterToPartGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("3d:2dgarbage")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1078")
+}
+
+func TestAgeWithZeroFromGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("0d")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1078")
+}
+
+func TestAgeWithZeroToIsOk(t *testing.T) {
+
+	_, _, err := getTimesFromAge("1d:0d")
+
+	assert.Nil(t, err)
+}
+
+func TestAgeWithSameFromAndToGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("1d:1d")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1077")
+}
+
+func TestAgeWithSameFromAndToDurationGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("1d:24h")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1077")
+}
+
+func TestAgeWithNegativeFromGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("-1d")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1078")
+}
+
+func TestAgeWithHugeNumberGivesError(t *testing.T) {
+
+	_, _, err := getTimesFromAge("12375612351237651273512376512765123d")
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "GAL1078")
+}
