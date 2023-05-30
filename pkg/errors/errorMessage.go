@@ -145,9 +145,11 @@ var (
 	GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_PORT_VALUE = NewMessageType("GAL1072E: Invalid value '%s' detected for optional property '%s' in bootstrap properties. Valid values must be a non-zero positive integer, for a port number. Only used when --debug flag is set. Defaults to '%s'. Can be overridden with the --debugPort flag.", 1072, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED    = NewMessageType("GAL1073E: Could not get run artifacts. Reason: '%s'", 1073, STACK_TRACE_WANTED)
 	GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED    = NewMessageType("GAL1074E: Could not download artifact '%s'. Reason: '%s'", 1074, STACK_TRACE_WANTED)
-
-	GALASA_ERROR_INVALID_RUN_NAME = NewMessageType("GAL1075E: run name '%s' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.", 1075, STACK_TRACE_NOT_WANTED)
-
+	GALASA_ERROR_INVALID_RUN_NAME               = NewMessageType("GAL1075E: run name '%s' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.", 1075, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_FROM_OR_TO_PARAMETER   = NewMessageType("GAL1076E: Badly formed from or to value '%s' specified in the age parameter. The value could not be converted into an integer value.", 1076, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FROM_AGE_SMALLER_THAN_TO_AGE   = NewMessageType("GAL1077E: Invalid value '%s' detected for age parameter. The 'from' value must be greater than the 'to' value.", 1077, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_AGE_PARAMETER          = NewMessageType("GAL1078E: Badly formed '--age' parameter value '%s' specified. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.", 1078, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_NO_RUNNAME_OR_AGE_SPECIFIED    = NewMessageType("GAL1079E: The --age or the --name parameter must be used to identify which test run(s) you want see.", 1079, STACK_TRACE_NOT_WANTED)
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 )

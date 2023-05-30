@@ -31,7 +31,7 @@ func DownloadArtifacts(
 	var runs []galasaapi.Run
 	var artifactPaths []string
 
-	runs, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
+	runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
 	if err == nil {
 		for _, run := range runs {
 			runId := run.GetRunId()
@@ -91,7 +91,7 @@ func WriteArtifactToFileSystem(
 	var err error = nil
 
 	pathParts := strings.Split(artifactPath, "/")
-	fileName := pathParts[len(pathParts) - 1]
+	fileName := pathParts[len(pathParts)-1]
 	targetFilePath := filepath.Join(runDirectory, artifactPath)
 
 	// Check if a new file should be created or if an existing one should be overwritten.
@@ -107,7 +107,7 @@ func WriteArtifactToFileSystem(
 			newFile, err = CreateEmptyArtifactFile(fileSystem, targetFilePath)
 			if err == nil {
 				log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
-	
+
 				err = TransferContent(fileDownloaded, newFile, targetFilePath)
 				if err == nil {
 					log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
@@ -150,9 +150,9 @@ func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath 
 }
 
 // Creates an empty file representing an artifact that is being written. Any parent directories that do not exist
-// will be created. Returns the empty file that was created or an error if any file creation operations failed. 
+// will be created. Returns the empty file that was created or an error if any file creation operations failed.
 func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string) (io.Writer, error) {
-	
+
 	var err error = nil
 	var newFile io.Writer = nil
 

@@ -13,7 +13,8 @@ galasactl runs get [flags]
 ### Options
 
 ```
-      --format string   output format for the data returned. Supported formats are: summary (default "summary")
+      --age string      the age of the test run(s) we want information about. Supported formats are: 'FROM' or 'FROM:TO', where FROM and TO are each ages, made up of an integer and a time-unit qualifier. Supported time-units are days('d'), weeks('w') and hours ('h'). If missing, the TO part is defaulted to '0h'. Examples: '--age 1d' , '--age 6h:1h' 
+      --format string   output format for the data returned. Supported formats are: 'summary', 'details' or 'raw' (default "summary")
   -h, --help            help for get
       --name string     the name of the test run we want information about
 ```
