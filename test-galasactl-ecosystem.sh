@@ -268,7 +268,7 @@ function runs_get_check_summary_format_output {
         fi
     done    
 
-    # Check that we got 2 lines out... one for the headers, on for the 1 line of test data.
+    # Check that we got 4 lines - headers, result data, empty line, totals count
     line_count=$(cat $output_file | wc -l | xargs)
     empty_line_count=grep -c ^$ $output_file
     line_count=$(($line_count + $empty_line_count))

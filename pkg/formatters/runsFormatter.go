@@ -24,6 +24,8 @@ const (
 	RUN_RESULT_FAILED              = "Failed"
 	RUN_RESULT_FAILED_WITH_DEFECTS = "Failed With Defects"
 	RUN_RESULT_ENVFAIL             = "EnvFail"
+	RUN_RESULT_UNKNOWN             = "UNKNOWN"
+	RUN_RESULT_ACTIVE              = "Active"
 
 	HEADER_RUNNAME        = "name"
 	HEADER_STATUS         = "status"
@@ -40,7 +42,7 @@ const (
 	HEADER_METHOD_TYPE    = "type"
 )
 
-var RESULT_LABELS = []string{RUN_RESULT_TOTAL, RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_FAILED_WITH_DEFECTS, RUN_RESULT_ENVFAIL}
+var RESULT_LABELS = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_FAILED_WITH_DEFECTS, RUN_RESULT_ENVFAIL, RUN_RESULT_UNKNOWN, RUN_RESULT_ACTIVE}
 
 type RunsFormatter interface {
 	FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error)
@@ -131,14 +133,17 @@ func getReadableTime(timeStringRaw string) string {
 
 // -----------------------------------------------------
 // Functions for result report
-func generateResultTotalsReport(resultsCount map[string]int) string {
-	var resultString string = ""
-	for count, label := range RESULT_LABELS {
-		if count != 0 {
+func generateResultTotalsReport(totalResults int, resultsCount map[string]int) string {
+	var resultString string = RUN_RESULT_TOTAL + ":" + strconv.Itoa(totalResults)
+	for _, label := range RESULT_LABELS {
+		labelResult := resultsCount[label]
+		if labelResult > 0 {
+
 			resultString += " "
+
+			resultLabelNoSpaces := strings.ReplaceAll(label, " ", "")
+			resultString += resultLabelNoSpaces + ":" + strconv.Itoa(labelResult)
 		}
-		resultLabelNoSpaces := strings.ReplaceAll(label, " ", "")
-		resultString += resultLabelNoSpaces + ":" + strconv.Itoa(resultsCount[label])
 	}
 
 	return resultString
@@ -146,12 +151,16 @@ func generateResultTotalsReport(resultsCount map[string]int) string {
 
 func accumulateResults(resultCounts map[string]int, run galasaapi.Run) {
 	runResult := run.TestStructure.GetResult()
-	resultTotal, isPresent := resultCounts[runResult]
-	if isPresent {
-		resultTotal++
-		resultCounts[runResult] = resultTotal
+	if len(runResult) > 0 {
+		resultTotal, isPresent := resultCounts[runResult]
+		if isPresent {
+			resultTotal++
+			resultCounts[runResult] = resultTotal
+		}
+	} else {
+		resultCounts[RUN_RESULT_ACTIVE]++
 	}
-	resultCounts["Total"]++
+
 }
 
 func initialiseResultMap() map[string]int {

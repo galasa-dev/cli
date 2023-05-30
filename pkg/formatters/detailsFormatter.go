@@ -39,6 +39,7 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	var result string = ""
 	var err error = nil
 
+	totalResults := len(runs)
 	resultCountsMap := initialiseResultMap()
 
 	buff := strings.Builder{}
@@ -49,14 +50,12 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 			accumulateResults(resultCountsMap, run)
 			coreDetailsTable := tabulateCoreRunDetails(run, apiServerUrl)
 			coreDetailsColumnLengths := calculateMaxLengthOfEachColumn(coreDetailsTable)
-			//writeTableToBuff(&buff, coreDetailsTable)
 			writeFormattedTableToStringBuilder(coreDetailsTable, &buff, coreDetailsColumnLengths)
 
 			buff.WriteString("\n")
 
 			methodTable := initialiseMethodTable()
 			methodTable = tabulateRunMethodsToTable(run.TestStructure.GetMethods(), methodTable)
-			//writeTableToBuff(&buff, methodTable)
 			methodColumnLengths := calculateMaxLengthOfEachColumn(methodTable)
 			writeFormattedTableToStringBuilder(methodTable, &buff, methodColumnLengths)
 
@@ -68,7 +67,7 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 
 		buff.WriteString("\n")
 	}
-	totalReportString := generateResultTotalsReport(resultCountsMap)
+	totalReportString := generateResultTotalsReport(totalResults, resultCountsMap)
 	buff.WriteString(totalReportString + "\n")
 
 	result = buff.String()

@@ -34,6 +34,7 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	var result string = ""
 	var err error = nil
 	buff := strings.Builder{}
+	totalResults := len(runs)
 	resultCountsMap := initialiseResultMap()
 	if len(runs) > 0 {
 		var table [][]string
@@ -57,7 +58,7 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 
 		buff.WriteString("\n")
 	}
-	totalReportString := generateResultTotalsReport(resultCountsMap)
+	totalReportString := generateResultTotalsReport(totalResults, resultCountsMap)
 	buff.WriteString(totalReportString + "\n")
 
 	result = buff.String()
