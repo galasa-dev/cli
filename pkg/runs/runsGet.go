@@ -49,7 +49,7 @@ func GetRuns(
 		// Validate the runName as best we can without contacting the ecosystem.
 		err = ValidateRunName(runName)
 	}
-	
+
 	if (err == nil) && (age != "") {
 		fromAge, toAge, err = getTimesFromAge(age)
 	}
@@ -178,9 +178,9 @@ func GetRunsFromRestApi(
 	restClient := api.InitialiseAPI(apiServerUrl)
 
 	now := timeService.Now()
-	fromTime := now.Add(-(time.Duration(fromAgeHours) * time.Hour)) // Add a minus, so subtract
+	fromTime := now.Add(-(time.Duration(fromAgeHours) * time.Hour)).UTC() // Add a minus, so subtract
 
-	toTime := now.Add(-(time.Duration(toAgeHours) * time.Hour)) // Add a minus, so subtract
+	toTime := now.Add(-(time.Duration(toAgeHours) * time.Hour)).UTC() // Add a minus, so subtract
 
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
