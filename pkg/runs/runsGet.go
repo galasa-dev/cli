@@ -265,7 +265,7 @@ func getTimesFromAge(age string) (int, int, error) {
 		fromPart := ageParts[0]
 		if !agePartRegex.MatchString(fromPart) {
 			// Invalid from part.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_INVALID_FROM_AGE_SPECIFIED, age)
 		} else {
 			fromAge, err = getHoursFromAgePart(fromPart, age)
 
@@ -311,7 +311,7 @@ func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) 
 
 		if len(durationPart) == 0 {
 			// Invalid from. It must be some time in the past.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_INVALID_FROM_AGE_SPECIFIED, errorMessageValue)
 		} else {
 			// we can extract the integer part now
 
