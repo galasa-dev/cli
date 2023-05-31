@@ -236,6 +236,8 @@ func GetRunsFromRestApi(
 				// Have we processed the last page ?
 				if pageNumberWanted == runData.GetNumPages() {
 					gotAllResults = true
+				} else {
+					pageNumberWanted++
 				}
 			}
 		}
