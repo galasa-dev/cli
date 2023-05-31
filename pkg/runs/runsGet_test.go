@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
 	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -746,4 +745,43 @@ func TestAgeWithHugeNumberGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+}
+
+func TestRunsGetURLQueryPagingJustFromAge(t *testing.T) {
+	// Given ...
+	age := "2d"
+	runName := ""
+	page := 1
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		assert.NotNil(t, query.Get("from"))
+		assert.NotEqualValues(t, query.Get("from"), "")
+		assert.EqualValues(t, query.Get("to"), "")
+		assert.NotNil(t, query.Get("page"))
+		assert.EqualValues(t, query.Get("page"), strconv.Itoa(page))
+		page++
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		w.Write([]byte(fmt.Sprintf(`
+		 {
+			 "pageNumber": %s,
+			 "pageSize": 1,
+			 "numPages": 5,
+			 "amountOfRuns": 0,
+			 "runs":[]
+		 }`, query.Get("page"))))
+	}))
+	defer server.Close()
+
+	outputFormat := "summary"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then ...
+	assert.Nil(t, err)
 }
