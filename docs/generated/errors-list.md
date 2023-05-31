@@ -78,6 +78,6 @@ The `galasactl` tool can generate the following errors:
 - GAL1075E: run name '{}' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.
 - GAL1076E: Badly formed from or to value '{}' specified in the age parameter. The value could not be converted into an integer value.
 - GAL1077E: Invalid value '{}' detected for age parameter. The 'from' value must be greater than the 'to' value.
-- GAL1078E: Badly formed '--age' parameter value '{}' specified. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
+- GAL1080E: Invalid 'from' value '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
 - GAL1079E: The --age or the --name parameter must be used to identify which test run(s) you want see.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
