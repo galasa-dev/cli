@@ -6,10 +6,13 @@ package runs
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -33,15 +36,68 @@ func DownloadArtifacts(
 
 	runs, err = GetRunsFromRestApi(runName, timeService, apiServerUrl)
 	if err == nil {
-		for _, run := range runs {
-			runId := run.GetRunId()
-			artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
-			if err == nil {
-				for _, artifactPath := range artifactPaths {
-					var artifactData io.Reader
-					artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
-					if err == nil {
-						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+		// if len(runs)>1 then compare/check submitted-times are equal
+		// 	if theyre equal then look/compare start-times
+		// 		sort runs in order of start-time (earliest start-time first)
+		// 		for each run {(do current download logic loop) and runDirectory = runname-run[i]-time.now() unless i=len(runs)-1 then runDirectory = runname-[i]}
+
+		if len(runs) > 1 {
+			log.Print(runs[0].GetRunId())
+			//get list of runs that are reRuns - get list of runs that are reRuns of each other
+			reRunsList := make([]galasaapi.Run, 0)
+			for count, run := range runs {
+				if runs[count].TestStructure.GetQueued() == runs[0].TestStructure.GetQueued() {
+					reRunsList = append(reRunsList, run)
+				}
+			}
+			// sort the reRuns in order of start-time to download each into separate folders
+			// sortedRunsBasedOnStartTime := make([]string, 0)
+			// for count, reRun := range reRunsList {
+
+			// }
+
+			var numberOfReRuns = len(reRunsList)
+			log.Print(reRunsList[1].GetRunId())
+			for i := 1; i < numberOfReRuns; i++ {
+				j := i
+				for j > 0 {
+					var differnceInt int
+					difference := getDuration(reRunsList[j-1].TestStructure.GetStartTime(), reRunsList[j].TestStructure.GetStartTime())
+					differnceInt, err = strconv.Atoi(difference)
+					if differnceInt < 0 {
+						reRunsList[j-1], reRunsList[j] = reRunsList[j], reRunsList[j-1]
+					}
+					j = j - 1
+				}
+			}
+
+			for count, reRun := range reRunsList {
+				log.Print(reRun.TestStructure.GetStartTime())
+				runName = runName + "-" + strconv.Itoa(count) + "-" + timeService.Now().String()
+				runId := reRun.GetRunId()
+				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
+				if err == nil {
+					for _, artifactPath := range artifactPaths {
+						var artifactData io.Reader
+						artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+						if err == nil {
+							err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+						}
+					}
+				}
+			}
+		} else {
+
+			for _, run := range runs {
+				runId := run.GetRunId()
+				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
+				if err == nil {
+					for _, artifactPath := range artifactPaths {
+						var artifactData io.Reader
+						artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+						if err == nil {
+							err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+						}
 					}
 				}
 			}
@@ -91,7 +147,7 @@ func WriteArtifactToFileSystem(
 	var err error = nil
 
 	pathParts := strings.Split(artifactPath, "/")
-	fileName := pathParts[len(pathParts) - 1]
+	fileName := pathParts[len(pathParts)-1]
 	targetFilePath := filepath.Join(runDirectory, artifactPath)
 
 	// Check if a new file should be created or if an existing one should be overwritten.
@@ -107,7 +163,7 @@ func WriteArtifactToFileSystem(
 			newFile, err = CreateEmptyArtifactFile(fileSystem, targetFilePath)
 			if err == nil {
 				log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
-	
+
 				err = TransferContent(fileDownloaded, newFile, targetFilePath)
 				if err == nil {
 					log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
@@ -150,9 +206,9 @@ func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath 
 }
 
 // Creates an empty file representing an artifact that is being written. Any parent directories that do not exist
-// will be created. Returns the empty file that was created or an error if any file creation operations failed. 
+// will be created. Returns the empty file that was created or an error if any file creation operations failed.
 func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string) (io.Writer, error) {
-	
+
 	var err error = nil
 	var newFile io.Writer = nil
 
@@ -190,4 +246,34 @@ func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) 
 
 	httpResponse.Body.Close()
 	return fileDownloaded, err
+}
+
+func formatTimeForDurationCalculation(rawTime string) time.Time {
+	parsedTime, err := time.Parse(time.RFC3339, rawTime)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return parsedTime
+}
+
+func calculateDurationMilliseconds(start time.Time, end time.Time) string {
+	duration := strconv.FormatInt(end.Sub(start).Milliseconds(), 10)
+
+	return duration
+}
+
+func getDuration(startTimeStringRaw string, endTimeStringRaw string) string {
+	var duration string = ""
+
+	var startTimeStringForDuration time.Time
+	var endTimeStringForDuration time.Time
+
+	if len(startTimeStringRaw) > 0 {
+		startTimeStringForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
+		if len(endTimeStringRaw) > 0 {
+			endTimeStringForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
+			duration = calculateDurationMilliseconds(startTimeStringForDuration, endTimeStringForDuration)
+		}
+	}
+	return duration
 }

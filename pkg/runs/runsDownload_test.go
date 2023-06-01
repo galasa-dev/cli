@@ -28,9 +28,9 @@ const (
 			 "requestor": "unitTesting",
 			 "status" : "Finished",
 			 "result" : "Passed",
-			 "queued" : null,	
-			 "startTime": "now",
-			 "endTime": "now",
+			 "queued" : "2023-05-10T06:00:13.043037Z",	
+			 "startTime": "2023-05-10T06:00:36.159003Z",
+			 "endTime": "2023-05-10T06:02:53.823338Z",
 			 "methods": [{
 				 "className": "myTestPackage.MyTestName",
 				 "methodName": "myTestMethodName",	
@@ -60,9 +60,9 @@ const (
 			 "requestor": "unitTesting27",
 			 "status" : "Finished",
 			 "result" : "LongResultString",
-			 "queued" : null,	
-			 "startTime": "now",
-			 "endTime": "now",
+			 "queued" : "2023-05-10T06:00:13.043037Z",	
+			 "startTime": "2023-05-10T06:00:36.159003Z",
+			 "endTime": "2023-05-10T06:02:53.823338Z",
 			 "methods": [{
 				 "className": "myTestPackage27.MyTestName27",
 				 "methodName": "myTestMethodName",	
@@ -81,12 +81,76 @@ const (
 			 "contentType":	"application/json"
 		 }]
 	}`
+
+	RUN_U27V2 = `{
+		"runId": "xxx987xxx",
+		"testStructure": {
+			"runName": "U27",
+			"bundle": "myBun27",	
+			"testName": "myTestPackage.MyTest27",
+			"testShortName": "MyTestName27",	
+			"requestor": "unitTesting27",
+			"status" : "Building",
+			"result" : "",
+			"queued" : "2023-05-10T06:00:13.043037Z",	
+			"startTime": "2023-05-10T06:01:36.159003Z",
+			"endTime": "2023-05-10T06:02:53.823338Z",
+			"methods": [{
+				"className": "myTestPackage27.MyTestName27",
+				"methodName": "myTestMethodName",	
+				"type": "test",	
+				"status": "Done",	
+				"result": "UNKNOWN",
+				"startTime": null,
+				"endTime": null,	
+				"runLogStart":null,	
+				"runLogEnd":null,	
+				"befores":[]
+			}]
+		},
+		"artifacts": [{
+			"artifactPath": "myPathToArtifact2",	
+			"contentType":	"application/json"
+		}]
+   }`
+
+	RUN_U27V3 = `{
+	"runId": "xxx987xxx",
+	"testStructure": {
+		"runName": "U27",
+		"bundle": "myBun27",	
+		"testName": "myTestPackage.MyTest27",
+		"testShortName": "MyTestName27",	
+		"requestor": "unitTesting27",
+		"status" : "Building",
+		"result" : "",
+		"queued" : "2023-05-10T06:00:13.043037Z",	
+		"startTime": "2023-05-10T06:02:36.159003Z",
+		"endTime": "2023-05-10T06:02:53.823338Z",
+		"methods": [{
+			"className": "myTestPackage27.MyTestName27",
+			"methodName": "myTestMethodName",	
+			"type": "test",	
+			"status": "Done",	
+			"result": "UNKNOWN",
+			"startTime": null,
+			"endTime": null,	
+			"runLogStart":null,	
+			"runLogEnd":null,	
+			"befores":[]
+		}]
+	},
+	"artifacts": [{
+		"artifactPath": "myPathToArtifact3",	
+		"contentType":	"application/json"
+	}]
+}`
 )
 
 type MockArtifact struct {
-	path string
+	path        string
 	contentType string
-	size int
+	size        int
 }
 
 func NewMockArtifact(mockPath string, mockContentType string, mockSize int) *MockArtifact {
@@ -140,7 +204,7 @@ func WriteMockRasRunsArtifactsResponse(
 	writer http.ResponseWriter,
 	req *http.Request,
 	artifactsList []MockArtifact) {
-	
+
 	writer.Header().Set("Content-Type", "application/json")
 
 	artifactsListJsonString := ""
@@ -158,7 +222,7 @@ func WriteMockRasRunsArtifactsResponse(
 	writer.Write([]byte(fmt.Sprintf(`
 	[ %s ]
 	`, artifactsListJsonString)))
-	
+
 }
 
 // Sets a response for requests to /ras/runs/{runId}/files/{artifactPath}
@@ -167,8 +231,8 @@ func WriteMockRasRunsFilesResponse(
 	writer http.ResponseWriter,
 	req *http.Request,
 	desiredContents string) {
-	
-	writer.Header().Set("Content-Disposition", "attachment")	
+
+	writer.Header().Set("Content-Disposition", "attachment")
 	writer.Write([]byte(desiredContents))
 }
 
@@ -185,13 +249,13 @@ func NewRunsDownloadServletMock(
 
 		acceptHeader := req.Header.Get("Accept")
 		switch req.URL.Path {
-			case "/ras/runs":
-				assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-				WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
+		case "/ras/runs":
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
 
-			case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-				assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-				WriteMockRasRunsArtifactsResponse(t, writer, req, artifactList)
+		case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsArtifactsResponse(t, writer, req, artifactList)
 		}
 
 		runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
@@ -317,10 +381,10 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 	mockConsole := utils.NewMockConsole()
-	
+
 	mockFileSystem := utils.NewMockFileSystem()
-	mockFileSystem.WriteTextFile(runName + dummyTxtArtifact.path, "dummy text file")
-	mockFileSystem.WriteTextFile(runName + dummyRunLog.path, "dummy log")
+	mockFileSystem.WriteTextFile(runName+dummyTxtArtifact.path, "dummy text file")
+	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
@@ -354,11 +418,11 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	mockConsole := utils.NewMockConsole()
 	mockTimeService := utils.NewMockTimeService()
-	
+
 	mockFileSystem := utils.NewMockFileSystem()
-	mockFileSystem.WriteTextFile(runName + "/dummy.txt", "dummy text file")
-	mockFileSystem.WriteTextFile(runName + "/run.log", "dummy log")
-	
+	mockFileSystem.WriteTextFile(runName+"/dummy.txt", "dummy text file")
+	mockFileSystem.WriteTextFile(runName+"/run.log", "dummy log")
+
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
@@ -437,15 +501,15 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	dummyArtifact := NewMockArtifact("/artifacts/dummy.gz", "application/x-gzip", 30)
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		switch req.URL.Path {
-			case "/ras/runs":
-				WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
+		case "/ras/runs":
+			WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
 
-			case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-				WriteMockRasRunsArtifactsResponse(t, writer, req, []MockArtifact{*dummyArtifact})
+		case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
+			WriteMockRasRunsArtifactsResponse(t, writer, req, []MockArtifact{*dummyArtifact})
 
-			case fmt.Sprintf(`/ras/runs/%s/files%s`, runId, dummyArtifact.path):
-				// Make the request to download an artifact fail
-				writer.WriteHeader(http.StatusInternalServerError)
+		case fmt.Sprintf(`/ras/runs/%s/files%s`, runId, dummyArtifact.path):
+			// Make the request to download an artifact fail
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 	}))
 	defer server.Close()
@@ -455,7 +519,6 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 	mockFileSystem := utils.NewMockFileSystem()
 	forceDownload := false
-
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
@@ -471,12 +534,12 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	runId := "xxx876xxx"
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		switch req.URL.Path {
-			case "/ras/runs":
-				WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
+		case "/ras/runs":
+			WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
 
-			case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-				// Make the request to list artifacts fail
-				writer.WriteHeader(http.StatusInternalServerError)
+		case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
+			// Make the request to list artifacts fail
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 	}))
 	defer server.Close()
@@ -492,4 +555,43 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1073")
+}
+
+func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId := "xxx543xxx"
+	forceDownload := false
+	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
+	dummyGzArtifact := NewMockArtifact("/artifacts/dummy.gz", "application/x-gzip", 342)
+	dummyRunLogArtifact := NewMockArtifact("/run.log", "text/plain", 203)
+	mockArtifacts := []MockArtifact{
+		*dummyTxtArtifact,
+		*dummyGzArtifact,
+		*dummyRunLogArtifact,
+	}
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, mockArtifacts, []string{RUN_U27, RUN_U27V2, RUN_U27V3})
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.path)
+	downloadedGzArtifactExists, _ := mockFileSystem.Exists(runName + dummyGzArtifact.path)
+	downloadedRunLogArtifactExists, _ := mockFileSystem.Exists(runName + dummyRunLogArtifact.path)
+
+	assert.Contains(t, err.Error(), "GAL1073")
+
+	assert.Nil(t, err)
+	assert.True(t, downloadedTxtArtifactExists)
+	assert.True(t, downloadedGzArtifactExists)
+	assert.True(t, downloadedRunLogArtifactExists)
 }
