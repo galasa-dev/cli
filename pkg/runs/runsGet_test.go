@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
 	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -697,7 +698,7 @@ func TestAgeWithExtraGarbageAfterToPartGivesError(t *testing.T) {
 	_, _, err := getTimesFromAge("3d:2dgarbage")
 
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "GAL1078")
+	assert.ErrorContains(t, err, "GAL1082")
 }
 
 func TestAgeWithZeroFromGivesError(t *testing.T) {
