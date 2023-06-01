@@ -58,11 +58,10 @@ const (
 			 "testName": "myTestPackage.MyTest27",
 			 "testShortName": "MyTestName27",	
 			 "requestor": "unitTesting27",
-			 "status" : "Finished",
+			 "status" : "building",
 			 "result" : "LongResultString",
 			 "queued" : "2023-05-10T06:00:13.043037Z",	
 			 "startTime": "2023-05-10T06:00:36.159003Z",
-			 "endTime": "2023-05-10T06:02:53.823338Z",
 			 "methods": [{
 				 "className": "myTestPackage27.MyTestName27",
 				 "methodName": "myTestMethodName",	
@@ -90,8 +89,8 @@ const (
 			"testName": "myTestPackage.MyTest27",
 			"testShortName": "MyTestName27",	
 			"requestor": "unitTesting27",
-			"status" : "Building",
-			"result" : "",
+			"status" : "finished",
+			"result" : "Fassed",
 			"queued" : "2023-05-10T06:00:13.043037Z",	
 			"startTime": "2023-05-10T06:01:36.159003Z",
 			"endTime": "2023-05-10T06:02:53.823338Z",
@@ -113,38 +112,6 @@ const (
 			"contentType":	"application/json"
 		}]
    }`
-
-	RUN_U27V3 = `{
-	"runId": "xxx999xxx",
-	"testStructure": {
-		"runName": "U27",
-		"bundle": "myBun27",	
-		"testName": "myTestPackage.MyTest27",
-		"testShortName": "MyTestName27",	
-		"requestor": "unitTesting27",
-		"status" : "Building",
-		"result" : "",
-		"queued" : "2023-05-10T06:00:13.043037Z",	
-		"startTime": "2023-05-10T06:02:36.159003Z",
-		"endTime": "2023-05-10T06:02:53.823338Z",
-		"methods": [{
-			"className": "myTestPackage27.MyTestName27",
-			"methodName": "myTestMethodName",	
-			"type": "test",	
-			"status": "Done",	
-			"result": "UNKNOWN",
-			"startTime": null,
-			"endTime": null,	
-			"runLogStart":null,	
-			"runLogEnd":null,	
-			"befores":[]
-		}]
-	},
-	"artifacts": [{
-		"artifactPath": "myPathToArtifact3",	
-		"contentType":	"application/json"
-	}]
-}`
 )
 
 type MockArtifact struct {
@@ -560,10 +527,10 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T) {
 	// Given ...
 	runName := "U27"
-	runIds := make([]string, 0)
-	runIds = append(runIds, "xxx543xxx")
-	runIds = append(runIds, "xxx987xxx")
-	runIds = append(runIds, "xxx999xxx")
+	runIds := []string{"xxx543xxx", "xxx987xxx"}
+	queuedTime := "2023-05-10_06:00:13"
+
+	runResultStrings := []string{RUN_U27, RUN_U27V2}
 
 	forceDownload := true
 	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
@@ -577,12 +544,18 @@ func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 
-		for _, runId := range runIds {
-			runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
-			if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
-				for _, artifact := range mockArtifacts {
-					if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-						WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+		acceptHeader := req.Header.Get("Accept")
+		if req.URL.Path == "/ras/runs" {
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
+		} else {
+			for _, runId := range runIds {
+				runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
+				if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
+					for _, artifact := range mockArtifacts {
+						if req.URL.Path == (runsFilesEndpoint + artifact.path) {
+							WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+						}
 					}
 				}
 			}
@@ -600,22 +573,15 @@ func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	// U27-1-2023-06-01-00:00:00
-	// U27-2-2023-06-01-00:00:00
-	// U27-3
-	todaysDate := "2023-06-01" // to do
-	timeRegex := ""            // to do
-	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s-%s%s", runName, todaysDate, timeRegex, dummyTxtArtifact.path))
-	downloadedGzArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s-%s%s", runName, todaysDate, timeRegex, dummyGzArtifact.path))
-	downloadedRunLogArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s-%s%s", runName, todaysDate, timeRegex, dummyRunLogArtifact.path))
+	// U27-1-2023-06-01_00:00:00 test did not finish
+	// U27-2 					 test finished
+	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime, dummyTxtArtifact.path))
+	downloadedGzArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime, dummyGzArtifact.path))
+	downloadedRunLogArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime, dummyRunLogArtifact.path))
 
-	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s-%s%s", runName, todaysDate, timeRegex, dummyTxtArtifact.path))
-	downloadedGzArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s-%s%s", runName, todaysDate, timeRegex, dummyGzArtifact.path))
-	downloadedRunLogArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s-%s%s", runName, todaysDate, timeRegex, dummyRunLogArtifact.path))
-
-	downloadedTxtArtifactExists3, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyTxtArtifact.path))
-	downloadedGzArtifactExists3, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyGzArtifact.path))
-	downloadedRunLogArtifactExists3, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyRunLogArtifact.path))
+	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyTxtArtifact.path))
+	downloadedGzArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyGzArtifact.path))
+	downloadedRunLogArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyRunLogArtifact.path))
 
 	assert.Nil(t, err)
 
@@ -626,9 +592,4 @@ func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T
 	assert.True(t, downloadedTxtArtifactExists2)
 	assert.True(t, downloadedGzArtifactExists2)
 	assert.True(t, downloadedRunLogArtifactExists2)
-
-	assert.True(t, downloadedTxtArtifactExists3)
-	assert.True(t, downloadedGzArtifactExists3)
-	assert.True(t, downloadedRunLogArtifactExists3)
-
 }

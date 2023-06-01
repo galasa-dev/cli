@@ -41,62 +41,66 @@ func DownloadArtifacts(
 		// 		sort runs in order of start-time (earliest start-time first)
 		// 		for each run {(do current download logic loop) and runDirectory = runname-run[i]-time.now() unless i=len(runs)-1 then runDirectory = runname-[i]}
 
-		// if len(runs) > 1 {
-		// 	log.Print(runs[0].GetRunId())
-		// 	//get list of runs that are reRuns - get list of runs that are reRuns of each other
-		// 	reRunsList := make([]galasaapi.Run, 0)
-		// 	for count, run := range runs {
-		// 		if runs[count].TestStructure.GetQueued() == runs[0].TestStructure.GetQueued() {
-		// 			reRunsList = append(reRunsList, run)
-		// 		}
-		// 	}
-		// 	// sort the reRuns in order of start-time to download each into separate folders
-		// 	// sortedRunsBasedOnStartTime := make([]string, 0)
-		// 	// for count, reRun := range reRunsList {
+		if len(runs) > 1 {
+			log.Print(runs[0].GetRunId())
+			//get list of runs that are reRuns - get list of runs that are reRuns of each other
+			reRunsList := make([]galasaapi.Run, 0)
+			for count, run := range runs {
+				if runs[count].TestStructure.GetQueued() == runs[0].TestStructure.GetQueued() {
+					reRunsList = append(reRunsList, run)
+				}
+			}
 
-		// 	// }
+			// sort the reRuns in order of start-time to download each into separate folders
+			// sortedRunsBasedOnStartTime := make([]string, 0)
+			// for count, reRun := range reRunsList {
+			// }
 
-		// 	var numberOfReRuns = len(reRunsList)
-		// 	log.Print(reRunsList[1].GetRunId())
-		// 	for i := 1; i < numberOfReRuns; i++ {
-		// 		j := i
-		// 		for j > 0 {
-		// 			var differnceInt int
-		// 			difference := getDuration(reRunsList[j-1].TestStructure.GetStartTime(), reRunsList[j].TestStructure.GetStartTime())
-		// 			differnceInt, err = strconv.Atoi(difference)
-		// 			if differnceInt < 0 {
-		// 				reRunsList[j-1], reRunsList[j] = reRunsList[j], reRunsList[j-1]
-		// 			}
-		// 			j = j - 1
-		// 		}
-		// 	}
+			// SORTING BY START TIME TO DO
+			// var numberOfReRuns = len(reRunsList)
+			// log.Print(reRunsList[1].GetRunId())
+			// for i := 1; i < numberOfReRuns; i++ {
+			// 	j := i
+			// 	for j > 0 {
+			// 		var differnceInt int
+			// 		difference := getDuration(reRunsList[j-1].TestStructure.GetStartTime(), reRunsList[j].TestStructure.GetStartTime())
+			// 		differnceInt, err = strconv.Atoi(difference)
+			// 		if differnceInt < 0 {
+			// 			reRunsList[j-1], reRunsList[j] = reRunsList[j], reRunsList[j-1]
+			// 		}
+			// 		j = j - 1
+			// 	}
+			// }
 
-		// 	for count, reRun := range reRunsList {
-		// 		log.Print(reRun.TestStructure.GetStartTime())
-		// 		runName = runName + "-" + strconv.Itoa(count) + "-" + timeService.Now().String()
-		// 		runId := reRun.GetRunId()
-		// 		artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
-		// 		if err == nil {
-		// 			for _, artifactPath := range artifactPaths {
-		// 				var artifactData io.Reader
-		// 				artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
-		// 				if err == nil {
-		// 					err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// } else {
+			for count, reRun := range reRunsList {
+				log.Print(reRun.TestStructure.GetStartTime())
+				queuedTimeString := strings.Replace(reRun.TestStructure.GetQueued(), "T", "_", -1)
+				queuedTimeString = strings.Split(queuedTimeString, ".")[0]
+				runName = runName + "-" + strconv.Itoa(count) + "_" + queuedTimeString
+				runId := reRun.GetRunId()
+				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
+				if err == nil {
+					for _, artifactPath := range artifactPaths {
+						var artifactData io.Reader
+						artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+						if err == nil {
+							err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+						}
+					}
+				}
+			}
+		} else {
 
-		for _, run := range runs {
-			runId := run.GetRunId()
-			artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
-			if err == nil {
-				for _, artifactPath := range artifactPaths {
-					var artifactData io.Reader
-					artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
-					if err == nil {
-						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+			for _, run := range runs {
+				runId := run.GetRunId()
+				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
+				if err == nil {
+					for _, artifactPath := range artifactPaths {
+						var artifactData io.Reader
+						artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+						if err == nil {
+							err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+						}
 					}
 				}
 			}
