@@ -115,7 +115,7 @@ const (
    }`
 
 	RUN_U27V3 = `{
-	"runId": "xxx987xxx",
+	"runId": "xxx999xxx",
 	"testStructure": {
 		"runName": "U27",
 		"bundle": "myBun27",	
@@ -560,8 +560,12 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T) {
 	// Given ...
 	runName := "U27"
-	runId := "xxx543xxx"
-	forceDownload := false
+	runIds := make([]string, 0)
+	runIds = append(runIds, "xxx543xxx")
+	runIds = append(runIds, "xxx987xxx")
+	runIds = append(runIds, "xxx999xxx")
+
+	forceDownload := true
 	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
 	dummyGzArtifact := NewMockArtifact("/artifacts/dummy.gz", "application/x-gzip", 342)
 	dummyRunLogArtifact := NewMockArtifact("/run.log", "text/plain", 203)
@@ -571,7 +575,19 @@ func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T
 		*dummyRunLogArtifact,
 	}
 
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, mockArtifacts, []string{RUN_U27, RUN_U27V2, RUN_U27V3})
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+
+		for _, runId := range runIds {
+			runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
+			if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
+				for _, artifact := range mockArtifacts {
+					if req.URL.Path == (runsFilesEndpoint + artifact.path) {
+						WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+					}
+				}
+			}
+		}
+	}))
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -584,14 +600,35 @@ func TestRunsDownloadWritesSingleArtifactToFileSystemMultipleReRuns(t *testing.T
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.path)
-	downloadedGzArtifactExists, _ := mockFileSystem.Exists(runName + dummyGzArtifact.path)
-	downloadedRunLogArtifactExists, _ := mockFileSystem.Exists(runName + dummyRunLogArtifact.path)
+	// U27-1-2023-06-01-00:00:00
+	// U27-2-2023-06-01-00:00:00
+	// U27-3
+	todaysDate := "2023-06-01" // to do
+	timeRegex := ""            // to do
+	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s-%s%s", runName, todaysDate, timeRegex, dummyTxtArtifact.path))
+	downloadedGzArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s-%s%s", runName, todaysDate, timeRegex, dummyGzArtifact.path))
+	downloadedRunLogArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s-%s%s", runName, todaysDate, timeRegex, dummyRunLogArtifact.path))
 
-	assert.Contains(t, err.Error(), "GAL1073")
+	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s-%s%s", runName, todaysDate, timeRegex, dummyTxtArtifact.path))
+	downloadedGzArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s-%s%s", runName, todaysDate, timeRegex, dummyGzArtifact.path))
+	downloadedRunLogArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s-%s%s", runName, todaysDate, timeRegex, dummyRunLogArtifact.path))
+
+	downloadedTxtArtifactExists3, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyTxtArtifact.path))
+	downloadedGzArtifactExists3, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyGzArtifact.path))
+	downloadedRunLogArtifactExists3, _ := mockFileSystem.Exists(fmt.Sprintf("%s-3%s", runName, dummyRunLogArtifact.path))
 
 	assert.Nil(t, err)
-	assert.True(t, downloadedTxtArtifactExists)
-	assert.True(t, downloadedGzArtifactExists)
-	assert.True(t, downloadedRunLogArtifactExists)
+
+	assert.True(t, downloadedTxtArtifactExists1)
+	assert.True(t, downloadedGzArtifactExists1)
+	assert.True(t, downloadedRunLogArtifactExists1)
+
+	assert.True(t, downloadedTxtArtifactExists2)
+	assert.True(t, downloadedGzArtifactExists2)
+	assert.True(t, downloadedRunLogArtifactExists2)
+
+	assert.True(t, downloadedTxtArtifactExists3)
+	assert.True(t, downloadedGzArtifactExists3)
+	assert.True(t, downloadedRunLogArtifactExists3)
+
 }
