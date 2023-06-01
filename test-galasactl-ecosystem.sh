@@ -373,23 +373,132 @@ function runs_get_check_raw_format_output {
     success "galasactl runs get --format raw seemed to work"
 }
 
-# function runs_get_check_summary_format_output_with_valid_age_param {
-#     h2 "Performing runs get with summary format providing an age parameter with a 'from' value..."
+#--------------------------------------------------------------------------
+function runs_get_check_raw_format_output_with_from_and_to {
+    h2 "Performing runs get with raw format providing a from and to age..."
 
-#     run_name=$1
-# }
+    run_name=$1
 
-# function runs_get_check_summary_format_output_with_invalid_age_param {
+    cd ${BASEDIR}/temp
 
-# }
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --age 1h:0h \
+    --format raw \
+    --bootstrap ${bootstrap}"
 
-# function runs_get_check_summary_format_output_with_no_runname_and_no_age_param {
+    info "Command is: $cmd"
 
-# }
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
 
-# function runs_get_check_summary_format_output_with_badly_formed_age_param {
+    # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
+    cat $output_file | grep "${run_name}" -q
+    rc=$?
+    # We expect a return code of '0' because the run name should be output.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find ${run_name} in raw output"
+        exit 1
+    fi  
 
-# }
+    success "galasactl runs get with age parameter returned results okay." 
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_raw_format_output_with_just_from {
+    h2 "Performing runs get with raw format providing just a from age..."
+
+    run_name=$1
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --age 1d \
+    --format raw \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
+    cat $output_file | grep "${run_name}" -q
+    rc=$?
+    # We expect a return code of '0' because the run name should be output.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find ${run_name} in raw output"
+        exit 1
+    fi  
+
+    success "galasactl runs get with age parameter with just from value returned results okay." 
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_raw_format_output_with_no_runname_and_no_age_param {
+    h2 "Performing runs get with raw format providing no run name and no age..."
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --format raw \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '1' because this should return the error GAL1079E.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to return an error."
+        exit 1
+    fi
+
+    success "galasactl runs get with no run name and no age returned an error okay." 
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_raw_format_output_with_invalid_age_param {
+    h2 "Performing runs get with raw format providing an age parameter with an invalid value..."
+
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --age 1y:1m \
+    --format raw \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '1' because this should return the error GAL1078E.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to return an error."
+        exit 1
+    fi
+
+    success "galasactl runs get with invalid age values returned an error okay." 
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_raw_format_output_with_older_to_than_from_age {
+    h2 "Performing runs get with raw format providing an age parameter with an older to than from age..."
+
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --age 1h:1d \
+    --format raw \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '1' because this should return the error GAL1077E.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to return an error."
+        exit 1
+    fi
+
+    success "galasactl runs get with older to age than from age returned an error okay." 
+}
 
 #--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
@@ -484,12 +593,13 @@ runs_get_check_details_format_output  $RUN_NAME
 runs_get_check_raw_format_output  $RUN_NAME
 
 # Query the result with the age parameter 
-runs_get_check_summary_format_output_with_valid_age_param $RUN_NAME
+runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
+runs_get_check_raw_format_output_with_just_from $RUN_NAME
 
 # Check that the age parameter throws correct errors with invalid values
-runs_get_check_summary_format_output_with_invalid_age_param $RUN_NAME
-runs_get_check_summary_format_output_with_no_runname_and_no_age_param
-runs_get_check_summary_format_output_with_badly_formed_age_param
+runs_get_check_raw_format_output_with_no_runname_and_no_age_param
+runs_get_check_raw_format_output_with_invalid_age_param
+runs_get_check_raw_format_output_with_older_to_than_from_age
 # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 # Launch test on ecosystem without a portfolio ...
