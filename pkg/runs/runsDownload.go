@@ -30,7 +30,6 @@ func DownloadArtifacts(
 
 	var err error = nil
 	var runs []galasaapi.Run
-	var artifactPaths []string
 
 	runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
 	if err == nil {
@@ -41,10 +40,22 @@ func DownloadArtifacts(
 
 		if len(runs) > 1 {
 			//get list of runs that are reRuns - get list of runs that are reRuns of each other
-			reRunsList := make([]galasaapi.Run, 0)
-			for count, run := range runs {
-				if runs[count].TestStructure.GetQueued() == runs[0].TestStructure.GetQueued() {
-					reRunsList = append(reRunsList, run)
+			// create a map of lists of reRuns - key is queued time, value is the run
+
+			reRunsByQueuedTime := make(map[string][]galasaapi.Run, 0)
+			queuedTime := ""
+			for _, run := range runs {
+				queuedTime = run.TestStructure.GetQueued()
+				runsWithSameQueuedTime := reRunsByQueuedTime[queuedTime]
+				runsWithSameQueuedTime = append(runsWithSameQueuedTime, run)
+				reRunsByQueuedTime[queuedTime] = runsWithSameQueuedTime
+			}
+
+			for _, reRunsList := range reRunsByQueuedTime {
+				for count, reRun := range reRunsList {
+
+					directoryName := nameArtifactDownloadDirectory(reRun, count)
+					err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload)
 				}
 			}
 
@@ -64,48 +75,51 @@ func DownloadArtifacts(
 			// 	}
 			// }
 
-			for count, reRun := range reRunsList {
-				directoryName := runName
-				if count < len(reRunsList)-1 || len(reRun.TestStructure.GetResult()) < 1 {
-					queuedTimeString := strings.Replace(reRun.TestStructure.GetQueued(), "T", "_", -1)
-					queuedTimeString = strings.Split(queuedTimeString, ".")[0]
-
-					directoryName = runName + "-" + strconv.Itoa(count+1) + "-" + queuedTimeString
-				} else {
-					directoryName = runName + "-" + strconv.Itoa(count+1)
-				}
-
-				runId := reRun.GetRunId()
-				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
-				if err == nil {
-					log.Printf("Creating folder %s", directoryName)
-					for _, artifactPath := range artifactPaths {
-						var artifactData io.Reader
-						artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
-						if err == nil {
-							err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload)
-						}
-					}
-				}
-			}
 		} else {
 
 			for _, run := range runs {
-				runId := run.GetRunId()
-				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
-				if err == nil {
-					for _, artifactPath := range artifactPaths {
-						var artifactData io.Reader
-						artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
-						if err == nil {
-							err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
-						}
-					}
-				}
+				err = downloadArtifactsToDirectory(apiServerUrl, runName, run, fileSystem, forceDownload)
+
 			}
 		}
 
 	}
+	return err
+}
+
+func nameArtifactDownloadDirectory(reRun galasaapi.Run, count int) string {
+	endTime := reRun.TestStructure.GetEndTime()
+	runName := reRun.TestStructure.GetRunName()
+	directoryName := runName
+	if endTime == "" {
+		queuedTimeString := strings.Replace(reRun.TestStructure.GetQueued(), "T", "_", -1)
+		queuedTimeString = strings.Split(queuedTimeString, ".")[0]
+
+		directoryName = runName + "-" + strconv.Itoa(count+1) + "-" + queuedTimeString
+	} else {
+		directoryName = runName + "-" + strconv.Itoa(count+1)
+	}
+	return directoryName
+}
+
+func downloadArtifactsToDirectory(apiServerUrl string,
+	directoryName string,
+	reRun galasaapi.Run,
+	fileSystem utils.FileSystem,
+	forceDownload bool) error {
+	runId := reRun.GetRunId()
+	artifactPaths, err := GetArtifactPathsFromRestApi(runId, apiServerUrl)
+	if err == nil {
+		log.Printf("Creating folder %s", directoryName)
+		for _, artifactPath := range artifactPaths {
+			var artifactData io.Reader
+			artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+			if err == nil {
+				err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload)
+			}
+		}
+	}
+
 	return err
 }
 

@@ -112,6 +112,68 @@ const (
 			"contentType":	"application/json"
 		}]
    }`
+
+	RUN_U27V3 = `{
+		"runId": "xxx4321xxx",
+		"testStructure": {
+			"runName": "U27",
+			"bundle": "myBun27",	
+			"testName": "myTestPackage.MyTest27",
+			"testShortName": "MyTestName27",	
+			"requestor": "unitTesting27",
+			"status" : "finished",
+			"result" : "EnvFail",
+			"queued" : "2022-05-10T04:00:13.043037Z",	
+			"startTime": "2022-05-10T04:01:36.159003Z",
+			"methods": [{
+				"className": "myTestPackage27.MyTestName27",
+				"methodName": "myTestMethodName",	
+				"type": "test",	
+				"status": "Done",	
+				"result": "UNKNOWN",
+				"startTime": null,
+				"endTime": null,	
+				"runLogStart":null,	
+				"runLogEnd":null,	
+				"befores":[]
+			}]
+		},
+		"artifacts": [{
+			"artifactPath": "myPathToArtifact2",	
+			"contentType":	"application/json"
+		}]
+	}`
+
+	RUN_U27V4 = `{
+		"runId": "xxx1234xxx",
+		"testStructure": {
+			"runName": "U27",
+			"bundle": "myBun27",	
+			"testName": "myTestPackage.MyTest27",
+			"testShortName": "MyTestName27",	
+			"requestor": "unitTesting27",
+			"status" : "finished",
+			"result" : "EnvFail",
+			"queued" : "2022-05-10T04:00:13.043037Z",	
+			"startTime": "2022-05-10T04:10:36.159003Z",
+			"methods": [{
+				"className": "myTestPackage27.MyTestName27",
+				"methodName": "myTestMethodName",	
+				"type": "test",	
+				"status": "Done",	
+				"result": "UNKNOWN",
+				"startTime": null,
+				"endTime": null,	
+				"runLogStart":null,	
+				"runLogEnd":null,	
+				"befores":[]
+			}]
+		},
+		"artifacts": [{
+			"artifactPath": "myPathToArtifact2",	
+			"contentType":	"application/json"
+		}]
+	}`
 )
 
 type MockArtifact struct {
@@ -572,7 +634,7 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "GAL1073")
 }
 
-func TestRunsDownloadWritesArtifactsToFileSystemMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
+func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	// Given ...
 	runName := "U27"
 	runId1 := "xxx543xxx"
@@ -696,4 +758,101 @@ func TestRunsDownloadWritesArtifactsToFileSystemMultipleReRunsWithCorrectOrderFo
 	assert.True(t, downloadedTxtArtifactExists2)
 	assert.True(t, downloadedGzArtifactExists2)
 	assert.True(t, downloadedRunLogArtifactExists2)
+}
+
+// Add test for two different sets of reruns
+func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId1a := "xxx543xxx"
+	runId1b := "xxx987xxx"
+
+	runId2a := "xxx1234xxx"
+	runId2b := "xxx4321xxx"
+
+	queuedTime1 := "2023-05-10_06:00:13"
+	queuedTime2 := "2022-05-10_04:00:13"
+
+	runResultStrings := []string{RUN_U27, RUN_U27V2, RUN_U27V3, RUN_U27V4} // add new
+
+	forceDownload := true
+
+	dummyTxtArtifactRunId1a := NewMockArtifact("/artifacts/dummy1a.txt", "text/plain", 1024)
+	mockArtifactsRunId1a := []MockArtifact{
+		*dummyTxtArtifactRunId1a,
+	}
+
+	dummyTxtArtifactRunId1b := NewMockArtifact("/artifacts/dummy1b.txt", "text/plain", 1024)
+	mockArtifactsRunId1b := []MockArtifact{
+		*dummyTxtArtifactRunId1b,
+	}
+
+	dummyTxtArtifactRunId2a := NewMockArtifact("/artifacts/dummy2a.txt", "text/plain", 1024)
+	mockArtifactsRunId2a := []MockArtifact{
+		*dummyTxtArtifactRunId2a,
+	}
+
+	dummyTxtArtifactRunId2b := NewMockArtifact("/artifacts/dummy2b.txt", "text/plain", 1024)
+	mockArtifactsRunId2b := []MockArtifact{
+		*dummyTxtArtifactRunId2b,
+	}
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId1a] = mockArtifactsRunId1a
+	runs[runId1b] = mockArtifactsRunId1b
+	runs[runId2a] = mockArtifactsRunId2a
+	runs[runId2b] = mockArtifactsRunId2b
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+
+		acceptHeader := req.Header.Get("Accept")
+
+		if req.URL.Path == "/ras/runs" {
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
+
+		} else {
+			for runId, artifacts := range runs {
+				if req.URL.Path == "/ras/runs/"+runId+"/artifacts" {
+					assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+					WriteMockRasRunsArtifactsResponse(t, writer, req, artifacts)
+				} else {
+					runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
+					if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
+						for _, artifact := range artifacts {
+							if req.URL.Path == (runsFilesEndpoint + artifact.path) {
+								WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+							}
+						}
+					}
+				}
+			}
+		}
+	}))
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	// U27-1-2023-06-01_00:00:00 test did not finish
+	// U27-2 					 test finished
+	downloadedTxtArtifactExists1a, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime1, dummyTxtArtifactRunId1a.path))
+	downloadedTxtArtifactExists1b, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2%s", runName, dummyTxtArtifactRunId1b.path))
+
+	downloadedTxtArtifactExists2a, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime2, dummyTxtArtifactRunId2a.path))
+	downloadedTxtArtifactExists2b, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s%s", runName, queuedTime2, dummyTxtArtifactRunId2b.path))
+
+	assert.Nil(t, err)
+
+	assert.True(t, downloadedTxtArtifactExists1a)
+	assert.True(t, downloadedTxtArtifactExists1b)
+	assert.True(t, downloadedTxtArtifactExists2a)
+	assert.True(t, downloadedTxtArtifactExists2b)
 }
