@@ -126,7 +126,8 @@ func TestSummaryFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 	run6 := createRunForSummary("2023-05-04T10:55:29.545323Z", "L789", "MyTestName5", "Finished", "Passed With Defects")
 	run7 := createRunForSummary("2023-05-04T10:55:29.545323Z", "C111", "MyTestName6", "Finished", "Failed")
 	run8 := createRunForSummary("2023-05-04T10:55:29.545323Z", "C222", "MyTestName7", "Finished", "UNKNOWN")
-	runs = append(runs, run1, run2, run3, run4, run5, run6, run7, run8)
+	run9 := createRunForSummary("2023-05-04T10:55:29.545323Z", "C333", "MyTestName8", "Finished", "Ignored")
+	runs = append(runs, run1, run2, run3, run4, run5, run6, run7, run8, run9)
 	apiServerURL := ""
 
 	// When...
@@ -143,7 +144,8 @@ func TestSummaryFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"2023-05-04 10:55:29 L789 Finished Passed With Defects MyTestName5\n" +
 			"2023-05-04 10:55:29 C111 Finished Failed              MyTestName6\n" +
 			"2023-05-04 10:55:29 C222 Finished UNKNOWN             MyTestName7\n" +
+			"2023-05-04 10:55:29 C333 Finished Ignored             MyTestName8\n" +
 			"\n" +
-			"Total:8 Passed:1 PassedWithDefects:1 Failed:2 EnvFail:2 UNKNOWN:1 Active:1\n"
+			"Total:9 Passed:1 PassedWithDefects:1 Failed:2 EnvFail:2 UNKNOWN:1 Active:1 Ignored:1\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
