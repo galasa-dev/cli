@@ -42,7 +42,6 @@ func DownloadArtifacts(
 		// 		for each run {(do current download logic loop) and runDirectory = runname-run[i]-time.now() unless i=len(runs)-1 then runDirectory = runname-[i]}
 
 		if len(runs) > 1 {
-			log.Print(runs[0].GetRunId())
 			//get list of runs that are reRuns - get list of runs that are reRuns of each other
 			reRunsList := make([]galasaapi.Run, 0)
 			for count, run := range runs {
@@ -51,40 +50,42 @@ func DownloadArtifacts(
 				}
 			}
 
-			// sort the reRuns in order of start-time to download each into separate folders
-			// sortedRunsBasedOnStartTime := make([]string, 0)
-			// for count, reRun := range reRunsList {
-			// }
-
 			// SORTING BY START TIME TO DO
 			// var numberOfReRuns = len(reRunsList)
 			// log.Print(reRunsList[1].GetRunId())
-			// for i := 1; i < numberOfReRuns; i++ {
-			// 	j := i
-			// 	for j > 0 {
+			// for reRun := 1; reRun < numberOfReRuns; reRun++ {
+			// 	currentPosition := reRun
+			// 	for currentPosition > 0 {
 			// 		var differnceInt int
-			// 		difference := getDuration(reRunsList[j-1].TestStructure.GetStartTime(), reRunsList[j].TestStructure.GetStartTime())
+			// 		difference := getDuration(reRunsList[currentPosition-1].TestStructure.GetStartTime(), reRunsList[currentPosition].TestStructure.GetStartTime())
 			// 		differnceInt, err = strconv.Atoi(difference)
 			// 		if differnceInt < 0 {
-			// 			reRunsList[j-1], reRunsList[j] = reRunsList[j], reRunsList[j-1]
+			// 			reRunsList[currentPosition-1], reRunsList[currentPosition] = reRunsList[currentPosition], reRunsList[currentPosition-1]
 			// 		}
-			// 		j = j - 1
+			// 		currentPosition = currentPosition - 1
 			// 	}
 			// }
 
 			for count, reRun := range reRunsList {
-				log.Print(reRun.TestStructure.GetStartTime())
-				queuedTimeString := strings.Replace(reRun.TestStructure.GetQueued(), "T", "_", -1)
-				queuedTimeString = strings.Split(queuedTimeString, ".")[0]
-				runName = runName + "-" + strconv.Itoa(count) + "_" + queuedTimeString
+				directoryName := runName
+				if count < len(reRunsList)-1 || len(reRun.TestStructure.GetResult()) < 1 {
+					queuedTimeString := strings.Replace(reRun.TestStructure.GetQueued(), "T", "_", -1)
+					queuedTimeString = strings.Split(queuedTimeString, ".")[0]
+
+					directoryName = runName + "-" + strconv.Itoa(count+1) + "-" + queuedTimeString
+				} else {
+					directoryName = runName + "-" + strconv.Itoa(count+1)
+				}
+
 				runId := reRun.GetRunId()
 				artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
 				if err == nil {
+					log.Printf("Creating folder %s", directoryName)
 					for _, artifactPath := range artifactPaths {
 						var artifactData io.Reader
 						artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 						if err == nil {
-							err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+							err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload)
 						}
 					}
 				}
