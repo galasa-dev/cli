@@ -114,7 +114,7 @@ const (
    }`
 
 	RUN_U27V3 = `{
-		"runId": "xxx4321xxx",
+		"runId": "xxx1234xxx",
 		"testStructure": {
 			"runName": "U27",
 			"bundle": "myBun27",	
@@ -145,7 +145,7 @@ const (
 	}`
 
 	RUN_U27V4 = `{
-		"runId": "xxx1234xxx",
+		"runId": "xxx4321xxx",
 		"testStructure": {
 			"runName": "U27",
 			"bundle": "myBun27",	
@@ -670,63 +670,7 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	runs[runId1] = mockArtifactsRunId1
 	runs[runId2] = mockArtifactsRunId2
 
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
-
-		acceptHeader := req.Header.Get("Accept")
-
-		if req.URL.Path == "/ras/runs" {
-			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
-
-		} else {
-			for runId, artifacts := range runs {
-				if req.URL.Path == "/ras/runs/"+runId+"/artifacts" {
-					assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-					WriteMockRasRunsArtifactsResponse(t, writer, req, artifacts)
-				} else {
-					runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
-					if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
-						for _, artifact := range artifacts {
-							if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-								WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// else if req.URL.Path == "/ras/runs/"+runId1+"/artifacts" {
-		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-		// 	WriteMockRasRunsArtifactsResponse(t, writer, req, mockArtifactsRunId1)
-
-		// } else if req.URL.Path == "/ras/runs/"+runId2+"/artifacts" {
-		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-		// 	WriteMockRasRunsArtifactsResponse(t, writer, req, mockArtifactsRunId2)
-
-		//}
-		// else {
-		// 	for _, runId := range runIds {
-		// 		runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
-		// 		if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
-		// 			if runId == runId1 {
-		// 				for _, artifact := range mockArtifactsRunId1 {
-		// 					if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-		// 						WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
-		// 					}
-		// 				}
-		// 			} else {
-		// 				for _, artifact := range mockArtifactsRunId2 {
-		// 					if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-		// 						WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
-		// 					}
-		// 				}
-		// 			}
-
-		// 		}
-		// 	}
-		// }
-	}))
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, runResultStrings, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -739,15 +683,15 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	// U27-1-2023-06-01_00:00:00 test did not finish
-	// U27-2 					 test finished
-	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime, dummyTxtArtifactRunId1.path))
-	downloadedGzArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime, dummyGzArtifactRunId1.path))
-	downloadedRunLogArtifactExists1, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime, dummyRunLogArtifactRunId1.path))
+	// U27-1-2023-2023-05-10T06:00:13 	(test did not finish)
+	// U27-2 					 		(test finished)
+	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyTxtArtifactRunId1.path)
+	downloadedGzArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyGzArtifactRunId1.path)
+	downloadedRunLogArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyRunLogArtifactRunId1.path)
 
-	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2%s", runName, dummyTxtArtifactRunId2.path))
-	downloadedGzArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2%s", runName, dummyGzArtifactRunId2.path))
-	downloadedRunLogArtifactExists2, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2%s", runName, dummyRunLogArtifactRunId2.path))
+	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyTxtArtifactRunId2.path)
+	downloadedGzArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyGzArtifactRunId2.path)
+	downloadedRunLogArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyRunLogArtifactRunId2.path)
 
 	assert.Nil(t, err)
 
@@ -760,7 +704,6 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	assert.True(t, downloadedRunLogArtifactExists2)
 }
 
-// Add test for two different sets of reruns
 func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *testing.T) {
 	// Given ...
 	runName := "U27"
@@ -773,7 +716,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	queuedTime1 := "2023-05-10_06:00:13"
 	queuedTime2 := "2022-05-10_04:00:13"
 
-	runResultStrings := []string{RUN_U27, RUN_U27V2, RUN_U27V3, RUN_U27V4} // add new
+	runResultStrings := []string{RUN_U27, RUN_U27V2, RUN_U27V3, RUN_U27V4}
 
 	forceDownload := true
 
@@ -803,32 +746,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	runs[runId2a] = mockArtifactsRunId2a
 	runs[runId2b] = mockArtifactsRunId2b
 
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
-
-		acceptHeader := req.Header.Get("Accept")
-
-		if req.URL.Path == "/ras/runs" {
-			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
-
-		} else {
-			for runId, artifacts := range runs {
-				if req.URL.Path == "/ras/runs/"+runId+"/artifacts" {
-					assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-					WriteMockRasRunsArtifactsResponse(t, writer, req, artifacts)
-				} else {
-					runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
-					if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
-						for _, artifact := range artifacts {
-							if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-								WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
-							}
-						}
-					}
-				}
-			}
-		}
-	}))
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, runResultStrings, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -841,13 +759,15 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
 	// Then...
-	// U27-1-2023-06-01_00:00:00 test did not finish
-	// U27-2 					 test finished
-	downloadedTxtArtifactExists1a, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime1, dummyTxtArtifactRunId1a.path))
-	downloadedTxtArtifactExists1b, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2%s", runName, dummyTxtArtifactRunId1b.path))
+	// U27-1-2023-05-10T06:00:13 	(test did not finish)
+	// U27-2 					 	(test finished)
+	// U27-1-2022-05-10T04:00:13 	(test did not finish)
+	// U27-2-2022-05-10T04:00:13    (test did not finish)
+	downloadedTxtArtifactExists1a, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime1 + dummyTxtArtifactRunId1a.path)
+	downloadedTxtArtifactExists1b, _ := mockFileSystem.Exists(runName + "-2" + dummyTxtArtifactRunId1b.path)
 
-	downloadedTxtArtifactExists2a, _ := mockFileSystem.Exists(fmt.Sprintf("%s-1-%s%s", runName, queuedTime2, dummyTxtArtifactRunId2a.path))
-	downloadedTxtArtifactExists2b, _ := mockFileSystem.Exists(fmt.Sprintf("%s-2-%s%s", runName, queuedTime2, dummyTxtArtifactRunId2b.path))
+	downloadedTxtArtifactExists2a, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime2 + dummyTxtArtifactRunId2a.path)
+	downloadedTxtArtifactExists2b, _ := mockFileSystem.Exists(runName + "-2-" + queuedTime2 + dummyTxtArtifactRunId2b.path)
 
 	assert.Nil(t, err)
 
