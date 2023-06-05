@@ -207,32 +207,52 @@ func WriteMockRasRunsFilesResponse(
 func NewRunsDownloadServletMock(
 	t *testing.T,
 	status int,
-	runId string,
 	runName string,
-	artifactList []MockArtifact,
-	runResultStrings []string) *httptest.Server {
+	runResultStrings []string,
+	runs map[string][]MockArtifact) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 
 		acceptHeader := req.Header.Get("Accept")
-		switch req.URL.Path {
-		case "/ras/runs":
+		if req.URL.Path == "/ras/runs" {
 			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
 			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
 
-		case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsArtifactsResponse(t, writer, req, artifactList)
-		}
-
-		runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
-		if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
-			for _, artifact := range artifactList {
-				if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-					WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+		} else {
+			for runId, artifacts := range runs {
+				if req.URL.Path == "/ras/runs/"+runId+"/artifacts" {
+					assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+					WriteMockRasRunsArtifactsResponse(t, writer, req, artifacts)
+				} else {
+					runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
+					if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
+						for _, artifact := range artifacts {
+							if req.URL.Path == (runsFilesEndpoint + artifact.path) {
+								WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+							}
+						}
+					}
 				}
 			}
 		}
+		// switch req.URL.Path {
+		// case "/ras/runs":
+		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+		// 	WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
+
+		// case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
+		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+		// 	WriteMockRasRunsArtifactsResponse(t, writer, req, artifactList)
+		// }
+
+		// runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
+		// if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
+		// 	for _, artifact := range artifactList {
+		// 		if req.URL.Path == (runsFilesEndpoint + artifact.path) {
+		// 			WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+		// 		}
+		// 	}
+		// }
 
 		writer.WriteHeader(status)
 	}))
@@ -251,7 +271,11 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	forceDownload := false
 
 	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyTxtArtifact}, []string{RUN_U27})
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = []MockArtifact{*dummyTxtArtifact}
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -283,7 +307,11 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	forceDownload := false
 
 	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyTxtArtifact}, []string{RUN_U27})
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = []MockArtifact{*dummyTxtArtifact}
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -310,7 +338,11 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	forceDownload := false
 
 	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyTxtArtifact}, []string{RUN_U27})
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = []MockArtifact{*dummyTxtArtifact}
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -342,7 +374,11 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 		*dummyTxtArtifact,
 		*dummyRunLog,
 	}
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, mockArtifacts, []string{RUN_U27})
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = mockArtifacts
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
 	defer server.Close()
 
 	apiServerUrl := server.URL
@@ -379,7 +415,11 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 		*NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024),
 		*NewMockArtifact("/run.log", "text/plain", 203),
 	}
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, mockArtifacts, []string{RUN_U27})
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = mockArtifacts
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
 	defer server.Close()
 
 	apiServerUrl := server.URL
@@ -411,7 +451,11 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 		*dummyGzArtifact,
 		*dummyRunLogArtifact,
 	}
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, mockArtifacts, []string{RUN_U27})
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = mockArtifacts
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -441,7 +485,11 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	forceDownload := false
 
 	dummyArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyArtifact}, []string{RUN_U27})
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = []MockArtifact{*dummyArtifact}
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -529,9 +577,9 @@ func TestRunsDownloadWritesArtifactsToFileSystemMultipleReRunsWithCorrectOrderFo
 	runName := "U27"
 	runId1 := "xxx543xxx"
 	runId2 := "xxx987xxx"
-	runIds := make([]string, 0)
-	runIds = append(runIds, runId1)
-	runIds = append(runIds, runId2)
+	// runIds := make([]string, 0)
+	// runIds = append(runIds, runId1)
+	// runIds = append(runIds, runId2)
 
 	queuedTime := "2023-05-10_06:00:13"
 
@@ -556,41 +604,66 @@ func TestRunsDownloadWritesArtifactsToFileSystemMultipleReRunsWithCorrectOrderFo
 		*dummyRunLogArtifactRunId2,
 	}
 
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId1] = mockArtifactsRunId1
+	runs[runId2] = mockArtifactsRunId2
+
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 
 		acceptHeader := req.Header.Get("Accept")
+
 		if req.URL.Path == "/ras/runs" {
 			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
 			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
 
-		} else if req.URL.Path == "/ras/runs/"+runId1+"/artifacts" {
-			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsArtifactsResponse(t, writer, req, mockArtifactsRunId1)
-
-		} else if req.URL.Path == "/ras/runs/"+runId2+"/artifacts" {
-			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsArtifactsResponse(t, writer, req, mockArtifactsRunId2)
 		} else {
-			for _, runId := range runIds {
-				runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
-				if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
-					if runId == runId1 {
-						for _, artifact := range mockArtifactsRunId1 {
-							if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-								WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
-							}
-						}
-					} else {
-						for _, artifact := range mockArtifactsRunId2 {
+			for runId, artifacts := range runs {
+				if req.URL.Path == "/ras/runs/"+runId+"/artifacts" {
+					assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+					WriteMockRasRunsArtifactsResponse(t, writer, req, artifacts)
+				} else {
+					runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
+					if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
+						for _, artifact := range artifacts {
 							if req.URL.Path == (runsFilesEndpoint + artifact.path) {
 								WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
 							}
 						}
 					}
-
 				}
 			}
 		}
+
+		// else if req.URL.Path == "/ras/runs/"+runId1+"/artifacts" {
+		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+		// 	WriteMockRasRunsArtifactsResponse(t, writer, req, mockArtifactsRunId1)
+
+		// } else if req.URL.Path == "/ras/runs/"+runId2+"/artifacts" {
+		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+		// 	WriteMockRasRunsArtifactsResponse(t, writer, req, mockArtifactsRunId2)
+
+		//}
+		// else {
+		// 	for _, runId := range runIds {
+		// 		runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
+		// 		if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
+		// 			if runId == runId1 {
+		// 				for _, artifact := range mockArtifactsRunId1 {
+		// 					if req.URL.Path == (runsFilesEndpoint + artifact.path) {
+		// 						WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+		// 					}
+		// 				}
+		// 			} else {
+		// 				for _, artifact := range mockArtifactsRunId2 {
+		// 					if req.URL.Path == (runsFilesEndpoint + artifact.path) {
+		// 						WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
+		// 					}
+		// 				}
+		// 			}
+
+		// 		}
+		// 	}
+		// }
 	}))
 	defer server.Close()
 

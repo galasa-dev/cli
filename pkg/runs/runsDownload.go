@@ -6,13 +6,11 @@ package runs
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -253,32 +251,32 @@ func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) 
 	return fileDownloaded, err
 }
 
-func formatTimeForDurationCalculation(rawTime string) time.Time {
-	parsedTime, err := time.Parse(time.RFC3339, rawTime)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return parsedTime
-}
+// func formatTimeForDurationCalculation(rawTime string) time.Time {
+// 	parsedTime, err := time.Parse(time.RFC3339, rawTime)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// 	return parsedTime
+// }
 
-func calculateDurationMilliseconds(start time.Time, end time.Time) string {
-	duration := strconv.FormatInt(end.Sub(start).Milliseconds(), 10)
+// func calculateDurationMilliseconds(start time.Time, end time.Time) string {
+// 	duration := strconv.FormatInt(end.Sub(start).Milliseconds(), 10)
 
-	return duration
-}
+// 	return duration
+// }
 
-func getDuration(startTimeStringRaw string, endTimeStringRaw string) string {
-	var duration string = ""
+// func getDuration(startTimeStringRaw string, endTimeStringRaw string) string {
+// 	var duration string = ""
 
-	var startTimeStringForDuration time.Time
-	var endTimeStringForDuration time.Time
+// 	var startTimeStringForDuration time.Time
+// 	var endTimeStringForDuration time.Time
 
-	if len(startTimeStringRaw) > 0 {
-		startTimeStringForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
-		if len(endTimeStringRaw) > 0 {
-			endTimeStringForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
-			duration = calculateDurationMilliseconds(startTimeStringForDuration, endTimeStringForDuration)
-		}
-	}
-	return duration
-}
+// 	if len(startTimeStringRaw) > 0 {
+// 		startTimeStringForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
+// 		if len(endTimeStringRaw) > 0 {
+// 			endTimeStringForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
+// 			duration = calculateDurationMilliseconds(startTimeStringForDuration, endTimeStringForDuration)
+// 		}
+// 	}
+// 	return duration
+// }
