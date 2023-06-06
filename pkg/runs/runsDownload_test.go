@@ -297,24 +297,6 @@ func NewRunsDownloadServletMock(
 				}
 			}
 		}
-		// switch req.URL.Path {
-		// case "/ras/runs":
-		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-		// 	WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
-
-		// case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-		// 	assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-		// 	WriteMockRasRunsArtifactsResponse(t, writer, req, artifactList)
-		// }
-
-		// runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
-		// if strings.HasPrefix(req.URL.Path, runsFilesEndpoint) {
-		// 	for _, artifact := range artifactList {
-		// 		if req.URL.Path == (runsFilesEndpoint + artifact.path) {
-		// 			WriteMockRasRunsFilesResponse(t, writer, req, artifact.path)
-		// 		}
-		// 	}
-		// }
 
 		writer.WriteHeader(status)
 	}))

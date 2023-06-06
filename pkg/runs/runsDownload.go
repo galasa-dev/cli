@@ -37,36 +37,43 @@ func DownloadArtifacts(
 			// get list of runs that are reRuns - get list of runs that are reRuns of each other
 			// create a map of lists of reRuns - key is queued time, value is the run
 
-			reRunsByQueuedTime := make(map[string][]galasaapi.Run, 0)
-			queuedTime := ""
-			for _, run := range runs {
-				queuedTime = run.TestStructure.GetQueued()
-				runsWithSameQueuedTime := reRunsByQueuedTime[queuedTime]
-				runsWithSameQueuedTime = append(runsWithSameQueuedTime, run)
-				reRunsByQueuedTime[queuedTime] = runsWithSameQueuedTime
-			}
-
-			// SORTING BY START TIME TO DO - on api side not in cli
+			reRunsByQueuedTime := createMapOfReRuns(runs)
 
 			for _, reRunsList := range reRunsByQueuedTime {
-				for count, reRun := range reRunsList {
-					directoryName := nameArtifactDownloadDirectory(reRun, count)
-					err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload)
+				if err == nil {
+					for reRunIndex, reRun := range reRunsList {
+						if err == nil {
+							directoryName := nameArtifactDownloadDirectory(reRun, reRunIndex)
+							err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload)
+						}
+					}
 				}
 			}
 
 		} else {
 			for _, run := range runs {
-				err = downloadArtifactsToDirectory(apiServerUrl, runName, run, fileSystem, forceDownload)
+				if err == nil {
+					err = downloadArtifactsToDirectory(apiServerUrl, runName, run, fileSystem, forceDownload)
+				}
 			}
-			//err = downloadArtifactsToDirectory(apiServerUrl, runName, runs[0], fileSystem, forceDownload)
 		}
-
 	}
 	return err
 }
 
-func nameArtifactDownloadDirectory(reRun galasaapi.Run, count int) string {
+func createMapOfReRuns(runs []galasaapi.Run) map[string][]galasaapi.Run {
+	reRunsByQueuedTime := make(map[string][]galasaapi.Run, 0)
+	queuedTime := ""
+	for _, run := range runs {
+		queuedTime = run.TestStructure.GetQueued()
+		runsWithSameQueuedTime := reRunsByQueuedTime[queuedTime]
+		runsWithSameQueuedTime = append(runsWithSameQueuedTime, run)
+		reRunsByQueuedTime[queuedTime] = runsWithSameQueuedTime
+	}
+	return reRunsByQueuedTime
+}
+
+func nameArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int) string {
 	endTime := reRun.TestStructure.GetEndTime()
 	runName := reRun.TestStructure.GetRunName()
 	directoryName := runName
@@ -74,9 +81,9 @@ func nameArtifactDownloadDirectory(reRun galasaapi.Run, count int) string {
 		queuedTimeString := strings.Replace(reRun.TestStructure.GetQueued(), "T", "_", -1)
 		queuedTimeString = strings.Split(queuedTimeString, ".")[0]
 
-		directoryName = runName + "-" + strconv.Itoa(count+1) + "-" + queuedTimeString
+		directoryName = runName + "-" + strconv.Itoa(reRunIndex+1) + "-" + queuedTimeString
 	} else {
-		directoryName = runName + "-" + strconv.Itoa(count+1)
+		directoryName = runName + "-" + strconv.Itoa(reRunIndex+1)
 	}
 	return directoryName
 }
@@ -91,10 +98,12 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 	if err == nil {
 		log.Printf("Creating folder %s", directoryName)
 		for _, artifactPath := range artifactPaths {
-			var artifactData io.Reader
-			artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 			if err == nil {
-				err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload)
+				var artifactData io.Reader
+				artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+				if err == nil {
+					err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload)
+				}
 			}
 		}
 	}
