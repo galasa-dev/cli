@@ -649,7 +649,6 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
-
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 
@@ -658,7 +657,6 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	// U27-2 					 		(test finished)
 	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyTxtArtifactRunId1.path)
 	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyTxtArtifactRunId2.path)
-
 	assert.Nil(t, err)
 
 	assert.True(t, downloadedTxtArtifactExists1)
@@ -736,4 +734,63 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	assert.True(t, downloadedTxtArtifactExists1b)
 	assert.True(t, downloadedTxtArtifactExists2a)
 	assert.True(t, downloadedTxtArtifactExists2b)
+}
+
+func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
+	// Given ...
+	runName := "U27"
+
+	runResultStrings := []string{}
+
+	forceDownload := true
+
+	runs := make(map[string][]MockArtifact, 0)
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, runResultStrings, runs)
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	// Then...
+
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, runName)
+	assert.Contains(t, textGotBack, "No artifacts")
+
+}
+
+func TestRunsDownloadWithInvalidRunName(t *testing.T) {
+	// Given ...
+	runName := "garbage"
+
+	runResultStrings := []string{}
+
+	forceDownload := true
+
+	runs := make(map[string][]MockArtifact, 0)
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, runResultStrings, runs)
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+
+	assert.Contains(t, err.Error(), "GAL1075E")
+	assert.Contains(t, err.Error(), "garbage")
+
 }

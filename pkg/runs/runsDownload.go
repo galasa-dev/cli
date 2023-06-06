@@ -31,29 +31,41 @@ func DownloadArtifacts(
 	var err error = nil
 	var runs []galasaapi.Run
 
-	runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
+	if (err == nil) && (runName != "") {
+		err = ValidateRunName(runName)
+	}
 	if err == nil {
-		if len(runs) > 1 {
-			// get list of runs that are reRuns - get list of runs that are reRuns of each other
-			// create a map of lists of reRuns - key is queued time, value is the run
+		runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
+		if err == nil {
+			if len(runs) > 1 {
+				// get list of runs that are reRuns - get list of runs that are reRuns of each other
+				// create a map of lists of reRuns - key is queued time, value is the run
+				reRunsByQueuedTime := createMapOfReRuns(runs)
 
-			reRunsByQueuedTime := createMapOfReRuns(runs)
+				err = downloadReRunArtfifacts(reRunsByQueuedTime, forceDownload, fileSystem, apiServerUrl)
 
-			for _, reRunsList := range reRunsByQueuedTime {
-				if err == nil {
-					for reRunIndex, reRun := range reRunsList {
-						if err == nil {
-							directoryName := nameArtifactDownloadDirectory(reRun, reRunIndex)
-							err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload)
-						}
-					}
-				}
+			} else if len(runs) == 1 {
+				err = downloadArtifactsToDirectory(apiServerUrl, runName, runs[0], fileSystem, forceDownload)
+			} else {
+				err = console.WriteString("No artifacts to download for run: '" + runName + "'\n")
 			}
+		}
+	}
+	return err
+}
 
-		} else {
-			for _, run := range runs {
+func downloadReRunArtfifacts(
+	reRunsByQueuedTime map[string][]galasaapi.Run,
+	forceDownload bool,
+	fileSystem utils.FileSystem,
+	apiServerUrl string) error {
+	var err error = nil
+	for _, reRunsList := range reRunsByQueuedTime {
+		if err == nil {
+			for reRunIndex, reRun := range reRunsList {
 				if err == nil {
-					err = downloadArtifactsToDirectory(apiServerUrl, runName, run, fileSystem, forceDownload)
+					directoryName := nameArtifactDownloadDirectory(reRun, reRunIndex)
+					err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload)
 				}
 			}
 		}
@@ -62,6 +74,13 @@ func DownloadArtifacts(
 }
 
 func createMapOfReRuns(runs []galasaapi.Run) map[string][]galasaapi.Run {
+	// key = queued time
+	// value = []runs
+	// This function creates a map of queued times. Each time has a list of runs with that queued time.
+	// helpful if we had two unrelated tests with the same runname, which both had a set of reruns.
+	// e.g.
+	// "2023-05-10T06:00:13.043037Z" = [reRun1, reRun2, reRun3]
+	// "2023-01-10T16:10:13.043037Z" = [reRunA, reRunB, reRunC]
 	reRunsByQueuedTime := make(map[string][]galasaapi.Run, 0)
 	queuedTime := ""
 	for _, run := range runs {
