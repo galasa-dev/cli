@@ -33,13 +33,8 @@ func DownloadArtifacts(
 
 	runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
 	if err == nil {
-		// if len(runs)>1 then compare/check submitted-times are equal
-		// 	if theyre equal then look/compare start-times
-		// 		sort runs in order of start-time (earliest start-time first)
-		// 		for each run {(do current download logic loop) and runDirectory = runname-run[i]-time.now() unless i=len(runs)-1 then runDirectory = runname-[i]}
-
 		if len(runs) > 1 {
-			//get list of runs that are reRuns - get list of runs that are reRuns of each other
+			// get list of runs that are reRuns - get list of runs that are reRuns of each other
 			// create a map of lists of reRuns - key is queued time, value is the run
 
 			reRunsByQueuedTime := make(map[string][]galasaapi.Run, 0)
@@ -51,36 +46,20 @@ func DownloadArtifacts(
 				reRunsByQueuedTime[queuedTime] = runsWithSameQueuedTime
 			}
 
+			// SORTING BY START TIME TO DO - on api side not in cli
+
 			for _, reRunsList := range reRunsByQueuedTime {
 				for count, reRun := range reRunsList {
-
 					directoryName := nameArtifactDownloadDirectory(reRun, count)
 					err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload)
 				}
 			}
 
-			// SORTING BY START TIME TO DO
-			// var numberOfReRuns = len(reRunsList)
-			// log.Print(reRunsList[1].GetRunId())
-			// for reRun := 1; reRun < numberOfReRuns; reRun++ {
-			// 	currentPosition := reRun
-			// 	for currentPosition > 0 {
-			// 		var differnceInt int
-			// 		difference := getDuration(reRunsList[currentPosition-1].TestStructure.GetStartTime(), reRunsList[currentPosition].TestStructure.GetStartTime())
-			// 		differnceInt, err = strconv.Atoi(difference)
-			// 		if differnceInt < 0 {
-			// 			reRunsList[currentPosition-1], reRunsList[currentPosition] = reRunsList[currentPosition], reRunsList[currentPosition-1]
-			// 		}
-			// 		currentPosition = currentPosition - 1
-			// 	}
-			// }
-
 		} else {
-
 			for _, run := range runs {
 				err = downloadArtifactsToDirectory(apiServerUrl, runName, run, fileSystem, forceDownload)
-
 			}
+			//err = downloadArtifactsToDirectory(apiServerUrl, runName, runs[0], fileSystem, forceDownload)
 		}
 
 	}
@@ -264,33 +243,3 @@ func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) 
 	httpResponse.Body.Close()
 	return fileDownloaded, err
 }
-
-// func formatTimeForDurationCalculation(rawTime string) time.Time {
-// 	parsedTime, err := time.Parse(time.RFC3339, rawTime)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	return parsedTime
-// }
-
-// func calculateDurationMilliseconds(start time.Time, end time.Time) string {
-// 	duration := strconv.FormatInt(end.Sub(start).Milliseconds(), 10)
-
-// 	return duration
-// }
-
-// func getDuration(startTimeStringRaw string, endTimeStringRaw string) string {
-// 	var duration string = ""
-
-// 	var startTimeStringForDuration time.Time
-// 	var endTimeStringForDuration time.Time
-
-// 	if len(startTimeStringRaw) > 0 {
-// 		startTimeStringForDuration = formatTimeForDurationCalculation(startTimeStringRaw)
-// 		if len(endTimeStringRaw) > 0 {
-// 			endTimeStringForDuration = formatTimeForDurationCalculation(endTimeStringRaw)
-// 			duration = calculateDurationMilliseconds(startTimeStringForDuration, endTimeStringForDuration)
-// 		}
-// 	}
-// 	return duration
-// }

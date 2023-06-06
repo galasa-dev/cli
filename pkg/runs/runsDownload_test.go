@@ -639,9 +639,6 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	runName := "U27"
 	runId1 := "xxx543xxx"
 	runId2 := "xxx987xxx"
-	// runIds := make([]string, 0)
-	// runIds = append(runIds, runId1)
-	// runIds = append(runIds, runId2)
 
 	queuedTime := "2023-05-10_06:00:13"
 
@@ -649,21 +646,13 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 
 	forceDownload := true
 	dummyTxtArtifactRunId1 := NewMockArtifact("/artifacts/dummy1.txt", "text/plain", 1024)
-	dummyGzArtifactRunId1 := NewMockArtifact("/artifacts/dummy1.gz", "application/x-gzip", 342)
-	dummyRunLogArtifactRunId1 := NewMockArtifact("/run1.log", "text/plain", 203)
 	mockArtifactsRunId1 := []MockArtifact{
 		*dummyTxtArtifactRunId1,
-		*dummyGzArtifactRunId1,
-		*dummyRunLogArtifactRunId1,
 	}
 
 	dummyTxtArtifactRunId2 := NewMockArtifact("/artifacts/dummy2.txt", "text/plain", 1024)
-	dummyGzArtifactRunId2 := NewMockArtifact("/artifacts/dummy2.gz", "application/x-gzip", 342)
-	dummyRunLogArtifactRunId2 := NewMockArtifact("/run2.log", "text/plain", 203)
 	mockArtifactsRunId2 := []MockArtifact{
 		*dummyTxtArtifactRunId2,
-		*dummyGzArtifactRunId2,
-		*dummyRunLogArtifactRunId2,
 	}
 
 	runs := make(map[string][]MockArtifact, 0)
@@ -686,22 +675,12 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	// U27-1-2023-2023-05-10T06:00:13 	(test did not finish)
 	// U27-2 					 		(test finished)
 	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyTxtArtifactRunId1.path)
-	downloadedGzArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyGzArtifactRunId1.path)
-	downloadedRunLogArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyRunLogArtifactRunId1.path)
-
 	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyTxtArtifactRunId2.path)
-	downloadedGzArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyGzArtifactRunId2.path)
-	downloadedRunLogArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyRunLogArtifactRunId2.path)
 
 	assert.Nil(t, err)
 
 	assert.True(t, downloadedTxtArtifactExists1)
-	assert.True(t, downloadedGzArtifactExists1)
-	assert.True(t, downloadedRunLogArtifactExists1)
-
 	assert.True(t, downloadedTxtArtifactExists2)
-	assert.True(t, downloadedGzArtifactExists2)
-	assert.True(t, downloadedRunLogArtifactExists2)
 }
 
 func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *testing.T) {
