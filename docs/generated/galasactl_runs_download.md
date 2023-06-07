@@ -13,9 +13,10 @@ galasactl runs download [flags]
 ### Options
 
 ```
-      --force         force artifacts to be overwritten if they already exist
-  -h, --help          help for download
-      --name string   the name of the test run we want information about
+      --destination string   The folder we want to download test run artifacts into. Sub-folders will be created within this location (default ".")
+      --force                force artifacts to be overwritten if they already exist
+  -h, --help                 help for download
+      --name string          the name of the test run we want information about
 ```
 
 ### Options inherited from parent commands

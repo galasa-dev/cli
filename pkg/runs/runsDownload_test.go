@@ -84,9 +84,9 @@ const (
 )
 
 type MockArtifact struct {
-	path string
+	path        string
 	contentType string
-	size int
+	size        int
 }
 
 func NewMockArtifact(mockPath string, mockContentType string, mockSize int) *MockArtifact {
@@ -140,7 +140,7 @@ func WriteMockRasRunsArtifactsResponse(
 	writer http.ResponseWriter,
 	req *http.Request,
 	artifactsList []MockArtifact) {
-	
+
 	writer.Header().Set("Content-Type", "application/json")
 
 	artifactsListJsonString := ""
@@ -158,7 +158,7 @@ func WriteMockRasRunsArtifactsResponse(
 	writer.Write([]byte(fmt.Sprintf(`
 	[ %s ]
 	`, artifactsListJsonString)))
-	
+
 }
 
 // Sets a response for requests to /ras/runs/{runId}/files/{artifactPath}
@@ -167,8 +167,8 @@ func WriteMockRasRunsFilesResponse(
 	writer http.ResponseWriter,
 	req *http.Request,
 	desiredContents string) {
-	
-	writer.Header().Set("Content-Disposition", "attachment")	
+
+	writer.Header().Set("Content-Disposition", "attachment")
 	writer.Write([]byte(desiredContents))
 }
 
@@ -185,13 +185,13 @@ func NewRunsDownloadServletMock(
 
 		acceptHeader := req.Header.Get("Accept")
 		switch req.URL.Path {
-			case "/ras/runs":
-				assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-				WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
+		case "/ras/runs":
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
 
-			case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-				assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-				WriteMockRasRunsArtifactsResponse(t, writer, req, artifactList)
+		case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsArtifactsResponse(t, writer, req, artifactList)
 		}
 
 		runsFilesEndpoint := fmt.Sprintf(`/ras/runs/%s/files`, runId)
@@ -239,7 +239,7 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -266,7 +266,7 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -293,7 +293,7 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1041")
@@ -317,13 +317,13 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 	mockConsole := utils.NewMockConsole()
-	
+
 	mockFileSystem := utils.NewMockFileSystem()
-	mockFileSystem.WriteTextFile(runName + dummyTxtArtifact.path, "dummy text file")
-	mockFileSystem.WriteTextFile(runName + dummyRunLog.path, "dummy log")
+	mockFileSystem.WriteTextFile(runName+dummyTxtArtifact.path, "dummy text file")
+	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Nil(t, err)
@@ -354,13 +354,13 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	mockConsole := utils.NewMockConsole()
 	mockTimeService := utils.NewMockTimeService()
-	
+
 	mockFileSystem := utils.NewMockFileSystem()
-	mockFileSystem.WriteTextFile(runName + "/dummy.txt", "dummy text file")
-	mockFileSystem.WriteTextFile(runName + "/run.log", "dummy log")
-	
+	mockFileSystem.WriteTextFile(runName+"/dummy.txt", "dummy text file")
+	mockFileSystem.WriteTextFile(runName+"/run.log", "dummy log")
+
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1036E")
@@ -390,7 +390,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.path)
@@ -420,10 +420,36 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + dummyArtifact.path)
+
+	assert.Nil(t, err)
+	assert.True(t, downloadedArtifactExists)
+}
+
+func TestRunsDownloadWritesSingleArtifactToFileSystemUsingTargetFolderPath(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId := "xxx543xxx"
+	forceDownload := false
+
+	dummyArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runId, runName, []MockArtifact{*dummyArtifact}, []string{RUN_U27})
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, "myFolder")
+
+	// Then...
+	downloadedArtifactExists, _ := mockFileSystem.Exists("myFolder/" + runName + dummyArtifact.path)
 
 	assert.Nil(t, err)
 	assert.True(t, downloadedArtifactExists)
@@ -437,15 +463,15 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	dummyArtifact := NewMockArtifact("/artifacts/dummy.gz", "application/x-gzip", 30)
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		switch req.URL.Path {
-			case "/ras/runs":
-				WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
+		case "/ras/runs":
+			WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
 
-			case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-				WriteMockRasRunsArtifactsResponse(t, writer, req, []MockArtifact{*dummyArtifact})
+		case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
+			WriteMockRasRunsArtifactsResponse(t, writer, req, []MockArtifact{*dummyArtifact})
 
-			case fmt.Sprintf(`/ras/runs/%s/files%s`, runId, dummyArtifact.path):
-				// Make the request to download an artifact fail
-				writer.WriteHeader(http.StatusInternalServerError)
+		case fmt.Sprintf(`/ras/runs/%s/files%s`, runId, dummyArtifact.path):
+			// Make the request to download an artifact fail
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 	}))
 	defer server.Close()
@@ -456,9 +482,8 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	mockFileSystem := utils.NewMockFileSystem()
 	forceDownload := false
 
-
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1074")
@@ -471,12 +496,12 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	runId := "xxx876xxx"
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		switch req.URL.Path {
-			case "/ras/runs":
-				WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
+		case "/ras/runs":
+			WriteMockRasRunsResponse(t, writer, req, runName, []string{RUN_U1})
 
-			case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
-				// Make the request to list artifacts fail
-				writer.WriteHeader(http.StatusInternalServerError)
+		case fmt.Sprintf(`/ras/runs/%s/artifacts`, runId):
+			// Make the request to list artifacts fail
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 	}))
 	defer server.Close()
@@ -488,7 +513,7 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1073")

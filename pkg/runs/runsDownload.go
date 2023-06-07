@@ -25,7 +25,9 @@ func DownloadArtifacts(
 	fileSystem utils.FileSystem,
 	timeService utils.TimeService,
 	console utils.Console,
-	apiServerUrl string) error {
+	apiServerUrl string,
+	targetFolder string,
+) error {
 
 	var err error = nil
 	var runs []galasaapi.Run
@@ -41,7 +43,8 @@ func DownloadArtifacts(
 					var artifactData io.Reader
 					artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 					if err == nil {
-						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+						runArtifactFolder := targetFolder + "/" + runName
+						err = WriteArtifactToFileSystem(fileSystem, runArtifactFolder, artifactPath, artifactData, forceDownload)
 					}
 				}
 			}

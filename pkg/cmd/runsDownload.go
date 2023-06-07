@@ -26,12 +26,16 @@ var (
 	}
 
 	// Variables set by cobra's command-line parsing.
-	runNameDownload string
-	runForceDownload bool
+	runNameDownload         string
+	runForceDownload        bool
+	runDownloadTargetFolder string
 )
 
 func init() {
 	runsDownloadCmd.PersistentFlags().StringVar(&runNameDownload, "name", "", "the name of the test run we want information about")
+	runsDownloadCmd.PersistentFlags().StringVar(&runDownloadTargetFolder, "destination", ".",
+		"The folder we want to download test run artifacts into. Sub-folders will be created within this location",
+	)
 	runsDownloadCmd.PersistentFlags().BoolVar(&runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
 	runsDownloadCmd.MarkPersistentFlagRequired("name")
 
@@ -77,7 +81,7 @@ func executeRunsDownload(cmd *cobra.Command, args []string) {
 
 	timeService := utils.NewRealTimeService()
 	// Call to process the command in a unit-testable way.
-	err = runs.DownloadArtifacts(runNameDownload, runForceDownload, fileSystem, timeService, console, apiServerUrl)
+	err = runs.DownloadArtifacts(runNameDownload, runForceDownload, fileSystem, timeService, console, apiServerUrl, runDownloadTargetFolder)
 	if err != nil {
 		panic(err)
 	}
