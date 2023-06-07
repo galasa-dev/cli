@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -622,8 +623,6 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	runId1 := "xxx543xxx"
 	runId2 := "xxx987xxx"
 
-	queuedTime := "2023-05-10_06:00:13"
-
 	runResultStrings := []string{RUN_U27, RUN_U27V2}
 
 	forceDownload := true
@@ -655,12 +654,15 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	// Then...
 	// U27-1-2023-2023-05-10T06:00:13 	(test did not finish)
 	// U27-2 					 		(test finished)
-	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime + dummyTxtArtifactRunId1.path)
+	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(runName + "-1-" + mockTimeService.Now().Format("2006-01-02_15:04:05") + dummyTxtArtifactRunId1.path)
 	downloadedTxtArtifactExists2, _ := mockFileSystem.Exists(runName + "-2" + dummyTxtArtifactRunId2.path)
 	assert.Nil(t, err)
 
 	assert.True(t, downloadedTxtArtifactExists1)
 	assert.True(t, downloadedTxtArtifactExists2)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, runName)
+	assert.Contains(t, textGotBack, "Created folder")
 }
 
 func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *testing.T) {
@@ -671,9 +673,6 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 
 	runId2a := "xxx1234xxx"
 	runId2b := "xxx4321xxx"
-
-	queuedTime1 := "2023-05-10_06:00:13"
-	queuedTime2 := "2022-05-10_04:00:13"
 
 	runResultStrings := []string{RUN_U27, RUN_U27V2, RUN_U27V3, RUN_U27V4}
 
@@ -713,6 +712,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
+	mockTimeService.Sleep(time.Second)
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
@@ -722,11 +722,11 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	// U27-2 					 	(test finished)
 	// U27-1-2022-05-10T04:00:13 	(test did not finish)
 	// U27-2-2022-05-10T04:00:13    (test did not finish)
-	downloadedTxtArtifactExists1a, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime1 + dummyTxtArtifactRunId1a.path)
+	downloadedTxtArtifactExists1a, _ := mockFileSystem.Exists(runName + "-1-" + mockTimeService.Now().Format("2006-01-02_15:04:05") + dummyTxtArtifactRunId1a.path)
 	downloadedTxtArtifactExists1b, _ := mockFileSystem.Exists(runName + "-2" + dummyTxtArtifactRunId1b.path)
 
-	downloadedTxtArtifactExists2a, _ := mockFileSystem.Exists(runName + "-1-" + queuedTime2 + dummyTxtArtifactRunId2a.path)
-	downloadedTxtArtifactExists2b, _ := mockFileSystem.Exists(runName + "-2-" + queuedTime2 + dummyTxtArtifactRunId2b.path)
+	downloadedTxtArtifactExists2a, _ := mockFileSystem.Exists(runName + "-1" + dummyTxtArtifactRunId2a.path)
+	downloadedTxtArtifactExists2b, _ := mockFileSystem.Exists(runName + "-2" + dummyTxtArtifactRunId2b.path)
 
 	assert.Nil(t, err)
 
@@ -759,10 +759,9 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
 	// Then...
 
-	assert.Nil(t, err)
-	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, runName)
-	assert.Contains(t, textGotBack, "No artifacts")
+	assert.Contains(t, err.Error(), "GAL3000I")
+	assert.Contains(t, err.Error(), runName)
+	assert.Contains(t, err.Error(), "No artifacts")
 
 }
 
