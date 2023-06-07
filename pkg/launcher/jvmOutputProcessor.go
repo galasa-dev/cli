@@ -72,10 +72,13 @@ func (processor *JVMOutputProcessor) Write(bytesToWrite []byte) (int, error) {
 		// "d.g.f.FrameworkInitialisation - Allocated Run Name U525 to this run"
 		stringToSearch := string(bytesToWrite)
 
+		// Note: The JVM trace writes out a new line, so we don't need to add our own here...
+		jvmStringNoTrailingNewline := strings.TrimSpace(stringToSearch)
+
 		if processor.detectedRunId != "" {
-			log.Printf("JVM output: (runid:%s) : %s\n", processor.detectedRunId, stringToSearch)
+			log.Printf("JVM output: (runid:%s) : %s\n", processor.detectedRunId, jvmStringNoTrailingNewline)
 		} else {
-			log.Printf("JVM output: %s\n", stringToSearch)
+			log.Printf("JVM output: %s\n", jvmStringNoTrailingNewline)
 		}
 
 		isAlertable := false
