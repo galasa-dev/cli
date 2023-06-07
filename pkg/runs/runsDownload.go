@@ -70,7 +70,7 @@ func downloadReRunArtfifacts(
 		if err == nil {
 			for reRunIndex, reRun := range reRunsList {
 				if err == nil {
-					directoryName := nameArtifactDownloadDirectory(reRun, reRunIndex, timeService)
+					directoryName := nameReRunArtifactDownloadDirectory(reRun, reRunIndex, timeService)
 					err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload, console)
 					if err == nil {
 						err = console.WriteString("Created folder: '" + directoryName + "'\n")
@@ -101,14 +101,12 @@ func createMapOfReRuns(runs []galasaapi.Run) map[string][]galasaapi.Run {
 	return reRunsByQueuedTime
 }
 
-func nameArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int, timeService utils.TimeService) string {
+func nameReRunArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int, timeService utils.TimeService) string {
 	result := reRun.TestStructure.GetResult()
 	runName := reRun.TestStructure.GetRunName()
 	directoryName := runName
 	if result == "" {
-		//change to time.now
-		// queuedTimeString := strings.Replace(reRun.TestStructure.GetQueued(), "T", "_", -1)
-		// queuedTimeString = strings.Split(queuedTimeString, ".")[0]
+		// Add timestamp of download to folder name
 		downloadedTime := timeService.Now().Format("2006-01-02_15:04:05")
 
 		directoryName = runName + "-" + strconv.Itoa(reRunIndex+1) + "-" + downloadedTime
