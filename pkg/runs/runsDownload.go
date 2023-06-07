@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
@@ -29,24 +30,112 @@ func DownloadArtifacts(
 
 	var err error = nil
 	var runs []galasaapi.Run
-	var artifactPaths []string
 
-	runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
+	if (err == nil) && (runName != "") {
+		err = ValidateRunName(runName)
+	}
 	if err == nil {
-		for _, run := range runs {
-			runId := run.GetRunId()
-			artifactPaths, err = GetArtifactPathsFromRestApi(runId, apiServerUrl)
-			if err == nil {
-				for _, artifactPath := range artifactPaths {
-					var artifactData io.Reader
-					artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+		runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
+		if err == nil {
+			if len(runs) > 1 {
+				// get list of runs that are reRuns - get list of runs that are reRuns of each other
+				// create a map of lists of reRuns - key is queued time, value is the run
+				reRunsByQueuedTime := createMapOfReRuns(runs)
+
+				err = downloadReRunArtfifacts(reRunsByQueuedTime, forceDownload, fileSystem, apiServerUrl, console, timeService)
+
+			} else if len(runs) == 1 {
+				err = downloadArtifactsToDirectory(apiServerUrl, runName, runs[0], fileSystem, forceDownload, console)
+				if err == nil {
+					err = console.WriteString("Created folder: '" + runName + "'\n")
+				}
+			} else {
+				log.Printf("No artifacts to download for run: '%s'", runName)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_INFO_NO_ARTIFACTS_TO_DOWNLOAD, runName)
+			}
+		}
+	}
+	return err
+}
+
+func downloadReRunArtfifacts(
+	reRunsByQueuedTime map[string][]galasaapi.Run,
+	forceDownload bool,
+	fileSystem utils.FileSystem,
+	apiServerUrl string,
+	console utils.Console,
+	timeService utils.TimeService) error {
+	var err error = nil
+	for _, reRunsList := range reRunsByQueuedTime {
+		if err == nil {
+			for reRunIndex, reRun := range reRunsList {
+				if err == nil {
+					directoryName := nameReRunArtifactDownloadDirectory(reRun, reRunIndex, timeService)
+					err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload, console)
 					if err == nil {
-						err = WriteArtifactToFileSystem(fileSystem, runName, artifactPath, artifactData, forceDownload)
+						err = console.WriteString("Created folder: '" + directoryName + "'\n")
 					}
 				}
 			}
 		}
 	}
+	return err
+}
+
+func createMapOfReRuns(runs []galasaapi.Run) map[string][]galasaapi.Run {
+	// key = queued time
+	// value = []runs
+	// This function creates a map of queued times. Each time has a list of runs with that queued time.
+	// helpful if we had two unrelated tests with the same runname, which both had a set of reruns.
+	// e.g.
+	// "2023-05-10T06:00:13.043037Z" = [reRun1, reRun2, reRun3]
+	// "2023-01-10T16:10:13.043037Z" = [reRunA, reRunB, reRunC]
+	reRunsByQueuedTime := make(map[string][]galasaapi.Run, 0)
+	queuedTime := ""
+	for _, run := range runs {
+		queuedTime = run.TestStructure.GetQueued()
+		runsWithSameQueuedTime := reRunsByQueuedTime[queuedTime]
+		runsWithSameQueuedTime = append(runsWithSameQueuedTime, run)
+		reRunsByQueuedTime[queuedTime] = runsWithSameQueuedTime
+	}
+	return reRunsByQueuedTime
+}
+
+func nameReRunArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int, timeService utils.TimeService) string {
+	result := reRun.TestStructure.GetResult()
+	runName := reRun.TestStructure.GetRunName()
+	directoryName := runName
+	if result == "" {
+		// Add timestamp of download to folder name
+		downloadedTime := timeService.Now().Format("2006-01-02_15:04:05")
+
+		directoryName = runName + "-" + strconv.Itoa(reRunIndex+1) + "-" + downloadedTime
+	} else {
+		directoryName = runName + "-" + strconv.Itoa(reRunIndex+1)
+	}
+	return directoryName
+}
+
+func downloadArtifactsToDirectory(apiServerUrl string,
+	directoryName string,
+	reRun galasaapi.Run,
+	fileSystem utils.FileSystem,
+	forceDownload bool,
+	console utils.Console) error {
+	runId := reRun.GetRunId()
+	artifactPaths, err := GetArtifactPathsFromRestApi(runId, apiServerUrl)
+	if err == nil {
+		for _, artifactPath := range artifactPaths {
+			if err == nil {
+				var artifactData io.Reader
+				artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+				if err == nil {
+					err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload, console)
+				}
+			}
+		}
+	}
+
 	return err
 }
 
@@ -86,7 +175,8 @@ func WriteArtifactToFileSystem(
 	runDirectory string,
 	artifactPath string,
 	fileDownloaded io.Reader,
-	shouldOverwrite bool) error {
+	shouldOverwrite bool,
+	console utils.Console) error {
 
 	var err error = nil
 
@@ -111,6 +201,7 @@ func WriteArtifactToFileSystem(
 				err = TransferContent(fileDownloaded, newFile, targetFilePath)
 				if err == nil {
 					log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
+
 				}
 			}
 		}
