@@ -38,8 +38,6 @@ func DownloadArtifacts(
 		runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
 		if err == nil {
 			if len(runs) > 1 {
-				// TO DO: change it to timestamp with client.now. if the run has a result then don't timestamp it - just index of re-run number.
-				//        if run has no result then timestamp it.
 				// get list of runs that are reRuns - get list of runs that are reRuns of each other
 				// create a map of lists of reRuns - key is queued time, value is the run
 				reRunsByQueuedTime := createMapOfReRuns(runs)
@@ -50,7 +48,6 @@ func DownloadArtifacts(
 				err = downloadArtifactsToDirectory(apiServerUrl, runName, runs[0], fileSystem, forceDownload, console)
 			} else {
 				log.Printf("No artifacts to download for run: '%s'", runName)
-				//err = console.WriteString("No artifacts to download for run: '" + runName + "'\n")
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_INFO_NO_ARTIFACTS_TO_DOWNLOAD, runName)
 			}
 		}
