@@ -45,9 +45,13 @@ func DownloadArtifacts(
 				err = downloadReRunArtfifacts(reRunsByQueuedTime, forceDownload, fileSystem, apiServerUrl, console, timeService)
 
 			} else if len(runs) == 1 {
-				err = downloadArtifactsToDirectory(apiServerUrl, runName, runs[0], fileSystem, forceDownload, console)
+				var folderName string
+				folderName, err = nameDownloadFolder(runs[0], runName, timeService)
 				if err == nil {
-					err = console.WriteString("Created folder: '" + runName + "'\n")
+					err = downloadArtifactsToDirectory(apiServerUrl, folderName, runs[0], fileSystem, forceDownload, console)
+					if err == nil {
+						err = console.WriteString("Created folder: '" + folderName + "'\n")
+					}
 				}
 			} else {
 				log.Printf("No artifacts to download for run: '%s'", runName)
@@ -114,6 +118,17 @@ func nameReRunArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int, tim
 		directoryName = runName + "-" + strconv.Itoa(reRunIndex+1)
 	}
 	return directoryName
+}
+
+func nameDownloadFolder(run galasaapi.Run, runName string, timeService utils.TimeService) (string, error) {
+	directoryName := runName
+	var err error = nil
+	result := run.TestStructure.GetResult()
+	if result == "" {
+		downloadedTime := timeService.Now().Format("2006-01-02_15:04:05")
+		directoryName = runName + "-" + downloadedTime
+	}
+	return directoryName, err
 }
 
 func downloadArtifactsToDirectory(apiServerUrl string,

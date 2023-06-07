@@ -60,7 +60,6 @@ const (
 			 "testShortName": "MyTestName27",	
 			 "requestor": "unitTesting27",
 			 "status" : "building",
-			 "result" : "",
 			 "queued" : "2023-05-10T06:00:13.043037Z",	
 			 "startTime": "2023-05-10T06:00:36.159003Z",
 			 "methods": [{
@@ -155,6 +154,36 @@ const (
 			"requestor": "unitTesting27",
 			"status" : "finished",
 			"result" : "EnvFail",
+			"queued" : "2022-05-10T04:00:13.043037Z",	
+			"startTime": "2022-05-10T04:10:36.159003Z",
+			"methods": [{
+				"className": "myTestPackage27.MyTestName27",
+				"methodName": "myTestMethodName",	
+				"type": "test",	
+				"status": "Done",	
+				"result": "UNKNOWN",
+				"startTime": null,
+				"endTime": null,	
+				"runLogStart":null,	
+				"runLogEnd":null,	
+				"befores":[]
+			}]
+		},
+		"artifacts": [{
+			"artifactPath": "myPathToArtifact2",	
+			"contentType":	"application/json"
+		}]
+	}`
+
+	RUN_U27V5 = `{
+		"runId": "xxx2468xxx",
+		"testStructure": {
+			"runName": "U27",
+			"bundle": "myBun27",	
+			"testName": "myTestPackage.MyTest27",
+			"testShortName": "MyTestName27",	
+			"requestor": "unitTesting27",
+			"status" : "Building",
 			"queued" : "2022-05-10T04:00:13.043037Z",	
 			"startTime": "2022-05-10T04:10:36.159003Z",
 			"methods": [{
@@ -410,7 +439,7 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t *testing.T) {
 	// Given ...
 	runName := "U27"
-	runId := "xxx543xxx"
+	runId := "xxx987xxx"
 	forceDownload := true
 
 	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
@@ -423,7 +452,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	runs := make(map[string][]MockArtifact, 0)
 	runs[runId] = mockArtifacts
 
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27V2}, runs)
 	defer server.Close()
 
 	apiServerUrl := server.URL
@@ -450,13 +479,13 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	assert.Equal(t, dummyRunLog.path, downloadedRunLogContents)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+runName+"'")
+	assert.Contains(t, textGotBack, "Created folder: '"+runName)
 }
 
 func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	// Given ...
 	runName := "U27"
-	runId := "xxx543xxx"
+	runId := "xxx987xxx"
 	forceDownload := false
 
 	mockArtifacts := []MockArtifact{
@@ -467,7 +496,7 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	runs := make(map[string][]MockArtifact, 0)
 	runs[runId] = mockArtifacts
 
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27V2}, runs)
 	defer server.Close()
 
 	apiServerUrl := server.URL
@@ -488,7 +517,7 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	// Given ...
 	runName := "U27"
-	runId := "xxx543xxx"
+	runId := "xxx987xxx"
 	forceDownload := false
 
 	dummyTxtArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
@@ -503,7 +532,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	runs := make(map[string][]MockArtifact, 0)
 	runs[runId] = mockArtifacts
 
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27V2}, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -532,7 +561,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	// Given ...
 	runName := "U27"
-	runId := "xxx543xxx"
+	runId := "xxx987xxx"
 	forceDownload := false
 
 	dummyArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
@@ -540,7 +569,7 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	runs := make(map[string][]MockArtifact, 0)
 	runs[runId] = []MockArtifact{*dummyArtifact}
 
-	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27}, runs)
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27V2}, runs)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -816,4 +845,44 @@ func TestRunsDownloadWithInvalidRunName(t *testing.T) {
 	assert.Contains(t, err.Error(), "GAL1075E")
 	assert.Contains(t, err.Error(), "garbage")
 
+}
+
+func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId1 := "xxx2468xxx"
+
+	runResultStrings := []string{RUN_U27V5}
+
+	forceDownload := true
+	dummyTxtArtifactRunId1 := NewMockArtifact("/artifacts/dummy1.txt", "text/plain", 1024)
+	mockArtifactsRunId1 := []MockArtifact{
+		*dummyTxtArtifactRunId1,
+	}
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId1] = mockArtifactsRunId1
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, runResultStrings, runs)
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then...
+	run1FolderName := runName + "-" + mockTimeService.Now().Format("2006-01-02_15:04:05")
+
+	downloadedTxtArtifactExists1, _ := mockFileSystem.Exists(run1FolderName + dummyTxtArtifactRunId1.path)
+
+	assert.Nil(t, err)
+
+	assert.True(t, downloadedTxtArtifactExists1)
+
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, "Created folder: '"+run1FolderName+"'")
 }
