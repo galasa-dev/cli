@@ -46,6 +46,9 @@ func DownloadArtifacts(
 
 			} else if len(runs) == 1 {
 				err = downloadArtifactsToDirectory(apiServerUrl, runName, runs[0], fileSystem, forceDownload, console)
+				if err == nil {
+					err = console.WriteString("Created folder: '" + runName + "'\n")
+				}
 			} else {
 				log.Printf("No artifacts to download for run: '%s'", runName)
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_INFO_NO_ARTIFACTS_TO_DOWNLOAD, runName)
