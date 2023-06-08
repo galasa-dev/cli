@@ -315,6 +315,14 @@ If a run directory named "C1234" already exists, artifacts stored within the dir
 galasactl runs download --name C1234 --force
 ```
 
+By default, all directories containing test run artifacts will be created as children of the current directory ('.'), 
+this can be overridden using the `--destination` option.
+For example: The command below downloads artifacts and places them in folder `/Users/me/my/folder/C1234`
+```
+galasactl runs download --name C1234 --destination /Users/me/my/folder
+```
+
+
 A complete list of supported parameters for the `runs download` command is available [here](./docs/generated/galasactl_runs_download.md).
 
 ## Reference Material

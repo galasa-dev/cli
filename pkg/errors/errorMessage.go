@@ -153,8 +153,11 @@ var (
 	GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED     = NewMessageType("GAL1080E: Invalid 'from' value '%s' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.", 1080, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_NEGATIVE_AGE_SPECIFIED         = NewMessageType("GAL1081E: Unable use a negative value '%s' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.", 1081, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED    = NewMessageType("GAL1082E: Invalid time unit specified '%s' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.", 1082, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_NO_ARTIFACTS_TO_DOWNLOAD       = NewMessageType("GAL1083E: No artifacts to download for run: '%s'", 1083, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_HTTP_RESPONSE_CLOSE_FAILED     = NewMessageType("GAL1084E: Communications failure while closing an HTTP response. '%s'", 1084, STACK_TRACE_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 	// Information messages...
-	GALASA_INFO_NO_ARTIFACTS_TO_DOWNLOAD = NewMessageType("GAL3000I: Info: No artifacts to download for run: '%s'", 3000, STACK_TRACE_WANTED)
+	GALASA_INFO_FOLDER_DOWNLOADED_TO = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
 )

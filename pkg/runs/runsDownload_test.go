@@ -368,7 +368,7 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -399,7 +399,7 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -430,7 +430,7 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1041")
@@ -464,7 +464,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Nil(t, err)
@@ -479,7 +479,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	assert.Equal(t, dummyRunLog.path, downloadedRunLogContents)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+runName)
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
@@ -508,9 +508,10 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	mockFileSystem.WriteTextFile(runName+"/run.log", "dummy log")
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
+	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1036E")
 }
 
@@ -542,7 +543,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.path)
@@ -555,7 +556,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	assert.True(t, downloadedRunLogArtifactExists)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+runName+"'")
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
@@ -579,7 +580,7 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + dummyArtifact.path)
@@ -588,7 +589,7 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	assert.True(t, downloadedArtifactExists)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+runName+"'")
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestFailingGetFileRequestReturnsError(t *testing.T) {
@@ -619,7 +620,7 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1074")
@@ -649,7 +650,7 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1073")
@@ -687,7 +688,7 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	// U27-1-2023-2023-05-10T06:00:13 	(test did not finish)
@@ -703,8 +704,8 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	assert.True(t, downloadedTxtArtifactExists2)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+run1FolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run2FolderName+"'")
+	assert.Contains(t, textGotBack, run1FolderName)
+	assert.Contains(t, textGotBack, run2FolderName)
 }
 
 func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *testing.T) {
@@ -757,7 +758,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	mockTimeService.Sleep(time.Second)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	// U27-1-2023-05-10T06:00:13 	(test did not finish)
@@ -783,10 +784,10 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	assert.True(t, downloadedTxtArtifactExists2b)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+run1aFolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run1bFolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run2aFolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run2bFolderName+"'")
+	assert.Contains(t, textGotBack, run1aFolderName)
+	assert.Contains(t, textGotBack, run1bFolderName)
+	assert.Contains(t, textGotBack, run2aFolderName)
+	assert.Contains(t, textGotBack, run2bFolderName)
 }
 
 func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
@@ -809,10 +810,10 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 	// Then...
 
-	assert.Contains(t, err.Error(), "GAL3000I")
+	assert.Contains(t, err.Error(), "GAL1083E")
 	assert.Contains(t, err.Error(), runName)
 	assert.Contains(t, err.Error(), "No artifacts")
 
@@ -838,7 +839,7 @@ func TestRunsDownloadWithInvalidRunName(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 
@@ -872,7 +873,7 @@ func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl)
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
 	run1FolderName := runName + "-" + mockTimeService.Now().Format("2006-01-02_15:04:05")
@@ -884,5 +885,39 @@ func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
 	assert.True(t, downloadedTxtArtifactExists1)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+run1FolderName+"'")
+	assert.Contains(t, textGotBack, run1FolderName)
+}
+
+func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
+	// Given ...
+	runName := "U27"
+	runId := "xxx987xxx"
+	forceDownload := false
+
+	dummyArtifact := NewMockArtifact("/artifacts/dummy.txt", "text/plain", 1024)
+
+	runs := make(map[string][]MockArtifact, 0)
+	runs[runId] = []MockArtifact{*dummyArtifact}
+
+	server := NewRunsDownloadServletMock(t, http.StatusOK, runName, []string{RUN_U27V2}, runs)
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := utils.NewMockFileSystem()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, "/myfolder")
+
+	// Then...
+	downloadedArtifactExists, _ := mockFileSystem.Exists("/myfolder/" + runName + dummyArtifact.path)
+
+	assert.Nil(t, err)
+	assert.True(t, downloadedArtifactExists)
+
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, "GAL2501I")
+	assert.Contains(t, textGotBack, "/myfolder/"+runName)
 }
