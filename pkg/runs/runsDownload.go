@@ -6,6 +6,7 @@ package runs
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"path/filepath"
@@ -155,6 +156,17 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 ) error {
 
 	runId := run.GetRunId()
+
+	// We want to base the directory we download to on the destination folder.
+	// If the destination folder is "." (current folder/relative)
+	// then ignore, as prefixing with a "." just adds noise when we log and
+	// print out the path.
+	if runDownloadTargetFolder != "." {
+		directoryName = runDownloadTargetFolder + "/" + directoryName
+	}
+
+	filesWrittenOkCount := 0
+
 	artifactPaths, err := GetArtifactPathsFromRestApi(runId, apiServerUrl)
 	if err == nil {
 		for _, artifactPath := range artifactPaths {
@@ -162,22 +174,21 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 				var artifactData io.Reader
 				artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 				if err == nil {
-
-					// We want to base the directory we download to on the destination folder.
-					// If the destination folder is "." (current folder/relative)
-					// then ignore, as prefixing with a "." just adds noise when we log and
-					// print out the path.
-					if runDownloadTargetFolder != "." {
-						directoryName = runDownloadTargetFolder + "/" + directoryName
-					}
-
 					err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload, console)
-
 					if err == nil {
-						err = console.WriteString("Created folder: '" + directoryName + "'\n")
+						filesWrittenOkCount += 1
 					}
 				}
 			}
+		}
+	}
+
+	if filesWrittenOkCount > 0 {
+		msg := fmt.Sprintf("Downloaded '%d' artifacts to folder: '%s'\n", filesWrittenOkCount, directoryName)
+		consoleErr := console.WriteString(msg)
+		// Console error is not as important to report as the original error if there was one.
+		if consoleErr != nil && err == nil {
+			err = consoleErr
 		}
 	}
 

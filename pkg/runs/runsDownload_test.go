@@ -479,7 +479,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	assert.Equal(t, dummyRunLog.path, downloadedRunLogContents)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+runName)
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
@@ -511,6 +511,7 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 
 	// Then...
+	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1036E")
 }
 
@@ -555,7 +556,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	assert.True(t, downloadedRunLogArtifactExists)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+runName+"'")
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
@@ -588,7 +589,7 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	assert.True(t, downloadedArtifactExists)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+runName+"'")
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestFailingGetFileRequestReturnsError(t *testing.T) {
@@ -703,8 +704,8 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	assert.True(t, downloadedTxtArtifactExists2)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+run1FolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run2FolderName+"'")
+	assert.Contains(t, textGotBack, run1FolderName)
+	assert.Contains(t, textGotBack, run2FolderName)
 }
 
 func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *testing.T) {
@@ -783,10 +784,10 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	assert.True(t, downloadedTxtArtifactExists2b)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+run1aFolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run1bFolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run2aFolderName+"'")
-	assert.Contains(t, textGotBack, "Created folder: '"+run2bFolderName+"'")
+	assert.Contains(t, textGotBack, run1aFolderName)
+	assert.Contains(t, textGotBack, run1bFolderName)
+	assert.Contains(t, textGotBack, run2aFolderName)
+	assert.Contains(t, textGotBack, run2bFolderName)
 }
 
 func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
@@ -884,7 +885,7 @@ func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
 	assert.True(t, downloadedTxtArtifactExists1)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '"+run1FolderName+"'")
+	assert.Contains(t, textGotBack, run1FolderName)
 }
 
 func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
@@ -917,5 +918,5 @@ func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
 	assert.True(t, downloadedArtifactExists)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "Created folder: '/myfolder/"+runName+"'")
+	assert.Contains(t, textGotBack, "'/myfolder/"+runName+"'")
 }
