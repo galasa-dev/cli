@@ -389,6 +389,7 @@ function runs_get_check_raw_format_output_with_from_and_to {
     info "Command is: $cmd"
 
     output_file="runs-get-output.txt"
+    set -o pipefail
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
@@ -419,6 +420,7 @@ function runs_get_check_raw_format_output_with_just_from {
     info "Command is: $cmd"
 
     output_file="runs-get-output.txt"
+    set -o pipefail
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
