@@ -63,18 +63,18 @@ func readTestRunFromJsonFile(
 	} else {
 		isExists, err := fileSystem.Exists(url.Path)
 		if err != nil {
-			log.Printf("Failed to check whether the file exists. Can't read status.")
+			log.Printf("Failed to check whether the file '%s' exists. Can't read status.", url.Path)
 		} else {
 			if !isExists {
-				log.Printf("readTestRunFromJsonFile file '%s' does not exist.", jsonFilePath)
+				log.Printf("readTestRunFromJsonFile file '%s' does not exist.", url.Path)
 			} else {
 				var jsonContent string
 				jsonContent, err = fileSystem.ReadTextFile(url.Path)
 				if err != nil {
-					log.Printf("readTestRunFromJsonFile file '%s' could not be read.", jsonFilePath)
+					log.Printf("readTestRunFromJsonFile file '%s' could not be read.", url.Path)
 				} else {
 					if len(jsonContent) <= 0 {
-						log.Printf("readTestRunFromJsonFile file '%s' is empty. Status could not be read.", jsonFilePath)
+						log.Printf("readTestRunFromJsonFile file '%s' is empty. Status could not be read.", url.Path)
 					} else {
 						var f interface{}
 						err = json.Unmarshal([]byte(jsonContent), &f)
