@@ -41,7 +41,7 @@ func (*RawFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (stri
 
 		duration := getDuration(startTimeStringRaw, endTimeStringRaw)
 
-		runLog := apiServerUrl + "/ras/run/" + run.GetRunId() + "/runlog"
+		runLog := apiServerUrl + RAS_RUNS_URL + run.GetRunId() + "/runlog"
 
 		buff.WriteString(run.TestStructure.GetRunName() + "|" +
 			run.TestStructure.GetStatus() + "|" +
