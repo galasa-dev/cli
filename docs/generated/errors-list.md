@@ -84,6 +84,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1081E: Unable use a negative value '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
 - GAL1082E: Invalid time unit specified '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
 - GAL1083E: No artifacts to download for run: '{}'
+- GAL1084E: Communications failure while closing an HTTP response. '{}'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

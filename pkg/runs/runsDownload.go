@@ -176,18 +176,21 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 			if err == nil {
 				var artifactData io.Reader
 				var httpResponse *http.Response
-				artifactData, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+				var isArtifactDataEmpty bool
+				artifactData, isArtifactDataEmpty, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 				if err == nil {
-					err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload, console)
-					if err == nil {
-						filesWrittenOkCount += 1
+					if !isArtifactDataEmpty {
+						err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload, console)
+						if err == nil {
+							filesWrittenOkCount += 1
+						}
 					}
+				}
 
-					closeErr := httpResponse.Body.Close()
-					// The first error is most important so needs preserving...
-					if closeErr != nil && err == nil {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_HTTP_RESPONSE_CLOSE_FAILED, closeErr.Error())
-					}
+				closeErr := httpResponse.Body.Close()
+				// The first error is most important so needs preserving...
+				if closeErr != nil && err == nil {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_HTTP_RESPONSE_CLOSE_FAILED, closeErr.Error())
 				}
 			}
 		}
@@ -348,9 +351,10 @@ func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string)
 
 // GetFileFromRestApi Retrieves an artifact for a given test run using its runId from the ecosystem API.
 // Note: The call leaves closing the http request as a responsibility of the caller.
-func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (io.Reader, *http.Response, error) {
+func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (io.Reader, bool, *http.Response, error) {
 
 	var err error = nil
+	isFileEmpty := false
 	log.Printf("Downloading artifact '%s' from API server", artifactPath)
 
 	// A HTTP client which can communicate with the api server in an ecosystem.
@@ -365,7 +369,12 @@ func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) 
 		log.Printf("Failed to download artifact. %s", err.Error())
 	} else {
 		log.Printf("Artifact '%s' http response from API server OK", artifactPath)
+
+		if fileDownloaded == nil {
+			log.Printf("Artifact '%s' http response returned nil file content.", artifactPath)
+			isFileEmpty = true
+		}
 	}
 
-	return fileDownloaded, httpResponse, err
+	return fileDownloaded, isFileEmpty, httpResponse, err
 }
