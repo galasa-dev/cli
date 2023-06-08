@@ -156,5 +156,6 @@ var (
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 	// Information messages...
-	GALASA_INFO_NO_ARTIFACTS_TO_DOWNLOAD = NewMessageType("GAL3000I: Info: No artifacts to download for run: '%s'", 3000, STACK_TRACE_WANTED)
+	GALASA_INFO_NO_ARTIFACTS_TO_DOWNLOAD = NewMessageType("GAL2500I: Info: No artifacts to download for run: '%s'", 2500, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_FOLDER_DOWNLOADED_TO     = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
 )

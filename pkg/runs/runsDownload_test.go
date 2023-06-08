@@ -813,7 +813,7 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 	// Then...
 
-	assert.Contains(t, err.Error(), "GAL3000I")
+	assert.Contains(t, err.Error(), "GAL2500I")
 	assert.Contains(t, err.Error(), runName)
 	assert.Contains(t, err.Error(), "No artifacts")
 
@@ -918,5 +918,6 @@ func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
 	assert.True(t, downloadedArtifactExists)
 
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "'/myfolder/"+runName+"'")
+	assert.Contains(t, textGotBack, "GAL2501I")
+	assert.Contains(t, textGotBack, "/myfolder/"+runName)
 }

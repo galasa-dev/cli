@@ -162,7 +162,7 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 	// then ignore, as prefixing with a "." just adds noise when we log and
 	// print out the path.
 	if runDownloadTargetFolder != "." {
-		directoryName = runDownloadTargetFolder + "/" + directoryName
+		directoryName = filepath.Join(runDownloadTargetFolder, directoryName)
 	}
 
 	filesWrittenOkCount := 0
@@ -183,8 +183,13 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 		}
 	}
 
+	// Write out the number of files downloaded to the folder xxx
 	if filesWrittenOkCount > 0 {
-		msg := fmt.Sprintf("Downloaded '%d' artifacts to folder: '%s'\n", filesWrittenOkCount, directoryName)
+		msg := fmt.Sprintf(
+			galasaErrors.GALASA_INFO_FOLDER_DOWNLOADED_TO.Template,
+			filesWrittenOkCount,
+			directoryName,
+		)
 		consoleErr := console.WriteString(msg)
 		// Console error is not as important to report as the original error if there was one.
 		if consoleErr != nil && err == nil {
