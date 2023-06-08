@@ -813,7 +813,7 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
 	// Then...
 
-	assert.Contains(t, err.Error(), "GAL2500I")
+	assert.Contains(t, err.Error(), "GAL1083E")
 	assert.Contains(t, err.Error(), runName)
 	assert.Contains(t, err.Error(), "No artifacts")
 

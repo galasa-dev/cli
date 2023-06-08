@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -63,10 +65,11 @@ func DownloadArtifacts(
 				}
 			} else {
 				log.Printf("No artifacts to download for run: '%s'", runName)
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_INFO_NO_ARTIFACTS_TO_DOWNLOAD, runName)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_ARTIFACTS_TO_DOWNLOAD, runName)
 			}
 		}
 	}
+
 	return err
 }
 
@@ -172,11 +175,18 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 		for _, artifactPath := range artifactPaths {
 			if err == nil {
 				var artifactData io.Reader
-				artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
+				var httpResponse *http.Response
+				artifactData, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 				if err == nil {
 					err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload, console)
 					if err == nil {
 						filesWrittenOkCount += 1
+					}
+
+					closeErr := httpResponse.Body.Close()
+					// The first error is most important so needs preserving...
+					if closeErr != nil && err == nil {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_HTTP_RESPONSE_CLOSE_FAILED, closeErr.Error())
 					}
 				}
 			}
@@ -262,7 +272,8 @@ func WriteArtifactToFileSystem(
 				err = TransferContent(fileDownloaded, newFile, targetFilePath)
 				if err == nil {
 					log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
-
+				} else {
+					log.Printf("Artifact '%s' write to '%s' failed. '%s'", fileName, targetFilePath, err.Error())
 				}
 			}
 		}
@@ -273,6 +284,9 @@ func WriteArtifactToFileSystem(
 // Writes the contents of a given source file into a given target file using a buffer
 // to read and write the contents in chunks.
 func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath string) error {
+
+	log.Printf("TransferContent: Entered. targetFilePath: %s sourceFile type:%s", targetFilePath, reflect.TypeOf(sourceFile))
+
 	var err error = nil
 
 	// Set buffer capacity to 1KB
@@ -285,6 +299,9 @@ func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath 
 		var bytesRead int
 		bytesRead, err = reader.Read(buffer)
 		if err != nil {
+			log.Printf("TransferContent: Read(...) returned %s", err.Error())
+
+			// Suppress end of file error, as we want to read until the end of the file.
 			if err == io.EOF {
 				// There was nothing else to read.
 				err = nil
@@ -292,12 +309,20 @@ func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath 
 			break
 		}
 
+		log.Printf("TransferContent: Read(...) returned %d bytes of data", bytesRead)
+
 		_, err = targetFile.Write(buffer[:bytesRead])
 		if err != nil {
+			log.Printf("TransferContent: Write() failed. err=%s", err.Error())
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
 			break
 		}
 	}
+
+	if err != nil {
+		log.Printf("TransferContent problem. File: %s. err: %s", targetFilePath, err.Error())
+	}
+
 	return err
 }
 
@@ -321,8 +346,9 @@ func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string)
 	return newFile, err
 }
 
-// Retrieves an artifact for a given test run using its runId from the ecosystem API.
-func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (io.Reader, error) {
+// GetFileFromRestApi Retrieves an artifact for a given test run using its runId from the ecosystem API.
+// Note: The call leaves closing the http request as a responsibility of the caller.
+func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) (io.Reader, *http.Response, error) {
 
 	var err error = nil
 	log.Printf("Downloading artifact '%s' from API server", artifactPath)
@@ -336,10 +362,10 @@ func GetFileFromRestApi(runId string, artifactPath string, apiServerUrl string) 
 
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
+		log.Printf("Failed to download artifact. %s", err.Error())
 	} else {
-		log.Printf("Downloaded artifact '%s' from API server OK", artifactPath)
+		log.Printf("Artifact '%s' http response from API server OK", artifactPath)
 	}
 
-	httpResponse.Body.Close()
-	return fileDownloaded, err
+	return fileDownloaded, httpResponse, err
 }
