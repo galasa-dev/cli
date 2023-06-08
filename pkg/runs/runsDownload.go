@@ -26,7 +26,9 @@ func DownloadArtifacts(
 	fileSystem utils.FileSystem,
 	timeService utils.TimeService,
 	console utils.Console,
-	apiServerUrl string) error {
+	apiServerUrl string,
+	runDownloadTargetFolder string,
+) error {
 
 	var err error = nil
 	var runs []galasaapi.Run
@@ -42,16 +44,21 @@ func DownloadArtifacts(
 				// create a map of lists of reRuns - key is queued time, value is the run
 				reRunsByQueuedTime := createMapOfReRuns(runs)
 
-				err = downloadReRunArtfifacts(reRunsByQueuedTime, forceDownload, fileSystem, apiServerUrl, console, timeService)
+				err = downloadReRunArtfifacts(
+					reRunsByQueuedTime,
+					forceDownload,
+					fileSystem,
+					apiServerUrl,
+					console,
+					timeService,
+					runDownloadTargetFolder,
+				)
 
 			} else if len(runs) == 1 {
 				var folderName string
 				folderName, err = nameDownloadFolder(runs[0], runName, timeService)
 				if err == nil {
-					err = downloadArtifactsToDirectory(apiServerUrl, folderName, runs[0], fileSystem, forceDownload, console)
-					if err == nil {
-						err = console.WriteString("Created folder: '" + folderName + "'\n")
-					}
+					err = downloadArtifactsToDirectory(apiServerUrl, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
 				}
 			} else {
 				log.Printf("No artifacts to download for run: '%s'", runName)
@@ -68,17 +75,24 @@ func downloadReRunArtfifacts(
 	fileSystem utils.FileSystem,
 	apiServerUrl string,
 	console utils.Console,
-	timeService utils.TimeService) error {
+	timeService utils.TimeService,
+	runDownloadTargetFolder string,
+) error {
 	var err error = nil
 	for _, reRunsList := range reRunsByQueuedTime {
 		if err == nil {
 			for reRunIndex, reRun := range reRunsList {
 				if err == nil {
 					directoryName := nameReRunArtifactDownloadDirectory(reRun, reRunIndex, timeService)
-					err = downloadArtifactsToDirectory(apiServerUrl, directoryName, reRun, fileSystem, forceDownload, console)
-					if err == nil {
-						err = console.WriteString("Created folder: '" + directoryName + "'\n")
-					}
+					err = downloadArtifactsToDirectory(
+						apiServerUrl,
+						directoryName,
+						reRun,
+						fileSystem,
+						forceDownload,
+						console,
+						runDownloadTargetFolder,
+					)
 				}
 			}
 		}
@@ -133,11 +147,14 @@ func nameDownloadFolder(run galasaapi.Run, runName string, timeService utils.Tim
 
 func downloadArtifactsToDirectory(apiServerUrl string,
 	directoryName string,
-	reRun galasaapi.Run,
+	run galasaapi.Run,
 	fileSystem utils.FileSystem,
 	forceDownload bool,
-	console utils.Console) error {
-	runId := reRun.GetRunId()
+	console utils.Console,
+	runDownloadTargetFolder string,
+) error {
+
+	runId := run.GetRunId()
 	artifactPaths, err := GetArtifactPathsFromRestApi(runId, apiServerUrl)
 	if err == nil {
 		for _, artifactPath := range artifactPaths {
@@ -145,7 +162,20 @@ func downloadArtifactsToDirectory(apiServerUrl string,
 				var artifactData io.Reader
 				artifactData, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiServerUrl)
 				if err == nil {
+
+					// We want to base the directory we download to on the destination folder.
+					// If the destination folder is "." (current folder/relative)
+					// then ignore, as prefixing with a "." just adds noise when we log and
+					// print out the path.
+					if runDownloadTargetFolder != "." {
+						directoryName = runDownloadTargetFolder + "/" + directoryName
+					}
+
 					err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload, console)
+
+					if err == nil {
+						err = console.WriteString("Created folder: '" + directoryName + "'\n")
+					}
 				}
 			}
 		}
