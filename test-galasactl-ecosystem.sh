@@ -300,7 +300,7 @@ function runs_download_check_folder_names_during_test_run {
                 error "Folder named incorrectly. Has timestamp when it should not."
                 exit 1
             fi
-        sleep 2    
+            
         else
             
             test_building_line=$(cat ${log_file} | grep "now 'building'")
