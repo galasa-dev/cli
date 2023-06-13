@@ -191,7 +191,9 @@ function launch_test_on_ecosystem_with_portfolio {
 
 #--------------------------------------------------------------------------
 function runs_download_check_folder_names_during_test_run {
-    h2 "Performing runs download..."
+    # runs_download_check_folder_names_during_test_run performs multiple runs downloads on a test that is running in the ecosystem
+    # checks the folder names are correct with timestamps where appropriate
+    h2 "Performing runs download while test is running..."
 
     run_name=$1
 
@@ -234,7 +236,7 @@ function runs_download_check_folder_names_during_test_run {
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
-    
+    # Start the test running inside a background process... so we can try to download artifacts about that test while it's running
     $cmd &
 
     is_done="false"
@@ -242,36 +244,30 @@ function runs_download_check_folder_names_during_test_run {
     max=100
     target_line=""
     
-    
+    # Loop waiting until we can extract the name of the test run which is running in the background.
     while [[ "${is_done}" == "false" ]]; do
         if [[ -e $log_file ]]; then
-            echo "file exists"
+            success "file exists"
             target_line=$(cat ${log_file} | grep "submitted")
             
 
             if [[ "$target_line" != "" ]]; then
-                echo "Target line is found."
+                info "Target line is found."
                 is_done="true"
             fi
         fi    
         sleep 1
         ((retries++))
         if (( $retries > $max )); then 
-            echo "Too many retries."
-            is_done="true"
+            error "Too many retries."
+            exit 1
         fi
     done
 
     run_name=$(echo $target_line | cut -f4 -d' ')
-    echo "Run name is $run_name"
+    info "Run name is $run_name"
 
-    rc=$?
-
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to submit a test to a remote ecosystem."
-        exit 1
-    fi
-
+    # Now download the test results which are available from the test which is being submitted in the background process.
     cmd="${BASEDIR}/bin/${binary} runs download \
     --name ${run_name} \
     --bootstrap ${bootstrap} \
@@ -287,14 +283,17 @@ function runs_download_check_folder_names_during_test_run {
     target_line=""
     while [[ "${is_test_finished}" == "false" ]]; do
         $cmd | tee $output_file
-      
+        # If the test run isn't finished, then we expect downloaded artifacts to appear in a folder with a timestamp - eg: U456-16:40:32
+        # So we can look for ':' in the folder name to tell if the test is still running or not.
+
         target_line=$(cat ${log_file} | grep "has finished")
-       
+        # Test has finished so should not have a timestamp in the folder name
         if [[ "$target_line" != "" ]]; then
-            echo "Target line is found."
+            success "Target line is found."
             is_test_finished="true"
            
             folder_name=$(cat $output_file| cut -d' ' -f 7)
+           
             echo $folder_name | grep ":" 
             rc=$?
             if [[ "${rc}" != "1" ]]; then 
@@ -309,12 +308,12 @@ function runs_download_check_folder_names_during_test_run {
                 cat ${log_file} | grep "now 'running'" -q
                 rc=$?
                 if [[ "${rc}" != "0" ]]; then
-        
+                    # Check to see of the folder created has a ":" in the folder name... indicating that the test is running.
                     folder_name=$(cat $output_file| cut -d' ' -f 7)
                     echo $folder_name | grep ":" 
                     rc=$?
                     if [[ "${rc}" != "0" ]]; then 
-                        error "Folder named incorrectly. Has no timestamp when it should."
+                        error "Folder named incorrectly. Has no timestamp when it should, because downloading from running tests should create a folder with a time in, such as U456-16:50:32."
                         exit 1
                     fi
                 fi    
@@ -323,15 +322,15 @@ function runs_download_check_folder_names_during_test_run {
 
         
         sleep 2
-        
+        # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
         ((retries++))
         if (( $retries > $max )); then 
-            echo "Too many retries."
-            is_test_finished="true"
+            error "Too many retries."
+            exit 1
         fi
     done
 
-    success "Downloading artifacts from a running test worked OK"
+    success "Downloading artifacts from a running test results in folder names with a timestamp. OK"
 }
 
 #--------------------------------------------------------------------------
