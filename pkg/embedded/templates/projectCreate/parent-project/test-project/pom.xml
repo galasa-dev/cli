@@ -28,6 +28,12 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>dev.galasa</groupId>
+            <artifactId>dev.galasa.core.manager</artifactId>
+        </dependency>
+        
     </dependencies>
   
 </project>
