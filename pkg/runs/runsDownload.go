@@ -31,7 +31,7 @@ func DownloadArtifacts(
 	var runs []galasaapi.Run
 	var artifactPaths []string
 
-	runs, err = GetRunsFromRestApi(runName, 0, 0, timeService, apiServerUrl)
+	runs, err = GetRunsFromRestApi(runName, "", 0, 0, timeService, apiServerUrl)
 	if err == nil {
 		for _, run := range runs {
 			runId := run.GetRunId()
