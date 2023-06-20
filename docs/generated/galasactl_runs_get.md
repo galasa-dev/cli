@@ -17,6 +17,7 @@ galasactl runs get [flags]
       --format string   output format for the data returned. Supported formats are: 'summary', 'details' or 'raw' (default "summary")
   -h, --help            help for get
       --name string     the name of the test run we want information about
+      --result string   the result of the test run we want information about
 ```
 
 ### Options inherited from parent commands
