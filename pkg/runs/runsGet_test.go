@@ -6,6 +6,7 @@ package runs
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"net/http/httptest"
 	"strconv"
 	"strings"
@@ -807,6 +808,7 @@ func TestRunsGetURLQueryWithRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.EqualValues(t, query.Get("from"), "")
 		assert.EqualValues(t, query.Get("to"), "")
 		assert.EqualValues(t, query.Get("runname"), runName)
+		assert.Contains(t, r.URL.RawQuery, "requestor="+ url.QueryEscape(requestor))
 		assert.EqualValues(t, query.Get("requestor"), requestor)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
@@ -845,6 +847,7 @@ func TestRunsGetURLQueryWithNumericRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.EqualValues(t, query.Get("to"), "")
 		assert.EqualValues(t, query.Get("runname"), runName)
 		assert.EqualValues(t, query.Get("requestor"), requestor)
+		assert.Contains(t, r.URL.RawQuery, "requestor="+ url.QueryEscape(requestor))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		w.Write([]byte(`
@@ -882,6 +885,7 @@ func TestRunsGetURLQueryWithDashInRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.EqualValues(t, query.Get("to"), "")
 		assert.EqualValues(t, query.Get("runname"), runName)
 		assert.EqualValues(t, query.Get("requestor"), requestor)
+		assert.Contains(t, r.URL.RawQuery, "requestor="+ url.QueryEscape(requestor))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		w.Write([]byte(`
@@ -919,7 +923,7 @@ func TestRunsGetURLQueryWithAmpersandRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.EqualValues(t, query.Get("to"), "")
 		assert.EqualValues(t, query.Get("runname"), runName)
 		assert.EqualValues(t, query.Get("requestor"), requestor)
-
+		assert.Contains(t, r.URL.RawQuery, "requestor="+ url.QueryEscape(requestor))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		w.Write([]byte(`
@@ -957,6 +961,7 @@ func TestRunsGetURLQueryWithSpecialCharactersRequestorSuppliedReturnsOK(t *testi
 		assert.EqualValues(t, query.Get("to"), "")
 		assert.EqualValues(t, query.Get("runname"), runName)
 		assert.EqualValues(t, query.Get("requestor"), requestor)
+		assert.Contains(t, r.URL.RawQuery, "requestor="+ url.QueryEscape(requestor))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)

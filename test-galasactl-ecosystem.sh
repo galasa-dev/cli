@@ -501,6 +501,35 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
 }
 
 #--------------------------------------------------------------------------
+function runs_get_check_raw_format_output_with_from_and_requestor {
+    h2 "Performing runs get with details format providing a from age and requestor as galasa..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --age 1d \
+    --requestor galasa \
+    --format details \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
+    cat $output_file | grep "requestor      : galasa" -q
+    rc=$?
+    # We expect a return code of '0' because the run name should be output.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find any runs with requestor 'galasa' in output"
+        exit 1
+    fi  
+
+    success "galasactl runs get with age parameter with just from value and requestor 'galasa' returned results okay." 
+}
+
+#--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
     h2 "Launching test on an ecosystem..."
 
