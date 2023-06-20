@@ -190,6 +190,150 @@ function launch_test_on_ecosystem_with_portfolio {
 }
 
 #--------------------------------------------------------------------------
+function runs_download_check_folder_names_during_test_run {
+    # runs_download_check_folder_names_during_test_run performs multiple runs downloads on a test that is running in the ecosystem
+    # checks the folder names are correct with timestamps where appropriate
+    h2 "Performing runs download while test is running..."
+
+    run_name=$1
+
+    mkdir -p ${BASEDIR}/temp
+    cd ${BASEDIR}/temp
+
+    # Create the portfolio.
+    cmd="${BASEDIR}/bin/${binary} runs prepare \
+    --bootstrap $bootstrap \
+    --stream inttests \
+    --portfolio portfolio.yaml \
+    --test ${GALASA_TEST_NAME_SHORT} \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '0' because this test is in the ecosystem's testcatalog.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to create a portfolio with a known test from the ecosystem's testcatalog."
+        exit 1
+    fi
+    success "Creating portfolio.yaml worked OK"
+
+    h2 "Launching test on an ecosystem from a portfolio..."
+
+    cd ${BASEDIR}/temp
+
+    log_file="runs-submit-output.txt"
+
+    cmd="${BASEDIR}/bin/${binary} runs submit \
+    --bootstrap ${bootstrap} \
+    --portfolio portfolio.yaml \
+    --throttle 1 \
+    --poll 10 \
+    --progress 1 \
+    --noexitcodeontestfailures \
+    --log ${log_file}"
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+
+    # Start the test running inside a background process... so we can try to download artifacts about that test while it's running
+    $cmd &
+
+    is_done="false"
+    retries=0
+    max=100
+    target_line=""
+    
+    # Loop waiting until we can extract the name of the test run which is running in the background.
+    while [[ "${is_done}" == "false" ]]; do
+        if [[ -e $log_file ]]; then
+            success "file exists"
+            target_line=$(cat ${log_file} | grep "submitted")
+            
+
+            if [[ "$target_line" != "" ]]; then
+                info "Target line is found."
+                is_done="true"
+            fi
+        fi    
+        sleep 1
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
+
+    run_name=$(echo $target_line | cut -f4 -d' ')
+    info "Run name is $run_name"
+
+    # Now download the test results which are available from the test which is being submitted in the background process.
+    cmd="${BASEDIR}/bin/${binary} runs download \
+    --name ${run_name} \
+    --bootstrap ${bootstrap} \
+    --force"
+
+    info "Command is: $cmd"
+
+    output_file="runs-download-output.txt"
+
+    is_test_finished="false"
+    retries=0
+    max=100
+    target_line=""
+    while [[ "${is_test_finished}" == "false" ]]; do
+        $cmd | tee $output_file
+        # If the test run isn't finished, then we expect downloaded artifacts to appear in a folder with a timestamp - eg: U456-16:40:32
+        # So we can look for ':' in the folder name to tell if the test is still running or not.
+
+        target_line=$(cat ${log_file} | grep "has finished")
+        # Test has finished so should not have a timestamp in the folder name
+        if [[ "$target_line" != "" ]]; then
+            success "Target line is found."
+            is_test_finished="true"
+           
+            folder_name=$(cat $output_file| cut -d' ' -f 7)
+           
+            echo $folder_name | grep ":" 
+            rc=$?
+            if [[ "${rc}" != "1" ]]; then 
+                error "Folder named incorrectly. Has timestamp when it should not."
+                exit 1
+            fi
+            
+        else
+            
+            test_building_line=$(cat ${log_file} | grep "now 'building'")
+            if [[ "$test_building_line" != "" ]]; then
+                cat ${log_file} | grep "now 'running'" -q
+                rc=$?
+                if [[ "${rc}" != "0" ]]; then
+                    # Check to see of the folder created has a ":" in the folder name... indicating that the test is running.
+                    folder_name=$(cat $output_file| cut -d' ' -f 7)
+                    echo $folder_name | grep ":" 
+                    rc=$?
+                    if [[ "${rc}" != "0" ]]; then 
+                        error "Folder named incorrectly. Has no timestamp when it should, because downloading from running tests should create a folder with a time in, such as U456-16:50:32."
+                        exit 1
+                    fi
+                fi    
+            fi
+        fi
+
+        
+        sleep 2
+        # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
+
+    success "Downloading artifacts from a running test results in folder names with a timestamp. OK"
+}
+
+#--------------------------------------------------------------------------
 function get_result_with_runname {
     h2 "Querying the result of the test we just ran..."
 
@@ -389,6 +533,7 @@ function runs_get_check_raw_format_output_with_from_and_to {
     info "Command is: $cmd"
 
     output_file="runs-get-output.txt"
+    set -o pipefail
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
@@ -419,6 +564,7 @@ function runs_get_check_raw_format_output_with_just_from {
     info "Command is: $cmd"
 
     output_file="runs-get-output.txt"
+    set -o pipefail
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
@@ -632,7 +778,7 @@ runs_get_check_raw_format_output_with_older_to_than_from_age
 # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 # Launch test on ecosystem without a portfolio ...
-# NOTE - Bug found with this command so commenting out for now
+# NOTE - Bug found with this command so commenting out for now see issue xxx
 # launch_test_on_ecosystem_without_portfolio
 
 # Attempt to create a test portfolio with an unknown test ...
@@ -640,3 +786,5 @@ create_portfolio_with_unknown_test
 
 # Attempt to launch a test from an unknown portfolio ...
 launch_test_from_unknown_portfolio
+
+runs_download_check_folder_names_during_test_run

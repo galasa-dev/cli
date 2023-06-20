@@ -449,7 +449,7 @@ function launch_test_on_ecosystem {
 
     cmd="${BASEDIR}/bin/${galasactl_command} runs submit \
     --bootstrap $GALASA_BOOTSTRAP \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
+    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
     --log -"
 
     info "Command is: $cmd"
@@ -609,14 +609,14 @@ function submit_local_test {
 
     unset GALASA_BOOTSTRAP
 
-    ${BASEDIR}/bin/${galasactl_command} runs submit local \
+    cmd="${BASEDIR}/bin/${galasactl_command} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
     --class ${BUNDLE}/${JAVA_CLASS} \
     --throttle 1 \
     --requesttype MikeCLI \
     --poll 10 \
     --progress 1 \
-    --log ${LOG_FILE}
+    --log ${LOG_FILE}"
 
     # --reportjson myreport.json \
     # --reportyaml myreport.yaml \
@@ -627,6 +627,8 @@ function submit_local_test {
     # --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
     # --galasaVersion 0.26.0 \
 
+    info "Command is ${cmd}"
+    $cmd
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to run the test. See details in log file ${LOG_FILE}"
@@ -635,18 +637,34 @@ function submit_local_test {
     success "Test ran OK"
 }
 
+function check_artifact_saved_in_ras {
+    # The extended type of test saves an artifact into the RAS store
+    # The artifact has "Hello Galasa !" inside.
+    # Lets check the RAS to make sure that file is present.
+    expected_string_in_test_artifact="Hello Galasa \!"
+    grep -R "$expected_string_in_test_artifact" $GALASA_HOME/ras > /dev/null
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to find the string \'$expected_string_in_test_artifact\" in RAS. Test case should have generated it."
+        exit 1
+    fi
+    success "Confirmed that test case saved a test artifact to RAS"
+}
+
 function run_test_locally_using_galasactl {
     export LOG_FILE=$1
     
     # Run the Payee tests.
     export TEST_BUNDLE=dev.galasa.example.banking.payee
-    export TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayee
+    export TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayeeExtended
     export TEST_OBR_GROUP_ID=dev.galasa.example.banking
     export TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
     export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
     submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION $LOG_FILE
+
+    check_artifact_saved_in_ras
 }
 
 function test_on_windows {

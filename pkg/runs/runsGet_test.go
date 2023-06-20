@@ -413,7 +413,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 	assert.Nil(t, err)
 	textGotBack := mockConsole.ReadText()
 	assert.Contains(t, textGotBack, runName)
-	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/run/xxx876xxx/runlog\n"
+	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
 	assert.Equal(t, textGotBack, want)
 }
 

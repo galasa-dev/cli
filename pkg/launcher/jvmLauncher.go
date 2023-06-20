@@ -311,16 +311,25 @@ func addStandardOverrideProperties(
 	overrides map[string]interface{},
 ) map[string]interface{} {
 
-	// Set the ras location to be local disk always.
-	const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
+	overrideRasStoreProperty(galasaHome, overrides)
+	overrideLocalRunIdPrefixProperty(overrides)
+	override3270TerminalOutputFormat(overrides)
+
+	return overrides
+}
+
+func override3270TerminalOutputFormat(overrides map[string]interface{}) {
+	// Force the launched runs to use the "L" prefix in their runids.
+	const OVERRIDE_PROPERTY_3270_TERMINAL_OUTPUT_FORMAT = "zos3270.terminal.output"
 
 	// Only set this property if it's not already set by the user, or in the users' override file.
-	_, isRasPropAlreadySet := overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE]
-	if !isRasPropAlreadySet {
-		rasPathUri := "file:///" + galasaHome.GetUrlFolderPath() + "/ras"
-		overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
+	_, isPropAlreadySet := overrides[OVERRIDE_PROPERTY_3270_TERMINAL_OUTPUT_FORMAT]
+	if !isPropAlreadySet {
+		overrides[OVERRIDE_PROPERTY_3270_TERMINAL_OUTPUT_FORMAT] = "json,png"
 	}
+}
 
+func overrideLocalRunIdPrefixProperty(overrides map[string]interface{}) {
 	// Force the launched runs to use the "L" prefix in their runids.
 	const OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX = "framework.request.type.LOCAL.prefix"
 
@@ -329,8 +338,20 @@ func addStandardOverrideProperties(
 	if !isPropAlreadySet {
 		overrides[OVERRIDE_PROPERTY_LOCAL_RUNID_PREFIX] = "L"
 	}
+}
 
-	return overrides
+func overrideRasStoreProperty(galasaHome utils.GalasaHome, overrides map[string]interface{}) {
+	// Set the ras location to be local disk always.
+	const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
+
+	// Only set this property if it's not already set by the user, or in the users' override file.
+	{
+		_, isRasPropAlreadySet := overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE]
+		if !isRasPropAlreadySet {
+			rasPathUri := "file:///" + galasaHome.GetUrlFolderPath() + "/ras"
+			overrides[OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE] = rasPathUri
+		}
+	}
 }
 
 func (launcher *JvmLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error) {

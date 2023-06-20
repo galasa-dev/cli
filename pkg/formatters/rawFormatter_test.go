@@ -67,7 +67,7 @@ func TestRawFormatterReturnsExpectedFormat(t *testing.T) {
 	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "U456|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/run/cbd-123/runlog\n"
+	expectedFormattedOutput := "U456|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/runs/cbd-123/runlog\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
@@ -87,9 +87,9 @@ func TestRawFormatterWithMultipleRunsSeparatesWithNewLine(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"U123|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/run/cbd-123/runlog\n" +
-			"U456|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/run/cbd-456/runlog\n" +
-			"U789|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/run/cbd-789/runlog\n"
+		"U123|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
+			"U456|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
+			"U789|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|2023-05-05T06:00:15.654565Z|1157|dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/runs/cbd-789/runlog\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -105,7 +105,7 @@ func TestRawFormatterNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testin
 	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "U456|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|||dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/run/cbd-123/runlog\n"
+	expectedFormattedOutput := "U456|Finished|Passed|2023-05-04T10:55:29.545323Z|2023-05-05T06:00:14.496953Z|||dev.galasa.Zos3270LocalJava11Ubuntu|galasa|dev.galasa|https://127.0.0.1/ras/runs/cbd-123/runlog\n"
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
