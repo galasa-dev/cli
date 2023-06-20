@@ -27,6 +27,7 @@ var RESULT_TYPES = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, R
 func ValidateResultName(resultNameInput string) (string, error) {
 	var err error = nil
 	var result string = ""
+
 	// compare the input result to the list of possibles - case insensitive
 	for _, resultType := range RESULT_TYPES {
 		if strings.EqualFold(resultNameInput, resultType) {
