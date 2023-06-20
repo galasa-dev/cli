@@ -282,6 +282,7 @@ function runs_download_check_folder_names_during_test_run {
     max=100
     target_line=""
     while [[ "${is_test_finished}" == "false" ]]; do
+        sleep 5
         $cmd | tee $output_file
         # If the test run isn't finished, then we expect downloaded artifacts to appear in a folder with a timestamp - eg: U456-16:40:32
         # So we can look for ':' in the folder name to tell if the test is still running or not.
@@ -321,7 +322,7 @@ function runs_download_check_folder_names_during_test_run {
         fi
 
         
-        sleep 2
+        
         # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
         ((retries++))
         if (( $retries > $max )); then 
@@ -644,6 +645,35 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
     fi
 
     success "galasactl runs get with older to age than from age returned an error okay." 
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_raw_format_output_with_from_and_requestor {
+    h2 "Performing runs get with details format providing a from age and requestor as galasa..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --age 1d \
+    --requestor galasa \
+    --format details \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
+    cat $output_file | grep "requestor      : galasa" -q
+    rc=$?
+    # We expect a return code of '0' because the run name should be output.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find any runs with requestor 'galasa' in output"
+        exit 1
+    fi  
+
+    success "galasactl runs get with age parameter with just from value and requestor 'galasa' returned results okay." 
 }
 
 #--------------------------------------------------------------------------
