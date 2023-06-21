@@ -26,19 +26,25 @@ var RESULT_TYPES = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, R
 // ------------------------------------------------
 func ValidateResultName(resultNameInput string) (string, error) {
 	var err error = nil
-	var result string = ""
-
+	var resultOut string = ""
+	resultInputs := strings.Split(resultNameInput, ",")
+	for _, result := range resultInputs {
+		result = strings.Trim(result, " ")
+	}
 	// compare the input result to the list of possibles - case insensitive
-	for _, resultType := range RESULT_TYPES {
-		if strings.EqualFold(resultNameInput, resultType) {
-			result = resultType
+	for _, input := range resultInputs {
+		for _, resultType := range RESULT_TYPES {
+			if strings.EqualFold(input, resultType) {
+				resultOut = resultType
+				//resultOut = resultType+","
+			}
 		}
 	}
 
-	if result == "" {
+	if resultOut == "" {
 		err = errors.NewGalasaError(errors.GALASA_ERROR_INVALID_RESULT_ARGUMENT, resultNameInput, getResultNamesString())
 	}
-	return result, err
+	return resultOut, err
 }
 
 func getResultNamesString() string {
