@@ -5,11 +5,12 @@ package utils
 
 import (
 	"bytes"
-	"embed"
 	"log"
 	"text/template"
 
+	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 //---------------------------------------------------------------------------------------------------
@@ -24,15 +25,15 @@ type GeneratedFileDef struct {
 }
 
 type FileGenerator struct {
-	fileSystem         FileSystem
-	embeddedFileSystem embed.FS
+	fileSystem         files.FileSystem
+	embeddedFileSystem embedded.ReadOnlyFileSystem
 }
 
 //-------------------------------------------------------------------------------------------------
 // Public functions.
 //-------------------------------------------------------------------------------------------------
 
-func NewFileGenerator(fileSystem FileSystem, embeddedFileSystem embed.FS) *FileGenerator {
+func NewFileGenerator(fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) *FileGenerator {
 	fileGenerator := &FileGenerator{fileSystem: fileSystem, embeddedFileSystem: embeddedFileSystem}
 	return fileGenerator
 }

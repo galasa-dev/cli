@@ -9,7 +9,13 @@
 //   which is generated from a yaml definition file.
 //   So we need to get hold of a generator tool so we can 
 //
+
+// Note: The following versions are picked up by the build process and fed
+// into the code, so the code knows what versions of galasa it should be 
+// dealing with.
 def galasaBootJarVersion = '0.27.0'
+def galasaFrameworkVersion = '0.27.0'
+
 repositories {
     gradlePluginPortal()
     mavenCentral()

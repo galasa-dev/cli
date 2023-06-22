@@ -32,5 +32,8 @@ build
 pkg/embedded/templates/lib/
 **/*.jar
 
+pkg/embedded/templates/lib/version/
+
 # The galasaapi package is generated.
 pkg/galasaapi/
+

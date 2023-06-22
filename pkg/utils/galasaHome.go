@@ -6,6 +6,8 @@ package utils
 import (
 	"log"
 	"strings"
+
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 type GalasaHome interface {
@@ -15,11 +17,11 @@ type GalasaHome interface {
 
 type galasaHomeImpl struct {
 	path string
-	fs   FileSystem
+	fs   files.FileSystem
 	env  Environment
 }
 
-func NewGalasaHome(fs FileSystem, env Environment, cmdFlagGalasaHome string) (GalasaHome, error) {
+func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome string) (GalasaHome, error) {
 	var err error = nil
 	var homeData *galasaHomeImpl = nil
 
@@ -50,7 +52,7 @@ func NewGalasaHome(fs FileSystem, env Environment, cmdFlagGalasaHome string) (Ga
 	return homeData, err
 }
 
-func validateUserHomeDir(path string, fs FileSystem) error {
+func validateUserHomeDir(path string, fs files.FileSystem) error {
 	var err error = nil
 
 	return err

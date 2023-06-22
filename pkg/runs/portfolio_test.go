@@ -6,7 +6,7 @@ package runs
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ func TestCanWriteAndReadAPortfolio(t *testing.T) {
 
 	AddClassesToPortfolio(testSelection, &testOverrides, portfolio)
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	err := WritePortfolio(fs, "my.portfolio", portfolio)
 	assert.Nil(t, err)
 

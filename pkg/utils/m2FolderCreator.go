@@ -4,11 +4,12 @@
 package utils
 
 import (
-	"embed"
 	"log"
 	"strings"
 
+	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 	MAVEN_REPO_URL_MAVEN_CENTRAL        = "https://repo.maven.apache.org/maven2"
 )
 
-func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS, isDevelopment bool) error {
+func InitialiseM2Folder(fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem, isDevelopment bool) error {
 
 	var err error
 	var userHomeDir string
@@ -38,7 +39,7 @@ func InitialiseM2Folder(fileSystem FileSystem, embeddedFileSystem embed.FS, isDe
 
 func createSettingsXMLFile(
 	fileGenerator *FileGenerator,
-	fileSystem FileSystem,
+	fileSystem files.FileSystem,
 	m2Dir string,
 	isDevelopment bool,
 ) error {
@@ -72,7 +73,7 @@ func createSettingsXMLFile(
 	return err
 }
 
-func warnIfFileDoesntContainGalasaOBRMavenRepository(fileSystem FileSystem, filePath string) error {
+func warnIfFileDoesntContainGalasaOBRMavenRepository(fileSystem files.FileSystem, filePath string) error {
 
 	content, err := fileSystem.ReadTextFile(filePath)
 	if err == nil {

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 type JunitTestSuites struct {
@@ -44,7 +44,7 @@ type JunitFailure struct {
 }
 
 func ReportJunit(
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	reportJunitFilename string,
 	groupName string,
 	finishedRuns map[string]*TestRun,

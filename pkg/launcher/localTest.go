@@ -11,6 +11,7 @@ import (
 	"time"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
@@ -45,7 +46,7 @@ type LocalTest struct {
 
 	// The file system the local test deposits results onto.
 	// We use this to read the results back to find out if it passed/failed. ...etc.
-	fileSystem utils.FileSystem
+	fileSystem files.FileSystem
 
 	// Something which can create new processes in the operating system
 	processFactory ProcessFactory
@@ -54,7 +55,7 @@ type LocalTest struct {
 // A structure which tells us all we know about a JVM process we launched.
 func NewLocalTest(
 	timeService utils.TimeService,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	processFactory ProcessFactory,
 ) *LocalTest {
 

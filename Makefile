@@ -22,9 +22,33 @@ build/coverage.txt : build/coverage.out
 	go tool cover -func=build/coverage.out > build/coverage.txt
 	cat build/coverage.txt
 
-galasactl-source : ./cmd/galasactl/*.go ./pkg/api/*.go ./pkg/formatters/*.go ./pkg/cmd/*.go ./pkg/utils/*.go ./pkg/runs/*.go ./pkg/launcher/*.go
+galasactl-source : \
+	./cmd/galasactl/*.go \
+	./pkg/api/*.go \
+	./pkg/formatters/*.go \
+	./pkg/cmd/*.go \
+	./pkg/utils/*.go \
+	./pkg/runs/*.go \
+	./pkg/launcher/*.go \
+	./pkg/files/*.go \
+	./pkg/props/*.go \
+	embedded_info
 
-# when the gradle stuff works, we can rely on this jar being here: ./pkg/embedded/templates/galasahome/lib/*.jar 
+# The build process 
+embedded_info : pkg/embedded/templates/version/build.properties
+	
+
+pkg/embedded/templates/version :
+	mkdir -p $@
+
+# Build a properties file containing versions of things.
+# Then the galasactl can embed the data and read it at run-time.
+pkg/embedded/templates/version/build.properties : VERSION pkg/embedded/templates/version Makefile build.gradle
+	echo "# Property file generated at build-time" > $@
+	# Turn the contents of VERSION file into a properties file value.
+	cat VERSION | sed "s/^/galasactl.version = /1" >> $@ ; echo "" >> $@
+	cat build.gradle | grep "def galasaBootJarVersion" | cut -f2 -d\' | sed "s/^/galasa.boot.jar.version = /" >> $@
+	cat build.gradle | grep "def galasaFrameworkVersion" | cut -f2 -d\' | sed "s/^/galasa.framework.version = /" >> $@
 
 bin/galasactl-linux-amd64 : galasactl-source 
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/galasactl-linux-amd64 ./cmd/galasactl
@@ -54,4 +78,5 @@ clean:
 	rm -fr bin/galasactl*
 	rm -fr build/*
 	rm -fr build/coverage*
+	rm -fr pkg/embedded/templates/version
 

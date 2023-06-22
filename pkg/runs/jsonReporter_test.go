@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestJsonReportWorks(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	finishedRuns := TestRun{
 		Name:      "myTestRun",

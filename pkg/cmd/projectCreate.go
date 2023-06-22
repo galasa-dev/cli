@@ -9,6 +9,7 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -81,7 +82,7 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := utils.NewOSFileSystem()
+	fileSystem := files.NewOSFileSystem()
 
 	err = utils.CaptureLog(fileSystem, logFileName)
 	if err != nil {
@@ -140,7 +141,7 @@ func executeCreateProject(cmd *cobra.Command, args []string) {
 // featureNamesCommaSeparated - eg: kettle,toaster. Causes a kettle and toaster project to be created with a sample test in.
 // isDevelopment - if true, the user wants to use bleeding-edge versions of galasa code and maven repositories.
 func createProject(
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	packageName string,
 	featureNamesCommaSeparated string,
 	isOBRProjectRequired bool,
@@ -161,7 +162,7 @@ func createProject(
 		useMaven = true
 	}
 
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 
 	fileGenerator := utils.NewFileGenerator(fileSystem, embeddedFileSystem)
 
@@ -300,25 +301,29 @@ func createParentFolderPom(
 		ChildModuleNames []string
 	}
 
-	templateParameters := ParentPomParameters{
-		Coordinates:      MavenCoordinates{ArtifactId: packageName, GroupId: packageName, Name: packageName},
-		GalasaVersion:    embedded.GetGalasaVersion(),
-		IsOBRRequired:    isOBRRequired,
-		ObrName:          packageName + ".obr",
-		ChildModuleNames: make([]string, len(featureNames)),
-	}
-	// Populate the child module names
-	for index, featureName := range featureNames {
-		templateParameters.ChildModuleNames[index] = packageName + "." + featureName
-	}
+	galasaVersion, err := embedded.GetGalasaVersion()
+	if err == nil {
 
-	targetFile := utils.GeneratedFileDef{
-		FileType:                 "pom",
-		TargetFilePath:           packageName + "/pom.xml",
-		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/pom.xml",
-		TemplateParameters:       templateParameters}
+		templateParameters := ParentPomParameters{
+			Coordinates:      MavenCoordinates{ArtifactId: packageName, GroupId: packageName, Name: packageName},
+			GalasaVersion:    galasaVersion,
+			IsOBRRequired:    isOBRRequired,
+			ObrName:          packageName + ".obr",
+			ChildModuleNames: make([]string, len(featureNames)),
+		}
+		// Populate the child module names
+		for index, featureName := range featureNames {
+			templateParameters.ChildModuleNames[index] = packageName + "." + featureName
+		}
 
-	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
+		targetFile := utils.GeneratedFileDef{
+			FileType:                 "pom",
+			TargetFilePath:           packageName + "/pom.xml",
+			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/pom.xml",
+			TemplateParameters:       templateParameters}
+
+		err = fileGenerator.CreateFile(targetFile, forceOverwrite, true)
+	}
 	return err
 }
 
@@ -566,27 +571,31 @@ func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolder
 		IsDevelopment bool
 	}
 
-	gradleProjectTemplateParameters := TestGradleParameters{
-		Parent:        GradleCoordinates{GroupId: packageName, Name: packageName},
-		Coordinates:   GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
-		GalasaVersion: embedded.GetGalasaVersion(),
-		IsDevelopment: isDevelopment}
-
-	buildGradleFile := utils.GeneratedFileDef{
-		FileType:                 "gradle",
-		TargetFilePath:           targetTestFolderPath + "/build.gradle",
-		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/build.gradle.template",
-		TemplateParameters:       gradleProjectTemplateParameters}
-
-	err := fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
+	galasaVersion, err := embedded.GetGalasaVersion()
 
 	if err == nil {
-		bndFile := utils.GeneratedFileDef{
-			FileType:                 "bnd",
-			TargetFilePath:           targetTestFolderPath + "/bnd.bnd",
-			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/bnd.bnd",
+		gradleProjectTemplateParameters := TestGradleParameters{
+			Parent:        GradleCoordinates{GroupId: packageName, Name: packageName},
+			Coordinates:   GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
+			GalasaVersion: galasaVersion,
+			IsDevelopment: isDevelopment}
+
+		buildGradleFile := utils.GeneratedFileDef{
+			FileType:                 "gradle",
+			TargetFilePath:           targetTestFolderPath + "/build.gradle",
+			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/build.gradle.template",
 			TemplateParameters:       gradleProjectTemplateParameters}
-		err = fileGenerator.CreateFile(bndFile, forceOverwrite, true)
+
+		err := fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
+
+		if err == nil {
+			bndFile := utils.GeneratedFileDef{
+				FileType:                 "bnd",
+				TargetFilePath:           targetTestFolderPath + "/bnd.bnd",
+				EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/bnd.bnd",
+				TemplateParameters:       gradleProjectTemplateParameters}
+			err = fileGenerator.CreateFile(bndFile, forceOverwrite, true)
+		}
 	}
 
 	return err

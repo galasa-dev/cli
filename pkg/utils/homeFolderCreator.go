@@ -4,14 +4,13 @@
 package utils
 
 import (
-	"embed"
-
 	"github.com/galasa.dev/cli/pkg/embedded"
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 //  galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 
-func InitialiseGalasaHomeFolder(home GalasaHome, fileSystem FileSystem, embeddedFileSystem embed.FS) error {
+func InitialiseGalasaHomeFolder(home GalasaHome, fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) error {
 
 	var err error
 
@@ -135,45 +134,58 @@ func createLibDirAndContent(fileGenerator *FileGenerator, galasaLibDir string) e
 	err := fileGenerator.CreateFolder(galasaLibDir)
 
 	if err == nil {
-		galasaVersion := embedded.GetGalasaVersion()
-		galasaVersionLibDir := galasaLibDir + fileGenerator.fileSystem.GetFilePathSeparator() + galasaVersion
-		err = fileGenerator.CreateFolder(galasaVersionLibDir)
-
+		var galasaVersion string
+		galasaVersion, err = embedded.GetGalasaVersion()
 		if err == nil {
-			bootJarVersion := embedded.GetBootJarVersion()
+			galasaVersionLibDir := galasaLibDir + fileGenerator.fileSystem.GetFilePathSeparator() + galasaVersion
+			err = fileGenerator.CreateFolder(galasaVersionLibDir)
 
-			installedBootJar := GeneratedFileDef{
-				FileType: "jar",
-				TargetFilePath: galasaVersionLibDir + fileGenerator.fileSystem.GetFilePathSeparator() +
-					"galasa-boot-" + bootJarVersion + ".jar",
-				EmbeddedTemplateFilePath: "templates/galasahome/lib/galasa-boot-" + bootJarVersion + ".jar",
-				TemplateParameters:       nil,
+			if err == nil {
+				var bootJarVersion string
+				bootJarVersion, err = embedded.GetBootJarVersion()
+
+				if err == nil {
+					installedBootJar := GeneratedFileDef{
+						FileType: "jar",
+						TargetFilePath: galasaVersionLibDir + fileGenerator.fileSystem.GetFilePathSeparator() +
+							"galasa-boot-" + bootJarVersion + ".jar",
+						EmbeddedTemplateFilePath: "templates/galasahome/lib/galasa-boot-" + bootJarVersion + ".jar",
+						TemplateParameters:       nil,
+					}
+
+					err = fileGenerator.CreateFile(
+						installedBootJar,
+						false, // don't force overwrite
+						false) // don't error if it already exists.
+				}
 			}
-
-			err = fileGenerator.CreateFile(
-				installedBootJar,
-				false, // don't force overwrite
-				false) // don't error if it already exists.
 		}
 	}
 
 	return err
 }
 
-func GetGalasaBootJarPath(fs FileSystem, home GalasaHome) (string, error) {
+func GetGalasaBootJarPath(fs files.FileSystem, home GalasaHome) (string, error) {
 	var galasaBootJarPath string = ""
 	var err error = nil
+	var galasaVersion = ""
 	var galasaHomePath = home.GetNativeFolderPath()
 
-	galasaVersion := embedded.GetGalasaVersion()
-	bootJarVersion := embedded.GetBootJarVersion()
+	galasaVersion, err = embedded.GetGalasaVersion()
 
-	separator := fs.GetFilePathSeparator()
+	if err == nil {
+		var bootJarVersion string
+		bootJarVersion, err = embedded.GetBootJarVersion()
 
-	galasaBootJarPath = galasaHomePath +
-		separator + "lib" +
-		separator + galasaVersion +
-		separator + "galasa-boot-" + bootJarVersion + ".jar"
+		if err == nil {
+			separator := fs.GetFilePathSeparator()
+
+			galasaBootJarPath = galasaHomePath +
+				separator + "lib" +
+				separator + galasaVersion +
+				separator + "galasa-boot-" + bootJarVersion + ".jar"
+		}
+	}
 
 	return galasaBootJarPath, err
 }

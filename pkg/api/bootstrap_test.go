@@ -6,6 +6,7 @@ package api
 import (
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +22,7 @@ func (mockSericeData *MockUrlResolutionService) Get(url string) (string, error) 
 
 func TestCanReadPropertiesInRemoteHttpBoostrap(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	mockUrlResolutionService := &MockUrlResolutionService{StringToReturnFromGet: "a=b", ErrorToReturnFromGet: nil}
 
@@ -40,7 +41,7 @@ func TestCanReadPropertiesInRemoteHttpBoostrap(t *testing.T) {
 
 func TestCanReadPropertiesInLocalFileBoostrap(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	mockFileSystem.WriteTextFile("my-bootstrap-file", "a=b")
 
 	// Shouldn't need to consult any network traffic.
@@ -63,7 +64,7 @@ func TestCanReadPropertiesInLocalFileBoostrap(t *testing.T) {
 
 func TestCanReadRemoteApiServerUrlFromLocalFileBoostrap(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	mockFileSystem.WriteTextFile(
 		"my-bootstrap-file",
 		"a=b\n"+
@@ -91,7 +92,7 @@ func TestCanReadRemoteApiServerUrlFromLocalFileBoostrap(t *testing.T) {
 
 func TestCanReadLocalBootstrapFileFromDefaultPlace(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	home, _ := mockFileSystem.GetUserHomeDirPath()
 	mockFileSystem.WriteTextFile(
 		home+"/.galasa/bootstrap.properties",
@@ -123,7 +124,7 @@ func TestCanReadLocalBootstrapFileFromDefaultPlace(t *testing.T) {
 // (Where it could refer to file on disk for example, or a remote ecosystem.)
 func TestBootstrapFromEnvVarGetsUsed(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	// Create a bootstrap not in the default place. We should find it as the Env Var points to it.
 	mockFileSystem.WriteTextFile(
@@ -155,7 +156,7 @@ func TestBootstrapFromEnvVarGetsUsed(t *testing.T) {
 
 func TestBootstrapExpandsTildaPathToHome(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	// Create a bootstrap not in the default place. We should find it as the Env Var points to it.
 	mockFileSystem.WriteTextFile(
@@ -187,7 +188,7 @@ func TestBootstrapExpandsTildaPathToHome(t *testing.T) {
 
 func TestBootstrapExpandsFileColonPath(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	// Create a bootstrap not in the default place. We should find it as the Env Var points to it.
 	mockFileSystem.WriteTextFile(

@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/runs"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ func executeRunsDownload(cmd *cobra.Command, args []string) {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := utils.NewOSFileSystem()
+	fileSystem := files.NewOSFileSystem()
 
 	err = utils.CaptureLog(fileSystem, logFileName)
 	if err != nil {
