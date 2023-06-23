@@ -115,7 +115,14 @@ func IsInstanceOf(objectPtr interface{}, typePtr interface{}) bool {
 }
 
 func init() {
-	galasaCtlVersion, _ := embedded.GetGalasaCtlVersion()
+	galasaCtlVersion, err := embedded.GetGalasaCtlVersion()
+	if err != nil {
+		// If that failed, something is very wrong...
+		// like we can't read the file from the embedded file system.
+		// Give up out now with a bad exit code
+		finalWord(err)
+	}
+
 	RootCmd.Version = galasaCtlVersion
 
 	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "",

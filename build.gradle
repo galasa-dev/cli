@@ -12,7 +12,8 @@
 
 // Note: The following versions are picked up by the build process and fed
 // into the code, so the code knows what versions of galasa it should be 
-// dealing with.
+// dealing with. Do not mess with the `def {variableName}` part of hte following 
+// lines, only change the versions we rely upon.
 def galasaBootJarVersion = '0.27.0'
 def galasaFrameworkVersion = '0.27.0'
 
