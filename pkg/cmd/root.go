@@ -9,6 +9,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -114,6 +115,16 @@ func IsInstanceOf(objectPtr interface{}, typePtr interface{}) bool {
 }
 
 func init() {
+	galasaCtlVersion, err := embedded.GetGalasaCtlVersion()
+	if err != nil {
+		// If that failed, something is very wrong...
+		// like we can't read the file from the embedded file system.
+		// Give up out now with a bad exit code
+		finalWord(err)
+	}
+
+	RootCmd.Version = galasaCtlVersion
+
 	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "",
 		"File to which log information will be sent. Any folder referred to must exist. "+
 			"An existing file will be overwritten. "+

@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -353,9 +354,9 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewOverridableMockFileSystem()
+	mockFileSystem := files.NewOverridableMockFileSystem()
 
-	mockFile := utils.MockFile{}
+	mockFile := files.MockFile{}
 	mockFile.VirtualFunction_Write = func(content []byte) (int, error) {
 		return 0, errors.New("simulating failed file write")
 	}
@@ -389,7 +390,7 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewOverridableMockFileSystem()
+	mockFileSystem := files.NewOverridableMockFileSystem()
 
 	mockFileSystem.VirtualFunction_Create = func(path string) (io.Writer, error) {
 		return nil, errors.New("simulating failed folder creation")
@@ -420,7 +421,7 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewOverridableMockFileSystem()
+	mockFileSystem := files.NewOverridableMockFileSystem()
 
 	mockFileSystem.VirtualFunction_MkdirAll = func(path string) error {
 		return errors.New("simulating failed folder creation")
@@ -459,7 +460,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockTimeService := utils.NewMockTimeService()
 	mockConsole := utils.NewMockConsole()
 
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	mockFileSystem.WriteTextFile(runName+dummyTxtArtifact.path, "dummy text file")
 	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
@@ -503,7 +504,7 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	mockTimeService := utils.NewMockTimeService()
 
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	mockFileSystem.WriteTextFile(runName+"/dummy.txt", "dummy text file")
 	mockFileSystem.WriteTextFile(runName+"/run.log", "dummy log")
 
@@ -537,7 +538,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -574,7 +575,7 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -616,7 +617,7 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceDownload := false
 
 	// When...
@@ -646,7 +647,7 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceDownload := false
 
 	// When...
@@ -683,7 +684,7 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -751,7 +752,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -804,7 +805,7 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -833,7 +834,7 @@ func TestRunsDownloadWithInvalidRunName(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -868,7 +869,7 @@ func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()
@@ -903,7 +904,7 @@ func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
 	mockTimeService := utils.NewMockTimeService()

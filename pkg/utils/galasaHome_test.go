@@ -6,12 +6,13 @@ package utils
 import (
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultHomePathTakenFromFileSystem(t *testing.T) {
 	// Given
-	fs := NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := NewMockEnv()
 
 	// When
@@ -25,7 +26,7 @@ func TestDefaultHomePathTakenFromFileSystem(t *testing.T) {
 
 func TestHomePathTakenFromEnvVarIfSet(t *testing.T) {
 	// Given
-	fs := NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := NewMockEnv()
 	env.SetEnv("GALASA_HOME", "AnyWhereIwantItToBe")
 

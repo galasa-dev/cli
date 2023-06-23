@@ -4,15 +4,17 @@
 package launcher
 
 import (
-	"embed"
 	"log"
 	"strconv"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/embedded"
 	"github.com/galasa.dev/cli/pkg/errors"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/props"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
@@ -43,14 +45,14 @@ type JvmLauncher struct {
 	env utils.Environment
 
 	// An abstraction of the file system so we can mock it out easily for unit tests.
-	fileSystem utils.FileSystem
+	fileSystem files.FileSystem
 
 	// A location galasa can call home
 	galasaHome utils.GalasaHome
 
 	// A file system so we can get at embedded content if required.
 	// (Like so we can unpack the boot.jar)
-	embeddedFileSystem embed.FS
+	embeddedFileSystem embedded.ReadOnlyFileSystem
 
 	// The collection of tests which are running, or have completed.
 	localTests []*LocalTest
@@ -62,7 +64,7 @@ type JvmLauncher struct {
 	processFactory ProcessFactory
 
 	// A map of bootstrap properties
-	bootstrapProps utils.JavaProperties
+	bootstrapProps props.JavaProperties
 }
 
 // These parameters are gathered from the command-line and passed into the laucher.
@@ -103,10 +105,10 @@ const (
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
 func NewJVMLauncher(
-	bootstrapProps utils.JavaProperties,
+	bootstrapProps props.JavaProperties,
 	env utils.Environment,
-	fileSystem utils.FileSystem,
-	embeddedFileSystem embed.FS,
+	fileSystem files.FileSystem,
+	embeddedFileSystem embedded.ReadOnlyFileSystem,
 	runsSubmitLocalCmdParams RunsSubmitLocalCmdParameters,
 	timeService utils.TimeService,
 	processFactory ProcessFactory,
@@ -254,13 +256,13 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 	return testRuns, err
 }
 
-func deleteTempFiles(fileSystem utils.FileSystem, temporaryFolderPath string) {
+func deleteTempFiles(fileSystem files.FileSystem, temporaryFolderPath string) {
 	fileSystem.DeleteDir(temporaryFolderPath)
 }
 
 func prepareTempFiles(
 	galasaHome utils.GalasaHome,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	overrides map[string]interface{},
 ) (string, string, error) {
 
@@ -294,20 +296,20 @@ func prepareTempFiles(
 func createTemporaryOverridesFile(
 	temporaryFolderPath string,
 	galasaHome utils.GalasaHome,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	overrides map[string]interface{},
 ) (string, error) {
 	overrides = addStandardOverrideProperties(galasaHome, fileSystem, overrides)
 
 	// Write the properties to a file
 	overridesFilePath := temporaryFolderPath + "overrides.properties"
-	err := utils.WritePropertiesFile(fileSystem, overridesFilePath, overrides)
+	err := props.WritePropertiesFile(fileSystem, overridesFilePath, overrides)
 	return overridesFilePath, err
 }
 
 func addStandardOverrideProperties(
 	galasaHome utils.GalasaHome,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	overrides map[string]interface{},
 ) map[string]interface{} {
 
@@ -469,9 +471,9 @@ func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
 //	    --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr \
 //	    --test dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee
 func getCommandSyntax(
-	bootstrapProperties utils.JavaProperties,
+	bootstrapProperties props.JavaProperties,
 	galasaHome utils.GalasaHome,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	javaHome string,
 	testObrs []utils.MavenCoordinates,
 	testLocation TestLocation,
@@ -592,7 +594,7 @@ func appendArgsDebugOptions(args []string, isDebugEnabled bool, debugMode string
 	return args
 }
 
-func appendArgsBootstrapJvmLaunchOptions(args []string, bootstrapProperties utils.JavaProperties) []string {
+func appendArgsBootstrapJvmLaunchOptions(args []string, bootstrapProperties props.JavaProperties) []string {
 	// Append all the java launch properties explicitly spelt-out in the boostrap file.
 	// The framework.jvm.local.launch.options bootstrap file property can add parameters to the commmand-line.
 	// For example -Xmx80m and similar parameters.
@@ -612,7 +614,7 @@ func appendArgsBootstrapJvmLaunchOptions(args []string, bootstrapProperties util
 	return args
 }
 
-func calculateDebugPort(debugPort uint32, bootstrapProperties utils.JavaProperties) (uint32, error) {
+func calculateDebugPort(debugPort uint32, bootstrapProperties props.JavaProperties) (uint32, error) {
 	var err error
 
 	if debugPort == 0 {
@@ -643,7 +645,7 @@ func calculateDebugPort(debugPort uint32, bootstrapProperties utils.JavaProperti
 	return debugPort, err
 }
 
-func calculateDebugMode(debugMode string, bootstrapProperties utils.JavaProperties) (string, error) {
+func calculateDebugMode(debugMode string, bootstrapProperties props.JavaProperties) (string, error) {
 	var err error
 
 	if debugMode == "" {

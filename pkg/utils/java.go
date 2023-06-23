@@ -5,6 +5,7 @@ package utils
 
 import (
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 type JavaClassDef struct {
@@ -20,7 +21,7 @@ type JavaClassDef struct {
 // - It must be set.
 // - JAVA_HOME/bin must be a folder which exists.
 // - JAVA_HOME/bin/java must exist as a file.
-func ValidateJavaHome(fileSystem FileSystem, javaHome string) error {
+func ValidateJavaHome(fileSystem files.FileSystem, javaHome string) error {
 
 	var err error = nil
 
@@ -46,7 +47,7 @@ func ValidateJavaHome(fileSystem FileSystem, javaHome string) error {
 
 // checkJavaHomeBinJavaProgramExists check to make sure JAVA_HOME/bin/java is a program which
 // - exists
-func checkJavaHomeBinJavaProgram(fileSystem FileSystem, javaHome string) error {
+func checkJavaHomeBinJavaProgram(fileSystem files.FileSystem, javaHome string) error {
 	var err error = nil
 
 	// Check that the program $JAVA_HOME/bin/java exists
@@ -67,7 +68,7 @@ func checkJavaHomeBinJavaProgram(fileSystem FileSystem, javaHome string) error {
 
 // sanitiseJavaHome Massage the javaHome value to make it more valid.
 // - strip off trailing path separators
-func sanitiseJavaHome(fs FileSystem, initialJavaHome string) string {
+func sanitiseJavaHome(fs files.FileSystem, initialJavaHome string) string {
 
 	result := initialJavaHome
 
@@ -81,7 +82,7 @@ func sanitiseJavaHome(fs FileSystem, initialJavaHome string) string {
 }
 
 // checkJavaHomeBinFolderExists Checks that the $JAVA_HOME/bin folder exists.
-func checkJavaHomeBinFolderExists(fileSystem FileSystem, javaHome string) error {
+func checkJavaHomeBinFolderExists(fileSystem files.FileSystem, javaHome string) error {
 	var err error = nil
 	javaBinFolder := javaHome + fileSystem.GetFilePathSeparator() + "bin"
 	var isBinFolderThere bool

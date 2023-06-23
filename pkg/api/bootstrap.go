@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa.dev/cli/pkg/props"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
@@ -36,7 +38,7 @@ type BootstrapData struct {
 	ApiServerURL string
 
 	// Properties - The properties which are read from the bootstrap
-	Properties utils.JavaProperties
+	Properties props.JavaProperties
 }
 
 type UrlResolutionService interface {
@@ -88,7 +90,7 @@ func getDefaultBootstrapPath(galasaHome utils.GalasaHome) (string, error) {
 // bootstrapPath - Where do we find the bootstrap contents from ? This can be a URL must end in /bootstrap
 func LoadBootstrap(
 	galasaHome utils.GalasaHome,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	env utils.Environment,
 	bootstrapPath string,
 	urlResolutionService UrlResolutionService,
@@ -146,11 +148,11 @@ func LoadBootstrap(
 	return bootstrap, err
 }
 
-func cleanPath(fileSystem utils.FileSystem, path string) (string, error) {
+func cleanPath(fileSystem files.FileSystem, path string) (string, error) {
 	var err error = nil
 	if path != "" {
 		path = removeLeadingFileColon(path)
-		path, err = utils.TildaExpansion(fileSystem, path)
+		path, err = files.TildaExpansion(fileSystem, path)
 	}
 	return path, err
 }
@@ -160,7 +162,7 @@ func removeLeadingFileColon(path string) string {
 	return path
 }
 
-func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem utils.FileSystem) (*BootstrapData, error) {
+func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem files.FileSystem) (*BootstrapData, error) {
 	bootstrap := new(BootstrapData)
 	var content string
 	var err error = nil
@@ -177,7 +179,7 @@ func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem u
 	} else {
 		// read the lines and extract the properties
 		//	fmt.Printf("bootstrap contents:-\n%v\n", bootstrapString.String())
-		bootstrap.Properties = utils.ReadProperties(content)
+		bootstrap.Properties = props.ReadProperties(content)
 	}
 
 	if err != nil {
@@ -213,7 +215,7 @@ func loadBootstrapFromUrl(path string, defaultApiServerURL string,
 		} else {
 			// read the lines and extract the properties
 			//	fmt.Printf("bootstrap contents:-\n%v\n", bootstrapString.String())
-			bootstrap.Properties = utils.ReadProperties(bootstrapContents)
+			bootstrap.Properties = props.ReadProperties(bootstrapContents)
 		}
 	}
 

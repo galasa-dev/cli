@@ -9,14 +9,15 @@ import (
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/embedded"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
 // To validate the string as a valid java package name before we start to use it.
 func TestCanCreateM2FolderAndSettingsXML(t *testing.T) {
 	// Given...
-	mockFileSystem := NewMockFileSystem()
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 	isDevelopment := false
 
 	// When ...
@@ -46,7 +47,7 @@ func TestWhenM2SettingsExistButReposNotPresentYouGetAWarningAboutRequiredReposYo
 	settingsXmlContents := "Something that doesn't contain https://devel??ment.galasa.dev/main/maven-repo/obr or https://repo.maven.apa??e.org/maven2"
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 	isDevelopment := false
 
 	// When ...
@@ -82,7 +83,7 @@ func checkThatDifferentSettingsXmlFileContentsCauseFailure(t *testing.T, setting
 	// Given...
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 	isDevelopment := false
 
 	// When ...
@@ -98,8 +99,8 @@ func checkThatDifferentSettingsXmlFileContentsCauseFailure(t *testing.T, setting
 	assert.Equal(t, warningMessagesCaptured, "", "Warnings issued but they should not have been !")
 }
 
-func newMockFSContainingSettingsXml(settingsXmlContents string) *MockFileSystem {
-	mockFileSystem := NewOverridableMockFileSystem()
+func newMockFSContainingSettingsXml(settingsXmlContents string) *files.MockFileSystem {
+	mockFileSystem := files.NewOverridableMockFileSystem()
 	homeDir, _ := mockFileSystem.GetUserHomeDirPath()
 	m2Dir := homeDir + "/.m2"
 	mockFileSystem.WriteTextFile(m2Dir+"/settings.xml", settingsXmlContents)
@@ -112,7 +113,7 @@ func TestWhenM2SettingsExistCheckFailsErrorGetsReturned(t *testing.T) {
 	settingsXmlContents := "Something that doesn't contain https://devel??ment.galasa.dev/main/maven-repo/obr or https://repo.maven.apa??e.org/maven2"
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 	isDevelopment := false
 
 	mockFileSystem.VirtualFunction_Exists = func(targetFolderPath string) (bool, error) {
@@ -137,7 +138,7 @@ func TestWhenM2SettingsReadTextFileFailsErrorGetsReturned(t *testing.T) {
 	settingsXmlContents := "Something that doesn't contain https://devel??ment.galasa.dev/main/maven-repo/obr or https://repo.maven.apa??e.org/maven2"
 	mockFileSystem := newMockFSContainingSettingsXml(settingsXmlContents)
 
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 	isDevelopment := false
 
 	mockFileSystem.VirtualFunction_ReadTextFile = func(targetFolderPath string) (string, error) {

@@ -3,7 +3,18 @@
  */
 package embedded
 
-import "embed"
+import (
+	"embed"
+	"log"
+
+	"github.com/galasa.dev/cli/pkg/props"
+)
+
+const (
+	PROPERTY_NAME_GALASACTL_VERSION        = "galasactl.version"
+	PROPERTY_NAME_GALASA_BOOT_JAR_VERSION  = "galasa.boot.jar.version"
+	PROPERTY_NAME_GALASA_FRAMEWORK_VERSION = "galasa.framework.version"
+)
 
 // Embed all the template files into the go executable, so there are no extra files
 // we need to ship/install/locate on the target machine.
@@ -12,16 +23,87 @@ import "embed"
 //go:embed templates/*
 var embeddedFileSystem embed.FS
 
-func GetEmbeddedFileSystem() embed.FS {
-	return embeddedFileSystem
+// An instance of the ReadOnlyFileSystem interface, set once, used many times.
+// It just delegates to teh embed.FS
+var readOnlyFileSystem ReadOnlyFileSystem
+
+type versions struct {
+	galasaFrameworkVersion string
+	galasaBootJarVersion   string
+	galasactlVersion       string
 }
 
-func GetGalasaVersion() string {
-	// Ideally, the build process would create something which go embeds, and we can read and return here.
-	return "0.27.0"
+var (
+	versionsCache *versions = nil
+	PropsFileName           = "templates/version/build.properties"
+)
+
+func GetGalasaVersion() (string, error) {
+	var err error
+	fs := GetReadOnlyFileSystem()
+	// Note: The cache is set when we read the versions from the embedded file.
+	versionsCache, err = readVersionsFromEmbeddedFile(fs, versionsCache)
+	var version string
+	if err == nil {
+		version = versionsCache.galasaFrameworkVersion
+	}
+	return version, err
 }
 
-func GetBootJarVersion() string {
-	// Ideally, the build process would create something which go embeds, and we can read and return here.
-	return "0.27.0"
+func GetBootJarVersion() (string, error) {
+	var err error
+	fs := GetReadOnlyFileSystem()
+	// Note: The cache is set when we read the versions from the embedded file.
+	versionsCache, err = readVersionsFromEmbeddedFile(fs, versionsCache)
+	var version string
+	if err == nil {
+		version = versionsCache.galasaBootJarVersion
+	}
+	return version, err
+}
+
+func GetGalasaCtlVersion() (string, error) {
+	fs := GetReadOnlyFileSystem()
+	var err error
+	// Note: The cache is set when we read the versions from the embedded file.
+	versionsCache, err = readVersionsFromEmbeddedFile(fs, versionsCache)
+	var version string
+	if err == nil {
+		version = versionsCache.galasactlVersion
+	}
+	return version, err
+}
+
+func GetReadOnlyFileSystem() ReadOnlyFileSystem {
+	if readOnlyFileSystem == nil {
+		readOnlyFileSystem = NewReadOnlyFileSystem()
+	}
+	return readOnlyFileSystem
+}
+
+// readVersionsFromEmbeddedFile - Reads a set of version data from an embedded property file, or returns
+// a set of version data we already know about. So that the version data is only ever read once.
+func readVersionsFromEmbeddedFile(fs ReadOnlyFileSystem, versionDataAlreadyKnown *versions) (*versions, error) {
+	var (
+		err   error
+		bytes []byte
+	)
+	if versionDataAlreadyKnown == nil {
+
+		log.Printf("Loading the properties file '%s'...", PropsFileName)
+		bytes, err = fs.ReadFile(PropsFileName)
+		if err != nil {
+			log.Printf("Failure. %s", err.Error())
+		} else {
+			propsFileContent := string(bytes)
+			properties := props.ReadProperties(propsFileContent)
+
+			versionDataAlreadyKnown = new(versions)
+
+			versionDataAlreadyKnown.galasaBootJarVersion = properties[PROPERTY_NAME_GALASA_BOOT_JAR_VERSION]
+			versionDataAlreadyKnown.galasaFrameworkVersion = properties[PROPERTY_NAME_GALASA_FRAMEWORK_VERSION]
+			versionDataAlreadyKnown.galasactlVersion = properties[PROPERTY_NAME_GALASACTL_VERSION]
+		}
+	}
+	return versionDataAlreadyKnown, err
 }

@@ -8,13 +8,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCanCreateProjectFailsIfPackageNameInvalid(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
@@ -34,7 +35,7 @@ func TestCanCreateProjectFailsIfPackageNameInvalid(t *testing.T) {
 
 func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
@@ -57,7 +58,7 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
-func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool) {
+func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool) {
 	parentFolderExists, err := mockFileSystem.DirExists("my.test.pkg")
 	assert.Nil(t, err)
 	assert.True(t, parentFolderExists, "Parent folder was not created.")
@@ -108,7 +109,7 @@ func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem utils.Fil
 	}
 }
 
-func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.FileSystem, featureName string, isMaven bool, isGradle bool) {
+func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem files.FileSystem, featureName string, isMaven bool, isGradle bool) {
 
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg." + featureName)
 	assert.Nil(t, err)
@@ -165,7 +166,7 @@ func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem utils.Fil
 	assert.True(t, isTestResourcesTextFileExists, "Test text resource file was not created.")
 }
 
-func assertJavaFileWasGenerated(t *testing.T, mockFileSystem utils.FileSystem, expectedJavaFilePath string, packageName string) {
+func assertJavaFileWasGenerated(t *testing.T, mockFileSystem files.FileSystem, expectedJavaFilePath string, packageName string) {
 	testJavaFileExists, err := mockFileSystem.Exists(expectedJavaFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testJavaFileExists, "Test java file was not created.")
@@ -179,7 +180,7 @@ func assertJavaFileWasGenerated(t *testing.T, mockFileSystem utils.FileSystem, e
 func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 
 	// Given...
-	mockFileSystem := utils.NewOverridableMockFileSystem()
+	mockFileSystem := files.NewOverridableMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
@@ -205,7 +206,7 @@ func TestCreateProjectErrorsWhenMkAllDirsFails(t *testing.T) {
 
 func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewOverridableMockFileSystem()
+	mockFileSystem := files.NewOverridableMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
@@ -230,7 +231,7 @@ func TestCreateProjectErrorsWhenWriteTextFileFails(t *testing.T) {
 
 func TestCreateProjectPomFileAlreadyExistsNoForceOverwrite(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := false
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
@@ -256,7 +257,7 @@ func TestCreateProjectPomFileAlreadyExistsNoForceOverwrite(t *testing.T) {
 
 func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	isObrProjectRequired := false
 	forceOverwrite := true
 	testPackageName := "my.test.pkg"
@@ -295,7 +296,7 @@ func TestCreateProjectPomFileAlreadyExistsWithForceOverwrite(t *testing.T) {
 
 func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := true
 	featureNamesCommandSeparatedList := "test"
@@ -319,7 +320,7 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
 
-func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.FileSystem, isMaven bool, isGradle bool) {
+func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem files.FileSystem, isMaven bool, isGradle bool) {
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.obr")
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test folder was not created.")
@@ -350,7 +351,7 @@ func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem utils.File
 
 func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := false
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
@@ -380,7 +381,7 @@ func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
 
 func TestCreateProjectWithInvalidFeaturesFails(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := false
 	isObrProjectRequired := false
 	testPackageName := "my.test.pkg"
@@ -403,7 +404,7 @@ func TestCreateProjectWithInvalidFeaturesFails(t *testing.T) {
 
 func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
@@ -427,7 +428,7 @@ func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
 
 func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := true
 	featureNamesCommandSeparatedList := "test"
@@ -453,7 +454,7 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 
 func TestCanCreateMavenAndGradleProject(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
@@ -478,7 +479,7 @@ func TestCanCreateMavenAndGradleProject(t *testing.T) {
 
 func TestCreateProjectDefaultsToMavenProject(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := false
 	featureNamesCommandSeparatedList := "test"
@@ -504,7 +505,7 @@ func TestCreateProjectDefaultsToMavenProject(t *testing.T) {
 
 func TestCanCreateGradleProjectNonDevelopmentModeGeneratesCommentedOutMavenRepoReference(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := true
 	featureNamesCommandSeparatedList := "test"
@@ -535,7 +536,7 @@ func TestCanCreateGradleProjectNonDevelopmentModeGeneratesCommentedOutMavenRepoR
 
 func TestCanCreateGradleProjectDevelopmentModeGeneratesMavenRepoReference(t *testing.T) {
 	// Given...
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
 	isObrProjectRequired := true
 	featureNamesCommandSeparatedList := "test"

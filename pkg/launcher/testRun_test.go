@@ -6,7 +6,7 @@ package launcher
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,7 +44,7 @@ const (
 
 func TestCanReadJsonTestRunFileOk(t *testing.T) {
 
-	fileSystem := utils.NewMockFileSystem()
+	fileSystem := files.NewMockFileSystem()
 	filePath := "/my/file/path"
 	fileSystem.WriteTextFile(filePath, testFileContentString)
 
