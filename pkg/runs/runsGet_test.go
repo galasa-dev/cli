@@ -1052,6 +1052,31 @@ func TestRunsGetURLQueryWithResultSuppliedReturnsOK(t *testing.T) {
 	assert.Contains(t, textGotBack, "Passed")
 }
 
+func TestRunsGetURLQueryWithMultipleResultSuppliedReturnsOK(t *testing.T) {
+	// Given ...
+	age := ""
+	runName := "U456"
+	requestor := ""
+	result := "Passed,envfail"
+
+	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "summary"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+
+	// Then ...
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, "Passed")
+}
+
 func TestRunsGetURLQueryWithResultNotSuppliedReturnsOK(t *testing.T) {
 	// Given ...
 	age := ""

@@ -12,7 +12,6 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/errors"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
 
 func ValidateResultParameter(resultInputString string, apiServerUrl string) (string, error) {
@@ -29,10 +28,11 @@ func ValidateResultParameter(resultInputString string, apiServerUrl string) (str
 		if httpResponse.StatusCode != http.StatusOK {
 			httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
 			errString := err.Error() + httpError
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RESULTNAMES_FAILED, errString)
+			err = errors.NewGalasaError(errors.GALASA_ERROR_QUERY_RESULTNAMES_FAILED, errString)
 		} else {
 			rasResultNames := rasResultNamesData.GetResultnames()
 			resultInputs := strings.Split(resultInputString, ",")
+
 			// compare the input result to the list of possibles - case insensitive
 			for _, resultInput := range resultInputs {
 				matched := false
