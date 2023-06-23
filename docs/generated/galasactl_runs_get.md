@@ -18,6 +18,7 @@ galasactl runs get [flags]
   -h, --help               help for get
       --name string        the name of the test run we want information about
       --requestor string   the requestor of the test run we want information about
+      --result string      the result of the test run we want information about
 ```
 
 ### Options inherited from parent commands

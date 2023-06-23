@@ -30,6 +30,7 @@ var (
 	age                string
 	outputFormatString string
 	requestor          string
+	result             string
 )
 
 func init() {
@@ -38,6 +39,7 @@ func init() {
 		" made up of an integer and a time-unit qualifier. Supported time-units are days('d'), weeks('w') and hours ('h'). If missing, the TO part is defaulted to '0h'. Examples: '--age 1d' , '--age 6h:1h' ")
 	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: 'summary', 'details' or 'raw'")
 	runsGetCmd.PersistentFlags().StringVar(&requestor, "requestor", "", "the requestor of the test run we want information about")
+	runsGetCmd.PersistentFlags().StringVar(&result, "result", "", "the result of the test run we want information about")
 	parentCommand := runsCmd
 	parentCommand.AddCommand(runsGetCmd)
 }
@@ -81,7 +83,7 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	timeService := utils.NewRealTimeService()
 
 	// Call to process the command in a unit-testable way.
-	err = runs.GetRuns(runName, age, requestor, outputFormatString, timeService, console, apiServerUrl)
+	err = runs.GetRuns(runName, age, requestor, result, outputFormatString, timeService, console, apiServerUrl)
 	if err != nil {
 		panic(err)
 	}
