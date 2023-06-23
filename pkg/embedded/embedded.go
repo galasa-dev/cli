@@ -39,8 +39,10 @@ var (
 )
 
 func GetGalasaVersion() (string, error) {
+	var err error
 	fs := GetReadOnlyFileSystem()
-	versionsCache, err := getVersionsCache(fs, versionsCache)
+	// Note: The cache is set when we read the versions from the embedded file.
+	versionsCache, err = readVersionsFromEmbeddedFile(fs, versionsCache)
 	var version string
 	if err == nil {
 		version = versionsCache.galasaFrameworkVersion
@@ -49,8 +51,10 @@ func GetGalasaVersion() (string, error) {
 }
 
 func GetBootJarVersion() (string, error) {
+	var err error
 	fs := GetReadOnlyFileSystem()
-	versionsCache, err := getVersionsCache(fs, versionsCache)
+	// Note: The cache is set when we read the versions from the embedded file.
+	versionsCache, err = readVersionsFromEmbeddedFile(fs, versionsCache)
 	var version string
 	if err == nil {
 		version = versionsCache.galasaBootJarVersion
@@ -60,7 +64,9 @@ func GetBootJarVersion() (string, error) {
 
 func GetGalasaCtlVersion() (string, error) {
 	fs := GetReadOnlyFileSystem()
-	versionsCache, err := getVersionsCache(fs, versionsCache)
+	var err error
+	// Note: The cache is set when we read the versions from the embedded file.
+	versionsCache, err = readVersionsFromEmbeddedFile(fs, versionsCache)
 	var version string
 	if err == nil {
 		version = versionsCache.galasactlVersion
@@ -75,12 +81,14 @@ func GetReadOnlyFileSystem() ReadOnlyFileSystem {
 	return readOnlyFileSystem
 }
 
-func getVersionsCache(fs ReadOnlyFileSystem, versionData *versions) (*versions, error) {
+// readVersionsFromEmbeddedFile - Reads a set of version data from an embedded property file, or returns
+// a set of version data we already know about. So that the version data is only ever read once.
+func readVersionsFromEmbeddedFile(fs ReadOnlyFileSystem, versionDataAlreadyKnown *versions) (*versions, error) {
 	var (
 		err   error
 		bytes []byte
 	)
-	if versionData == nil {
+	if versionDataAlreadyKnown == nil {
 
 		log.Printf("Loading the properties file '%s'...", PropsFileName)
 		bytes, err = fs.ReadFile(PropsFileName)
@@ -90,12 +98,12 @@ func getVersionsCache(fs ReadOnlyFileSystem, versionData *versions) (*versions, 
 			propsFileContent := string(bytes)
 			properties := props.ReadProperties(propsFileContent)
 
-			versionData = new(versions)
+			versionDataAlreadyKnown = new(versions)
 
-			versionData.galasaBootJarVersion = properties[PROPERTY_NAME_GALASA_BOOT_JAR_VERSION]
-			versionData.galasaFrameworkVersion = properties[PROPERTY_NAME_GALASA_FRAMEWORK_VERSION]
-			versionData.galasactlVersion = properties[PROPERTY_NAME_GALASACTL_VERSION]
+			versionDataAlreadyKnown.galasaBootJarVersion = properties[PROPERTY_NAME_GALASA_BOOT_JAR_VERSION]
+			versionDataAlreadyKnown.galasaFrameworkVersion = properties[PROPERTY_NAME_GALASA_FRAMEWORK_VERSION]
+			versionDataAlreadyKnown.galasactlVersion = properties[PROPERTY_NAME_GALASACTL_VERSION]
 		}
 	}
-	return versionData, err
+	return versionDataAlreadyKnown, err
 }
