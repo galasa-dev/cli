@@ -31,8 +31,8 @@ func (fs *MockReadOnlyFileSystem) ReadFile(filePath string) ([]byte, error) {
 	return []byte(content), nil
 }
 
-func TestCanGetBootJarVersion(t *testing.T) {
-	propsFileName := "version/build.properties"
+func TestCanParseVersionsFromEmbeddedFS(t *testing.T) {
+	propsFileName := "templates/version/build.properties"
 	content := "galasactl.version=myVersion\n" +
 		"galasa.boot.jar.version=0.1.2\n" +
 		"galasa.framework.version=3.4.5\n"
@@ -40,7 +40,7 @@ func TestCanGetBootJarVersion(t *testing.T) {
 	fs := NewMockReadOnlyFileSystem()
 	fs.WriteFile(propsFileName, content)
 
-	versions, err := getVersionsCache(fs)
+	versions, err := getVersionsCache(fs, nil)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, versions)

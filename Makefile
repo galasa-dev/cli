@@ -35,7 +35,8 @@ galasactl-source : \
 	embedded_info
 
 # The build process 
-embedded_info : pkg/embedded/templates/version/build.properties
+embedded_info : \
+	pkg/embedded/templates/version/build.properties
 	
 
 pkg/embedded/templates/version :
@@ -47,7 +48,9 @@ pkg/embedded/templates/version/build.properties : VERSION pkg/embedded/templates
 	echo "# Property file generated at build-time" > $@
 	# Turn the contents of VERSION file into a properties file value.
 	cat VERSION | sed "s/^/galasactl.version = /1" >> $@ ; echo "" >> $@
+	# Add the `galasa.boot.jar.version` property based on the build.gradle value.
 	cat build.gradle | grep "def galasaBootJarVersion" | cut -f2 -d\' | sed "s/^/galasa.boot.jar.version = /" >> $@
+	# Add the `galasa.framework.version` property based on the build.gradle value.
 	cat build.gradle | grep "def galasaFrameworkVersion" | cut -f2 -d\' | sed "s/^/galasa.framework.version = /" >> $@
 
 bin/galasactl-linux-amd64 : galasactl-source 

@@ -35,35 +35,35 @@ type versions struct {
 
 var (
 	versionsCache *versions = nil
-	PropsFileName           = "version/build.properties"
+	PropsFileName           = "templates/version/build.properties"
 )
 
 func GetGalasaVersion() (string, error) {
 	fs := GetReadOnlyFileSystem()
-	cache, err := getVersionsCache(fs)
+	versionsCache, err := getVersionsCache(fs, versionsCache)
 	var version string
 	if err == nil {
-		version = cache.galasaFrameworkVersion
+		version = versionsCache.galasaFrameworkVersion
 	}
 	return version, err
 }
 
 func GetBootJarVersion() (string, error) {
 	fs := GetReadOnlyFileSystem()
-	cache, err := getVersionsCache(fs)
+	versionsCache, err := getVersionsCache(fs, versionsCache)
 	var version string
 	if err == nil {
-		version = cache.galasaBootJarVersion
+		version = versionsCache.galasaBootJarVersion
 	}
 	return version, err
 }
 
 func GetGalasaCtlVersion() (string, error) {
 	fs := GetReadOnlyFileSystem()
-	cache, err := getVersionsCache(fs)
+	versionsCache, err := getVersionsCache(fs, versionsCache)
 	var version string
 	if err == nil {
-		version = cache.galasactlVersion
+		version = versionsCache.galasactlVersion
 	}
 	return version, err
 }
@@ -75,17 +75,13 @@ func GetReadOnlyFileSystem() ReadOnlyFileSystem {
 	return readOnlyFileSystem
 }
 
-func getVersionsCache(fs ReadOnlyFileSystem) (*versions, error) {
+func getVersionsCache(fs ReadOnlyFileSystem, versionData *versions) (*versions, error) {
 	var (
 		err   error
 		bytes []byte
 	)
-	if versionsCache == nil {
-		versionsCache = &versions{
-			galasaFrameworkVersion: "unknown",
-			galasaBootJarVersion:   "unknown",
-			galasactlVersion:       "unknown",
-		}
+	if versionData == nil {
+
 		log.Printf("Loading the properties file '%s'...", PropsFileName)
 		bytes, err = fs.ReadFile(PropsFileName)
 		if err != nil {
@@ -94,10 +90,12 @@ func getVersionsCache(fs ReadOnlyFileSystem) (*versions, error) {
 			propsFileContent := string(bytes)
 			properties := props.ReadProperties(propsFileContent)
 
-			versionsCache.galasaBootJarVersion = properties[PROPERTY_NAME_GALASA_BOOT_JAR_VERSION]
-			versionsCache.galasaFrameworkVersion = properties[PROPERTY_NAME_GALASA_FRAMEWORK_VERSION]
-			versionsCache.galasactlVersion = properties[PROPERTY_NAME_GALASACTL_VERSION]
+			versionData = new(versions)
+
+			versionData.galasaBootJarVersion = properties[PROPERTY_NAME_GALASA_BOOT_JAR_VERSION]
+			versionData.galasaFrameworkVersion = properties[PROPERTY_NAME_GALASA_FRAMEWORK_VERSION]
+			versionData.galasactlVersion = properties[PROPERTY_NAME_GALASACTL_VERSION]
 		}
 	}
-	return versionsCache, err
+	return versionData, err
 }
