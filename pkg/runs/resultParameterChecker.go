@@ -52,20 +52,6 @@ func ValidateResultParameter(resultInputString string, apiServerUrl string) (str
 				}
 			}
 
-			// compare the input result to the list of possibles - case insensitive
-			// for _, resultInput := range resultInputs {
-			// 	matched := false
-			// 	for _, rasResultName := range rasResultNames {
-			// 		if strings.EqualFold(resultInput, rasResultName) {
-			// 			validResultInputs = append(validResultInputs, rasResultName)
-			// 			matched = true
-			// 		}
-			// 	}
-			// 	if !matched {
-			// 		invalidResultInputs = append(invalidResultInputs, resultInput)
-			// 	}
-			// }
-
 			if len(invalidResultInputs) > 0 {
 				err = errors.NewGalasaError(errors.GALASA_ERROR_INVALID_RESULT_ARGUMENT, covertArrayToCommaSeparatedStringWithQuotes(invalidResultInputs), covertArrayToCommaSeparatedStringWithQuotes(rasResultNames))
 			}
