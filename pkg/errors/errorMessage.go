@@ -155,8 +155,8 @@ var (
 	GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED    = NewMessageType("GAL1082E: Invalid time unit specified '%s' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.", 1082, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_NO_ARTIFACTS_TO_DOWNLOAD       = NewMessageType("GAL1083E: No artifacts to download for run: '%s'", 1083, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_HTTP_RESPONSE_CLOSE_FAILED     = NewMessageType("GAL1084E: Communications failure while closing an HTTP response. '%s'", 1084, STACK_TRACE_WANTED)
-	GALASA_ERROR_INVALID_RESULT_ARGUMENT        = NewMessageType("GAL1085E: Invalid result parameter %s. The possible result values in RAS are: %s", 1085, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_QUERY_RESULTNAMES_FAILED       = NewMessageType("GAL1086E: Could not retrieve ruesult names. Reason: '%s'", 1086, STACK_TRACE_WANTED)
+	GALASA_ERROR_INVALID_RESULT_ARGUMENT        = NewMessageType("GAL1085E: Invalid '--result' parameter value: %s. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: %s", 1085, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_QUERY_RESULTNAMES_FAILED       = NewMessageType("GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '%s'", 1086, STACK_TRACE_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

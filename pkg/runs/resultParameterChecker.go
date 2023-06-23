@@ -5,6 +5,7 @@ package runs
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -31,21 +32,39 @@ func ValidateResultParameter(resultInputString string, apiServerUrl string) (str
 			err = errors.NewGalasaError(errors.GALASA_ERROR_QUERY_RESULTNAMES_FAILED, errString)
 		} else {
 			rasResultNames := rasResultNamesData.GetResultnames()
+			log.Println("List of valid result names from the ecosystem: " + covertArrayToCommaSeparatedStringWithQuotes(rasResultNames))
 			resultInputs := strings.Split(resultInputString, ",")
 
-			// compare the input result to the list of possibles - case insensitive
+			validResultNamesMap := make(map[string]string)
+			for _, resultName := range rasResultNames {
+				validResultNamesMap[strings.ToLower(resultName)] = resultName
+			}
+
 			for _, resultInput := range resultInputs {
 				matched := false
-				for _, rasResultName := range rasResultNames {
-					if strings.EqualFold(resultInput, rasResultName) {
-						validResultInputs = append(validResultInputs, rasResultName)
-						matched = true
-					}
+				matchedResultNameValue := validResultNamesMap[strings.ToLower(resultInput)]
+				if len(matchedResultNameValue) > 0 {
+					validResultInputs = append(validResultInputs, matchedResultNameValue)
+					matched = true
 				}
 				if !matched {
 					invalidResultInputs = append(invalidResultInputs, resultInput)
 				}
 			}
+
+			// compare the input result to the list of possibles - case insensitive
+			// for _, resultInput := range resultInputs {
+			// 	matched := false
+			// 	for _, rasResultName := range rasResultNames {
+			// 		if strings.EqualFold(resultInput, rasResultName) {
+			// 			validResultInputs = append(validResultInputs, rasResultName)
+			// 			matched = true
+			// 		}
+			// 	}
+			// 	if !matched {
+			// 		invalidResultInputs = append(invalidResultInputs, resultInput)
+			// 	}
+			// }
 
 			if len(invalidResultInputs) > 0 {
 				err = errors.NewGalasaError(errors.GALASA_ERROR_INVALID_RESULT_ARGUMENT, covertArrayToCommaSeparatedStringWithQuotes(invalidResultInputs), covertArrayToCommaSeparatedStringWithQuotes(rasResultNames))

@@ -39,7 +39,7 @@ func init() {
 		" made up of an integer and a time-unit qualifier. Supported time-units are days('d'), weeks('w') and hours ('h'). If missing, the TO part is defaulted to '0h'. Examples: '--age 1d' , '--age 6h:1h' ")
 	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: 'summary', 'details' or 'raw'")
 	runsGetCmd.PersistentFlags().StringVar(&requestor, "requestor", "", "the requestor of the test run we want information about")
-	runsGetCmd.PersistentFlags().StringVar(&result, "result", "", "the result of the test run we want information about")
+	runsGetCmd.PersistentFlags().StringVar(&result, "result", "", "A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example \"--result Failed,Ignored,EnvFail\"")
 	parentCommand := runsCmd
 	parentCommand.AddCommand(runsGetCmd)
 }

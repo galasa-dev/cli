@@ -45,8 +45,8 @@ var (
 func GetRuns(
 	runName string,
 	age string,
-	requestor string,
-	result string,
+	requestorParameter string,
+	resultParameter string,
 	outputFormatString string,
 	timeService utils.TimeService,
 	console utils.Console,
@@ -70,8 +70,8 @@ func GetRuns(
 		fromAge, toAge, err = getTimesFromAge(age)
 	}
 
-	if (err == nil) && (result != "") {
-		result, err = ValidateResultParameter(result, apiServerUrl)
+	if (err == nil) && (resultParameter != "") {
+		resultParameter, err = ValidateResultParameter(resultParameter, apiServerUrl)
 	}
 
 	if err == nil {
@@ -79,7 +79,7 @@ func GetRuns(
 		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
 			var runJson []galasaapi.Run
-			runJson, err = GetRunsFromRestApi(runName, requestor, result, fromAge, toAge, timeService, apiServerUrl)
+			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, timeService, apiServerUrl)
 			if err == nil {
 				// Some formatters need extra fields filled-in so they can be displayed.
 				if chosenFormatter.IsNeedingMethodDetails() {
@@ -183,8 +183,8 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiServerUrl string) (
 // Multiple test runs can be returned as the runName is not unique.
 func GetRunsFromRestApi(
 	runName string,
-	requestor string,
-	result string,
+	requestorParameter string,
+	resultParameter string,
 	fromAgeHours int,
 	toAgeHours int,
 	timeService utils.TimeService,
@@ -222,11 +222,11 @@ func GetRunsFromRestApi(
 		if runName != "" {
 			apicall = apicall.Runname(runName)
 		}
-		if requestor != "" {
-			apicall = apicall.Requestor(requestor)
+		if requestorParameter != "" {
+			apicall = apicall.Requestor(requestorParameter)
 		}
-		if result != "" {
-			apicall = apicall.Result(result)
+		if resultParameter != "" {
+			apicall = apicall.Result(resultParameter)
 		}
 		apicall = apicall.Page(pageNumberWanted)
 		apicall = apicall.Sort("to:desc")
