@@ -103,7 +103,7 @@ export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}
 export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
 export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
 export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
-export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="3"
+export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 
 
 #--------------------------------------------------------------------------
@@ -313,11 +313,13 @@ function runs_download_check_folder_names_during_test_run {
                     # Check to see of the folder created has a ":" in the folder name... indicating that the test is running.
                     folder_name=$(cat $output_file| cut -d' ' -f 7)
                     no_artifacts=$(cat $output_file| cut -d' ' -f 3)
+                    no_artifacts=$(($no_artifacts+0))
                     expected_artifact_count=$GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT
+                    expected_artifact_count=$(($expected_artifact_count+0))
                     echo $folder_name | grep ":" 
                     rc=$?
                     if [[ "${rc}" != "0" ]]; then 
-                        if [[ "${no_artifacts}" == "${expected_artifact_count}" ]]; then
+                        if [[ "${no_artifacts}" < "${expected_artifact_count}" ]]; then
                             error "Folder named incorrectly. Has no timestamp when it should, because downloading from running tests should create a folder with a time in, such as U456-16:50:32."
                             exit 1
                         fi
