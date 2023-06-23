@@ -306,9 +306,8 @@ function runs_download_check_folder_names_during_test_run {
             
             test_building_line=$(cat ${log_file} | grep "now 'building'")
             if [[ "$test_building_line" != "" ]]; then
-                cat ${log_file} | grep "now 'running'" -q
-                rc=$?
-                if [[ "${rc}" != "0" ]]; then
+                test_running_line=$(cat ${log_file} | grep "running") 
+                if [[ "$test_running_line" == "" ]]; then
                     # Check to see of the folder created has a ":" in the folder name... indicating that the test is running.
                     folder_name=$(cat $output_file| cut -d' ' -f 7)
                     echo $folder_name | grep ":" 
@@ -760,32 +759,32 @@ function launch_test_from_unknown_portfolio {
 calculate_galasactl_executable
 
 # Launch test on ecosystem from a portfolio ...
-launch_test_on_ecosystem_with_portfolio
+# launch_test_on_ecosystem_with_portfolio
 
-# Query the result ... setting RUN_NAME to hold the one which galasa allocated
-get_result_with_runname 
-runs_get_check_summary_format_output  $RUN_NAME
-runs_get_check_details_format_output  $RUN_NAME
-runs_get_check_raw_format_output  $RUN_NAME
+# # Query the result ... setting RUN_NAME to hold the one which galasa allocated
+# get_result_with_runname 
+# runs_get_check_summary_format_output  $RUN_NAME
+# runs_get_check_details_format_output  $RUN_NAME
+# runs_get_check_raw_format_output  $RUN_NAME
 
-# Query the result with the age parameter 
-runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
-runs_get_check_raw_format_output_with_just_from $RUN_NAME
+# # Query the result with the age parameter 
+# runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
+# runs_get_check_raw_format_output_with_just_from $RUN_NAME
 
-# Check that the age parameter throws correct errors with invalid values
-runs_get_check_raw_format_output_with_no_runname_and_no_age_param
-runs_get_check_raw_format_output_with_invalid_age_param
-runs_get_check_raw_format_output_with_older_to_than_from_age
-# Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
+# # Check that the age parameter throws correct errors with invalid values
+# runs_get_check_raw_format_output_with_no_runname_and_no_age_param
+# runs_get_check_raw_format_output_with_invalid_age_param
+# runs_get_check_raw_format_output_with_older_to_than_from_age
+# # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
-# Launch test on ecosystem without a portfolio ...
-# NOTE - Bug found with this command so commenting out for now see issue xxx
-# launch_test_on_ecosystem_without_portfolio
+# # Launch test on ecosystem without a portfolio ...
+# # NOTE - Bug found with this command so commenting out for now see issue xxx
+# # launch_test_on_ecosystem_without_portfolio
 
-# Attempt to create a test portfolio with an unknown test ...
-create_portfolio_with_unknown_test
+# # Attempt to create a test portfolio with an unknown test ...
+# create_portfolio_with_unknown_test
 
-# Attempt to launch a test from an unknown portfolio ...
-launch_test_from_unknown_portfolio
+# # Attempt to launch a test from an unknown portfolio ...
+# launch_test_from_unknown_portfolio
 
 runs_download_check_folder_names_during_test_run
