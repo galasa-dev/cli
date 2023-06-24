@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa.dev/cli/pkg/props"
 
 	"github.com/galasa.dev/cli/pkg/embedded"
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -20,7 +22,7 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	utils.AddJavaRuntimeToMock(fs, "/java")
 
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
@@ -34,7 +36,7 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	bootstrapProps := getBasicBootstrapProperties()
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetEmbeddedFileSystem(),
+		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 	if err != nil {
 		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
@@ -50,8 +52,8 @@ func getBasicJvmLaunchParams() RunsSubmitLocalCmdParameters {
 	}
 }
 
-func getBasicBootstrapProperties() utils.JavaProperties {
-	props := utils.JavaProperties{}
+func getBasicBootstrapProperties() props.JavaProperties {
+	props := props.JavaProperties{}
 	props[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_OPTIONS] = "-Xmx80m"
 	return props
 }
@@ -61,7 +63,7 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	env := utils.NewMockEnv()
 	// env.EnvVars["JAVA_HOME"] = "/java"
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	utils.AddJavaRuntimeToMock(fs, "/java")
 
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
@@ -75,7 +77,7 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetEmbeddedFileSystem(),
+		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 	if err == nil {
 		assert.Fail(t, "Constructor should have failed but it did not.")
@@ -88,7 +90,7 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	utils.AddJavaRuntimeToMock(fs, "/java")
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
@@ -100,7 +102,7 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 	bootstrapProps := getBasicBootstrapProperties()
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetEmbeddedFileSystem(),
+		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 
 	if err != nil {
@@ -114,7 +116,7 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	utils.AddJavaRuntimeToMock(fs, "/java")
 
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
@@ -128,7 +130,7 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	bootstrapProps := getBasicBootstrapProperties()
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetEmbeddedFileSystem(),
+		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 
 	if err != nil {
@@ -163,7 +165,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	utils.AddJavaRuntimeToMock(fs, "/java")
 
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
@@ -177,7 +179,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 	bootstrapProps := getBasicBootstrapProperties()
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetEmbeddedFileSystem(),
+		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 	if err != nil {
 		assert.Fail(t, "Launcher should have launched command OK")
@@ -261,7 +263,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 
 func TestJvmLauncherSetsRASStoreOverride(t *testing.T) {
 	overrides := make(map[string]interface{})
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
@@ -271,7 +273,7 @@ func TestJvmLauncherSetsRASStoreOverride(t *testing.T) {
 
 func TestJvmLauncherSets3270TerminalOutputFormatProperty(t *testing.T) {
 	overrides := make(map[string]interface{})
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
@@ -284,7 +286,7 @@ func TestJvmLauncherSets3270TerminalOutputFormatProperty(t *testing.T) {
 
 func TestCanCreateTempPropsFile(t *testing.T) {
 	overrides := make(map[string]interface{})
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
@@ -300,17 +302,17 @@ func TestCanCreateTempPropsFile(t *testing.T) {
 
 	// The temp property file should exist
 	assert.NotEmpty(t, tempPropsFile)
-	overridesGotBack, err := utils.ReadPropertiesFile(fs, tempPropsFile)
+	overridesGotBack, err := props.ReadPropertiesFile(fs, tempPropsFile)
 	assert.Nil(t, err)
 	assert.Contains(t, overridesGotBack, "framework.resultarchive.store")
 	assert.Contains(t, overridesGotBack, "framework.request.type.LOCAL.prefix")
 }
 
 func getDefaultCommandSyntaxTestParameters() (
-	utils.JavaProperties,
+	props.JavaProperties,
 	utils.Environment,
 	utils.GalasaHome,
-	*utils.MockFileSystem,
+	*files.MockFileSystem,
 	string,
 	[]utils.MavenCoordinates,
 	TestLocation,
@@ -320,7 +322,7 @@ func getDefaultCommandSyntaxTestParameters() (
 	bool,
 ) {
 	bootstrapProps := getBasicBootstrapProperties()
-	fs := utils.NewOverridableMockFileSystem()
+	fs := files.NewOverridableMockFileSystem()
 	javaHome := "my_java_home"
 	testObrs := make([]utils.MavenCoordinates, 0)
 	testObrs = append(

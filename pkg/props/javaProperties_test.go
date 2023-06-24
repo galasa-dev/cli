@@ -1,11 +1,12 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package utils
+package props
 
 import (
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +15,7 @@ func TestCanCreateAPropsFileAndReadItBack(t *testing.T) {
 	props["a"] = "b"
 	props["d"] = "e"
 
-	fs := NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 
 	WritePropertiesFile(fs, "myPropsFile.properties", props)
 
@@ -29,7 +30,7 @@ func TestCanCreateAPropsFileAndReadItBack(t *testing.T) {
 
 func TestCanCreateReadAPropsFileBackWithCommentsIgnored(t *testing.T) {
 
-	fs := NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 
 	text := `
 

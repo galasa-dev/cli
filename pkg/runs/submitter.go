@@ -14,14 +14,16 @@ import (
 	randomGenerator "github.com/satori/go.uuid"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/launcher"
+	"github.com/galasa.dev/cli/pkg/props"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
 func ExecuteSubmitRuns(
 	galasaHome utils.GalasaHome,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	params utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
 	timeService utils.TimeService,
@@ -78,7 +80,7 @@ func ExecuteSubmitRuns(
 	return err
 }
 
-func executeSubmitRuns(fileSystem utils.FileSystem,
+func executeSubmitRuns(fileSystem files.FileSystem,
 	params utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
 	timeService utils.TimeService,
@@ -138,7 +140,7 @@ func executeSubmitRuns(fileSystem utils.FileSystem,
 	return finishedRuns, lostRuns, err
 }
 
-func writeThrottleFile(fileSystem utils.FileSystem, throttleFileName string, throttle int) error {
+func writeThrottleFile(fileSystem files.FileSystem, throttleFileName string, throttle int) error {
 	var err error = nil
 	if throttleFileName != "" {
 		// Throttle filename was specified. Lets use a throttle file.
@@ -151,7 +153,7 @@ func writeThrottleFile(fileSystem utils.FileSystem, throttleFileName string, thr
 }
 
 func updateThrottleFromFileIfDifferent(
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	throttleFileName string,
 	currentThrottle int,
 	wasThrottleFileLostAlready bool) (int, bool) {
@@ -192,7 +194,7 @@ const (
 	INT_TYPE_VARIANT_INT64     = 64
 )
 
-func readThrottleFile(fileSystem utils.FileSystem, throttleFileName string) (int, error) {
+func readThrottleFile(fileSystem files.FileSystem, throttleFileName string) (int, error) {
 	var savedThrottle int = 0
 	var intermediateThrottle int64
 	contents, err := fileSystem.ReadTextFile(throttleFileName)
@@ -342,7 +344,7 @@ func runsFetchCurrentStatus(
 
 }
 
-func createReports(fileSystem utils.FileSystem, params utils.RunsSubmitCmdParameters,
+func createReports(fileSystem files.FileSystem, params utils.RunsSubmitCmdParameters,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
 
 	FinalHumanReadableReport(finishedRuns, lostRuns)
@@ -417,7 +419,7 @@ func buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]strin
 
 func validateAndCorrectParams(
 	galasaHome utils.GalasaHome,
-	fs utils.FileSystem,
+	fs files.FileSystem,
 	params *utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
 	submitSelectionFlags *TestSelectionFlags,
@@ -473,7 +475,7 @@ func validateAndCorrectParams(
 
 func correctOverrideFilePathParameter(
 	galasaHome utils.GalasaHome,
-	fs utils.FileSystem,
+	fs files.FileSystem,
 	params *utils.RunsSubmitCmdParameters,
 ) error {
 	var err error
@@ -496,36 +498,36 @@ func correctOverrideFilePathParameter(
 	return err
 }
 
-func tildaExpandAllPaths(fs utils.FileSystem, params *utils.RunsSubmitCmdParameters) error {
+func tildaExpandAllPaths(fs files.FileSystem, params *utils.RunsSubmitCmdParameters) error {
 	var err error = nil
 
 	if err == nil {
-		params.OverrideFilePath, err = utils.TildaExpansion(fs, params.OverrideFilePath)
+		params.OverrideFilePath, err = files.TildaExpansion(fs, params.OverrideFilePath)
 	}
 
 	if err == nil {
-		params.PortfolioFileName, err = utils.TildaExpansion(fs, params.PortfolioFileName)
+		params.PortfolioFileName, err = files.TildaExpansion(fs, params.PortfolioFileName)
 	}
 
 	if err == nil {
-		params.ReportJsonFilename, err = utils.TildaExpansion(fs, params.ReportJsonFilename)
+		params.ReportJsonFilename, err = files.TildaExpansion(fs, params.ReportJsonFilename)
 	}
 
 	if err == nil {
-		params.ReportJunitFilename, err = utils.TildaExpansion(fs, params.ReportJunitFilename)
+		params.ReportJunitFilename, err = files.TildaExpansion(fs, params.ReportJunitFilename)
 	}
 
 	if err == nil {
-		params.ReportYamlFilename, err = utils.TildaExpansion(fs, params.ReportYamlFilename)
+		params.ReportYamlFilename, err = files.TildaExpansion(fs, params.ReportYamlFilename)
 	}
 
 	if err == nil {
-		params.ThrottleFileName, err = utils.TildaExpansion(fs, params.ThrottleFileName)
+		params.ThrottleFileName, err = files.TildaExpansion(fs, params.ThrottleFileName)
 	}
 	return err
 }
 
-func buildOverrideMap(fileSystem utils.FileSystem, commandParameters utils.RunsSubmitCmdParameters) (map[string]string, error) {
+func buildOverrideMap(fileSystem files.FileSystem, commandParameters utils.RunsSubmitCmdParameters) (map[string]string, error) {
 
 	path := commandParameters.OverrideFilePath
 	runOverrides, err := loadOverrideFile(fileSystem, path)
@@ -538,10 +540,10 @@ func buildOverrideMap(fileSystem utils.FileSystem, commandParameters utils.RunsS
 	return runOverrides, err
 }
 
-func loadOverrideFile(fileSystem utils.FileSystem, overrideFilePath string) (map[string]string, error) {
+func loadOverrideFile(fileSystem files.FileSystem, overrideFilePath string) (map[string]string, error) {
 
 	var (
-		overrides utils.JavaProperties
+		overrides props.JavaProperties
 		err       error = nil
 	)
 
@@ -549,7 +551,7 @@ func loadOverrideFile(fileSystem utils.FileSystem, overrideFilePath string) (map
 		// Don't read properties from a file.
 		overrides = make(map[string]string)
 	} else {
-		overrides, err = utils.ReadPropertiesFile(fileSystem, overrideFilePath)
+		overrides, err = props.ReadPropertiesFile(fileSystem, overrideFilePath)
 	}
 
 	return overrides, err
@@ -581,7 +583,7 @@ func addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides [
 	return overrides, nil
 }
 
-func getPortfolio(fileSystem utils.FileSystem, portfolioFileName string, launcher launcher.Launcher, submitSelectionFlags *TestSelectionFlags) (*Portfolio, error) {
+func getPortfolio(fileSystem files.FileSystem, portfolioFileName string, launcher launcher.Launcher, submitSelectionFlags *TestSelectionFlags) (*Portfolio, error) {
 	// Load the portfolio of tests
 	var portfolio *Portfolio = nil
 	var err error = nil

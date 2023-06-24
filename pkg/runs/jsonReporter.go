@@ -8,7 +8,7 @@ import (
 	"log"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 type TestReport struct {
@@ -16,7 +16,7 @@ type TestReport struct {
 }
 
 func ReportJSON(
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	reportJsonFilename string,
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun) error {

@@ -1,36 +1,36 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package utils
+package files
 
 // ------------------------------------------------------------------------------------
 // The implementation of the io.writer interface.
 // -----------------------------------------------------------------------------------
 type MockFile struct {
-    fileSystem *MockFileSystem
-    path string
-    err error
+	fileSystem *MockFileSystem
+	path       string
+	err        error
 
-    // The mock struct contains methods which can be over-ridden on a per-test basis.
-    VirtualFunction_Write func(contents []byte) (int, error)
+	// The mock struct contains methods which can be over-ridden on a per-test basis.
+	VirtualFunction_Write func(contents []byte) (int, error)
 }
 
 // Creates an implementation of a mock file and allows callers to set up different
 // virtual functions to change the mock behaviours.
 func NewOverridableMockFile(fs *MockFileSystem, filePath string) *MockFile {
 
-    // Allocate the default structure
-    mockFile := MockFile{
-        fileSystem: fs,
-        path: filePath,
-        err: nil,
-    }
+	// Allocate the default structure
+	mockFile := MockFile{
+		fileSystem: fs,
+		path:       filePath,
+		err:        nil,
+	}
 
-    mockFile.VirtualFunction_Write = func(data []byte) (int, error) {
-        return mockFile.mockFileWrite(data)
-    }
+	mockFile.VirtualFunction_Write = func(data []byte) (int, error) {
+		return mockFile.mockFileWrite(data)
+	}
 
-    return &mockFile
+	return &mockFile
 }
 
 // ------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ func NewOverridableMockFile(fs *MockFileSystem, filePath string) *MockFile {
 // ------------------------------------------------------------------------------------
 
 func (mockFile *MockFile) Write(contents []byte) (int, error) {
-    return mockFile.VirtualFunction_Write(contents)
+	return mockFile.VirtualFunction_Write(contents)
 }
 
 // ------------------------------------------------------------------------------------
@@ -46,8 +46,8 @@ func (mockFile *MockFile) Write(contents []byte) (int, error) {
 // ------------------------------------------------------------------------------------
 
 func (mockFile *MockFile) mockFileWrite(data []byte) (int, error) {
-    fileNode := mockFile.fileSystem.data[mockFile.path]
-    fileNode.content = append(fileNode.content, data...)
-    
-    return len(data), mockFile.err
+	fileNode := mockFile.fileSystem.data[mockFile.path]
+	fileNode.content = append(fileNode.content, data...)
+
+	return len(data), mockFile.err
 }

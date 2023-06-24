@@ -7,12 +7,12 @@ import (
 	"log"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa.dev/cli/pkg/files"
 	"gopkg.in/yaml.v3"
 )
 
 func ReportYaml(
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	reportYamlFilename string,
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun) error {

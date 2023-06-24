@@ -11,6 +11,7 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/embedded"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/launcher"
 	"github.com/galasa.dev/cli/pkg/runs"
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -40,7 +41,7 @@ func init() {
 		"the url of the remote maven where galasa bundles can be loaded from. "+
 			"Defaults to maven central.")
 
-	currentGalasaVersion := embedded.GetGalasaVersion()
+	currentGalasaVersion, _ := embedded.GetGalasaVersion()
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.TargetGalasaVersion, "galasaVersion",
 		currentGalasaVersion,
 		"the version of galasa you want to use to run your tests. "+
@@ -83,7 +84,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := utils.NewOSFileSystem()
+	fileSystem := files.NewOSFileSystem()
 
 	err = utils.CaptureLog(fileSystem, logFileName)
 	if err != nil {
@@ -113,7 +114,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	timeService := utils.NewRealTimeService()
 
 	// the submit is targetting a local JVM
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 
 	// Something which can kick off new operating system processes
 	processFactory := launcher.NewRealProcessFactory()

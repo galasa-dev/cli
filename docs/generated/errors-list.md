@@ -85,7 +85,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1082E: Invalid time unit specified '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be 'w' (weeks), 'd' (days) or 'h' (hours). 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
 - GAL1083E: No artifacts to download for run: '{}'
 - GAL1084E: Communications failure while closing an HTTP response. '{}'
-
+- GAL1085E: Programming logic error. ReadTextFile operation on embedded file system failed. Reason is {}
 - GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '{}'
 - GAL1087E: Invalid '--result' parameter value: {}. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: {}
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'

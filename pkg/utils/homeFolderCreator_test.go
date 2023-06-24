@@ -10,14 +10,15 @@ import (
 	"log"
 
 	"github.com/galasa.dev/cli/pkg/embedded"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
 // To validate the string as a valid java package name before we start to use it.
 func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 	// Given...
-	mockFileSystem := NewMockFileSystem()
-	embeddedFileSystem := embedded.GetEmbeddedFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 	mockEnv := NewMockEnv()
 	galasaHome, err := NewGalasaHome(mockFileSystem, mockEnv, "")
 
@@ -44,11 +45,11 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 	assertFolderExists(t, mockFileSystem, libDir, "Didn't create "+libDir+" folder in home directory.")
 
 	// Check that the folder of the galasa level is created in lib.
-	galasaVersion := embedded.GetGalasaVersion()
+	galasaVersion, _ := embedded.GetGalasaVersion()
 	galasaVersionLibSubdir := libDir + "/" + galasaVersion
 	assertFolderExists(t, mockFileSystem, galasaVersionLibSubdir, "Didn't create "+galasaVersionLibSubdir+" folder in home directory.")
 
-	bootJarVersion := embedded.GetBootJarVersion()
+	bootJarVersion, _ := embedded.GetBootJarVersion()
 	bootJarName := galasaVersionLibSubdir + "/galasa-boot-" + bootJarVersion + ".jar"
 
 	isExists, _ := mockFileSystem.Exists(bootJarName)
@@ -70,14 +71,14 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 	assert.True(t, isExists, "Failed to create file "+galasaHomeDir+"/credentials.properties")
 }
 
-func assertFolderExists(t *testing.T, mockFileSystem FileSystem, path string, message string) {
+func assertFolderExists(t *testing.T, mockFileSystem files.FileSystem, path string, message string) {
 	isExist, _ := mockFileSystem.DirExists(path)
 	assert.True(t, isExist, message)
 }
 
 func TestCanGetGalasaBootJarPath(t *testing.T) {
 
-	fs := NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	mockEnv := NewMockEnv()
 	galasaHome, _ := NewGalasaHome(fs, mockEnv, "")
 	path, err := GetGalasaBootJarPath(fs, galasaHome)

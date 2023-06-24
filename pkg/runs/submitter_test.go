@@ -6,14 +6,16 @@ package runs
 import (
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/launcher"
+	"github.com/galasa.dev/cli/pkg/props"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	err := writeThrottleFile(mockFileSystem, "throttle", 101)
 	if err != nil {
 		assert.Fail(t, "Should not have failed to write a throttle file. "+err.Error())
@@ -37,7 +39,7 @@ func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 func TestReadBackThrottleFileFailsIfNoThrottleFileThere(t *testing.T) {
 
 	var err error
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	_, err = readThrottleFile(mockFileSystem, "throttle")
 	if err == nil {
@@ -49,7 +51,7 @@ func TestReadBackThrottleFileFailsIfNoThrottleFileThere(t *testing.T) {
 func TestReadBackThrottleFileFailsIfFileContainsInvalidInt(t *testing.T) {
 
 	var err error
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	mockFileSystem.WriteTextFile("throttle", "abc")
 
@@ -62,7 +64,7 @@ func TestReadBackThrottleFileFailsIfFileContainsInvalidInt(t *testing.T) {
 
 func TestUpdateThrottleFromFileIfDifferentChangesValueWhenDifferent(t *testing.T) {
 
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	mockFileSystem.WriteTextFile("throttle", "10")
 	newValue, isLost := updateThrottleFromFileIfDifferent(mockFileSystem, "throttle", 20, false)
@@ -73,7 +75,7 @@ func TestUpdateThrottleFromFileIfDifferentChangesValueWhenDifferent(t *testing.T
 
 func TestUpdateThrottleFromFileIfDifferentDoesntChangeIfFileMissing(t *testing.T) {
 
-	mockFileSystem := utils.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 
 	// mockFileSystem.WriteTextFile("throttle", "10") - file is missing now.
 	newValue, isLost := updateThrottleFromFileIfDifferent(mockFileSystem, "throttle", 20, false)
@@ -87,8 +89,8 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 	fileProps := make(map[string]interface{})
 	fileProps["c"] = "d"
 
-	fs := utils.NewMockFileSystem()
-	utils.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
+	fs := files.NewMockFileSystem()
+	props.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
@@ -110,8 +112,8 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 	fileProps := make(map[string]interface{})
 	fileProps["c"] = "d"
 
-	fs := utils.NewMockFileSystem()
-	utils.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
+	fs := files.NewMockFileSystem()
+	props.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
@@ -128,7 +130,7 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 
 func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.T) {
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
 	galasaHome, err := utils.NewGalasaHome(fs, env, "")
 	if err != nil {
@@ -152,7 +154,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 
 func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testing.T) {
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
 	galasaHome, err := utils.NewGalasaHome(fs, env, "")
 	if err != nil {
@@ -165,7 +167,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 	path := home + separator + ".galasa" + separator + "overrides.properties"
 	fileProps := make(map[string]interface{})
 	fileProps["c"] = "d"
-	utils.WritePropertiesFile(fs, path, fileProps)
+	props.WritePropertiesFile(fs, path, fileProps)
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
@@ -182,7 +184,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 
 func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
@@ -201,7 +203,7 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
 func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
-	fs := utils.NewMockFileSystem()
+	fs := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
 	galasaHome, err := utils.NewGalasaHome(fs, env, "")
 	if err != nil {

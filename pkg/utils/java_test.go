@@ -6,13 +6,14 @@ package utils
 import (
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBlankJavaHomeIsInvalid(t *testing.T) {
 	javaHome := ""
 
-	fileSystem := NewMockFileSystem()
+	fileSystem := files.NewMockFileSystem()
 	AddJavaRuntimeToMock(fileSystem, javaHome)
 
 	err := ValidateJavaHome(fileSystem, "")
@@ -25,7 +26,7 @@ func TestBlankJavaHomeIsInvalid(t *testing.T) {
 func TestTrailingSlashInJavaHomeIsValid(t *testing.T) {
 	javaHome := "/java"
 
-	fileSystem := NewMockFileSystem()
+	fileSystem := files.NewMockFileSystem()
 	AddJavaRuntimeToMock(fileSystem, javaHome)
 
 	err := ValidateJavaHome(fileSystem, javaHome+"/")
@@ -37,7 +38,7 @@ func TestTrailingSlashInJavaHomeIsValid(t *testing.T) {
 func TestNonExistentJavaHomeFolderIsInValid(t *testing.T) {
 	javaHome := "/java"
 
-	fileSystem := NewMockFileSystem()
+	fileSystem := files.NewMockFileSystem()
 	// AddJavaRuntimeToMock(fileSystem, javaHome)
 
 	err := ValidateJavaHome(fileSystem, javaHome)
@@ -50,7 +51,7 @@ func TestNonExistentJavaHomeFolderIsInValid(t *testing.T) {
 func TestNonExistentJavaBinaryHomeIsInValid(t *testing.T) {
 	javaHome := "/java"
 
-	fileSystem := NewMockFileSystem()
+	fileSystem := files.NewMockFileSystem()
 	fileSystem.MkdirAll("/java/bin")
 	// AddJavaRuntimeToMock(fileSystem, javaHome)
 
@@ -64,7 +65,7 @@ func TestNonExistentJavaBinaryHomeIsInValid(t *testing.T) {
 func TestJavaHomeCanBeValid(t *testing.T) {
 	javaHome := "/java"
 
-	fileSystem := NewMockFileSystem()
+	fileSystem := files.NewMockFileSystem()
 	fileSystem.MkdirAll("/java/bin")
 	AddJavaRuntimeToMock(fileSystem, javaHome)
 
@@ -78,7 +79,7 @@ func TestJavaHomeCanBeValidOnWindows(t *testing.T) {
 	javaHome := "/java"
 
 	// Create the java.exe in the file system...
-	fileSystem := NewOverridableMockFileSystem()
+	fileSystem := files.NewOverridableMockFileSystem()
 	fileSystem.SetExecutableExtension(".exe")
 
 	AddJavaRuntimeToMock(fileSystem, javaHome)

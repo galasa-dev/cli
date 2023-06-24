@@ -17,6 +17,7 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
@@ -26,7 +27,7 @@ import (
 func DownloadArtifacts(
 	runName string,
 	forceDownload bool,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	timeService utils.TimeService,
 	console utils.Console,
 	apiServerUrl string,
@@ -80,7 +81,7 @@ func DownloadArtifacts(
 func downloadReRunArtfifacts(
 	reRunsByQueuedTime map[string][]galasaapi.Run,
 	forceDownload bool,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	apiServerUrl string,
 	console utils.Console,
 	timeService utils.TimeService,
@@ -156,7 +157,7 @@ func nameDownloadFolder(run galasaapi.Run, runName string, timeService utils.Tim
 func downloadArtifactsToDirectory(apiServerUrl string,
 	directoryName string,
 	run galasaapi.Run,
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	forceDownload bool,
 	console utils.Console,
 	runDownloadTargetFolder string,
@@ -249,7 +250,7 @@ func GetArtifactPathsFromRestApi(runId string, apiServerUrl string) ([]string, e
 // to be written to. Existing files are only overwritten if the --force option is used as part of
 // the "runs download" command.
 func WriteArtifactToFileSystem(
-	fileSystem utils.FileSystem,
+	fileSystem files.FileSystem,
 	runDirectory string,
 	artifactPath string,
 	fileDownloaded io.Reader,
@@ -335,7 +336,7 @@ func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath 
 
 // Creates an empty file representing an artifact that is being written. Any parent directories that do not exist
 // will be created. Returns the empty file that was created or an error if any file creation operations failed.
-func CreateEmptyArtifactFile(fileSystem utils.FileSystem, targetFilePath string) (io.Writer, error) {
+func CreateEmptyArtifactFile(fileSystem files.FileSystem, targetFilePath string) (io.Writer, error) {
 
 	var err error = nil
 	var newFile io.Writer = nil

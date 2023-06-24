@@ -1,7 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package utils
+package props
 
 import (
 	"bufio"
@@ -10,11 +10,13 @@ import (
 	"log"
 	"sort"
 	"strings"
+
+	"github.com/galasa.dev/cli/pkg/files"
 )
 
 type JavaProperties map[string]string
 
-func ReadPropertiesFile(fs FileSystem, filePath string) (JavaProperties, error) {
+func ReadPropertiesFile(fs files.FileSystem, filePath string) (JavaProperties, error) {
 	var properties JavaProperties
 	contents, err := fs.ReadTextFile(filePath)
 	if err == nil {
@@ -52,7 +54,7 @@ func ReadProperties(propertyString string) JavaProperties {
 	return properties
 }
 
-func WritePropertiesFile(fs FileSystem, path string, properties map[string]interface{}) error {
+func WritePropertiesFile(fs files.FileSystem, path string, properties map[string]interface{}) error {
 	var err error = nil
 
 	buff := new(bytes.Buffer)
