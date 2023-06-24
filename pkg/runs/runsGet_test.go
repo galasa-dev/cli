@@ -1121,6 +1121,6 @@ func TestRunsGetURLQueryWithInvalidResultSuppliedReturnsError(t *testing.T) {
 
 	// Then ...
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1085E")
+	assert.ErrorContains(t, err, "GAL1087E")
 	assert.ErrorContains(t, err, result)
 }

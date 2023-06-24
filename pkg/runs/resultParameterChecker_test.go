@@ -105,7 +105,7 @@ func TestGarbageResultNameFailsWithError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
-	assert.ErrorContains(t, err, "GAL1085E")
+	assert.ErrorContains(t, err, "GAL1087E")
 	assert.Equal(t, "", result)
 	assert.Contains(t, err.Error(), "'garbage'")
 	assert.Contains(t, err.Error(), "'Passed'")
@@ -125,7 +125,7 @@ func TestValidResultFollowedByGarbageResultNameFailsWithError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
-	assert.ErrorContains(t, err, "GAL1085E")
+	assert.ErrorContains(t, err, "GAL1087E")
 	assert.Equal(t, "", result)
 	assert.Contains(t, err.Error(), "'garbage'")
 	assert.Contains(t, err.Error(), "'Passed'")
@@ -145,7 +145,7 @@ func TestMultipleGarbageResultNameFailsWithError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
-	assert.ErrorContains(t, err, "GAL1085E")
+	assert.ErrorContains(t, err, "GAL1087E")
 	assert.Equal(t, "", result)
 	assert.Contains(t, err.Error(), "'fail'")
 	assert.Contains(t, err.Error(), "'garbage'")
@@ -166,7 +166,7 @@ func TestMixOfValidAndGarbageResultNameFailsWithError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
-	assert.ErrorContains(t, err, "GAL1085E")
+	assert.ErrorContains(t, err, "GAL1087E")
 	assert.Equal(t, "", result)
 	assert.Contains(t, err.Error(), "'garbage'")
 	assert.Contains(t, err.Error(), "'rubbish'")
