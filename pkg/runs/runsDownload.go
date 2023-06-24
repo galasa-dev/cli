@@ -41,7 +41,11 @@ func DownloadArtifacts(
 		err = ValidateRunName(runName)
 	}
 	if err == nil {
-		runs, err = GetRunsFromRestApi(runName, "", 0, 0, timeService, apiServerUrl)
+		requestorParameter := ""
+		resultParameter := ""
+		fromAgeHours := 0
+		toAgeHours := 0
+		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, timeService, apiServerUrl)
 		if err == nil {
 			if len(runs) > 1 {
 				// get list of runs that are reRuns - get list of runs that are reRuns of each other

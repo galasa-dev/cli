@@ -18,6 +18,7 @@ galasactl runs get [flags]
   -h, --help               help for get
       --name string        the name of the test run we want information about
       --requestor string   the requestor of the test run we want information about
+      --result string      A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example "--result Failed,Ignored,EnvFail"
 ```
 
 ### Options inherited from parent commands

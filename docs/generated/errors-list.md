@@ -86,6 +86,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1083E: No artifacts to download for run: '{}'
 - GAL1084E: Communications failure while closing an HTTP response. '{}'
 - GAL1085E: Programming logic error. ReadTextFile operation on embedded file system failed. Reason is {}
+- GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '{}'
+- GAL1087E: Invalid '--result' parameter value: {}. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: {}
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 
