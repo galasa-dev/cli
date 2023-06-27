@@ -655,14 +655,15 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
 }
 
 #--------------------------------------------------------------------------
-function runs_get_check_raw_format_output_with_from_and_requestor {
-    h2 "Performing runs get with details format providing a from age and requestor as galasa..."
+function runs_get_check_requestor_parameter {
+    requestor="unknown"
+    h2 "Performing runs get with details format providing a from age and requestor as $requestor..."
 
     cd ${BASEDIR}/temp
 
     cmd="${BASEDIR}/bin/${binary} runs get \
     --age 1d \
-    --requestor galasa \
+    --requestor $requestor \
     --format details \
     --bootstrap ${bootstrap}"
 
@@ -672,15 +673,43 @@ function runs_get_check_raw_format_output_with_from_and_requestor {
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
-    cat $output_file | grep "requestor      : galasa" -q
+    cat $output_file | grep "requestor      : $requestor" -q
     rc=$?
     # We expect a return code of '0' because the run name should be output.
     if [[ "${rc}" != "0" ]]; then 
-        error "Did not find any runs with requestor 'galasa' in output"
+        error "Did not find any runs with requestor '$requestor' in output"
         exit 1
     fi  
 
-    success "galasactl runs get with age parameter with just from value and requestor 'galasa' returned results okay." 
+    success "galasactl runs get with age parameter with just from value and requestor '$requestor' returned results okay." 
+}
+
+#--------------------------------------------------------------------------
+function runs_get_check_result_parameter {
+    h2 "Performing runs get with details format providing a from age and result as PASSED..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} runs get \
+    --age 1d \
+    --result PASSED \
+    --format details \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    cat $output_file | grep "result         : Passed" -q
+    rc=$?
+   
+    if [[ "${rc}" != "0" ]]; then 
+        error "Did not find any runs with result 'Passed' in output"
+        exit 1
+    fi  
+
+    success "galasactl runs get with age parameter with just from value and result 'PASSED' returned results okay." 
 }
 
 #--------------------------------------------------------------------------
@@ -783,6 +812,9 @@ runs_get_check_raw_format_output_with_just_from $RUN_NAME
 runs_get_check_raw_format_output_with_no_runname_and_no_age_param
 runs_get_check_raw_format_output_with_invalid_age_param
 runs_get_check_raw_format_output_with_older_to_than_from_age
+runs_get_check_requestor_parameter
+runs_get_check_result_parameter 
+
 # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 # Launch test on ecosystem without a portfolio ...
