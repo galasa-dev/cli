@@ -25,18 +25,11 @@ var (
 
 	// Make a map of how many hours for each unit so can compare from and to values consistently
 	// Can be extended to support other units
-	timeUnits = map[string]int{
-		"w": 10080,
-		"d": 1440,
-		"h": 60,
-		"m": 1,
-	}
-
-	timeUnitsForErrorMap = map[string]string{
-		"w": "weeks",
-		"d": "days",
-		"h": "hours",
-		"m": "minutes",
+	timeUnits = map[string]TimeUnit{
+		"w": {"weeks", 10080},
+		"d": {"days", 1440},
+		"h": {"hours", 60},
+		"m": {"minutes", 1},
 	}
 
 	// When parsing the '--age' parameter value....
@@ -281,26 +274,26 @@ func getTimesFromAge(age string) (int, int, error) {
 
 	if len(ageParts) > 2 {
 		// Too many colons.
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, getTimeUnitsForErrorMessage(timeUnitsForErrorMap))
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, getTimeUnitsForErrorMessage(timeUnits))
 	} else {
 		// No colons !... only 'from' time specified.
 		fromPart := ageParts[0]
 		if !agePartRegex.MatchString(fromPart) {
 			// Invalid from part.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, age, getTimeUnitsForErrorMessage(timeUnitsForErrorMap))
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, age, getTimeUnitsForErrorMessage(timeUnits))
 		} else {
-			fromAge, err = getHoursFromAgePart(fromPart, age)
+			fromAge, err = getMinutesFromAgePart(fromPart, age)
 
 			if fromAge == 0 {
 				// 'from' can't be 0 hours.
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, getTimeUnitsForErrorMessage(timeUnitsForErrorMap))
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, getTimeUnitsForErrorMessage(timeUnits))
 			}
 		}
 
 		if (err == nil) && (len(ageParts) > 1) {
 			// One colon, indicates there is a 'to' part.
 			toPart := ageParts[1]
-			toAge, err = getHoursFromAgePart(toPart, age)
+			toAge, err = getMinutesFromAgePart(toPart, age)
 			if err == nil {
 				// From value must be bigger than to value
 				if toAge > 0 && fromAge <= toAge {
@@ -314,7 +307,7 @@ func getTimesFromAge(age string) (int, int, error) {
 }
 
 // getHoursFromAgePart - Input value is '15d' or '14h' for example.
-func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) {
+func getMinutesFromAgePart(agePart string, errorMessageValue string) (int, error) {
 	var err error
 	var minutes int = 0
 	var duration int
@@ -328,12 +321,12 @@ func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) 
 
 	if leadingGarbage != "" {
 		// Some leading garbage prior to the 'FROM' field. It must be empty.
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue, getTimeUnitsForErrorMessage(timeUnitsForErrorMap))
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
 	} else {
 
 		if len(durationPart) == 0 {
 			// Invalid from. It must be some time in the past.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnitsForErrorMap))
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
 		} else {
 			// we can extract the integer part now
 
@@ -341,15 +334,15 @@ func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) 
 			if err == nil {
 				if duration < 0 {
 					// Number part of the duration can't be negative.
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NEGATIVE_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnitsForErrorMap))
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NEGATIVE_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
 				} else {
 
-					minsMultiplier, isRecognisedTimeUnit := timeUnits[durationUnitStr]
+					timeUnit, isRecognisedTimeUnit := timeUnits[durationUnitStr]
 					if !isRecognisedTimeUnit {
 						// Bad time unit.
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnitsForErrorMap))
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
 					} else {
-						minutes = duration * minsMultiplier
+						minutes = duration * timeUnit.getMinuteMultiplier()
 					}
 				}
 			}
@@ -367,7 +360,7 @@ func getValueAsInt(value string) (int, error) {
 	return age, err
 }
 
-func getTimeUnitsForErrorMessage(timeUnits map[string]string) string {
+func getTimeUnitsForErrorMessage(timeUnits map[string]TimeUnit) string {
 	outputString := strings.Builder{}
 	count := 0
 	for initial, unit := range timeUnits {
@@ -375,7 +368,7 @@ func getTimeUnitsForErrorMessage(timeUnits map[string]string) string {
 		if count != 0 {
 			outputString.WriteString(", ")
 		}
-		outputString.WriteString("'" + initial + "' (" + unit + ")")
+		outputString.WriteString("'" + initial + "' (" + unit.getName() + ")")
 		count++
 	}
 
