@@ -706,7 +706,7 @@ function runs_get_check_result_parameter {
     rc=$?
    
     if [[ "${rc}" != "0" ]]; then 
-        error "Did not find any runs with result 'Passed' in output"
+        error "Did not find any runs with result '$result' in output"
         exit 1
     fi  
 
