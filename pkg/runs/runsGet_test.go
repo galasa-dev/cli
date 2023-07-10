@@ -833,6 +833,13 @@ func TestAgeWithSameFromAndToGivesError(t *testing.T) {
 	assert.ErrorContains(t, err, "GAL1077")
 }
 
+func TestAgeWithMinutesUnitReturnsOk(t *testing.T) {
+
+	_, _, err := getTimesFromAge("10m")
+
+	assert.Nil(t, err)
+}
+
 func TestAgeWithSameFromAndToDurationGivesError(t *testing.T) {
 
 	_, _, err := getTimesFromAge("1d:24h")

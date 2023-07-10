@@ -25,12 +25,8 @@ var (
 
 	// Make a map of how many hours for each unit so can compare from and to values consistently
 	// Can be extended to support other units
-	timeUnits = map[string]TimeUnit{
-		"w": {"weeks", 10080},
-		"d": {"days", 1440},
-		"h": {"hours", 60},
-		"m": {"minutes", 1},
-	}
+
+	timeUnits = createTimeUnits()
 
 	// When parsing the '--age' parameter value....
 	// (^[\\D]*) - matches any leading garbage, which is non-digits. Should be empty.
@@ -38,6 +34,24 @@ var (
 	// (.*) - matches any time unit. Should be a valid time unit from our map above.
 	agePartRegex *regexp.Regexp = regexp.MustCompile(`(^[\D]*)([0-9]+)(.*)`)
 )
+
+func createTimeUnits() map[string]TimeUnit {
+	timeUnits := make(map[string]TimeUnit, 0)
+
+	unitWeeks := newTimeUnit(TIME_UNIT_WEEKS, 10080)
+	timeUnits["w"] = *unitWeeks
+
+	unitDays := newTimeUnit(TIME_UNIT_DAYS, 1440)
+	timeUnits["d"] = *unitDays
+
+	unitHours := newTimeUnit(TIME_UNIT_HOURS, 60)
+	timeUnits["h"] = *unitHours
+
+	unitMinutes := newTimeUnit(TIME_UNIT_MINUTES, 1)
+	timeUnits["m"] = *unitMinutes
+
+	return timeUnits
+}
 
 // ---------------------------------------------------
 
