@@ -4,10 +4,15 @@
 package runs
 
 const (
-	TIME_UNIT_WEEKS   = "weeks"
-	TIME_UNIT_DAYS    = "days"
-	TIME_UNIT_HOURS   = "hours"
-	TIME_UNIT_MINUTES = "minutes"
+	TIME_UNIT_WEEKS_LONG   = "weeks"
+	TIME_UNIT_DAYS_LONG    = "days"
+	TIME_UNIT_HOURS_LONG   = "hours"
+	TIME_UNIT_MINUTES_LONG = "minutes"
+
+	TIME_UNIT_WEEKS_SHORT   = "w"
+	TIME_UNIT_DAYS_SHORT    = "d"
+	TIME_UNIT_HOURS_SHORT   = "h"
+	TIME_UNIT_MINUTES_SHORT = "m"
 )
 
 type TimeUnit struct {

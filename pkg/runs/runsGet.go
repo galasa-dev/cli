@@ -35,24 +35,6 @@ var (
 	agePartRegex *regexp.Regexp = regexp.MustCompile(`(^[\D]*)([0-9]+)(.*)`)
 )
 
-func createTimeUnits() map[string]TimeUnit {
-	timeUnits := make(map[string]TimeUnit, 0)
-
-	unitWeeks := newTimeUnit(TIME_UNIT_WEEKS, 10080)
-	timeUnits["w"] = *unitWeeks
-
-	unitDays := newTimeUnit(TIME_UNIT_DAYS, 1440)
-	timeUnits["d"] = *unitDays
-
-	unitHours := newTimeUnit(TIME_UNIT_HOURS, 60)
-	timeUnits["h"] = *unitHours
-
-	unitMinutes := newTimeUnit(TIME_UNIT_MINUTES, 1)
-	timeUnits["m"] = *unitMinutes
-
-	return timeUnits
-}
-
 // ---------------------------------------------------
 
 // GetRuns - performs all the logic to implement the `galasactl runs get` command,
@@ -112,6 +94,24 @@ func GetRuns(
 		}
 	}
 	return err
+}
+
+func createTimeUnits() map[string]TimeUnit {
+	timeUnits := make(map[string]TimeUnit, 0)
+
+	unitWeeks := newTimeUnit(TIME_UNIT_WEEKS_LONG, 10080)
+	timeUnits[TIME_UNIT_WEEKS_SHORT] = *unitWeeks
+
+	unitDays := newTimeUnit(TIME_UNIT_DAYS_LONG, 1440)
+	timeUnits[TIME_UNIT_DAYS_SHORT] = *unitDays
+
+	unitHours := newTimeUnit(TIME_UNIT_HOURS_LONG, 60)
+	timeUnits[TIME_UNIT_HOURS_SHORT] = *unitHours
+
+	unitMinutes := newTimeUnit(TIME_UNIT_MINUTES_LONG, 1)
+	timeUnits[TIME_UNIT_MINUTES_SHORT] = *unitMinutes
+
+	return timeUnits
 }
 
 func createFormatters() map[string]formatters.RunsFormatter {
