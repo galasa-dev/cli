@@ -21,12 +21,12 @@ import (
 )
 
 var (
-	validFormatters = createFormatters()
+	validFormatters = CreateFormatters()
 
 	// Make a map of how many hours for each unit so can compare from and to values consistently
 	// Can be extended to support other units
 
-	timeUnits = createTimeUnits()
+	timeUnits = CreateTimeUnits()
 
 	// When parsing the '--age' parameter value....
 	// (^[\\D]*) - matches any leading garbage, which is non-digits. Should be empty.
@@ -96,7 +96,7 @@ func GetRuns(
 	return err
 }
 
-func createTimeUnits() map[string]TimeUnit {
+func CreateTimeUnits() map[string]TimeUnit {
 	timeUnits := make(map[string]TimeUnit, 0)
 
 	unitWeeks := newTimeUnit(TIME_UNIT_WEEKS_LONG, 10080)
@@ -114,7 +114,7 @@ func createTimeUnits() map[string]TimeUnit {
 	return timeUnits
 }
 
-func createFormatters() map[string]formatters.RunsFormatter {
+func CreateFormatters() map[string]formatters.RunsFormatter {
 	validFormatters := make(map[string]formatters.RunsFormatter, 0)
 	summaryFormatter := formatters.NewSummaryFormatter()
 	validFormatters[summaryFormatter.GetName()] = summaryFormatter
@@ -133,8 +133,8 @@ func writeOutput(outputText string, console utils.Console) error {
 	return err
 }
 
-// getFormatterNamesString builds a string of comma separated, quoted formatter names
-func getFormatterNamesString(validFormatters map[string]formatters.RunsFormatter) string {
+// GetFormatterNamesString builds a string of comma separated, quoted formatter names
+func GetFormatterNamesString(validFormatters map[string]formatters.RunsFormatter) string {
 	// extract names into a sorted slice
 	names := make([]string, 0, len(validFormatters))
 	for name := range validFormatters {
@@ -163,7 +163,7 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 	chosenFormatter, isPresent := validFormatters[outputFormatString]
 
 	if !isPresent {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString, getFormatterNamesString(validFormatters))
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString, GetFormatterNamesString(validFormatters))
 	}
 
 	return chosenFormatter, err
@@ -288,19 +288,19 @@ func getTimesFromAge(age string) (int, int, error) {
 
 	if len(ageParts) > 2 {
 		// Too many colons.
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, getTimeUnitsForErrorMessage(timeUnits))
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, GetTimeUnitsForErrorMessage(timeUnits))
 	} else {
 		// No colons !... only 'from' time specified.
 		fromPart := ageParts[0]
 		if !agePartRegex.MatchString(fromPart) {
 			// Invalid from part.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, age, getTimeUnitsForErrorMessage(timeUnits))
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, age, GetTimeUnitsForErrorMessage(timeUnits))
 		} else {
 			fromAge, err = getMinutesFromAgePart(fromPart, age)
 
 			if fromAge == 0 {
 				// 'from' can't be 0 hours.
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, getTimeUnitsForErrorMessage(timeUnits))
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, GetTimeUnitsForErrorMessage(timeUnits))
 			}
 		}
 
@@ -335,12 +335,12 @@ func getMinutesFromAgePart(agePart string, errorMessageValue string) (int, error
 
 	if leadingGarbage != "" {
 		// Some leading garbage prior to the 'FROM' field. It must be empty.
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 	} else {
 
 		if len(durationPart) == 0 {
 			// Invalid from. It must be some time in the past.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 		} else {
 			// we can extract the integer part now
 
@@ -348,13 +348,13 @@ func getMinutesFromAgePart(agePart string, errorMessageValue string) (int, error
 			if err == nil {
 				if duration < 0 {
 					// Number part of the duration can't be negative.
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NEGATIVE_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NEGATIVE_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 				} else {
 
 					timeUnit, isRecognisedTimeUnit := timeUnits[durationUnitStr]
 					if !isRecognisedTimeUnit {
 						// Bad time unit.
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED, errorMessageValue, getTimeUnitsForErrorMessage(timeUnits))
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 					} else {
 						minutes = duration * timeUnit.getMinuteMultiplier()
 					}
@@ -374,7 +374,7 @@ func getValueAsInt(value string) (int, error) {
 	return age, err
 }
 
-func getTimeUnitsForErrorMessage(timeUnits map[string]TimeUnit) string {
+func GetTimeUnitsForErrorMessage(timeUnits map[string]TimeUnit) string {
 	outputString := strings.Builder{}
 	count := 0
 	for initial, unit := range timeUnits {

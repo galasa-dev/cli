@@ -182,7 +182,7 @@ func ConfigureServerForResultNamesEndpoint(t *testing.T, w http.ResponseWriter, 
 // Testing that the output format string passed by the user on the command-line
 // is valid and supported.
 func TestOutputFormatSummaryValidatesOk(t *testing.T) {
-	validFormatters := createFormatters()
+	validFormatters := CreateFormatters()
 	outputFormatter, err := validateOutputFormatFlagValue("summary", validFormatters)
 	if err != nil {
 		assert.Fail(t, "Summary validate gave unexpected error "+err.Error())
@@ -191,7 +191,7 @@ func TestOutputFormatSummaryValidatesOk(t *testing.T) {
 }
 
 func TestOutputFormatGarbageStringValidationGivesError(t *testing.T) {
-	validFormatters := createFormatters()
+	validFormatters := CreateFormatters()
 	_, err := validateOutputFormatFlagValue("garbage", validFormatters)
 	if err == nil {
 		assert.Fail(t, "Garbage output format flag value should have given validation error.")
@@ -325,7 +325,7 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 }
 
 func TestOutputFormatDetailsValidatesOk(t *testing.T) {
-	validFormatters := createFormatters()
+	validFormatters := CreateFormatters()
 	outputFormatter, err := validateOutputFormatFlagValue("details", validFormatters)
 	if err != nil {
 		assert.Fail(t, "Details validate gave unexpected error "+err.Error())
@@ -385,7 +385,7 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 	validFormatters["first"] = nil
 	validFormatters["second"] = nil
 
-	result := getFormatterNamesString(validFormatters)
+	result := GetFormatterNamesString(validFormatters)
 
 	assert.NotNil(t, result)
 	assert.Equal(t, result, "'first', 'second'")
