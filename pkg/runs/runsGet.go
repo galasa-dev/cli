@@ -51,8 +51,8 @@ func GetRuns(
 	timeService utils.TimeService,
 	console utils.Console,
 	apiServerUrl string,
+	OSUser utils.Username,
 ) error {
-
 	var err error
 	var fromAge int
 	var toAge int
@@ -72,6 +72,11 @@ func GetRuns(
 
 	if (err == nil) && (resultParameter != "") {
 		resultParameter, err = ValidateResultParameter(resultParameter, apiServerUrl)
+	}
+
+	if (err == nil) && (requestorParameter == "") {
+		requestorParameter = OSUser.GetUsername()
+		log.Print(requestorParameter)
 	}
 
 	if err == nil {
