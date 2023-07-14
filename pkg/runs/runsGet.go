@@ -75,7 +75,7 @@ func GetRuns(
 	}
 
 	if (err == nil) && (requestorParameter == "") {
-		requestorParameter = env.GetUsername()
+		requestorParameter, err = env.GetUsername()
 	}
 
 	if err == nil {

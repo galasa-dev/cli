@@ -23,8 +23,8 @@ func (env *MockEnv) SetEnv(propertyName string, value string) {
 	env.EnvVars[propertyName] = value
 }
 
-func (env *MockEnv) GetUsername() string {
-	return env.username
+func (env *MockEnv) GetUsername() (string, error) {
+	return env.username, nil
 }
 
 func (env *MockEnv) SetUsername(name string) {
