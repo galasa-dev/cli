@@ -695,7 +695,7 @@ func TestAgeWithExtraColonAfterToPartGivesError(t *testing.T) {
 
 func TestAgeWithExtraGarbageAfterToPartGivesError(t *testing.T) {
 
-	_, _, err := getTimesFromAge("3d:2dgarbage")
+	_, _, err := getTimesFromAge("3d:2djindex")
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1082")
