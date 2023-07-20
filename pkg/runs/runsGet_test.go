@@ -182,7 +182,7 @@ func ConfigureServerForResultNamesEndpoint(t *testing.T, w http.ResponseWriter, 
 // Testing that the output format string passed by the user on the command-line
 // is valid and supported.
 func TestOutputFormatSummaryValidatesOk(t *testing.T) {
-	validFormatters := createFormatters()
+	validFormatters := CreateFormatters()
 	outputFormatter, err := validateOutputFormatFlagValue("summary", validFormatters)
 	if err != nil {
 		assert.Fail(t, "Summary validate gave unexpected error "+err.Error())
@@ -191,7 +191,7 @@ func TestOutputFormatSummaryValidatesOk(t *testing.T) {
 }
 
 func TestOutputFormatGarbageStringValidationGivesError(t *testing.T) {
-	validFormatters := createFormatters()
+	validFormatters := CreateFormatters()
 	_, err := validateOutputFormatFlagValue("garbage", validFormatters)
 	if err == nil {
 		assert.Fail(t, "Garbage output format flag value should have given validation error.")
@@ -345,7 +345,7 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 }
 
 func TestOutputFormatDetailsValidatesOk(t *testing.T) {
-	validFormatters := createFormatters()
+	validFormatters := CreateFormatters()
 	outputFormatter, err := validateOutputFormatFlagValue("details", validFormatters)
 	if err != nil {
 		assert.Fail(t, "Details validate gave unexpected error "+err.Error())
@@ -410,7 +410,7 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 	validFormatters["first"] = nil
 	validFormatters["second"] = nil
 
-	result := getFormatterNamesString(validFormatters)
+	result := GetFormatterNamesString(validFormatters)
 
 	assert.NotNil(t, result)
 	assert.Equal(t, result, "'first', 'second'")
@@ -489,31 +489,31 @@ func TestRunsGetWithFromAndToAge(t *testing.T) {
 
 	// Then...
 	// We expect
-	// from = 5*24 = 120
-	// to   = 12*1 = 12
+	// from = 5*1440 = 7200
+	// to   = 12*60 = 720
 	assert.Nil(t, err)
 	assert.NotNil(t, from)
 	assert.NotNil(t, to)
-	assert.EqualValues(t, 120, from)
-	assert.EqualValues(t, 12, to)
+	assert.EqualValues(t, 7200, from)
+	assert.EqualValues(t, 720, to)
 }
 
 func TestRunsGetWithJustFromAge(t *testing.T) {
 
 	// Given
-	age := "20d"
+	age := "20m"
 
 	// When
 	from, to, err := getTimesFromAge(age)
 
 	// Then...
 	// We expect
-	// from = 20*24    = 480
+	// from = 20
 	// to not provided = 0
 	assert.Nil(t, err)
 	assert.NotNil(t, from)
 	assert.NotNil(t, to)
-	assert.EqualValues(t, 480, from)
+	assert.EqualValues(t, 20, from)
 	assert.EqualValues(t, 0, to)
 }
 
@@ -529,12 +529,20 @@ func TestRunsGetWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 	// We expect
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestRunsGetWithBadlyFormedFromAndToParameter(t *testing.T) {
 
 	// Given
-	age := "12m:1y"
+	age := "1y:1s"
 
 	// When
 	_, _, err := getTimesFromAge(age)
@@ -543,6 +551,14 @@ func TestRunsGetWithBadlyFormedFromAndToParameter(t *testing.T) {
 	// We expect
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestRunsGetWithOlderToAgeThanFromAge(t *testing.T) {
@@ -732,7 +748,7 @@ func TestRunsGetURLQueryWithOlderToAgeThanFromAgeReturnsError(t *testing.T) {
 
 func TestRunsGetURLQueryWithBadlyFormedFromAndToParameterReturnsError(t *testing.T) {
 	// Given ...
-	age := "12m:1y"
+	age := "1y:1s"
 	runName := "U456"
 	requestor := ""
 	result := ""
@@ -771,6 +787,14 @@ func TestRunsGetURLQueryWithBadlyFormedFromAndToParameterReturnsError(t *testing
 	// Then ...
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 // Fine-grained tests for validating and extracting age parameter values.age
@@ -780,6 +804,14 @@ func TestAgeWithMissingColonGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestAgeWithTwoColonGivesError(t *testing.T) {
@@ -788,6 +820,14 @@ func TestAgeWithTwoColonGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestAgeWithExtraColonAfterToPartGivesError(t *testing.T) {
@@ -796,6 +836,14 @@ func TestAgeWithExtraColonAfterToPartGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestAgeWithExtraGarbageAfterToPartGivesError(t *testing.T) {
@@ -804,6 +852,14 @@ func TestAgeWithExtraGarbageAfterToPartGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1082")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestAgeWithZeroFromGivesError(t *testing.T) {
@@ -812,6 +868,14 @@ func TestAgeWithZeroFromGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestAgeWithZeroToIsOk(t *testing.T) {
@@ -829,6 +893,13 @@ func TestAgeWithSameFromAndToGivesError(t *testing.T) {
 	assert.ErrorContains(t, err, "GAL1077")
 }
 
+func TestAgeWithMinutesUnitReturnsOk(t *testing.T) {
+
+	_, _, err := getTimesFromAge("10m")
+
+	assert.Nil(t, err)
+}
+
 func TestAgeWithSameFromAndToDurationGivesError(t *testing.T) {
 
 	_, _, err := getTimesFromAge("1d:24h")
@@ -843,6 +914,14 @@ func TestAgeWithNegativeFromGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestAgeWithHugeNumberGivesError(t *testing.T) {
@@ -851,6 +930,14 @@ func TestAgeWithHugeNumberGivesError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "GAL1078")
+	assert.Contains(t, err.Error(), "'w'")
+	assert.Contains(t, err.Error(), "'d'")
+	assert.Contains(t, err.Error(), "'h'")
+	assert.Contains(t, err.Error(), "'m'")
+	assert.Contains(t, err.Error(), "(weeks)")
+	assert.Contains(t, err.Error(), "(days)")
+	assert.Contains(t, err.Error(), "(hours)")
+	assert.Contains(t, err.Error(), "(minutes)")
 }
 
 func TestRunsGetURLQueryWithRequestorNotSuppliedReturnsOK(t *testing.T) {

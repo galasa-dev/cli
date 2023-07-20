@@ -21,15 +21,12 @@ import (
 )
 
 var (
-	validFormatters = createFormatters()
+	validFormatters = CreateFormatters()
 
 	// Make a map of how many hours for each unit so can compare from and to values consistently
 	// Can be extended to support other units
-	timeUnits = map[string]int{
-		"w": 168,
-		"d": 24,
-		"h": 1,
-	}
+
+	timeUnits = CreateTimeUnits()
 
 	// When parsing the '--age' parameter value....
 	// (^[\\D]*) - matches any leading garbage, which is non-digits. Should be empty.
@@ -103,7 +100,25 @@ func GetRuns(
 	return err
 }
 
-func createFormatters() map[string]formatters.RunsFormatter {
+func CreateTimeUnits() map[string]TimeUnit {
+	timeUnits := make(map[string]TimeUnit, 0)
+
+	unitWeeks := newTimeUnit(TIME_UNIT_WEEKS_LONG, 10080)
+	timeUnits[TIME_UNIT_WEEKS_SHORT] = *unitWeeks
+
+	unitDays := newTimeUnit(TIME_UNIT_DAYS_LONG, 1440)
+	timeUnits[TIME_UNIT_DAYS_SHORT] = *unitDays
+
+	unitHours := newTimeUnit(TIME_UNIT_HOURS_LONG, 60)
+	timeUnits[TIME_UNIT_HOURS_SHORT] = *unitHours
+
+	unitMinutes := newTimeUnit(TIME_UNIT_MINUTES_LONG, 1)
+	timeUnits[TIME_UNIT_MINUTES_SHORT] = *unitMinutes
+
+	return timeUnits
+}
+
+func CreateFormatters() map[string]formatters.RunsFormatter {
 	validFormatters := make(map[string]formatters.RunsFormatter, 0)
 	summaryFormatter := formatters.NewSummaryFormatter()
 	validFormatters[summaryFormatter.GetName()] = summaryFormatter
@@ -122,8 +137,8 @@ func writeOutput(outputText string, console utils.Console) error {
 	return err
 }
 
-// getFormatterNamesString builds a string of comma separated, quoted formatter names
-func getFormatterNamesString(validFormatters map[string]formatters.RunsFormatter) string {
+// GetFormatterNamesString builds a string of comma separated, quoted formatter names
+func GetFormatterNamesString(validFormatters map[string]formatters.RunsFormatter) string {
 	// extract names into a sorted slice
 	names := make([]string, 0, len(validFormatters))
 	for name := range validFormatters {
@@ -152,7 +167,7 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 	chosenFormatter, isPresent := validFormatters[outputFormatString]
 
 	if !isPresent {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString, getFormatterNamesString(validFormatters))
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString, GetFormatterNamesString(validFormatters))
 	}
 
 	return chosenFormatter, err
@@ -189,8 +204,8 @@ func GetRunsFromRestApi(
 	runName string,
 	requestorParameter string,
 	resultParameter string,
-	fromAgeHours int,
-	toAgeHours int,
+	fromAgeMins int,
+	toAgeMins int,
 	timeService utils.TimeService,
 	apiServerUrl string,
 ) ([]galasaapi.Run, error) {
@@ -204,9 +219,9 @@ func GetRunsFromRestApi(
 	restClient := api.InitialiseAPI(apiServerUrl)
 
 	now := timeService.Now()
-	fromTime := now.Add(-(time.Duration(fromAgeHours) * time.Hour)).UTC() // Add a minus, so subtract
+	fromTime := now.Add(-(time.Duration(fromAgeMins) * time.Minute)).UTC() // Add a minus, so subtract
 
-	toTime := now.Add(-(time.Duration(toAgeHours) * time.Hour)).UTC() // Add a minus, so subtract
+	toTime := now.Add(-(time.Duration(toAgeMins) * time.Minute)).UTC() // Add a minus, so subtract
 
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
@@ -217,10 +232,10 @@ func GetRunsFromRestApi(
 		var httpResponse *http.Response
 		log.Printf("Requesting page '%d' ", pageNumberWanted)
 		apicall := restClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context)
-		if fromAgeHours != 0 {
+		if fromAgeMins != 0 {
 			apicall = apicall.From(fromTime)
 		}
-		if toAgeHours != 0 {
+		if toAgeMins != 0 {
 			apicall = apicall.To(toTime)
 		}
 		if runName != "" {
@@ -277,26 +292,26 @@ func getTimesFromAge(age string) (int, int, error) {
 
 	if len(ageParts) > 2 {
 		// Too many colons.
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, GetTimeUnitsForErrorMessage(timeUnits))
 	} else {
 		// No colons !... only 'from' time specified.
 		fromPart := ageParts[0]
 		if !agePartRegex.MatchString(fromPart) {
 			// Invalid from part.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, age)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, age, GetTimeUnitsForErrorMessage(timeUnits))
 		} else {
-			fromAge, err = getHoursFromAgePart(fromPart, age)
+			fromAge, err = getMinutesFromAgePart(fromPart, age)
 
 			if fromAge == 0 {
 				// 'from' can't be 0 hours.
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, age, GetTimeUnitsForErrorMessage(timeUnits))
 			}
 		}
 
 		if (err == nil) && (len(ageParts) > 1) {
 			// One colon, indicates there is a 'to' part.
 			toPart := ageParts[1]
-			toAge, err = getHoursFromAgePart(toPart, age)
+			toAge, err = getMinutesFromAgePart(toPart, age)
 			if err == nil {
 				// From value must be bigger than to value
 				if toAge > 0 && fromAge <= toAge {
@@ -310,9 +325,9 @@ func getTimesFromAge(age string) (int, int, error) {
 }
 
 // getHoursFromAgePart - Input value is '15d' or '14h' for example.
-func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) {
+func getMinutesFromAgePart(agePart string, errorMessageValue string) (int, error) {
 	var err error
-	var hours int = 0
+	var minutes int = 0
 	var duration int
 
 	// Separate the integer part from time unit part.
@@ -324,12 +339,12 @@ func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) 
 
 	if leadingGarbage != "" {
 		// Some leading garbage prior to the 'FROM' field. It must be empty.
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_AGE_PARAMETER, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 	} else {
 
 		if len(durationPart) == 0 {
 			// Invalid from. It must be some time in the past.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, errorMessageValue)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 		} else {
 			// we can extract the integer part now
 
@@ -337,21 +352,21 @@ func getHoursFromAgePart(agePart string, errorMessageValue string) (int, error) 
 			if err == nil {
 				if duration < 0 {
 					// Number part of the duration can't be negative.
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NEGATIVE_AGE_SPECIFIED, errorMessageValue)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NEGATIVE_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 				} else {
 
-					hoursMultiplier, isRecognisedTimeUnit := timeUnits[durationUnitStr]
+					timeUnit, isRecognisedTimeUnit := timeUnits[durationUnitStr]
 					if !isRecognisedTimeUnit {
 						// Bad time unit.
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED, errorMessageValue)
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage(timeUnits))
 					} else {
-						hours = duration * hoursMultiplier
+						minutes = duration * timeUnit.getMinuteMultiplier()
 					}
 				}
 			}
 		}
 	}
-	return hours, err
+	return minutes, err
 }
 
 func getValueAsInt(value string) (int, error) {
@@ -361,4 +376,19 @@ func getValueAsInt(value string) (int, error) {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_FROM_OR_TO_PARAMETER, value)
 	}
 	return age, err
+}
+
+func GetTimeUnitsForErrorMessage(timeUnits map[string]TimeUnit) string {
+	outputString := strings.Builder{}
+	count := 0
+	for initial, unit := range timeUnits {
+
+		if count != 0 {
+			outputString.WriteString(", ")
+		}
+		outputString.WriteString("'" + initial + "' (" + unit.getName() + ")")
+		count++
+	}
+
+	return outputString.String()
 }

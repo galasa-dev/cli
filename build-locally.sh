@@ -593,9 +593,8 @@ function submit_local_test {
     LOG_FILE=$6
 
     # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
-    export BOOT_JAR_VERSION="0.27.0"
-
-    export GALASA_VERSION="0.27.0"
+    export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion[ ]*=" | cut -f2 -d"'" )
+    export GALASA_VERSION=$(cat ${BASEDIR}/VERSION )
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
     export BOOT_JAR_PATH=${GALASA_HOME}/lib/${GALASA_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
