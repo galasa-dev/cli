@@ -33,6 +33,10 @@ var (
 	// ([0-9]+) - matches any digit sequence. Should be an integer.
 	// (.*) - matches any time unit. Should be a valid time unit from our map above.
 	agePartRegex *regexp.Regexp = regexp.MustCompile(`(^[\D]*)([0-9]+)(.*)`)
+
+	// Comma separated string of valid status values
+	// specifically, status values of an 'active' test
+	activeStatusNames = "started,ending,generating,building,provstart,running,rundone,up"
 )
 
 // ---------------------------------------------------
@@ -44,6 +48,7 @@ func GetRuns(
 	age string,
 	requestorParameter string,
 	resultParameter string,
+	shouldGetActive bool,
 	outputFormatString string,
 	timeService utils.TimeService,
 	console utils.Console,
@@ -68,7 +73,12 @@ func GetRuns(
 	}
 
 	if (err == nil) && (resultParameter != "") {
-		resultParameter, err = ValidateResultParameter(resultParameter, apiServerUrl)
+		if shouldGetActive {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_ACTIVE_AND_RESULT_ARE_MUTUALLY_EXCLUSIVE)
+		}
+		if err == nil {
+			resultParameter, err = ValidateResultParameter(resultParameter, apiServerUrl)
+		}
 	}
 
 	if err == nil {
@@ -76,7 +86,7 @@ func GetRuns(
 		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
 			var runJson []galasaapi.Run
-			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, timeService, apiServerUrl)
+			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, shouldGetActive, timeService, apiServerUrl)
 			if err == nil {
 				// Some formatters need extra fields filled-in so they can be displayed.
 				if chosenFormatter.IsNeedingMethodDetails() {
@@ -202,6 +212,7 @@ func GetRunsFromRestApi(
 	resultParameter string,
 	fromAgeMins int,
 	toAgeMins int,
+	shouldGetActive bool,
 	timeService utils.TimeService,
 	apiServerUrl string,
 ) ([]galasaapi.Run, error) {
@@ -243,6 +254,9 @@ func GetRunsFromRestApi(
 		if resultParameter != "" {
 			apicall = apicall.Result(resultParameter)
 		}
+		// if shouldGetActive {
+		// 	apicall = apicall.Status(activeStatusNames)
+		// }
 		apicall = apicall.Page(pageNumberWanted)
 		apicall = apicall.Sort("to:desc")
 		runData, httpResponse, err = apicall.Execute()
