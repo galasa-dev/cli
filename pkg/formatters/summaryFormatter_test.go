@@ -67,7 +67,7 @@ func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"submitted-time      name status   result             test-name\n" +
+		"submitted-time(UTC) name status   result             test-name\n" +
 			"2023-05-04 10:55:29 U456 Finished MyLongResultString MyTestName\n" +
 			"\n" +
 			"Total:1\n"
@@ -87,7 +87,7 @@ func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"submitted-time      name status   result test-name\n" +
+		"submitted-time(UTC) name status   result test-name\n" +
 			"2023-05-04 10:55:29 U456 Finished Short  MyTestName\n" +
 			"\n" +
 			"Total:1\n"
@@ -108,7 +108,7 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"submitted-time      name        status     result             test-name\n" +
+		"submitted-time(UTC) name        status     result             test-name\n" +
 			"2023-05-04 10:45:29 LongRunName LongStatus Short              TestName\n" +
 			"2023-05-04 10:55:29 U456        short      MyLongResultString MyTestName\n" +
 			"\n" +
@@ -137,7 +137,7 @@ func TestSummaryFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"submitted-time      name status   result              test-name\n" +
+		"submitted-time(UTC) name status   result              test-name\n" +
 			"2023-05-04 10:45:29 U123 Finished Passed              TestName\n" +
 			"2023-05-04 10:55:29 U456 Finished Failed              MyTestName1\n" +
 			"2023-05-04 10:55:29 U789 Finished EnvFail             MyTestName2\n" +
