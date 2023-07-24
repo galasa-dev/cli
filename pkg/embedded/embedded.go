@@ -91,9 +91,7 @@ func readVersionsFromEmbeddedFile(fs ReadOnlyFileSystem, versionDataAlreadyKnown
 	if versionDataAlreadyKnown == nil {
 
 		bytes, err = fs.ReadFile(PropsFileName)
-		if err != nil {
-			log.Printf("Failure to load contents from an embedded property file %s. reason:%s", PropsFileName, err.Error())
-		} else {
+		if err == nil {
 			propsFileContent := string(bytes)
 			properties := props.ReadProperties(propsFileContent)
 
