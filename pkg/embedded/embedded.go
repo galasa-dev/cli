@@ -5,7 +5,6 @@ package embedded
 
 import (
 	"embed"
-	"log"
 
 	"github.com/galasa.dev/cli/pkg/props"
 )
