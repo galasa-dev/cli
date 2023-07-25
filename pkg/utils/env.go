@@ -9,7 +9,8 @@ import (
 
 // Environment is a thin interface layer above the os package which can be mocked out
 type Environment interface {
-	GetEnv(propertyName string) string
+	GetEnv(propertyName string)   string
+	UnsetEnv(propertyName string) error
 }
 
 //------------------------------------------------------------------------------------
@@ -36,4 +37,8 @@ func NewEnvironment() Environment {
 
 func (osEnv OSEnvironment) GetEnv(propertyName string) string {
 	return os.Getenv(propertyName)
+}
+
+func (osEnv OSEnvironment) UnsetEnv(propertyName string) error {
+	return os.Unsetenv(propertyName)
 }

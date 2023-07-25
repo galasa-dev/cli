@@ -48,6 +48,7 @@ type MockFileSystem struct {
 	VirtualFunction_OutputWarningMessage func(string) error
 	VirtualFunction_MkTempDir            func() (string, error)
 	VirtualFunction_DeleteDir            func(path string)
+	VirtualFunction_DeleteFile           func(path string)
 	VirtualFunction_Create               func(path string) (io.Writer, error)
 }
 
@@ -114,6 +115,10 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 		mockFSDeleteDir(mockFileSystem, pathToDelete)
 	}
 
+	mockFileSystem.VirtualFunction_DeleteFile = func(pathToDelete string) {
+		mockFSDeleteFile(mockFileSystem, pathToDelete)
+	}
+
 	randomSource := rand.NewSource(13)
 	mockFileSystem.random = rand.New(randomSource)
 
@@ -147,6 +152,11 @@ func (fs *MockFileSystem) GetExecutableExtension() string {
 func (fs *MockFileSystem) DeleteDir(pathToDelete string) {
 	// Call the virtual function.
 	fs.VirtualFunction_DeleteDir(pathToDelete)
+}
+
+func (fs *MockFileSystem) DeleteFile(pathToDelete string) {
+	// Call the virtual function.
+	fs.VirtualFunction_DeleteFile(pathToDelete)
 }
 
 func (fs *MockFileSystem) MkTempDir() (string, error) {
@@ -217,6 +227,11 @@ func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {
 	for _, keyToRemove := range keysToRemove {
 		delete(fs.data, keyToRemove)
 	}
+}
+
+func mockFSDeleteFile(fs MockFileSystem, pathToDelete string) {
+	// Delete the entrt we want to delete
+	delete(fs.data, pathToDelete)
 }
 
 func mockFSMkTempDir(fs MockFileSystem) (string, error) {

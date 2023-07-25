@@ -20,3 +20,8 @@ func (env *MockEnv) GetEnv(propertyName string) string {
 func (env *MockEnv) SetEnv(propertyName string, value string) {
 	env.EnvVars[propertyName] = value
 }
+
+func (env *MockEnv) UnsetEnv(propertyName string) error {
+	delete(env.EnvVars, propertyName)
+	return nil
+}
