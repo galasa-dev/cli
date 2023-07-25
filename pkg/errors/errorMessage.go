@@ -162,6 +162,9 @@ var (
 
 	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE = NewMessageType("GAL1088E: Unable to delete the bearer token file.", 1088, STACK_TRACE_NOT_WANTED)
 
+	GALASA_ERROR_UNABLE_TO_READ_GALASACTL_YAML_FILE      = NewMessageType("GAL1089E: Unable to read the galasactl.yaml file.", 1089, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_YAML_FILE = NewMessageType("GAL1090E: Unable to unmarshal the galasactl.yaml file.", 1090, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 	// Information messages...

@@ -109,7 +109,7 @@ func assertOverridesPropertiesCreated(t *testing.T, mockFileSystem files.FileSys
 }
 
 func assertGalasactlPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
-	testGalasactlPropertiesExists, err := mockFileSystem.Exists(galasaDir + "galasactl.properties")
+	testGalasactlPropertiesExists, err := mockFileSystem.Exists(galasaDir + "galasactl.yaml")
 	assert.Nil(t, err)
 	assert.True(t, testGalasactlPropertiesExists, "Galasactl properties was not created")
 }

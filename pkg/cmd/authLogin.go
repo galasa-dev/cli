@@ -10,6 +10,9 @@ import (
 	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
 
 var (
@@ -22,13 +25,11 @@ var (
 	}
 
 	// Variables set by cobra's command-line parsing.
-	authBootstrap  string
-	token          string
+	authBootstrap string
 )
 
 func init() {
 	authLoginCmd.PersistentFlags().StringVarP(&authBootstrap, "bootstrap", "b", "", "Bootstrap URL")
-	authLoginCmd.PersistentFlags().StringVar(&token, "token", "", "The authentication token")
 	authCmd.AddCommand(authLoginCmd)
 }
 
@@ -63,17 +64,14 @@ func executeAuthLogin(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	console := utils.NewRealConsole()
-
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	// Call to process the command in a unit-testable way.
 	err = Login(
-		token,
 		apiServerUrl,
 		fileSystem,
-		console,
+		galasaHome,
 	)
 
 	if err != nil {
@@ -81,6 +79,36 @@ func executeAuthLogin(cmd *cobra.Command, args []string) {
 	}
 }
 
-func Login(token string, apiServerUrl string, fileSystem files.FileSystem, console utils.Console) error {
-	return nil
+func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) error {
+
+	galasactlYamlFilePath := galasaHome.GetNativeFolderPath() + "/galasactl.yaml"
+	galasactlYamlFile, err := fileSystem.ReadTextFile(galasactlYamlFilePath)
+	if err == nil {
+		var auth Auth
+		err = yaml.Unmarshal([]byte(galasactlYamlFile), &auth)
+		if err == nil {
+			// To do: Pass these to the API to generate a JWT using the /token endpoint
+			// clientId := auth.ClientId
+			// secret := auth.Secret
+			// accessToken := auth.AccessToken
+
+			jwt := "jwt"
+
+			bearerTokenFilePath := galasaHome.GetNativeFolderPath() + "/bearer-token.json"
+			fileSystem.Create(bearerTokenFilePath)
+			fileSystem.WriteTextFile(bearerTokenFilePath, jwt)
+		} else {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_YAML_FILE)
+		}
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_GALASACTL_YAML_FILE)
+	}
+
+	return err
+}
+
+type Auth struct {
+	ClientId    string
+	Secret      string
+	AccessToken string
 }
