@@ -5,7 +5,6 @@ package embedded
 
 import (
 	"embed"
-	"log"
 
 	"github.com/galasa.dev/cli/pkg/props"
 )
@@ -90,11 +89,8 @@ func readVersionsFromEmbeddedFile(fs ReadOnlyFileSystem, versionDataAlreadyKnown
 	)
 	if versionDataAlreadyKnown == nil {
 
-		log.Printf("Loading the properties file '%s'...", PropsFileName)
 		bytes, err = fs.ReadFile(PropsFileName)
-		if err != nil {
-			log.Printf("Failure. %s", err.Error())
-		} else {
+		if err == nil {
 			propsFileContent := string(bytes)
 			properties := props.ReadProperties(propsFileContent)
 
