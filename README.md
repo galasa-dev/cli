@@ -91,6 +91,30 @@ To build a project with Gradle artifacts, use `gradle build publishToMavenLocal`
 
 If you wish the generated code to depend upon the very latest/bleeding-edge of galasa code, then add the `--development` flag. This will add extra settings to the `settings.gradle` file of the parent and the `build.gradle` file of any of the child test projects.
 
+## auth login
+
+Before interacting with a Galasa ecosystem using `galasactl`, you must be authenticated against it. The `auth login` command allows you to log in to an ecosystem provided by your `$GALASA_BOOTSTRAP` environment variable or through the `--bootstrap` flag.
+
+### Examples
+
+Logging in to an ecosystem:
+
+```
+galasactl auth login
+```
+
+## auth logout
+
+To log out of a Galasa ecosystem using `galasactl`, you can use the `auth logout` command. While logged out, you will not be able to interact with the ecosystem until you run an `auth login` command.
+
+### Examples
+
+Logging out of an ecosystem:
+
+```
+galasactl auth logout
+```
+
 ## runs prepare
 
 The purpose of `runs prepare` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.

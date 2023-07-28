@@ -71,7 +71,9 @@ func Logout(fileSystem files.FileSystem, console utils.Console, env utils.Enviro
 	var err error
 	bearerTokenFile := fmt.Sprintf("%s/%s", galasaHome.GetNativeFolderPath(), "bearer-token.json")
 	if _, err := fileSystem.Exists(bearerTokenFile); err == nil {
+		log.Printf("Deleting bearer token file '%s'", bearerTokenFile)
 		fileSystem.DeleteFile(bearerTokenFile)
+		log.Printf("Deleted bearer token file '%s' OK", bearerTokenFile)
 	}
 
 	if err != nil {
