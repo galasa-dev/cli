@@ -52,11 +52,10 @@ func TestLoginWithNoGalasactlYamlFileReturnsError(t *testing.T) {
 
 	apiServerUrl := server.URL
 
-	// When ...
+	// When...
 	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	// Should have created a folder for the parent package.
 	assert.NotNil(t, err, "Should return an error if the galasactl.yaml file does not exist")
 	assert.ErrorContains(t, err, "GAL1089E")
 }
@@ -76,11 +75,10 @@ func TestLoginWithBadGalasactlYamlFileReturnsError(t *testing.T) {
 
 	apiServerUrl := server.URL
 
-	// When ...
+	// When...
 	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	// Should have created a folder for the parent package.
 	assert.NotNil(t, err, "Should return an error if the galasactl.yaml file does not contain valid YAML")
 	assert.ErrorContains(t, err, "GAL1090E")
 }
@@ -109,7 +107,7 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 
 	apiServerUrl := server.URL
 
-	// When ...
+	// When...
 	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	bearerTokenFilePath := mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json"
@@ -117,7 +115,6 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	bearerTokenFileContents, _ := mockFileSystem.ReadTextFile(bearerTokenFilePath)
 
 	// Then...
-	// Should have created a folder for the parent package.
 	assert.Nil(t, err, "Should not return an error if the bearer token file has been successfully created")
 	assert.True(t, bearerTokenFileExists, "Bearer token file should exist")
 	assert.Equal(t, mockResponse, bearerTokenFileContents)
@@ -151,11 +148,10 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 
 	apiServerUrl := server.URL
 
-	// When ...
+	// When...
 	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	// Should have created a folder for the parent package.
 	assert.NotNil(t, err, "Should return an error if writing the bearer token file fails")
 	assert.ErrorContains(t, err, "GAL1042E")
 }
@@ -184,11 +180,10 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 
 	apiServerUrl := server.URL
 
-	// When ...
+	// When...
 	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	// Should have created a folder for the parent package.
 	assert.NotNil(t, err, "Should return an error if the API request returns an error")
 	assert.ErrorContains(t, err, "GAL1091E")
 }

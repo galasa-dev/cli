@@ -26,7 +26,6 @@ func TestLogoutDeletesBearerTokenFile(t *testing.T) {
 	fileExists, _ := mockFileSystem.Exists(bearerTokenFilePath)
 
 	// Then...
-	// Should have created a folder for the parent package.
 	assert.False(t, fileExists, "bearer token file should not exist")
 	assert.Nil(t, err, "Should not return an error if the bearer token file has been successfully deleted")
 }
@@ -45,7 +44,6 @@ func TestLogoutWithNoBearerTokenFileDoesNotThrowError(t *testing.T) {
 	fileExists, _ := mockFileSystem.Exists(bearerTokenFilePath)
 
 	// Then...
-	// Should have created a folder for the parent package.
 	assert.False(t, fileExists, "bearer token file should not exist")
 	assert.Nil(t, err, "Should not return an error if the bearer token file does not already exist")
 }
