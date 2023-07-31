@@ -6,6 +6,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/files"
@@ -22,6 +23,14 @@ func NewAuthServletMock(t *testing.T, status int, mockResponse string) *httptest
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 
 		if strings.Contains(request.URL.Path, "/auth") {
+			requestBody, err := ioutil.ReadAll(request.Body)
+			assert.Nil(t, err, "Error reading request body")
+
+			requestBodyStr := string(requestBody)
+			assert.Contains(t, requestBodyStr, "client_id")
+			assert.Contains(t, requestBodyStr, "secret")
+			assert.Contains(t, requestBodyStr, "access_token")
+
 			writer.Header().Set("Content-Type", "application/json")
 			writer.Write([]byte(mockResponse))
 		}
@@ -89,9 +98,11 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"ClientId: %s\n"+
-		"Secret: %s\n"+
-		"RefreshToken: %s", mockClientId, mockSecret, mockRefreshToken))
+		"apiVersion: v1\n"+
+		"auth:\n"+
+		"  client_id: %s\n"+
+		"  secret: %s\n"+
+		"  access_token: %s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockResponse := `{"jwt":"blah"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
@@ -125,9 +136,11 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"ClientId: %s\n"+
-		"Secret: %s\n"+
-		"RefreshToken: %s", mockClientId, mockSecret, mockRefreshToken))
+		"apiVersion: v1\n"+
+		"auth:\n"+
+		"  client_id: %s\n"+
+		"  secret: %s\n"+
+		"  access_token: %s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockFileSystem.VirtualFunction_WriteTextFile = func(path string, contents string) error {
 		return errors.New("simulating a failed write operation")

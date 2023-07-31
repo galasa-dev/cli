@@ -82,6 +82,16 @@ func executeAuthLogin(cmd *cobra.Command, args []string) {
 	}
 }
 
+type AuthYaml struct {
+	Auth AuthPropertiesYaml `yaml:"auth,omitempty"`
+}
+
+type AuthPropertiesYaml struct {
+	ClientId    string `yaml:"client_id,omitempty"`
+	Secret      string `yaml:"secret,omitempty"`
+	AccessToken string `yaml:"access_token,omitempty"`
+}
+
 func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) error {
 
 	var err error = nil
@@ -101,12 +111,12 @@ func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.Ga
 // Gets authentication properties from the user's galasactl.yaml file
 func getAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome) (galasaapi.AuthProperties, error) {
 	var err error = nil
-	var auth galasaapi.AuthProperties
+	var authParent AuthYaml
 
 	galasactlYamlFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.yaml")
 	galasactlYamlFile, err := fileSystem.ReadTextFile(galasactlYamlFilePath)
 	if err == nil {
-		err = yaml.Unmarshal([]byte(galasactlYamlFile), &auth)
+		err = yaml.Unmarshal([]byte(galasactlYamlFile), &authParent)
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_YAML_FILE)
 		}
@@ -114,7 +124,13 @@ func getAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome)
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_GALASACTL_YAML_FILE)
 	}
 
-	return auth, err
+	// Convert the YAML representations of the auth properties into the OpenAPI-generated "AuthProperties" type
+	authProperties := galasaapi.NewAuthProperties()
+	authProperties.SetClientId(authParent.Auth.ClientId)
+	authProperties.SetSecret(authParent.Auth.Secret)
+	authProperties.SetAccessToken(authParent.Auth.AccessToken)
+
+	return *authProperties, err
 }
 
 func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthProperties) (string, error) {
