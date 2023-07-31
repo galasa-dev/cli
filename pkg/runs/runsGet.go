@@ -211,7 +211,7 @@ func GetRunsFromRestApi(
 
 	var context context.Context = nil
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
+	// A HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
 	now := timeService.Now()

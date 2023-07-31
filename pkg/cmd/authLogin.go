@@ -4,10 +4,13 @@
 package cmd
 
 import (
+	"context"
 	"log"
+	"path/filepath"
 
 	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -81,34 +84,75 @@ func executeAuthLogin(cmd *cobra.Command, args []string) {
 
 func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) error {
 
-	galasactlYamlFilePath := galasaHome.GetNativeFolderPath() + "/galasactl.yaml"
+	var err error = nil
+	var authProperties galasaapi.AuthProperties
+	authProperties, err = getAuthProperties(fileSystem, galasaHome)
+	if err == nil {
+		var jwt string
+		jwt, err = GetJwtFromRestApi(apiServerUrl, authProperties)
+		if err == nil {
+			err = writeBearerTokenJsonFile(fileSystem, galasaHome, jwt)
+		}
+	}
+
+	return err
+}
+
+// Gets authentication properties from the user's galasactl.yaml file
+func getAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome) (galasaapi.AuthProperties, error) {
+	var err error = nil
+	var auth galasaapi.AuthProperties
+
+	galasactlYamlFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.yaml")
 	galasactlYamlFile, err := fileSystem.ReadTextFile(galasactlYamlFilePath)
 	if err == nil {
-		var auth Auth
 		err = yaml.Unmarshal([]byte(galasactlYamlFile), &auth)
-		if err == nil {
-			// To do: Pass these to the API to generate a JWT using the /token endpoint
-			// clientId := auth.ClientId
-			// secret := auth.Secret
-			// accessToken := auth.AccessToken
-
-			jwt := "jwt"
-
-			bearerTokenFilePath := galasaHome.GetNativeFolderPath() + "/bearer-token.json"
-			fileSystem.Create(bearerTokenFilePath)
-			fileSystem.WriteTextFile(bearerTokenFilePath, jwt)
-		} else {
+		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_YAML_FILE)
 		}
 	} else {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_GALASACTL_YAML_FILE)
 	}
 
-	return err
+	return auth, err
 }
 
-type Auth struct {
-	ClientId    string
-	Secret      string
-	AccessToken string
+func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthProperties) (string, error) {
+	var err error = nil
+	var context context.Context = nil
+	var jwtJsonStr string
+
+	restClient := api.InitialiseAPI(apiServerUrl)
+
+	tokenResponse, httpResponse, err := restClient.AuthenticationAPIApi.PostAuthenticate(context).
+		AuthProperties(authProperties).
+		Execute()
+	defer httpResponse.Body.Close()
+
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN, err.Error())
+		log.Printf("Failed to retrieve JWT from API server. %s", err.Error())
+	} else {
+		var tokenResponseJson []byte
+		tokenResponseJson, err = tokenResponse.MarshalJSON()
+		jwtJsonStr = string(tokenResponseJson)
+		log.Println("JWT received from API server OK")
+
+	}
+	return jwtJsonStr, err
+}
+
+func writeBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome utils.GalasaHome, jwt string) error {
+	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
+
+	log.Printf("Writing JWT to bearer token file '%s'", bearerTokenFilePath)
+	err := fileSystem.WriteTextFile(bearerTokenFilePath, jwt)
+
+	if err == nil {
+		log.Printf("Written JWT to bearer token file '%s' OK", bearerTokenFilePath)
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, bearerTokenFilePath, err.Error())
+		log.Printf("Failed to write bearer token file '%s'. %s", bearerTokenFilePath, err.Error())
+	}
+	return err
 }

@@ -225,7 +225,7 @@ func GetArtifactPathsFromRestApi(runId string, apiServerUrl string) ([]string, e
 	var artifactPaths []string
 	log.Println("Retrieving artifact paths for the given run")
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
+	// A HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
 	var artifactsList []galasaapi.ArtifactIndexEntry
