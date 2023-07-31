@@ -159,6 +159,7 @@ var (
 	GALASA_ERROR_QUERY_RESULTNAMES_FAILED                 = NewMessageType("GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '%s'", 1086, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_RESULT_ARGUMENT                  = NewMessageType("GAL1087E: Invalid '--result' parameter value: %s. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: %s", 1087, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_ACTIVE_AND_RESULT_ARE_MUTUALLY_EXCLUSIVE = NewMessageType("GAL1088E: --active and --result must not be used at the same time, they are mutually exclusive.", 1088, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_MAVEN_AND_OR_GRADLE_FLAG_MUST_BE_SET     = NewMessageType("GAL1089E: Need to use --maven and/or --gradle parameter", 1089, STACK_TRACE_NOT_WANTED)
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 	// Information messages...

@@ -477,7 +477,7 @@ func TestCanCreateMavenAndGradleProject(t *testing.T) {
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
-func TestCreateProjectDefaultsToMavenProject(t *testing.T) {
+func TestCreateProjectInsistsOnGradleAndOrMaven(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	forceOverwrite := true
@@ -485,22 +485,16 @@ func TestCreateProjectDefaultsToMavenProject(t *testing.T) {
 	featureNamesCommandSeparatedList := "test"
 	maven := false
 	gradle := false
-	expectMaven := true
 	isDevelopment := false
 
-	// When ...
 	err := createProject(
 		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
-	// Should have created a folder for the parent package.
-	if err != nil {
-		assert.Fail(t, err.Error())
-	}
-
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, expectMaven, gradle)
-	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", expectMaven, gradle)
+	// Should throw an error asking for flags to be set
+	assert.NotNil(t, err, "err should have been set!")
+	assert.Contains(t, err.Error(), "GAL1089E")
 }
 
 func TestCanCreateGradleProjectNonDevelopmentModeGeneratesCommentedOutMavenRepoReference(t *testing.T) {

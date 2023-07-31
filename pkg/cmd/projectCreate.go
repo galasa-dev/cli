@@ -156,41 +156,42 @@ func createProject(
 	var err error
 
 	// By default, create a Maven project unless --gradle is the only flag set
-	if useGradle && !useMaven {
-		useMaven = false
-	} else {
-		useMaven = true
+	if !useGradle && !useMaven {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MAVEN_AND_OR_GRADLE_FLAG_MUST_BE_SET)
 	}
 
-	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
-
-	fileGenerator := utils.NewFileGenerator(fileSystem, embeddedFileSystem)
-
-	// Separate out the feature names from a string into a slice of strings.
-	var featureNames []string
-	featureNames, err = separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated)
-
 	if err == nil {
-		err = utils.ValidateJavaPackageName(packageName)
+
+		embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+
+		fileGenerator := utils.NewFileGenerator(fileSystem, embeddedFileSystem)
+
+		// Separate out the feature names from a string into a slice of strings.
+		var featureNames []string
+		featureNames, err = separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated)
+
 		if err == nil {
-
-			// Create the parent folder
-			parentProjectFolder := packageName
-			err = fileGenerator.CreateFolder(parentProjectFolder)
-
+			err = utils.ValidateJavaPackageName(packageName)
 			if err == nil {
-				err = createParentFolderContents(
-					fileGenerator, packageName, featureNames, isOBRProjectRequired,
-					forceOverwrite, useMaven, useGradle, isDevelopment)
-			}
 
-			if err == nil {
-				err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite,
-					useMaven, useGradle, isDevelopment)
+				// Create the parent folder
+				parentProjectFolder := packageName
+				err = fileGenerator.CreateFolder(parentProjectFolder)
+
 				if err == nil {
-					if isOBRProjectRequired {
-						err = createOBRProject(fileGenerator, packageName, featureNames,
-							forceOverwrite, useMaven, useGradle)
+					err = createParentFolderContents(
+						fileGenerator, packageName, featureNames, isOBRProjectRequired,
+						forceOverwrite, useMaven, useGradle, isDevelopment)
+				}
+
+				if err == nil {
+					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite,
+						useMaven, useGradle, isDevelopment)
+					if err == nil {
+						if isOBRProjectRequired {
+							err = createOBRProject(fileGenerator, packageName, featureNames,
+								forceOverwrite, useMaven, useGradle)
+						}
 					}
 				}
 			}
