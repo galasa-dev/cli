@@ -87,9 +87,9 @@ type AuthYaml struct {
 }
 
 type AuthPropertiesYaml struct {
-	ClientId    string `yaml:"client_id,omitempty"`
+	ClientId    string `yaml:"client-id,omitempty"`
 	Secret      string `yaml:"secret,omitempty"`
-	AccessToken string `yaml:"access_token,omitempty"`
+	AccessToken string `yaml:"access-token,omitempty"`
 }
 
 func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) error {
@@ -128,7 +128,7 @@ func getAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome)
 	authProperties := galasaapi.NewAuthProperties()
 	authProperties.SetClientId(authParent.Auth.ClientId)
 	authProperties.SetSecret(authParent.Auth.Secret)
-	authProperties.SetAccessToken(authParent.Auth.AccessToken)
+	authProperties.SetRefreshToken(authParent.Auth.AccessToken)
 
 	return *authProperties, err
 }

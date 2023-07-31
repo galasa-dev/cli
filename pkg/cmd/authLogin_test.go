@@ -29,7 +29,7 @@ func NewAuthServletMock(t *testing.T, status int, mockResponse string) *httptest
 			requestBodyStr := string(requestBody)
 			assert.Contains(t, requestBodyStr, "client_id")
 			assert.Contains(t, requestBodyStr, "secret")
-			assert.Contains(t, requestBodyStr, "access_token")
+			assert.Contains(t, requestBodyStr, "refresh_token")
 
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(status)
@@ -97,9 +97,9 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
 		"apiVersion: v1\n"+
 		"auth:\n"+
-		"  client_id: %s\n"+
+		"  client-id: %s\n"+
 		"  secret: %s\n"+
-		"  access_token: %s", mockClientId, mockSecret, mockRefreshToken))
+		"  access-token: %s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockResponse := `{"jwt":"blah"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
@@ -134,9 +134,9 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
 		"apiVersion: v1\n"+
 		"auth:\n"+
-		"  client_id: %s\n"+
+		"  client-id: %s\n"+
 		"  secret: %s\n"+
-		"  access_token: %s", mockClientId, mockSecret, mockRefreshToken))
+		"  access-token: %s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockFileSystem.VirtualFunction_WriteTextFile = func(path string, contents string) error {
 		return errors.New("simulating a failed write operation")
@@ -170,9 +170,9 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
 		"apiVersion: v1\n"+
 		"auth:\n"+
-		"  client_id: %s\n"+
+		"  client-id: %s\n"+
 		"  secret: %s\n"+
-		"  access_token: %s", mockClientId, mockSecret, mockRefreshToken))
+		"  access-token: %s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockResponse := `{"error":"something went wrong!"}`
 	server := NewAuthServletMock(t, 500, mockResponse)
