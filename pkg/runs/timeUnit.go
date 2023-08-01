@@ -72,7 +72,6 @@ func GetTimeUnitsOrderedList() []*TimeUnit {
 }
 
 func createOrderedListOfTimeUnits() []*TimeUnit {
-
 	// Build a complete list (ordered by importance/length of time) of all the time units.
 	list := make([]*TimeUnit, 0)
 	list = append(list, TIME_UNIT_WEEKS)
