@@ -1,7 +1,8 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
-
 /*
 Package launcher contains an abstraction of a launcher which can launch things.
 
