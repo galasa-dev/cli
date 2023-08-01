@@ -366,7 +366,8 @@ function get_result_with_runname {
 
     cmd="${BASEDIR}/bin/${binary} runs get \
     --name ${runname} \
-    --bootstrap ${bootstrap}"
+    --bootstrap ${bootstrap} \
+    --log -"
 
     info "Command is: $cmd"
 
