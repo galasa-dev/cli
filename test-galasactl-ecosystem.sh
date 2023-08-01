@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Copyright contributors to the Galasa project
+#
+# SPDX-License-Identifier: EPL-2.0
+#
 echo "Running script test-galasactl-ecosystem.sh"
 
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
