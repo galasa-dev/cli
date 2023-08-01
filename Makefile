@@ -1,6 +1,8 @@
 #
 # Copyright contributors to the Galasa project
 #
+# SPDX-License-Identifier: EPL-2.0
+#
 all: tests galasactl gendocs-galasactl
 
 galasactl: bin/galasactl-linux-amd64 bin/galasactl-windows-amd64.exe bin/galasactl-darwin-amd64 bin/galasactl-darwin-arm64 bin/galasactl-linux-s390x
