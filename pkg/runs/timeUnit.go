@@ -111,3 +111,8 @@ func createTimeUnitsForErrorMessage() string {
 
 	return outputString.String()
 }
+
+func GetTimeUnitFromShortName(shortName string) (*TimeUnit, bool) {
+	unit, isFound := GetTimeUnitsMap()[shortName]
+	return unit, isFound
+}

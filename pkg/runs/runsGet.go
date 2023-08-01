@@ -23,11 +23,6 @@ import (
 var (
 	validFormatters = CreateFormatters()
 
-	// Make a map of how many hours for each unit so can compare from and to values consistently
-	// Can be extended to support other units
-
-	timeUnits = GetTimeUnitsMap()
-
 	// When parsing the '--age' parameter value....
 	// (^[\\D]*) - matches any leading garbage, which is non-digits. Should be empty.
 	// ([0-9]+) - matches any digit sequence. Should be an integer.
@@ -333,7 +328,7 @@ func getMinutesFromAgePart(agePart string, errorMessageValue string) (int, error
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NEGATIVE_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage())
 				} else {
 
-					timeUnit, isRecognisedTimeUnit := timeUnits[durationUnitStr]
+					timeUnit, isRecognisedTimeUnit := GetTimeUnitFromShortName(durationUnitStr)
 					if !isRecognisedTimeUnit {
 						// Bad time unit.
 						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TIME_UNIT_AGE_SPECIFIED, errorMessageValue, GetTimeUnitsForErrorMessage())
