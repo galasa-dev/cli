@@ -5,6 +5,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
+
 # Where is this script executing from ? Lets find out...
 BASEDIR=$(dirname "$0");pushd $BASEDIR 2>&1 >> /dev/null ;BASEDIR=$(pwd);popd 2>&1 >> /dev/null
 export ORIGINAL_DIR=$(pwd)
