@@ -14,7 +14,7 @@
 // into the code, so the code knows what versions of galasa it should be 
 // dealing with. Do not mess with the `def {variableName}` part of hte following 
 // lines, only change the versions we rely upon.
-def galasaBootJarVersion = '0.29.0'
+def galasaBootJarVersion = '0.30.0'
 def galasaFrameworkVersion = '0.30.0'
 
 repositories {
