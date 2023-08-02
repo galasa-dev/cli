@@ -119,12 +119,11 @@ if [[ ! -e "../framework/openapi.yaml" ]]; then
 fi
 success "OK"
 
+
 #--------------------------------------------------------------------------
 h2 "Setting versions of things."
-# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
-export BOOT_JAR_VERSION="0.27.0"
-info "BOOT_JAR_VERSION=${BOOT_JAR_VERSION}"
-success "OK"
+# Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/
+read_boot_jar_version
 
 #--------------------------------------------------------------------------
 # Create a temporary folder which is never checked in.
@@ -307,7 +306,7 @@ function run_test_java_minus_jar_method {
     export M2_PATH=$(cd ~/.m2 ; pwd)
     export BOOT_JAR_PATH=${BASEDIR}/pkg/embedded/templates/galasahome/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
 
-    export OBR_VERSION="0.26.0"
+    export OBR_VERSION="0.30.0"
 
 
     # Local .m2 content over-rides these anyway...
@@ -583,6 +582,12 @@ function generate_galasactl_documentation {
 }
 
 #--------------------------------------------------------------------------
+function read_boot_jar_version {
+    export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion[ ]*=" | cut -f2 -d"'" )
+    info "Boot jar version is $BOOT_JAR_VERSION"
+}
+
+#--------------------------------------------------------------------------
 # Run test using the galasactl locally in a JVM
 function submit_local_test {
 
@@ -597,8 +602,8 @@ function submit_local_test {
     OBR_VERSION=$5
     LOG_FILE=$6
 
-    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
-    export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion[ ]*=" | cut -f2 -d"'" )
+    # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/
+    read_boot_jar_version
     export GALASA_VERSION=$(cat ${BASEDIR}/VERSION )
 
     export M2_PATH=$(cd ~/.m2 ; pwd)
