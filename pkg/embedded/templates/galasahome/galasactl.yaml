@@ -1,5 +1,4 @@
-apiVersion: v1
-# This is the section for authenticating to the Galasa Ecosystem
+# This is the section for authenticating with the Galasa Ecosystem
 auth:
   client-id: "my-client-id"
   secret: "my-secret"

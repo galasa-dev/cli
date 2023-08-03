@@ -1,7 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
  */
-package cmd
+package auth
 
 import (
 	"testing"

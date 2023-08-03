@@ -1,12 +1,12 @@
 /*
 * Copyright contributors to the Galasa project
  */
-package cmd
+package auth
 
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/files"
@@ -23,7 +23,7 @@ func NewAuthServletMock(t *testing.T, status int, mockResponse string) *httptest
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 
 		if strings.Contains(request.URL.Path, "/auth") {
-			requestBody, err := ioutil.ReadAll(request.Body)
+			requestBody, err := io.ReadAll(request.Body)
 			assert.Nil(t, err, "Error reading request body")
 
 			requestBodyStr := string(requestBody)
@@ -95,7 +95,6 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"apiVersion: v1\n"+
 		"auth:\n"+
 		"  client-id: %s\n"+
 		"  secret: %s\n"+
@@ -132,7 +131,6 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"apiVersion: v1\n"+
 		"auth:\n"+
 		"  client-id: %s\n"+
 		"  secret: %s\n"+
@@ -168,7 +166,6 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"apiVersion: v1\n"+
 		"auth:\n"+
 		"  client-id: %s\n"+
 		"  secret: %s\n"+

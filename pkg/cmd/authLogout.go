@@ -4,14 +4,12 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/galasa.dev/cli/pkg/auth"
 	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
-
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
 
 var (
@@ -54,7 +52,7 @@ func executeAuthLogout(cmd *cobra.Command, args []string) {
 	console := utils.NewRealConsole()
 
 	// Call to process the command in a unit-testable way.
-	err = Logout(
+	err = auth.Logout(
 		fileSystem,
 		console,
 		env,
@@ -64,21 +62,4 @@ func executeAuthLogout(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func Logout(fileSystem files.FileSystem, console utils.Console, env utils.Environment, galasaHome utils.GalasaHome) error {
-
-	var err error
-	bearerTokenFile := fmt.Sprintf("%s/%s", galasaHome.GetNativeFolderPath(), "bearer-token.json")
-	if _, err := fileSystem.Exists(bearerTokenFile); err == nil {
-		log.Printf("Deleting bearer token file '%s'", bearerTokenFile)
-		fileSystem.DeleteFile(bearerTokenFile)
-		log.Printf("Deleted bearer token file '%s' OK", bearerTokenFile)
-	}
-
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE)
-	}
-
-	return err
 }
