@@ -254,9 +254,9 @@ func GetRunsFromRestApi(
 		if resultParameter != "" {
 			apicall = apicall.Result(resultParameter)
 		}
-		// if shouldGetActive {
-		// 	apicall = apicall.Status(activeStatusNames)
-		// }
+		 if shouldGetActive {
+		 	apicall = apicall.Status(activeStatusNames)
+		 }
 		apicall = apicall.Page(pageNumberWanted)
 		apicall = apicall.Sort("to:desc")
 		runData, httpResponse, err = apicall.Execute()
