@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+#
+# Copyright contributors to the Galasa project
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 # Objectives: 
 # Give the tooling a spin to basically make sure it still works.
 
@@ -185,9 +191,9 @@ export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
 # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
-export BOOT_JAR_VERSION="0.27.0"
+export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion" | head -1 | cut -f2 -d"'")
 
-export OBR_VERSION="0.27.0"
+export OBR_VERSION=$(cat ${BASEDIR}/VERSION)
 
 export M2_PATH=$(cd ~/.m2 ; pwd)
 export BOOT_JAR_PATH=~/.galasa/lib/${OBR_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
@@ -250,6 +256,3 @@ if [[ "${rc}" != "0" ]]; then
     exit 1
 fi
 echo "Test ran OK"
-
-
-    
