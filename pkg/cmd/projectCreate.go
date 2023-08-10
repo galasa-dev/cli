@@ -160,9 +160,7 @@ func createProject(
 	// By default, create a Maven project unless --gradle is the only flag set
 	if !useGradle && !useMaven {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MAVEN_AND_OR_GRADLE_FLAG_MUST_BE_SET)
-	}
-
-	if err == nil {
+	} else {
 
 		embeddedFileSystem := embedded.GetReadOnlyFileSystem()
 
