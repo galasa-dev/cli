@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"gopkg.in/yaml.v2"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 )
 
 type AuthYaml struct {
@@ -94,7 +94,10 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 	return jwtJsonStr, err
 }
 
-// Writes a new bearer-token.json file containing a JWT
+// Writes a new bearer-token.json file containing a JWT with the following format:
+// { 
+//   "jwt": "<bearer-token-here>"
+// }
 func writeBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome utils.GalasaHome, jwt string) error {
 	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
 

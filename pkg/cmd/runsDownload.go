@@ -78,7 +78,7 @@ func executeRunsDownload(cmd *cobra.Command, args []string) {
 	var console = utils.NewRealConsole()
 
 	apiServerUrl := bootstrapData.ApiServerURL
-	log.Printf("The API sever is at '%s'\n", apiServerUrl)
+	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	timeService := utils.NewRealTimeService()
 	// Call to process the command in a unit-testable way.

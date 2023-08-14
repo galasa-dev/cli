@@ -4,7 +4,14 @@
 package api
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"path/filepath"
+
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/utils"
 )
 
 func InitialiseAPI(apiServerUrl string) *galasaapi.APIClient {
@@ -18,4 +25,46 @@ func InitialiseAPI(apiServerUrl string) *galasaapi.APIClient {
 	apiClient = galasaapi.NewAPIClient(cfg)
 
 	return apiClient
+}
+
+func InitialiseAPIWithAuthHeader(apiServerUrl string, galasaHome utils.GalasaHome) *galasaapi.APIClient {
+	apiClient := InitialiseAPI(apiServerUrl)
+	cfg := apiClient.GetConfig()
+
+	fileSystem := files.NewOSFileSystem()
+
+	bearerToken, err := getBearerTokenFromTokenJsonFile(fileSystem, galasaHome)
+	if err == nil {
+		cfg.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
+	}
+
+	return apiClient
+}
+
+type BearerTokenJson struct {
+	Jwt string `json:"jwt"`
+}
+
+// Gets the JWT from the bearer-token.json file if it exists, errors if the file does not exist
+func getBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome utils.GalasaHome) (string, error) {
+	var err error = nil
+	var bearerToken string = ""
+
+	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
+
+	log.Printf("Retrieving JWT from bearer token file '%s'", bearerTokenFilePath)
+	bearerTokenJsonContents, err := fileSystem.ReadTextFile(bearerTokenFilePath)
+	if err == nil {
+		var bearerTokenJson BearerTokenJson
+		err = json.Unmarshal([]byte(bearerTokenJsonContents), &bearerTokenJson)
+		if err == nil {
+			bearerToken = bearerTokenJson.Jwt
+			log.Printf("Retrieved JWT from bearer token file '%s' OK", bearerTokenFilePath)
+		}
+	}
+
+	if err != nil {
+		log.Printf("Could not find bearer token in file '%s', continuing without 'Authorization' header", bearerTokenFilePath)
+	}
+	return bearerToken, err
 }
