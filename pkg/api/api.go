@@ -9,6 +9,7 @@ import (
 	"log"
 	"path/filepath"
 
+	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -27,18 +28,21 @@ func InitialiseAPI(apiServerUrl string) *galasaapi.APIClient {
 	return apiClient
 }
 
-func InitialiseAPIWithAuthHeader(apiServerUrl string, galasaHome utils.GalasaHome) *galasaapi.APIClient {
+func InitialiseAPIWithAuthHeader(apiServerUrl string, galasaHome utils.GalasaHome) (*galasaapi.APIClient, error) {
+	var err error = nil
+	var bearerToken string = ""
+
 	apiClient := InitialiseAPI(apiServerUrl)
 	cfg := apiClient.GetConfig()
 
 	fileSystem := files.NewOSFileSystem()
 
-	bearerToken, err := getBearerTokenFromTokenJsonFile(fileSystem, galasaHome)
+	bearerToken, err = getBearerTokenFromTokenJsonFile(fileSystem, galasaHome)
 	if err == nil {
 		cfg.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
 	}
 
-	return apiClient
+	return apiClient, err
 }
 
 type BearerTokenJson struct {
@@ -64,7 +68,7 @@ func getBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome uti
 	}
 
 	if err != nil {
-		log.Printf("Could not find bearer token in file '%s', continuing without 'Authorization' header", bearerTokenFilePath)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE, bearerTokenFilePath, err.Error())
 	}
 	return bearerToken, err
 }

@@ -82,7 +82,7 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 	defer httpResponse.Body.Close()
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
 		log.Printf("Failed to retrieve JWT from API server. %s", err.Error())
 	} else {
 		var tokenResponseJson []byte

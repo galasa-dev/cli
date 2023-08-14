@@ -160,11 +160,11 @@ var (
 	GALASA_ERROR_QUERY_RESULTNAMES_FAILED = NewMessageType("GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '%s'", 1086, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_RESULT_ARGUMENT  = NewMessageType("GAL1087E: Invalid '--result' parameter value: %s. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: %s", 1087, STACK_TRACE_NOT_WANTED)
 
-	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE = NewMessageType("GAL1088E: Unable to delete the bearer token file.", 1088, STACK_TRACE_NOT_WANTED)
-
+	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE      = NewMessageType("GAL1088E: Unable to delete the bearer token file.", 1088, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_UNABLE_TO_READ_GALASACTL_YAML_FILE      = NewMessageType("GAL1089E: Unable to read the galasactl.yaml file.", 1089, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_YAML_FILE = NewMessageType("GAL1090E: Unable to unmarshal the galasactl.yaml file.", 1090, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RETRIEVING_BEARER_TOKEN 				 = NewMessageType("GAL1091E: Could not get JWT from API server. Reason: '%s'", 1091, STACK_TRACE_WANTED)
+	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER = NewMessageType("GAL1091E: Could not get JWT from API server. Reason: '%s'", 1091, STACK_TRACE_WANTED)
+	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE       = NewMessageType("GAL1092E: Could not get JWT from bearer token file '%s'. Reason: '%s'. Please ensure you are authenticated by running 'galasactl auth login'", 1092, STACK_TRACE_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
