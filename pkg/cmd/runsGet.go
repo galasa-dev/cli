@@ -34,6 +34,7 @@ var (
 	outputFormatString string
 	requestor          string
 	result             string
+	isActiveRuns       bool
 )
 
 func init() {
@@ -47,6 +48,7 @@ func init() {
 	runsGetCmd.PersistentFlags().StringVar(&outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 	runsGetCmd.PersistentFlags().StringVar(&requestor, "requestor", "", "the requestor of the test run we want information about")
 	runsGetCmd.PersistentFlags().StringVar(&result, "result", "", "A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example \"--result Failed,Ignored,EnvFail\"")
+	runsGetCmd.PersistentFlags().BoolVar(&isActiveRuns, "active", false, "parameter to retrieve runs that have not finished yet.")
 	parentCommand := runsCmd
 	parentCommand.AddCommand(runsGetCmd)
 }
@@ -90,7 +92,7 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	timeService := utils.NewRealTimeService()
 
 	// Call to process the command in a unit-testable way.
-	err = runs.GetRuns(runName, age, requestor, result, outputFormatString, timeService, console, apiServerUrl, env)
+	err = runs.GetRuns(runName, age, requestor, result, isActiveRuns, outputFormatString, timeService, console, apiServerUrl, env)
 	if err != nil {
 		panic(err)
 	}
