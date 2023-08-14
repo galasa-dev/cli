@@ -1349,6 +1349,9 @@ func TestActiveAndResultAreMutuallyExclusiveShouldReturnError(t *testing.T) {
 	requestor := ""
 	result := "Passed"
 	shouldGetActive := true
+	mockUsername := "tester"
+	mockEnv := utils.NewMockEnv()
+	mockEnv.SetUsername(mockUsername)
 
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
@@ -1360,7 +1363,7 @@ func TestActiveAndResultAreMutuallyExclusiveShouldReturnError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl, mockEnv)
 
 	// Then ...
 	assert.Error(t, err)
@@ -1374,6 +1377,9 @@ func TestActiveParameterReturnsOk(t *testing.T) {
 	requestor := ""
 	result := ""
 	shouldGetActive := true
+	mockUsername := "tester"
+	mockEnv := utils.NewMockEnv()
+	mockEnv.SetUsername(mockUsername)
 
 	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
 	defer server.Close()
@@ -1385,52 +1391,55 @@ func TestActiveParameterReturnsOk(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl, mockEnv)
 
 	// Then ...
 	assert.Nil(t, err)
 }
 
-// func TestRunsGetActiveRunsBuildsQueryCorrectly(t *testing.T) {
-// 	// Given ...
-// 	age := ""
-// 	runName := "U456"
-// 	requestor := ""
-// 	result := ""
-// 	shouldGetActive := true
+func TestRunsGetActiveRunsBuildsQueryCorrectly(t *testing.T) {
+	// Given ...
+	age := ""
+	runName := "U456"
+	requestor := "tester"
+	result := ""
+	shouldGetActive := true
 
-// 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		query := r.URL.Query()
-// 		assert.EqualValues(t, query.Get("from"), "")
-// 		assert.EqualValues(t, query.Get("to"), "")
-// 		assert.EqualValues(t, query.Get("runname"), runName)
-// 		assert.EqualValues(t, query.Get("requestor"), requestor)
-// 		assert.NotContains(t, r.URL.RawQuery, "status="+url.QueryEscape("finished"))
-// 		w.Header().Set("Content-Type", "application/json")
-// 		w.WriteHeader(200)
-// 		w.Write([]byte(`
-// 		 {
-// 			 "pageNumber": 1,
-// 			 "pageSize": 1,
-// 			 "numPages": 1,
-// 			 "amountOfRuns": 0,
-// 			 "runs":[]
-// 		 }`))
-// 	}))
-// 	defer server.Close()
+	mockEnv := utils.NewMockEnv()
+	mockEnv.SetUsername(requestor)
 
-// 	outputFormat := "summary"
-// 	mockConsole := utils.NewMockConsole()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		assert.EqualValues(t, query.Get("from"), "")
+		assert.EqualValues(t, query.Get("to"), "")
+		assert.EqualValues(t, query.Get("runname"), runName)
+		assert.EqualValues(t, query.Get("requestor"), requestor)
+		assert.NotContains(t, r.URL.RawQuery, "status="+url.QueryEscape("finished"))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		w.Write([]byte(`
+		 {
+			 "pageNumber": 1,
+			 "pageSize": 1,
+			 "numPages": 1,
+			 "amountOfRuns": 0,
+			 "runs":[]
+		 }`))
+	}))
+	defer server.Close()
 
-// 	apiServerUrl := server.URL
-// 	mockTimeService := utils.NewMockTimeService()
+	outputFormat := "summary"
+	mockConsole := utils.NewMockConsole()
 
-// 	// When...
-// 	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	apiServerUrl := server.URL
+	mockTimeService := utils.NewMockTimeService()
 
-// 	// Then ...
-// 	assert.Nil(t, err)
-// }
+	// When...
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl, mockEnv)
+
+	// Then ...
+	assert.Nil(t, err)
+}
 
 func TestRunsGetURLQueryWithEmptyRequestorDefaultsToOSName(t *testing.T) {
 	// Given ...
@@ -1439,6 +1448,7 @@ func TestRunsGetURLQueryWithEmptyRequestorDefaultsToOSName(t *testing.T) {
 	requestor := ""
 	result := ""
 
+	shouldGetActive := false
 	mockUsername := "tester"
 	mockEnv := utils.NewMockEnv()
 	mockEnv.SetUsername(mockUsername)
@@ -1471,7 +1481,7 @@ func TestRunsGetURLQueryWithEmptyRequestorDefaultsToOSName(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, mockEnv)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl, mockEnv)
 
 	// Then ...
 	assert.Nil(t, err)
