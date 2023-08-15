@@ -12,19 +12,9 @@ import (
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/props"
 	"github.com/galasa.dev/cli/pkg/utils"
-	"gopkg.in/yaml.v2"
 )
-
-type AuthYaml struct {
-	Auth AuthPropertiesYaml `yaml:"auth,omitempty"`
-}
-
-type AuthPropertiesYaml struct {
-	ClientId    string `yaml:"client-id,omitempty"`
-	Secret      string `yaml:"secret,omitempty"`
-	AccessToken string `yaml:"access-token,omitempty"`
-}
 
 // Login - performs all the logic to implement the `galasactl auth login` command
 func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) error {
@@ -46,24 +36,21 @@ func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.Ga
 // Gets authentication properties from the user's galasactl.yaml file
 func getAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome) (galasaapi.AuthProperties, error) {
 	var err error = nil
-	var authParent AuthYaml
+	authProperties := galasaapi.NewAuthProperties()
 
-	galasactlYamlFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.yaml")
-	galasactlYamlFile, err := fileSystem.ReadTextFile(galasactlYamlFilePath)
+	galasactlPropertiesFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.properties")
+	galasactlProperties, err := props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
 	if err == nil {
-		err = yaml.Unmarshal([]byte(galasactlYamlFile), &authParent)
-		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_YAML_FILE)
+		authProperties.SetClientId(galasactlProperties["auth.client.id"])
+		authProperties.SetSecret(galasactlProperties["auth.secret"])
+		authProperties.SetRefreshToken(galasactlProperties["auth.access.token"])
+
+		if authProperties.GetClientId() == "" || authProperties.GetSecret() == "" || authProperties.GetRefreshToken() == "" {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_PROPERTIES_FILE)
 		}
 	} else {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_GALASACTL_YAML_FILE)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, galasactlPropertiesFilePath, err.Error())
 	}
-
-	// Convert the YAML representations of the auth properties into the OpenAPI-generated "AuthProperties" type
-	authProperties := galasaapi.NewAuthProperties()
-	authProperties.SetClientId(authParent.Auth.ClientId)
-	authProperties.SetSecret(authParent.Auth.Secret)
-	authProperties.SetRefreshToken(authParent.Auth.AccessToken)
 
 	return *authProperties, err
 }

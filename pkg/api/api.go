@@ -68,7 +68,7 @@ func getBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome uti
 	}
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE, bearerTokenFilePath, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNAUTHORIZED)
 	}
 	return bearerToken, err
 }

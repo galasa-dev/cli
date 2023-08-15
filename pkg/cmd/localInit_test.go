@@ -68,6 +68,7 @@ func TestCanCreateGalasaHomeFolderWhenAlreadyInitialised(t *testing.T) {
 	mockFileSystem.WriteTextFile(galasaDir+"cps.properties", "")
 	mockFileSystem.WriteTextFile(galasaDir+"credentials.properties", "")
 	mockFileSystem.WriteTextFile(galasaDir+"overrides.properties", "")
+	mockFileSystem.WriteTextFile(galasaDir+"galasactl.properties", "")
 	mockFileSystem.WriteTextFile(m2Dir+"settings.xml", "")
 
 	mockEnv := utils.NewMockEnv()
@@ -109,7 +110,7 @@ func assertOverridesPropertiesCreated(t *testing.T, mockFileSystem files.FileSys
 }
 
 func assertGalasactlPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
-	testGalasactlPropertiesExists, err := mockFileSystem.Exists(galasaDir + "galasactl.yaml")
+	testGalasactlPropertiesExists, err := mockFileSystem.Exists(galasaDir + "galasactl.properties")
 	assert.Nil(t, err)
 	assert.True(t, testGalasactlPropertiesExists, "Galasactl properties was not created")
 }

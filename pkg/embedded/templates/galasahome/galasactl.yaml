@@ -1,5 +1,0 @@
-# This is the section for authenticating with the Galasa Ecosystem
-auth:
-  client-id: "my-client-id"
-  secret: "my-secret"
-  access-token: "my-access-token"

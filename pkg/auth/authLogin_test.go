@@ -40,7 +40,7 @@ func NewAuthServletMock(t *testing.T, status int, mockResponse string) *httptest
 	return server
 }
 
-func TestLoginWithNoGalasactlYamlFileReturnsError(t *testing.T) {
+func TestLoginWithNoGalasactlPropertiesFileReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
@@ -56,18 +56,18 @@ func TestLoginWithNoGalasactlYamlFileReturnsError(t *testing.T) {
 	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	assert.NotNil(t, err, "Should return an error if the galasactl.yaml file does not exist")
-	assert.ErrorContains(t, err, "GAL1089E")
+	assert.NotNil(t, err, "Should return an error if the galasactl.properties file does not exist")
+	assert.ErrorContains(t, err, "GAL1043E")
 }
 
-func TestLoginWithBadGalasactlYamlFileReturnsError(t *testing.T) {
+func TestLoginWithBadGalasactlPropertiesFileReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	galasactlYamlFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.yaml"
-	mockFileSystem.WriteTextFile(galasactlYamlFilePath, "here are some bad galasactl.yaml contents!")
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, "here are some bad galasactl.properties contents!")
 
 	mockResponse := `{"jwt":"blah"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
@@ -79,8 +79,8 @@ func TestLoginWithBadGalasactlYamlFileReturnsError(t *testing.T) {
 	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	assert.NotNil(t, err, "Should return an error if the galasactl.yaml file does not contain valid YAML")
-	assert.ErrorContains(t, err, "GAL1090E")
+	assert.NotNil(t, err, "Should return an error if the galasactl.properties file does not contain valid YAML")
+	assert.ErrorContains(t, err, "GAL1089E")
 }
 
 func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
@@ -89,16 +89,15 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	galasactlYamlFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.yaml"
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 
 	mockClientId := "dummyId"
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
-	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"auth:\n"+
-		"  client-id: %s\n"+
-		"  secret: %s\n"+
-		"  access-token: %s", mockClientId, mockSecret, mockRefreshToken))
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
+		"auth.client.id=%s\n"+
+		"auth.secret=%s\n"+
+		"auth.access.token=%s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockResponse := `{"jwt":"blah"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
@@ -125,16 +124,15 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	galasactlYamlFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.yaml"
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 
 	mockClientId := "dummyId"
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
-	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"auth:\n"+
-		"  client-id: %s\n"+
-		"  secret: %s\n"+
-		"  access-token: %s", mockClientId, mockSecret, mockRefreshToken))
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
+		"auth.client.id=%s\n"+
+		"auth.secret=%s\n"+
+		"auth.access.token=%s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockFileSystem.VirtualFunction_WriteTextFile = func(path string, contents string) error {
 		return errors.New("simulating a failed write operation")
@@ -160,16 +158,17 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	galasactlYamlFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.yaml"
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 
 	mockClientId := "dummyId"
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
-	mockFileSystem.WriteTextFile(galasactlYamlFilePath, fmt.Sprintf(
-		"auth:\n"+
-		"  client-id: %s\n"+
-		"  secret: %s\n"+
-		"  access-token: %s", mockClientId, mockSecret, mockRefreshToken))
+
+
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
+		"auth.client.id=%s\n"+
+		"auth.secret=%s\n"+
+		"auth.access.token=%s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockResponse := `{"error":"something went wrong!"}`
 	server := NewAuthServletMock(t, 500, mockResponse)
@@ -182,5 +181,5 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the API request returns an error")
-	assert.ErrorContains(t, err, "GAL1091E")
+	assert.ErrorContains(t, err, "GAL1090E")
 }

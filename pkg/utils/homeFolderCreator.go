@@ -135,12 +135,12 @@ func createOverridesPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir s
 
 func createGalasactlPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
 
-	targetPath := galasaHomeDir + fileGenerator.fileSystem.GetFilePathSeparator() + "galasactl.yaml"
+	targetPath := galasaHomeDir + fileGenerator.fileSystem.GetFilePathSeparator() + "galasactl.properties"
 
 	propertyFile := GeneratedFileDef{
 		FileType:                 "properties",
 		TargetFilePath:           targetPath,
-		EmbeddedTemplateFilePath: "templates/galasahome/galasactl.yaml",
+		EmbeddedTemplateFilePath: "templates/galasahome/galasactl.properties",
 		TemplateParameters:       nil,
 	}
 
