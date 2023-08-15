@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -217,10 +218,11 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
 	// We expect
@@ -251,10 +253,11 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 
 	outputFormat := "summary"
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
 	// We expect
@@ -278,10 +281,11 @@ func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	outputFormat := "summary"
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
 	// We expect
@@ -315,10 +319,11 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	outputFormat := "summary"
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1075")
@@ -347,10 +352,11 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
 	// We expect
@@ -404,10 +410,11 @@ func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
 	// We expect
@@ -430,10 +437,11 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
 	// We expect
@@ -569,10 +577,11 @@ func TestRunsGetURLQueryWithFromAndToDate(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -606,10 +615,11 @@ func TestRunsGetURLQueryJustFromAge(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -643,10 +653,11 @@ func TestRunsGetURLQueryWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.NotNil(t, err)
@@ -681,10 +692,11 @@ func TestRunsGetURLQueryWithOlderToAgeThanFromAgeReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.NotNil(t, err)
@@ -719,10 +731,11 @@ func TestRunsGetURLQueryWithBadlyFormedFromAndToParameterReturnsError(t *testing
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.NotNil(t, err)
@@ -909,10 +922,11 @@ func TestRunsGetURLQueryWithRequestorNotSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -948,10 +962,11 @@ func TestRunsGetURLQueryWithRequestorSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -987,10 +1002,11 @@ func TestRunsGetURLQueryWithNumericRequestorSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1026,10 +1042,11 @@ func TestRunsGetURLQueryWithDashInRequestorSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1065,10 +1082,11 @@ func TestRunsGetURLQueryWithAmpersandRequestorSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1105,10 +1123,11 @@ func TestRunsGetURLQueryWithSpecialCharactersRequestorSuppliedReturnsOK(t *testi
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1128,10 +1147,11 @@ func TestRunsGetURLQueryWithResultSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1153,10 +1173,11 @@ func TestRunsGetURLQueryWithMultipleResultSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1178,10 +1199,11 @@ func TestRunsGetURLQueryWithResultNotSuppliedReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1201,10 +1223,11 @@ func TestRunsGetURLQueryWithInvalidResultSuppliedReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl)
+	err := GetRuns(runName, age, requestor, result, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then ...
 	assert.Error(t, err)

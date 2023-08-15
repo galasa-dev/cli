@@ -80,6 +80,11 @@ func executeRunsDownload(cmd *cobra.Command, args []string) {
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
+	apiClient, err := api.InitialiseAPIWithAuthHeader(apiServerUrl, galasaHome)
+	if err != nil {
+		panic(err)
+	}
+
 	timeService := utils.NewRealTimeService()
 	// Call to process the command in a unit-testable way.
 	err = runs.DownloadArtifacts(
@@ -89,6 +94,7 @@ func executeRunsDownload(cmd *cobra.Command, args []string) {
 		timeService,
 		console,
 		apiServerUrl,
+		apiClient,
 		runDownloadTargetFolder,
 	)
 	if err != nil {

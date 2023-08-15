@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/galasa.dev/cli/pkg/api"
 	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -24,30 +25,30 @@ const (
 		 "runId": "xxx876xxx",
 		 "testStructure": {
 			 "runName": "U1",
-			 "bundle": "myBundleId",	
+			 "bundle": "myBundleId",
 			 "testName": "myTestPackage.MyTestName",
-			 "testShortName": "MyTestName",	
+			 "testShortName": "MyTestName",
 			 "requestor": "unitTesting",
 			 "status" : "Finished",
 			 "result" : "Passed",
-			 "queued" : "2023-05-10T06:00:13.043037Z",	
+			 "queued" : "2023-05-10T06:00:13.043037Z",
 			 "startTime": "2023-05-10T06:00:36.159003Z",
 			 "endTime": "2023-05-10T06:02:53.823338Z",
 			 "methods": [{
 				 "className": "myTestPackage.MyTestName",
-				 "methodName": "myTestMethodName",	
-				 "type": "test",	
-				 "status": "Done",	
+				 "methodName": "myTestMethodName",
+				 "type": "test",
+				 "status": "Done",
 				 "result": "Success",
 				 "startTime": null,
-				 "endTime": null,	
-				 "runLogStart":null,	
-				 "runLogEnd":null,	
+				 "endTime": null,
+				 "runLogStart":null,
+				 "runLogEnd":null,
 				 "befores":[]
 			 }]
 		 },
 		 "artifacts": [{
-			 "artifactPath": "myPathToArtifact1",	
+			 "artifactPath": "myPathToArtifact1",
 			 "contentType":	"application/json"
 		 }]
 	 }`
@@ -56,28 +57,28 @@ const (
 		 "runId": "xxx543xxx",
 		 "testStructure": {
 			 "runName": "U27",
-			 "bundle": "myBun27",	
+			 "bundle": "myBun27",
 			 "testName": "myTestPackage.MyTest27",
-			 "testShortName": "MyTestName27",	
+			 "testShortName": "MyTestName27",
 			 "requestor": "unitTesting27",
 			 "status" : "building",
-			 "queued" : "2023-05-10T06:00:13.043037Z",	
+			 "queued" : "2023-05-10T06:00:13.043037Z",
 			 "startTime": "2023-05-10T06:00:36.159003Z",
 			 "methods": [{
 				 "className": "myTestPackage27.MyTestName27",
-				 "methodName": "myTestMethodName",	
-				 "type": "test",	
-				 "status": "Done",	
+				 "methodName": "myTestMethodName",
+				 "type": "test",
+				 "status": "Done",
 				 "result": "UNKNOWN",
 				 "startTime": null,
-				 "endTime": null,	
-				 "runLogStart":null,	
-				 "runLogEnd":null,	
+				 "endTime": null,
+				 "runLogStart":null,
+				 "runLogEnd":null,
 				 "befores":[]
 			 }]
 		 },
 		 "artifacts": [{
-			 "artifactPath": "myPathToArtifact1",	
+			 "artifactPath": "myPathToArtifact1",
 			 "contentType":	"application/json"
 		 }]
 	}`
@@ -86,30 +87,30 @@ const (
 		"runId": "xxx987xxx",
 		"testStructure": {
 			"runName": "U27",
-			"bundle": "myBun27",	
+			"bundle": "myBun27",
 			"testName": "myTestPackage.MyTest27",
-			"testShortName": "MyTestName27",	
+			"testShortName": "MyTestName27",
 			"requestor": "unitTesting27",
 			"status" : "finished",
 			"result" : "Passed",
-			"queued" : "2023-05-10T06:00:13.043037Z",	
+			"queued" : "2023-05-10T06:00:13.043037Z",
 			"startTime": "2023-05-10T06:01:36.159003Z",
 			"endTime": "2023-05-10T06:02:53.823338Z",
 			"methods": [{
 				"className": "myTestPackage27.MyTestName27",
-				"methodName": "myTestMethodName",	
-				"type": "test",	
-				"status": "Done",	
+				"methodName": "myTestMethodName",
+				"type": "test",
+				"status": "Done",
 				"result": "UNKNOWN",
 				"startTime": null,
-				"endTime": null,	
-				"runLogStart":null,	
-				"runLogEnd":null,	
+				"endTime": null,
+				"runLogStart":null,
+				"runLogEnd":null,
 				"befores":[]
 			}]
 		},
 		"artifacts": [{
-			"artifactPath": "myPathToArtifact2",	
+			"artifactPath": "myPathToArtifact2",
 			"contentType":	"application/json"
 		}]
    }`
@@ -118,29 +119,29 @@ const (
 		"runId": "xxx1234xxx",
 		"testStructure": {
 			"runName": "U27",
-			"bundle": "myBun27",	
+			"bundle": "myBun27",
 			"testName": "myTestPackage.MyTest27",
-			"testShortName": "MyTestName27",	
+			"testShortName": "MyTestName27",
 			"requestor": "unitTesting27",
 			"status" : "finished",
 			"result" : "EnvFail",
-			"queued" : "2022-05-10T04:00:13.043037Z",	
+			"queued" : "2022-05-10T04:00:13.043037Z",
 			"startTime": "2022-05-10T04:01:36.159003Z",
 			"methods": [{
 				"className": "myTestPackage27.MyTestName27",
-				"methodName": "myTestMethodName",	
-				"type": "test",	
-				"status": "Done",	
+				"methodName": "myTestMethodName",
+				"type": "test",
+				"status": "Done",
 				"result": "UNKNOWN",
 				"startTime": null,
-				"endTime": null,	
-				"runLogStart":null,	
-				"runLogEnd":null,	
+				"endTime": null,
+				"runLogStart":null,
+				"runLogEnd":null,
 				"befores":[]
 			}]
 		},
 		"artifacts": [{
-			"artifactPath": "myPathToArtifact2",	
+			"artifactPath": "myPathToArtifact2",
 			"contentType":	"application/json"
 		}]
 	}`
@@ -149,29 +150,29 @@ const (
 		"runId": "xxx4321xxx",
 		"testStructure": {
 			"runName": "U27",
-			"bundle": "myBun27",	
+			"bundle": "myBun27",
 			"testName": "myTestPackage.MyTest27",
-			"testShortName": "MyTestName27",	
+			"testShortName": "MyTestName27",
 			"requestor": "unitTesting27",
 			"status" : "finished",
 			"result" : "EnvFail",
-			"queued" : "2022-05-10T04:00:13.043037Z",	
+			"queued" : "2022-05-10T04:00:13.043037Z",
 			"startTime": "2022-05-10T04:10:36.159003Z",
 			"methods": [{
 				"className": "myTestPackage27.MyTestName27",
-				"methodName": "myTestMethodName",	
-				"type": "test",	
-				"status": "Done",	
+				"methodName": "myTestMethodName",
+				"type": "test",
+				"status": "Done",
 				"result": "UNKNOWN",
 				"startTime": null,
-				"endTime": null,	
-				"runLogStart":null,	
-				"runLogEnd":null,	
+				"endTime": null,
+				"runLogStart":null,
+				"runLogEnd":null,
 				"befores":[]
 			}]
 		},
 		"artifacts": [{
-			"artifactPath": "myPathToArtifact2",	
+			"artifactPath": "myPathToArtifact2",
 			"contentType":	"application/json"
 		}]
 	}`
@@ -180,28 +181,28 @@ const (
 		"runId": "xxx2468xxx",
 		"testStructure": {
 			"runName": "U27",
-			"bundle": "myBun27",	
+			"bundle": "myBun27",
 			"testName": "myTestPackage.MyTest27",
-			"testShortName": "MyTestName27",	
+			"testShortName": "MyTestName27",
 			"requestor": "unitTesting27",
 			"status" : "Building",
-			"queued" : "2022-05-10T04:00:13.043037Z",	
+			"queued" : "2022-05-10T04:00:13.043037Z",
 			"startTime": "2022-05-10T04:10:36.159003Z",
 			"methods": [{
 				"className": "myTestPackage27.MyTestName27",
-				"methodName": "myTestMethodName",	
-				"type": "test",	
-				"status": "Done",	
+				"methodName": "myTestMethodName",
+				"type": "test",
+				"status": "Done",
 				"result": "UNKNOWN",
 				"startTime": null,
-				"endTime": null,	
-				"runLogStart":null,	
-				"runLogEnd":null,	
+				"endTime": null,
+				"runLogStart":null,
+				"runLogEnd":null,
 				"befores":[]
 			}]
 		},
 		"artifacts": [{
-			"artifactPath": "myPathToArtifact2",	
+			"artifactPath": "myPathToArtifact2",
 			"contentType":	"application/json"
 		}]
 	}`
@@ -366,10 +367,11 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	}
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -397,10 +399,11 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	}
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -428,10 +431,11 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	}
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1041")
@@ -457,6 +461,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	defer server.Close()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 	mockConsole := utils.NewMockConsole()
 
@@ -464,8 +469,9 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockFileSystem.WriteTextFile(runName+dummyTxtArtifact.path, "dummy text file")
 	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
+
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	assert.Nil(t, err)
@@ -501,6 +507,7 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	defer server.Close()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockConsole := utils.NewMockConsole()
 	mockTimeService := utils.NewMockTimeService()
 
@@ -508,8 +515,9 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	mockFileSystem.WriteTextFile(runName+"/dummy.txt", "dummy text file")
 	mockFileSystem.WriteTextFile(runName+"/run.log", "dummy log")
 
+
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	assert.NotNil(t, err)
@@ -541,10 +549,11 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.path)
@@ -578,10 +587,11 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + dummyArtifact.path)
@@ -616,12 +626,13 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 	mockFileSystem := files.NewMockFileSystem()
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1074")
@@ -646,12 +657,13 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 	mockFileSystem := files.NewMockFileSystem()
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1073")
@@ -687,9 +699,11 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	// U27-1-2023-2023-05-10T06:00:13 	(test did not finish)
@@ -755,11 +769,12 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 	mockTimeService.Sleep(time.Second)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	// U27-1-2023-05-10T06:00:13 	(test did not finish)
@@ -808,10 +823,11 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 	// Then...
 
 	assert.Contains(t, err.Error(), "GAL1083E")
@@ -837,10 +853,11 @@ func TestRunsDownloadWithInvalidRunName(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 
@@ -872,9 +889,11 @@ func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
 
 	// Then...
 	run1FolderName := runName + "-" + mockTimeService.Now().Format("2006-01-02_15:04:05")
@@ -907,10 +926,11 @@ func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, "/myfolder")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, "/myfolder")
 
 	// Then...
 	downloadedArtifactExists, _ := mockFileSystem.Exists("/myfolder/" + runName + dummyArtifact.path)

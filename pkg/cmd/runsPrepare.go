@@ -91,7 +91,10 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	}
 
 	// Create an API client
-	launcher := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
+	launcher, err := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL, galasaHome)
+	if err != nil {
+		panic(err)
+	}
 
 	testSelection, err := runs.SelectTests(launcher, &prepareSelectionFlags)
 	if err != nil {

@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
@@ -48,6 +47,7 @@ func GetRuns(
 	timeService utils.TimeService,
 	console utils.Console,
 	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 ) error {
 
 	var err error
@@ -68,7 +68,7 @@ func GetRuns(
 	}
 
 	if (err == nil) && (resultParameter != "") {
-		resultParameter, err = ValidateResultParameter(resultParameter, apiServerUrl)
+		resultParameter, err = ValidateResultParameter(resultParameter, apiClient)
 	}
 
 	if err == nil {
@@ -76,11 +76,11 @@ func GetRuns(
 		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
 			var runJson []galasaapi.Run
-			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, timeService, apiServerUrl)
+			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, timeService, apiClient)
 			if err == nil {
 				// Some formatters need extra fields filled-in so they can be displayed.
 				if chosenFormatter.IsNeedingMethodDetails() {
-					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiServerUrl)
+					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiClient)
 				}
 
 				if err == nil {
@@ -169,17 +169,16 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 	return chosenFormatter, err
 }
 
-func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiServerUrl string) ([]galasaapi.Run, error) {
+func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.APIClient) ([]galasaapi.Run, error) {
 	var err error = nil
 	var runsDetails []galasaapi.Run = make([]galasaapi.Run, 0)
-	restClient := api.InitialiseAPI(apiServerUrl)
 	var context context.Context = nil
 	var details *galasaapi.Run
 	var httpResponse *http.Response
 
 	for _, run := range runs {
 		runid := run.GetRunId()
-		details, httpResponse, err = restClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).Execute()
+		details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).Execute()
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 		} else {
@@ -203,16 +202,13 @@ func GetRunsFromRestApi(
 	fromAgeMins int,
 	toAgeMins int,
 	timeService utils.TimeService,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 ) ([]galasaapi.Run, error) {
 
 	var err error = nil
 	var results []galasaapi.Run = make([]galasaapi.Run, 0)
 
 	var context context.Context = nil
-
-	// A HTTP client which can communicate with the api server in an ecosystem.
-	restClient := api.InitialiseAPI(apiServerUrl)
 
 	now := timeService.Now()
 	fromTime := now.Add(-(time.Duration(fromAgeMins) * time.Minute)).UTC() // Add a minus, so subtract
@@ -227,7 +223,7 @@ func GetRunsFromRestApi(
 		var runData *galasaapi.RunResults
 		var httpResponse *http.Response
 		log.Printf("Requesting page '%d' ", pageNumberWanted)
-		apicall := restClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context)
+		apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context)
 		if fromAgeMins != 0 {
 			apicall = apicall.From(fromTime)
 		}

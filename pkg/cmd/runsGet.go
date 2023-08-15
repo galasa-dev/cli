@@ -83,10 +83,15 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
+	apiClient, err := api.InitialiseAPIWithAuthHeader(apiServerUrl, galasaHome)
+	if err != nil {
+		panic(err)
+	}
+
 	timeService := utils.NewRealTimeService()
 
 	// Call to process the command in a unit-testable way.
-	err = runs.GetRuns(runName, age, requestor, result, outputFormatString, timeService, console, apiServerUrl)
+	err = runs.GetRuns(runName, age, requestor, result, outputFormatString, timeService, console, apiServerUrl, apiClient)
 	if err != nil {
 		panic(err)
 	}

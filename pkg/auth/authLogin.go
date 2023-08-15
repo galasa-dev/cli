@@ -95,7 +95,7 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 }
 
 // Writes a new bearer-token.json file containing a JWT with the following format:
-// { 
+// {
 //   "jwt": "<bearer-token-here>"
 // }
 func writeBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome utils.GalasaHome, jwt string) error {
