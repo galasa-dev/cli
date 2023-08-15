@@ -8,8 +8,9 @@ package api
 import (
 	"io"
 	"net/http"
-	"net/url"
+	//"net/url"
 	"strings"
+	//"path/filepath"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
@@ -73,19 +74,17 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 }
 
 // getDefaultBootstrapPath - Work out where the boostrap file can normally be found.
-func getDefaultBootstrapPath(galasaHome utils.GalasaHome) (string, error) {
-	var path string = ""
+func getDefaultBootstrapPath(galasaHome utils.GalasaHome) (string) {
 
 	// Turn the path into a URL
 	// This may involve changing the direction of slash characters.
-	baseUrl, err := url.Parse("file:///")
-	if err == nil {
-		// All URLs have forward-facing slashes.
-		fullUrl := baseUrl.JoinPath(galasaHome.GetUrlFolderPath(), "bootstrap.properties")
-		path = fullUrl.String()
-	}
+	baseUrl :="file://"
+	
+	// All URLs have forward-facing slashes.
+	fullUrl := baseUrl + galasaHome.GetUrlFolderPath() + "/bootstrap.properties"
 
-	return path, err
+
+	return fullUrl
 }
 
 // loadBootstrap - Loads the contents of a bootstrap file into memory.
@@ -112,7 +111,7 @@ func LoadBootstrap(
 
 	// If it's still not clear, use the default bootstrap.properties in the ${HOME}/.galasa folder.
 	if path == "" {
-		path, err = getDefaultBootstrapPath(galasaHome)
+		path = getDefaultBootstrapPath(galasaHome)
 	}
 
 	if err == nil {
