@@ -161,9 +161,9 @@ var (
 	GALASA_ERROR_INVALID_RESULT_ARGUMENT  = NewMessageType("GAL1087E: Invalid '--result' parameter value: %s. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: %s", 1087, STACK_TRACE_NOT_WANTED)
 
 	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE            = NewMessageType("GAL1088E: Unable to delete the bearer token file.", 1088, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_PROPERTIES_FILE = NewMessageType("GAL1089E: Unable to unmarshal the galasactl.properties file.", 1090, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER       = NewMessageType("GAL1090E: Could not get JWT from API server. Reason: '%s'", 1091, STACK_TRACE_WANTED)
-	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE             = NewMessageType("GAL1091E: Could not get JWT from bearer token file '%s'. Reason: '%s'. Please ensure you are authenticated by running 'galasactl auth login'", 1092, STACK_TRACE_WANTED)
+	GALASA_ERROR_MISSING_GALASACTL_PROPERTY                    = NewMessageType("GAL1089E: Property '%s' was expected but has not been set in the galasactl.properties file.", 1090, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER       = NewMessageType("GAL1090E: Could not get security bearer token from API server. Reason: '%s'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret", 1091, STACK_TRACE_WANTED)
+	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE             = NewMessageType("GAL1091E: Could not get security bearer token from file '%s'. Reason: '%s'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked", 1092, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNAUTHORIZED					               = NewMessageType("GAL1092E: Unauthorized. Please log in to your ecosystem by running 'galasactl auth login'", 1093, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...

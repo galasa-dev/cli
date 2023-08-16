@@ -33,7 +33,7 @@ func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.Ga
 	return err
 }
 
-// Gets authentication properties from the user's galasactl.yaml file
+// Gets authentication properties from the user's galasactl.properties file
 func getAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome) (galasaapi.AuthProperties, error) {
 	var err error = nil
 	authProperties := galasaapi.NewAuthProperties()
@@ -41,19 +41,38 @@ func getAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome)
 	galasactlPropertiesFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.properties")
 	galasactlProperties, err := props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
 	if err == nil {
-		authProperties.SetClientId(galasactlProperties["auth.client.id"])
-		authProperties.SetSecret(galasactlProperties["auth.secret"])
-		authProperties.SetRefreshToken(galasactlProperties["auth.access.token"])
+		clientIdProperty := "auth.client.id"
+		secretProperty := "auth.secret"
+		accessTokenProperty := "auth.access.token"
 
-		if authProperties.GetClientId() == "" || authProperties.GetSecret() == "" || authProperties.GetRefreshToken() == "" {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_GALASACTL_PROPERTIES_FILE)
+		requiredAuthProperties := []string{clientIdProperty, secretProperty, accessTokenProperty}
+		err = validateRequiredGalasactlProperties(requiredAuthProperties, galasactlProperties)
+
+		if err == nil {
+			authProperties.SetClientId(galasactlProperties[clientIdProperty])
+			authProperties.SetSecret(galasactlProperties[secretProperty])
+			authProperties.SetRefreshToken(galasactlProperties[accessTokenProperty])
 		}
+
 	} else {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, galasactlPropertiesFilePath, err.Error())
 	}
 
 	return *authProperties, err
 }
+
+// Ensures the provided galasactl properties contain values for the required properties, returning an error if a property is missing
+func validateRequiredGalasactlProperties(requiredProperties []string, galasactlProperties props.JavaProperties) error {
+	var err error = nil
+	for _, property := range requiredProperties {
+		if galasactlProperties[property] == "" {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_GALASACTL_PROPERTY, property)
+			break
+		}
+	}
+	return err
+}
+
 
 // Gets a JSON Web Token (JWT) from the API server's /auth endpoint
 func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthProperties) (string, error) {

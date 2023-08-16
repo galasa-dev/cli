@@ -183,3 +183,31 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 	assert.NotNil(t, err, "Should return an error if the API request returns an error")
 	assert.ErrorContains(t, err, "GAL1090E")
 }
+
+func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+
+	mockClientId := "dummyId"
+	mockSecret := "shhhh"
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
+		"auth.client.id=%s\n"+
+		"auth.secret=%s\n", mockClientId, mockSecret))
+
+	mockResponse := `{"jwt":"blah"}`
+	server := NewAuthServletMock(t, 200, mockResponse)
+	defer server.Close()
+
+	apiServerUrl := server.URL
+
+	// When...
+	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome)
+
+	// Then...
+	assert.NotNil(t, err, "Should return an error if the auth.access.token property is missing")
+	assert.ErrorContains(t, err, "GAL1089E")
+}
