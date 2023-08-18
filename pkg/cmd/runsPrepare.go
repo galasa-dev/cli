@@ -91,7 +91,7 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	}
 
 	// Create an API client
-	launcher, err := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL, galasaHome)
+	launcher, err := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL, fileSystem, galasaHome)
 	if err != nil {
 		panic(err)
 	}

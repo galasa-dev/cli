@@ -4,6 +4,7 @@
 package auth
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/galasa.dev/cli/pkg/files"
@@ -46,4 +47,23 @@ func TestLogoutWithNoBearerTokenFileDoesNotThrowError(t *testing.T) {
 	// Then...
 	assert.False(t, fileExists, "bearer token file should not exist")
 	assert.Nil(t, err, "Should not return an error if the bearer token file does not already exist")
+}
+
+func TestLogoutWithFailingFileExistsReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewOverridableMockFileSystem()
+	mockConsole := utils.NewMockConsole()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	mockFileSystem.VirtualFunction_Exists = func(targetFilePath string) (bool, error) {
+		return false, errors.New("simulating a failed file exists check")
+	}
+
+	// When...
+	err := Logout(mockFileSystem, mockConsole, mockEnvironment, mockGalasaHome)
+
+	// Then...
+	assert.NotNil(t, err, "Should return an error if the file exists check fails")
+	assert.ErrorContains(t, err, "GAL1088E")
 }

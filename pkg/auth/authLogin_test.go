@@ -95,9 +95,9 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
-		"auth.client.id=%s\n"+
-		"auth.secret=%s\n"+
-		"auth.access.token=%s", mockClientId, mockSecret, mockRefreshToken))
+		"GALASA_CLIENT_ID=%s\n"+
+		"GALASA_SECRET=%s\n"+
+		"GALASA_ACCESS_TOKEN=%s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockResponse := `{"jwt":"blah"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
@@ -130,9 +130,9 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
-		"auth.client.id=%s\n"+
-		"auth.secret=%s\n"+
-		"auth.access.token=%s", mockClientId, mockSecret, mockRefreshToken))
+		"GALASA_CLIENT_ID=%s\n"+
+		"GALASA_SECRET=%s\n"+
+		"GALASA_ACCESS_TOKEN=%s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockFileSystem.VirtualFunction_WriteTextFile = func(path string, contents string) error {
 		return errors.New("simulating a failed write operation")
@@ -164,11 +164,10 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 	mockSecret := "shhhh"
 	mockRefreshToken := "abcdefg"
 
-
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
-		"auth.client.id=%s\n"+
-		"auth.secret=%s\n"+
-		"auth.access.token=%s", mockClientId, mockSecret, mockRefreshToken))
+		"GALASA_CLIENT_ID=%s\n"+
+		"GALASA_SECRET=%s\n"+
+		"GALASA_ACCESS_TOKEN=%s", mockClientId, mockSecret, mockRefreshToken))
 
 	mockResponse := `{"error":"something went wrong!"}`
 	server := NewAuthServletMock(t, 500, mockResponse)
@@ -195,8 +194,8 @@ func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
 	mockClientId := "dummyId"
 	mockSecret := "shhhh"
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
-		"auth.client.id=%s\n"+
-		"auth.secret=%s\n", mockClientId, mockSecret))
+		"GALASA_CLIENT_ID=%s\n"+
+		"GALASA_SECRET=%s\n", mockClientId, mockSecret))
 
 	mockResponse := `{"jwt":"blah"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
@@ -210,4 +209,51 @@ func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the auth.access.token property is missing")
 	assert.ErrorContains(t, err, "GAL1089E")
+}
+
+func TestGetAuthenticatedAPIClientWithBearerTokenFileReturnsClient(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	apiServerUrl := "http://dummy-url"
+
+	bearerTokenFilePath := mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json"
+	mockFileSystem.WriteTextFile(bearerTokenFilePath, `{"jwt":"blah"}`)
+
+	// When...
+	_, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
+
+	// Then...
+	assert.Nil(t, err, "Should not return an error if the bearer-token.json file exists")
+}
+
+func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+
+	mockClientId := "dummyId"
+	mockSecret := "shhhh"
+	mockRefreshToken := "abcdefg"
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
+		"GALASA_CLIENT_ID=%s\n"+
+		"GALASA_SECRET=%s\n"+
+		"GALASA_ACCESS_TOKEN=%s", mockClientId, mockSecret, mockRefreshToken))
+
+	mockResponse := `{"jwt":"blah"}`
+	server := NewAuthServletMock(t, 200, mockResponse)
+	defer server.Close()
+
+	apiServerUrl := server.URL
+
+	// When...
+	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
+
+	// Then...
+	assert.Nil(t, err, "Should not return an error if the login was successful")
+	assert.NotNil(t, apiClient, "API client should not be nil if the login was successful")
 }

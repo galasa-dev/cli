@@ -10,8 +10,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/auth"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
@@ -26,14 +27,14 @@ type RemoteLauncher struct {
 //----------------------------------------------------------------------------------
 
 // NewRemoteLauncher create a remote launcher.
-func NewRemoteLauncher(apiServerUrl string, galasaHome utils.GalasaHome) (*RemoteLauncher, error) {
+func NewRemoteLauncher(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) (*RemoteLauncher, error) {
 	var err error = nil
 	log.Printf("NewRemoteLauncher(%s) entered.", apiServerUrl)
 
 	launcher := new(RemoteLauncher)
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
-	launcher.apiClient, err = api.InitialiseAPIWithAuthHeader(apiServerUrl, galasaHome)
+	launcher.apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
 
 	return launcher, err
 }

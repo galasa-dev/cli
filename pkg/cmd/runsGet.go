@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa.dev/cli/pkg/auth"
 	"github.com/galasa.dev/cli/pkg/files"
 	"github.com/galasa.dev/cli/pkg/runs"
 	"github.com/galasa.dev/cli/pkg/utils"
@@ -83,7 +84,7 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-	apiClient, err := api.InitialiseAPIWithAuthHeader(apiServerUrl, galasaHome)
+	apiClient, err := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
 	if err != nil {
 		panic(err)
 	}

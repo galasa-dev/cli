@@ -12,15 +12,15 @@ import (
 func Logout(fileSystem files.FileSystem, console utils.Console, env utils.Environment, galasaHome utils.GalasaHome) error {
 
 	var err error = nil
-	bearerTokenFile := fmt.Sprintf("%s/%s", galasaHome.GetNativeFolderPath(), "bearer-token.json")
-	if _, err := fileSystem.Exists(bearerTokenFile); err == nil {
-		log.Printf("Deleting bearer token file '%s'", bearerTokenFile)
-		fileSystem.DeleteFile(bearerTokenFile)
-		log.Printf("Deleted bearer token file '%s' OK", bearerTokenFile)
+	bearerTokenFilePath := fmt.Sprintf("%s/%s", galasaHome.GetNativeFolderPath(), "bearer-token.json")
+	if _, err = fileSystem.Exists(bearerTokenFilePath); err == nil {
+		log.Printf("Deleting bearer token file '%s'", bearerTokenFilePath)
+		fileSystem.DeleteFile(bearerTokenFilePath)
+		log.Printf("Deleted bearer token file '%s' OK", bearerTokenFilePath)
 	}
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE, bearerTokenFilePath)
 	}
 
 	return err

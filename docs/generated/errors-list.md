@@ -88,7 +88,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1085E: Programming logic error. ReadTextFile operation on embedded file system failed. Reason is {}
 - GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '{}'
 - GAL1087E: Invalid '--result' parameter value: {}. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: {}
-- GAL1088E: Unable to delete the bearer token file.
+- GAL1088E: Unable to delete the bearer token file '{}'.
 - GAL1089E: Property '{}' was expected but has not been set in the galasactl.properties file.
 - GAL1090E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
 - GAL1091E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
