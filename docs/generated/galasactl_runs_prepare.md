@@ -15,7 +15,7 @@ galasactl runs prepare [flags]
 ```
       --append             Append tests to existing portfolio
       --bundle strings     bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
-      --class strings      test class names, for building a portfolio when a stream/test catalog is not available. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
+      --class strings      test class names to run from the specified stream. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
   -h, --help               help for prepare
       --override strings   overrides to be sent with the tests (overrides in the portfolio will take precedence)
       --package strings    packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex

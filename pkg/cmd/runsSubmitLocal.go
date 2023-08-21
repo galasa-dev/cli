@@ -31,11 +31,10 @@ var (
 	// Variables set by cobra's command-line parsing.
 	runsSubmitLocalCmdParams launcher.RunsSubmitLocalCmdParameters
 
-	submitLocalSelectionFlags = runs.TestSelectionFlags{}
+	submitLocalSelectionFlags = runs.NewTestSelectionFlags()
 )
 
 func init() {
-
 	// currentUserName := runs.GetCurrentUserName()
 
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.RemoteMaven, "remoteMaven",
@@ -53,6 +52,7 @@ func init() {
 		"The maven coordinates of the obr bundle(s) which refer to your test bundles. "+
 			"The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' "+
 			"Multiple instances of this flag can be used to describe multiple obr bundles.")
+	runsSubmitLocalCmd.MarkFlagRequired("obr")
 
 	runsSubmitLocalCmd.Flags().Uint32Var(&runsSubmitLocalCmdParams.DebugPort, "debugPort", 0,
 		"The port to use when the --debug option causes the testcase to connect to a java debugger. "+
@@ -76,7 +76,8 @@ func init() {
 			"The connection is established using the --debugMode and --debugPort values.",
 	)
 
-	runs.AddCommandFlags(runsSubmitLocalCmd, &submitLocalSelectionFlags)
+	runs.AddClassFlag(runsSubmitLocalCmd, submitLocalSelectionFlags, true, "test class names."+
+		" The format of each entry is osgi-bundle-name/java-class-name. Java class names are fully qualified. No .class suffix is needed.")
 
 	runsSubmitCmd.AddCommand(runsSubmitLocalCmd)
 }
@@ -134,7 +135,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 			runsSubmitCmdParams,
 			launcherInstance,
 			timeService,
-			&submitLocalSelectionFlags,
+			submitLocalSelectionFlags,
 		)
 	}
 
