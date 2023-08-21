@@ -62,7 +62,7 @@ func AddCommandFlags(command *cobra.Command, flags *TestSelectionFlags) {
 	command.Flags().StringVarP(&flags.stream, "stream", "s", "", "test stream to extract the tests from")
 	flags.regexSelect = command.Flags().Bool("regex", false, "Test selection is performed by using regex")
 
-	AddClassFlag(command, flags, false, "test class names to run from the specified stream."+
+	AddClassFlag(command, flags, false, "test class names to run from the specified stream or portfolio."+
 		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
 }
 
