@@ -74,7 +74,6 @@ func validateRequiredGalasactlProperties(requiredProperties []string, galasactlP
 	return err
 }
 
-
 // Gets a JSON Web Token (JWT) from the API server's /auth endpoint
 func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthProperties) (string, error) {
 	var err error = nil
