@@ -124,6 +124,7 @@ func LoadBootstrap(
 			// The path looks like a URL...
 			bootstrap, err = loadBootstrapFromUrl(path, defaultApiServerURL, urlResolutionService)
 		} else {
+
 			// The path looks like a file...
 			bootstrap, err = loadBootstrapFromFile(path, defaultApiServerURL, fileSystem)
 		}
