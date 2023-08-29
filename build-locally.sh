@@ -612,7 +612,8 @@ cleanup_temp
 calculate_galasactl_executable
 galasa_home_init
 
-build_portfolio
+# Local environments don't support the portfolio yet.
+# build_portfolio
 
 generate_galasactl_documentation
 
