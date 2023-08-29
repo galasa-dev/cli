@@ -30,12 +30,13 @@ var (
 	// Variables set by cobra's command-line parsing.
 	runsSubmitCmdParams utils.RunsSubmitCmdParameters
 
-	submitSelectionFlags = runs.TestSelectionFlags{}
+	submitSelectionFlags = runs.NewTestSelectionFlags()
 )
 
 func init() {
 
-	runsSubmitCmd.PersistentFlags().StringVarP(&runsSubmitCmdParams.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
+	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdParams.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
+
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportJsonFilename, "reportjson", "", "json file to record the final results in")
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
@@ -81,7 +82,7 @@ func init() {
 
 	runsSubmitCmd.PersistentFlags().BoolVar(&(runsSubmitCmdParams.NoExitCodeOnTestFailures), "noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
 
-	runs.AddCommandFlags(runsSubmitCmd, &submitSelectionFlags)
+	runs.AddCommandFlags(runsSubmitCmd, submitSelectionFlags)
 
 	runsCmd.AddCommand(runsSubmitCmd)
 }
@@ -124,7 +125,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
 
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, &submitSelectionFlags)
+		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, submitSelectionFlags)
 	}
 
 	if err != nil {
