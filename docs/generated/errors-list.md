@@ -9,7 +9,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio
 - GAL1007E: Failed to create report yaml file {}. Reason is {}
 - GAL1008E: Failed to check if group {} exists already. Reason is {}
-- GAL1009E: The submit command requires either test selection flags or a portfolio
+- GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test) or --portfolio flag to be specified. Use the --help flag for more details.
 - GAL1010E: Invalid override '{}'
 - GAL1011E: Failed to encode the yaml file {}. Reason is {}
 - GAL1012E: Failed to prepare test report for writing to json file {}. Reason is {}
@@ -31,7 +31,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1028E: Failed to unmarshal test catalog from REST reply for property '{}', stream '{}'. Reason is {}
 - GAL1029E: Stream '{}' is not found in the ecosystem. There are no streams set up. Ask your Galasa system administrator to add a new stream with the desired name.
 - GAL1030E: Stream '{}' is not found in the ecosystem. Valid streams are:{}. Try again using a valid stream, or ask your Galasa system administrator to add a new stream with the desired name.
-- GAL1031E: Invalid flags. --bundle, --package, --test and --tag flags can only be specified if --stream is provided.
+- GAL1031E: Invalid flags. --bundle, --package, --test and --tag --class flags can only be specified if --stream is provided.
 - GAL1032E: Invalid select regex '{}'. Reason is {}
 - GAL1033E: Invalid select quoted regex '{}'. Reason is {}
 - GAL1034E: Class '{}' is not format 'bundle/class'

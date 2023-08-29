@@ -14,7 +14,7 @@ galasactl runs submit [flags]
 
 ```
       --bundle strings             bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
-      --class strings              test class names, for building a portfolio when a stream/test catalog is not available. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
+      --class strings              test class names to run from the specified stream or portfolio. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
   -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
   -h, --help                       help for submit
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
@@ -41,7 +41,7 @@ galasactl runs submit [flags]
 ### Options inherited from parent commands
 
 ```
-  -b, --bootstrap string    Bootstrap URL
+  -b, --bootstrap string    Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Examples: http://galasa-cicsk8s.hursley.ibm.com/bootstrap , file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
       --galasahome string   Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
   -l, --log string          File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
 ```

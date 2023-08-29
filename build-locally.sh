@@ -291,71 +291,6 @@ function build_generated_source_gradle {
 }
 
 #--------------------------------------------------------------------------
-# Execute the tests in Galasa
-
-function run_test_java_minus_jar_method {
-
-    cd $BASEDIR/temp
-
-    TEST_BUNDLE=$1
-    TEST_JAVA_CLASS=$2
-    TEST_OBR_GROUP_ID=$3
-    TEST_OBR_ARTIFACT_ID=$4
-    TEST_OBR_VERSION=$5
-
-    export M2_PATH=$(cd ~/.m2 ; pwd)
-    export BOOT_JAR_PATH=${BASEDIR}/pkg/embedded/templates/galasahome/lib/galasa-boot-${BOOT_JAR_VERSION}.jar
-
-    export OBR_VERSION="0.30.0"
-
-
-    # Local .m2 content over-rides these anyway...
-    # use development version of the OBR
-    export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
-    # else go to maven central
-    #export REMOTE_MAVEN=https://repo.maven.apache.org/maven2
-
-
-
-    info "Running the following command..."
-    cat << EOF 
-
-    java -jar ${BOOT_JAR_PATH} \\
-    --localmaven file:${M2_PATH}/repository/ \\
-    --remotemaven $REMOTE_MAVEN \\
-    --bootstrap file:${HOME}/.galasa/bootstrap.properties \\
-    --overrides file:${HOME}/.galasa/overrides.properties \\
-    --obr mvn:dev.galasa/dev.galasa.uber.obr/${OBR_VERSION}/obr \\
-    --obr mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr \\
-    --test ${TEST_BUNDLE}/${TEST_JAVA_CLASS} 
-
-EOF
-
-    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-
-    java -jar ${BOOT_JAR_PATH} \
-    --localmaven file:${M2_PATH}/repository/ \
-    --remotemaven $REMOTE_MAVEN \
-    --bootstrap file:${HOME}/.galasa/bootstrap.properties \
-    --overrides file:${HOME}/.galasa/overrides.properties \
-    --obr mvn:dev.galasa/dev.galasa.uber.obr/${OBR_VERSION}/obr \
-    --obr mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr \
-    --test ${TEST_BUNDLE}/${TEST_JAVA_CLASS} | tee jvm-log.txt | grep "[*][*][*]" | grep -v "[*][*][*][*]" | sed -e "s/[--]*//g"
-    cat jvm-log.txt | grep "Passed - Test class ${TEST_JAVA_CLASS}"
-    rc=$?
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to run the test"
-        exit 1
-    fi
-    success "Test ran OK"
-}
-
-
-
-
-
-
-#--------------------------------------------------------------------------
 # Build a portfolio
 function build_portfolio {
     h2 "Building a portfolio file"
@@ -364,45 +299,12 @@ function build_portfolio {
 
     cmd="${BASEDIR}/bin/${galasactl_command} runs prepare \
     --portfolio my.portfolio \
-    --bootstrap file:~/.galasa/bootstrap.properties \
+    --bootstrap file://${GALASA_HOME}/bootstrap.properties \
     --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
     --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
-    --log -"
-
-    TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayeeExtended
-    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
-
-    # Run the Account tests
-    TEST_BUNDLE=dev.galasa.example.banking.account
-    TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccount
-    TEST_OBR_GROUP_ID=dev.galasa.example.banking
-    TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
-    TEST_OBR_VERSION=0.0.1-SNAPSHOT
-    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
-
-    TEST_JAVA_CLASS=dev.galasa.example.banking.account.TestAccountExtended
-    run_test_java_minus_jar_method $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION   
- 
-    success "OK"
-}
-
-
-#--------------------------------------------------------------------------
-# Build a portfolio
-function build_portfolio {
-    h2 "Building a portfolio file"
-
-    cd ${BASEDIR}/temp
-
-    cmd="${BASEDIR}/bin/${galasactl_command} runs prepare \
-    --portfolio my.portfolio \
-    --bootstrap file:~/.galasa/bootstrap.properties \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccountExtended \
-    --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount \
-    --log -"
+    --log ${BASEDIR}/temp/portfolio-create-log.txt"
 
     info "Command is: $cmd"
-
     $cmd
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -697,24 +599,23 @@ download_dependencies
 generate_rest_client
 build_executables
 
-generate_galasactl_documentation
+
 
 
 # Now the steps to test it.
 
 h2 "Setting up GALASA_HOME"
-export GALASA_HOME=${BASEDIR}/temp/.galasa
+export GALASA_HOME=${BASEDIR}/temp/home
 success "GALASA_HOME is set to be ${GALASA_HOME}"
 
+cleanup_temp
 calculate_galasactl_executable
 galasa_home_init
 
+# Local environments don't support the portfolio yet.
+# build_portfolio
 
-export GALASA_HOME=${BASEDIR}/temp/home
-cleanup_temp
-calculate_galasactl_executable
-
-
+generate_galasactl_documentation
 
 # Gradle ...
 cleanup_temp
@@ -744,8 +645,6 @@ build_generated_source_gradle
 run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
 
 
-# run_tests_java_minus_jar_method
-# build_portfolio
 
 
 # launch_test_on_ecosystem

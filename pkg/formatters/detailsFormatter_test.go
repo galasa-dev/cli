@@ -96,19 +96,19 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name           : U456\n" +
-			"status         : Finished\n" +
-			"result         : Passed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
+		"name                : U456\n" +
+			"status              : Finished\n" +
+			"result              : Passed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"Total:1 Passed:1\n"
@@ -135,53 +135,53 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name           : U123\n" +
-			"status         : Finished\n" +
-			"result         : Passed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
+		"name                : U123\n" +
+			"status              : Finished\n" +
+			"result              : Passed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : U456\n" +
-			"status         : Finished\n" +
-			"result         : Failed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
+			"name                : U456\n" +
+			"status              : Finished\n" +
+			"result              : Failed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : U789\n" +
-			"status         : Finished\n" +
-			"result         : Passed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-789/runlog\n" +
+			"name                : U789\n" +
+			"status              : Finished\n" +
+			"result              : Passed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-789/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"Total:3 Passed:2 Failed:1\n"
@@ -206,19 +206,19 @@ func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) 
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name           : U456\n" +
-			"status         : Finished\n" +
-			"result         : Passed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : \n" +
-			"duration(ms)   : \n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
+		"name                : U456\n" +
+			"status              : Finished\n" +
+			"result              : Passed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : \n" +
+			"duration(ms)        : \n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"Total:1 Passed:1\n"
@@ -243,20 +243,20 @@ func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name           : U456\n" +
-			"status         : Finished\n" +
-			"result         : Passed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
+		"name                : U456\n" +
+			"status              : Finished\n" +
+			"result              : Passed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time duration(ms)\n" +
-			"testCoreIvtTest test finished passed 2023-05-05 06:03:38          \n" +
+			"method          type status   result start-time(UTC)     end-time(UTC) duration(ms)\n" +
+			"testCoreIvtTest test finished passed 2023-05-05 06:03:38               \n" +
 			"\n" +
 			"Total:1 Passed:1\n"
 
@@ -288,155 +288,155 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		"name           : U123\n" +
-			"status         : Finished\n" +
-			"result         : Passed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
+		"name                : U123\n" +
+			"status              : Finished\n" +
+			"result              : Passed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : U456\n" +
-			"status         : Finished\n" +
-			"result         : Failed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
+			"name                : U456\n" +
+			"status              : Finished\n" +
+			"result              : Failed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : U789\n" +
-			"status         : Finished\n" +
-			"result         : Passed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-789/runlog\n" +
+			"name                : U789\n" +
+			"status              : Finished\n" +
+			"result              : Passed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-789/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : C123\n" +
-			"status         : Finished\n" +
-			"result         : Passed With Defects\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-12345/runlog\n" +
+			"name                : C123\n" +
+			"status              : Finished\n" +
+			"result              : Passed With Defects\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-12345/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : C456\n" +
-			"status         : UNKNOWN\n" +
-			"result         : EnvFail\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-67890/runlog\n" +
+			"name                : C456\n" +
+			"status              : UNKNOWN\n" +
+			"result              : EnvFail\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-67890/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : C789\n" +
-			"status         : Finished\n" +
-			"result         : Failed With Defects\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-98765/runlog\n" +
+			"name                : C789\n" +
+			"status              : Finished\n" +
+			"result              : Failed With Defects\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-98765/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : L111\n" +
-			"status         : Finished\n" +
-			"result         : Failed\n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : 2023-05-05 06:00:15\n" +
-			"duration(ms)   : 1157\n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-543210/runlog\n" +
+			"name                : L111\n" +
+			"status              : Finished\n" +
+			"result              : Failed\n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : 2023-05-05 06:00:15\n" +
+			"duration(ms)        : 1157\n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-543210/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : L222\n" +
-			"status         : Building\n" +
-			"result         : \n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : \n" +
-			"duration(ms)   : \n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-222/runlog\n" +
+			"name                : L222\n" +
+			"status              : Building\n" +
+			"result              : \n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : \n" +
+			"duration(ms)        : \n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-222/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"---" +
 			"\n\n" +
-			"name           : L333\n" +
-			"status         : Generating\n" +
-			"result         : \n" +
-			"submitted-time : 2023-05-04 10:55:29\n" +
-			"start-time     : 2023-05-05 06:00:14\n" +
-			"end-time       : \n" +
-			"duration(ms)   : \n" +
-			"test-name      : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
-			"requestor      : galasa\n" +
-			"bundle         : dev.galasa\n" +
-			"run-log        : https://127.0.0.1/ras/runs/cbd-333/runlog\n" +
+			"name                : L333\n" +
+			"status              : Generating\n" +
+			"result              : \n" +
+			"submitted-time(UTC) : 2023-05-04 10:55:29\n" +
+			"start-time(UTC)     : 2023-05-05 06:00:14\n" +
+			"end-time(UTC)       : \n" +
+			"duration(ms)        : \n" +
+			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
+			"requestor           : galasa\n" +
+			"bundle              : dev.galasa\n" +
+			"run-log             : https://127.0.0.1/ras/runs/cbd-333/runlog\n" +
 			"\n" +
-			"method          type status   result start-time          end-time            duration(ms)\n" +
+			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
 			"testCoreIvtTest test finished passed 2023-05-05 06:03:38 2023-05-05 06:03:39 349\n" +
 			"\n" +
 			"Total:9 Passed:2 PassedWithDefects:1 Failed:2 FailedWithDefects:1 EnvFail:1 Active:2\n"

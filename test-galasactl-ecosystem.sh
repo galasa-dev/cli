@@ -413,7 +413,7 @@ function runs_get_check_summary_format_output {
     fi
 
     # Check headers
-    headers=("submitted-time" "name" "status" "result" "test-name")
+    headers=("submitted-time(UTC)" "name" "status" "result" "test-name")
 
     for header in "${headers[@]}"
     do
@@ -468,7 +468,7 @@ function runs_get_check_details_format_output {
     fi
 
     # Check method headers
-    headers=("method" "type" "status" "result" "start-time" "end-time" "duration(ms)")
+    headers=("method" "type" "status" "result" "start-time(UTC)" "end-time(UTC)" "duration(ms)")
 
     for header in "${headers[@]}"
     do
@@ -482,7 +482,7 @@ function runs_get_check_details_format_output {
     done  
 
     #check methods start on line 13 - implies other test details have outputted 
-    line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time[[:space:]]*end-time[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
+    line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time(UTC)[[:space:]]*end-time(UTC)[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
     expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then 
         # We expect a return code of '0' because the method header should be output on line 13.
@@ -679,7 +679,7 @@ function runs_get_check_requestor_parameter {
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
-    cat $output_file | grep "requestor      : $requestor" -q
+    cat $output_file | grep "requestor[ ]*:[ ]*$requestor" -q
     rc=$?
     # We expect a return code of '0' because the run name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -708,7 +708,7 @@ function runs_get_check_result_parameter {
     output_file="runs-get-output.txt"
     $cmd | tee $output_file
 
-    cat $output_file | grep "result         : $result" -q
+    cat $output_file | grep "result[ ]*:[ ]*$result" -q
     rc=$?
    
     if [[ "${rc}" != "0" ]]; then 
@@ -728,6 +728,7 @@ function launch_test_on_ecosystem_without_portfolio {
     cmd="${BASEDIR}/bin/${binary} runs submit \
     --bootstrap $bootstrap \
     --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+    --stream inttest
     --throttle 1 \
     --poll 10 \
     --progress 1 \
@@ -824,8 +825,7 @@ runs_get_check_result_parameter
 # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 # Launch test on ecosystem without a portfolio ...
-# NOTE - Bug found with this command so commenting out for now see issue xxx
-# launch_test_on_ecosystem_without_portfolio
+launch_test_on_ecosystem_without_portfolio
 
 # Attempt to create a test portfolio with an unknown test ...
 create_portfolio_with_unknown_test
