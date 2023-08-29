@@ -727,6 +727,7 @@ function launch_test_on_ecosystem_without_portfolio {
     cmd="${BASEDIR}/bin/${binary} runs submit \
     --bootstrap $bootstrap \
     --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+    --stream inttest
     --throttle 1 \
     --poll 10 \
     --progress 1 \
@@ -823,8 +824,7 @@ runs_get_check_result_parameter
 # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 # Launch test on ecosystem without a portfolio ...
-# NOTE - Bug found with this command so commenting out for now see issue xxx
-# launch_test_on_ecosystem_without_portfolio
+launch_test_on_ecosystem_without_portfolio
 
 # Attempt to create a test portfolio with an unknown test ...
 create_portfolio_with_unknown_test

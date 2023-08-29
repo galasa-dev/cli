@@ -136,14 +136,6 @@ galasactl runs prepare
           --regex
 ```
 
-Selecting tests without a test stream:-
-
-```
-galasactl runs prepare
-          --portfolio test.yaml
-          --class test.package.one/Test1
-          --class test.package.one/Test2
-```
 
 Providing test specific overrides:-
 

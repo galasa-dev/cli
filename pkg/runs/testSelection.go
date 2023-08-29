@@ -51,6 +51,39 @@ func NewTestSelectionFlags() *TestSelectionFlags {
 	return flags
 }
 
+type TestSelectionFlagValidator interface {
+	Validate(flags *TestSelectionFlags) error
+}
+
+type StreamBasedValidator struct {
+}
+
+func NewStreamBasedValidator() TestSelectionFlagValidator {
+	return new(StreamBasedValidator)
+}
+
+func (*StreamBasedValidator) Validate(flags *TestSelectionFlags) error {
+	var err error = nil
+	if flags.stream == "" {
+		if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 || len(*flags.classes) > 0 {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
+		}
+	}
+	return err
+}
+
+type ObrBasedValidator struct {
+}
+
+func NewObrBasedValidator() TestSelectionFlagValidator {
+	return new(ObrBasedValidator)
+}
+
+func (*ObrBasedValidator) Validate(flags *TestSelectionFlags) error {
+	var err error = nil
+	return err
+}
+
 // Adds a ton of flags to a cobra command like 'runs prepare' or 'runs submit'.
 // The flags are consistently added as a result.
 func AddCommandFlags(command *cobra.Command, flags *TestSelectionFlags) {
@@ -126,11 +159,11 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 	if err == nil {
 		testSelection = TestSelection{Classes: make([]TestClass, 0)}
 
-		if flags.stream == "" {
-			if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
-			}
-		}
+		// if flags.stream == "" {
+		// 	if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 || len(*flags.classes) > 0 {
+		// 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
+		// 	}
+		// }
 
 		if err == nil {
 			err = selectTestsByBundle(testCatalog, &testSelection, flags)

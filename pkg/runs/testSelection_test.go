@@ -6,6 +6,7 @@
 package runs
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,4 +39,42 @@ func TestAllocatingNewFlagsStructureHasEmptyArrays(t *testing.T) {
 	assert.Equal(t, len(*flags.classes), 0)
 
 	assert.NotNil(t, flags.regexSelect)
+
+	assert.Empty(t, flags.stream)
+}
+
+func TestStreamBasedValidatorNoStreamButClassSpecifiedCausesError(t *testing.T) {
+	flags := NewTestSelectionFlags()
+	validator := NewStreamBasedValidator()
+	// No stream set.
+
+	*flags.classes = make([]string, 1)
+	(*flags.classes)[0] = "myclass"
+
+	flags.stream = ""
+
+	err := validator.Validate(flags)
+
+	assert.NotNil(t, err)
+	if err != nil {
+		errorMessage := err.Error()
+		fmt.Printf("Error returned is : %s\n", errorMessage)
+		assert.Contains(t, err.Error(), "GAL1031E:")
+	}
+}
+
+func TestStreamBasedValidatorWithStreamAndClassSpecifiedIsOk(t *testing.T) {
+	flags := NewTestSelectionFlags()
+	validator := NewStreamBasedValidator()
+	// No stream set.
+
+	*flags.classes = make([]string, 1)
+	(*flags.classes)[0] = "myclass"
+
+	flags.stream = "myStream"
+
+	err := validator.Validate(flags)
+
+	assert.Nil(t, err)
+
 }
