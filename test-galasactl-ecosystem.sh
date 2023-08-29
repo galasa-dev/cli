@@ -678,7 +678,7 @@ function runs_get_check_requestor_parameter {
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
-    cat $output_file | grep "requestor      : $requestor" -q
+    cat $output_file | grep "requestor[ ]*:[ ]*$requestor" -q
     rc=$?
     # We expect a return code of '0' because the run name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -707,7 +707,7 @@ function runs_get_check_result_parameter {
     output_file="runs-get-output.txt"
     $cmd | tee $output_file
 
-    cat $output_file | grep "result         : $result" -q
+    cat $output_file | grep "result[ ]*:[ ]*$result" -q
     rc=$?
    
     if [[ "${rc}" != "0" ]]; then 
