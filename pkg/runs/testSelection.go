@@ -159,12 +159,6 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 	if err == nil {
 		testSelection = TestSelection{Classes: make([]TestClass, 0)}
 
-		// if flags.stream == "" {
-		// 	if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 || len(*flags.classes) > 0 {
-		// 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
-		// 	}
-		// }
-
 		if err == nil {
 			err = selectTestsByBundle(testCatalog, &testSelection, flags)
 		}

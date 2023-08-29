@@ -103,7 +103,7 @@ var (
 	GALASA_ERROR_CATALOG_UNMARSHAL_FAILED                 = NewMessageType("GAL1028E: Failed to unmarshal test catalog from REST reply for property '%s', stream '%s'. Reason is %s", 1028, STACK_TRACE_WANTED)
 	GALASA_ERROR_NO_STREAMS_CONFIGURED                    = NewMessageType("GAL1029E: Stream '%s' is not found in the ecosystem. There are no streams set up. Ask your Galasa system administrator to add a new stream with the desired name.", 1029, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_STREAM                           = NewMessageType("GAL1030E: Stream '%s' is not found in the ecosystem. Valid streams are:%s. Try again using a valid stream, or ask your Galasa system administrator to add a new stream with the desired name.", 1030, STACK_TRACE_WANTED)
-	GALASA_ERROR_STREAM_FLAG_REQUIRED                     = NewMessageType("GAL1031E: Invalid flags. --bundle, --package, --test and --tag --class flags can only be specified if --stream is provided.", 1031, STACK_TRACE_WANTED)
+	GALASA_ERROR_STREAM_FLAG_REQUIRED                     = NewMessageType("GAL1031E: Invalid flags. --bundle, --package, --test, --tag, and --class flags can only be specified if --stream is provided.", 1031, STACK_TRACE_WANTED)
 	GALASA_ERROR_SELECTION_REGEX_ERROR                    = NewMessageType("GAL1032E: Invalid select regex '%v'. Reason is %v", 1032, STACK_TRACE_WANTED)
 	GALASA_ERROR_SELECTION_REGEX_QUOTED_ERROR             = NewMessageType("GAL1033E: Invalid select quoted regex '%v'. Reason is %v", 1033, STACK_TRACE_WANTED)
 	GALASA_ERROR_CLASS_FORMAT                             = NewMessageType("GAL1034E: Class '%v' is not format 'bundle/class'", 1034, STACK_TRACE_WANTED)
