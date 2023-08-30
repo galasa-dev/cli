@@ -8,9 +8,7 @@ package api
 import (
 	"io"
 	"net/http"
-	//"net/url"
 	"strings"
-	//"path/filepath"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
@@ -74,15 +72,14 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 }
 
 // getDefaultBootstrapPath - Work out where the boostrap file can normally be found.
-func getDefaultBootstrapPath(galasaHome utils.GalasaHome) (string) {
+func getDefaultBootstrapPath(galasaHome utils.GalasaHome) string {
 
 	// Turn the path into a URL
 	// This may involve changing the direction of slash characters.
-	baseUrl :="file://"
-	
+	baseUrl := "file://"
+
 	// All URLs have forward-facing slashes.
 	fullUrl := baseUrl + galasaHome.GetUrlFolderPath() + "/bootstrap.properties"
-
 
 	return fullUrl
 }
