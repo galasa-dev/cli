@@ -92,7 +92,7 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	timeService := utils.NewRealTimeService()
 
 	// Call to process the command in a unit-testable way.
-	err = runs.GetRuns(runName, age, requestor, result, isActiveRuns, outputFormatString, timeService, console, apiServerUrl, env)
+	err = runs.GetRuns(runName, age, requestor, result, isActiveRuns, outputFormatString, timeService, console, apiServerUrl)
 	if err != nil {
 		panic(err)
 	}

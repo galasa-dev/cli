@@ -50,7 +50,6 @@ func GetRuns(
 	timeService utils.TimeService,
 	console utils.Console,
 	apiServerUrl string,
-	env utils.Environment,
 ) error {
 	var err error
 	var fromAge int
