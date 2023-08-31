@@ -31,7 +31,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1028E: Failed to unmarshal test catalog from REST reply for property '{}', stream '{}'. Reason is {}
 - GAL1029E: Stream '{}' is not found in the ecosystem. There are no streams set up. Ask your Galasa system administrator to add a new stream with the desired name.
 - GAL1030E: Stream '{}' is not found in the ecosystem. Valid streams are:{}. Try again using a valid stream, or ask your Galasa system administrator to add a new stream with the desired name.
-- GAL1031E: Invalid flags. --bundle, --package, --test and --tag --class flags can only be specified if --stream is provided.
+- GAL1031E: Invalid flags. --bundle, --package, --test, --tag, and --class flags can only be specified if --stream is provided.
 - GAL1032E: Invalid select regex '{}'. Reason is {}
 - GAL1033E: Invalid select quoted regex '{}'. Reason is {}
 - GAL1034E: Class '{}' is not format 'bundle/class'

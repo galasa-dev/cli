@@ -142,10 +142,11 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 	var testCatalog launcher.TestCatalog
 
 	if flags.stream != "" {
-		availableStreams, err := GetStreams(launcherInstance)
+		var availableStreams []string
+		availableStreams, err = GetStreams(launcherInstance)
 		if err == nil {
 
-			err := ValidateStream(availableStreams, flags.stream)
+			err = ValidateStream(availableStreams, flags.stream)
 			if err == nil {
 
 				testCatalog, err = launcherInstance.GetTestCatalog(flags.stream)

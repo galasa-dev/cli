@@ -7,13 +7,13 @@ package utils
 
 type MockEnv struct {
 	EnvVars  map[string]string
-	username string
+	userName string
 }
 
 func NewMockEnv() *MockEnv {
 	env := new(MockEnv)
 	env.EnvVars = make(map[string]string, 0)
-	env.username = ""
+	env.userName = ""
 	return env
 }
 
@@ -25,10 +25,10 @@ func (env *MockEnv) SetEnv(propertyName string, value string) {
 	env.EnvVars[propertyName] = value
 }
 
-func (env *MockEnv) GetUsername() (string, error) {
-	return env.username, nil
+func (env *MockEnv) GetUserName() (string, error) {
+	return env.userName, nil
 }
 
-func (env *MockEnv) SetUsername(name string) {
-	env.username = name
+func (env *MockEnv) SetUserName(name string) {
+	env.userName = name
 }

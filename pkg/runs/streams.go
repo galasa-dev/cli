@@ -29,10 +29,10 @@ func ValidateStream(streams []string, stream string) error {
 	}
 
 	// Build the error message.
-	var error *galasaErrors.GalasaError
+	var err *galasaErrors.GalasaError
 	if len(streams) < 1 {
 		// No streams configured.
-		error = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_STREAMS_CONFIGURED, stream)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_STREAMS_CONFIGURED, stream)
 	} else {
 
 		var buffer strings.Builder
@@ -43,8 +43,8 @@ func ValidateStream(streams []string, stream string) error {
 			buffer.WriteString("'")
 		}
 		availableStreamsList = buffer.String()
-		error = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_STREAM, stream, availableStreamsList)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_STREAM, stream, availableStreamsList)
 	}
 
-	return error
+	return err
 }

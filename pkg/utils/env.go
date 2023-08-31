@@ -15,7 +15,7 @@ import (
 // Environment is a thin interface layer above the os package which can be mocked out
 type Environment interface {
 	GetEnv(propertyName string) string
-	GetUsername() (string, error)
+	GetUserName() (string, error)
 }
 
 //------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ func (osEnv OSEnvironment) GetEnv(propertyName string) string {
 	return os.Getenv(propertyName)
 }
 
-func (osEnv OSEnvironment) GetUsername() (string, error) {
+func (osEnv OSEnvironment) GetUserName() (string, error) {
 	name, err := user.Current()
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_USERNAME_FAILED, err.Error())

@@ -721,18 +721,17 @@ function runs_get_check_result_parameter {
 
 #--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
-    h2 "Launching test on an ecosystem..."
+    h2 "Launching test on an ecosystem... directly... without a portfolio."
 
     cd ${BASEDIR}/temp
 
     cmd="${BASEDIR}/bin/${binary} runs submit \
     --bootstrap $bootstrap \
     --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
-    --stream inttest
+    --stream inttests
     --throttle 1 \
     --poll 10 \
     --progress 1 \
-    --noexitcodeontestfailures \
     --log -"
 
     info "Command is: $cmd"
@@ -803,6 +802,11 @@ function launch_test_from_unknown_portfolio {
 
 calculate_galasactl_executable
 
+# Launch test on ecosystem without a portfolio ...
+launch_test_on_ecosystem_without_portfolio
+
+exit 1
+
 # Launch test on ecosystem from a portfolio ...
 launch_test_on_ecosystem_with_portfolio
 
@@ -824,8 +828,7 @@ runs_get_check_requestor_parameter
 runs_get_check_result_parameter
 # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
-# Launch test on ecosystem without a portfolio ...
-launch_test_on_ecosystem_without_portfolio
+
 
 # Attempt to create a test portfolio with an unknown test ...
 create_portfolio_with_unknown_test

@@ -41,7 +41,7 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 	if len(runs) > 0 {
 		var table [][]string
 
-		var headers = []string{HEADER_SUBMITTED_TIME, HEADER_RUNNAME, HEADER_STATUS, HEADER_RESULT, HEADER_TEST_NAME}
+		var headers = []string{HEADER_SUBMITTED_TIME, HEADER_RUNNAME, HEADER_REQUESTOR, HEADER_STATUS, HEADER_RESULT, HEADER_TEST_NAME}
 
 		table = append(table, headers)
 		for _, run := range runs {
@@ -51,7 +51,7 @@ func (*SummaryFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 
 			accumulateResults(resultCountsMap, run)
 
-			line = append(line, submittedTimeReadable, run.TestStructure.GetRunName(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestName())
+			line = append(line, submittedTimeReadable, run.TestStructure.GetRunName(), run.TestStructure.GetRequestor(), run.TestStructure.GetStatus(), run.TestStructure.GetResult(), run.TestStructure.GetTestName())
 			table = append(table, line)
 		}
 
