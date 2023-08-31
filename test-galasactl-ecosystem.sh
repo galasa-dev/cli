@@ -805,8 +805,6 @@ calculate_galasactl_executable
 # Launch test on ecosystem without a portfolio ...
 launch_test_on_ecosystem_without_portfolio
 
-exit 1
-
 # Launch test on ecosystem from a portfolio ...
 launch_test_on_ecosystem_with_portfolio
 
