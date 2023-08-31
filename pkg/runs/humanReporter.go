@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -36,6 +38,7 @@ func FinalHumanReadableReport(finishedRuns map[string]*TestRun, lostRuns map[str
 
 func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) string {
 
+	totalResults := 0
 	resultCounts := make(map[string]int, 0)
 
 	resultCounts["Passed"] = 0
@@ -50,9 +53,11 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 		} else {
 			resultCounts[run.Result] = c + 1
 		}
+		totalResults += 1
 	}
 
 	resultCounts["Lost"] = len(lostRuns)
+	totalResults += len(lostRuns)
 
 	var buff bytes.Buffer
 
@@ -124,11 +129,17 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 		fmt.Fprintln(&buff, "***     None")
 	}
 	fmt.Fprintln(&buff, "***")
-	fmt.Fprintln(&buff, "*** results")
-	resultsSoFar := "*** results "
-	for result, count := range resultCounts {
-		resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", result, count)
+	fmt.Fprintln(&buff, "*** Results")
+	resultsSoFar := "*** Total=" + strconv.Itoa(totalResults)
+
+	//Printing results in  a fixed order
+	//Total, Passed, Passed With Defects, Failed, Failed With Defects, Lost, EnvFail, Custom Keys...
+	orderedKeys := orderResultKeys(resultCounts)
+
+	for i := range orderedKeys {
+		resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", orderedKeys[i], resultCounts[orderedKeys[i]])
 	}
+
 	fmt.Fprintln(&buff, resultsSoFar)
 	return buff.String()
 }
@@ -156,6 +167,7 @@ func InterrimProgressReportAsString(
 	finished := len(finishedRuns)
 	lost := len(lostRuns)
 
+	totalResults := 0
 	resultCounts := make(map[string]int, 0)
 
 	for _, run := range finishedRuns {
@@ -165,7 +177,11 @@ func InterrimProgressReportAsString(
 		} else {
 			resultCounts[run.Result] = c + 1
 		}
+		totalResults += 1
 	}
+
+	resultCounts["Lost"] = len(lostRuns)
+	totalResults += lost
 
 	var buff bytes.Buffer
 
@@ -178,13 +194,41 @@ func InterrimProgressReportAsString(
 	fmt.Fprintln(&buff, "*** ----------------------------------------------------------------------------")
 	fmt.Fprintf(&buff, "*** run status, ready=%v, submitted=%v, finished=%v, lost=%v\n", ready, submitted, finished, lost)
 	fmt.Fprintf(&buff, "*** throttle=%v\n", throttle)
+
 	if len(resultCounts) > 0 {
-		resultsSoFar := "*** results so far"
-		for result, count := range resultCounts {
-			resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", result, count)
+		resultsSoFar := fmt.Sprintf("*** Results so far:\n*** Total=%v", totalResults)
+
+		orderedKeys := orderResultKeys(resultCounts)
+		for i := range orderedKeys {
+			print("key", orderedKeys[i], "")
+			resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", orderedKeys[i], resultCounts[orderedKeys[i]])
 		}
 		fmt.Fprintln(&buff, resultsSoFar)
 	}
+
 	fmt.Fprintln(&buff, "***")
 	return buff.String()
+}
+
+func orderResultKeys(resultCounts map[string]int) []string {
+
+	var keys []string
+	keys = append(keys, "Passed")
+	keys = append(keys, "Passed With Defects")
+	keys = append(keys, "Failed")
+	keys = append(keys, "Failed With Defects")
+	keys = append(keys, "Lost")
+	keys = append(keys, "EnvFail")
+
+	var customLabels []string
+	for keyLabel := range resultCounts {
+		if keyLabel != "Passed" && keyLabel != "Passed With Defects" && keyLabel != "Failed" && keyLabel != "Failed With Defects" && keyLabel != "EnvFail" && keyLabel != "Lost" {
+			customLabels = append(customLabels, keyLabel)
+		}
+	}
+
+	sort.Strings(customLabels)
+	keys = append(keys, customLabels...)
+
+	return keys
 }
