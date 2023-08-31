@@ -22,7 +22,7 @@ func GetStreams(launcher launcher.Launcher) ([]string, error) {
 func ValidateStream(validStreamNames []string, streamNameToCheck string) error {
 	log.Printf("Validating that stream %s exists in the list of valid streams.\n",streamNameToCheck)
 
-	var err *galasaErrors.GalasaError = nil
+	var err error = nil
 
 	var streamFound = false
 	
@@ -37,7 +37,7 @@ func ValidateStream(validStreamNames []string, streamNameToCheck string) error {
 	
 	if ! streamFound {
 		// Not a valid stream name. Build the error message.
-
+		log.Println("Stream not found, deciding error.")
 		if len(validStreamNames) < 1 {
 			// No streams configured.
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_STREAMS_CONFIGURED, streamNameToCheck)
