@@ -136,6 +136,7 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 			launcherInstance,
 			timeService,
 			submitLocalSelectionFlags,
+			env,
 		)
 	}
 

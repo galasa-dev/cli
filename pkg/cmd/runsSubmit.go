@@ -131,7 +131,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	}
 
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, submitSelectionFlags)
+		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, submitSelectionFlags, env)
 	}
 
 	if err != nil {

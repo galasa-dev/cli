@@ -71,6 +71,8 @@ func (launcher *RemoteLauncher) SubmitTestRuns(
 	testRunRequest.SetTrace(isTraceEnabled)
 	testRunRequest.SetOverrides(overrides)
 
+	log.Printf("RemoteLauncher.SubmitTestRuns : using requestor %s\n", requestor)
+
 	var resultGroup *galasaapi.TestRuns
 	var err error
 

@@ -29,11 +29,12 @@ func ExecuteSubmitRuns(
 	launcher launcher.Launcher,
 	timeService utils.TimeService,
 	testSelectionFlags *TestSelectionFlags,
+	env utils.Environment,
 ) error {
 
 	var err error = nil
 
-	err = validateAndCorrectParams(galasaHome, fileSystem, &params, launcher, testSelectionFlags)
+	err = validateAndCorrectParams(galasaHome, fileSystem, &params, launcher, testSelectionFlags, env)
 	if err != nil {
 		return err
 	}
@@ -424,6 +425,7 @@ func validateAndCorrectParams(
 	params *utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
 	submitSelectionFlags *TestSelectionFlags,
+	env utils.Environment,
 ) error {
 
 	var err error = nil
@@ -452,6 +454,13 @@ func validateAndCorrectParams(
 	} else {
 		if !AreSelectionFlagsProvided(submitSelectionFlags) {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS)
+		}
+	}
+
+	if err == nil {
+		if params.Requestor == "" {
+			// Requestor has not been set. Default it to the current user id.
+			params.Requestor, err = env.GetUserName()
 		}
 	}
 
