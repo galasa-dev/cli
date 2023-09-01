@@ -145,8 +145,8 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	//Total, Passed, Passed With Defects, Failed, Failed With Defects, Lost, EnvFail, Custom Keys...
 	orderedKeys := orderResultKeys(resultCounts)
 
-	for i := range orderedKeys {
-		resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", orderedKeys[i], resultCounts[orderedKeys[i]])
+	for _, key := range orderedKeys {
+		resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", key, resultCounts[key])
 	}
 
 	fmt.Fprintln(&buff, resultsSoFar)
@@ -208,8 +208,8 @@ func InterrimProgressReportAsString(
 		resultsSoFar := fmt.Sprintf("*** Results so far:\n*** Total=%v", totalResults)
 
 		orderedKeys := orderResultKeys(resultCounts)
-		for i := range orderedKeys {
-			resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", orderedKeys[i], resultCounts[orderedKeys[i]])
+		for _, key := range orderedKeys {
+			resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", key, resultCounts[key])
 		}
 		fmt.Fprintln(&buff, resultsSoFar)
 	}
@@ -220,23 +220,28 @@ func InterrimProgressReportAsString(
 
 func orderResultKeys(resultCounts map[string]int) []string {
 
-	var keys []string
-	keys = append(keys, RESULT_PASSED)
-	keys = append(keys, RESULT_PASSED_WITH_DEFECTS)
-	keys = append(keys, RESULT_FAILED)
-	keys = append(keys, RESULT_FAILED_WITH_DEFECTS)
-	keys = append(keys, RESULT_LOST)
-	keys = append(keys, RESULT_ENVFAIL)
+	var orderedkeys []string
+	orderedkeys = append(orderedkeys, RESULT_PASSED)
+	orderedkeys = append(orderedkeys, RESULT_PASSED_WITH_DEFECTS)
+	orderedkeys = append(orderedkeys, RESULT_FAILED)
+	orderedkeys = append(orderedkeys, RESULT_FAILED_WITH_DEFECTS)
+	orderedkeys = append(orderedkeys, RESULT_LOST)
+	orderedkeys = append(orderedkeys, RESULT_ENVFAIL)
+
+	var keyMap = make(map[string]string)
+	for _, key := range orderedkeys {
+		keyMap[key] = ""
+	}
 
 	var customLabels []string
 	for keyLabel := range resultCounts {
-		if keyLabel != RESULT_PASSED && keyLabel != RESULT_PASSED_WITH_DEFECTS && keyLabel != RESULT_FAILED && keyLabel != RESULT_FAILED_WITH_DEFECTS && keyLabel != RESULT_ENVFAIL && keyLabel != RESULT_LOST {
+		if _, ok := keyMap[keyLabel]; !ok {
 			customLabels = append(customLabels, keyLabel)
 		}
 	}
 
 	sort.Strings(customLabels)
-	keys = append(keys, customLabels...)
+	orderedkeys = append(orderedkeys, customLabels...)
 
-	return keys
+	return orderedkeys
 }
