@@ -143,9 +143,9 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 
 	//Printing results in  a fixed order
 	//Total, Passed, Passed With Defects, Failed, Failed With Defects, Lost, EnvFail, Custom Keys...
-	orderedKeys := orderResultKeys(resultCounts)
+	orderedResultLabels := orderResultLabelKeys(resultCounts)
 
-	for _, key := range orderedKeys {
+	for _, key := range orderedResultLabels {
 		resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", key, resultCounts[key])
 	}
 
@@ -180,8 +180,8 @@ func InterrimProgressReportAsString(
 	resultCounts := make(map[string]int, 0)
 
 	for _, run := range finishedRuns {
-		c, ok := resultCounts[run.Result]
-		if !ok {
+		c, isFound := resultCounts[run.Result]
+		if !isFound {
 			resultCounts[run.Result] = 1
 		} else {
 			resultCounts[run.Result] = c + 1
@@ -207,8 +207,8 @@ func InterrimProgressReportAsString(
 	if len(resultCounts) > 0 {
 		resultsSoFar := fmt.Sprintf("*** Results so far:\n*** Total=%v", totalResults)
 
-		orderedKeys := orderResultKeys(resultCounts)
-		for _, key := range orderedKeys {
+		orderedResultLabels := orderResultLabelKeys(resultCounts)
+		for _, key := range orderedResultLabels {
 			resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", key, resultCounts[key])
 		}
 		fmt.Fprintln(&buff, resultsSoFar)
@@ -218,30 +218,34 @@ func InterrimProgressReportAsString(
 	return buff.String()
 }
 
-func orderResultKeys(resultCounts map[string]int) []string {
+func orderResultLabelKeys(resultCounts map[string]int) []string {
 
-	var orderedkeys []string
-	orderedkeys = append(orderedkeys, RESULT_PASSED)
-	orderedkeys = append(orderedkeys, RESULT_PASSED_WITH_DEFECTS)
-	orderedkeys = append(orderedkeys, RESULT_FAILED)
-	orderedkeys = append(orderedkeys, RESULT_FAILED_WITH_DEFECTS)
-	orderedkeys = append(orderedkeys, RESULT_LOST)
-	orderedkeys = append(orderedkeys, RESULT_ENVFAIL)
+	var orderedResultLabels []string
+	orderedResultLabels = append(orderedResultLabels, RESULT_PASSED)
+	orderedResultLabels = append(orderedResultLabels, RESULT_PASSED_WITH_DEFECTS)
+	orderedResultLabels = append(orderedResultLabels, RESULT_FAILED)
+	orderedResultLabels = append(orderedResultLabels, RESULT_FAILED_WITH_DEFECTS)
+	orderedResultLabels = append(orderedResultLabels, RESULT_LOST)
+	orderedResultLabels = append(orderedResultLabels, RESULT_ENVFAIL)
 
-	var keyMap = make(map[string]struct{})
-	for _, key := range orderedkeys {
-		keyMap[key] = struct{}{}
+	//Build a list of standard labels to prevent duplication
+	var standardResultLabels = make(map[string]struct{})
+	for _, key := range orderedResultLabels {
+		//'struct{}{}' allocates no storage. In Go 1.19 we can use just '{}' instead
+		standardResultLabels[key] = struct{}{}
 	}
 
-	var customLabels []string
+	//Gathering custom labels
+	var customResultLabels []string
 	for keyLabel := range resultCounts {
-		if _, ok := keyMap[keyLabel]; !ok {
-			customLabels = append(customLabels, keyLabel)
+		_, isStandardLabel := standardResultLabels[keyLabel]
+		if !isStandardLabel {
+			customResultLabels = append(customResultLabels, keyLabel)
 		}
 	}
 
-	sort.Strings(customLabels)
-	orderedkeys = append(orderedkeys, customLabels...)
+	sort.Strings(customResultLabels)
+	orderedResultLabels = append(orderedResultLabels, customResultLabels...)
 
-	return orderedkeys
+	return orderedResultLabels
 }
