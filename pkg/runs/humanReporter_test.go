@@ -256,7 +256,6 @@ func TestHumanReportResultsPrintsInOrderWhenAllResultsAreCustomResults(t *testin
 	// When
 	reportText := FinalHumanReadableReportAsString(finishedRunsMap, lostRunsMap)
 	//Then
-	print(reportText)
 	assert.Contains(t, reportText, "Total=4, Passed=0, Passed With Defects=0, Failed=0, Failed With Defects=0, Lost=1, EnvFail=0, Cookies=1, Doughnuts=1, Jam=1")
 }
 

@@ -11,8 +11,16 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
+)
+
+const (
+	RESULT_PASSED              = "Passed"
+	RESULT_PASSED_WITH_DEFECTS = "Passed With Defects"
+	RESULT_FAILED              = "Failed"
+	RESULT_FAILED_WITH_DEFECTS = "Failed With Defects"
+	RESULT_LOST                = "Lost"
+	RESULT_ENVFAIL             = "EnvFail"
 )
 
 func CountTotalFailedRuns(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) int {
@@ -21,7 +29,7 @@ func CountTotalFailedRuns(finishedRuns map[string]*TestRun, lostRuns map[string]
 
 	for _, run := range finishedRuns {
 		// Anything which didn't pass failed by definition.
-		if !strings.HasPrefix(run.Result, "Passed") {
+		if !strings.HasPrefix(run.Result, RESULT_PASSED) {
 			totalFailed = totalFailed + 1
 		}
 	}
@@ -41,10 +49,11 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	totalResults := 0
 	resultCounts := make(map[string]int, 0)
 
-	resultCounts["Passed"] = 0
-	resultCounts["Failed"] = 0
-	resultCounts["Passed With Defects"] = 0
-	resultCounts["Failed With Defects"] = 0
+	resultCounts[RESULT_PASSED] = 0
+	resultCounts[RESULT_FAILED] = 0
+	resultCounts[RESULT_PASSED_WITH_DEFECTS] = 0
+	resultCounts[RESULT_FAILED_WITH_DEFECTS] = 0
+	resultCounts[RESULT_ENVFAIL] = 0
 
 	for _, run := range finishedRuns {
 		c, ok := resultCounts[run.Result]
@@ -56,7 +65,7 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 		totalResults += 1
 	}
 
-	resultCounts["Lost"] = len(lostRuns)
+	resultCounts[RESULT_LOST] = len(lostRuns)
 	totalResults += len(lostRuns)
 
 	var buff bytes.Buffer
@@ -68,7 +77,7 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	fmt.Fprintln(&buff, "*** Passed test runs:-")
 	found := false
 	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Passed") && !strings.HasPrefix(run.Result, "Passed With Defects") {
+		if strings.HasPrefix(run.Result, RESULT_PASSED) && !strings.HasPrefix(run.Result, RESULT_PASSED_WITH_DEFECTS) {
 			fmt.Fprintf(&buff, "***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
 			found = true
 		}
@@ -81,7 +90,7 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	fmt.Fprintln(&buff, "*** Failed test runs:-")
 	found = false
 	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Failed") && !strings.HasPrefix(run.Result, "Failed With Defects") {
+		if strings.HasPrefix(run.Result, RESULT_FAILED) && !strings.HasPrefix(run.Result, RESULT_FAILED_WITH_DEFECTS) {
 			fmt.Fprintf(&buff, "***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
 			found = true
 		}
@@ -94,7 +103,7 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	fmt.Fprintln(&buff, "*** Passed With Defects test runs:-")
 	found = false
 	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Passed With Defects") {
+		if strings.HasPrefix(run.Result, RESULT_PASSED_WITH_DEFECTS) {
 			fmt.Fprintf(&buff, "***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
 			found = true
 		}
@@ -107,7 +116,7 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	fmt.Fprintln(&buff, "*** Failed With Defects test runs:-")
 	found = false
 	for runName, run := range finishedRuns {
-		if strings.HasPrefix(run.Result, "Failed With Defects") {
+		if strings.HasPrefix(run.Result, RESULT_FAILED_WITH_DEFECTS) {
 			log.Printf("***     Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
 			found = true
 		}
@@ -120,7 +129,7 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	fmt.Fprintln(&buff, "*** Other test runs:-")
 	found = false
 	for runName, run := range finishedRuns {
-		if !strings.HasPrefix(run.Result, "Passed") && !strings.HasPrefix(run.Result, "Failed") {
+		if !strings.HasPrefix(run.Result, RESULT_PASSED) && !strings.HasPrefix(run.Result, RESULT_FAILED) {
 			fmt.Fprintf(&buff, "***     Run %v(%v) - %v/%v/%v\n", runName, run.Result, run.Stream, run.Bundle, run.Class)
 			found = true
 		}
@@ -130,7 +139,7 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	}
 	fmt.Fprintln(&buff, "***")
 	fmt.Fprintln(&buff, "*** Results")
-	resultsSoFar := "*** Total=" + strconv.Itoa(totalResults)
+	resultsSoFar := fmt.Sprintf("*** Total=%v", totalResults)
 
 	//Printing results in  a fixed order
 	//Total, Passed, Passed With Defects, Failed, Failed With Defects, Lost, EnvFail, Custom Keys...
@@ -180,7 +189,7 @@ func InterrimProgressReportAsString(
 		totalResults += 1
 	}
 
-	resultCounts["Lost"] = len(lostRuns)
+	resultCounts[RESULT_LOST] = len(lostRuns)
 	totalResults += lost
 
 	var buff bytes.Buffer
@@ -200,7 +209,6 @@ func InterrimProgressReportAsString(
 
 		orderedKeys := orderResultKeys(resultCounts)
 		for i := range orderedKeys {
-			print("key", orderedKeys[i], "")
 			resultsSoFar = resultsSoFar + fmt.Sprintf(", %v=%v", orderedKeys[i], resultCounts[orderedKeys[i]])
 		}
 		fmt.Fprintln(&buff, resultsSoFar)
@@ -213,16 +221,16 @@ func InterrimProgressReportAsString(
 func orderResultKeys(resultCounts map[string]int) []string {
 
 	var keys []string
-	keys = append(keys, "Passed")
-	keys = append(keys, "Passed With Defects")
-	keys = append(keys, "Failed")
-	keys = append(keys, "Failed With Defects")
-	keys = append(keys, "Lost")
-	keys = append(keys, "EnvFail")
+	keys = append(keys, RESULT_PASSED)
+	keys = append(keys, RESULT_PASSED_WITH_DEFECTS)
+	keys = append(keys, RESULT_FAILED)
+	keys = append(keys, RESULT_FAILED_WITH_DEFECTS)
+	keys = append(keys, RESULT_LOST)
+	keys = append(keys, RESULT_ENVFAIL)
 
 	var customLabels []string
 	for keyLabel := range resultCounts {
-		if keyLabel != "Passed" && keyLabel != "Passed With Defects" && keyLabel != "Failed" && keyLabel != "Failed With Defects" && keyLabel != "EnvFail" && keyLabel != "Lost" {
+		if keyLabel != RESULT_PASSED && keyLabel != RESULT_PASSED_WITH_DEFECTS && keyLabel != RESULT_FAILED && keyLabel != RESULT_FAILED_WITH_DEFECTS && keyLabel != RESULT_ENVFAIL && keyLabel != RESULT_LOST {
 			customLabels = append(customLabels, keyLabel)
 		}
 	}
