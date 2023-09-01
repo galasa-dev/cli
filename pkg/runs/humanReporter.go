@@ -228,9 +228,9 @@ func orderResultKeys(resultCounts map[string]int) []string {
 	orderedkeys = append(orderedkeys, RESULT_LOST)
 	orderedkeys = append(orderedkeys, RESULT_ENVFAIL)
 
-	var keyMap = make(map[string]string)
+	var keyMap = make(map[string]struct{})
 	for _, key := range orderedkeys {
-		keyMap[key] = ""
+		keyMap[key] = struct{}{}
 	}
 
 	var customLabels []string
