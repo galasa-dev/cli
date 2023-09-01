@@ -90,54 +90,60 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	fileSystem := files.NewOSFileSystem()
 
 	err = utils.CaptureLog(fileSystem, logFileName)
-	if err != nil {
-		panic(err)
-	}
-	isCapturingLogs = true
-
-	log.Println("Galasa CLI - Submit tests (Local)")
-
-	// Get the ability to query environment variables.
-	env := utils.NewEnvironment()
-
-	// Work out where galasa home is, only once.
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
-	if err != nil {
-		panic(err)
-	}
-
-	timeService := utils.NewRealTimeService()
-
-	// the submit is targetting a local JVM
-	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
-
-	// Something which can kick off new operating system processes
-	processFactory := launcher.NewRealProcessFactory()
-
-	var launcherInstance launcher.Launcher
-	launcherInstance, err = launcher.NewJVMLauncher(
-		bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
-		runsSubmitLocalCmdParams, timeService,
-		processFactory, galasaHome)
 
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(
-			galasaHome,
-			fileSystem,
-			runsSubmitCmdParams,
-			launcherInstance,
-			timeService,
-			submitLocalSelectionFlags,
-			env,
-		)
+		isCapturingLogs = true
+
+		log.Println("Galasa CLI - Submit tests (Local)")
+
+		// Get the ability to query environment variables.
+		env := utils.NewEnvironment()
+
+		// Work out where galasa home is, only once.
+		galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+		if err == nil {
+
+			// Read the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
+			if err == nil {
+
+				timeService := utils.NewRealTimeService()
+
+				// the submit is targetting a local JVM
+				embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+
+				// Something which can kick off new operating system processes
+				processFactory := launcher.NewRealProcessFactory()
+
+				// Validate the test selection parameters.
+				validator := runs.NewObrBasedValidator()
+				err = validator.Validate(submitSelectionFlags)
+				if err == nil {
+
+					// A launcher is needed to launch anythihng
+					var launcherInstance launcher.Launcher
+					launcherInstance, err = launcher.NewJVMLauncher(
+						bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
+						runsSubmitLocalCmdParams, timeService,
+						processFactory, galasaHome)
+
+					if err == nil {
+						// Do the launching of the tests.
+						err = runs.ExecuteSubmitRuns(
+							galasaHome,
+							fileSystem,
+							runsSubmitCmdParams,
+							launcherInstance,
+							timeService,
+							submitLocalSelectionFlags,
+							env,
+						)
+					}
+				}
+			}
+		}
 	}
 
 	if err != nil {
