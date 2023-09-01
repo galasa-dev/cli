@@ -151,7 +151,10 @@ func cleanPath(fileSystem files.FileSystem, path string) (string, error) {
 	var err error = nil
 	if path != "" {
 		path = removeLeadingFileColon(path)
-		path, err = files.TildaExpansion(fileSystem, path)
+		err = validateURL(path)
+		if err == nil{
+			path, err = files.TildaExpansion(fileSystem, path)
+		}
 	}
 	return path, err
 }
@@ -159,6 +162,14 @@ func cleanPath(fileSystem files.FileSystem, path string) (string, error) {
 func removeLeadingFileColon(path string) string {
 	path = strings.TrimPrefix(path, "file://")
 	return path
+}
+
+func validateURL(path string) error {
+	var err error = nil
+	if strings.HasPrefix(path, "file:") {
+		err=galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_BOOTSTRAP_FILE_URL, path)
+	}
+	return err
 }
 
 func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem files.FileSystem) (*BootstrapData, error) {
