@@ -9,13 +9,13 @@ galasactl: \
 	bin/galasactl-linux-arm64 \
 	bin/galasactl-linux-amd64 \
 	bin/galasactl-windows-amd64.exe \
-	bin/galasactl-darwin-amd64 \
+	bin/galasactl-darwin-x86_64 \
 	bin/galasactl-darwin-arm64 \
 	bin/galasactl-linux-s390x
 
 # 'gendocs-galasactl' is a command-line tool which generates documentation about the galasactl tool.
 # When executed, the .md produced contain up-to-date information on tool syntax.
-gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darwin-amd64 bin/gendocs-galasactl-linux-amd64
+gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darwin-x86_64 bin/gendocs-galasactl-linux-amd64
 
 tests: galasactl-source build/coverage.txt build/coverage.html
 	
@@ -67,8 +67,8 @@ bin/galasactl-linux-amd64 : galasactl-source
 bin/galasactl-windows-amd64.exe : galasactl-source
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o bin/galasactl-windows-amd64.exe ./cmd/galasactl
 
-bin/galasactl-darwin-amd64 : galasactl-source
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/galasactl-darwin-amd64 ./cmd/galasactl
+bin/galasactl-darwin-x86_64 : galasactl-source
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/galasactl-darwin-x86_64 ./cmd/galasactl
 
 bin/galasactl-darwin-arm64 : galasactl-source
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/galasactl-darwin-arm64 ./cmd/galasactl	
@@ -87,8 +87,8 @@ bin/gendocs-galasactl-darwin-arm64 : galasactl-source
 bin/gendocs-galasactl-linux-amd64 : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/gendocs-galasactl-linux-amd64 ./cmd/gendocs-galasactl
 
-bin/gendocs-galasactl-darwin-amd64 : galasactl-source 
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/gendocs-galasactl-darwin-amd64 ./cmd/gendocs-galasactl
+bin/gendocs-galasactl-darwin-x86_64 : galasactl-source 
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/gendocs-galasactl-darwin-x86_64 ./cmd/gendocs-galasactl
 
 clean:
 	rm -fr bin/galasactl*
