@@ -91,6 +91,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1088E: --active and --result must not be used at the same time, they are mutually exclusive.
 - GAL1089E: Need to use --maven and/or --gradle parameter
 - GAL1090E: Could not get username of current requestor. Reason is '{}'
+- GAL1091E: '{}' is not a properly formed file URL
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 
