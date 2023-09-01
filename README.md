@@ -340,9 +340,9 @@ Built artifacts include:
 
 - galasactl-darwin-x86_64 
 - galasactl-darwin-arm64
-- galasactl-linux-amd64 
+- galasactl-linux-x86_64 
 - galasactl-linux-s390x 
-- galasactl-windows-amd64.exe
+- galasactl-windows-x86_64.exe
 
 Browse the following web site and download whichever built binary files you wish:
 
@@ -353,11 +353,11 @@ Browse the following web site and download whichever built binary files you wish
 The build process builds some docker images with the command-line tools installed.
 This could be useful when wishing to embed a usage of the command-line within a build process which can use a docker image.
 
-- Bleeding edge/Unstable : `docker pull harbor.galasa.dev/galasadev/galasa-cli-amd64:main`
+- Bleeding edge/Unstable : `docker pull harbor.galasa.dev/galasadev/galasa-cli-x86_64:main`
 
 ### How to use the docker image
 The docker image has the `galasactl` tool on the path of the docker image when it starts up.
 So, invoke the `galasactl` without installing on your local machine, using the docker image like this:
 ```
-docker run harbor.galasa.dev/galasadev/galasa-cli-amd64:main galasactl --version
+docker run harbor.galasa.dev/galasadev/galasa-cli-x86_64:main galasactl --version
 ```
