@@ -133,9 +133,6 @@ function calculate_galasactl_executable {
     esac
 
     architecture=$(uname -m)
-    if [[ "${architecture}" == "x86_64" ]]; then
-        architecture="amd64"
-    fi
 
     export binary="galasactl-${os}-${architecture}"
     info "galasactl binary is ${binary}"
@@ -662,7 +659,7 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
 
 #--------------------------------------------------------------------------
 function runs_get_check_requestor_parameter {
-    requestor="unknown"
+    requestor=$(whoami)
     h2 "Performing runs get with details format providing a from age and requestor as $requestor..."
 
     cd ${BASEDIR}/temp
