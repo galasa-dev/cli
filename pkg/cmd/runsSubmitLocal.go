@@ -100,7 +100,8 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 		env := utils.NewEnvironment()
 
 		// Work out where galasa home is, only once.
-		galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+		var galasaHome utils.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties.
