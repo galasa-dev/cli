@@ -37,7 +37,7 @@ func (*DetailsFormatter) IsNeedingMethodDetails() bool {
 	return true
 }
 
-func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error) {
+func (*DetailsFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 	var result string = ""
 	var err error = nil
 
@@ -50,14 +50,14 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 
 		for i, run := range runs {
 			accumulateResults(resultCountsMap, run)
-			coreDetailsTable := tabulateCoreRunDetails(run, apiServerUrl)
+			coreDetailsTable := tabulateCoreRunDetails(run)
 			coreDetailsColumnLengths := calculateMaxLengthOfEachColumn(coreDetailsTable)
 			writeFormattedTableToStringBuilder(coreDetailsTable, &buff, coreDetailsColumnLengths)
 
 			buff.WriteString("\n")
 
 			methodTable := initialiseMethodTable()
-			methodTable = tabulateRunMethodsToTable(run.TestStructure.GetMethods(), methodTable)
+			methodTable = tabulateRunMethodsToTable(run.Methods, methodTable)
 			methodColumnLengths := calculateMaxLengthOfEachColumn(methodTable)
 			writeFormattedTableToStringBuilder(methodTable, &buff, methodColumnLengths)
 
@@ -79,9 +79,9 @@ func (*DetailsFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (
 
 // -----------------------------------------------------
 // Internal functions
-func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
-	startTimeStringRaw := run.TestStructure.GetStartTime()
-	endTimeStringRaw := run.TestStructure.GetEndTime()
+func tabulateCoreRunDetails(run FormattableTest) [][]string {
+	startTimeStringRaw := run.StartTimeUTC
+	endTimeStringRaw := run.EndTimeUTC
 
 	startTimeStringReadable := getReadableTime(startTimeStringRaw)
 	endTimeStringReadable := getReadableTime(endTimeStringRaw)
@@ -89,17 +89,17 @@ func tabulateCoreRunDetails(run galasaapi.Run, apiServerUrl string) [][]string {
 	duration := getDuration(startTimeStringRaw, endTimeStringRaw)
 
 	var table = [][]string{
-		{HEADER_RUNNAME, ": " + run.TestStructure.GetRunName()},
-		{HEADER_STATUS, ": " + run.TestStructure.GetStatus()},
-		{HEADER_RESULT, ": " + run.TestStructure.GetResult()},
-		{HEADER_SUBMITTED_TIME, ": " + formatTimeReadable(run.TestStructure.GetQueued())},
+		{HEADER_RUNNAME, ": " + run.Name},
+		{HEADER_STATUS, ": " + run.Status},
+		{HEADER_RESULT, ": " + run.Result},
+		{HEADER_SUBMITTED_TIME, ": " + formatTimeReadable(run.QueuedTimeUTC)},
 		{HEADER_START_TIME, ": " + startTimeStringReadable},
 		{HEADER_END_TIME, ": " + endTimeStringReadable},
 		{HEADER_DURATION, ": " + duration},
-		{HEADER_TEST_NAME, ": " + run.TestStructure.GetTestName()},
-		{HEADER_REQUESTOR, ": " + run.TestStructure.GetRequestor()},
-		{HEADER_BUNDLE, ": " + run.TestStructure.GetBundle()},
-		{HEADER_RUN_LOG, ": " + apiServerUrl + RAS_RUNS_URL + run.GetRunId() + "/runlog"},
+		{HEADER_TEST_NAME, ": " + run.TestName},
+		{HEADER_REQUESTOR, ": " + run.Requestor},
+		{HEADER_BUNDLE, ": " + run.Bundle},
+		{HEADER_RUN_LOG, ": " + run.ApiServerUrl + RAS_RUNS_URL + run.RunId + "/runlog"},
 	}
 	return table
 }

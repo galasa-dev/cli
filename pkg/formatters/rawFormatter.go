@@ -5,11 +5,7 @@
  */
 package formatters
 
-import (
-	"strings"
-
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-)
+import "strings"
 
 // -----------------------------------------------------
 // Summary format.
@@ -32,29 +28,29 @@ func (*RawFormatter) IsNeedingMethodDetails() bool {
 	return false
 }
 
-func (*RawFormatter) FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error) {
+func (*RawFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 	var result string = ""
 	var err error = nil
 	buff := strings.Builder{}
 
 	for _, run := range runs {
-		startTimeStringRaw := run.TestStructure.GetStartTime()
-		endTimeStringRaw := run.TestStructure.GetEndTime()
+		startTimeStringRaw := run.StartTimeUTC
+		endTimeStringRaw := run.EndTimeUTC
 
 		duration := getDuration(startTimeStringRaw, endTimeStringRaw)
 
-		runLog := apiServerUrl + RAS_RUNS_URL + run.GetRunId() + "/runlog"
+		runLog := run.ApiServerUrl + RAS_RUNS_URL + run.RunId + "/runlog"
 
-		buff.WriteString(run.TestStructure.GetRunName() + "|" +
-			run.TestStructure.GetStatus() + "|" +
-			run.TestStructure.GetResult() + "|" +
-			run.TestStructure.GetQueued() + "|" +
+		buff.WriteString(run.Name + "|" +
+			run.Status + "|" +
+			run.Result + "|" +
+			run.QueuedTimeUTC + "|" +
 			startTimeStringRaw + "|" +
 			endTimeStringRaw + "|" +
 			duration + "|" +
-			run.TestStructure.GetTestName() + "|" +
-			run.TestStructure.GetRequestor() + "|" +
-			run.TestStructure.GetBundle() + "|" +
+			run.TestName + "|" +
+			run.Requestor + "|" +
+			run.Bundle + "|" +
 			runLog,
 		)
 
