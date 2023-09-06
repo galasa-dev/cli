@@ -91,7 +91,11 @@ func GetRuns(
 
 				if err == nil {
 					var outputText string
-					outputText, err = chosenFormatter.FormatRuns(runJson, apiServerUrl)
+
+					//convert galsaapi.Runs into formattable data
+					formattableTest := formatters.NewFormattableTestFromGalasaApi(runJson, apiServerUrl)
+					outputText, err = chosenFormatter.FormatRuns(formattableTest)
+
 					if err == nil {
 						err = writeOutput(outputText, console)
 					}

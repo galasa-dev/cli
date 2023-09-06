@@ -47,10 +47,30 @@ const (
 	RAS_RUNS_URL = "/ras/runs/"
 )
 
+type FormattableTest struct {
+	RunId         string
+	Name          string
+	TestName      string
+	Status        string
+	Result        string
+	StartTimeUTC  string
+	EndTimeUTC    string
+	QueuedTimeUTC string
+	Requestor     string
+	Bundle        string
+	ApiServerUrl  string
+	Methods       []galasaapi.TestMethod
+}
+
+func NewFormattableTest() FormattableTest {
+	this := FormattableTest{}
+	return this
+}
+
 var RESULT_LABELS = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_FAILED_WITH_DEFECTS, RUN_RESULT_ENVFAIL, RUN_RESULT_UNKNOWN, RUN_RESULT_ACTIVE, RUN_RESULT_IGNORED}
 
 type RunsFormatter interface {
-	FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error)
+	FormatRuns(testResultsData []FormattableTest) (string, error)
 	GetName() string
 
 	// IsNeedingDetails - Does this formatter require all of the detailed fields to be filled-in,
@@ -154,8 +174,8 @@ func generateResultTotalsReport(totalResults int, resultsCount map[string]int) s
 	return resultString
 }
 
-func accumulateResults(resultCounts map[string]int, run galasaapi.Run) {
-	runResult := run.TestStructure.GetResult()
+func accumulateResults(resultCounts map[string]int, run FormattableTest) {
+	runResult := run.Result
 	if len(runResult) > 0 {
 		resultTotal, isPresent := resultCounts[runResult]
 		if isPresent {

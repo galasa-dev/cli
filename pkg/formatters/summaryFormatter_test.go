@@ -8,7 +8,6 @@ package formatters
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,18 +15,17 @@ func TestSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
 
 	formatter := NewSummaryFormatter()
 	// No data to format...
-	runs := make([]galasaapi.Run, 0)
-	apiServerURL := ""
+	formattableTest := make([]FormattableTest, 0)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput := "Total:0\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func createRunForSummary(queued string, runName string, testName string, status string, result string, requestor string) galasaapi.Run {
+func createFormattableTestForSummary(queuedTimeUTC string, name string, testName string, status string, result string, requestor string) FormattableTest {
 	//run1Id := "ar"
 	//bundle := ""
 	//testName := ""
@@ -35,35 +33,30 @@ func createRunForSummary(queued string, runName string, testName string, status 
 	// queued := ""
 	// startTime := ""
 	// endTime := ""
-	testStructure := galasaapi.TestStructure{
-		RunName: &runName,
+	formattableTest := FormattableTest{
+		Name: name,
 		//Bundle:        &bundle,
 		//TestName:      &testName,
-		TestName:  &testName,
-		Requestor: &requestor,
-		Status:    &status,
-		Result:    &result,
-		Queued:    &queued,
+		TestName:      testName,
+		Requestor:     requestor,
+		Status:        status,
+		Result:        result,
+		QueuedTimeUTC: queuedTimeUTC,
 		// StartTime:     &startTime,
 		// EndTime:       &endTime,
 	}
-	run1 := galasaapi.Run{
-		//RunId:         &run1Id,
-		TestStructure: &testStructure,
-	}
-	return run1
+	return formattableTest
 }
 
 func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "Finished", "MyLongResultString", "myUserId1")
-	runs = append(runs, run1)
-	apiServerURL := ""
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "Finished", "MyLongResultString", "myUserId1")
+	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -77,13 +70,12 @@ func TestSummaryFormatterLongResultStringReturnsExpectedFormat(t *testing.T) {
 func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "Finished", "Short", "myUserId1")
-	runs = append(runs, run1)
-	apiServerURL := ""
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "Finished", "Short", "myUserId1")
+	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -97,14 +89,13 @@ func TestSummaryFormatterShortResultStringReturnsExpectedFormat(t *testing.T) {
 func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForSummary("2023-05-04T10:45:29.545323Z", "LongRunName", "TestName", "LongStatus", "Short", "myUserId1")
-	run2 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "short", "MyLongResultString", "myUserId1")
-	runs = append(runs, run1, run2)
-	apiServerURL := ""
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForSummary("2023-05-04T10:45:29.545323Z", "LongRunName", "TestName", "LongStatus", "Short", "myUserId1")
+	formattableTest2 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "short", "MyLongResultString", "myUserId1")
+	formattableTest = append(formattableTest, formattableTest1, formattableTest2)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -119,21 +110,20 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 func TestSummaryFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForSummary("2023-05-04T10:45:29.545323Z", "U123", "TestName", "Finished", "Passed", "myUserId1")
-	run2 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName1", "Finished", "Failed", "myUserId2")
-	run3 := createRunForSummary("2023-05-04T10:55:29.545323Z", "U789", "MyTestName2", "Finished", "EnvFail", "myUserId1")
-	run4 := createRunForSummary("2023-05-04T10:55:29.545323Z", "L123", "MyTestName3", "UNKNOWN", "", "myUserId2")
-	run5 := createRunForSummary("2023-05-04T10:55:29.545323Z", "L456", "MyTestName4", "Building", "EnvFail", "myUserId1")
-	run6 := createRunForSummary("2023-05-04T10:55:29.545323Z", "L789", "MyTestName5", "Finished", "Passed With Defects", "myUserId2")
-	run7 := createRunForSummary("2023-05-04T10:55:29.545323Z", "C111", "MyTestName6", "Finished", "Failed", "myUserId1")
-	run8 := createRunForSummary("2023-05-04T10:55:29.545323Z", "C222", "MyTestName7", "Finished", "UNKNOWN", "myUserId2")
-	run9 := createRunForSummary("2023-05-04T10:55:29.545323Z", "C333", "MyTestName8", "Finished", "Ignored", "myUserId1")
-	runs = append(runs, run1, run2, run3, run4, run5, run6, run7, run8, run9)
-	apiServerURL := ""
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForSummary("2023-05-04T10:45:29.545323Z", "U123", "TestName", "Finished", "Passed", "myUserId1")
+	formattableTest2 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "U456", "MyTestName1", "Finished", "Failed", "myUserId2")
+	formattableTest3 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "U789", "MyTestName2", "Finished", "EnvFail", "myUserId1")
+	formattableTest4 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "L123", "MyTestName3", "UNKNOWN", "", "myUserId2")
+	formattableTest5 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "L456", "MyTestName4", "Building", "EnvFail", "myUserId1")
+	formattableTest6 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "L789", "MyTestName5", "Finished", "Passed With Defects", "myUserId2")
+	formattableTest7 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "C111", "MyTestName6", "Finished", "Failed", "myUserId1")
+	formattableTest8 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "C222", "MyTestName7", "Finished", "UNKNOWN", "myUserId2")
+	formattableTest9 := createFormattableTestForSummary("2023-05-04T10:55:29.545323Z", "C333", "MyTestName8", "Finished", "Ignored", "myUserId1")
+	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3, formattableTest4, formattableTest5, formattableTest6, formattableTest7, formattableTest8, formattableTest9)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerURL)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
