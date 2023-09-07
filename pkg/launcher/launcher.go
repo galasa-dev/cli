@@ -25,6 +25,7 @@ type Launcher interface {
 		requestType string,
 		requestor string,
 		stream string,
+		obrFromPortfolio string,
 		isTraceEnabled bool,
 		overrides map[string]interface{},
 	) (*galasaapi.TestRuns, error)

@@ -174,7 +174,12 @@ var (
 	GALASA_ERROR_ACTIVE_AND_RESULT_ARE_MUTUALLY_EXCLUSIVE = NewMessageType("GAL1088E: --active and --result must not be used at the same time, they are mutually exclusive.", 1088, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_MAVEN_AND_OR_GRADLE_FLAG_MUST_BE_SET     = NewMessageType("GAL1089E: Need to use --maven and/or --gradle parameter", 1089, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RETRIEVING_USERNAME_FAILED               = NewMessageType("GAL1090E: Could not get username of current requestor. Reason is '%s'", 1090, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_BAD_BOOTSTRAP_FILE_URL					  = NewMessageType("GAL1091E: '%s' is not a properly formed file URL", 1091, STACK_TRACE_WANTED)
+	GALASA_ERROR_BAD_BOOTSTRAP_FILE_URL                   = NewMessageType("GAL1091E: '%s' is not a properly formed file URL", 1091, STACK_TRACE_WANTED)
+	GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST               = NewMessageType("GAL1092E: Galasa Ecosystem error: Test submitted to server. Server Accepted it but didn't add it to the run group. "+
+		"Test is lost and will not execute. (bundle: %s, class: %s). Reason: %s", 1092, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_SUBMIT_TEST      = NewMessageType("GAL1093E: Failed to submit test (bundle: %s, class: %s). Reason is: %s", 1093, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS = NewMessageType("GAL1094E: User error: Cannot run test %s on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.", 1094, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 	// Information messages...

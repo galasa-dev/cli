@@ -38,6 +38,7 @@ func (launcher *MockLauncher) SubmitTestRun(
 	requestType string,
 	requestor string,
 	stream string,
+	obrFromPortfolio string,
 	isTraceEnabled bool,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
