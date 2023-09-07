@@ -306,3 +306,63 @@ func TestValidateAndCorrectParametersDefaultsRequestorFieldFromEnvironment(t *te
 	assert.Nil(t, err)
 	assert.Equal(t, commandParameters.Requestor, "mybaduserid")
 }
+
+func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
+
+	fs := files.NewMockFileSystem()
+
+	obrName := "myobr"
+	bundleName := "myBundle"
+	className := "myClass"
+
+	portfolioFilePath := "myportfolio.yaml"
+	_ = createTestPortfolioFile(t, fs, portfolioFilePath, bundleName, className, "", obrName)
+
+	env := utils.NewMockEnv()
+	env.SetUserName("myuserid")
+
+	galasaHome, err := utils.NewGalasaHome(fs, env, "")
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	commandParameters := &utils.RunsSubmitCmdParameters{}
+	commandParameters.PortfolioFileName = portfolioFilePath
+
+	regexSelectValue := false
+	submitSelectionFlags := &TestSelectionFlags{
+		bundles:     new([]string),
+		packages:    new([]string),
+		tests:       new([]string),
+		tags:        new([]string),
+		classes:     new([]string),
+		stream:      "",
+		regexSelect: &regexSelectValue,
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	timeService := utils.NewMockTimeService()
+
+	// Do the launching of the tests.
+	err = ExecuteSubmitRuns(
+		galasaHome,
+		fs,
+		*commandParameters,
+		mockLauncher,
+		timeService,
+		submitSelectionFlags,
+		env,
+	)
+
+	assert.Nil(t, err)
+
+	launchesRecorded := mockLauncher.GetRecordedLaunchRecords()
+
+	assert.Equal(t, 1, len(launchesRecorded))
+	if len(launchesRecorded) > 0 {
+		assert.Equal(t, obrName, launchesRecorded[0].ObrFromPortfolio)
+		assert.Equal(t, bundleName+"/"+className, launchesRecorded[0].ClassName)
+	}
+
+}

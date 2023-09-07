@@ -5,13 +5,38 @@
  */
 package launcher
 
-import "github.com/galasa.dev/cli/pkg/galasaapi"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/galasa.dev/cli/pkg/galasaapi"
+)
+
+// Structure used to collect parameters which are sent to the mock, so we can get them back in the
+// test and assert they had certain values.
+type LaunchParameters struct {
+	GroupName        string
+	ClassName        string
+	RequestType      string
+	Requestor        string
+	Stream           string
+	ObrFromPortfolio string
+	IsTraceEnabled   bool
+	Overrides        map[string]interface{}
+}
 
 type MockLauncher struct {
+	allTestRuns *galasaapi.TestRuns
+	nextRunId   int
+	launches    []LaunchParameters
 }
 
 func NewMockLauncher() *MockLauncher {
-	return new(MockLauncher)
+	launcher := new(MockLauncher)
+	launcher.allTestRuns = newEmptyTestRun()
+	launcher.allTestRuns.Runs = make([]galasaapi.TestRun, 0)
+	launcher.nextRunId = 100
+	return launcher
 }
 
 //-------------------------------------------------------------------
@@ -20,7 +45,7 @@ func NewMockLauncher() *MockLauncher {
 
 // GetRunsByGroup gets the lust of test runs for this groupName
 func (launcher *MockLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error) {
-	return newEmptyTestRun(), nil
+	return launcher.allTestRuns, nil
 }
 
 func newEmptyTestRun() *galasaapi.TestRuns {
@@ -29,6 +54,10 @@ func newEmptyTestRun() *galasaapi.TestRuns {
 	testRuns.Complete = &isCompleteValue
 	testRuns.Runs = []galasaapi.TestRun{}
 	return testRuns
+}
+
+func (launcher *MockLauncher) GetRecordedLaunchRecords() []LaunchParameters {
+	return launcher.launches
 }
 
 // SubmitTestRuns launch the test runs
@@ -42,7 +71,47 @@ func (launcher *MockLauncher) SubmitTestRun(
 	isTraceEnabled bool,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
-	return newEmptyTestRun(), nil
+
+	launchRecord := LaunchParameters{
+		GroupName:        groupName,
+		ClassName:        className,
+		RequestType:      requestType,
+		Requestor:        requestor,
+		Stream:           stream,
+		ObrFromPortfolio: obrFromPortfolio,
+		IsTraceEnabled:   isTraceEnabled,
+		Overrides:        overrides,
+	}
+	launcher.launches = append(launcher.launches, launchRecord)
+
+	name := fmt.Sprintf("M%d", launcher.nextRunId)
+	launcher.nextRunId += 1
+
+	newTestRun := galasaapi.NewTestRun()
+	newTestRun.SetGroup(groupName)
+
+	classNameParts := strings.Split(className, "/")
+	bundleName := classNameParts[0]
+	qualifiedClassName := classNameParts[1]
+
+	newTestRun.SetBundleName(bundleName)
+	newTestRun.SetTestName(qualifiedClassName)
+
+	newTestRun.SetStream(stream)
+	newTestRun.SetName(name)
+	launcher.allTestRuns.Runs = append(launcher.allTestRuns.Runs, *newTestRun)
+
+	newTestRun.SetStatus("finished")
+	newTestRun.SetResult("Passed")
+
+	// Add the new test run to an empty list, so the caller can read things off it.
+	testRunList := newEmptyTestRun()
+	testRunList.Runs = append(testRunList.Runs, *newTestRun)
+
+	// Add the new test run to our list so we can return details when asked about it later.
+	launcher.allTestRuns.Runs = append(launcher.allTestRuns.Runs, *newTestRun)
+
+	return launcher.allTestRuns, nil
 }
 
 // GetRunsById gets the Run information for the run with a specific run identifier

@@ -263,7 +263,7 @@ func submitRun(
 				if len(resultGroup.GetRuns()) < 1 {
 					log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
 					lostRuns[className] = &nextRun
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST, nextRun.Bundle, nextRun.Class)
 				}
 
 				if err == nil {
@@ -411,6 +411,7 @@ func buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]strin
 			Bundle:    portfolioTest.Bundle,
 			Class:     portfolioTest.Class,
 			Stream:    portfolioTest.Stream,
+			Obr:       portfolioTest.Obr,
 			Status:    "queued",
 			Overrides: make(map[string]string, 0),
 		}
