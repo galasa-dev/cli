@@ -144,9 +144,9 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	var overrides map[string]interface{} = make(map[string]interface{})
 
 	// When...
-	testRuns, err := launcher.SubmitTestRuns(
+	testRuns, err := launcher.SubmitTestRun(
 		"myGroup",
-		[]string{"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount"},
+		"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount",
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",
@@ -190,9 +190,9 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
 
-	launcher.SubmitTestRuns(
+	launcher.SubmitTestRun(
 		"myGroup",
-		[]string{"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount"},
+		"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount",
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",

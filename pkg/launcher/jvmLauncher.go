@@ -166,19 +166,20 @@ func NewJVMLauncher(
 // stream - The stream the test run is part of
 // isTraceEnabled - True of the trace for the test run should be gathered.
 // overrides - A map of overrides of key-value pairs.
-func (launcher *JvmLauncher) SubmitTestRuns(
+func (launcher *JvmLauncher) SubmitTestRun(
 	groupName string,
-	classNames []string,
+	className string,
 	requestType string,
 	requestor string,
 	stream string,
+	obrFromPortfolio string,
 	isTraceEnabled bool,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
 
-	log.Printf("JvmLauncher: SubmitTestRuns entered. group=%s classNames=%v "+
+	log.Printf("JvmLauncher: SubmitTestRun entered. group=%s className=%s "+
 		"requestType=%s requestor=%s stream=%s isTraceEnabled=%v",
-		groupName, classNames, requestType,
+		groupName, className, requestType,
 		requestor, stream, isTraceEnabled)
 
 	testRuns := new(galasaapi.TestRuns)
@@ -203,53 +204,46 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 			testRuns.Complete = &isComplete
 			testRuns.Runs = make([]galasaapi.TestRun, 0)
 
-			for _, classNameUserInput := range classNames {
+			var testClassToLaunch *TestLocation
+			testClassToLaunch, err = classNameUserInputToTestClassLocation(className)
 
-				var testClassToLaunch *TestLocation
-				testClassToLaunch, err = classNameUserInputToTestClassLocation(classNameUserInput)
-
+			if err == nil {
+				var (
+					cmd  string
+					args []string
+				)
+				cmd, args, err = getCommandSyntax(
+					launcher.bootstrapProps,
+					launcher.galasaHome,
+					launcher.fileSystem, launcher.javaHome, obrs,
+					*testClassToLaunch, launcher.cmdParams.RemoteMaven,
+					launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
+					isTraceEnabled,
+					launcher.cmdParams.IsDebugEnabled,
+					launcher.cmdParams.DebugPort,
+					launcher.cmdParams.DebugMode,
+				)
 				if err == nil {
-					var (
-						cmd  string
-						args []string
-					)
-					cmd, args, err = getCommandSyntax(
-						launcher.bootstrapProps,
-						launcher.galasaHome,
-						launcher.fileSystem, launcher.javaHome, obrs,
-						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
-						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
-						isTraceEnabled,
-						launcher.cmdParams.IsDebugEnabled,
-						launcher.cmdParams.DebugPort,
-						launcher.cmdParams.DebugMode,
-					)
+					log.Printf("Launching command '%s' '%v'\n", cmd, args)
+					localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
+					err = localTest.launch(cmd, args)
+
 					if err == nil {
-						log.Printf("Launching command '%s' '%v'\n", cmd, args)
-						localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
-						err = localTest.launch(cmd, args)
+						// The JVM process started. Store away its' details
+						launcher.localTests = append(launcher.localTests, localTest)
 
-						if err == nil {
-							// The JVM process started. Store away its' details
-							launcher.localTests = append(launcher.localTests, localTest)
+						localTest.testRun = new(galasaapi.TestRun)
+						localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+						localTest.testRun.SetStream(stream)
+						localTest.testRun.SetGroup(groupName)
+						localTest.testRun.SetRequestor(requestor)
+						localTest.testRun.SetTrace(isTraceEnabled)
+						localTest.testRun.SetType(requestType)
+						localTest.testRun.SetName(localTest.runId)
 
-							localTest.testRun = new(galasaapi.TestRun)
-							localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
-							localTest.testRun.SetStream(stream)
-							localTest.testRun.SetGroup(groupName)
-							localTest.testRun.SetRequestor(requestor)
-							localTest.testRun.SetTrace(isTraceEnabled)
-							localTest.testRun.SetType(requestType)
-							localTest.testRun.SetName(localTest.runId)
-
-							// The test run we started can be returned to the submitter.
-							testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
-						}
+						// The test run we started can be returned to the submitter.
+						testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
 					}
-				}
-
-				if err != nil {
-					break
 				}
 			}
 		}

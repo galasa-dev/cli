@@ -19,9 +19,9 @@ type Launcher interface {
 	GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error)
 
 	// SubmitTestRuns launch the test runs
-	SubmitTestRuns(
+	SubmitTestRun(
 		groupName string,
-		classNames []string,
+		className string,
 		requestType string,
 		requestor string,
 		stream string,

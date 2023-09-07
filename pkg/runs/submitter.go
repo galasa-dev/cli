@@ -233,7 +233,6 @@ func submitRun(
 	readyRuns = readyRuns[1:]
 
 	className := nextRun.Bundle + "/" + nextRun.Class
-	classNames := []string{className}
 
 	submitOverrides := make(map[string]interface{})
 
@@ -243,7 +242,7 @@ func submitRun(
 
 	var resultGroup *galasaapi.TestRuns
 	var err error
-	resultGroup, err = launcher.SubmitTestRuns(groupName, classNames, requestType, requestor, nextRun.Stream, trace, submitOverrides)
+	resultGroup, err = launcher.SubmitTestRun(groupName, className, requestType, requestor, nextRun.Stream, trace, submitOverrides)
 	if err != nil {
 		log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
 		lostRuns[className] = &nextRun

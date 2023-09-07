@@ -23,7 +23,7 @@ func (launcher *MockLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestR
 	return newEmptyTestRun(), nil
 }
 
-func newEmptyTestRun() *galasaapi.TestRuns{
+func newEmptyTestRun() *galasaapi.TestRuns {
 	isCompleteValue := false
 	testRuns := new(galasaapi.TestRuns)
 	testRuns.Complete = &isCompleteValue
@@ -32,9 +32,9 @@ func newEmptyTestRun() *galasaapi.TestRuns{
 }
 
 // SubmitTestRuns launch the test runs
-func (launcher *MockLauncher) SubmitTestRuns(
+func (launcher *MockLauncher) SubmitTestRun(
 	groupName string,
-	classNames []string,
+	className string,
 	requestType string,
 	requestor string,
 	stream string,
