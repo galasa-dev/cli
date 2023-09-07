@@ -150,6 +150,7 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",
+		"myObr",
 		isTraceEnabled,
 		overrides,
 	)
@@ -196,6 +197,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",
+		"myObr",
 		isTraceEnabled,
 		overrides,
 	)
