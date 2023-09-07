@@ -31,7 +31,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1028E: Failed to unmarshal test catalog from REST reply for property '{}', stream '{}'. Reason is {}
 - GAL1029E: Stream '{}' is not found in the ecosystem. There are no streams set up. Ask your Galasa system administrator to add a new stream with the desired name.
 - GAL1030E: Stream '{}' is not found in the ecosystem. Valid streams are:{}. Try again using a valid stream, or ask your Galasa system administrator to add a new stream with the desired name.
-- GAL1031E: Invalid flags. --bundle, --package, --test, --tag, and --class flags can only be specified if --stream is provided.
+- GAL1031E: Invalid flags. --bundle, --package, --test and --tag flags can only be specified if --stream is provided.
 - GAL1032E: Invalid select regex '{}'. Reason is {}
 - GAL1033E: Invalid select quoted regex '{}'. Reason is {}
 - GAL1034E: Class '{}' is not format 'bundle/class'
@@ -60,10 +60,10 @@ The `galasactl` tool can generate the following errors:
 - GAL1057E: The run identifier could not be detected in trace output of the child process
 - GAL1058E: Failed to load bootstrap file '{}'. Reason is '{}'
 - GAL1059E: Failed to load overrides file '{}'. Reason is '{}'
-- GAL1060E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.
-- GAL1061E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.
-- GAL1062E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with a 'mvn:' prefix.
-- GAL1063E: Badly formed OBR parameter '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with an '/obr' suffix.
+- GAL1060E: Badly formed OBR '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.
+- GAL1061E: Badly formed OBR '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with 4 parts separated by slash characters.
+- GAL1062E: Badly formed OBR '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with a 'mvn:' prefix.
+- GAL1063E: Badly formed OBR '{}'. Expected it to be of the form mvn:<GROUP_ID>/<ARTIFACT_ID>/<VERSION>/obr with an '/obr' suffix.
 - GAL1064E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. No slash found.
 - GAL1065E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Too many slashes found.
 - GAL1066E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.
@@ -90,8 +90,9 @@ The `galasactl` tool can generate the following errors:
 - GAL1087E: Invalid '--result' parameter value: {}. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: {}
 - GAL1088E: --active and --result must not be used at the same time, they are mutually exclusive.
 - GAL1089E: Need to use --maven and/or --gradle parameter
-- GAL1090E: Could not get username of current requestor. Reason is '{}'
-- GAL1091E: '{}' is not a properly formed file URL
+- GAL1092E: Galasa Ecosystem error: Test submitted to server. Server Accepted it but didn't add it to the run group. Test is lost and will not execute. (bundle: {}, class: {}). Reason: {}
+- GAL1093E: Failed to submit test (bundle: {}, class: {}). Reason is: {}
+- GAL1094E: User error: Cannot run test {} on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

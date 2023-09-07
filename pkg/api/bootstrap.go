@@ -8,6 +8,7 @@ package api
 import (
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -72,16 +73,19 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 }
 
 // getDefaultBootstrapPath - Work out where the boostrap file can normally be found.
-func getDefaultBootstrapPath(galasaHome utils.GalasaHome) string {
+func getDefaultBootstrapPath(galasaHome utils.GalasaHome) (string, error) {
+	var path string = ""
 
 	// Turn the path into a URL
 	// This may involve changing the direction of slash characters.
-	baseUrl := "file://"
+	baseUrl, err := url.Parse("file:///")
+	if err == nil {
+		// All URLs have forward-facing slashes.
+		fullUrl := baseUrl.JoinPath(galasaHome.GetUrlFolderPath(), "bootstrap.properties")
+		path = fullUrl.String()
+	}
 
-	// All URLs have forward-facing slashes.
-	fullUrl := baseUrl + galasaHome.GetUrlFolderPath() + "/bootstrap.properties"
-
-	return fullUrl
+	return path, err
 }
 
 // loadBootstrap - Loads the contents of a bootstrap file into memory.
@@ -108,7 +112,7 @@ func LoadBootstrap(
 
 	// If it's still not clear, use the default bootstrap.properties in the ${HOME}/.galasa folder.
 	if path == "" {
-		path = getDefaultBootstrapPath(galasaHome)
+		path, err = getDefaultBootstrapPath(galasaHome)
 	}
 
 	if err == nil {
@@ -151,10 +155,7 @@ func cleanPath(fileSystem files.FileSystem, path string) (string, error) {
 	var err error = nil
 	if path != "" {
 		path = removeLeadingFileColon(path)
-		err = validateURL(path)
-		if err == nil{
-			path, err = files.TildaExpansion(fileSystem, path)
-		}
+		path, err = files.TildaExpansion(fileSystem, path)
 	}
 	return path, err
 }
@@ -162,14 +163,6 @@ func cleanPath(fileSystem files.FileSystem, path string) (string, error) {
 func removeLeadingFileColon(path string) string {
 	path = strings.TrimPrefix(path, "file://")
 	return path
-}
-
-func validateURL(path string) error {
-	var err error = nil
-	if strings.HasPrefix(path, "file:") {
-		err=galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_BOOTSTRAP_FILE_URL, path)
-	}
-	return err
 }
 
 func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem files.FileSystem) (*BootstrapData, error) {

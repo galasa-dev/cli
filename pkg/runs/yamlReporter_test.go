@@ -55,6 +55,7 @@ func TestYamlReportWorks(t *testing.T) {
 	  bundle: myBundle
 	  class: com.myco.MyClass
 	  stream: myStream
+	  obr: ""
 	  status: myStatus
 	  result: PASSED
 	  overrides: {}

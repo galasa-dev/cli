@@ -35,7 +35,7 @@ var (
 
 func init() {
 
-	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdParams.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
+	runsSubmitCmd.PersistentFlags().StringVarP(&runsSubmitCmdParams.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
 
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportJsonFilename, "reportjson", "", "json file to record the final results in")
@@ -124,14 +124,8 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	// The launcher we are going to use to start/monitor tests.
 	launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
 
-	validator := runs.NewStreamBasedValidator()
-	err = validator.Validate(prepareSelectionFlags)
-	if err != nil {
-		panic(err)
-	}
-
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, submitSelectionFlags, env)
+		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, submitSelectionFlags)
 	}
 
 	if err != nil {

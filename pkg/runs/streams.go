@@ -19,41 +19,32 @@ func GetStreams(launcher launcher.Launcher) ([]string, error) {
 	return streams, err
 }
 
-func ValidateStream(validStreamNames []string, streamNameToCheck string) error {
-	log.Printf("Validating that stream %s exists in the list of valid streams.\n",streamNameToCheck)
-
-	var err error = nil
-
-	var streamFound = false
-	
-	for _, s := range validStreamNames {
-		if s == streamNameToCheck {
+func ValidateStream(streams []string, stream string) error {
+	log.Println("Validating streams list.")
+	for _, s := range streams {
+		if s == stream {
 			log.Println("Stream is found in the list of valid streams.")
-			streamFound = true
-			break;
+			return nil
 		}
 	}
 
-	
-	if ! streamFound {
-		// Not a valid stream name. Build the error message.
-		log.Println("Stream not found, deciding error.")
-		if len(validStreamNames) < 1 {
-			// No streams configured.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_STREAMS_CONFIGURED, streamNameToCheck)
-		} else {
+	// Build the error message.
+	var error *galasaErrors.GalasaError
+	if len(streams) < 1 {
+		// No streams configured.
+		error = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_STREAMS_CONFIGURED, stream)
+	} else {
 
-			var buffer strings.Builder
-			var availableStreamsList string
-			for _, s := range validStreamNames {
-				buffer.WriteString(" '")
-				buffer.WriteString(s)
-				buffer.WriteString("'")
-			}
-			availableStreamsList = buffer.String()
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_STREAM, streamNameToCheck, availableStreamsList)
+		var buffer strings.Builder
+		var availableStreamsList string
+		for _, s := range streams {
+			buffer.WriteString(" '")
+			buffer.WriteString(s)
+			buffer.WriteString("'")
 		}
+		availableStreamsList = buffer.String()
+		error = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_STREAM, stream, availableStreamsList)
 	}
 
-	return err
+	return error
 }

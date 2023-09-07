@@ -207,8 +207,6 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
 	fs := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	env.SetUserName("myuserid")
-
 	galasaHome, err := utils.NewGalasaHome(fs, env, "")
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
@@ -233,76 +231,8 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 	mockLauncher := launcher.NewMockLauncher()
 
 	err = validateAndCorrectParams(galasaHome, fs, commandParameters,
-		mockLauncher, submitSelectionFlags, env)
+		mockLauncher, submitSelectionFlags)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, commandParameters.OverrideFilePath)
-}
-
-func TestValidateAndCorrectParametersRespectsExplicitRequestorField(t *testing.T) {
-
-	fs := files.NewMockFileSystem()
-	env := utils.NewMockEnv()
-	env.SetUserName("mybaduserid")
-
-	galasaHome, err := utils.NewGalasaHome(fs, env, "")
-	if err != nil {
-		assert.Fail(t, "Should not have failed! message = %s", err.Error())
-	}
-
-	commandParameters := &utils.RunsSubmitCmdParameters{
-		Requestor: "myvaliduserid",
-	}
-
-	regexSelectValue := false
-	submitSelectionFlags := &TestSelectionFlags{
-		bundles:     new([]string),
-		packages:    new([]string),
-		tests:       new([]string),
-		tags:        new([]string),
-		classes:     new([]string),
-		stream:      "myStream",
-		regexSelect: &regexSelectValue,
-	}
-
-	mockLauncher := launcher.NewMockLauncher()
-
-	err = validateAndCorrectParams(galasaHome, fs, commandParameters,
-		mockLauncher, submitSelectionFlags, env)
-
-	assert.Nil(t, err)
-	assert.Equal(t, commandParameters.Requestor, "myvaliduserid")
-}
-
-func TestValidateAndCorrectParametersDefaultsRequestorFieldFromEnvironment(t *testing.T) {
-
-	fs := files.NewMockFileSystem()
-	env := utils.NewMockEnv()
-	env.SetUserName("mybaduserid")
-
-	galasaHome, err := utils.NewGalasaHome(fs, env, "")
-	if err != nil {
-		assert.Fail(t, "Should not have failed! message = %s", err.Error())
-	}
-
-	commandParameters := &utils.RunsSubmitCmdParameters{}
-
-	regexSelectValue := false
-	submitSelectionFlags := &TestSelectionFlags{
-		bundles:     new([]string),
-		packages:    new([]string),
-		tests:       new([]string),
-		tags:        new([]string),
-		classes:     new([]string),
-		stream:      "myStream",
-		regexSelect: &regexSelectValue,
-	}
-
-	mockLauncher := launcher.NewMockLauncher()
-
-	err = validateAndCorrectParams(galasaHome, fs, commandParameters,
-		mockLauncher, submitSelectionFlags, env)
-
-	assert.Nil(t, err)
-	assert.Equal(t, commandParameters.Requestor, "mybaduserid")
 }

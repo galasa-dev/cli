@@ -22,6 +22,7 @@ func TestCanWriteAndReadAPortfolio(t *testing.T) {
 		Bundle: "myBundle",
 		Class:  "myClass",
 		Stream: "myStream",
+		Obr:	"myObr",
 	})
 
 	testOverrides := make(map[string]string)
@@ -38,5 +39,6 @@ func TestCanWriteAndReadAPortfolio(t *testing.T) {
 	assert.Equal(t, "myBundle", portfolioGotBack.Classes[0].Bundle)
 	assert.Equal(t, "myClass", portfolioGotBack.Classes[0].Class)
 	assert.Equal(t, "myStream", portfolioGotBack.Classes[0].Stream)
+	assert.Equal(t, "myObr", portfolioGotBack.Classes[0].Obr)
 
 }

@@ -222,34 +222,3 @@ func TestBootstrapExpandsFileColonPath(t *testing.T) {
 	assert.Equal(t, bootstrapData.Properties["a"], "b", "Failed to read the dummy boostrap properties.")
 	assert.Equal(t, bootstrapData.ApiServerURL, "http://my.fake.server/dummy-url", "Failed to set API server URL to value found in the bootstrap.")
 }
-
-func TestBootstrapFileURLReturnsBadWhenLeadingFileNotStripped(t *testing.T) {
-	// Given...
-	mockFileSystem := files.NewMockFileSystem()
-
-	// Create a bootstrap not in the default place. We should find it as the Env Var points to it.
-	mockFileSystem.WriteTextFile(
-		"file:/my.bootstrap.properties",
-		"a=b\n"+
-		BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL+"= http://my.fake.server/dummy-url",
-	)
-
-	// Shouldn't need to consult any network traffic.
-	var mockUrlResolutionService *MockUrlResolutionService = nil
-
-	// Empty environment variables.
-	mockEnvironment := utils.NewMockEnv()
-
-	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-
-	var bootstrapPath = "file:/my.bootstrap.properties"
-	_, err := LoadBootstrap(
-		galasaHome,
-		mockFileSystem,
-		mockEnvironment,
-		bootstrapPath,
-		mockUrlResolutionService)
-	
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1091E:")
-}

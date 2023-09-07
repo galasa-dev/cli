@@ -15,6 +15,7 @@ import (
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+
 )
 
 // RemoteLauncher A launcher, which launches and monitors tests on a remote ecosystem via HTTP/HTTPS.
@@ -53,15 +54,20 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 	return testRuns, err
 }
 
-func (launcher *RemoteLauncher) SubmitTestRuns(
-	groupName string,
-	classNames []string,
-	requestType string,
-	requestor string,
-	stream string,
+func (launcher *RemoteLauncher) SubmitTestRun(
+	groupName      string,
+	className      string,
+	requestType    string,
+	requestor      string,
+	stream         string,
+	obr            string, // The remote launcher doesn't use this parameter on the interface.
 	isTraceEnabled bool,
-	overrides map[string]interface{},
+	overrides      map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
+
+	// We have a single class, but the REST API needs an arrray of class names.
+	var classNames []string = make([]string,1)
+	classNames[0] = className
 
 	testRunRequest := galasaapi.NewTestRunRequest()
 	testRunRequest.SetClassNames(classNames)
@@ -70,8 +76,6 @@ func (launcher *RemoteLauncher) SubmitTestRuns(
 	testRunRequest.SetTestStream(stream)
 	testRunRequest.SetTrace(isTraceEnabled)
 	testRunRequest.SetOverrides(overrides)
-
-	log.Printf("RemoteLauncher.SubmitTestRuns : using requestor %s\n", requestor)
 
 	var resultGroup *galasaapi.TestRuns
 	var err error

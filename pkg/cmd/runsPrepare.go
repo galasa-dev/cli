@@ -95,12 +95,6 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	// Create an API client
 	launcher := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
 
-	validator := runs.NewStreamBasedValidator()
-	err = validator.Validate(prepareSelectionFlags)
-	if err != nil {
-		panic(err)
-	}
-
 	testSelection, err := runs.SelectTests(launcher, prepareSelectionFlags)
 	if err != nil {
 		panic(err)

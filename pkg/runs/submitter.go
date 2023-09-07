@@ -6,6 +6,7 @@
 package runs
 
 import (
+	
 	"log"
 	"os/user"
 	"strconv"
@@ -29,31 +30,38 @@ func ExecuteSubmitRuns(
 	launcher launcher.Launcher,
 	timeService utils.TimeService,
 	testSelectionFlags *TestSelectionFlags,
-	env utils.Environment,
 ) error {
 
 	var err error = nil
 
-	err = validateAndCorrectParams(galasaHome, fileSystem, &params, launcher, testSelectionFlags, env)
-	if err != nil {
-		return err
+	err = validateAndCorrectParams(galasaHome, fileSystem, &params, launcher, testSelectionFlags)
+	if err == nil {
+		var runOverrides map[string]string
+		runOverrides, err = buildOverrideMap(fileSystem, params)
+		if err == nil {
+			var portfolio *Portfolio
+			portfolio, err = getPortfolio(fileSystem, params.PortfolioFileName, launcher, testSelectionFlags)
+			if err == nil {
+				err = validatePortfolio(portfolio, params.PortfolioFileName)
+				if err == nil {
+					err = executePortfolio(portfolio, runOverrides, fileSystem, params, launcher, timeService)
+				}
+			}
+		}
 	}
 
-	runOverrides, err := buildOverrideMap(fileSystem, params)
-	if err != nil {
-		return err
-	}
+	return err
+}
 
-	var portfolio *Portfolio
-	portfolio, err = getPortfolio(fileSystem, params.PortfolioFileName, launcher, testSelectionFlags)
-	if err != nil {
-		return err
-	}
+func executePortfolio(portfolio *Portfolio,
+	runOverrides map[string]string,
+	fileSystem files.FileSystem,
+	params utils.RunsSubmitCmdParameters,
+	launcher launcher.Launcher,
+	timeService utils.TimeService,
+) error {
 
-	err = validatePortfolio(portfolio, params.PortfolioFileName)
-	if err != nil {
-		return err
-	}
+	var err error = nil
 
 	// Build list of runs to submit
 	readyRuns := buildListOfRunsToSubmit(portfolio, runOverrides)
@@ -114,8 +122,11 @@ func executeSubmitRuns(fileSystem files.FileSystem,
 	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
 
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
-			readyRuns = submitRun(launcher, params.GroupName, readyRuns, submittedRuns,
+			readyRuns,err = submitRun(launcher, params.GroupName, readyRuns, submittedRuns,
 				lostRuns, &runOverrides, params.Trace, params.Requestor, params.RequestType)
+
+			// TODO: Log the error to the console.
+			// Ignore the error and continue to process the list of available runs.
 		}
 
 		// Only do progress reporting if the user didn't disable it.
@@ -223,47 +234,49 @@ func submitRun(
 	runOverrides *map[string]string,
 	trace bool,
 	requestor string,
-	requestType string) []TestRun {
+	requestType string) ([]TestRun,error) {
 
-	if len(readyRuns) < 1 {
-		return readyRuns
+	var err error = nil
+	if len(readyRuns) >= 1 {
+		
+		nextRun := readyRuns[0]
+		readyRuns = readyRuns[1:]
+
+		if err == nil {
+
+			className := nextRun.Bundle + "/" + nextRun.Class
+
+			submitOverrides := make(map[string]interface{})
+
+			for key, value := range nextRun.Overrides {
+				submitOverrides[key] = value
+			}
+
+			var resultGroup *galasaapi.TestRuns
+			resultGroup, err = launcher.SubmitTestRun(groupName, className, requestType, requestor, nextRun.Stream, nextRun.Obr , trace, submitOverrides)
+			if err != nil {
+				log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
+				lostRuns[className] = &nextRun
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
+			} else {
+				if len(resultGroup.GetRuns()) < 1 {
+					log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
+					lostRuns[className] = &nextRun
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST)
+				}
+
+				if err == nil {
+					submittedRun := resultGroup.GetRuns()[0]
+					nextRun.Name = *submittedRun.Name
+
+					submittedRuns[nextRun.Name] = &nextRun
+
+					log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
+				}
+			}
+		}
 	}
-
-	nextRun := readyRuns[0]
-	readyRuns = readyRuns[1:]
-
-	className := nextRun.Bundle + "/" + nextRun.Class
-	classNames := []string{className}
-
-	submitOverrides := make(map[string]interface{})
-
-	for key, value := range nextRun.Overrides {
-		submitOverrides[key] = value
-	}
-
-	var resultGroup *galasaapi.TestRuns
-	var err error
-	resultGroup, err = launcher.SubmitTestRuns(groupName, classNames, requestType, requestor, nextRun.Stream, trace, submitOverrides)
-	if err != nil {
-		log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
-		lostRuns[className] = &nextRun
-		return readyRuns
-	}
-
-	if len(resultGroup.GetRuns()) < 1 {
-		log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
-		lostRuns[className] = &nextRun
-		return readyRuns
-	}
-
-	submittedRun := resultGroup.GetRuns()[0]
-	nextRun.Name = *submittedRun.Name
-
-	submittedRuns[nextRun.Name] = &nextRun
-
-	log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
-
-	return readyRuns
+	return readyRuns,err
 }
 
 func runsFetchCurrentStatus(
@@ -425,7 +438,6 @@ func validateAndCorrectParams(
 	params *utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
 	submitSelectionFlags *TestSelectionFlags,
-	env utils.Environment,
 ) error {
 
 	var err error = nil
@@ -458,27 +470,27 @@ func validateAndCorrectParams(
 	}
 
 	if err == nil {
-		if params.Requestor == "" {
-			// Requestor has not been set. Default it to the current user id.
-			params.Requestor, err = env.GetUserName()
-		}
-	}
-
-	if err == nil {
 		// generate a group name if required
 		if params.GroupName == "" {
-			params.GroupName = randomGenerator.NewV4().String()
+			var uuid randomGenerator.UUID
+			uuid, err = randomGenerator.NewV4()
+			if err == nil {
+				params.GroupName = uuid.String()
+			}
 		}
-		log.Printf("Using group name '%v' for test run submission\n", params.GroupName)
 
-		_, err = checkIfGroupAlreadyInUse(launcher, params.GroupName)
+		if err == nil {
+			log.Printf("Using group name '%v' for test run submission\n", params.GroupName)
+			_, err = checkIfGroupAlreadyInUse(launcher, params.GroupName)
+		}
 	}
 
 	if err == nil {
 		err = correctOverrideFilePathParameter(galasaHome, fs, params)
+		if err == nil {
+			tildaExpandAllPaths(fs, params)
+		}
 	}
-
-	tildaExpandAllPaths(fs, params)
 
 	return err
 }

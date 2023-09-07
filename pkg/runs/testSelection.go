@@ -38,6 +38,7 @@ type TestClass struct {
 	Bundle string
 	Class  string
 	Stream string
+	Obr    string
 }
 
 func NewTestSelectionFlags() *TestSelectionFlags {
@@ -49,39 +50,6 @@ func NewTestSelectionFlags() *TestSelectionFlags {
 	flags.classes = new([]string)
 	flags.regexSelect = new(bool)
 	return flags
-}
-
-type TestSelectionFlagValidator interface {
-	Validate(flags *TestSelectionFlags) error
-}
-
-type StreamBasedValidator struct {
-}
-
-func NewStreamBasedValidator() TestSelectionFlagValidator {
-	return new(StreamBasedValidator)
-}
-
-func (*StreamBasedValidator) Validate(flags *TestSelectionFlags) error {
-	var err error = nil
-	if flags.stream == "" {
-		if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 || len(*flags.classes) > 0 {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
-		}
-	}
-	return err
-}
-
-type ObrBasedValidator struct {
-}
-
-func NewObrBasedValidator() TestSelectionFlagValidator {
-	return new(ObrBasedValidator)
-}
-
-func (*ObrBasedValidator) Validate(flags *TestSelectionFlags) error {
-	var err error = nil
-	return err
 }
 
 // Adds a ton of flags to a cobra command like 'runs prepare' or 'runs submit'.
@@ -142,11 +110,10 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 	var testCatalog launcher.TestCatalog
 
 	if flags.stream != "" {
-		var availableStreams []string
-		availableStreams, err = GetStreams(launcherInstance)
+		availableStreams, err := GetStreams(launcherInstance)
 		if err == nil {
 
-			err = ValidateStream(availableStreams, flags.stream)
+			err := ValidateStream(availableStreams, flags.stream)
 			if err == nil {
 
 				testCatalog, err = launcherInstance.GetTestCatalog(flags.stream)
@@ -159,6 +126,12 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 
 	if err == nil {
 		testSelection = TestSelection{Classes: make([]TestClass, 0)}
+
+		if flags.stream == "" {
+			if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
+			}
+		}
 
 		if err == nil {
 			err = selectTestsByBundle(testCatalog, &testSelection, flags)

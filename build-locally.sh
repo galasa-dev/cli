@@ -234,6 +234,9 @@ function calculate_galasactl_executable {
     esac
 
     architecture=$(uname -m)
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
 
     export galasactl_command="galasactl-${os}-${architecture}"
     info "galasactl command is ${galasactl_command}"
@@ -455,6 +458,9 @@ function generate_galasactl_documentation {
                     exit 1
     esac
     architecture="$(uname -m)"
+    if [[ "${architecture}" == "x86_64" ]]; then
+        architecture="amd64"
+    fi
 
     # Call the documentation generator, which builds .md files
     info "Using program ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} to generate the documentation..."
@@ -574,7 +580,7 @@ function run_test_locally_using_galasactl {
 
 function test_on_windows {
     WINDOWS_HOST="cics-galasa-test"
-    scp ${BASEDIR}/bin/galasactl-windows-x86_64.exe ${WINDOWS_HOST}:galasactl.exe
+    scp ${BASEDIR}/bin/galasactl-windows-amd64.exe ${WINDOWS_HOST}:galasactl.exe
     ssh ${WINDOWS_HOST} ./galasactl.exe runs submit local  --obr mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr  --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount --log -
 }
 
@@ -606,8 +612,7 @@ cleanup_temp
 calculate_galasactl_executable
 galasa_home_init
 
-# Local environments don't support the portfolio yet.
-# build_portfolio
+build_portfolio
 
 generate_galasactl_documentation
 

@@ -18,13 +18,14 @@ type Launcher interface {
 	// GetRunsByGroup gets the lust of test runs for this groupName
 	GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error)
 
-	// SubmitTestRuns launch the test runs
-	SubmitTestRuns(
+	// SubmitTestRuns launch the test run
+	SubmitTestRun(
 		groupName string,
-		classNames []string,
+		className string,
 		requestType string,
 		requestor string,
 		stream string,
+		obr string,
 		isTraceEnabled bool,
 		overrides map[string]interface{},
 	) (*galasaapi.TestRuns, error)

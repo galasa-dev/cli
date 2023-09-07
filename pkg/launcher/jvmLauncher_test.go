@@ -113,7 +113,16 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 	assert.NotNil(t, launcher, "Launcher returned is nil!")
 }
 
-func TestCanLaunchLocalJvmTest(t *testing.T) {
+func NewMockLauncherParams() (
+	props.JavaProperties,
+	*utils.MockEnv,
+	files.FileSystem,
+	embedded.ReadOnlyFileSystem,
+	RunsSubmitLocalCmdParameters,
+	utils.TimeService,
+	ProcessFactory,
+	utils.GalasaHome,
+) {
 	// Given...
 	env := utils.NewMockEnv()
 	env.EnvVars["JAVA_HOME"] = "/java"
@@ -131,8 +140,86 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 
 	bootstrapProps := getBasicBootstrapProperties()
 
+	return bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome
+}
+
+func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
+
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+
+	launcher, _ := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// When...
+	var err error
+	_, err = launcher.SubmitTestRun(
+		"myGroup",
+		"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount",
+		"myRequestType-UnitTest",
+		"myRequestor",
+		"unitTestStream",
+		"notmaven://group/artifact/version/classifier",
+		isTraceEnabled,
+		overrides,
+	)
+
+	assert.NotNil(t, err)
+	if err != nil {
+		// Expect badly formed OBR
+		assert.Contains(t, err.Error(), "GAL1061E:")
+	}
+}
+
+func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
+
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+
+	launcher, _ := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// Empty list of obrs from the command-line.
+	jvmLaunchParams.Obrs = make([]string, 0)
+
+	// When...
+	var err error
+	_, err = launcher.SubmitTestRun(
+		"myGroup",
+		"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount",
+		"myRequestType-UnitTest",
+		"myRequestor",
+		"unitTestStream",
+		"", // No Obr from the profile record.
+		isTraceEnabled,
+		overrides,
+	)
+
+	assert.NotNil(t, err)
+	if err != nil {
+		// Expect Can't run this test because no obr information specified.
+		assert.Contains(t, err.Error(), "GAL1094E:")
+	}
+}
+
+func TestCanLaunchLocalJvmTest(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
 
 	if err != nil {
@@ -144,22 +231,24 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	var overrides map[string]interface{} = make(map[string]interface{})
 
 	// When...
-	testRuns, err := launcher.SubmitTestRuns(
+	testRuns, err := launcher.SubmitTestRun(
 		"myGroup",
-		[]string{"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount"},
+		"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount",
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",
+		"mvn:myObrGroupId/myObrArtifactId/myObrVersion/obr",
 		isTraceEnabled,
 		overrides,
 	)
 	if err != nil {
-		assert.Fail(t, "Launcher should have launched command OK")
-	}
-	assert.NotNil(t, testRuns, "Returned test runs is nil, should have been an object.")
+		assert.Fail(t, "Launcher should have launched command OK.", err.Error())
+	} else {
+		assert.NotNil(t, testRuns, "Returned test runs is nil, should have been an object.")
 
-	assert.Len(t, testRuns.Runs, 1, "Returned test runs array doesn't contain correct number of tests launched.")
-	assert.False(t, *testRuns.Complete, "Returned test runs should not already be complete")
+		assert.Len(t, testRuns.Runs, 1, "Returned test runs array doesn't contain correct number of tests launched.")
+		assert.False(t, *testRuns.Complete, "Returned test runs should not already be complete")
+	}
 }
 
 func TestCanGetRunGroupStatus(t *testing.T) {
@@ -190,12 +279,13 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
 
-	launcher.SubmitTestRuns(
+	launcher.SubmitTestRun(
 		"myGroup",
-		[]string{"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount"},
+		"galasa.dev.example.banking.account/galasa.dev.example.banking.account.TestAccount",
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",
+		"mvn:myObrGroupId/myObrArtifactId/myObrVersion/obr",
 		isTraceEnabled,
 		overrides,
 	)
@@ -489,54 +579,6 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, cmd, "myJavaHome\\bin\\java")
-}
-
-func TestSingleValidObrIsValid(t *testing.T) {
-	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr"}
-	mavenCoordinates, err := validateObrs(obrInputs)
-	assert.Nil(t, err)
-	assert.Len(t, mavenCoordinates, 1)
-	assert.NotNil(t, mavenCoordinates)
-	assert.Equal(t, mavenCoordinates[0].ArtifactId, "dev.galasa.example.banking.obr")
-	assert.Equal(t, mavenCoordinates[0].Classifier, "obr")
-	assert.Equal(t, mavenCoordinates[0].GroupId, "dev.galasa.example.banking")
-	assert.Equal(t, mavenCoordinates[0].Version, "0.0.1-SNAPSHOT")
-}
-
-func TestSingleObrIsInvalidTooFewPartsWithSlashSeparator(t *testing.T) {
-	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOTobr"}
-	mavenCoordinates, err := validateObrs(obrInputs)
-	assert.NotNil(t, err)
-	assert.NotNil(t, mavenCoordinates)
-	assert.Len(t, mavenCoordinates, 0)
-	assert.Contains(t, err.Error(), "GAL1060E")
-}
-
-func TestSingleObrIsInvalidTooManyPartsWithSlashSeparator(t *testing.T) {
-	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT//obr"}
-	mavenCoordinates, err := validateObrs(obrInputs)
-	assert.NotNil(t, err)
-	assert.NotNil(t, mavenCoordinates)
-	assert.Len(t, mavenCoordinates, 0)
-	assert.Contains(t, err.Error(), "GAL1061E")
-}
-
-func TestSingleObrIsInvalidTooManyPartsWithMissingMvnPrefix(t *testing.T) {
-	obrInputs := []string{"dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr"}
-	mavenCoordinates, err := validateObrs(obrInputs)
-	assert.NotNil(t, err)
-	assert.NotNil(t, mavenCoordinates)
-	assert.Len(t, mavenCoordinates, 0)
-	assert.Contains(t, err.Error(), "GAL1062E")
-}
-
-func TestSingleObrIsInvalidTooManyPartsWithMissingObrSuffix(t *testing.T) {
-	obrInputs := []string{"mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/mysuffix"}
-	mavenCoordinates, err := validateObrs(obrInputs)
-	assert.NotNil(t, err)
-	assert.NotNil(t, mavenCoordinates)
-	assert.Len(t, mavenCoordinates, 0)
-	assert.Contains(t, err.Error(), "GAL1063E")
 }
 
 func TestValidClassInputGetsSplitCorrectly(t *testing.T) {
