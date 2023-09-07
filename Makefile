@@ -5,7 +5,7 @@
 #
 all: tests galasactl gendocs-galasactl
 
-galasactl: \
+galasactl: \	
 	bin/galasactl-linux-arm64 \
 	bin/galasactl-linux-amd64 \
 	bin/galasactl-windows-amd64.exe \

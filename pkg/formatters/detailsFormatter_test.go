@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createMethod(methodName string,
+func CreateMethod(methodName string,
 	methodType string,
 	status string,
 	result string,
@@ -30,46 +30,53 @@ func createMethod(methodName string,
 	return method
 }
 
-func createRunForDetails(runId string,
-	runName string,
+func createFormattableTestForDetails(runId string,
+	name string,
 	status string,
 	result string,
 	bundle string,
 	testName string,
 	requestor string,
-	queued string,
-	startTime string,
-	endTime string,
-	methods []galasaapi.TestMethod) galasaapi.Run {
-
-	testStructure := galasaapi.TestStructure{
-		RunName:   &runName,
-		Bundle:    &bundle,
-		TestName:  &testName,
-		Requestor: &requestor,
-		Status:    &status,
-		Result:    &result,
-		Queued:    &queued,
-		StartTime: &startTime,
-		EndTime:   &endTime,
-		Methods:   methods,
+	queuedTimeUTC string,
+	startTimeUTC string,
+	endTimeUTC string,
+	apiServerUrl string,
+	methods []galasaapi.TestMethod) FormattableTest {
+	// runId := ""
+	// name := ""
+	// testName := ""
+	// status := ""
+	// result := ""
+	// startTimeUTC := ""
+	// endTimeUTC := ""
+	// queuedTimeUTC := ""
+	// requestor := ""
+	// bundle := ""
+	// apiServerUrl := ""
+	formattableTest := FormattableTest{
+		RunId:         runId,
+		Name:          name,
+		TestName:      testName,
+		Status:        status,
+		Result:        result,
+		StartTimeUTC:  startTimeUTC,
+		EndTimeUTC:    endTimeUTC,
+		QueuedTimeUTC: queuedTimeUTC,
+		Requestor:     requestor,
+		Bundle:        bundle,
+		ApiServerUrl:  apiServerUrl,
+		Methods:       methods,
 	}
-	run1 := galasaapi.Run{
-		RunId:         &runId,
-		TestStructure: &testStructure,
-	}
-	return run1
+	return formattableTest
 }
 
 func TestDetailsFormatterNoDataReturnsTotalsCountAllZeros(t *testing.T) {
 
 	formatter := NewDetailsFormatter()
 	// No data to format...
-	runs := make([]galasaapi.Run, 0)
-	apiServerUrl := "https://127.0.0.1"
-
+	formattableTest := make([]FormattableTest, 0)
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput := "Total:0\n"
@@ -78,21 +85,20 @@ func TestDetailsFormatterNoDataReturnsTotalsCountAllZeros(t *testing.T) {
 
 func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 	formatter := NewDetailsFormatter()
-	apiServerUrl := "https://127.0.0.1"
 
 	methods := make([]galasaapi.TestMethod, 0)
-	method1 := createMethod("testCoreIvtTest", "test", "finished", "passed",
+	method1 := CreateMethod("testCoreIvtTest", "test", "finished", "passed",
 		"2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
 	methods = append(methods, method1)
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa",
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa",
 		"dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z",
-		"2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	runs = append(runs, run1)
+		"2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -118,20 +124,19 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 
 func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T) {
 	formatter := NewDetailsFormatter()
-	apiServerUrl := "https://127.0.0.1"
 
 	methods := make([]galasaapi.TestMethod, 0)
-	method1 := createMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
+	method1 := CreateMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
 	methods = append(methods, method1)
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run2 := createRunForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run3 := createRunForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	runs = append(runs, run1, run2, run3)
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -191,18 +196,17 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 
 func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) {
 	formatter := NewDetailsFormatter()
-	apiServerUrl := "https://127.0.0.1"
 
 	methods := make([]galasaapi.TestMethod, 0)
-	method1 := createMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
+	method1 := CreateMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
 	methods = append(methods, method1)
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", methods)
-	runs = append(runs, run1)
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods)
+	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -228,18 +232,17 @@ func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) 
 
 func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 	formatter := NewDetailsFormatter()
-	apiServerUrl := "https://127.0.0.1"
 
 	methods := make([]galasaapi.TestMethod, 0)
-	method1 := createMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "")
+	method1 := CreateMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "")
 	methods = append(methods, method1)
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	runs = append(runs, run1)
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
@@ -265,26 +268,25 @@ func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 
 func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount(t *testing.T) {
 	formatter := NewDetailsFormatter()
-	apiServerUrl := "https://127.0.0.1"
 
 	methods := make([]galasaapi.TestMethod, 0)
-	method1 := createMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
+	method1 := CreateMethod("testCoreIvtTest", "test", "finished", "passed", "2023-05-05T06:03:38.872894Z", "2023-05-05T06:03:39.222758Z")
 	methods = append(methods, method1)
 
-	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run2 := createRunForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run3 := createRunForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run4 := createRunForDetails("cbd-12345", "C123", "Finished", "Passed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run5 := createRunForDetails("cbd-67890", "C456", "UNKNOWN", "EnvFail", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run6 := createRunForDetails("cbd-98765", "C789", "Finished", "Failed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run7 := createRunForDetails("cbd-543210", "L111", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", methods)
-	run8 := createRunForDetails("cbd-222", "L222", "Building", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", methods)
-	run9 := createRunForDetails("cbd-333", "L333", "Generating", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", methods)
-	runs = append(runs, run1, run2, run3, run4, run5, run6, run7, run8, run9)
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest4 := createFormattableTestForDetails("cbd-12345", "C123", "Finished", "Passed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest5 := createFormattableTestForDetails("cbd-67890", "C456", "UNKNOWN", "EnvFail", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest6 := createFormattableTestForDetails("cbd-98765", "C789", "Finished", "Failed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest7 := createFormattableTestForDetails("cbd-543210", "L111", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods)
+	formattableTest8 := createFormattableTestForDetails("cbd-222", "L222", "Building", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods)
+	formattableTest9 := createFormattableTestForDetails("cbd-333", "L333", "Generating", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods)
+	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3, formattableTest4, formattableTest5, formattableTest6, formattableTest7, formattableTest8, formattableTest9)
 
 	// When...
-	actualFormattedOutput, err := formatter.FormatRuns(runs, apiServerUrl)
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
 
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
