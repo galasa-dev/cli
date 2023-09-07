@@ -130,8 +130,12 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	console := utils.NewRealConsole()
+
+	submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console)
+
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(galasaHome, fileSystem, runsSubmitCmdParams, launcherInstance, timeService, submitSelectionFlags, env)
+		err = submitter.ExecuteSubmitRuns(runsSubmitCmdParams, submitSelectionFlags)
 	}
 
 	if err != nil {
