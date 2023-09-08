@@ -38,26 +38,16 @@ blue=$(tput setaf 25)
 # Headers and Logging
 #
 #--------------------------------------------------------------------------
-underline() { printf "${underline}${bold}%s${reset}\n" "$@"
-}
-h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@"
-}
-h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@"
-}
-debug() { printf "${white}%s${reset}\n" "$@"
-}
-info() { printf "${white}➜ %s${reset}\n" "$@"
-}
-success() { printf "${green}✔ %s${reset}\n" "$@"
-}
-error() { printf "${red}✖ %s${reset}\n" "$@"
-}
-warn() { printf "${tan}➜ %s${reset}\n" "$@"
-}
-bold() { printf "${bold}%s${reset}\n" "$@"
-}
-note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
-}
+underline() { printf "${underline}${bold}%s${reset}\n" "$@" ;}
+h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@" ;}
+h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@" ;}
+debug() { printf "${white}%s${reset}\n" "$@" ;}
+info() { printf "${white}➜ %s${reset}\n" "$@" ;}
+success() { printf "${green}✔ %s${reset}\n" "$@" ;}
+error() { printf "${red}✖ %s${reset}\n" "$@" ;}
+warn() { printf "${tan}➜ %s${reset}\n" "$@" ;}
+bold() { printf "${bold}%s${reset}\n" "$@" ;}
+note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@" ;}
 
 
 #-----------------------------------------------------------------------------------------                   
@@ -92,13 +82,12 @@ while [ "$1" != "" ]; do
 done
 
 # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
-if [[ "${bootstrap}" != "" ]]; then
-    echo "Running tests against ecosystem bootstrap ${bootstrap}"
-else
-    error "Need to provide the bootstrap for a remote ecosystem."
-    usage
-    exit 1  
+if [[ "${bootstrap}" == "" ]]; then
+    export bootstrap="http://galasa-cicsk8s.hursley.ibm.com/bootstrap"
+    info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
 fi
+
+info "Running tests against ecosystem bootstrap ${bootstrap}"
 
 #-----------------------------------------------------------------------------------------                   
 # Constants
@@ -361,6 +350,11 @@ function get_result_with_runname {
     sed 's/Run //; s/ -//; s/[(].*[)]//;' line.txt > runname.txt 
     runname=$(cat runname.txt)
 
+    if [[ "$runname" == "" ]]; then
+        error "Run name not captured from previous run launch."
+        exit 1
+    fi
+
     cmd="${BASEDIR}/bin/${binary} runs get \
     --name ${runname} \
     --bootstrap ${bootstrap} \
@@ -425,8 +419,6 @@ function runs_get_check_summary_format_output {
 
     # Check that we got 4 lines - headers, result data, empty line, totals count
     line_count=$(cat $output_file | wc -l | xargs)
-    empty_line_count=grep -c ^$ $output_file
-    line_count=$(($line_count + $empty_line_count))
     expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then 
         error "line count is wrong. expected ${expected_line_count} got ${line_count}"

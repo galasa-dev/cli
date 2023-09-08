@@ -53,15 +53,19 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 	return testRuns, err
 }
 
-func (launcher *RemoteLauncher) SubmitTestRuns(
+func (launcher *RemoteLauncher) SubmitTestRun(
 	groupName string,
-	classNames []string,
+	className string,
 	requestType string,
 	requestor string,
 	stream string,
+	obrFromPortfolio string,
 	isTraceEnabled bool,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
+
+	classNames := make([]string, 1)
+	classNames[0] = className
 
 	testRunRequest := galasaapi.NewTestRunRequest()
 	testRunRequest.SetClassNames(classNames)

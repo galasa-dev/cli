@@ -10,6 +10,7 @@ type TestRun struct {
 	Bundle    string            `yaml:"bundle" json:"bundle"`
 	Class     string            `yaml:"class" json:"class"`
 	Stream    string            `yaml:"stream" json:"stream"`
+	Obr       string            `yaml:"obr" json:"obr"`
 	Status    string            `yaml:"status" json:"status"`
 	Result    string            `yaml:"result" json:"result"`
 	Overrides map[string]string `yaml:"overrides" json:"overrides"`

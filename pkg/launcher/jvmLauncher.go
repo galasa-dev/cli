@@ -166,47 +166,54 @@ func NewJVMLauncher(
 // stream - The stream the test run is part of
 // isTraceEnabled - True of the trace for the test run should be gathered.
 // overrides - A map of overrides of key-value pairs.
-func (launcher *JvmLauncher) SubmitTestRuns(
+func (launcher *JvmLauncher) SubmitTestRun(
 	groupName string,
-	classNames []string,
+	className string,
 	requestType string,
 	requestor string,
 	stream string,
+	obrFromPortfolio string,
 	isTraceEnabled bool,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
 
-	log.Printf("JvmLauncher: SubmitTestRuns entered. group=%s classNames=%v "+
+	log.Printf("JvmLauncher: SubmitTestRun entered. group=%s className=%s "+
 		"requestType=%s requestor=%s stream=%s isTraceEnabled=%v",
-		groupName, classNames, requestType,
+		groupName, className, requestType,
 		requestor, stream, isTraceEnabled)
 
+	var err error
 	testRuns := new(galasaapi.TestRuns)
 
+	// We have some OBRs from the runs submit local command-line.
 	var obrs []utils.MavenCoordinates
-	obrs, err := validateObrs(launcher.cmdParams.Obrs)
+	obrs, err = buildListOfAllObrs(launcher.cmdParams.Obrs, obrFromPortfolio)
 	if err == nil {
 
-		var (
-			overridesFilePath   string
-			temporaryFolderPath string
-		)
-		temporaryFolderPath, overridesFilePath, err = prepareTempFiles(
-			launcher.galasaHome, launcher.fileSystem, overrides)
+		if len(obrs) < 1 {
+			// There are no obrs ! We have no idea how to find the test!
+			err = galasaErrors.NewGalasaError(errors.GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS, className)
+		}
 		if err == nil {
 
-			defer func() {
-				deleteTempFiles(launcher.fileSystem, temporaryFolderPath)
-			}()
+			var (
+				overridesFilePath   string
+				temporaryFolderPath string
+			)
+			temporaryFolderPath, overridesFilePath, err = prepareTempFiles(
+				launcher.galasaHome, launcher.fileSystem, overrides)
+			if err == nil {
 
-			isComplete := false
-			testRuns.Complete = &isComplete
-			testRuns.Runs = make([]galasaapi.TestRun, 0)
+				defer func() {
+					deleteTempFiles(launcher.fileSystem, temporaryFolderPath)
+				}()
 
-			for _, classNameUserInput := range classNames {
+				isComplete := false
+				testRuns.Complete = &isComplete
+				testRuns.Runs = make([]galasaapi.TestRun, 0)
 
 				var testClassToLaunch *TestLocation
-				testClassToLaunch, err = classNameUserInputToTestClassLocation(classNameUserInput)
+				testClassToLaunch, err = classNameUserInputToTestClassLocation(className)
 
 				if err == nil {
 					var (
@@ -247,15 +254,27 @@ func (launcher *JvmLauncher) SubmitTestRuns(
 						}
 					}
 				}
-
-				if err != nil {
-					break
-				}
 			}
 		}
 	}
 
 	return testRuns, err
+}
+
+func buildListOfAllObrs(obrsFromCommandLine []string, obrFromPortfolio string) ([]utils.MavenCoordinates, error) {
+	obrs, err := utils.ValidateObrs(obrsFromCommandLine)
+	if err == nil {
+
+		// We may have an obr from the portfolio also...
+		if obrFromPortfolio != "" {
+			var obrMavenCoordinates utils.MavenCoordinates
+			obrMavenCoordinates, err = utils.ValidateObr(obrFromPortfolio)
+			if err == nil {
+				obrs = append(obrs, obrMavenCoordinates)
+			}
+		}
+	}
+	return obrs, err
 }
 
 func deleteTempFiles(fileSystem files.FileSystem, temporaryFolderPath string) {
@@ -416,40 +435,6 @@ func (launcher *JvmLauncher) GetTestCatalog(stream string) (TestCatalog, error) 
 // -----------------------------------------------------------------------------
 // Local functions
 // -----------------------------------------------------------------------------
-
-// We expect a parameter to be of the form:
-// mvn:dev.galasa.example.banking/dev.galasa.example.banking.obr/0.0.1-SNAPSHOT/obr
-// Validate that the --obr parameter(s) passed by the user conform to this convention by splitting the
-// input into pieces.
-func validateObrs(obrInputs []string) ([]utils.MavenCoordinates, error) {
-
-	var err error = nil
-	obrs := make([]utils.MavenCoordinates, 0)
-
-	for _, obr := range obrInputs {
-		parts := strings.Split(obr, "/")
-		if len(parts) < 4 {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NOT_ENOUGH_PARTS, obr)
-		} else if len(parts) > 4 {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_TOO_MANY_PARTS, obr)
-		} else if !strings.HasPrefix(parts[0], "mvn:") {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NO_MVN_PREFIX, obr)
-		} else if parts[3] != "obr" {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OBR_NO_OBR_SUFFIX, obr)
-		} else {
-			groupId := strings.ReplaceAll(parts[0], "mvn:", "")
-			coordinates := utils.MavenCoordinates{
-				GroupId:    groupId,
-				ArtifactId: parts[1],
-				Version:    parts[2],
-				Classifier: parts[3],
-			}
-
-			obrs = append(obrs, coordinates)
-		}
-	}
-	return obrs, err
-}
 
 // getCommandSyntax From the parameters we aim to build a command-line incantation which would launch the test in a JVM...
 // For example:
