@@ -307,4 +307,46 @@ func TestValidateAndCorrectParametersDefaultsRequestorFieldFromEnvironment(t *te
 	assert.Equal(t, commandParameters.Requestor, "mybaduserid")
 }
 
-// func TestTestRunTestsAreConverted
+// func TestTestRunsAreOrdered(t *testing.T){
+// 	//Given
+// 	finished1 := TestRun{
+// 		Name:      "myTestRun1",
+// 		Bundle:    "myBundle",
+// 		Class:     "com.myco.MyClass",
+// 		Stream:    "myStream",
+// 		Status:    "myStatus",
+// 		Result:    "Passed",
+// 		Overrides: make(map[string]string, 1),
+// 		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+// 	finished2 := TestRun{
+// 		Name:      "myTestRun2",
+// 		Bundle:    "myBundle",
+// 		Class:     "com.myco.MyClass",
+// 		Stream:    "myStream",
+// 		Status:    "myStatus",
+// 		Result:    "Custom",
+// 		Overrides: make(map[string]string, 1),
+// 		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+// 	finished3 := TestRun{
+// 		Name:      "myTestRun3",
+// 		Bundle:    "myBundle",
+// 		Class:     "com.myco.MyClass",
+// 		Stream:    "myStream",
+// 		Status:    "myStatus",
+// 		Result:    "Custard",
+// 		Overrides: make(map[string]string, 1),
+// 		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+// 	finishedRunsMap := make(map[string]*TestRun, 3)
+// 	finishedRunsMap["myTestRun1"] = &finished1
+// 	finishedRunsMap["myTestRun2"] = &finished2
+// 	finishedRunsMap["myTestRun3"] = &finished3
+
+// 	//When
+// 	orderedFinishedRuns := orderFinishedRunsMap(finishedRunsMap)
+
+// 	//Then
+// 	assert.Equal(t, orderedFinishedRuns[0].Result, )
+// }

@@ -349,9 +349,9 @@ func runsFetchCurrentStatus(
 
 func createReports(fileSystem files.FileSystem, params utils.RunsSubmitCmdParameters,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
-	log.Printf("in create reports\n")
+
 	//convert TestRun tests into formattable data
-	convertTestRunTests(finishedRuns, lostRuns)
+	displayTestRunResults(finishedRuns, lostRuns)
 
 	var err error = nil
 	if params.ReportYamlFilename != "" {
@@ -373,14 +373,14 @@ func createReports(fileSystem files.FileSystem, params utils.RunsSubmitCmdParame
 	return err
 }
 
-func convertTestRunTests(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
-	var chosenFormatter formatters.RunsFormatter
+func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+	var formatter = formatters.NewSummaryFormatter()
 	var err error = nil
 	var outputText string
-	log.Printf("in convertTEstRuns()\n")
+
+	//convert and display interrim reports
 	formattableTest := NewFormattableTestFromTestRun(finishedRuns, lostRuns)
-	outputText, err = chosenFormatter.FormatRuns(formattableTest)
-	log.Printf("got ouputtext")
+	outputText, err = formatter.FormatRuns(formattableTest)
 	if err == nil {
 		print(outputText)
 	}

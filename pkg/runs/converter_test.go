@@ -128,7 +128,7 @@ func TestTestRunHasNoRecordsReturnsNoRecords(t *testing.T) {
 	output := NewFormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
 
 	//Then
-	assert.Equal(t, len(output), 0, "The input record is empty and so should be the output record")
+	assert.Equal(t, 0, len(output), "The input record is empty and so should be the output record")
 
 }
 
@@ -215,5 +215,80 @@ func TestRunsTestRunHasRecordsReturnsTrueForLostRecord(t *testing.T) {
 	//Then
 	assert.Equal(t, total, len(output), "The input record has a length of %v whilst the output has length of %v", total, len(output))
 	//lostRuns are always appended last so checking if last appended test with len(output)-1
-	assert.Equal(t, output[len(output)-1].Lost, true)
+	assert.Equal(t, true, output[len(output)-1].Lost)
+}
+
+func TestRunsOfTestRunStructArePrintedInSortedOrder(t *testing.T) {
+	// Given...
+	finished1 := TestRun{
+		Name:      "myTestRun1",
+		Bundle:    "myBundle",
+		Class:     "com.myco.MyClass",
+		Stream:    "myStream",
+		Status:    "myStatus",
+		Result:    "Passed",
+		Overrides: make(map[string]string, 1),
+		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+	finished2 := TestRun{
+		Name:      "myTestRun2",
+		Bundle:    "myBundle",
+		Class:     "com.myco.MyClass",
+		Stream:    "myStream",
+		Status:    "myStatus",
+		Result:    "Custom",
+		Overrides: make(map[string]string, 1),
+		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+	finished3 := TestRun{
+		Name:      "myTestRun3",
+		Bundle:    "myBundle",
+		Class:     "com.myco.MyClass",
+		Stream:    "myStream",
+		Status:    "myStatus",
+		Result:    "Custard",
+		Overrides: make(map[string]string, 1),
+		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+	finished4 := TestRun{
+		Name:      "myTestRun4",
+		Bundle:    "myBundle",
+		Class:     "com.myco.MyClass",
+		Stream:    "myStream",
+		Status:    "myStatus",
+		Result:    "Failed",
+		Overrides: make(map[string]string, 1),
+		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+	finished5 := TestRun{
+		Name:      "myTestRun5",
+		Bundle:    "myBundle",
+		Class:     "com.myco.MyClass",
+		Stream:    "myStream",
+		Status:    "myStatus",
+		Result:    "Apples",
+		Overrides: make(map[string]string, 1),
+		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+
+	finishedRunsMap := make(map[string]*TestRun, 3)
+	finishedRunsMap["myTestRun1"] = &finished1
+	finishedRunsMap["myTestRun2"] = &finished2
+	finishedRunsMap["myTestRun3"] = &finished3
+	finishedRunsMap["myTestRun4"] = &finished4
+	finishedRunsMap["myTestRun5"] = &finished5
+
+	lostRunsMap := make(map[string]*TestRun)
+
+	total := len(finishedRunsMap) + len(lostRunsMap)
+
+	//When
+	output := NewFormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
+
+	//Then
+	assert.Equal(t, total, len(output), "The input record has a length of %v whilst the output has length of %v", total, len(output))
+	assert.Equal(t, "Passed", output[0].Result)
+	assert.Equal(t, "Failed", output[1].Result)
+	assert.Equal(t, "Apples", output[2].Result)
+	assert.Equal(t, "Custard", output[3].Result)
+	assert.Equal(t, "Custom", output[4].Result)
 }

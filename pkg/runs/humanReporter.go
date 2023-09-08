@@ -56,8 +56,8 @@ func FinalHumanReadableReportAsString(finishedRuns map[string]*TestRun, lostRuns
 	resultCounts[RESULT_ENVFAIL] = 0
 
 	for _, run := range finishedRuns {
-		c, ok := resultCounts[run.Result]
-		if !ok {
+		c, isFound := resultCounts[run.Result]
+		if !isFound {
 			resultCounts[run.Result] = 1
 		} else {
 			resultCounts[run.Result] = c + 1

@@ -118,7 +118,12 @@ func writeFormattedTableToStringBuilder(table [][]string, buff *strings.Builder,
 // -----------------------------------------------------
 // Functions for time formats and duration
 func formatTimeReadable(rawTime string) string {
-	formattedTimeString := rawTime[0:10] + " " + rawTime[11:19]
+	var formattedTimeString string
+	if len(rawTime) < 19 {
+		formattedTimeString = ""
+	} else {
+		formattedTimeString = rawTime[0:10] + " " + rawTime[11:19]
+	}
 	return formattedTimeString
 }
 

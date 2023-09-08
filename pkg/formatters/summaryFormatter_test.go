@@ -211,3 +211,23 @@ func TestSummaryFormatterMultipleRunsWithUnknownStatusOfLostRunsDoesNotDisplayLo
 
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
+
+func TestSummaryFormatterHasTestWithoutTimeStamps(t *testing.T) {
+	formatter := NewSummaryFormatter()
+
+	formattableTest := make([]FormattableTest, 0)
+	formattableTest1 := createFormattableTestForSummary("", "U123", "TestName", "Finished", "Passed", "myUserId1", false)
+	formattableTest = append(formattableTest, formattableTest1)
+
+	// When...
+	actualFormattedOutput, err := formatter.FormatRuns(formattableTest)
+
+	assert.Nil(t, err)
+	expectedFormattedOutput :=
+		"submitted-time(UTC) name requestor status   result test-name\n" +
+			"                    U123 myUserId1 Finished Passed TestName\n" +
+			"\n" +
+			"Total:1 Passed:1\n"
+
+	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
+}
