@@ -306,3 +306,5 @@ func TestValidateAndCorrectParametersDefaultsRequestorFieldFromEnvironment(t *te
 	assert.Nil(t, err)
 	assert.Equal(t, commandParameters.Requestor, "mybaduserid")
 }
+
+// func TestTestRunTestsAreConverted

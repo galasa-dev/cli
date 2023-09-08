@@ -49,20 +49,24 @@ func (*DetailsFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 	if len(runs) > 0 {
 
 		for i, run := range runs {
-			accumulateResults(resultCountsMap, run)
-			coreDetailsTable := tabulateCoreRunDetails(run)
-			coreDetailsColumnLengths := calculateMaxLengthOfEachColumn(coreDetailsTable)
-			writeFormattedTableToStringBuilder(coreDetailsTable, &buff, coreDetailsColumnLengths)
+			if !run.Lost {
+				accumulateResults(resultCountsMap, run)
+				coreDetailsTable := tabulateCoreRunDetails(run)
+				coreDetailsColumnLengths := calculateMaxLengthOfEachColumn(coreDetailsTable)
+				writeFormattedTableToStringBuilder(coreDetailsTable, &buff, coreDetailsColumnLengths)
 
-			buff.WriteString("\n")
+				buff.WriteString("\n")
 
-			methodTable := initialiseMethodTable()
-			methodTable = tabulateRunMethodsToTable(run.Methods, methodTable)
-			methodColumnLengths := calculateMaxLengthOfEachColumn(methodTable)
-			writeFormattedTableToStringBuilder(methodTable, &buff, methodColumnLengths)
+				methodTable := initialiseMethodTable()
+				methodTable = tabulateRunMethodsToTable(run.Methods, methodTable)
+				methodColumnLengths := calculateMaxLengthOfEachColumn(methodTable)
+				writeFormattedTableToStringBuilder(methodTable, &buff, methodColumnLengths)
 
-			if i < len(runs)-1 {
-				buff.WriteString("\n---\n\n")
+				if i < len(runs)-1 {
+					buff.WriteString("\n---\n\n")
+				}
+			} else {
+				resultCountsMap[RUN_RESULT_LOST] += 1
 			}
 
 		}

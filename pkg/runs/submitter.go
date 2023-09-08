@@ -16,6 +16,7 @@ import (
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/launcher"
 	"github.com/galasa.dev/cli/pkg/props"
@@ -348,11 +349,11 @@ func runsFetchCurrentStatus(
 
 func createReports(fileSystem files.FileSystem, params utils.RunsSubmitCmdParameters,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
-
-	FinalHumanReadableReport(finishedRuns, lostRuns)
+	log.Printf("in create reports\n")
+	//convert TestRun tests into formattable data
+	convertTestRunTests(finishedRuns, lostRuns)
 
 	var err error = nil
-
 	if params.ReportYamlFilename != "" {
 		err = ReportYaml(fileSystem, params.ReportYamlFilename, finishedRuns, lostRuns)
 	}
@@ -370,6 +371,19 @@ func createReports(fileSystem files.FileSystem, params utils.RunsSubmitCmdParame
 	}
 
 	return err
+}
+
+func convertTestRunTests(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+	var chosenFormatter formatters.RunsFormatter
+	var err error = nil
+	var outputText string
+	log.Printf("in convertTEstRuns()\n")
+	formattableTest := NewFormattableTestFromTestRun(finishedRuns, lostRuns)
+	outputText, err = chosenFormatter.FormatRuns(formattableTest)
+	log.Printf("got ouputtext")
+	if err == nil {
+		print(outputText)
+	}
 }
 
 func isRasDetailNeededForReports(params utils.RunsSubmitCmdParameters) bool {
