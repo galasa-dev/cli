@@ -8,6 +8,7 @@ package runs
 import (
 	"testing"
 
+	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
@@ -177,6 +178,128 @@ func TestRunsTestRunHasRecordsReturnsSameAmountofRecords(t *testing.T) {
 
 	//Then
 	assert.Equal(t, total, len(output), "The input record has a length of %v whilst the output has length of %v", total, len(output))
+}
+
+func TestFormattableTestsArePrintedInOrder(t *testing.T) {
+	//Given
+	var formattableTest []formatters.FormattableTest
+	formattableTest1 := formatters.FormattableTest{
+		RunId:    "id1",
+		Name:     "formattableTest1",
+		TestName: "testName1",
+		Status:   "status1",
+		Result:   "Failed",
+		//StartTimeUTC  string
+		//EndTimeUTC    string
+		//QueuedTimeUTC string
+		Requestor:    "Requestor1",
+		Bundle:       "bundle1",
+		ApiServerUrl: "127.0.0.1",
+		Methods:      nil,
+		Lost:         false,
+	}
+	formattableTest2 := formatters.FormattableTest{
+		RunId:    "id2",
+		Name:     "formattableTest2",
+		TestName: "testName2",
+		Status:   "status2",
+		Result:   "Failed",
+		//StartTimeUTC  string
+		//EndTimeUTC    string
+		//QueuedTimeUTC string
+		Requestor:    "Requestor2",
+		Bundle:       "bundle2",
+		ApiServerUrl: "127.0.0.1",
+		Methods:      nil,
+		Lost:         false,
+	}
+	formattableTest3 := formatters.FormattableTest{
+		RunId:    "id3",
+		Name:     "formattableTest3",
+		TestName: "testName3",
+		Status:   "status3",
+		Result:   "Passed",
+		//StartTimeUTC  string
+		//EndTimeUTC    string
+		//QueuedTimeUTC string
+		Requestor:    "Requestor3",
+		Bundle:       "bundle3",
+		ApiServerUrl: "137.0.0.1",
+		Methods:      nil,
+		Lost:         false,
+	}
+	formattableTest4 := formatters.FormattableTest{
+		RunId:    "id4",
+		Name:     "formattableTest4",
+		TestName: "testName4",
+		Status:   "status4",
+		Result:   "Custard",
+		//StartTimeUTC  string
+		//EndTimeUTC    string
+		//QueuedTimeUTC string
+		Requestor:    "Requestor4",
+		Bundle:       "bundle4",
+		ApiServerUrl: "147.0.0.1",
+		Methods:      nil,
+		Lost:         false,
+	}
+	formattableTest5 := formatters.FormattableTest{
+		RunId:    "id5",
+		Name:     "formattableTest5",
+		TestName: "testName5",
+		Status:   "status5",
+		Result:   "Doughnuts",
+		//StartTimeUTC  string
+		//EndTimeUTC    string
+		//QueuedTimeUTC string
+		Requestor:    "Requestor5",
+		Bundle:       "bundle5",
+		ApiServerUrl: "157.0.0.1",
+		Methods:      nil,
+		Lost:         false,
+	}
+	formattableTest6 := formatters.FormattableTest{
+		RunId:    "id6",
+		Name:     "formattableTest6",
+		TestName: "testName6",
+		Status:   "status6",
+		Result:   "Custom",
+		//StartTimeUTC  string
+		//EndTimeUTC    string
+		//QueuedTimeUTC string
+		Requestor:    "Requestor6",
+		Bundle:       "bundle6",
+		ApiServerUrl: "167.0.0.1",
+		Methods:      nil,
+		Lost:         false,
+	}
+	formattableTest7 := formatters.FormattableTest{
+		RunId:    "id7",
+		Name:     "formattableTest7",
+		TestName: "testName7",
+		Status:   "status7",
+		Result:   "Passed With Defects",
+		//StartTimeUTC  string
+		//EndTimeUTC    string
+		//QueuedTimeUTC string
+		Requestor:    "Requestor7",
+		Bundle:       "bundle7",
+		ApiServerUrl: "177.0.0.1",
+		Methods:      nil,
+		Lost:         false,
+	}
+	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3, formattableTest4, formattableTest5, formattableTest6, formattableTest7)
+	//When
+	orderedFormattableTest := orderFormattableTests(formattableTest)
+	//Then
+	assert.Equal(t, len(formattableTest), len(orderedFormattableTest))
+	assert.Equal(t, "Passed", orderedFormattableTest[0].Result)
+	assert.Equal(t, "Passed With Defects", orderedFormattableTest[1].Result)
+	assert.Equal(t, "Failed", orderedFormattableTest[2].Result)
+	assert.Equal(t, "Failed", orderedFormattableTest[3].Result)
+	assert.Equal(t, "Custard", orderedFormattableTest[4].Result)
+	assert.Equal(t, "Custom", orderedFormattableTest[5].Result)
+	assert.Equal(t, "Doughnuts", orderedFormattableTest[6].Result)
 }
 
 func TestRunsTestRunHasRecordsReturnsTrueForLostRecord(t *testing.T) {

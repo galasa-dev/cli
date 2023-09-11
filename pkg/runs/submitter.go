@@ -6,6 +6,7 @@
 package runs
 
 import (
+	"fmt"
 	"log"
 	"os/user"
 	"strconv"
@@ -123,7 +124,8 @@ func executeSubmitRuns(fileSystem files.FileSystem,
 		if params.ProgressReportIntervalMinutes > 0 {
 			now := timeService.Now()
 			if now.After(nextProgressReport) {
-				InterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
+				//convert TestRun
+				displayInterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
 				nextProgressReport = now.Add(progressReportInterval)
 			}
 		}
@@ -142,6 +144,34 @@ func executeSubmitRuns(fileSystem files.FileSystem,
 
 	return finishedRuns, lostRuns, err
 }
+
+func displayInterrimProgressReport(readyRuns []TestRun,
+	submittedRuns map[string]*TestRun,
+	finishedRuns map[string]*TestRun,
+	lostRuns map[string]*TestRun,
+	throttle int){
+
+	ready := len(readyRuns)
+	submitted := len(submittedRuns)
+	finished := len(finishedRuns)
+	lost := len(lostRuns)
+
+	fmt.Println("Progress report")
+
+	//Log submittedRuns
+	for runName, run := range submittedRuns {
+		log.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
+	}
+
+	fmt.Println("----------------------------------------------------------------------------")
+	fmt.Printf("Run status: Ready=%v, Submitted=%v, Finished=%v, Lost=%v\n", ready, submitted, finished, lost)
+	fmt.Printf("Throttle=%v\n", throttle)
+
+	if finished > 0 {
+		displayTestRunResults(finishedRuns, lostRuns)
+	}
+}
+
 
 func writeThrottleFile(fileSystem files.FileSystem, throttleFileName string, throttle int) error {
 	var err error = nil
@@ -378,7 +408,6 @@ func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string
 	var err error = nil
 	var outputText string
 
-	//convert and display interrim reports
 	formattableTest := NewFormattableTestFromTestRun(finishedRuns, lostRuns)
 	outputText, err = formatter.FormatRuns(formattableTest)
 	if err == nil {
