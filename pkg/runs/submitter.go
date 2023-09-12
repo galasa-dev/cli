@@ -149,7 +149,7 @@ func displayInterrimProgressReport(readyRuns []TestRun,
 	submittedRuns map[string]*TestRun,
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun,
-	throttle int){
+	throttle int) {
 
 	ready := len(readyRuns)
 	submitted := len(submittedRuns)
@@ -157,12 +157,10 @@ func displayInterrimProgressReport(readyRuns []TestRun,
 	lost := len(lostRuns)
 
 	fmt.Println("Progress report")
-
-	//Log submittedRuns
 	for runName, run := range submittedRuns {
 		log.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
+		fmt.Printf("Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
 	}
-
 	fmt.Println("----------------------------------------------------------------------------")
 	fmt.Printf("Run status: Ready=%v, Submitted=%v, Finished=%v, Lost=%v\n", ready, submitted, finished, lost)
 	fmt.Printf("Throttle=%v\n", throttle)
@@ -171,7 +169,6 @@ func displayInterrimProgressReport(readyRuns []TestRun,
 		displayTestRunResults(finishedRuns, lostRuns)
 	}
 }
-
 
 func writeThrottleFile(fileSystem files.FileSystem, throttleFileName string, throttle int) error {
 	var err error = nil
