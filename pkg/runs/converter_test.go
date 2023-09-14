@@ -69,7 +69,7 @@ func TestGalasaapiRunHasNoRecordsReturnsNoRecords(t *testing.T) {
 	apiServerUrl := ""
 
 	//When
-	output := NewFormattableTestFromGalasaApi(runs, apiServerUrl)
+	output := FormattableTestFromGalasaApi(runs, apiServerUrl)
 
 	//Then
 	assert.Equal(t, len(output), 0, "The input record is empty and so should be the output record")
@@ -87,7 +87,7 @@ func TestGalasaapiRunHasRecordsReturnsSameAmountOfRecordsWithNoMethods(t *testin
 	apiServerUrl := ""
 
 	//When
-	output := NewFormattableTestFromGalasaApi(runs, apiServerUrl)
+	output := FormattableTestFromGalasaApi(runs, apiServerUrl)
 
 	//Then
 	assert.Equal(t, len(runs), len(output), "The input record has a length of %v whilst the output has length of %v", len(runs), len(output))
@@ -109,7 +109,7 @@ func TestGalasaapiRunHasRecordsReturnsSameAmountOfRecordsWithMethods(t *testing.
 	apiServerUrl := ""
 
 	//When
-	output := NewFormattableTestFromGalasaApi(runs, apiServerUrl)
+	output := FormattableTestFromGalasaApi(runs, apiServerUrl)
 
 	//Then
 	assert.Equal(t, len(runs), len(output), "The input record has a length of %v whilst the output has length of %v", len(runs), len(output))
@@ -126,7 +126,7 @@ func TestTestRunHasNoRecordsReturnsNoRecords(t *testing.T) {
 	var lostRunsMap map[string]*TestRun = make(map[string]*TestRun, 0)
 
 	//When
-	output := NewFormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
+	output := FormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
 
 	//Then
 	assert.Equal(t, 0, len(output), "The input record is empty and so should be the output record")
@@ -174,7 +174,7 @@ func TestRunsTestRunHasRecordsReturnsSameAmountofRecords(t *testing.T) {
 
 	total := len(finishedRunsMap) + len(lostRunsMap)
 	//When
-	output := NewFormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
+	output := FormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
 
 	//Then
 	assert.Equal(t, total, len(output), "The input record has a length of %v whilst the output has length of %v", total, len(output))
@@ -333,7 +333,7 @@ func TestRunsTestRunHasRecordsReturnsTrueForLostRecord(t *testing.T) {
 
 	total := len(finishedRunsMap) + len(lostRunsMap)
 	//When
-	output := NewFormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
+	output := FormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
 
 	//Then
 	assert.Equal(t, total, len(output), "The input record has a length of %v whilst the output has length of %v", total, len(output))
@@ -405,7 +405,7 @@ func TestRunsOfTestRunStructArePrintedInSortedOrder(t *testing.T) {
 	total := len(finishedRunsMap) + len(lostRunsMap)
 
 	//When
-	output := NewFormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
+	output := FormattableTestFromTestRun(finishedRunsMap, lostRunsMap)
 
 	//Then
 	assert.Equal(t, total, len(output), "The input record has a length of %v whilst the output has length of %v", total, len(output))

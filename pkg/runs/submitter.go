@@ -405,7 +405,7 @@ func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string
 	var err error = nil
 	var outputText string
 
-	formattableTest := NewFormattableTestFromTestRun(finishedRuns, lostRuns)
+	formattableTest := FormattableTestFromTestRun(finishedRuns, lostRuns)
 	outputText, err = formatter.FormatRuns(formattableTest)
 	if err == nil {
 		print(outputText)
