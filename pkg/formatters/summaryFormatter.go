@@ -42,7 +42,9 @@ func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, 
 
 		table = append(table, headers)
 		for _, run := range testResultsData {
-			if !run.Lost {
+			if run.Lost {
+				resultCountsMap[RUN_RESULT_LOST] += 1
+			} else {
 				var line []string
 				submittedTime := run.QueuedTimeUTC
 				submittedTimeReadable := formatTimeReadable(submittedTime)
@@ -51,8 +53,6 @@ func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, 
 
 				line = append(line, submittedTimeReadable, run.Name, run.Requestor, run.Status, run.Result, run.TestName)
 				table = append(table, line)
-			} else {
-				resultCountsMap[RUN_RESULT_LOST] += 1
 			}
 		}
 

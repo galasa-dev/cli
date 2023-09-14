@@ -82,7 +82,7 @@ func TestRawFormatterReturnsExpectedFormat(t *testing.T) {
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestRawFormatterWithMultipleformattableTestSeparatesWithNewLine(t *testing.T) {
+func TestRawFormatterWithMultipleFormattableTestsSeparatesWithNewLine(t *testing.T) {
 	formatter := NewRawFormatter()
 
 	formattableTest := make([]FormattableTest, 0)
@@ -118,7 +118,7 @@ func TestRawFormatterNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testin
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestRawFormatterOnlyLostTestReturnsBlankOutput(t *testing.T) {
+func TestRawFormatterOnlyLostRunReturnsEmpty(t *testing.T) {
 	formatter := NewRawFormatter()
 
 	formattableTest := make([]FormattableTest, 0)
@@ -136,7 +136,7 @@ func TestRawFormatterOnlyLostTestReturnsBlankOutput(t *testing.T) {
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestRawFormatterMultipleTestsWithLostTestDoesNotPrintLostTests(t *testing.T) {
+func TestRawFormatterMultipleRunsPrintsOnlyFinishedRuns(t *testing.T) {
 	formatter := NewRawFormatter()
 
 	formattableTest := make([]FormattableTest, 0)

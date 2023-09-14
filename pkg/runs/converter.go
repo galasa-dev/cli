@@ -62,7 +62,7 @@ func getAvailableResultLabelsinOrder(formattableTest []formatters.FormattableTes
 	return orderedResultLabels
 }
 
-func NewFormattableTestFromGalasaApi(runs []galasaapi.Run, apiServerUrl string) []formatters.FormattableTest {
+func FormattableTestFromGalasaApi(runs []galasaapi.Run, apiServerUrl string) []formatters.FormattableTest {
 	var formattableTest []formatters.FormattableTest
 
 	for _, run := range runs {
@@ -96,7 +96,7 @@ func getTestStructureData(run galasaapi.Run, apiServerUrl string) formatters.For
 	return newFormattableTest
 }
 
-func NewFormattableTestFromTestRun(finishedMap map[string]*TestRun, lostMap map[string]*TestRun) []formatters.FormattableTest {
+func FormattableTestFromTestRun(finishedMap map[string]*TestRun, lostMap map[string]*TestRun) []formatters.FormattableTest {
 	var formattableTest []formatters.FormattableTest
 	for _, run := range finishedMap {
 		isLost := false

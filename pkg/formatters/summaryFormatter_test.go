@@ -109,7 +109,7 @@ func TestSummaryFormatterShortAndLongStatusReturnsExpectedFormat(t *testing.T) {
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestSummaryFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount(t *testing.T) {
+func TestSummaryFormatterWithMultipleRunsPrintsOnlyFinishedRuns(t *testing.T) {
 	formatter := NewSummaryFormatter()
 
 	formattableTest := make([]FormattableTest, 0)

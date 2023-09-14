@@ -49,7 +49,9 @@ func (*DetailsFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 	if len(runs) > 0 {
 
 		for i, run := range runs {
-			if !run.Lost {
+			if run.Lost {
+				resultCountsMap[RUN_RESULT_LOST] += 1
+			} else {
 				accumulateResults(resultCountsMap, run)
 				coreDetailsTable := tabulateCoreRunDetails(run)
 				coreDetailsColumnLengths := calculateMaxLengthOfEachColumn(coreDetailsTable)
@@ -65,8 +67,6 @@ func (*DetailsFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 				if i < len(runs)-1 {
 					buff.WriteString("\n---\n\n")
 				}
-			} else {
-				resultCountsMap[RUN_RESULT_LOST] += 1
 			}
 
 		}
