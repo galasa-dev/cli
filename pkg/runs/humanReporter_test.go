@@ -312,6 +312,7 @@ func TestCanCallHumanInterrimReportNoErrors(t *testing.T) {
 	// When
 	reportText := InterrimProgressReportAsString(make([]TestRun, 0), finishedRunsMap, finishedRunsMap, lostRunsMap, 5)
 
+	//Then...
 	assert.Contains(t, reportText, "Progress report")
 	assert.Contains(t, reportText, "Total=3, Passed=1, Passed With Defects=0, Failed=0, Failed With Defects=1, Lost=1, EnvFail=0")
 }

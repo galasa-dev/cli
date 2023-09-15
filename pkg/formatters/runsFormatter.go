@@ -25,6 +25,7 @@ const (
 	RUN_RESULT_PASSED_WITH_DEFECTS = "Passed With Defects"
 	RUN_RESULT_FAILED              = "Failed"
 	RUN_RESULT_FAILED_WITH_DEFECTS = "Failed With Defects"
+	RUN_RESULT_LOST                = "Lost"
 	RUN_RESULT_ENVFAIL             = "EnvFail"
 	RUN_RESULT_UNKNOWN             = "UNKNOWN"
 	RUN_RESULT_ACTIVE              = "Active"
@@ -47,6 +48,8 @@ const (
 	RAS_RUNS_URL = "/ras/runs/"
 )
 
+// -----------------------------------------------------
+// Structure to store test data from external structures to be used in by FomatRuns()
 type FormattableTest struct {
 	RunId         string
 	Name          string
@@ -60,6 +63,7 @@ type FormattableTest struct {
 	Bundle        string
 	ApiServerUrl  string
 	Methods       []galasaapi.TestMethod
+	Lost          bool
 }
 
 func NewFormattableTest() FormattableTest {
@@ -67,7 +71,7 @@ func NewFormattableTest() FormattableTest {
 	return this
 }
 
-var RESULT_LABELS = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_FAILED_WITH_DEFECTS, RUN_RESULT_ENVFAIL, RUN_RESULT_UNKNOWN, RUN_RESULT_ACTIVE, RUN_RESULT_IGNORED}
+var RESULT_LABELS = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_FAILED_WITH_DEFECTS, RUN_RESULT_LOST, RUN_RESULT_ENVFAIL, RUN_RESULT_UNKNOWN, RUN_RESULT_ACTIVE, RUN_RESULT_IGNORED}
 
 type RunsFormatter interface {
 	FormatRuns(testResultsData []FormattableTest) (string, error)
@@ -114,7 +118,12 @@ func writeFormattedTableToStringBuilder(table [][]string, buff *strings.Builder,
 // -----------------------------------------------------
 // Functions for time formats and duration
 func formatTimeReadable(rawTime string) string {
-	formattedTimeString := rawTime[0:10] + " " + rawTime[11:19]
+	var formattedTimeString string
+	if len(rawTime) < 19 {
+		formattedTimeString = ""
+	} else {
+		formattedTimeString = rawTime[0:10] + " " + rawTime[11:19]
+	}
 	return formattedTimeString
 }
 

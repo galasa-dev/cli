@@ -34,6 +34,10 @@ func (*RawFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 	buff := strings.Builder{}
 
 	for _, run := range runs {
+		if run.Lost {
+			//don't do anything for this iteration if run is lost
+			continue
+		}
 		startTimeStringRaw := run.StartTimeUTC
 		endTimeStringRaw := run.EndTimeUTC
 

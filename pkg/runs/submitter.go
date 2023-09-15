@@ -17,6 +17,7 @@ import (
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/launcher"
 	"github.com/galasa.dev/cli/pkg/props"
@@ -155,7 +156,8 @@ func (submitter *Submitter) executeSubmitRuns(
 		if params.ProgressReportIntervalMinutes > 0 {
 			now := submitter.timeService.Now()
 			if now.After(nextProgressReport) {
-				InterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
+				//convert TestRun
+				displayInterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
 				nextProgressReport = now.Add(progressReportInterval)
 			}
 		}
@@ -173,6 +175,31 @@ func (submitter *Submitter) executeSubmitRuns(
 	}
 
 	return finishedRuns, lostRuns, err
+}
+
+func displayInterrimProgressReport(readyRuns []TestRun,
+	submittedRuns map[string]*TestRun,
+	finishedRuns map[string]*TestRun,
+	lostRuns map[string]*TestRun,
+	throttle int) {
+
+	ready := len(readyRuns)
+	submitted := len(submittedRuns)
+	finished := len(finishedRuns)
+	lost := len(lostRuns)
+
+	fmt.Println("Progress report")
+	for runName, run := range submittedRuns {
+		log.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
+		fmt.Printf("Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
+	}
+	fmt.Println("----------------------------------------------------------------------------")
+	fmt.Printf("Run status: Ready=%v, Submitted=%v, Finished=%v, Lost=%v\n", ready, submitted, finished, lost)
+	fmt.Printf("Throttle=%v\n", throttle)
+
+	if finished > 0 {
+		displayTestRunResults(finishedRuns, lostRuns)
+	}
 }
 
 func (submitter *Submitter) writeThrottleFile(throttleFileName string, throttle int) error {
@@ -384,10 +411,10 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 func (submitter *Submitter) createReports(params utils.RunsSubmitCmdParameters,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
 
-	FinalHumanReadableReport(finishedRuns, lostRuns)
+	//convert TestRun tests into formattable data
+	displayTestRunResults(finishedRuns, lostRuns)
 
 	var err error = nil
-
 	if params.ReportYamlFilename != "" {
 		err = ReportYaml(submitter.fileSystem, params.ReportYamlFilename, finishedRuns, lostRuns)
 	}
@@ -405,6 +432,18 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdParameters,
 	}
 
 	return err
+}
+
+func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+	var formatter = formatters.NewSummaryFormatter()
+	var err error = nil
+	var outputText string
+
+	formattableTest := FormattableTestFromTestRun(finishedRuns, lostRuns)
+	outputText, err = formatter.FormatRuns(formattableTest)
+	if err == nil {
+		print(outputText)
+	}
 }
 
 func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitCmdParameters) bool {

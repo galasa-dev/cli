@@ -42,14 +42,18 @@ func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, 
 
 		table = append(table, headers)
 		for _, run := range testResultsData {
-			var line []string
-			submittedTime := run.QueuedTimeUTC
-			submittedTimeReadable := formatTimeReadable(submittedTime)
+			if run.Lost {
+				resultCountsMap[RUN_RESULT_LOST] += 1
+			} else {
+				var line []string
+				submittedTime := run.QueuedTimeUTC
+				submittedTimeReadable := formatTimeReadable(submittedTime)
 
-			accumulateResults(resultCountsMap, run)
+				accumulateResults(resultCountsMap, run)
 
-			line = append(line, submittedTimeReadable, run.Name, run.Requestor, run.Status, run.Result, run.TestName)
-			table = append(table, line)
+				line = append(line, submittedTimeReadable, run.Name, run.Requestor, run.Status, run.Result, run.TestName)
+				table = append(table, line)
+			}
 		}
 
 		columnLengths := calculateMaxLengthOfEachColumn(table)
