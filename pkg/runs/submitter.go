@@ -24,52 +24,80 @@ import (
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
-func ExecuteSubmitRuns(
+type Submitter struct {
+	galasaHome  utils.GalasaHome
+	fileSystem  files.FileSystem
+	launcher    launcher.Launcher
+	timeService utils.TimeService
+	env         utils.Environment
+	console     utils.Console
+}
+
+func NewSubmitter(
 	galasaHome utils.GalasaHome,
 	fileSystem files.FileSystem,
-	params utils.RunsSubmitCmdParameters,
 	launcher launcher.Launcher,
 	timeService utils.TimeService,
-	testSelectionFlags *TestSelectionFlags,
 	env utils.Environment,
+	console utils.Console,
+) *Submitter {
+	instance := new(Submitter)
+	instance.galasaHome = galasaHome
+	instance.fileSystem = fileSystem
+	instance.launcher = launcher
+	instance.timeService = timeService
+	instance.env = env
+	instance.console = console
+	return instance
+}
+
+func (submitter *Submitter) ExecuteSubmitRuns(
+	params utils.RunsSubmitCmdParameters,
+	testSelectionFlags *TestSelectionFlags,
+
 ) error {
 
 	var err error = nil
 
-	err = validateAndCorrectParams(galasaHome, fileSystem, &params, launcher, testSelectionFlags, env)
-	if err != nil {
-		return err
+	err = submitter.validateAndCorrectParams(&params, testSelectionFlags)
+	if err == nil {
+		var runOverrides map[string]string
+		runOverrides, err = submitter.buildOverrideMap(params)
+		if err == nil {
+			var portfolio *Portfolio
+			portfolio, err = submitter.getPortfolio(params.PortfolioFileName, testSelectionFlags)
+			if err == nil {
+				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName)
+				if err == nil {
+					err = submitter.executePortfolio(portfolio, runOverrides, params)
+				}
+			}
+		}
 	}
 
-	runOverrides, err := buildOverrideMap(fileSystem, params)
-	if err != nil {
-		return err
-	}
+	return err
+}
 
-	var portfolio *Portfolio
-	portfolio, err = getPortfolio(fileSystem, params.PortfolioFileName, launcher, testSelectionFlags)
-	if err != nil {
-		return err
-	}
+func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
+	runOverrides map[string]string,
+	params utils.RunsSubmitCmdParameters,
+) error {
 
-	err = validatePortfolio(portfolio, params.PortfolioFileName)
-	if err != nil {
-		return err
-	}
+	var err error = nil
 
 	// Build list of runs to submit
-	readyRuns := buildListOfRunsToSubmit(portfolio, runOverrides)
+	readyRuns := submitter.buildListOfRunsToSubmit(portfolio, runOverrides)
 
 	// Run all the tests
 	var finishedRuns map[string]*TestRun
 	var lostRuns map[string]*TestRun
-	finishedRuns, lostRuns, err = executeSubmitRuns(
-		fileSystem, params, launcher, timeService, readyRuns, runOverrides)
+	finishedRuns, lostRuns, err = submitter.executeSubmitRuns(
+		params, readyRuns, runOverrides)
 
 	// Report on the results.
 	if err == nil {
 		// Generate all the reports summarising the end-results.
-		err = createReports(fileSystem, params, finishedRuns, lostRuns)
+		err = submitter.createReports(params, finishedRuns, lostRuns)
 		if err == nil {
 
 			// Fail the command if tests failed, and the user wanted us to fail if tests fail.
@@ -84,12 +112,11 @@ func ExecuteSubmitRuns(
 	return err
 }
 
-func executeSubmitRuns(fileSystem files.FileSystem,
+func (submitter *Submitter) executeSubmitRuns(
 	params utils.RunsSubmitCmdParameters,
-	launcher launcher.Launcher,
-	timeService utils.TimeService,
 	readyRuns []TestRun,
-	runOverrides map[string]string) (map[string]*TestRun, map[string]*TestRun, error) {
+	runOverrides map[string]string,
+) (map[string]*TestRun, map[string]*TestRun, error) {
 
 	var err error = nil
 
@@ -100,10 +127,10 @@ func executeSubmitRuns(fileSystem files.FileSystem,
 
 	progressReportInterval := time.Minute * time.Duration(params.ProgressReportIntervalMinutes)
 	throttle := params.Throttle
-	fetchRas := isRasDetailNeededForReports(params)
+	fetchRas := submitter.isRasDetailNeededForReports(params)
 	pollInterval := time.Second * time.Duration(params.PollIntervalSeconds)
 
-	err = writeThrottleFile(fileSystem, params.ThrottleFileName, throttle)
+	err = submitter.writeThrottleFile(params.ThrottleFileName, throttle)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -111,18 +138,23 @@ func executeSubmitRuns(fileSystem files.FileSystem,
 	//
 	// Main submit loop
 	//
-	nextProgressReport := timeService.Now().Add(progressReportInterval)
+	nextProgressReport := submitter.timeService.Now().Add(progressReportInterval)
 	isThrottleFileLost := false
 	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
 
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
-			readyRuns = submitRun(launcher, params.GroupName, readyRuns, submittedRuns,
+			readyRuns, err = submitter.submitRun(params.GroupName, readyRuns, submittedRuns,
 				lostRuns, &runOverrides, params.Trace, params.Requestor, params.RequestType)
+
+			if err != nil {
+				// Ignore the error and continue to process the list of available runs.
+				submitter.console.WriteString(fmt.Sprintf("%s\n", err.Error()))
+			}
 		}
 
 		// Only do progress reporting if the user didn't disable it.
 		if params.ProgressReportIntervalMinutes > 0 {
-			now := timeService.Now()
+			now := submitter.timeService.Now()
 			if now.After(nextProgressReport) {
 				//convert TestRun
 				displayInterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
@@ -130,14 +162,14 @@ func executeSubmitRuns(fileSystem files.FileSystem,
 			}
 		}
 
-		throttle, isThrottleFileLost = updateThrottleFromFileIfDifferent(fileSystem, params.ThrottleFileName, throttle, isThrottleFileLost)
+		throttle, isThrottleFileLost = submitter.updateThrottleFromFileIfDifferent(params.ThrottleFileName, throttle, isThrottleFileLost)
 
-		runsFetchCurrentStatus(launcher, params.GroupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
+		submitter.runsFetchCurrentStatus(params.GroupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
 
 		// Only sleep if there are runs in progress but not yet finished.
 		if len(submittedRuns) > 0 || len(rerunRuns) > 0 {
 			log.Printf("Sleeping for the poll interval of %v seconds\n", params.PollIntervalSeconds)
-			timeService.Sleep(pollInterval)
+			submitter.timeService.Sleep(pollInterval)
 			log.Printf("Awake from poll interval sleep of %v seconds\n", params.PollIntervalSeconds)
 		}
 	}
@@ -170,11 +202,11 @@ func displayInterrimProgressReport(readyRuns []TestRun,
 	}
 }
 
-func writeThrottleFile(fileSystem files.FileSystem, throttleFileName string, throttle int) error {
+func (submitter *Submitter) writeThrottleFile(throttleFileName string, throttle int) error {
 	var err error = nil
 	if throttleFileName != "" {
 		// Throttle filename was specified. Lets use a throttle file.
-		err = fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
+		err = submitter.fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_WRITE, throttleFileName, err.Error())
 		}
@@ -182,11 +214,11 @@ func writeThrottleFile(fileSystem files.FileSystem, throttleFileName string, thr
 	return err
 }
 
-func updateThrottleFromFileIfDifferent(
-	fileSystem files.FileSystem,
+func (submitter *Submitter) updateThrottleFromFileIfDifferent(
 	throttleFileName string,
 	currentThrottle int,
-	wasThrottleFileLostAlready bool) (int, bool) {
+	wasThrottleFileLostAlready bool,
+) (int, bool) {
 
 	var newThrottle int = currentThrottle
 	var isThrottleFileLost bool = wasThrottleFileLostAlready
@@ -194,7 +226,7 @@ func updateThrottleFromFileIfDifferent(
 	// Only bother with anything here if there is a throttle file specified by the user.
 	if throttleFileName != "" {
 
-		savedThrottle, err := readThrottleFile(fileSystem, throttleFileName)
+		savedThrottle, err := submitter.readThrottleFile(throttleFileName)
 		if err != nil {
 			if wasThrottleFileLostAlready {
 				// Don't log it, as we logged it when it was first lost.
@@ -224,10 +256,10 @@ const (
 	INT_TYPE_VARIANT_INT64     = 64
 )
 
-func readThrottleFile(fileSystem files.FileSystem, throttleFileName string) (int, error) {
+func (submitter *Submitter) readThrottleFile(throttleFileName string) (int, error) {
 	var savedThrottle int = 0
 	var intermediateThrottle int64
-	contents, err := fileSystem.ReadTextFile(throttleFileName)
+	contents, err := submitter.fileSystem.ReadTextFile(throttleFileName)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_THROTTLE_FILE_READ, throttleFileName, err.Error())
 	} else {
@@ -242,8 +274,7 @@ func readThrottleFile(fileSystem files.FileSystem, throttleFileName string) (int
 	return savedThrottle, err
 }
 
-func submitRun(
-	launcher launcher.Launcher,
+func (submitter *Submitter) submitRun(
 	groupName string,
 	readyRuns []TestRun,
 	submittedRuns map[string]*TestRun,
@@ -251,51 +282,54 @@ func submitRun(
 	runOverrides *map[string]string,
 	trace bool,
 	requestor string,
-	requestType string) []TestRun {
+	requestType string,
+) ([]TestRun, error) {
 
-	if len(readyRuns) < 1 {
-		return readyRuns
+	var err error = nil
+	if len(readyRuns) >= 1 {
+
+		nextRun := readyRuns[0]
+		readyRuns = readyRuns[1:]
+
+		if err == nil {
+
+			className := nextRun.Bundle + "/" + nextRun.Class
+
+			submitOverrides := make(map[string]interface{})
+
+			for key, value := range nextRun.Overrides {
+				submitOverrides[key] = value
+			}
+
+			var resultGroup *galasaapi.TestRuns
+			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
+				nextRun.Stream, nextRun.Obr, trace, submitOverrides)
+			if err != nil {
+				log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
+				lostRuns[className] = &nextRun
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
+			} else {
+				if len(resultGroup.GetRuns()) < 1 {
+					log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
+					lostRuns[className] = &nextRun
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST, nextRun.Bundle, nextRun.Class)
+				}
+
+				if err == nil {
+					submittedRun := resultGroup.GetRuns()[0]
+					nextRun.Name = *submittedRun.Name
+
+					submittedRuns[nextRun.Name] = &nextRun
+
+					log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
+				}
+			}
+		}
 	}
-
-	nextRun := readyRuns[0]
-	readyRuns = readyRuns[1:]
-
-	className := nextRun.Bundle + "/" + nextRun.Class
-	classNames := []string{className}
-
-	submitOverrides := make(map[string]interface{})
-
-	for key, value := range nextRun.Overrides {
-		submitOverrides[key] = value
-	}
-
-	var resultGroup *galasaapi.TestRuns
-	var err error
-	resultGroup, err = launcher.SubmitTestRuns(groupName, classNames, requestType, requestor, nextRun.Stream, trace, submitOverrides)
-	if err != nil {
-		log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
-		lostRuns[className] = &nextRun
-		return readyRuns
-	}
-
-	if len(resultGroup.GetRuns()) < 1 {
-		log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
-		lostRuns[className] = &nextRun
-		return readyRuns
-	}
-
-	submittedRun := resultGroup.GetRuns()[0]
-	nextRun.Name = *submittedRun.Name
-
-	submittedRuns[nextRun.Name] = &nextRun
-
-	log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
-
-	return readyRuns
+	return readyRuns, err
 }
 
-func runsFetchCurrentStatus(
-	launcher launcher.Launcher,
+func (submitter *Submitter) runsFetchCurrentStatus(
 	groupName string,
 	readyRuns []TestRun,
 	submittedRuns map[string]*TestRun,
@@ -303,7 +337,7 @@ func runsFetchCurrentStatus(
 	lostRuns map[string]*TestRun,
 	fetchRas bool) {
 
-	currentGroup, err := launcher.GetRunsByGroup(groupName)
+	currentGroup, err := submitter.launcher.GetRunsByGroup(groupName)
 	if err != nil {
 		log.Printf("Received error from group request - %v\n", err)
 		return
@@ -335,7 +369,7 @@ func runsFetchCurrentStatus(
 				rasRunID := currentRun.RasRunId
 				if fetchRas && rasRunID != nil {
 
-					rasRun, err := launcher.GetRunsById(*rasRunID)
+					rasRun, err := submitter.launcher.GetRunsById(*rasRunID)
 
 					if err != nil {
 						log.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
@@ -374,7 +408,7 @@ func runsFetchCurrentStatus(
 
 }
 
-func createReports(fileSystem files.FileSystem, params utils.RunsSubmitCmdParameters,
+func (submitter *Submitter) createReports(params utils.RunsSubmitCmdParameters,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
 
 	//convert TestRun tests into formattable data
@@ -382,18 +416,18 @@ func createReports(fileSystem files.FileSystem, params utils.RunsSubmitCmdParame
 
 	var err error = nil
 	if params.ReportYamlFilename != "" {
-		err = ReportYaml(fileSystem, params.ReportYamlFilename, finishedRuns, lostRuns)
+		err = ReportYaml(submitter.fileSystem, params.ReportYamlFilename, finishedRuns, lostRuns)
 	}
 
 	if err == nil {
 		if params.ReportJsonFilename != "" {
-			err = ReportJSON(fileSystem, params.ReportJsonFilename, finishedRuns, lostRuns)
+			err = ReportJSON(submitter.fileSystem, params.ReportJsonFilename, finishedRuns, lostRuns)
 		}
 	}
 
 	if err == nil {
 		if params.ReportJunitFilename != "" {
-			err = ReportJunit(fileSystem, params.ReportJunitFilename, params.GroupName, finishedRuns, lostRuns)
+			err = ReportJunit(submitter.fileSystem, params.ReportJunitFilename, params.GroupName, finishedRuns, lostRuns)
 		}
 	}
 
@@ -412,7 +446,7 @@ func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string
 	}
 }
 
-func isRasDetailNeededForReports(params utils.RunsSubmitCmdParameters) bool {
+func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitCmdParameters) bool {
 
 	// Do we need to ask the RAS for the test structure
 	isRasDetailNeeded := false
@@ -429,7 +463,7 @@ func isRasDetailNeededForReports(params utils.RunsSubmitCmdParameters) bool {
 	return isRasDetailNeeded
 }
 
-func buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]string) []TestRun {
+func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]string) []TestRun {
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
 
 	for _, portfolioTest := range portfolio.Classes {
@@ -437,6 +471,7 @@ func buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]strin
 			Bundle:    portfolioTest.Bundle,
 			Class:     portfolioTest.Class,
 			Stream:    portfolioTest.Stream,
+			Obr:       portfolioTest.Obr,
 			Status:    "queued",
 			Overrides: make(map[string]string, 0),
 		}
@@ -459,13 +494,9 @@ func buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]strin
 	return readyRuns
 }
 
-func validateAndCorrectParams(
-	galasaHome utils.GalasaHome,
-	fs files.FileSystem,
+func (submitter *Submitter) validateAndCorrectParams(
 	params *utils.RunsSubmitCmdParameters,
-	launcher launcher.Launcher,
 	submitSelectionFlags *TestSelectionFlags,
-	env utils.Environment,
 ) error {
 
 	var err error = nil
@@ -500,7 +531,7 @@ func validateAndCorrectParams(
 	if err == nil {
 		if params.Requestor == "" {
 			// Requestor has not been set. Default it to the current user id.
-			params.Requestor, err = env.GetUserName()
+			params.Requestor, err = submitter.env.GetUserName()
 		}
 	}
 
@@ -511,30 +542,28 @@ func validateAndCorrectParams(
 		}
 		log.Printf("Using group name '%v' for test run submission\n", params.GroupName)
 
-		_, err = checkIfGroupAlreadyInUse(launcher, params.GroupName)
+		_, err = submitter.checkIfGroupAlreadyInUse(params.GroupName)
 	}
 
 	if err == nil {
-		err = correctOverrideFilePathParameter(galasaHome, fs, params)
+		err = submitter.correctOverrideFilePathParameter(params)
 	}
 
-	tildaExpandAllPaths(fs, params)
+	submitter.tildaExpandAllPaths(params)
 
 	return err
 }
 
-func correctOverrideFilePathParameter(
-	galasaHome utils.GalasaHome,
-	fs files.FileSystem,
+func (submitter *Submitter) correctOverrideFilePathParameter(
 	params *utils.RunsSubmitCmdParameters,
 ) error {
 	var err error
 	// Correct the default overrideFile path if it wasn't specified.
 	if params.OverrideFilePath == "" {
 
-		params.OverrideFilePath = galasaHome.GetUrlFolderPath() + "/overrides.properties"
+		params.OverrideFilePath = submitter.galasaHome.GetUrlFolderPath() + "/overrides.properties"
 		var isFileThere bool
-		isFileThere, err = fs.Exists(params.OverrideFilePath)
+		isFileThere, err = submitter.fileSystem.Exists(params.OverrideFilePath)
 		if err == nil {
 			if !isFileThere {
 				// The flag wasn't specified.
@@ -548,49 +577,49 @@ func correctOverrideFilePathParameter(
 	return err
 }
 
-func tildaExpandAllPaths(fs files.FileSystem, params *utils.RunsSubmitCmdParameters) error {
+func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdParameters) error {
 	var err error = nil
 
 	if err == nil {
-		params.OverrideFilePath, err = files.TildaExpansion(fs, params.OverrideFilePath)
+		params.OverrideFilePath, err = files.TildaExpansion(submitter.fileSystem, params.OverrideFilePath)
 	}
 
 	if err == nil {
-		params.PortfolioFileName, err = files.TildaExpansion(fs, params.PortfolioFileName)
+		params.PortfolioFileName, err = files.TildaExpansion(submitter.fileSystem, params.PortfolioFileName)
 	}
 
 	if err == nil {
-		params.ReportJsonFilename, err = files.TildaExpansion(fs, params.ReportJsonFilename)
+		params.ReportJsonFilename, err = files.TildaExpansion(submitter.fileSystem, params.ReportJsonFilename)
 	}
 
 	if err == nil {
-		params.ReportJunitFilename, err = files.TildaExpansion(fs, params.ReportJunitFilename)
+		params.ReportJunitFilename, err = files.TildaExpansion(submitter.fileSystem, params.ReportJunitFilename)
 	}
 
 	if err == nil {
-		params.ReportYamlFilename, err = files.TildaExpansion(fs, params.ReportYamlFilename)
+		params.ReportYamlFilename, err = files.TildaExpansion(submitter.fileSystem, params.ReportYamlFilename)
 	}
 
 	if err == nil {
-		params.ThrottleFileName, err = files.TildaExpansion(fs, params.ThrottleFileName)
+		params.ThrottleFileName, err = files.TildaExpansion(submitter.fileSystem, params.ThrottleFileName)
 	}
 	return err
 }
 
-func buildOverrideMap(fileSystem files.FileSystem, commandParameters utils.RunsSubmitCmdParameters) (map[string]string, error) {
+func (submitter *Submitter) buildOverrideMap(commandParameters utils.RunsSubmitCmdParameters) (map[string]string, error) {
 
 	path := commandParameters.OverrideFilePath
-	runOverrides, err := loadOverrideFile(fileSystem, path)
+	runOverrides, err := submitter.loadOverrideFile(path)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE, path, err.Error())
 	} else {
-		runOverrides, err = addOverridesFromCmdLine(runOverrides, commandParameters.Overrides)
+		runOverrides, err = submitter.addOverridesFromCmdLine(runOverrides, commandParameters.Overrides)
 	}
 
 	return runOverrides, err
 }
 
-func loadOverrideFile(fileSystem files.FileSystem, overrideFilePath string) (map[string]string, error) {
+func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[string]string, error) {
 
 	var (
 		overrides props.JavaProperties
@@ -601,13 +630,13 @@ func loadOverrideFile(fileSystem files.FileSystem, overrideFilePath string) (map
 		// Don't read properties from a file.
 		overrides = make(map[string]string)
 	} else {
-		overrides, err = props.ReadPropertiesFile(fileSystem, overrideFilePath)
+		overrides, err = props.ReadPropertiesFile(submitter.fileSystem, overrideFilePath)
 	}
 
 	return overrides, err
 }
 
-func addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string) (map[string]string, error) {
+func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string) (map[string]string, error) {
 	var err error = nil
 
 	// Convert overrides to a map
@@ -633,18 +662,18 @@ func addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides [
 	return overrides, nil
 }
 
-func getPortfolio(fileSystem files.FileSystem, portfolioFileName string, launcher launcher.Launcher, submitSelectionFlags *TestSelectionFlags) (*Portfolio, error) {
+func (submitter *Submitter) getPortfolio(portfolioFileName string, submitSelectionFlags *TestSelectionFlags) (*Portfolio, error) {
 	// Load the portfolio of tests
 	var portfolio *Portfolio = nil
 	var err error = nil
 
 	if portfolioFileName != "" {
-		portfolio, err = ReadPortfolio(fileSystem, portfolioFileName)
+		portfolio, err = ReadPortfolio(submitter.fileSystem, portfolioFileName)
 	} else {
 		// There is no portfolio file, so create an in-memory portfolio
 		// from the tests we can find from the test selection.
 		var testSelection TestSelection
-		testSelection, err = SelectTests(launcher, submitSelectionFlags)
+		testSelection, err = SelectTests(submitter.launcher, submitSelectionFlags)
 
 		if err == nil {
 			testOverrides := make(map[string]string)
@@ -655,7 +684,7 @@ func getPortfolio(fileSystem files.FileSystem, portfolioFileName string, launche
 	return portfolio, err
 }
 
-func GetCurrentUserName() string {
+func (submitter *Submitter) GetCurrentUserName() string {
 	userName := "cli"
 	currentUser, err := user.Current()
 	if err == nil {
@@ -664,7 +693,7 @@ func GetCurrentUserName() string {
 	return userName
 }
 
-func validatePortfolio(portfolio *Portfolio, portfolioFilename string) error {
+func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string) error {
 	var err error = nil
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
 		// Empty portfolio
@@ -673,12 +702,12 @@ func validatePortfolio(portfolio *Portfolio, portfolioFilename string) error {
 	return err
 }
 
-func checkIfGroupAlreadyInUse(launcher launcher.Launcher, groupName string) (bool, error) {
+func (submitter *Submitter) checkIfGroupAlreadyInUse(groupName string) (bool, error) {
 	isInUse := false
 	var err error = nil
 
 	// Just check if it is already in use,  which is perfectly valid for custom group names
-	uuidCheck, err := launcher.GetRunsByGroup(groupName)
+	uuidCheck, err := submitter.launcher.GetRunsByGroup(groupName)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
 	} else {

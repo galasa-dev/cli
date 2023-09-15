@@ -37,7 +37,12 @@ type TestSelection struct {
 type TestClass struct {
 	Bundle string
 	Class  string
+
+	// The stream will be set for ecosystem runs.
 	Stream string
+
+	// The obr will be set for local runs.
+	Obr string
 }
 
 func NewTestSelectionFlags() *TestSelectionFlags {

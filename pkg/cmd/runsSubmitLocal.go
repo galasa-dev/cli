@@ -131,15 +131,21 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 						processFactory, galasaHome)
 
 					if err == nil {
+						console := utils.NewRealConsole()
+
 						// Do the launching of the tests.
-						err = runs.ExecuteSubmitRuns(
+						submitter := runs.NewSubmitter(
 							galasaHome,
 							fileSystem,
-							runsSubmitCmdParams,
 							launcherInstance,
 							timeService,
-							submitLocalSelectionFlags,
 							env,
+							console,
+						)
+
+						err = submitter.ExecuteSubmitRuns(
+							runsSubmitCmdParams,
+							submitLocalSelectionFlags,
 						)
 					}
 				}

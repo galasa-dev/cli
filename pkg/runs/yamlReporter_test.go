@@ -23,6 +23,7 @@ func TestYamlReportWorks(t *testing.T) {
 		Bundle:    "myBundle",
 		Class:     "com.myco.MyClass",
 		Stream:    "myStream",
+		Obr:       "myObr",
 		Status:    "myStatus",
 		Result:    "PASSED",
 		Overrides: make(map[string]string, 1),
@@ -55,6 +56,7 @@ func TestYamlReportWorks(t *testing.T) {
 	  bundle: myBundle
 	  class: com.myco.MyClass
 	  stream: myStream
+	  obr: myObr
 	  status: myStatus
 	  result: PASSED
 	  overrides: {}
