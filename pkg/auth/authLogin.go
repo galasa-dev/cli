@@ -162,6 +162,14 @@ func GetAuthenticatedAPIClient(apiServerUrl string, fileSystem files.FileSystem,
 		}
 
 	}
-	apiClient := api.InitialiseAuthenticatedAPI(apiServerUrl, bearerToken)
+
+	var apiClient *galasaapi.APIClient
+	if err == nil {
+		apiClient = api.InitialiseAuthenticatedAPI(apiServerUrl, bearerToken)
+	} else {
+		// Continue without a bearer token
+		apiClient = api.InitialiseAPI(apiServerUrl)
+		err = nil
+	}
 	return apiClient, err
 }

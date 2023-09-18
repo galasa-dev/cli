@@ -257,3 +257,23 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 	assert.Nil(t, err, "Should not return an error if the login was successful")
 	assert.NotNil(t, apiClient, "API client should not be nil if the login was successful")
 }
+
+// Temporary test - remove once authentication is enforced
+func TestGetAuthenticatedAPIClientWithUnavailableAPIContinuesWithoutToken(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	server := NewAuthServletMock(t, 500, "")
+	defer server.Close()
+
+	apiServerUrl := server.URL
+
+	// When...
+	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
+
+	// Then...
+	assert.Nil(t, err, "Should not return an error if the API server is unavailable")
+	assert.NotNil(t, apiClient, "API client should not be nil")
+}
