@@ -152,7 +152,6 @@ func createGalasactlPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir s
 		false) // Don't error if the file already exists.
 
 	return err
-
 }
 
 func createLibDirAndContent(fileGenerator *FileGenerator, galasaLibDir string) error {

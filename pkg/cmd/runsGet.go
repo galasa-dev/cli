@@ -91,9 +91,6 @@ func executeRunsGet(cmd *cobra.Command, args []string) {
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
-	if err != nil {
-		panic(err)
-	}
 
 	timeService := utils.NewRealTimeService()
 
