@@ -30,17 +30,13 @@ func GetAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome)
     galasactlPropertiesFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.properties")
     galasactlProperties, err := props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
     if err == nil {
-        clientIdProperty := "GALASA_CLIENT_ID"
-        secretProperty := "GALASA_SECRET"
-        accessTokenProperty := "GALASA_ACCESS_TOKEN"
-
         requiredAuthProperties := getAuthPropertiesList()
         err = validateRequiredGalasactlProperties(requiredAuthProperties, galasactlProperties)
 
         if err == nil {
-            authProperties.SetClientId(galasactlProperties[clientIdProperty])
-            authProperties.SetSecret(galasactlProperties[secretProperty])
-            authProperties.SetRefreshToken(galasactlProperties[accessTokenProperty])
+            authProperties.SetClientId(galasactlProperties[CLIENT_ID_PROPERTY])
+            authProperties.SetSecret(galasactlProperties[SECRET_PROPERTY])
+            authProperties.SetRefreshToken(galasactlProperties[ACCESS_TOKEN_PROPERTY])
         }
 
     } else {
