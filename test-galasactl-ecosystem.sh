@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Copyright contributors to the Galasa project
+#
+# SPDX-License-Identifier: EPL-2.0
+#
 echo "Running script test-galasactl-ecosystem.sh"
 
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
@@ -33,26 +38,16 @@ blue=$(tput setaf 25)
 # Headers and Logging
 #
 #--------------------------------------------------------------------------
-underline() { printf "${underline}${bold}%s${reset}\n" "$@"
-}
-h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@"
-}
-h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@"
-}
-debug() { printf "${white}%s${reset}\n" "$@"
-}
-info() { printf "${white}➜ %s${reset}\n" "$@"
-}
-success() { printf "${green}✔ %s${reset}\n" "$@"
-}
-error() { printf "${red}✖ %s${reset}\n" "$@"
-}
-warn() { printf "${tan}➜ %s${reset}\n" "$@"
-}
-bold() { printf "${bold}%s${reset}\n" "$@"
-}
-note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
-}
+underline() { printf "${underline}${bold}%s${reset}\n" "$@" ;}
+h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@" ;}
+h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@" ;}
+debug() { printf "${white}%s${reset}\n" "$@" ;}
+info() { printf "${white}➜ %s${reset}\n" "$@" ;}
+success() { printf "${green}✔ %s${reset}\n" "$@" ;}
+error() { printf "${red}✖ %s${reset}\n" "$@" ;}
+warn() { printf "${tan}➜ %s${reset}\n" "$@" ;}
+bold() { printf "${bold}%s${reset}\n" "$@" ;}
+note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@" ;}
 
 
 #-----------------------------------------------------------------------------------------                   
@@ -87,13 +82,12 @@ while [ "$1" != "" ]; do
 done
 
 # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
-if [[ "${bootstrap}" != "" ]]; then
-    echo "Running tests against ecosystem bootstrap ${bootstrap}"
-else
-    error "Need to provide the bootstrap for a remote ecosystem."
-    usage
-    exit 1  
+if [[ "${bootstrap}" == "" ]]; then
+    export bootstrap="http://galasa-cicsk8s.hursley.ibm.com/bootstrap"
+    info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
 fi
+
+info "Running tests against ecosystem bootstrap ${bootstrap}"
 
 #-----------------------------------------------------------------------------------------                   
 # Constants
@@ -128,9 +122,6 @@ function calculate_galasactl_executable {
     esac
 
     architecture=$(uname -m)
-    if [[ "${architecture}" == "x86_64" ]]; then
-        architecture="amd64"
-    fi
 
     export binary="galasactl-${os}-${architecture}"
     info "galasactl binary is ${binary}"
@@ -176,6 +167,8 @@ function launch_test_on_ecosystem_with_portfolio {
     --noexitcodeontestfailures \
     --log -"
 
+    info "Command is: $cmd"
+    
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     $cmd | tee runs-submit-output.txt # Store the output of galasactl runs submit to use later
 
@@ -356,12 +349,18 @@ function get_result_with_runname {
     # There is a line in the output like this:
     #   Run C6967 - inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
     # Environment failure of the test results in "C6976(EnvFail)" ... so the '('...')' part needs removing also.
-    sed 's/Run //; s/ -//; s/[(].*[)]//;' line.txt > runname.txt 
+    sed 's/Run //; s/ -//; s/[(].*[)]//;' line.txt > runname.txt
     runname=$(cat runname.txt)
+
+    if [[ "$runname" == "" ]]; then
+        error "Run name not captured from previous run launch."
+        exit 1
+    fi
 
     cmd="${BASEDIR}/bin/${binary} runs get \
     --name ${runname} \
-    --bootstrap ${bootstrap}"
+    --bootstrap ${bootstrap} \
+    --log -"
 
     info "Command is: $cmd"
 
@@ -407,7 +406,7 @@ function runs_get_check_summary_format_output {
     fi
 
     # Check headers
-    headers=("submitted-time" "name" "status" "result" "test-name")
+    headers=("submitted-time(UTC)" "name" "status" "result" "test-name")
 
     for header in "${headers[@]}"
     do
@@ -422,8 +421,6 @@ function runs_get_check_summary_format_output {
 
     # Check that we got 4 lines - headers, result data, empty line, totals count
     line_count=$(cat $output_file | wc -l | xargs)
-    empty_line_count=grep -c ^$ $output_file
-    line_count=$(($line_count + $empty_line_count))
     expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then 
         error "line count is wrong. expected ${expected_line_count} got ${line_count}"
@@ -462,7 +459,7 @@ function runs_get_check_details_format_output {
     fi
 
     # Check method headers
-    headers=("method" "type" "status" "result" "start-time" "end-time" "duration(ms)")
+    headers=("method" "type" "status" "result" "start-time(UTC)" "end-time(UTC)" "duration(ms)")
 
     for header in "${headers[@]}"
     do
@@ -476,7 +473,7 @@ function runs_get_check_details_format_output {
     done  
 
     #check methods start on line 13 - implies other test details have outputted 
-    line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time[[:space:]]*end-time[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
+    line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time(UTC)[[:space:]]*end-time(UTC)[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
     expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then 
         # We expect a return code of '0' because the method header should be output on line 13.
@@ -656,7 +653,7 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
 
 #--------------------------------------------------------------------------
 function runs_get_check_requestor_parameter {
-    requestor="unknown"
+    requestor=$(whoami)
     h2 "Performing runs get with details format providing a from age and requestor as $requestor..."
 
     cd ${BASEDIR}/temp
@@ -673,7 +670,7 @@ function runs_get_check_requestor_parameter {
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
-    cat $output_file | grep "requestor      : $requestor" -q
+    cat $output_file | grep "requestor[ ]*:[ ]*$requestor" -q
     rc=$?
     # We expect a return code of '0' because the run name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -702,7 +699,7 @@ function runs_get_check_result_parameter {
     output_file="runs-get-output.txt"
     $cmd | tee $output_file
 
-    cat $output_file | grep "result         : $result" -q
+    cat $output_file | grep "result[ ]*:[ ]*$result" -q
     rc=$?
    
     if [[ "${rc}" != "0" ]]; then 
@@ -715,17 +712,17 @@ function runs_get_check_result_parameter {
 
 #--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
-    h2 "Launching test on an ecosystem..."
+    h2 "Launching test on an ecosystem... directly... without a portfolio."
 
     cd ${BASEDIR}/temp
 
     cmd="${BASEDIR}/bin/${binary} runs submit \
     --bootstrap $bootstrap \
     --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+    --stream inttests
     --throttle 1 \
     --poll 10 \
     --progress 1 \
-    --noexitcodeontestfailures \
     --log -"
 
     info "Command is: $cmd"
@@ -796,6 +793,9 @@ function launch_test_from_unknown_portfolio {
 
 calculate_galasactl_executable
 
+# Launch test on ecosystem without a portfolio ...
+launch_test_on_ecosystem_without_portfolio
+
 # Launch test on ecosystem from a portfolio ...
 launch_test_on_ecosystem_with_portfolio
 
@@ -817,9 +817,7 @@ runs_get_check_requestor_parameter
 runs_get_check_result_parameter
 # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
-# Launch test on ecosystem without a portfolio ...
-# NOTE - Bug found with this command so commenting out for now see issue xxx
-# launch_test_on_ecosystem_without_portfolio
+
 
 # Attempt to create a test portfolio with an unknown test ...
 create_portfolio_with_unknown_test

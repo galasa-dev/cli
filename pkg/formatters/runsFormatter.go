@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package formatters
 
@@ -23,6 +25,7 @@ const (
 	RUN_RESULT_PASSED_WITH_DEFECTS = "Passed With Defects"
 	RUN_RESULT_FAILED              = "Failed"
 	RUN_RESULT_FAILED_WITH_DEFECTS = "Failed With Defects"
+	RUN_RESULT_LOST                = "Lost"
 	RUN_RESULT_ENVFAIL             = "EnvFail"
 	RUN_RESULT_UNKNOWN             = "UNKNOWN"
 	RUN_RESULT_ACTIVE              = "Active"
@@ -32,9 +35,9 @@ const (
 	HEADER_STATUS         = "status"
 	HEADER_RESULT         = "result"
 	HEADER_TEST_NAME      = "test-name"
-	HEADER_SUBMITTED_TIME = "submitted-time"
-	HEADER_START_TIME     = "start-time"
-	HEADER_END_TIME       = "end-time"
+	HEADER_SUBMITTED_TIME = "submitted-time(UTC)"
+	HEADER_START_TIME     = "start-time(UTC)"
+	HEADER_END_TIME       = "end-time(UTC)"
 	HEADER_DURATION       = "duration(ms)"
 	HEADER_BUNDLE         = "bundle"
 	HEADER_REQUESTOR      = "requestor"
@@ -45,10 +48,33 @@ const (
 	RAS_RUNS_URL = "/ras/runs/"
 )
 
-var RESULT_LABELS = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_FAILED_WITH_DEFECTS, RUN_RESULT_ENVFAIL, RUN_RESULT_UNKNOWN, RUN_RESULT_ACTIVE, RUN_RESULT_IGNORED}
+// -----------------------------------------------------
+// Structure to store test data from external structures to be used in by FomatRuns()
+type FormattableTest struct {
+	RunId         string
+	Name          string
+	TestName      string
+	Status        string
+	Result        string
+	StartTimeUTC  string
+	EndTimeUTC    string
+	QueuedTimeUTC string
+	Requestor     string
+	Bundle        string
+	ApiServerUrl  string
+	Methods       []galasaapi.TestMethod
+	Lost          bool
+}
+
+func NewFormattableTest() FormattableTest {
+	this := FormattableTest{}
+	return this
+}
+
+var RESULT_LABELS = []string{RUN_RESULT_PASSED, RUN_RESULT_PASSED_WITH_DEFECTS, RUN_RESULT_FAILED, RUN_RESULT_FAILED_WITH_DEFECTS, RUN_RESULT_LOST, RUN_RESULT_ENVFAIL, RUN_RESULT_UNKNOWN, RUN_RESULT_ACTIVE, RUN_RESULT_IGNORED}
 
 type RunsFormatter interface {
-	FormatRuns(runs []galasaapi.Run, apiServerUrl string) (string, error)
+	FormatRuns(testResultsData []FormattableTest) (string, error)
 	GetName() string
 
 	// IsNeedingDetails - Does this formatter require all of the detailed fields to be filled-in,
@@ -92,7 +118,12 @@ func writeFormattedTableToStringBuilder(table [][]string, buff *strings.Builder,
 // -----------------------------------------------------
 // Functions for time formats and duration
 func formatTimeReadable(rawTime string) string {
-	formattedTimeString := rawTime[0:10] + " " + rawTime[11:19]
+	var formattedTimeString string
+	if len(rawTime) < 19 {
+		formattedTimeString = ""
+	} else {
+		formattedTimeString = rawTime[0:10] + " " + rawTime[11:19]
+	}
 	return formattedTimeString
 }
 
@@ -152,8 +183,8 @@ func generateResultTotalsReport(totalResults int, resultsCount map[string]int) s
 	return resultString
 }
 
-func accumulateResults(resultCounts map[string]int, run galasaapi.Run) {
-	runResult := run.TestStructure.GetResult()
+func accumulateResults(resultCounts map[string]int, run FormattableTest) {
+	runResult := run.Result
 	if len(runResult) > 0 {
 		resultTotal, isPresent := resultCounts[runResult]
 		if isPresent {

@@ -1,7 +1,8 @@
 /*
-*  Copyright contributors to the Galasa project
+ * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
-
 package runs
 
 import (
@@ -36,7 +37,56 @@ type TestSelection struct {
 type TestClass struct {
 	Bundle string
 	Class  string
+
+	// The stream will be set for ecosystem runs.
 	Stream string
+
+	// The obr will be set for local runs.
+	Obr string
+}
+
+func NewTestSelectionFlags() *TestSelectionFlags {
+	flags := new(TestSelectionFlags)
+	flags.bundles = new([]string)
+	flags.packages = new([]string)
+	flags.tests = new([]string)
+	flags.tags = new([]string)
+	flags.classes = new([]string)
+	flags.regexSelect = new(bool)
+	return flags
+}
+
+type TestSelectionFlagValidator interface {
+	Validate(flags *TestSelectionFlags) error
+}
+
+type StreamBasedValidator struct {
+}
+
+func NewStreamBasedValidator() TestSelectionFlagValidator {
+	return new(StreamBasedValidator)
+}
+
+func (*StreamBasedValidator) Validate(flags *TestSelectionFlags) error {
+	var err error = nil
+	if flags.stream == "" {
+		if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 || len(*flags.classes) > 0 {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
+		}
+	}
+	return err
+}
+
+type ObrBasedValidator struct {
+}
+
+func NewObrBasedValidator() TestSelectionFlagValidator {
+	return new(ObrBasedValidator)
+}
+
+func (*ObrBasedValidator) Validate(flags *TestSelectionFlags) error {
+	var err error = nil
+	return err
 }
 
 // Adds a ton of flags to a cobra command like 'runs prepare' or 'runs submit'.
@@ -46,10 +96,19 @@ func AddCommandFlags(command *cobra.Command, flags *TestSelectionFlags) {
 	flags.bundles = command.Flags().StringSlice("bundle", make([]string, 0), "bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex")
 	flags.tests = command.Flags().StringSlice("test", make([]string, 0), "test names which will be selected if the name contains this string, or if --regex is specified then matches the regex")
 	flags.tags = command.Flags().StringSlice("tag", make([]string, 0), "tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex")
-	flags.classes = command.Flags().StringSlice("class", make([]string, 0), "test class names, for building a portfolio when a stream/test catalog is not available."+
-		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
+
 	command.Flags().StringVarP(&flags.stream, "stream", "s", "", "test stream to extract the tests from")
 	flags.regexSelect = command.Flags().Bool("regex", false, "Test selection is performed by using regex")
+
+	AddClassFlag(command, flags, false, "test class names to run from the specified stream or portfolio."+
+		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
+}
+
+func AddClassFlag(command *cobra.Command, flags *TestSelectionFlags, isRequired bool, helpText string) {
+	flags.classes = command.Flags().StringSlice("class", make([]string, 0), helpText)
+	if isRequired {
+		command.MarkFlagRequired("class")
+	}
 }
 
 func AreSelectionFlagsProvided(flags *TestSelectionFlags) bool {
@@ -88,10 +147,11 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 	var testCatalog launcher.TestCatalog
 
 	if flags.stream != "" {
-		availableStreams, err := GetStreams(launcherInstance)
+		var availableStreams []string
+		availableStreams, err = GetStreams(launcherInstance)
 		if err == nil {
 
-			err := ValidateStream(availableStreams, flags.stream)
+			err = ValidateStream(availableStreams, flags.stream)
 			if err == nil {
 
 				testCatalog, err = launcherInstance.GetTestCatalog(flags.stream)
@@ -104,12 +164,6 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 
 	if err == nil {
 		testSelection = TestSelection{Classes: make([]TestClass, 0)}
-
-		if flags.stream == "" {
-			if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
-			}
-		}
 
 		if err == nil {
 			err = selectTestsByBundle(testCatalog, &testSelection, flags)

@@ -174,14 +174,6 @@ galasactl runs prepare
           --regex
 ```
 
-Selecting tests without a test stream:-
-
-```
-galasactl runs prepare
-          --portfolio test.yaml
-          --class test.package.one/Test1
-          --class test.package.one/Test2
-```
 
 Providing test specific overrides:-
 
@@ -384,11 +376,11 @@ Download built artifacts:
 
 Built artifacts include:
 
-- galasactl-darwin-amd64 
+- galasactl-darwin-x86_64 
 - galasactl-darwin-arm64
-- galasactl-linux-amd64 
+- galasactl-linux-x86_64 
 - galasactl-linux-s390x 
-- galasactl-windows-amd64.exe
+- galasactl-windows-x86_64.exe
 
 Browse the following web site and download whichever built binary files you wish:
 

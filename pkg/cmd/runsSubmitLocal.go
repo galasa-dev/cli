@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package cmd
 
@@ -29,11 +31,10 @@ var (
 	// Variables set by cobra's command-line parsing.
 	runsSubmitLocalCmdParams launcher.RunsSubmitLocalCmdParameters
 
-	submitLocalSelectionFlags = runs.TestSelectionFlags{}
+	submitLocalSelectionFlags = runs.NewTestSelectionFlags()
 )
 
 func init() {
-
 	// currentUserName := runs.GetCurrentUserName()
 
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.RemoteMaven, "remoteMaven",
@@ -51,6 +52,7 @@ func init() {
 		"The maven coordinates of the obr bundle(s) which refer to your test bundles. "+
 			"The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' "+
 			"Multiple instances of this flag can be used to describe multiple obr bundles.")
+	runsSubmitLocalCmd.MarkFlagRequired("obr")
 
 	runsSubmitLocalCmd.Flags().Uint32Var(&runsSubmitLocalCmdParams.DebugPort, "debugPort", 0,
 		"The port to use when the --debug option causes the testcase to connect to a java debugger. "+
@@ -74,7 +76,8 @@ func init() {
 			"The connection is established using the --debugMode and --debugPort values.",
 	)
 
-	runs.AddCommandFlags(runsSubmitLocalCmd, &submitLocalSelectionFlags)
+	runs.AddClassFlag(runsSubmitLocalCmd, submitLocalSelectionFlags, true, "test class names."+
+		" The format of each entry is osgi-bundle-name/java-class-name. Java class names are fully qualified. No .class suffix is needed.")
 
 	runsSubmitCmd.AddCommand(runsSubmitLocalCmd)
 }
@@ -87,53 +90,67 @@ func executeSubmitLocal(cmd *cobra.Command, args []string) {
 	fileSystem := files.NewOSFileSystem()
 
 	err = utils.CaptureLog(fileSystem, logFileName)
-	if err != nil {
-		panic(err)
-	}
-	isCapturingLogs = true
-
-	log.Println("Galasa CLI - Submit tests (Local)")
-
-	// Get the ability to query environment variables.
-	env := utils.NewEnvironment()
-
-	// Work out where galasa home is, only once.
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
-	if err != nil {
-		panic(err)
-	}
-
-	timeService := utils.NewRealTimeService()
-
-	// the submit is targetting a local JVM
-	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
-
-	// Something which can kick off new operating system processes
-	processFactory := launcher.NewRealProcessFactory()
-
-	var launcherInstance launcher.Launcher
-	launcherInstance, err = launcher.NewJVMLauncher(
-		bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
-		runsSubmitLocalCmdParams, timeService,
-		processFactory, galasaHome)
 
 	if err == nil {
-		err = runs.ExecuteSubmitRuns(
-			galasaHome,
-			fileSystem,
-			runsSubmitCmdParams,
-			launcherInstance,
-			timeService,
-			&submitLocalSelectionFlags,
-		)
+		isCapturingLogs = true
+
+		log.Println("Galasa CLI - Submit tests (Local)")
+
+		// Get the ability to query environment variables.
+		env := utils.NewEnvironment()
+
+		// Work out where galasa home is, only once.
+		var galasaHome utils.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+		if err == nil {
+
+			// Read the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
+			if err == nil {
+
+				timeService := utils.NewRealTimeService()
+
+				// the submit is targetting a local JVM
+				embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+
+				// Something which can kick off new operating system processes
+				processFactory := launcher.NewRealProcessFactory()
+
+				// Validate the test selection parameters.
+				validator := runs.NewObrBasedValidator()
+				err = validator.Validate(submitSelectionFlags)
+				if err == nil {
+
+					// A launcher is needed to launch anythihng
+					var launcherInstance launcher.Launcher
+					launcherInstance, err = launcher.NewJVMLauncher(
+						bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
+						runsSubmitLocalCmdParams, timeService,
+						processFactory, galasaHome)
+
+					if err == nil {
+						console := utils.NewRealConsole()
+
+						// Do the launching of the tests.
+						submitter := runs.NewSubmitter(
+							galasaHome,
+							fileSystem,
+							launcherInstance,
+							timeService,
+							env,
+							console,
+						)
+
+						err = submitter.ExecuteSubmitRuns(
+							runsSubmitCmdParams,
+							submitLocalSelectionFlags,
+						)
+					}
+				}
+			}
+		}
 	}
 
 	if err != nil {

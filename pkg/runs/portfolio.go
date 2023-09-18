@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package runs
 
@@ -25,6 +27,7 @@ type PortfolioClass struct {
 	Bundle    string            `yaml:"bundle"`
 	Class     string            `yaml:"class"`
 	Stream    string            `yaml:"stream"`
+	Obr       string            `yaml:"obr"`
 	Overrides map[string]string `yaml:"overrides"`
 }
 
@@ -55,6 +58,7 @@ func AddClassesToPortfolio(testSelection *TestSelection, testOverrides *map[stri
 			Bundle:    selectedClass.Bundle,
 			Class:     selectedClass.Class,
 			Stream:    selectedClass.Stream,
+			Obr:       selectedClass.Obr,
 			Overrides: *testOverrides,
 		}
 		portfolio.Classes = append(portfolio.Classes, portfolioClass)

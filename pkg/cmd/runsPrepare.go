@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package cmd
 
@@ -29,7 +31,7 @@ var (
 	prepareFlagOverrides *[]string
 	prepareAppend        *bool
 
-	prepareSelectionFlags = runs.TestSelectionFlags{}
+	prepareSelectionFlags = runs.NewTestSelectionFlags()
 )
 
 func init() {
@@ -37,7 +39,7 @@ func init() {
 	prepareFlagOverrides = runsAssembleCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
 	prepareAppend = runsAssembleCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
 	runsAssembleCmd.MarkFlagRequired("portfolio")
-	runs.AddCommandFlags(runsAssembleCmd, &prepareSelectionFlags)
+	runs.AddCommandFlags(runsAssembleCmd, prepareSelectionFlags)
 
 	runsCmd.AddCommand(runsAssembleCmd)
 }
@@ -96,7 +98,13 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	testSelection, err := runs.SelectTests(launcher, &prepareSelectionFlags)
+	validator := runs.NewStreamBasedValidator()
+	err = validator.Validate(prepareSelectionFlags)
+	if err != nil {
+		panic(err)
+	}
+
+	testSelection, err := runs.SelectTests(launcher, prepareSelectionFlags)
 	if err != nil {
 		panic(err)
 	}

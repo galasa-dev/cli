@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package runs
 
@@ -20,6 +22,7 @@ func TestJsonReportWorks(t *testing.T) {
 		Bundle:    "myBundle",
 		Class:     "com.myco.MyClass",
 		Stream:    "myStream",
+		Obr:       "myOBR",
 		Status:    "myStatus",
 		Result:    "PASSED",
 		Overrides: make(map[string]string, 1),
@@ -54,6 +57,7 @@ func TestJsonReportWorks(t *testing.T) {
 				"bundle": "myBundle",
 				"class": "com.myco.MyClass",
 				"stream": "myStream",
+				"obr": "myOBR",
 				"status": "myStatus",
 				"result": "PASSED",
 				"overrides": {},

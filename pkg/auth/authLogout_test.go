@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package auth
 
@@ -65,5 +67,5 @@ func TestLogoutWithFailingFileExistsReturnsError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the file exists check fails")
-	assert.ErrorContains(t, err, "GAL1088E")
+	assert.ErrorContains(t, err, "GAL1095E")
 }

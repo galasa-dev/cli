@@ -9,7 +9,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio
 - GAL1007E: Failed to create report yaml file {}. Reason is {}
 - GAL1008E: Failed to check if group {} exists already. Reason is {}
-- GAL1009E: The submit command requires either test selection flags or a portfolio
+- GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test) or --portfolio flag to be specified. Use the --help flag for more details.
 - GAL1010E: Invalid override '{}'
 - GAL1011E: Failed to encode the yaml file {}. Reason is {}
 - GAL1012E: Failed to prepare test report for writing to json file {}. Reason is {}
@@ -31,7 +31,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1028E: Failed to unmarshal test catalog from REST reply for property '{}', stream '{}'. Reason is {}
 - GAL1029E: Stream '{}' is not found in the ecosystem. There are no streams set up. Ask your Galasa system administrator to add a new stream with the desired name.
 - GAL1030E: Stream '{}' is not found in the ecosystem. Valid streams are:{}. Try again using a valid stream, or ask your Galasa system administrator to add a new stream with the desired name.
-- GAL1031E: Invalid flags. --bundle, --package, --test and --tag flags can only be specified if --stream is provided.
+- GAL1031E: Invalid flags. --bundle, --package, --test, --tag, and --class flags can only be specified if --stream is provided.
 - GAL1032E: Invalid select regex '{}'. Reason is {}
 - GAL1033E: Invalid select quoted regex '{}'. Reason is {}
 - GAL1034E: Class '{}' is not format 'bundle/class'
@@ -88,11 +88,18 @@ The `galasactl` tool can generate the following errors:
 - GAL1085E: Programming logic error. ReadTextFile operation on embedded file system failed. Reason is {}
 - GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '{}'
 - GAL1087E: Invalid '--result' parameter value: {}. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: {}
-- GAL1088E: Unable to delete the bearer token file '{}'.
-- GAL1089E: Property '{}' was expected but has not been set in the galasactl.properties file.
-- GAL1090E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
-- GAL1091E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
-- GAL1092E: Unauthorized. Please log in to your ecosystem by running 'galasactl auth login'
+- GAL1088E: --active and --result must not be used at the same time, they are mutually exclusive.
+- GAL1089E: Need to use --maven and/or --gradle parameter
+- GAL1090E: Could not get username of current requestor. Reason is '{}'
+- GAL1091E: '{}' is not a properly formed file URL
+- GAL1092E: Galasa Ecosystem error: A test was submitted for launch. The galasa runtime is not reporting test progress. The test is lost and may execute but test progress cannot be monitored from this tool. (bundle: {}, class: {}).
+- GAL1093E: Failed to submit test (bundle: {}, class: {}). Reason is: {}
+- GAL1094E: User error: Cannot run test {} on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.
+- GAL1095E: Unable to delete the bearer token file '{}'.
+- GAL1096E: Property '{}' was expected but has not been set in the galasactl.properties file.
+- GAL1097E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
+- GAL1098E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
+- GAL1099E: Unauthorized. Please log in to your ecosystem by running 'galasactl auth login'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

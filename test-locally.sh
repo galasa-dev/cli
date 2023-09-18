@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+#
+# Copyright contributors to the Galasa project
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 # Objectives: 
 # Give the tooling a spin to basically make sure it still works.
 
@@ -53,6 +59,13 @@ note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" 
 }
 
 #-------------------------------------------------------------------------
+# ERROR and exit - script broken, much duplicated within test-galasactl-local.sh.
+# Being kept around incase of future revival
+#-------------------------------------------------------------------------
+error "Script is currently out of use and broken. Use test-galasactl-local.sh for a more up to date version."
+exit 1
+
+#-------------------------------------------------------------------------
 # Clean
 #-------------------------------------------------------------------------
 rm -fr temp
@@ -79,9 +92,6 @@ case $raw_os in
 esac
 
 architecture=$(uname -m)
-if [[ "${architecture}" == "x86_64" ]]; then
-    architecture="amd64"
-fi
 
 export GALASACTL="${BASEDIR}/bin/galasactl-${os}-${architecture}"
 
@@ -89,7 +99,7 @@ export GALASACTL="${BASEDIR}/bin/galasactl-${os}-${architecture}"
 # Run tool, generate source
 #-------------------------------------------------------------------------
 cd temp
-${GALASACTL} project create --package dev.galasa.example.banking --features payee,account --obr --log -
+${GALASACTL} project create --package dev.galasa.example.banking --features payee,account --obr --maven --gradle --log -
 rc=$?
 if [[ "${rc}" != "0" ]]; then 
     error "Failed. rc=${rc}"
@@ -185,9 +195,9 @@ export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
 # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
-export BOOT_JAR_VERSION="0.27.0"
+export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion" | head -1 | cut -f2 -d"'")
 
-export OBR_VERSION="0.27.0"
+export OBR_VERSION=$(cat ${BASEDIR}/VERSION)
 
 export M2_PATH=$(cd ~/.m2 ; pwd)
 export BOOT_JAR_PATH=~/.galasa/lib/${OBR_VERSION}/galasa-boot-${BOOT_JAR_VERSION}.jar
@@ -213,8 +223,8 @@ ${GALASACTL} runs submit local \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee \
 --class dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayeeExtended \
 --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
---galasaVersion 0.27.0 
-# --log - 2>&1 | tee ${BASEDIR}/temp/log.txt
+--galasaVersion 0.27.0  \
+--log - 2>&1 | tee ${BASEDIR}/temp/log.txt
 
 # --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestLongRunningAccount \
 # \
@@ -250,6 +260,3 @@ if [[ "${rc}" != "0" ]]; then
     exit 1
 fi
 echo "Test ran OK"
-
-
-    

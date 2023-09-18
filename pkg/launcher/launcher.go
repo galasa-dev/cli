@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package launcher
 
@@ -17,12 +19,13 @@ type Launcher interface {
 	GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error)
 
 	// SubmitTestRuns launch the test runs
-	SubmitTestRuns(
+	SubmitTestRun(
 		groupName string,
-		classNames []string,
+		className string,
 		requestType string,
 		requestor string,
 		stream string,
+		obrFromPortfolio string,
 		isTraceEnabled bool,
 		overrides map[string]interface{},
 	) (*galasaapi.TestRuns, error)

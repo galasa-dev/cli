@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package launcher
 
@@ -54,15 +56,19 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 	return testRuns, err
 }
 
-func (launcher *RemoteLauncher) SubmitTestRuns(
+func (launcher *RemoteLauncher) SubmitTestRun(
 	groupName string,
-	classNames []string,
+	className string,
 	requestType string,
 	requestor string,
 	stream string,
+	obrFromPortfolio string,
 	isTraceEnabled bool,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
+
+	classNames := make([]string, 1)
+	classNames[0] = className
 
 	testRunRequest := galasaapi.NewTestRunRequest()
 	testRunRequest.SetClassNames(classNames)
@@ -71,6 +77,8 @@ func (launcher *RemoteLauncher) SubmitTestRuns(
 	testRunRequest.SetTestStream(stream)
 	testRunRequest.SetTrace(isTraceEnabled)
 	testRunRequest.SetOverrides(overrides)
+
+	log.Printf("RemoteLauncher.SubmitTestRuns : using requestor %s\n", requestor)
 
 	var resultGroup *galasaapi.TestRuns
 	var err error

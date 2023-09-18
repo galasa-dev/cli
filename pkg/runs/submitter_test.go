@@ -1,5 +1,7 @@
 /*
  * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package runs
 
@@ -16,7 +18,24 @@ import (
 func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 
 	mockFileSystem := files.NewMockFileSystem()
-	err := writeThrottleFile(mockFileSystem, "throttle", 101)
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+
+	console := utils.NewMockConsole()
+
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	err := submitter.writeThrottleFile("throttle", 101)
 	if err != nil {
 		assert.Fail(t, "Should not have failed to write a throttle file. "+err.Error())
 	}
@@ -29,7 +48,7 @@ func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 	assert.True(t, isThrottleFileExists, "throttle file does not exist!")
 
 	var readBackThrottle int
-	readBackThrottle, err = readThrottleFile(mockFileSystem, "throttle")
+	readBackThrottle, err = submitter.readThrottleFile("throttle")
 	if err != nil {
 		assert.Fail(t, "Should not have failed to read from a throttle file. "+err.Error())
 	}
@@ -40,8 +59,24 @@ func TestReadBackThrottleFileFailsIfNoThrottleFileThere(t *testing.T) {
 
 	var err error
 	mockFileSystem := files.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
 
-	_, err = readThrottleFile(mockFileSystem, "throttle")
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+
+	console := utils.NewMockConsole()
+
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	_, err = submitter.readThrottleFile("throttle")
 	if err == nil {
 		assert.Fail(t, "Should have failed to read from a throttle file. "+err.Error())
 	}
@@ -55,7 +90,23 @@ func TestReadBackThrottleFileFailsIfFileContainsInvalidInt(t *testing.T) {
 
 	mockFileSystem.WriteTextFile("throttle", "abc")
 
-	_, err = readThrottleFile(mockFileSystem, "throttle")
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	_, err = submitter.readThrottleFile("throttle")
 	if err == nil {
 		assert.Fail(t, "Should have failed to read from a throttle file. "+err.Error())
 	}
@@ -66,8 +117,23 @@ func TestUpdateThrottleFromFileIfDifferentChangesValueWhenDifferent(t *testing.T
 
 	mockFileSystem := files.NewMockFileSystem()
 
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
 	mockFileSystem.WriteTextFile("throttle", "10")
-	newValue, isLost := updateThrottleFromFileIfDifferent(mockFileSystem, "throttle", 20, false)
+	newValue, isLost := submitter.updateThrottleFromFileIfDifferent("throttle", 20, false)
 
 	assert.Equal(t, 10, newValue)
 	assert.False(t, isLost)
@@ -77,8 +143,23 @@ func TestUpdateThrottleFromFileIfDifferentDoesntChangeIfFileMissing(t *testing.T
 
 	mockFileSystem := files.NewMockFileSystem()
 
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
 	// mockFileSystem.WriteTextFile("throttle", "10") - file is missing now.
-	newValue, isLost := updateThrottleFromFileIfDifferent(mockFileSystem, "throttle", 20, false)
+	newValue, isLost := submitter.updateThrottleFromFileIfDifferent("throttle", 20, false)
 
 	assert.Equal(t, 20, newValue)
 	assert.True(t, isLost)
@@ -89,15 +170,30 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 	fileProps := make(map[string]interface{})
 	fileProps["c"] = "d"
 
-	fs := files.NewMockFileSystem()
-	props.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
+	mockFileSystem := files.NewMockFileSystem()
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "/tmp/temp.properties",
 	}
 
-	overrides, err := buildOverrideMap(fs, commandParameters)
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	overrides, err := submitter.buildOverrideMap(commandParameters)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, overrides)
@@ -112,15 +208,29 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 	fileProps := make(map[string]interface{})
 	fileProps["c"] = "d"
 
-	fs := files.NewMockFileSystem()
-	props.WritePropertiesFile(fs, "/tmp/temp.properties", fileProps)
+	mockFileSystem := files.NewMockFileSystem()
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "/tmp/temp.wrong.file.properties",
 	}
 
-	overrides, err := buildOverrideMap(fs, commandParameters)
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+	overrides, err := submitter.buildOverrideMap(commandParameters)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, overrides)
@@ -130,9 +240,9 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 
 func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.T) {
 
-	fs := files.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(fs, env, "")
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
@@ -142,7 +252,18 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 		OverrideFilePath: "",
 	}
 
-	err = correctOverrideFilePathParameter(galasaHome, fs, &commandParameters)
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+	err = submitter.correctOverrideFilePathParameter(&commandParameters)
 
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
@@ -154,27 +275,38 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 
 func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testing.T) {
 
-	fs := files.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(fs, env, "")
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
 
 	// A dummy overrides file in .galasa
-	home, _ := fs.GetUserHomeDirPath()
-	separator := fs.GetFilePathSeparator()
+	home, _ := mockFileSystem.GetUserHomeDirPath()
+	separator := mockFileSystem.GetFilePathSeparator()
 	path := home + separator + ".galasa" + separator + "overrides.properties"
 	fileProps := make(map[string]interface{})
 	fileProps["c"] = "d"
-	props.WritePropertiesFile(fs, path, fileProps)
+	props.WritePropertiesFile(mockFileSystem, path, fileProps)
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "",
 	}
 
-	err = correctOverrideFilePathParameter(galasaHome, fs, &commandParameters)
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+	err = submitter.correctOverrideFilePathParameter(&commandParameters)
 
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
@@ -184,14 +316,27 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 
 func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
-	fs := files.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
 
 	commandParameters := utils.RunsSubmitCmdParameters{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "-",
 	}
 
-	overrides, err := buildOverrideMap(fs, commandParameters)
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+	overrides, err := submitter.buildOverrideMap(commandParameters)
 
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
@@ -203,9 +348,11 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
 func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
-	fs := files.NewMockFileSystem()
+	mockFileSystem := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(fs, env, "")
+	env.SetUserName("myuserid")
+
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
@@ -228,9 +375,168 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
 	mockLauncher := launcher.NewMockLauncher()
 
-	err = validateAndCorrectParams(galasaHome, fs, commandParameters,
-		mockLauncher, submitSelectionFlags)
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, commandParameters.OverrideFilePath)
+}
+
+func TestValidateAndCorrectParametersRespectsExplicitRequestorField(t *testing.T) {
+
+	mockFileSystem := files.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	env.SetUserName("mybaduserid")
+
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	commandParameters := &utils.RunsSubmitCmdParameters{
+		Requestor: "myvaliduserid",
+	}
+
+	regexSelectValue := false
+	submitSelectionFlags := &TestSelectionFlags{
+		bundles:     new([]string),
+		packages:    new([]string),
+		tests:       new([]string),
+		tags:        new([]string),
+		classes:     new([]string),
+		stream:      "myStream",
+		regexSelect: &regexSelectValue,
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
+
+	assert.Nil(t, err)
+	assert.Equal(t, commandParameters.Requestor, "myvaliduserid")
+}
+
+func TestValidateAndCorrectParametersDefaultsRequestorFieldFromEnvironment(t *testing.T) {
+
+	mockFileSystem := files.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	env.SetUserName("mybaduserid")
+
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	commandParameters := &utils.RunsSubmitCmdParameters{}
+
+	regexSelectValue := false
+	submitSelectionFlags := &TestSelectionFlags{
+		bundles:     new([]string),
+		packages:    new([]string),
+		tests:       new([]string),
+		tags:        new([]string),
+		classes:     new([]string),
+		stream:      "myStream",
+		regexSelect: &regexSelectValue,
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
+
+	assert.Nil(t, err)
+	assert.Equal(t, commandParameters.Requestor, "mybaduserid")
+}
+
+func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
+
+	mockFileSystem := files.NewMockFileSystem()
+
+	obrName := "myobr"
+	bundleName := "myBundle"
+	className := "myClass"
+
+	portfolioFilePath := "myportfolio.yaml"
+	_ = createTestPortfolioFile(t, mockFileSystem, portfolioFilePath, bundleName, className, "", obrName)
+
+	env := utils.NewMockEnv()
+	env.SetUserName("myuserid")
+
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	commandParameters := &utils.RunsSubmitCmdParameters{}
+	commandParameters.PortfolioFileName = portfolioFilePath
+
+	regexSelectValue := false
+	submitSelectionFlags := &TestSelectionFlags{
+		bundles:     new([]string),
+		packages:    new([]string),
+		tests:       new([]string),
+		tags:        new([]string),
+		classes:     new([]string),
+		stream:      "",
+		regexSelect: &regexSelectValue,
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+	// Do the launching of the tests.
+	err = submitter.ExecuteSubmitRuns(
+		*commandParameters,
+		submitSelectionFlags,
+	)
+
+	assert.Nil(t, err)
+
+	launchesRecorded := mockLauncher.GetRecordedLaunchRecords()
+
+	assert.Equal(t, 1, len(launchesRecorded))
+	if len(launchesRecorded) > 0 {
+		assert.Equal(t, obrName, launchesRecorded[0].ObrFromPortfolio)
+		assert.Equal(t, bundleName+"/"+className, launchesRecorded[0].ClassName)
+	}
+
 }

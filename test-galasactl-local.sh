@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Copyright contributors to the Galasa project
+#
+# SPDX-License-Identifier: EPL-2.0
+#
 echo "Running script test-galasactl-local.sh"
 
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
@@ -127,9 +132,6 @@ function calculate_galasactl_executable {
     esac
 
     architecture=$(uname -m)
-    if [[ "${architecture}" == "x86_64" ]]; then
-        architecture="amd64"
-    fi
 
     export binary="galasactl-${os}-${architecture}"
     info "galasactl binary is ${binary}"
