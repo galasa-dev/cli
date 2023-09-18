@@ -232,7 +232,6 @@ func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {
 }
 
 func mockFSDeleteFile(fs MockFileSystem, pathToDelete string) {
-	// Delete the entrt we want to delete
 	delete(fs.data, pathToDelete)
 }
 
