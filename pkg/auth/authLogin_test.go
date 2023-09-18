@@ -224,10 +224,10 @@ func TestGetAuthenticatedAPIClientWithBearerTokenFileReturnsClient(t *testing.T)
 	mockFileSystem.WriteTextFile(bearerTokenFilePath, `{"jwt":"blah"}`)
 
 	// When...
-	_, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
+	apiClient := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	assert.Nil(t, err, "Should not return an error if the bearer-token.json file exists")
+	assert.NotNil(t, apiClient, "API client should not be nil")
 }
 
 func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *testing.T) {
@@ -253,10 +253,9 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 	apiServerUrl := server.URL
 
 	// When...
-	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
+	apiClient := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	assert.Nil(t, err, "Should not return an error if the login was successful")
 	assert.NotNil(t, apiClient, "API client should not be nil if the login was successful")
 }
 
@@ -273,9 +272,8 @@ func TestGetAuthenticatedAPIClientWithUnavailableAPIContinuesWithoutToken(t *tes
 	apiServerUrl := server.URL
 
 	// When...
-	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
+	apiClient := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome)
 
 	// Then...
-	assert.Nil(t, err, "Should not return an error if the API server is unavailable")
 	assert.NotNil(t, apiClient, "API client should not be nil")
 }

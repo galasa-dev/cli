@@ -29,16 +29,15 @@ type RemoteLauncher struct {
 //----------------------------------------------------------------------------------
 
 // NewRemoteLauncher create a remote launcher.
-func NewRemoteLauncher(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) (*RemoteLauncher, error) {
-	var err error = nil
+func NewRemoteLauncher(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) *RemoteLauncher {
 	log.Printf("NewRemoteLauncher(%s) entered.", apiServerUrl)
 
 	launcher := new(RemoteLauncher)
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
-	launcher.apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
+	launcher.apiClient = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
 
-	return launcher, err
+	return launcher
 }
 
 //----------------------------------------------------------------------------------

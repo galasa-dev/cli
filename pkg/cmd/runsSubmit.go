@@ -122,7 +122,7 @@ func executeSubmit(cmd *cobra.Command, args []string) {
 	var launcherInstance launcher.Launcher = nil
 
 	// The launcher we are going to use to start/monitor tests.
-	launcherInstance, err = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL, fileSystem, galasaHome)
+	launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL, fileSystem, galasaHome)
 
 	validator := runs.NewStreamBasedValidator()
 	err = validator.Validate(prepareSelectionFlags)

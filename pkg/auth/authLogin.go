@@ -152,7 +152,7 @@ func getBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome uti
 }
 
 // Gets a new authenticated API client, attempting to log in if a bearer token file does not exist
-func GetAuthenticatedAPIClient(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) (*galasaapi.APIClient, error) {
+func GetAuthenticatedAPIClient(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) *galasaapi.APIClient {
     bearerToken, err := getBearerTokenFromTokenJsonFile(fileSystem, galasaHome)
     if err != nil {
         // Attempt to log in
@@ -162,7 +162,6 @@ func GetAuthenticatedAPIClient(apiServerUrl string, fileSystem files.FileSystem,
             log.Printf("Logged in to the Galasa Ecosystem at '%s' OK", apiServerUrl)
             bearerToken, err = getBearerTokenFromTokenJsonFile(fileSystem, galasaHome)
         }
-
     }
 
     var apiClient *galasaapi.APIClient
@@ -171,7 +170,6 @@ func GetAuthenticatedAPIClient(apiServerUrl string, fileSystem files.FileSystem,
     } else {
         // Continue without a bearer token
         apiClient = api.InitialiseAPI(apiServerUrl)
-        err = nil
     }
-    return apiClient, err
+    return apiClient
 }

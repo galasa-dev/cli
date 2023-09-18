@@ -83,7 +83,7 @@ func executeRunsDownload(cmd *cobra.Command, args []string) {
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-	apiClient, err := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
 	if err != nil {
 		panic(err)
 	}
