@@ -61,7 +61,8 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+	var galasaHome utils.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
 	if err != nil {
 		panic(err)
 	}
@@ -71,13 +72,13 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 	for _, override := range *prepareFlagOverrides {
 		pos := strings.Index(override, "=")
 		if pos < 1 {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
 			panic(err)
 		}
 		key := override[:pos]
 		value := override[pos+1:]
 		if value == "" {
-			err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
 			panic(err)
 		}
 
@@ -86,7 +87,8 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
 	// Load the bootstrap properties.
 	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	bootstrapData, err := api.LoadBootstrap(
+	var bootstrapData *api.BootstrapData
+	bootstrapData, err = api.LoadBootstrap(
 		galasaHome, fileSystem, env, bootstrap, urlService)
 	if err != nil {
 		panic(err)
@@ -94,9 +96,6 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 
 	// Create an API client
 	launcher := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL, fileSystem, galasaHome)
-	if err != nil {
-		panic(err)
-	}
 
 	validator := runs.NewStreamBasedValidator()
 	err = validator.Validate(prepareSelectionFlags)
@@ -104,14 +103,15 @@ func executeAssemble(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	testSelection, err := runs.SelectTests(launcher, prepareSelectionFlags)
+	var testSelection runs.TestSelection
+	testSelection, err = runs.SelectTests(launcher, prepareSelectionFlags)
 	if err != nil {
 		panic(err)
 	}
 
 	count := len(testSelection.Classes)
 	if count < 1 {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
 		panic(err)
 	} else {
 		if count == 1 {
