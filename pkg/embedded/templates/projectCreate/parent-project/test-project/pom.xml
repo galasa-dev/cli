@@ -33,6 +33,11 @@
             <groupId>dev.galasa</groupId>
             <artifactId>dev.galasa.core.manager</artifactId>
         </dependency>
+
+        <dependency>
+		    <groupId>dev.galasa</groupId>
+		    <artifactId>dev.galasa.framework</artifactId>
+	    </dependency>
         
     </dependencies>
   
