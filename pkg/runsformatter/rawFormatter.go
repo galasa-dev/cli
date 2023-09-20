@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package formatters
+package runsformatter
 
 import "strings"
 

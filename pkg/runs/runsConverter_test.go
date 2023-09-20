@@ -8,7 +8,7 @@ package runs
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/formatters"
+	"github.com/galasa.dev/cli/pkg/runsformatter"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,7 +72,7 @@ func TestGalasaapiRunHasNoRecordsReturnsNoRecords(t *testing.T) {
 	output := FormattableTestFromGalasaApi(runs, apiServerUrl)
 
 	//Then
-	assert.Equal(t, len(output), 0, "The input record is empty and so should be the output record")
+	assert.Equal(t, 0, len(output), "The input record is empty and so should be the output record")
 
 }
 
@@ -182,8 +182,8 @@ func TestRunsTestRunHasRecordsReturnsSameAmountofRecords(t *testing.T) {
 
 func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 	//Given
-	var formattableTest []formatters.FormattableTest
-	formattableTest1 := formatters.FormattableTest{
+	var formattableTest []runsformatter.FormattableTest
+	formattableTest1 := runsformatter.FormattableTest{
 		RunId:    "id1",
 		Name:     "formattableTest1",
 		TestName: "testName1",
@@ -198,7 +198,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest2 := formatters.FormattableTest{
+	formattableTest2 := runsformatter.FormattableTest{
 		RunId:    "id2",
 		Name:     "formattableTest2",
 		TestName: "testName2",
@@ -213,7 +213,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest3 := formatters.FormattableTest{
+	formattableTest3 := runsformatter.FormattableTest{
 		RunId:    "id3",
 		Name:     "formattableTest3",
 		TestName: "testName3",
@@ -228,7 +228,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest4 := formatters.FormattableTest{
+	formattableTest4 := runsformatter.FormattableTest{
 		RunId:    "id4",
 		Name:     "formattableTest4",
 		TestName: "testName4",
@@ -243,7 +243,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest5 := formatters.FormattableTest{
+	formattableTest5 := runsformatter.FormattableTest{
 		RunId:    "id5",
 		Name:     "formattableTest5",
 		TestName: "testName5",
@@ -258,7 +258,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest6 := formatters.FormattableTest{
+	formattableTest6 := runsformatter.FormattableTest{
 		RunId:    "id6",
 		Name:     "formattableTest6",
 		TestName: "testName6",
@@ -273,7 +273,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest7 := formatters.FormattableTest{
+	formattableTest7 := runsformatter.FormattableTest{
 		RunId:    "id7",
 		Name:     "formattableTest7",
 		TestName: "testName7",

@@ -17,8 +17,8 @@ import (
 
 	"github.com/galasa.dev/cli/pkg/api"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa.dev/cli/pkg/runsformatter"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
@@ -78,7 +78,7 @@ func GetRuns(
 	}
 
 	if err == nil {
-		var chosenFormatter formatters.RunsFormatter
+		var chosenFormatter runsformatter.RunsFormatter
 		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
 			var runJson []galasaapi.Run
@@ -106,15 +106,15 @@ func GetRuns(
 	return err
 }
 
-func CreateFormatters() map[string]formatters.RunsFormatter {
-	validFormatters := make(map[string]formatters.RunsFormatter, 0)
-	summaryFormatter := formatters.NewSummaryFormatter()
+func CreateFormatters() map[string]runsformatter.RunsFormatter {
+	validFormatters := make(map[string]runsformatter.RunsFormatter, 0)
+	summaryFormatter := runsformatter.NewSummaryFormatter()
 	validFormatters[summaryFormatter.GetName()] = summaryFormatter
 
-	detailedFormatter := formatters.NewDetailsFormatter()
+	detailedFormatter := runsformatter.NewDetailsFormatter()
 	validFormatters[detailedFormatter.GetName()] = detailedFormatter
 
-	rawFormatter := formatters.NewRawFormatter()
+	rawFormatter := runsformatter.NewRawFormatter()
 	validFormatters[rawFormatter.GetName()] = rawFormatter
 
 	return validFormatters
@@ -126,7 +126,7 @@ func writeOutput(outputText string, console utils.Console) error {
 }
 
 // GetFormatterNamesString builds a string of comma separated, quoted formatter names
-func GetFormatterNamesString(validFormatters map[string]formatters.RunsFormatter) string {
+func GetFormatterNamesString(validFormatters map[string]runsformatter.RunsFormatter) string {
 	// extract names into a sorted slice
 	names := make([]string, 0, len(validFormatters))
 	for name := range validFormatters {
@@ -149,7 +149,7 @@ func GetFormatterNamesString(validFormatters map[string]formatters.RunsFormatter
 }
 
 // Ensures the user has provided a valid output format as part of the "runs get" command.
-func validateOutputFormatFlagValue(outputFormatString string, validFormatters map[string]formatters.RunsFormatter) (formatters.RunsFormatter, error) {
+func validateOutputFormatFlagValue(outputFormatString string, validFormatters map[string]runsformatter.RunsFormatter) (runsformatter.RunsFormatter, error) {
 	var err error
 
 	chosenFormatter, isPresent := validFormatters[outputFormatString]
