@@ -34,7 +34,6 @@ var (
 	}
 
 	// Variables set by cobra's command-line parsing.
-	propertiesName         string
 	propertiesPrefix       string
 	propertiesSuffix       string
 	propertiesOutputFormat string
@@ -42,7 +41,6 @@ var (
 
 func init() {
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesName, "name", "", "the name of the property we want to get the value of")
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "", "the name of properties from a specified namespace with the provided prefix")
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesSuffix, "suffix", "", "the name of properties from a specified namespace with the provided suffix")
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
@@ -64,7 +62,7 @@ func executepropertiesGet(cmd *cobra.Command, args []string) {
 
 	log.Println("Galasa CLI - Get ecosystem properties")
 
-	if propertiesName != "" && (propertiesPrefix != "" || propertiesSuffix != "") {
+	if propertyName != "" && (propertiesPrefix != "" || propertiesSuffix != "") {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION)
 	} else {
 		// Get the ability to query environment variables.
@@ -83,18 +81,16 @@ func executepropertiesGet(cmd *cobra.Command, args []string) {
 			panic(err)
 		}
 
-		// var console = utils.NewRealConsole()
+		var console = utils.NewRealConsole()
 
 		apiServerUrl := bootstrapData.ApiServerURL
 		log.Printf("The API sever is at '%s'\n", apiServerUrl)
 
-		// timeService := utils.NewRealTimeService()
-
-		// // Call to process the command in a unit-testable way.
-		// err = runs.GetRuns(runName, age, requestor, result, isActiveRuns, outputFormatString, timeService, console, apiServerUrl)
-		// if err != nil {
-		// 	panic(err)
-		// }
+		// Call to process the command in a unit-testable way.
+		err = properties.GetProperties(namespace, propertyName, propertiesPrefix, propertiesSuffix, apiServerUrl, propertiesOutputFormat, console)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 }

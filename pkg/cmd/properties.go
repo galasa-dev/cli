@@ -18,6 +18,7 @@ var (
 	}
 	ecosystemBootstrap string
 	namespace          string
+	propertyName       string
 )
 
 func init() {
@@ -30,10 +31,14 @@ func init() {
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
 			"Examples: http://galasa-cicsk8s.hursley.ibm.com/bootstrap , file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
-	cmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "",
+	cmd.PersistentFlags().StringVarP(&namespace, "namespace", "s", "",
 		"Namespace. A container for a collection of properties. "+
 			"It has no default value.")
 	cmd.MarkFlagRequired("namespace")
 
-	parentCmd.AddCommand(runsCmd)
+	cmd.PersistentFlags().StringVarP(&propertyName, "name", "n", "",
+		"Name of a property in the namespace."+
+			"It has no default value.")
+
+	parentCmd.AddCommand(propertiesCmd)
 }
