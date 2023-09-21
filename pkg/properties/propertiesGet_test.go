@@ -41,7 +41,7 @@ func MockPropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Request)
 	namespace := splitUrl[2]
 
 	//cps/ns/properties
-	statusCode, namespaceProperties = checkNamespace(namespace)
+	statusCode, namespaceProperties = CheckNamespace(namespace)
 	if statusCode == 200 {
 		if len(splitUrl) == 4 {
 			query := r.URL.Query()
@@ -56,14 +56,14 @@ func MockPropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Request)
 			//cps/ns/properties/propertyname
 		} else if len(splitUrl) == 5 {
 			propertyName := splitUrl[4]
-			namespaceProperties, statusCode = checkName(propertyName)
+			namespaceProperties, statusCode = CheckName(propertyName)
 		}
 	}
 	w.WriteHeader(statusCode)
 	w.Write([]byte(namespaceProperties))
 }
 
-func checkName(name string) (string, int) {
+func CheckName(name string) (string, int) {
 	statusCode := 200
 	namespaceProperties := "[]"
 	switch name {
@@ -102,7 +102,7 @@ func checkPrefixSuffix(prefixParameter string, suffixParameter string) string {
 	return namespaceProperties
 }
 
-func checkNamespace(namespace string) (int, string) {
+func CheckNamespace(namespace string) (int, string) {
 	statusCode := 200
 	namespaceProperties := "[]"
 

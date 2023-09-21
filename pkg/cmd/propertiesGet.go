@@ -30,7 +30,7 @@ var (
 		Short: "Get the details of properties in a namespace.",
 		Long:  "Get the details of all properties in a namespace, filtered with flags if present",
 		Args:  cobra.NoArgs,
-		Run:   executepropertiesGet,
+		Run:   executePropertiesGet,
 	}
 
 	// Variables set by cobra's command-line parsing.
@@ -48,7 +48,7 @@ func init() {
 	parentCommand.AddCommand(propertiesGetCmd)
 }
 
-func executepropertiesGet(cmd *cobra.Command, args []string) {
+func executePropertiesGet(cmd *cobra.Command, args []string) {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
