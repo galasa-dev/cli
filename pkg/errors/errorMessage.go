@@ -181,10 +181,12 @@ var (
 	GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS               = NewMessageType("GAL1094E: User error: Cannot run test %s on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.", 1094, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_NAMESPACE                        = NewMessageType("GAL1095E: namespace '%s' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.", 1095, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_QUERY_NAMESPACE_FAILED                   = NewMessageType("GAL1096E: Could not query namesapace results. Reason: '%s'", 1096, STACK_TRACE_WANTED)
-	GALASA_ERROR_QUERY_NAMESPACE_STATUS_CODE_DOESNT_MATCH = NewMessageType("GAL1097E: Status Code when querying namespace does not match. Reason: '%s'", 1097, STACK_TRACE_WANTED)
+	GALASA_ERROR_QUERY_NAMESPACE_STATUS_CODE_NOT_OK       = NewMessageType("GAL1097E: Status Code when querying namespace does not match. Reason: '%s'", 1097, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION      = NewMessageType("GAL1098E: Property --name cannot be set alongside --prefix or --suffix.", 1098, STACK_TRACE_WANTED)
 	GALASA_ERROR_PUT_PROPERTY_FAILED                      = NewMessageType("GAL1099E: Property value of '%v' could not be updated to '%v'. Reason: '%s'", 1099, STACK_TRACE_WANTED)
-	GALASA_ERROR_PUT_PROPERTY_STATUS_CODE_DOESNT_MATCH    = NewMessageType("GAL1100E: Status Code when updating the property value does not match. Reason: '%s'", 1100, STACK_TRACE_WANTED)
+	GALASA_ERROR_PUT_PROPERTY_STATUS_CODE_NOT_OK          = NewMessageType("GAL1100E: Status Code when updating the property value does not match. Reason: '%s'", 1100, STACK_TRACE_WANTED)
+	GALASA_ERROR_DELETE_PROPERTY_FAILED                   = NewMessageType("GAL1101E: Property '%v' could not be deleted. Reason: '%s'", 1101, STACK_TRACE_WANTED)
+	GALASA_ERROR_DELETE_PROPERTY_STATUS_CODE_NOT_OK       = NewMessageType("GAL1102E: Status Code when deleting property '%v'. Reason: '%s'", 1102, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

@@ -17,16 +17,16 @@ import (
 )
 
 // MockServlet
-func newUpdatePropertiesServletMock(t *testing.T) *httptest.Server {
+func newDeletePropertiesServletMock(t *testing.T) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		mockUpdatePropertiesServlet(t, w, r)
+		mockDeletePropertiesServlet(t, w, r)
 	}))
 
 	return server
 }
 
-func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
+func mockDeletePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	if !strings.Contains(r.URL.Path, "/cps/") {
 		t.Errorf("Expected to request '/cps/', got: %s", r.URL.Path)
 	}
@@ -60,34 +60,28 @@ func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 					}`
 			} else if propertyName == "validProperty" {
 				statusCode = 201
-				namespaceProperties = `[
-					{
-						"name" = "validProperty",
-						"value" = "newValue"
-					}
-				]`
+				namespaceProperties = `Successfully deleted validProperty`
 			}
 		}
 	}
 	w.WriteHeader(statusCode)
 	w.Write([]byte(namespaceProperties))
 }
-
-func TestUpdatePropertyValueReturnsOk(t *testing.T) {
+ 
+func TestUDeletePropertyValueReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
 	name := "validName"
-	value := "newValue"
 
-	server := newUpdatePropertiesServletMock(t)
+	server := newDeletePropertiesServletMock(t)
 	apiServerUrl := server.URL
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := "Successfully updated the value of " + name + " to " + value
+	expectedOutput := "Successfully deleted " + name
 
 	//When
-	err := UpdateProperty(namespace, name, value, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -95,20 +89,19 @@ func TestUpdatePropertyValueReturnsOk(t *testing.T) {
 }
 
 // invalid OR empty namespace, valid propertyname
-func TestUpdatePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
+func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 	//Given...
 	namespace := "invalidNamespace"
 	name := "validName"
-	value := "newValue"
 
-	server := newUpdatePropertiesServletMock(t)
+	server := newDeletePropertiesServletMock(t)
 	apiServerUrl := server.URL
 	defer server.Close()
 
 	console := utils.NewMockConsole()
 
 	//When
-	err := UpdateProperty(namespace, name, value, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl, console)
 
 	//Then
 	assert.NotNil(t, err)
@@ -116,13 +109,12 @@ func TestUpdatePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 }
 
 // validnamespace , invalid propertyname
-func TestValidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
+func TestValidNamespaceAndDeleteInvalidPropertyNameReturnsError(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
 	name := "invalidName"
-	value := "newValue"
 
-	server := newUpdatePropertiesServletMock(t)
+	server := newDeletePropertiesServletMock(t)
 	apiServerUrl := server.URL
 	defer server.Close()
 
@@ -133,12 +125,14 @@ func TestValidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
 	// }`
 
 	//When
-	err := UpdateProperty(namespace, name, value, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl, console)
 
 	//Then
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "GAL5018E:")
 }
+
+
 
 //create new property successful
 //unsuccessful

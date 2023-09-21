@@ -101,7 +101,7 @@ func getCpsPropertiesFromRestApi(
 		if httpResponse.StatusCode != http.StatusOK {
 			httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
 			errString := err.Error() + httpError
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_STATUS_CODE_DOESNT_MATCH, errString)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_STATUS_CODE_NOT_OK, errString)
 		}
 	}
 
