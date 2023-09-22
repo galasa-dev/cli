@@ -47,16 +47,16 @@ func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 		if namespace == "invalidNamespace" {
 			statusCode = 404
 			namespaceProperties = `{
-				error_code: 5017,
-				error_message: "GAL5017E: Error occured when trying to access namespace 'invalidNamespace'. The Namespace provided is invalid."
+				"error_code": 5017,
+				"error_message": "GAL5017E: Error occured when trying to access namespace 'invalidNamespace'. The Namespace provided is invalid."
 				}`
 		} else if namespace == "validNamespace" {
 			propertyName := splitUrl[4]
 			if propertyName == "invalidProperty" {
 				statusCode = 404
 				namespaceProperties = `{
-					error_code: 5018
-					error_message: "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
+					"error_code": 5018
+					"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
 					}`
 			} else if propertyName == "validProperty" {
 				statusCode = 201
