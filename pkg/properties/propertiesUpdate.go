@@ -54,7 +54,7 @@ func updateCpsProperty(namespace string,
 
 	var httpResponse *http.Response
 
-	apicall := restClient.ConfigurationPropertyStoreAPIApi.PutCpsProperty(context, namespace, name)
+	apicall := restClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name)
 	apicall = apicall.Body(value)
 	_, httpResponse, err = apicall.Execute()
 

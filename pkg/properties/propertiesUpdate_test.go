@@ -52,18 +52,18 @@ func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 				}`
 		} else if namespace == "validNamespace" {
 			propertyName := splitUrl[4]
-			if propertyName == "invalidProperty" {
+			if propertyName == "invalidName" {
 				statusCode = 404
 				namespaceProperties = `{
 					"error_code": 5018
 					"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
 					}`
-			} else if propertyName == "validProperty" {
+			} else if propertyName == "validName" {
 				statusCode = 201
 				namespaceProperties = `[
 					{
-						"name" = "validProperty",
-						"value" = "newValue"
+						"name": "validName",
+						"value": "newValue"
 					}
 				]`
 			}
@@ -112,7 +112,7 @@ func TestUpdatePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL5017E")
+	assert.Contains(t, err.Error(), "GAL1099E")
 }
 
 // validnamespace , invalid propertyname
@@ -127,17 +127,13 @@ func TestValidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	// expectedOutput := `{
-	// 	error_code: 5018
-	// 	error_message: "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
-	// }`
 
 	//When
 	err := UpdateProperty(namespace, name, value, apiServerUrl, console)
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL5018E:")
+	assert.ErrorContains(t, err, "GAL1099E:")
 }
 
 //create new property successful

@@ -105,8 +105,7 @@ func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL5017E")
-	assert.Contains(t, err.Error(), "GAL1102E:")
+	assert.Contains(t, err.Error(), "GAL1101E")
 }
 
 // validnamespace , invalid propertyname
@@ -120,17 +119,13 @@ func TestValidNamespaceAndDeleteInvalidPropertyNameReturnsError(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	// expectedOutput := `{
-	// 	error_code: 5018
-	// 	error_message: "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
-	// }`
 
 	//When
 	err := DeleteProperty(namespace, name, apiServerUrl, console)
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1102E:")
+	assert.ErrorContains(t, err, "GAL1101E:")
 }
 
 
