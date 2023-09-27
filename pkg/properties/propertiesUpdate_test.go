@@ -59,7 +59,7 @@ func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 					"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
 					}`
 			} else if propertyName == "validName" {
-				statusCode = 201
+				statusCode = 200
 				namespaceProperties = `[
 					{
 						"name": "validName",
