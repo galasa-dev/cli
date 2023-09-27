@@ -84,7 +84,7 @@ func TestUpdatePropertyValueReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := "Successfully updated the value of " + name + " to " + value
+	expectedOutput := "Successfully updated the value of '" + name + "' in namespace '" + namespace + "'"
 
 	//When
 	err := UpdateProperty(namespace, name, value, apiServerUrl, console)

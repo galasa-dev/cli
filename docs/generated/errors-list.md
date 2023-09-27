@@ -102,6 +102,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1099E: Property value of '{}' could not be updated to '{}'. Reason: '{}'
 - GAL1100E: Status Code when updating the property value does not match. Reason: '{}'
 - GAL1101E: Property '{}' could not be deleted. Reason: '{}'
+- GAL1102E: Status Code when deleting property '{}'. Reason: '{}'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

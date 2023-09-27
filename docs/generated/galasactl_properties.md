@@ -25,5 +25,6 @@ Allows interaction with the CPS to Initiate, query and maintain properties in Ga
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
+* [galasactl properties delete](galasactl_properties_delete.md)	 - Delete a property in a namespace.
 * [galasactl properties get](galasactl_properties_get.md)	 - Get the details of properties in a namespace.
 

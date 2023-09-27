@@ -31,7 +31,7 @@ func UpdateProperty(
 
 		err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
 		if err == nil {
-			console.WriteString("Successfully updated the value of " + name + " to " + value)
+			console.WriteString("Successfully updated the value of '" + name + "' in namespace '" + namespace + "'")
 		} else {
 			console.WriteString(err.Error())
 		}

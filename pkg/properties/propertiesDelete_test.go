@@ -58,16 +58,16 @@ func mockDeletePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 					"error_code": 5018
 					"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
 				}`
-			} else if propertyName == "validProperty" {
-				statusCode = 201
-				namespaceProperties = `Successfully deleted validProperty`
+			} else if propertyName == "validName" {
+				statusCode = 200
+				namespaceProperties = `Successfully deleted 'validName' in 'validNamespace'`
 			}
 		}
 	}
 	w.WriteHeader(statusCode)
 	w.Write([]byte(namespaceProperties))
 }
- 
+
 func TestUDeletePropertyValueReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
@@ -78,7 +78,7 @@ func TestUDeletePropertyValueReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := "Successfully deleted " + name
+	expectedOutput := "Successfully deleted '" + name + "' in namespace '" + namespace + "'"
 
 	//When
 	err := DeleteProperty(namespace, name, apiServerUrl, console)
@@ -109,7 +109,7 @@ func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 }
 
 // validnamespace , invalid propertyname
-func TestValidNamespaceAndDeleteInvalidPropertyNameReturnsError(t *testing.T) {
+func TestValidNamespaceAndDeleteInvalidNameNameReturnsError(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
 	name := "invalidName"
@@ -127,8 +127,6 @@ func TestValidNamespaceAndDeleteInvalidPropertyNameReturnsError(t *testing.T) {
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "GAL1101E:")
 }
-
-
 
 //create new property successful
 //unsuccessful
