@@ -127,8 +127,3 @@ func TestValidNamespaceAndDeleteInvalidNameNameReturnsError(t *testing.T) {
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "GAL1101E:")
 }
-
-//create new property successful
-//unsuccessful
-//check if propertyname of the same name value? -> error?
-//property fails to create because not in right format

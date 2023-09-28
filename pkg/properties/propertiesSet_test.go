@@ -40,65 +40,43 @@ func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 	splitUrl := strings.Split(r.URL.Path, "/")
 	namespace := splitUrl[2]
 
-	//cps/ns/properties/name
+	//UPDATE -> cps/ns/properties/name
 	statusCode, namespaceProperties = CheckNamespace(namespace)
 	if len(splitUrl) == 5 {
-
-		if namespace == "invalidNamespace" {
-			statusCode = 404
-			namespaceProperties = `{
-				"error_code": 5017,
-				"error_message": "GAL5017E: Error occured when trying to access namespace 'invalidNamespace'. The Namespace provided is invalid."
-				}`
-		} else if namespace == "validNamespace" {
+		if namespace == "validNamespace" {
 			propertyName := splitUrl[4]
 			if propertyName == "invalidName" {
 				statusCode = 404
 				namespaceProperties = `{
-					"error_code": 5018
+					"error_code": 5018,
 					"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
 					}`
 			} else if propertyName == "validName" {
 				statusCode = 200
-				namespaceProperties = `[
-					{
-						"name": "validName",
-						"value": "newValue"
-					}
-				]`
+				namespaceProperties = `{
+						"name": "validNamespace.validName",
+						"value": "updatedValue"
+					}`
+			} else if propertyName == "newName" {
+				statusCode = 404
+				namespaceProperties = `{
+					"error_code": 5017,
+					"error_message": "GAL5017E: Error occured when trying to access property 'newName'. The property name provided is invalid."
+					}`
 			}
 		}
 	}
+
 	w.WriteHeader(statusCode)
 	w.Write([]byte(namespaceProperties))
 }
 
-func TestUpdatePropertyValueReturnsOk(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := "validName"
-	value := "newValue"
-
-	server := newUpdatePropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-	expectedOutput := "Successfully updated the value of '" + name + "' in namespace '" + namespace + "'"
-
-	//When
-	err := UpdateProperty(namespace, name, value, apiServerUrl, console)
-
-	//Then
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
-}
-
-// invalid OR empty namespace, valid propertyname
-func TestUpdatePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
+// --------
+// CREATING
+func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
 	//Given...
 	namespace := "invalidNamespace"
-	name := "validName"
+	name := "newName"
 	value := "newValue"
 
 	server := newUpdatePropertiesServletMock(t)
@@ -108,35 +86,73 @@ func TestUpdatePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 	console := utils.NewMockConsole()
 
 	//When
-	err := UpdateProperty(namespace, name, value, apiServerUrl, console)
-
-	//Then
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1099E")
-}
-
-// validnamespace , invalid propertyname
-func TestValidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := "invalidName"
-	value := "newValue"
-
-	server := newUpdatePropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-
-	//When
-	err := UpdateProperty(namespace, name, value, apiServerUrl, console)
+	err := SetProperty(namespace, name, value, apiServerUrl, console)
 
 	//Then
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "GAL1099E:")
 }
 
-//create new property successful
-//unsuccessful
-//check if propertyname of the same name value? -> error?
-//property fails to create because not in right format
+func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validNamespace"
+	name := "newName"
+	value := "newValue"
+
+	server := newUpdatePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+	expectedOutput := "Successfully set the value of '" + name + "' in namespace '" + namespace + "'"
+
+	//When
+	err := SetProperty(namespace, name, value, apiServerUrl, console)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+// --------
+// UPDATING
+func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validNamespace"
+	name := "validName"
+	value := "updatedValue"
+
+	server := newUpdatePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+	expectedOutput := "Successfully set the value of '" + name + "' in namespace '" + namespace + "'"
+
+	//When
+	err := SetProperty(namespace, name, value, apiServerUrl, console)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T) {
+	//Given...
+	namespace := "invalidNamespace"
+	name := "validName"
+	value := "updatedValue"
+
+	server := newUpdatePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := SetProperty(namespace, name, value, apiServerUrl, console)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1099E")
+}
