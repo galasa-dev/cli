@@ -21,9 +21,9 @@ import (
 // PropertyFormatter - implementations can take a collection of properties results
 // and turn them into a string for display to the user.
 const (
-	HEADER_PROPERTY_NAMESPACE = "Namespace"
-	HEADER_PROPERTY_NAME      = "Name"
-	HEADER_PROPERTY_VALUE     = "Value"
+	HEADER_PROPERTY_NAMESPACE = "namespace"
+	HEADER_PROPERTY_NAME      = "name"
+	HEADER_PROPERTY_VALUE     = "value"
 )
 
 type FormattableProperty struct {
@@ -41,8 +41,6 @@ type PropertyFormatter interface {
 	FormatProperties(propertyResults []FormattableProperty) (string, error)
 	GetName() string
 }
-
-
 
 // -----------------------------------------------------
 // Functions for tables

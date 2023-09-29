@@ -71,7 +71,7 @@ func updateCpsProperty(namespace string,
 	_, httpResponse, err = apicall.Execute()
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, value, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
 	} else {
 		if httpResponse.StatusCode != http.StatusOK {
 			httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)

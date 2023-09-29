@@ -73,26 +73,6 @@ func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 
 // --------
 // CREATING
-func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
-	//Given...
-	namespace := "invalidNamespace"
-	name := "newName"
-	value := "newValue"
-
-	server := newUpdatePropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-
-	//When
-	err := SetProperty(namespace, name, value, apiServerUrl, console)
-
-	//Then
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1099E:")
-}
-
 func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
@@ -112,6 +92,26 @@ func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	//Then
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
+	//Given...
+	namespace := "invalidNamespace"
+	name := "newName"
+	value := "newValue"
+
+	server := newUpdatePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := SetProperty(namespace, name, value, apiServerUrl, console)
+
+	//Then
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1099E:")
 }
 
 // --------
