@@ -96,10 +96,10 @@ The `galasactl` tool can generate the following errors:
 - GAL1093E: Failed to submit test (bundle: {}, class: {}). Reason is: {}
 - GAL1094E: User error: Cannot run test {} on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.
 - GAL1095E: namespace '{}' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.
-- GAL1096E: Could not query namesapace results. Reason: '{}'
+- GAL1096E: Could not query namesapace results.
 - GAL1097E: Status Code when querying namespace does not match. Reason: '{}'
 - GAL1098E: Property --name cannot be set alongside --prefix or --suffix.
-- GAL1099E: Property value of '{}' could not be updated to '{}'. Reason: '{}'
+- GAL1099E: Property '{}' could not be updated. Reason: '{}'
 - GAL1100E: Status Code when updating the property value does not match. Reason: '{}'
 - GAL1101E: Property '{}' could not be deleted. Reason: '{}'
 - GAL1102E: Status Code when deleting property '{}'. Reason: '{}'

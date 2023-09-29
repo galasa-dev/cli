@@ -175,7 +175,7 @@ func TestValidNamespaceReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `Namespace      Name      Value
+	expectedOutput := `namespace      name      value
 validNamespace property0 value0
 validNamespace property1 value1
 validNamespace property2 value2
@@ -228,7 +228,7 @@ func TestValidNamespaceAndPrefixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `Namespace      Name             Value
+	expectedOutput := `namespace      name             value
 validNamespace aPrefix.property prefixVal
 
 Total:1
@@ -255,7 +255,7 @@ func TestValidNamespaceAndSuffixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `Namespace      Name             Value
+	expectedOutput := `namespace      name             value
 validNamespace property.aSuffix suffixVal
 
 Total:1
@@ -282,7 +282,7 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `Namespace      Name                     Value
+	expectedOutput := `namespace      name                     value
 validNamespace aPrefix.property.aSuffix prefixSuffixVal
 
 Total:1
@@ -380,7 +380,7 @@ func TestValidNameWithValidNameReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `Namespace      Name      Value
+	expectedOutput := `namespace      name      value
 validNamespace property0 value0
 
 Total:1
