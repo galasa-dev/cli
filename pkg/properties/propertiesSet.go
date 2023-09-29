@@ -28,20 +28,23 @@ func SetProperty(
 	console utils.Console,
 ) error {
 	var err error
+	var outputMessage = "Successfully updated property '" + name + "' in namespace '" + namespace + "'"
 
 	if err == nil {
 
 		err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
 
+		// if updateProperty() returns an error containing "404 Not Found" due to receiving a
+		// GAL5017E from the api, we know the property does not exist and
+		// so we assume the user wants to create a new property
 		if err != nil && strings.Contains(err.Error(), "404") {
-			//if the property does not exist we expect a 404 Not Found error (5017 api error), so we attempt to create it
 			err = createCpsProperty(namespace, name, value, apiServerUrl, console)
+			outputMessage = "Successfully created property '" + name + "' in namespace '" + namespace + "'"
 		}
 
 		if err == nil {
-			console.WriteString("Successfully set the value of '" + name + "' in namespace '" + namespace + "'")
+			console.WriteString(outputMessage)
 		} else {
-			//for any other error
 			console.WriteString(err.Error())
 		}
 	}
@@ -98,8 +101,8 @@ func createCpsProperty(namespace string,
 	cpsPropertyRequest.SetName(name)
 	cpsPropertyRequest.SetValue(value)
 
-	apicall := restClient.ConfigurationPropertyStoreAPIApi.CreateCpsPropertyRequest(cpsPropertyRequest)
-	apicall = restClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace)
+	apicall := restClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace)
+	apicall = apicall.CreateCpsPropertyRequest(*cpsPropertyRequest)
 	_, httpResponse, err = apicall.Execute()
 
 	if err != nil {
