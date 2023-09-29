@@ -30,23 +30,20 @@ func SetProperty(
 	var err error
 	var outputMessage = "Successfully updated property '" + name + "' in namespace '" + namespace + "'"
 
+	err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
+
+	// if updateProperty() returns an error containing "404 Not Found" due to receiving a
+	// GAL5017E from the api, we know the property does not exist and
+	// so we assume the user wants to create a new property
+	if err != nil && strings.Contains(err.Error(), "404") {
+		err = createCpsProperty(namespace, name, value, apiServerUrl, console)
+		outputMessage = "Successfully created property '" + name + "' in namespace '" + namespace + "'"
+	}
+
 	if err == nil {
-
-		err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
-
-		// if updateProperty() returns an error containing "404 Not Found" due to receiving a
-		// GAL5017E from the api, we know the property does not exist and
-		// so we assume the user wants to create a new property
-		if err != nil && strings.Contains(err.Error(), "404") {
-			err = createCpsProperty(namespace, name, value, apiServerUrl, console)
-			outputMessage = "Successfully created property '" + name + "' in namespace '" + namespace + "'"
-		}
-
-		if err == nil {
-			console.WriteString(outputMessage)
-		} else {
-			console.WriteString(err.Error())
-		}
+		console.WriteString(outputMessage)
+	} else {
+		console.WriteString(err.Error())
 	}
 	return err
 }
