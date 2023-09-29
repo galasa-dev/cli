@@ -17,16 +17,16 @@ import (
 )
 
 // MockServlet
-func newUpdatePropertiesServletMock(t *testing.T) *httptest.Server {
+func newSetPropertiesServletMock(t *testing.T) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		mockUpdatePropertiesServlet(t, w, r)
+		mockSetPropertiesServlet(t, w, r)
 	}))
 
 	return server
 }
 
-func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
+func mockSetPropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
 	if !strings.Contains(r.URL.Path, "/cps/") {
 		t.Errorf("Expected to request '/cps/', got: %s", r.URL.Path)
 	}
@@ -36,50 +36,62 @@ func mockUpdatePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", "application/json")
 
 	var statusCode int
-	var namespaceProperties string
+	var response string
 	splitUrl := strings.Split(r.URL.Path, "/")
 	namespace := splitUrl[2]
 
-	//UPDATE -> cps/ns/properties/name
-	statusCode, namespaceProperties = CheckNamespace(namespace)
-	if len(splitUrl) == 5 {
-		if namespace == "validNamespace" {
+	statusCode, response = CheckNamespace(namespace)
+	if namespace == "validNamespace" {
+		if len(splitUrl) == 5 {
 			propertyName := splitUrl[4]
-			if propertyName == "invalidName" {
-				statusCode = 404
-				namespaceProperties = `{
-					"error_code": 5018,
-					"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
-					}`
-			} else if propertyName == "validName" {
-				statusCode = 200
-				namespaceProperties = `{
-						"name": "validNamespace.validName",
-						"value": "updatedValue"
-					}`
-			} else if propertyName == "newName" {
-				statusCode = 404
-				namespaceProperties = `{
-					"error_code": 5017,
-					"error_message": "GAL5017E: Error occured when trying to access property 'newName'. The property name provided is invalid."
-					}`
-			}
+			//UPDATE -> cps/ns/properties/name
+			statusCode, response = updateProperty(propertyName)
+		} else if len(splitUrl) == 4 {
+			statusCode, response = createProperty()
 		}
 	}
 
 	w.WriteHeader(statusCode)
-	w.Write([]byte(namespaceProperties))
+	w.Write([]byte(response))
+}
+
+func createProperty() (int, string) {
+	statusCode := 201
+	response := "Successfully created property newName in validNamespace"
+	return statusCode, response
+}
+
+func updateProperty(propertyName string) (int, string) {
+	statusCode := 200
+	response := "Successfully updated property validName in validNamespace"
+
+	if propertyName == "invalidName" {
+		statusCode = 404
+		response = `{
+			"error_code": 5018,
+			"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
+			}`
+	} else if propertyName == "newName" { //property should be created
+		statusCode = 404
+		response = `{
+			"error_code": 5017,
+			"error_message": "GAL5017E: Error occured when trying to access property 'newName'. The property name provided is invalid."
+			}`
+	}
+
+	return statusCode, response
 }
 
 // --------
 // CREATING
+// bad value feturn error
 func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
 	name := "newName"
 	value := "newValue"
 
-	server := newUpdatePropertiesServletMock(t)
+	server := newSetPropertiesServletMock(t)
 	apiServerUrl := server.URL
 	defer server.Close()
 
@@ -100,7 +112,7 @@ func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t 
 	name := "newName"
 	value := "newValue"
 
-	server := newUpdatePropertiesServletMock(t)
+	server := newSetPropertiesServletMock(t)
 	apiServerUrl := server.URL
 	defer server.Close()
 
@@ -122,7 +134,7 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	name := "validName"
 	value := "updatedValue"
 
-	server := newUpdatePropertiesServletMock(t)
+	server := newSetPropertiesServletMock(t)
 	apiServerUrl := server.URL
 	defer server.Close()
 
@@ -143,7 +155,7 @@ func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T
 	name := "validName"
 	value := "updatedValue"
 
-	server := newUpdatePropertiesServletMock(t)
+	server := newSetPropertiesServletMock(t)
 	apiServerUrl := server.URL
 	defer server.Close()
 

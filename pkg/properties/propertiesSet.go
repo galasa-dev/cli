@@ -18,7 +18,7 @@ import (
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
-// SetProperty - performs all the logic to implement the `galasactl properties update` command,
+// SetProperty - performs all the logic to implement the `galasactl properties set` command,
 // but in a unit-testable manner.
 func SetProperty(
 	namespace string,
@@ -105,7 +105,7 @@ func createCpsProperty(namespace string,
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, value, err.Error())
 	} else {
-		if httpResponse.StatusCode != http.StatusOK {
+		if httpResponse.StatusCode != http.StatusCreated {
 			httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
 			errString := err.Error() + httpError
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_STATUS_CODE_NOT_OK, errString)
