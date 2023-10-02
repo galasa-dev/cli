@@ -24,14 +24,14 @@ var (
 	propertiesSetCmd = &cobra.Command{
 		Use:   "set",
 		Short: "Set the details of properties in a namespace.",
-		Long:  "Set the details of a property in a namespace." + 
-		"If the property does not exist, a new property is created, otherwise the value for that property will be updated.",
-		Args:  cobra.NoArgs,
-		Run:   executePropertiesSet,
+		Long: "Set the details of a property in a namespace. " +
+			"If the property does not exist, a new property is created, otherwise the value for that property will be updated.",
+		Args: cobra.NoArgs,
+		Run:  executePropertiesSet,
 	}
 
 	// Variables set by cobra's command-line parsing.
-	propertyValue          string
+	propertyValue string
 )
 
 func init() {
@@ -54,7 +54,7 @@ func executePropertiesSet(cmd *cobra.Command, args []string) {
 	}
 	isCapturingLogs = true
 
-	log.Println("Galasa CLI - Get ecosystem properties")
+	log.Println("Galasa CLI - Set ecosystem properties")
 
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
@@ -75,7 +75,7 @@ func executePropertiesSet(cmd *cobra.Command, args []string) {
 	var console = utils.NewRealConsole()
 
 	apiServerUrl := bootstrapData.ApiServerURL
-	log.Printf("The API sever is at '%s'\n", apiServerUrl)
+	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	// Call to process the command in a unit-testable way.
 	err = properties.SetProperty(namespace, propertyName, propertyValue, apiServerUrl, console)

@@ -123,7 +123,7 @@ func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t 
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1099E:")
+	assert.ErrorContains(t, err, "GAL1098E:")
 }
 
 // --------
@@ -166,5 +166,5 @@ func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1099E")
+	assert.Contains(t, err.Error(), "GAL1098E")
 }

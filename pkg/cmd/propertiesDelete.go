@@ -50,7 +50,7 @@ func executePropertiesDelete(cmd *cobra.Command, args []string) {
 	}
 	isCapturingLogs = true
 
-	log.Println("Galasa CLI - Get ecosystem properties")
+	log.Println("Galasa CLI - Delete ecosystem properties")
 
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
@@ -71,7 +71,7 @@ func executePropertiesDelete(cmd *cobra.Command, args []string) {
 	var console = utils.NewRealConsole()
 
 	apiServerUrl := bootstrapData.ApiServerURL
-	log.Printf("The API sever is at '%s'\n", apiServerUrl)
+	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	// Call to process the command in a unit-testable way.
 	err = properties.DeleteProperty(namespace, propertyName, apiServerUrl, console)

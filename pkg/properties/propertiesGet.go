@@ -8,9 +8,7 @@ package properties
 
 import (
 	"context"
-	"net/http"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
@@ -37,7 +35,7 @@ func GetProperties(
 ) error {
 	var err error
 	var chosenFormatter propertiesformatter.PropertyFormatter
-	
+
 	chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
 	if err == nil {
 		var cpsProperty []galasaapi.CpsProperty
@@ -77,7 +75,6 @@ func getCpsPropertiesFromRestApi(
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	var httpResponse *http.Response
 	var cpsProperties = make([]galasaapi.CpsProperty, 0)
 
 	if name == "" {
@@ -88,20 +85,14 @@ func getCpsPropertiesFromRestApi(
 		if suffix != "" {
 			apicall = apicall.Suffix(suffix)
 		}
-		cpsProperties, httpResponse, err = apicall.Execute()
+		cpsProperties, _, err = apicall.Execute()
 	} else {
 		apicall := restClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name)
-		cpsProperties, httpResponse, err = apicall.Execute()
+		cpsProperties, _, err = apicall.Execute()
 	}
 
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_FAILED, err.Error())
-	} else {
-		if httpResponse.StatusCode != http.StatusOK {
-			httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
-			errString := err.Error() + httpError
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_STATUS_CODE_NOT_OK, errString)
-		}
 	}
 
 	return cpsProperties, err

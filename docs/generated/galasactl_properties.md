@@ -4,14 +4,14 @@ Manages properties in an ecosystem
 
 ### Synopsis
 
-Allows interaction with the CPS to Initiate, query and maintain properties in Galasa Ecosystem
+Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem
 
 ### Options
 
 ```
-  -b, --bootstrap string   Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Examples: http://galasa-cicsk8s.hursley.ibm.com/bootstrap , file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
+  -b, --bootstrap string   Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap
   -h, --help               help for properties
-  -n, --name string        Name of a property in the namespace.It has no default value.
+  -n, --name string        Name of a property in the namespace. It has no default value.
   -s, --namespace string   Namespace. A container for a collection of properties. It has no default value.
 ```
 

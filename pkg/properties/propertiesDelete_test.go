@@ -105,7 +105,7 @@ func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1101E")
+	assert.Contains(t, err.Error(), "GAL1099E")
 }
 
 // validnamespace , invalid propertyname
@@ -125,5 +125,5 @@ func TestValidNamespaceAndDeleteInvalidNameNameReturnsError(t *testing.T) {
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1101E:")
+	assert.ErrorContains(t, err, "GAL1099E:")
 }

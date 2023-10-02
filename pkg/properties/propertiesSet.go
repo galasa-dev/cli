@@ -8,8 +8,6 @@ package properties
 
 import (
 	"context"
-	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/api"
@@ -61,20 +59,12 @@ func updateCpsProperty(namespace string,
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	var httpResponse *http.Response
-
 	apicall := restClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name)
 	apicall = apicall.Body(value)
-	_, httpResponse, err = apicall.Execute()
+	_, _, err = apicall.Execute()
 
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
-	} else {
-		if httpResponse.StatusCode != http.StatusOK {
-			httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
-			errString := err.Error() + httpError
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_STATUS_CODE_NOT_OK, errString)
-		}
 	}
 
 	return err
@@ -93,23 +83,15 @@ func createCpsProperty(namespace string,
 	// An HTTP client which can communicate with the api server in an ecosystem.
 	restClient := api.InitialiseAPI(apiServerUrl)
 
-	var httpResponse *http.Response
 	var cpsPropertyRequest = galasaapi.NewCreateCpsPropertyRequest()
 	cpsPropertyRequest.SetName(name)
 	cpsPropertyRequest.SetValue(value)
 
-	apicall := restClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace)
-	apicall = apicall.CreateCpsPropertyRequest(*cpsPropertyRequest)
-	_, httpResponse, err = apicall.Execute()
+	apicall := restClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).CreateCpsPropertyRequest(*cpsPropertyRequest)
+	_, _, err = apicall.Execute()
 
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, value, err.Error())
-	} else {
-		if httpResponse.StatusCode != http.StatusCreated {
-			httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
-			errString := err.Error() + httpError
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_STATUS_CODE_NOT_OK, errString)
-		}
 	}
 
 	return err

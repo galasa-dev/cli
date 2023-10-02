@@ -84,7 +84,7 @@ func executePropertiesGet(cmd *cobra.Command, args []string) {
 		var console = utils.NewRealConsole()
 
 		apiServerUrl := bootstrapData.ApiServerURL
-		log.Printf("The API sever is at '%s'\n", apiServerUrl)
+		log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 		// Call to process the command in a unit-testable way.
 		err = properties.GetProperties(namespace, propertyName, propertiesPrefix, propertiesSuffix, apiServerUrl, propertiesOutputFormat, console)
