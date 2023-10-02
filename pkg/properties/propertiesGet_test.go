@@ -76,6 +76,13 @@ func CheckName(name string) (string, int) {
 	]`
 	case "invalidName": //property name does not exist
 		namespaceProperties = `[]`
+	case "emptyValueName": //property name does not exist
+		namespaceProperties = `[
+			{
+				"name": "validNamespace.emptyValueName",
+				"value": ""
+			}
+		]`
 	}
 	return namespaceProperties, statusCode
 }
@@ -406,7 +413,10 @@ func TestValidNameWithEmptyValueValidNameReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `Total:0
+	expectedOutput := `namespace      name           value
+validNamespace emptyValueName 
+
+Total:1
 `
 
 	//When
