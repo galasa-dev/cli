@@ -18,5 +18,6 @@ A tool for controlling Galasa resources using the command-line.
 
 * [galasactl local](galasactl_local.md)	 - Manipulate local system
 * [galasactl project](galasactl_project.md)	 - Manipulate local project source code
+* [galasactl properties](galasactl_properties.md)	 - Manages properties in an ecosystem
 * [galasactl runs](galasactl_runs.md)	 - Manage test runs in the ecosystem
 

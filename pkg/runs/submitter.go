@@ -17,10 +17,10 @@ import (
 
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/formatters"
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/launcher"
 	"github.com/galasa.dev/cli/pkg/props"
+	"github.com/galasa.dev/cli/pkg/runsformatter"
 	"github.com/galasa.dev/cli/pkg/utils"
 )
 
@@ -435,7 +435,7 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdParameters,
 }
 
 func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
-	var formatter = formatters.NewSummaryFormatter()
+	var formatter = runsformatter.NewSummaryFormatter()
 	var err error = nil
 	var outputText string
 

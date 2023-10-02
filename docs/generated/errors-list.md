@@ -95,6 +95,12 @@ The `galasactl` tool can generate the following errors:
 - GAL1092E: Galasa Ecosystem error: A test was submitted for launch. The galasa runtime is not reporting test progress. The test is lost and may execute but test progress cannot be monitored from this tool. (bundle: {}, class: {}).
 - GAL1093E: Failed to submit test (bundle: {}, class: {}). Reason is: {}
 - GAL1094E: User error: Cannot run test {} on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.
+- GAL1095E: namespace '{}' is invalid. Expected it to be in a format starting with letters, and ending in a number with no non-alphanumeric characters.
+- GAL1096E: Could not query namespace results.
+- GAL1097E: Property --name cannot be set alongside --prefix or --suffix.
+- GAL1098E: Property '{}' could not be updated. Reason: '{}'
+- GAL1099E: Property '{}' could not be deleted. Reason: '{}'
+- GAL1100E: Property '{}' could not be created. Reason: '{}'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

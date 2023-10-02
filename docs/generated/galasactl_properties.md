@@ -1,16 +1,18 @@
-## galasactl runs
+## galasactl properties
 
-Manage test runs in the ecosystem
+Manages properties in an ecosystem
 
 ### Synopsis
 
-Assembles, submits and monitors test runs in Galasa Ecosystem
+Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem
 
 ### Options
 
 ```
   -b, --bootstrap string   Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
-  -h, --help               help for runs
+  -h, --help               help for properties
+  -n, --name string        Name of a property in the namespace. It has no default value.
+  -s, --namespace string   Namespace. A container for a collection of properties. It has no default value.
 ```
 
 ### Options inherited from parent commands
@@ -23,8 +25,7 @@ Assembles, submits and monitors test runs in Galasa Ecosystem
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
-* [galasactl runs download](galasactl_runs_download.md)	 - Download the artifacts of a test run which ran.
-* [galasactl runs get](galasactl_runs_get.md)	 - Get the details of a test runname which ran or is running.
-* [galasactl runs prepare](galasactl_runs_prepare.md)	 - prepares a list of tests
-* [galasactl runs submit](galasactl_runs_submit.md)	 - submit a list of tests to the ecosystem
+* [galasactl properties delete](galasactl_properties_delete.md)	 - Delete a property in a namespace.
+* [galasactl properties get](galasactl_properties_get.md)	 - Get the details of properties in a namespace.
+* [galasactl properties set](galasactl_properties_set.md)	 - Set the details of properties in a namespace.
 

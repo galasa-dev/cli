@@ -21,7 +21,7 @@ tests: galasactl-source build/coverage.txt build/coverage.html
 	
 build/coverage.out : galasactl-source
 	mkdir -p build
-	go test -v -cover -coverprofile=build/coverage.out -coverpkg pkg/api,./pkg/cmd,./pkg/formatters,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs ./pkg/...
+	go test -v -cover -coverprofile=build/coverage.out -coverpkg pkg/api,./pkg/cmd,./pkg/runsformatter,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/properties,./pkg/propertiesformatter ./pkg/...
 
 build/coverage.html : build/coverage.out
 	go tool cover -html=build/coverage.out -o build/coverage.html
@@ -33,13 +33,15 @@ build/coverage.txt : build/coverage.out
 galasactl-source : \
 	./cmd/galasactl/*.go \
 	./pkg/api/*.go \
-	./pkg/formatters/*.go \
+	./pkg/runsformatter/*.go \
 	./pkg/cmd/*.go \
 	./pkg/utils/*.go \
 	./pkg/runs/*.go \
 	./pkg/launcher/*.go \
 	./pkg/files/*.go \
 	./pkg/props/*.go \
+	./pkg/properties/*.go \
+	./pkg/propertiesformatter/*.go \
 	embedded_info
 
 # The build process 

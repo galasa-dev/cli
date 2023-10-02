@@ -317,6 +317,58 @@ galasactl runs download --name C1234 --destination /Users/me/my/folder
 
 A complete list of supported parameters for the `runs download` command is available [here](./docs/generated/galasactl_runs_download.md).
 
+
+## properties get
+This command retrieves details of properties in a namespace.
+
+Properties in a namespace can be filtered out by using `--prefix` and/or `--suffix`, or `--name`.
+Currently one format is supported: "summary".
+
+### Examples
+`--prefix` and `--suffix` can be used together or separately to get all properties with a matching prefix and/or suffix.
+```
+galasactl properties get --namespace framework --prefix test --format summary
+```
+```
+galasactl properties get --namespace framework --prefix test --suffix stream --format summary
+```
+
+`--name` is used to get a singular property
+```
+galasactl properties get --namespace framework --name propertyName --format summary
+```
+
+For a complete list of supported formatters try running the command with a known to be bad formatter name. For example:
+```
+galasactl properties get --name propertyName --format badFormatterName
+```
+For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_get.md).
+
+
+## properties set
+This command attempts to update the value of a property in a namespace, but if the property does not exist in that namespace, it creates the property.
+
+The property to be set is supplied through `--name` and its value through `--value`.
+### Examples
+```
+galasactl properties set --namespace framework --name propertyName --value propertyValue
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_set.md).
+
+
+## properties delete
+This command deletes a property in a namespace.
+
+The property to be deleted is supplied through `--name`.
+### Examples
+```
+galasactl properties delete --namespace framework --name propertyName
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_delete.md).
+
+
 ## Reference Material
 
 ### Syntax
