@@ -27,10 +27,6 @@ func (*PropertySummaryFormatter) GetName() string {
 	return SUMMARY_FORMATTER_NAME
 }
 
-func (*PropertySummaryFormatter) IsNeedingMethodDetails() bool {
-	return false
-}
-
 func (*PropertySummaryFormatter) FormatProperties(cpsProperties []FormattableProperty) (string, error) {
 	var result string = ""
 	var err error = nil
