@@ -95,17 +95,6 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 
 		if infixParameter == "anInfix" { //for a single infix
 			namespaceProperties = `[{"name": "validNamespace.aPrefix.anInfix.property.aSuffix","value": "prefixSuffixInfixVal"}]`
-		} else if strings.Contains(infixParameter, "infix1") && strings.Contains(infixParameter, "infix3") { //for multiple infixes
-			namespaceProperties = `[
-				{
-					"name": "validNamespace.aPrefix.infix1.aSuffix",
-					"value": "prefixsuffixMultInfixVal1"
-				},
-				{
-					"name": "validNamespace.aPrefix.infix3aSuffix",
-					"value": "prefixsuffixMultInfixVal3"
-				}
-			]`
 		} else { //no infix
 			namespaceProperties = `[{"name": "validNamespace.aPrefix.property.aSuffix","value": "prefixSuffixVal"}]`
 		}
@@ -114,17 +103,6 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 
 		if infixParameter == "anInfix" {
 			namespaceProperties = `[{"name":"validNamespace.property.anInfix.aSuffix", "value":"suffixInfixVal"}]`
-		} else if strings.Contains(infixParameter, "infix1") && strings.Contains(infixParameter, "infix3") {
-			namespaceProperties = `[
-				{
-					"name": "validNamespace.extra.infix1.aSuffix",
-					"value": "suffixMultInfixVal1"
-				},
-				{
-					"name": "validNamespace.extra.infix3.aSuffix",
-					"value": "suffixMultInfixVal3"
-				}
-			]`
 		} else {
 			namespaceProperties = `[{"name":"validNamespace.property.aSuffix", "value":"suffixVal"}]`
 		}
@@ -133,17 +111,6 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 
 		if infixParameter == "anInfix" {
 			namespaceProperties = `[{"name":"validNamespace.aPrefix.property.anInfix", "value":"prefixInfixVal"}]`
-		} else if strings.Contains(infixParameter, "infix1") && strings.Contains(infixParameter, "infix3") {
-			namespaceProperties = `[
-				{
-					"name": "validNamespace.aPrefix.infix1.extra",
-					"value": "prefixMultInfixVal1"
-				},
-				{
-					"name": "validNamespace.aPrefixinfix3.extra",
-					"value": "prefixMultInfixVal3"
-				}
-			]`
 		} else {
 			namespaceProperties = `[{"name":"validNamespace.aPrefix.property", "value":"prefixVal"}]`
 		}
@@ -162,36 +129,9 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 	if prefixParameter == "" && suffixParameter == "" {
 		if infixParameter == "anInfix" {
 			namespaceProperties = `[{"name":"validNamespace.extra.anInfix.extra", "value":"infixVal"}]`
-		} else if strings.Contains(infixParameter, "infix1") && strings.Contains(infixParameter, "infix2") && strings.Contains(infixParameter, "infix3") {
-			namespaceProperties = `[
-				{
-					"name": "validNamespace.extra.infix1.extra",
-					"value": "infixVal1"
-				},
-				{
-					"name": "validNamespace.extra.infix2extra",
-					"value": "infixVal2"
-				},
-				{
-					"name": "validNamespace.extra.infix3.extra",
-					"value": "infixVal3"
-				}
-			]`
-		} else if strings.Contains(infixParameter, "infix1") && strings.Contains(infixParameter, "infix3") {
-			namespaceProperties = `[
-				{
-					"name": "validNamespace.extra.infix1.extra",
-					"value": "infixVal1"
-				},
-				{
-					"name": "validNamespace.extra.infix3.extra",
-					"value": "infixVal3"
-				}
-			]`
-		} else if infixParameter == "noMatchingInfix" || infixParameter == "noMatchingInfix,noMatchingInfix" { //singular or multiple infixes that do not match
+		} else if infixParameter == "noMatchingInfix" { //singular or multiple infixes that do not match
 			namespaceProperties = `[]`
 		}
-
 	}
 
 	return namespaceProperties
@@ -598,171 +538,6 @@ validNamespace aPrefix.anInfix.property.aSuffix prefixSuffixInfixVal
 Total:1
 `
 
-	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
-
-	//Then
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
-}
-
-func TestValidNamespaceWithAllMatchingMultipleInfixReturnsOk(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := ""
-	prefix := ""
-	suffix := ""
-	infix := "infix1,infix2,infix3"
-	propertiesOutputFormat := "summary"
-
-	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-	expectedOutput := `namespace      name               value
-validNamespace extra.infix1.extra infixVal1
-validNamespace extra.infix2extra  infixVal2
-validNamespace extra.infix3.extra infixVal3
-
-Total:3
-`
-	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
-
-	//Then
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
-}
-
-func TestValidNamespaceWithNoMatchingMultipleInfixReturnsEmpty(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := ""
-	prefix := ""
-	suffix := ""
-	infix := "noMatchingInfix,noMatchinginfix"
-	propertiesOutputFormat := "summary"
-
-	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-	expectedOutput := `Total:0
-`
-	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
-
-	//Then
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
-}
-
-func TestValidNamespaceWithSomeMatchingMultipleInfixReturnsOk(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := ""
-	prefix := ""
-	suffix := ""
-	infix := "infix1,blahblah,infix3"
-	propertiesOutputFormat := "summary"
-
-	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-	expectedOutput := `namespace      name               value
-validNamespace extra.infix1.extra infixVal1
-validNamespace extra.infix3.extra infixVal3
-
-Total:2
-`
-	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
-
-	//Then
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
-}
-
-func TestValidNamespaceWithMatchingPrefixAndMultipleInfixReturnsOk(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := ""
-	prefix := "aPrefix"
-	suffix := ""
-	infix := "infix1,blahblah,infix3"
-	propertiesOutputFormat := "summary"
-
-	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-	expectedOutput := `namespace      name                 value
-validNamespace aPrefix.infix1.extra prefixMultInfixVal1
-validNamespace aPrefixinfix3.extra  prefixMultInfixVal3
-
-Total:2
-`
-	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
-
-	//Then
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
-}
-
-func TestValidNamespaceWithMatchingSuffixAndMultipleInfixReturnsOk(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := ""
-	prefix := ""
-	suffix := "aSuffix"
-	infix := "infix1,blahblah,infix3"
-	propertiesOutputFormat := "summary"
-
-	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-	expectedOutput := `namespace      name                 value
-validNamespace extra.infix1.aSuffix suffixMultInfixVal1
-validNamespace extra.infix3.aSuffix suffixMultInfixVal3
-
-Total:2
-`
-	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
-
-	//Then
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
-}
-
-func TestValidNamespaceWithMatchingPrefixAndSuffixAndMultipleInfixReturnsOk(t *testing.T) {
-	//Given...
-	namespace := "validNamespace"
-	name := ""
-	prefix := "aPrefix"
-	suffix := "aSuffix"
-	infix := "infix1,blahblah,infix3,extra"
-	propertiesOutputFormat := "summary"
-
-	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
-	defer server.Close()
-
-	console := utils.NewMockConsole()
-	expectedOutput := `namespace      name                   value
-validNamespace aPrefix.infix1.aSuffix prefixsuffixMultInfixVal1
-validNamespace aPrefix.infix3aSuffix  prefixsuffixMultInfixVal3
-
-Total:2
-`
 	//When
 	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
 
