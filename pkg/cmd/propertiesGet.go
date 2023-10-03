@@ -36,13 +36,15 @@ var (
 	// Variables set by cobra's command-line parsing.
 	propertiesPrefix       string
 	propertiesSuffix       string
+	propertiesInfix        string
 	propertiesOutputFormat string
 )
 
 func init() {
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "", "the name of properties from a specified namespace with the provided prefix")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesSuffix, "suffix", "", "the name of properties from a specified namespace with the provided suffix")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "", "properties from a specified namespace with the provided prefix")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesSuffix, "suffix", "", "properties from a specified namespace with the provided suffix")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesInfix, "infix", "", "properties from a specified namespace which contain at least one of the provided infixes")
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 	parentCommand := propertiesCmd
 	parentCommand.AddCommand(propertiesGetCmd)
@@ -62,7 +64,8 @@ func executePropertiesGet(cmd *cobra.Command, args []string) {
 
 	log.Println("Galasa CLI - Get ecosystem properties")
 
-	if propertyName != "" && (propertiesPrefix != "" || propertiesSuffix != "") {
+	//--name cannot be used together with --prefix or --suffix or --infix
+	if propertyName != "" && (propertiesPrefix != "" || propertiesSuffix != "" || propertiesInfix != "") {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION)
 	} else {
 		// Get the ability to query environment variables.
@@ -87,7 +90,7 @@ func executePropertiesGet(cmd *cobra.Command, args []string) {
 		log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 		// Call to process the command in a unit-testable way.
-		err = properties.GetProperties(namespace, propertyName, propertiesPrefix, propertiesSuffix, apiServerUrl, propertiesOutputFormat, console)
+		err = properties.GetProperties(namespace, propertyName, propertiesPrefix, propertiesSuffix, propertiesInfix, apiServerUrl, propertiesOutputFormat, console)
 		if err != nil {
 			panic(err)
 		}

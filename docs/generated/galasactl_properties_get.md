@@ -15,8 +15,9 @@ galasactl properties get [flags]
 ```
       --format string   output format for the data returned. Supported formats are: 'summary'. (default "summary")
   -h, --help            help for get
-      --prefix string   the name of properties from a specified namespace with the provided prefix
-      --suffix string   the name of properties from a specified namespace with the provided suffix
+      --infix string    properties from a specified namespace which contain at least one of the provided infixes
+      --prefix string   properties from a specified namespace with the provided prefix
+      --suffix string   properties from a specified namespace with the provided suffix
 ```
 
 ### Options inherited from parent commands

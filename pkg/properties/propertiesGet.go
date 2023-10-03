@@ -29,6 +29,7 @@ func GetProperties(
 	name string,
 	prefix string,
 	suffix string,
+	infix string,
 	apiServerUrl string,
 	propertiesOutputFormat string,
 	console utils.Console,
@@ -39,7 +40,7 @@ func GetProperties(
 	chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
 	if err == nil {
 		var cpsProperty []galasaapi.CpsProperty
-		cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, apiServerUrl, console)
+		cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiServerUrl, console)
 		if err == nil {
 			var outputText string
 
@@ -64,6 +65,7 @@ func getCpsPropertiesFromRestApi(
 	name string,
 	prefix string,
 	suffix string,
+	infix string,
 	apiServerUrl string,
 	console utils.Console,
 ) ([]galasaapi.CpsProperty, error) {
@@ -84,6 +86,9 @@ func getCpsPropertiesFromRestApi(
 		}
 		if suffix != "" {
 			apicall = apicall.Suffix(suffix)
+		}
+		if infix != "" {
+			apicall = apicall.Infix(infix)
 		}
 		cpsProperties, _, err = apicall.Execute()
 	} else {
