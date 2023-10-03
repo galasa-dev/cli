@@ -42,9 +42,9 @@ var (
 
 func init() {
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "", "properties from a specified namespace with the provided prefix")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesSuffix, "suffix", "", "properties from a specified namespace with the provided suffix")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesInfix, "infix", "", "properties from a specified namespace which contain at least one of the provided infixes")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "", "returns properties from a specified namespace with the supplied prefix")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesSuffix, "suffix", "", "returns properties from a specified namespace with the supplied suffix")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesInfix, "infix", "", "returns properties from a specified namespace which contains the supplied infix or at least one of the supplied infixes if there are multiple")
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 	parentCommand := propertiesCmd
 	parentCommand.AddCommand(propertiesGetCmd)
@@ -64,7 +64,7 @@ func executePropertiesGet(cmd *cobra.Command, args []string) {
 
 	log.Println("Galasa CLI - Get ecosystem properties")
 
-	//--name cannot be used together with --prefix or --suffix or --infix
+	//Checks if --name has been provided with one or more of --prefix, --suffix, --infix as they are mutually exclusive
 	if propertyName != "" && (propertiesPrefix != "" || propertiesSuffix != "" || propertiesInfix != "") {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION)
 	} else {
