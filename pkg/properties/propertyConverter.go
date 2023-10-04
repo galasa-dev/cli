@@ -33,9 +33,9 @@ func getCpsPropertyData(property galasaapi.CpsProperty) propertiesformatter.Form
 	fullName := property.GetName()
 	firstDotIndex := strings.Index(fullName, ".")
 
-	//for namsepace capture everything before the first dot
+	//to get the namespace capture everything before the first dot
 	newFormattableProperty.Namespace = fullName[:firstDotIndex]
-	//for name, capture everything after the first dot
+	//to get the property name, capture everything after the first dot
 	newFormattableProperty.Name = fullName[firstDotIndex+1:]
 	newFormattableProperty.Value = property.GetValue()
 
