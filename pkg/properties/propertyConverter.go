@@ -7,22 +7,12 @@
 package properties
 
 import (
-	"sort"
 	"strings"
 
 	"github.com/galasa.dev/cli/pkg/galasaapi"
 	"github.com/galasa.dev/cli/pkg/propertiesformatter"
 )
 
-func orderFormattableProperties(formattableProperty []propertiesformatter.FormattableProperty) []propertiesformatter.FormattableProperty {
-
-	//order by property name
-	sort.SliceStable(formattableProperty, func(i, j int) bool {
-		return formattableProperty[i].Name < formattableProperty[j].Name
-	})
-
-	return formattableProperty
-}
 
 func FormattablePropertyFromGalasaApi(properties []galasaapi.CpsProperty) []propertiesformatter.FormattableProperty {
 	var formattableProperty []propertiesformatter.FormattableProperty
@@ -33,9 +23,7 @@ func FormattablePropertyFromGalasaApi(properties []galasaapi.CpsProperty) []prop
 		formattableProperty = append(formattableProperty, newFormattableProperty)
 	}
 
-	orderedFormattableProperties := orderFormattableProperties(formattableProperty)
-
-	return orderedFormattableProperties
+	return formattableProperty
 }
 
 func getCpsPropertyData(property galasaapi.CpsProperty) propertiesformatter.FormattableProperty {
