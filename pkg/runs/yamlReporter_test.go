@@ -58,6 +58,8 @@ func TestYamlReportWorks(t *testing.T) {
 	  stream: myStream
 	  obr: myObr
 	  status: myStatus
+	  queued: ""
+	  requestor: ""
 	  result: PASSED
 	  overrides: {}
 	  tests:
