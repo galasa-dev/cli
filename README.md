@@ -321,16 +321,19 @@ A complete list of supported parameters for the `runs download` command is avail
 ## properties get
 This command retrieves details of properties in a namespace.
 
-Properties in a namespace can be filtered out by using `--prefix` and/or `--suffix`, or `--name`.
+Properties in a namespace can be filtered out by using `--prefix`, `--infix` and/or `--suffix`, or `--name`.
 Currently one format is supported: "summary".
 
 ### Examples
-`--prefix` and `--suffix` can be used together or separately to get all properties with a matching prefix and/or suffix.
+`--prefix`, `--infix` and `--suffix` can be used together or separately to get all properties with a matching prefix, infix and/or suffix.
 ```
 galasactl properties get --namespace framework --prefix test --format summary
 ```
 ```
-galasactl properties get --namespace framework --prefix test --suffix stream --format summary
+galasactl properties get --namespace framework --infix galasa --suffix test --format summary
+```
+```
+galasactl properties get --namespace framework --prefix test --infix galasa --suffix stream --format summary
 ```
 
 `--name` is used to get a singular property

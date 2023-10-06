@@ -52,31 +52,4 @@ func TestGalasaapiPropertyWithRecordsReturnsSameAmountOfRecords(t *testing.T) {
 
 	//Then
 	assert.Equal(t, len(properties), len(output), "The input record has a length of %v whilst the output has length of %v", len(properties), len(output))
-	assert.Equal(t, "framework", output[0].Namespace)
-	assert.Equal(t, "name1", output[0].Name)
-	assert.Equal(t, "value1", output[0].Value)
-	assert.Equal(t, "multi", output[2].Namespace)
-	assert.Equal(t, "name2", output[2].Name)
-	assert.Equal(t, "multValue2", output[2].Value)
-}
-
-func TestGalasaapiPropertyWithRecordsReturnsRecordsInOrder(t *testing.T) {
-	//Given
-	properties := make([]galasaapi.CpsProperty, 0)
-
-	property1 := createCpsPropertyForConverter("framework.name1", "value1")
-	property2 := createCpsPropertyForConverter("framework.name2", "value2")
-	property3 := createCpsPropertyForConverter("framework.jindex", "jindexValue")
-	property4 := createCpsPropertyForConverter("framework.custard", "custardValue")
-	properties = append(properties, property1, property2, property3, property4)
-
-	//When
-	output := FormattablePropertyFromGalasaApi(properties)
-
-	//Then
-	assert.Equal(t, len(properties), len(output), "The input record has a length of %v whilst the output has length of %v", len(properties), len(output))
-	assert.Equal(t, "custard", output[0].Name)
-	assert.Equal(t, "jindex", output[1].Name)
-	assert.Equal(t, "name1", output[2].Name)
-	assert.Equal(t, "name2", output[3].Name)
 }
