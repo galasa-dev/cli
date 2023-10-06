@@ -67,7 +67,6 @@ func mockDeletePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 	w.WriteHeader(statusCode)
 	w.Write([]byte(namespaceProperties))
 }
-
 func TestUDeletePropertyValueReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"

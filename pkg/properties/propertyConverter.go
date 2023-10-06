@@ -13,7 +13,6 @@ import (
 	"github.com/galasa.dev/cli/pkg/propertiesformatter"
 )
 
-
 func FormattablePropertyFromGalasaApi(properties []galasaapi.CpsProperty) []propertiesformatter.FormattableProperty {
 	var formattableProperty []propertiesformatter.FormattableProperty
 
