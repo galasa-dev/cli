@@ -59,6 +59,8 @@ func TestJsonReportWorks(t *testing.T) {
 				"stream": "myStream",
 				"obr": "myOBR",
 				"status": "myStatus",
+				"queued":"",
+				"requestor":"",
 				"result": "PASSED",
 				"overrides": {},
 				"tests": [

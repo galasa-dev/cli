@@ -465,13 +465,15 @@ func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitC
 
 func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]string) []TestRun {
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
-
+	currentUser , _ := user.Current()
 	for _, portfolioTest := range portfolio.Classes {
 		newTestrun := TestRun{
 			Bundle:    portfolioTest.Bundle,
 			Class:     portfolioTest.Class,
 			Stream:    portfolioTest.Stream,
 			Obr:       portfolioTest.Obr,
+			QueuedTimeUTC: submitter.timeService.Now().String(),
+			Requestor: currentUser.Username,
 			Status:    "queued",
 			Overrides: make(map[string]string, 0),
 		}

@@ -31,16 +31,17 @@ func CreateMethod(methodName string,
 	return method
 }
 
-func createRunForConverter(queued string, runName string,
+
+func createRunForConverter(
+	runName string,
 	testName string,
+	requestor string,
 	status string,
 	result string,
+	queued string, 
 	methods []galasaapi.TestMethod) galasaapi.Run {
 	run1Id := "ar"
 	bundle := ""
-	// testName = ""
-	requestor := ""
-	// queued := ""
 	startTime := ""
 	endTime := ""
 
@@ -81,8 +82,9 @@ func TestGalasaapiRunHasRecordsReturnsSameAmountOfRecordsWithNoMethods(t *testin
 	methods := make([]galasaapi.TestMethod, 0)
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForConverter("2023-05-04T10:45:29.545323Z", "LongRunName", "TestName", "LongStatus", "Short", methods)
-	run2 := createRunForConverter("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "short", "MyLongResultString", methods)
+	//runName, testName, requestor, status, result, queued, methods
+	run1 := createRunForConverter("LongRunName", "TestName", "requestor", "LongStatus", "Passed", "2023-05-04T10:45:29.545323Z", methods)
+	run2 := createRunForConverter("U456", "MyTestName", "myRequestorString", "Status", "Failed", "2023-05-04T10:55:29.545323Z", methods)
 	runs = append(runs, run1, run2)
 	apiServerUrl := ""
 
@@ -103,8 +105,8 @@ func TestGalasaapiRunHasRecordsReturnsSameAmountOfRecordsWithMethods(t *testing.
 	methods = append(methods, method1, method2)
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForConverter("2023-05-04T10:45:29.545323Z", "LongRunName", "TestName", "LongStatus", "Short", methods)
-	run2 := createRunForConverter("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "short", "MyLongResultString", methods)
+	run1 := createRunForConverter("LongRunName", "TestName", "requestor", "LongStatus", "Passed", "2023-05-04T10:45:29.545323Z", methods)
+	run2 := createRunForConverter("U456", "MyTestName", "myRequestorString", "Status", "Failed", "2023-05-04T10:55:29.545323Z", methods)
 	runs = append(runs, run1, run2)
 	apiServerUrl := ""
 
@@ -191,7 +193,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Failed",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor1",
 		Bundle:       "bundle1",
 		ApiServerUrl: "127.0.0.1",
@@ -206,7 +208,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Failed",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor2",
 		Bundle:       "bundle2",
 		ApiServerUrl: "127.0.0.1",
@@ -221,7 +223,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Passed",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor3",
 		Bundle:       "bundle3",
 		ApiServerUrl: "137.0.0.1",
@@ -236,7 +238,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Custard",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor4",
 		Bundle:       "bundle4",
 		ApiServerUrl: "147.0.0.1",
@@ -251,7 +253,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Doughnuts",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor5",
 		Bundle:       "bundle5",
 		ApiServerUrl: "157.0.0.1",
@@ -266,7 +268,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Custom",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor6",
 		Bundle:       "bundle6",
 		ApiServerUrl: "167.0.0.1",
@@ -281,7 +283,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Passed With Defects",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor7",
 		Bundle:       "bundle7",
 		ApiServerUrl: "177.0.0.1",

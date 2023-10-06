@@ -25,6 +25,8 @@ func TestYamlReportWorks(t *testing.T) {
 		Stream:    "myStream",
 		Obr:       "myObr",
 		Status:    "myStatus",
+		QueuedTimeUTC: "",
+		Requestor: "me",
 		Result:    "PASSED",
 		Overrides: make(map[string]string, 1),
 		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
@@ -58,6 +60,8 @@ func TestYamlReportWorks(t *testing.T) {
 	  stream: myStream
 	  obr: myObr
 	  status: myStatus
+	  queued: ""
+	  requestor: me
 	  result: PASSED
 	  overrides: {}
 	  tests:
