@@ -41,7 +41,6 @@ func init() {
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportJsonFilename, "reportjson", "", "json file to record the final results in")
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ReportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
 	runsSubmitCmd.PersistentFlags().StringVarP(&runsSubmitCmdParams.GroupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
-	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.Requestor, "requestor", "", "the requestor id to be associated with the test runs. Defaults to the current user id.")
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.RequestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
 
 	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdParams.ThrottleFileName, "throttlefile", "",

@@ -529,10 +529,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 	}
 
 	if err == nil {
-		if params.Requestor == "" {
-			// Requestor has not been set. Default it to the current user id.
-			params.Requestor, err = submitter.env.GetUserName()
-		}
+		params.Requestor, err = submitter.env.GetUserName()
 	}
 
 	if err == nil {

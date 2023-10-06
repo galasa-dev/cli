@@ -35,7 +35,7 @@ var (
 )
 
 func init() {
-	// currentUserName := runs.GetCurrentUserName()
+	//currentUserName := runs.GetCurrentUserName()
 
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.RemoteMaven, "remoteMaven",
 		"https://repo.maven.apache.org/maven2",
