@@ -465,17 +465,17 @@ func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitC
 
 func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]string) []TestRun {
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
-	currentUser , _ := user.Current()
+	currentUser := submitter.GetCurrentUserName()
 	for _, portfolioTest := range portfolio.Classes {
 		newTestrun := TestRun{
-			Bundle:    portfolioTest.Bundle,
-			Class:     portfolioTest.Class,
-			Stream:    portfolioTest.Stream,
-			Obr:       portfolioTest.Obr,
+			Bundle:        portfolioTest.Bundle,
+			Class:         portfolioTest.Class,
+			Stream:        portfolioTest.Stream,
+			Obr:           portfolioTest.Obr,
 			QueuedTimeUTC: submitter.timeService.Now().String(),
-			Requestor: currentUser.Username,
-			Status:    "queued",
-			Overrides: make(map[string]string, 0),
+			Requestor:     currentUser,
+			Status:        "queued",
+			Overrides:     make(map[string]string, 0),
 		}
 
 		// load the run overrides
@@ -531,10 +531,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 	}
 
 	if err == nil {
-		if params.Requestor == "" {
-			// Requestor has not been set. Default it to the current user id.
-			params.Requestor, err = submitter.env.GetUserName()
-		}
+		params.Requestor, err = submitter.env.GetUserName()
 	}
 
 	if err == nil {
