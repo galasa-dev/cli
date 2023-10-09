@@ -126,8 +126,8 @@ func getTestRunData(run TestRun, isLost bool) runsformatter.FormattableTest {
 	newFormattableTest.Result = run.Result
 	newFormattableTest.StartTimeUTC = ""
 	newFormattableTest.EndTimeUTC = ""
-	newFormattableTest.QueuedTimeUTC = ""
-	newFormattableTest.Requestor = ""
+	newFormattableTest.QueuedTimeUTC = run.QueuedTimeUTC
+	newFormattableTest.Requestor = run.Requestor
 	newFormattableTest.Bundle = run.Bundle
 	newFormattableTest.Methods = nil
 	newFormattableTest.Lost = isLost

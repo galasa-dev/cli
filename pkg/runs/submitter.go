@@ -135,6 +135,7 @@ func (submitter *Submitter) executeSubmitRuns(
 		return nil, nil, err
 	}
 
+	currentUser := submitter.GetCurrentUserName()
 	//
 	// Main submit loop
 	//
@@ -144,7 +145,7 @@ func (submitter *Submitter) executeSubmitRuns(
 
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
 			readyRuns, err = submitter.submitRun(params.GroupName, readyRuns, submittedRuns,
-				lostRuns, &runOverrides, params.Trace, params.Requestor, params.RequestType)
+				lostRuns, &runOverrides, params.Trace, currentUser, params.RequestType)
 
 			if err != nil {
 				// Ignore the error and continue to process the list of available runs.
@@ -465,15 +466,17 @@ func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitC
 
 func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]string) []TestRun {
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
-
+	currentUser := submitter.GetCurrentUserName()
 	for _, portfolioTest := range portfolio.Classes {
 		newTestrun := TestRun{
-			Bundle:    portfolioTest.Bundle,
-			Class:     portfolioTest.Class,
-			Stream:    portfolioTest.Stream,
-			Obr:       portfolioTest.Obr,
-			Status:    "queued",
-			Overrides: make(map[string]string, 0),
+			Bundle:        portfolioTest.Bundle,
+			Class:         portfolioTest.Class,
+			Stream:        portfolioTest.Stream,
+			Obr:           portfolioTest.Obr,
+			QueuedTimeUTC: submitter.timeService.Now().String(),
+			Requestor:     currentUser,
+			Status:        "queued",
+			Overrides:     make(map[string]string, 0),
 		}
 
 		// load the run overrides
@@ -525,13 +528,6 @@ func (submitter *Submitter) validateAndCorrectParams(
 	} else {
 		if !AreSelectionFlagsProvided(submitSelectionFlags) {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS)
-		}
-	}
-
-	if err == nil {
-		if params.Requestor == "" {
-			// Requestor has not been set. Default it to the current user id.
-			params.Requestor, err = submitter.env.GetUserName()
 		}
 	}
 
