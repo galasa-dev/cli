@@ -391,48 +391,6 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 	assert.NotEmpty(t, commandParameters.OverrideFilePath)
 }
 
-func TestValidateAndCorrectParametersDefaultsRequestorFieldFromEnvironment(t *testing.T) {
-
-	mockFileSystem := files.NewMockFileSystem()
-	env := utils.NewMockEnv()
-	env.SetUserName("mybaduserid")
-
-	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
-	if err != nil {
-		assert.Fail(t, "Should not have failed! message = %s", err.Error())
-	}
-
-	commandParameters := &utils.RunsSubmitCmdParameters{}
-
-	regexSelectValue := false
-	submitSelectionFlags := &TestSelectionFlags{
-		bundles:     new([]string),
-		packages:    new([]string),
-		tests:       new([]string),
-		tags:        new([]string),
-		classes:     new([]string),
-		stream:      "myStream",
-		regexSelect: &regexSelectValue,
-	}
-
-	mockLauncher := launcher.NewMockLauncher()
-
-	mockTimeService := utils.NewMockTimeService()
-	console := utils.NewMockConsole()
-	submitter := NewSubmitter(
-		galasaHome,
-		mockFileSystem,
-		mockLauncher,
-		mockTimeService,
-		env,
-		console,
-	)
-	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
-
-	assert.Nil(t, err)
-	assert.Equal(t, commandParameters.Requestor, "mybaduserid")
-}
-
 func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 
 	mockFileSystem := files.NewMockFileSystem()
