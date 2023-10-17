@@ -34,7 +34,7 @@ func init() {
 	cmd.PersistentFlags().StringVarP(&namespace, "namespace", "s", "",
 		"Namespace. A mandatory flag that describes a container for a collection of properties. "+
 			"It has no default value.")
-	cmd.MarkFlagRequired("namespace")
+	cmd.MarkPersistentFlagRequired("namespace")
 
 	cmd.PersistentFlags().StringVarP(&propertyName, "name", "n", "",
 		"Name of a property in the namespace. "+

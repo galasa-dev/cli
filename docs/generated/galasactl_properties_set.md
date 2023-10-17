@@ -13,7 +13,7 @@ galasactl properties set [flags]
 ### Options
 
 ```
-  -h, --help           Help command for  properties set
+  -h, --help           Displays the options for the  properties set command.
       --value string   the value of the property you want to create
 ```
 

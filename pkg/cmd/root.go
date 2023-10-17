@@ -144,7 +144,7 @@ func init() {
 			alias = nameAndAliases[1]
 		}
 
-		c.Flags().BoolP("help", "h", false, "Help command for "+alias)
+		c.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
 	})
 
 	RootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
