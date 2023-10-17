@@ -9,7 +9,7 @@ Creates and manipulates Galasa test project source code
 ### Options
 
 ```
-  -h, --help   help for project
+  -h, --help   Help command for project
 ```
 
 ### Options inherited from parent commands

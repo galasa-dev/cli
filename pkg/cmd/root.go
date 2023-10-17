@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 
 	"github.com/galasa.dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
@@ -132,11 +133,30 @@ func init() {
 			"An existing file will be overwritten. "+
 			"Specify \"-\" to log to stderr. "+
 			"Defaults to not logging.")
+
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+	Walk(RootCmd, func(c *cobra.Command) {
+		alias := c.NameAndAliases()
+		//alias is in the format c.Name, c.Aliases
+		nameAndAliases := strings.Split(alias, ",")
+		if len(nameAndAliases) > 1 {
+			alias = nameAndAliases[1]
+		}
+
+		c.Flags().BoolP("help", "h", false, "Help command for "+alias)
+	})
 
 	RootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
 		"Path to a folder where Galasa will read and write files and configuration settings. "+
 			"The default is '${HOME}/.galasa'. "+
 			"This overrides the GALASA_HOME environment variable which may be set instead.",
 	)
+}
+
+func Walk(c *cobra.Command, f func(*cobra.Command)) {
+	f(c)
+	for _, c := range c.Commands() {
+		Walk(c, f)
+	}
 }

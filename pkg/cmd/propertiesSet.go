@@ -26,8 +26,9 @@ var (
 		Short: "Set the details of properties in a namespace.",
 		Long: "Set the details of a property in a namespace. " +
 			"If the property does not exist, a new property is created, otherwise the value for that property will be updated.",
-		Args: cobra.NoArgs,
-		Run:  executePropertiesSet,
+		Args:    cobra.NoArgs,
+		Run:     executePropertiesSet,
+		Aliases: []string{"properties set"},
 	}
 
 	// Variables set by cobra's command-line parsing.

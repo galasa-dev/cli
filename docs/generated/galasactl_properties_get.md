@@ -14,7 +14,7 @@ galasactl properties get [flags]
 
 ```
       --format string   output format for the data returned. Supported formats are: 'summary'. (default "summary")
-  -h, --help            help for get
+  -h, --help            Help command for  properties get
       --infix string    Infix(es) that could be part of the property name within the namespace, multiple infixes are supplied as a comma-separated list
       --prefix string   Prefix to match against the start of the property name within the namespace
       --suffix string   Suffix to match against the end of the property name within the namespace

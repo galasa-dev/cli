@@ -31,6 +31,7 @@ var (
 		Long:  "Get the details of all properties in a namespace, filtered with flags if present",
 		Args:  cobra.NoArgs,
 		Run:   executePropertiesGet,
+		Aliases: []string{"properties get"},
 	}
 
 	// Variables set by cobra's command-line parsing.

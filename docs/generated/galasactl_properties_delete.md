@@ -13,7 +13,7 @@ galasactl properties delete [flags]
 ### Options
 
 ```
-  -h, --help   help for delete
+  -h, --help   Help command for  properties delete
 ```
 
 ### Options inherited from parent commands
