@@ -791,6 +791,111 @@ function launch_test_from_unknown_portfolio {
     success "Unknown portfolio could not be read. galasactl reported this error correctly."
 }
 
+#--------------------------------------------------------------------------
+#--------------------------- PROPERTIES TESTS -----------------------------
+#--------------------------------------------------------------------------
+function get_random_property_name_number {
+    minimum=100
+    maximum=999
+    PROP_NUM=$(($minimum + $RANDOM % $maximum))
+}
+function properties_set_with_name {
+    h2 "Performing properties set with name parameter"
+
+    cd ${BASEDIR}/temp
+    prop_name="properties.test.name.$PROP_NUM"
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to create property with name set."
+        exit 1
+    fi
+    success "Properties set with name set seems to have been created correctly."
+}
+
+#--------------------------------------------------------------------------
+function properties_set_with_name_and_value {
+    h2 "Launching a test from an unknown portfolio..."
+
+    cd ${BASEDIR}/temp
+    prop_name="properties.test.name.value.$PROP_NUM"
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
+    --name $prop_name \
+    --value test-value \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to create property with name and value set."
+        exit 1
+    fi
+    success "Properties set with name and value set seems to have been created correctly."
+}
+
+#--------------------------------------------------------------------------
+function properties_set_without_name {
+    h2 "Launching a test from an unknown portfolio..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to recognise properties set without name should error."
+        exit 1
+    fi
+    success "Properties set with no name correctly throws an error."
+}
+
+#--------------------------------------------------------------------------
+function properties_set_with_blank_name {
+    h2 "Launching a test from an unknown portfolio..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
+    --name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to recognise properties set with blank name should error."
+        exit 1
+    fi
+    success "Properties set with no name correctly throws an error."
+}
+#--------------------------------------------------------------------------
+function properties_get_with_namespace {
+    h2 "Performing properties get with namespace"
+}
+
 calculate_galasactl_executable
 
 # Launch test on ecosystem without a portfolio ...
@@ -826,3 +931,13 @@ create_portfolio_with_unknown_test
 launch_test_from_unknown_portfolio
 
 runs_download_check_folder_names_during_test_run
+
+
+# Properties tests
+# test properties get --namespace
+# test properties get --prefix
+# test properties get --infix
+# test properties get --suffix
+# test properties get --name
+# test properties get --format 
+# so step 1: get namespace and name to be used, step 2: test creating, updating, deleting, etc.
