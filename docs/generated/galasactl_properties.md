@@ -12,7 +12,7 @@ Allows interaction with the CPS to create, query and maintain properties in Gala
   -b, --bootstrap string   Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
   -h, --help               help for properties
   -n, --name string        Name of a property in the namespace. It has no default value.
-  -s, --namespace string   Namespace. A container for a collection of properties. It has no default value.
+  -s, --namespace string   Namespace. A mandatory flag that describes a container for a collection of properties. It has no default value.
 ```
 
 ### Options inherited from parent commands
