@@ -26,7 +26,6 @@ func SetProperty(
 	console utils.Console,
 ) error {
 	var err error
-	var outputMessage = "Successfully updated property '" + name + "' in namespace '" + namespace + "'"
 
 	err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
 
@@ -35,12 +34,9 @@ func SetProperty(
 	// so we assume the user wants to create a new property
 	if err != nil && strings.Contains(err.Error(), "404") {
 		err = createCpsProperty(namespace, name, value, apiServerUrl, console)
-		outputMessage = "Successfully created property '" + name + "' in namespace '" + namespace + "'"
 	}
 
-	if err == nil {
-		console.WriteString(outputMessage)
-	} else {
+	if err != nil {
 		console.WriteString(err.Error())
 	}
 	return err

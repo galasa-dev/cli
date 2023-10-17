@@ -77,14 +77,12 @@ func TestUDeletePropertyValueReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := "Successfully deleted '" + name + "' in namespace '" + namespace + "'"
 
 	//When
 	err := DeleteProperty(namespace, name, apiServerUrl, console)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
 }
 
 // invalid OR empty namespace, valid propertyname
