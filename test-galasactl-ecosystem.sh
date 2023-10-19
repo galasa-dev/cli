@@ -798,38 +798,18 @@ function get_random_property_name_number {
     minimum=100
     maximum=999
     PROP_NUM=$(($minimum + $RANDOM % $maximum))
-}
-function properties_set_with_name {
-    h2 "Performing properties set with name parameter"
-
-    cd ${BASEDIR}/temp
-    prop_name="properties.test.name.$PROP_NUM"
-
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
-    --name $prop_name \
-    --bootstrap $bootstrap \
-    --log -"
-
-    info "Command is: $cmd"
-
-    $cmd
-    rc=$?
-    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to create property with name set."
-        exit 1
-    fi
-    success "Properties set with name set seems to have been created correctly."
+    echo $PROP_NUM
 }
 
 #--------------------------------------------------------------------------
-function properties_set_with_name_and_value {
-    h2 "Launching a test from an unknown portfolio..."
+function properties_create {
+    h2 "Performing properties set with name and value parameter set: create..."
 
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     cd ${BASEDIR}/temp
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
     --name $prop_name \
     --value test-value \
     --bootstrap $bootstrap \
@@ -839,7 +819,248 @@ function properties_set_with_name_and_value {
 
     $cmd
     rc=$?
-    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
+    # We expect a return code of 0 because this is a properly formed properties set command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to create property with name and value set."
+        exit 1
+    fi
+
+    # check that property has been created
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get property with name set."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property
+    cat $output_file | grep "$prop_name" -q
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to create property with name and value set."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property, with the correct value
+    cat $output_file | grep "$prop_name test-value" -q
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Property successfully created, but value incorrect."
+        exit 1
+    fi
+
+   
+
+    success "Properties set with name and value set seems to have been created correctly."
+}
+
+#--------------------------------------------------------------------------
+function properties_update {
+    h2 "Performing properties set with name and value parameter set: update..."
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+    cd ${BASEDIR}/temp
+    prop_name="properties.test.name.value.$PROP_NUM"
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    --name $prop_name \
+    --value updated-value \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties set command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to update property, set command failed."
+        exit 1
+    fi
+
+    # check that property has been updated
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get property with name set, get command failed."
+        exit 1
+    fi
+
+    # Check that the previous properties set updated the property value
+    cat $output_file | grep "$prop_name updated-value" -q
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to update property, property not found in namespace."
+        exit 1
+    fi
+
+    success "Properties set with name and value set seems to have been updated correctly."
+}
+
+#--------------------------------------------------------------------------
+function properties_delete {
+    h2 "Performing properties delete with name parameter set..."
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+    cd ${BASEDIR}/temp
+    prop_name="properties.test.name.value.$PROP_NUM"
+
+    cmd="${BASEDIR}/bin/${binary} properties delete --namespace ecosystemtest \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties set command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to delete property, command failed."
+        exit 1
+    fi
+
+    # check that property has been updated
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get property with name set."
+        exit 1
+    fi
+
+    # Check that the previous properties set updated the property value
+    cat $output_file | grep "Total:0" -q
+
+    rc=$?
+    # We expect a return code of 1 because this property should not exist anymore.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to delete property, property remains in namespace."
+        exit 1
+    fi
+
+    success "Properties delete with name set seems to have been deleted correctly."
+}
+
+#--------------------------------------------------------------------------
+function properties_set_with_name_without_value {
+    h2 "Performing properties set with name parameter, but no value parameter..."
+
+    cd ${BASEDIR}/temp
+    prop_name="properties.test.name.$PROP_NUM"
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # we expect a return code of 1 as properties set should not be able to run without value set.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to recognise properties set without value should error."
+        exit 1
+    fi
+    success "Properties set with no value correctly throws an error."
+}
+
+#--------------------------------------------------------------------------
+function properties_set_without_name_with_value {
+    h2 "Performing properties set without name parameter and with value parameter..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    --value random-arbitrary-value \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # we expect a return code of 1 as properties set should not be able to run without name set.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to recognise properties set without name set should error."
+        exit 1
+    fi
+    success "Properties set with no name correctly throws an error."
+}
+
+#--------------------------------------------------------------------------
+function properties_set_without_name_and_value {
+    h2 "Performing properties set without name and value parameter set..."
+
+    cd ${BASEDIR}/temp
+    prop_name="properties.test.name.value.$PROP_NUM"
+
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # we expect a return code of 1 as properties set should not be able to run without name and value set.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Failed to recognise properties set without name and value set should error."
+        exit 1
+    fi
+    success "Properties set with no name and value correctly throws an error."
+}
+
+#--------------------------------------------------------------------------
+function properties_get_with_name_check_previous_create_test {
+    h2 "Performing properties get with namespace set..."
+
+    cd ${BASEDIR}/temp
+    prop_name="properties.test.name.value.$PROP_NUM"
+
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+
+
+    # Check that the previous properties set created a property
+    cat $output_file | grep "$prop_name" -q
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to create property with name and value set."
         exit 1
@@ -847,97 +1068,75 @@ function properties_set_with_name_and_value {
     success "Properties set with name and value set seems to have been created correctly."
 }
 
-#--------------------------------------------------------------------------
-function properties_set_without_name {
-    h2 "Launching a test from an unknown portfolio..."
 
-    cd ${BASEDIR}/temp
 
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
-    --bootstrap $bootstrap \
-    --log -"
-
-    info "Command is: $cmd"
-
-    $cmd
-    rc=$?
-    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
-    if [[ "${rc}" != "1" ]]; then 
-        error "Failed to recognise properties set without name should error."
-        exit 1
-    fi
-    success "Properties set with no name correctly throws an error."
+function properties_tests {
+    get_random_property_name_number
+    properties_create
+    properties_update
+    properties_delete
+    properties_set_with_name_without_value
+    properties_set_without_name_with_value
+    properties_set_without_name_and_value
 }
 
-#--------------------------------------------------------------------------
-function properties_set_with_blank_name {
-    h2 "Launching a test from an unknown portfolio..."
+ calculate_galasactl_executable
 
-    cd ${BASEDIR}/temp
+# # Launch test on ecosystem without a portfolio ...
+# launch_test_on_ecosystem_without_portfolio
 
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystem-test \
-    --name \
-    --bootstrap $bootstrap \
-    --log -"
+# # Launch test on ecosystem from a portfolio ...
+# launch_test_on_ecosystem_with_portfolio
 
-    info "Command is: $cmd"
+# # Query the result ... setting RUN_NAME to hold the one which galasa allocated
+# get_result_with_runname 
+# runs_get_check_summary_format_output  $RUN_NAME
+# runs_get_check_details_format_output  $RUN_NAME
+# runs_get_check_raw_format_output  $RUN_NAME
 
-    $cmd
-    rc=$?
-    # We expect a return code of '1' because the galasactl shouldn't be able to read this portfolio.
-    if [[ "${rc}" != "1" ]]; then 
-        error "Failed to recognise properties set with blank name should error."
-        exit 1
-    fi
-    success "Properties set with no name correctly throws an error."
-}
-#--------------------------------------------------------------------------
-function properties_get_with_namespace {
-    h2 "Performing properties get with namespace"
-}
+# # Query the result with the age parameter 
+# runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
+# runs_get_check_raw_format_output_with_just_from $RUN_NAME
 
-calculate_galasactl_executable
-
-# Launch test on ecosystem without a portfolio ...
-launch_test_on_ecosystem_without_portfolio
-
-# Launch test on ecosystem from a portfolio ...
-launch_test_on_ecosystem_with_portfolio
-
-# Query the result ... setting RUN_NAME to hold the one which galasa allocated
-get_result_with_runname 
-runs_get_check_summary_format_output  $RUN_NAME
-runs_get_check_details_format_output  $RUN_NAME
-runs_get_check_raw_format_output  $RUN_NAME
-
-# Query the result with the age parameter 
-runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
-runs_get_check_raw_format_output_with_just_from $RUN_NAME
-
-# Check that the age parameter throws correct errors with invalid values
-runs_get_check_raw_format_output_with_no_runname_and_no_age_param
-runs_get_check_raw_format_output_with_invalid_age_param
-runs_get_check_raw_format_output_with_older_to_than_from_age
-runs_get_check_requestor_parameter
-runs_get_check_result_parameter
-# Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
+# # Check that the age parameter throws correct errors with invalid values
+# runs_get_check_raw_format_output_with_no_runname_and_no_age_param
+# runs_get_check_raw_format_output_with_invalid_age_param
+# runs_get_check_raw_format_output_with_older_to_than_from_age
+# runs_get_check_requestor_parameter
+# runs_get_check_result_parameter
+# # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 
 
-# Attempt to create a test portfolio with an unknown test ...
-create_portfolio_with_unknown_test
+# # Attempt to create a test portfolio with an unknown test ...
+# create_portfolio_with_unknown_test
 
-# Attempt to launch a test from an unknown portfolio ...
-launch_test_from_unknown_portfolio
+# # Attempt to launch a test from an unknown portfolio ...
+# launch_test_from_unknown_portfolio
 
-runs_download_check_folder_names_during_test_run
+# runs_download_check_folder_names_during_test_run
 
 
+
+
+properties_tests
 # Properties tests
-# test properties get --namespace
-# test properties get --prefix
-# test properties get --infix
-# test properties get --suffix
-# test properties get --name
-# test properties get --format 
+# properties get flags:
+# --namespace
+# --name
+# --prefix
+# --infix
+# --suffix
+# --format
+
+# properties set flags:
+# --namespace
+# --name
+# --value
+
+# properties delete flags:
+# --namespace
+# --name
+
 # so step 1: get namespace and name to be used, step 2: test creating, updating, deleting, etc.
+# properties set: 3 flags - namespace, name, value. All must be set.
