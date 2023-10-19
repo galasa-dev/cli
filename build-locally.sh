@@ -133,6 +133,8 @@ function download_dependencies {
     if [[ "${build_type}" == "clean" ]]; then
         h2 "Cleaning the dependencies out..."
         rm -fr build/dependencies
+        h2 "Tidying go mod file..."
+        go mod tidy
     fi
 
     info "Making sure the boot jar we embed is a fresh one from maven."

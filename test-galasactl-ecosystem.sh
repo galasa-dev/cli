@@ -794,6 +794,7 @@ function launch_test_from_unknown_portfolio {
 #--------------------------------------------------------------------------
 #--------------------------- PROPERTIES TESTS -----------------------------
 #--------------------------------------------------------------------------
+# generate a random number to append to test names to avoid multiple running at once overriding each other
 function get_random_property_name_number {
     minimum=100
     maximum=999
@@ -836,7 +837,7 @@ function properties_create {
     output_file="properties-get-output.txt"
     $cmd | tee $output_file
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to get property with name set."
+        error "Failed to get property with name set: command failed."
         exit 1
     fi
 
@@ -969,6 +970,53 @@ function properties_delete {
 }
 
 #--------------------------------------------------------------------------
+function properties_delete_invalid_property {
+    h2 "Performing properties delete with name parameter set..."
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} properties delete --namespace ecosystemtest \
+    --name this.property.shouldnt.exist \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties set command.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Command should have failed due to non existent property."
+        exit 1
+    fi
+    success "Properties delete with the name of a non existent property correctly throws an error."
+}
+
+#--------------------------------------------------------------------------
+function properties_delete_without_name {
+    h2 "Performing properties delete with name parameter set..."
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+    cd ${BASEDIR}/temp
+
+    cmd="${BASEDIR}/bin/${binary} properties delete --namespace ecosystemtest \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties set command.
+    if [[ "${rc}" != "1" ]]; then 
+        error "Command should have failed due to name not being set."
+        exit 1
+    fi
+    success "Properties delete without the name flag set correctly throws an error."
+}
+
+#--------------------------------------------------------------------------
 function properties_set_with_name_without_value {
     h2 "Performing properties set with name parameter, but no value parameter..."
 
@@ -1039,14 +1087,21 @@ function properties_set_without_name_and_value {
 }
 
 #--------------------------------------------------------------------------
-function properties_get_with_name_check_previous_create_test {
-    h2 "Performing properties get with namespace set..."
+function properties_get_setup {
+    h2 "Performing setup for subsequent properties get commands."
+    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    --name get.test.property \
+    --value this-shouldnt-be-deleted \
+    --bootstrap $bootstrap \
+    --log -"
+    $cmd
+}
 
-    cd ${BASEDIR}/temp
-    prop_name="properties.test.name.value.$PROP_NUM"
-
+#--------------------------------------------------------------------------
+function properties_get_with_namespace {
+    h2 "Performing properties get with only namespace set, expecting list of properties..."
+    
     cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
-    --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
 
@@ -1054,89 +1109,264 @@ function properties_get_with_name_check_previous_create_test {
 
     output_file="properties-get-output.txt"
     $cmd | tee $output_file
-
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties with namespace set: command failed."
+        exit 1
+    fi
 
     # Check that the previous properties set created a property
-    cat $output_file | grep "$prop_name" -q
+    cat $output_file | grep "Total:([1-9])+" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to create property with name and value set."
+        error "Failed to get a list of properties under the namespace"
         exit 1
     fi
-    success "Properties set with name and value set seems to have been created correctly."
+    success "Properties get with namespace set seems to be successful."
 }
 
+#--------------------------------------------------------------------------
+function properties_get_with_name {
+    h2 "Performing properties get with only namespace set, expecting list of properties..."
+    
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --name get.test.property \
+    --bootstrap $bootstrap \
+    --log -"
 
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get property with name set: command failed."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property
+    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get property whilst name is set"
+        exit 1
+    fi
+    success "Properties get with name set seems to be successful."
+}
+
+#--------------------------------------------------------------------------
+function properties_get_with_prefix {
+    h2 "Performing properties get with prefix set, expecting list of properties..."
+    
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --prefix get \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties with prefix set: command failed."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property
+    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties whilst prefix is set"
+        exit 1
+    fi
+    success "Properties get with prefix set seems to be successful."
+}
+
+#--------------------------------------------------------------------------
+function properties_get_with_suffix {
+    h2 "Performing properties get with suffix set, expecting list of properties..."
+    
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --suffix property \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties with suffix set: command failed."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property
+    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties whilst suffix is set"
+        exit 1
+    fi
+    success "Properties get with suffix set seems to be successful."
+}
+
+#--------------------------------------------------------------------------
+function properties_get_with_infix {
+    h2 "Performing properties get with infix set, expecting list of properties..."
+    
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --infix test \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties with infix set: command failed."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property
+    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties whilst infix is set"
+        exit 1
+    fi
+    success "Properties get with infix set seems to be successful."
+}
+
+#--------------------------------------------------------------------------
+function properties_get_with_prefix_infix_and_suffix {
+    h2 "Performing properties get with prefix, infix, and suffix set, expecting list of properties..."
+    
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --prefix get \
+    --suffix property \
+    --infix test \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties with prefix, infix, and suffix set: command failed."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property
+    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties whilst prefix, infix, and suffix is set"
+        exit 1
+    fi
+    success "Properties get with prefix, infix, and suffix set seems to be successful."
+}
+
+#--------------------------------------------------------------------------
+# function properties_get_with_name_prefix_infix_and_suffix {
+#     h2 "Performing properties get with name, prefix, infix, and suffix set, expecting an error..."
+    
+#     cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+#     --name get.test.property \
+#     --prefix get \
+#     --suffix property \
+#     --infix test \
+#     --bootstrap $bootstrap \
+#     --log -"
+
+#     info "Command is: $cmd"
+
+#     $cmd
+
+#     rc=$?
+#     if [[ "${rc}" != "1" ]]; then 
+#         error "Failed to recognise getting properties with name, prefix, infix, and suffix set should error."
+#         exit 1
+#     fi
+
+#     success "Properties get with name, prefix, infix, and suffix set seems to properly error."
+# }
+# TO BE ADDED IN ONCE PROPERTIES GET CHANGED TO NOT FAIL ON THIS TEST: ADD LOGIC IN TO MAKE FLAGS MUTUALLY EXCLUSIVE + UNIT TEST
 
 function properties_tests {
     get_random_property_name_number
     properties_create
     properties_update
     properties_delete
+    properties_delete_invalid_property
+    properties_delete_without_name
     properties_set_with_name_without_value
     properties_set_without_name_with_value
     properties_set_without_name_and_value
+    properties_get_setup
+    properties_get_with_namespace
+    properties_get_with_name
+    properties_get_with_prefix
+    properties_get_with_suffix
+    properties_get_with_infix
+    properties_get_with_prefix_infix_and_suffix
+    #properties_get_with_name_prefix_infix_and_suffix
 }
 
  calculate_galasactl_executable
 
-# # Launch test on ecosystem without a portfolio ...
-# launch_test_on_ecosystem_without_portfolio
+# Launch test on ecosystem without a portfolio ...
+launch_test_on_ecosystem_without_portfolio
 
-# # Launch test on ecosystem from a portfolio ...
-# launch_test_on_ecosystem_with_portfolio
+# Launch test on ecosystem from a portfolio ...
+launch_test_on_ecosystem_with_portfolio
 
-# # Query the result ... setting RUN_NAME to hold the one which galasa allocated
-# get_result_with_runname 
-# runs_get_check_summary_format_output  $RUN_NAME
-# runs_get_check_details_format_output  $RUN_NAME
-# runs_get_check_raw_format_output  $RUN_NAME
+# Query the result ... setting RUN_NAME to hold the one which galasa allocated
+get_result_with_runname 
+runs_get_check_summary_format_output  $RUN_NAME
+runs_get_check_details_format_output  $RUN_NAME
+runs_get_check_raw_format_output  $RUN_NAME
 
-# # Query the result with the age parameter 
-# runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
-# runs_get_check_raw_format_output_with_just_from $RUN_NAME
+# Query the result with the age parameter 
+runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
+runs_get_check_raw_format_output_with_just_from $RUN_NAME
 
-# # Check that the age parameter throws correct errors with invalid values
-# runs_get_check_raw_format_output_with_no_runname_and_no_age_param
-# runs_get_check_raw_format_output_with_invalid_age_param
-# runs_get_check_raw_format_output_with_older_to_than_from_age
-# runs_get_check_requestor_parameter
-# runs_get_check_result_parameter
-# # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
+# Check that the age parameter throws correct errors with invalid values
+runs_get_check_raw_format_output_with_no_runname_and_no_age_param
+runs_get_check_raw_format_output_with_invalid_age_param
+runs_get_check_raw_format_output_with_older_to_than_from_age
+runs_get_check_requestor_parameter
+runs_get_check_result_parameter
+# Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 
 
-# # Attempt to create a test portfolio with an unknown test ...
-# create_portfolio_with_unknown_test
+# Attempt to create a test portfolio with an unknown test ...
+create_portfolio_with_unknown_test
 
-# # Attempt to launch a test from an unknown portfolio ...
-# launch_test_from_unknown_portfolio
+# Attempt to launch a test from an unknown portfolio ...
+launch_test_from_unknown_portfolio
 
-# runs_download_check_folder_names_during_test_run
+runs_download_check_folder_names_during_test_run
 
 
 
 
 properties_tests
-# Properties tests
-# properties get flags:
-# --namespace
-# --name
-# --prefix
-# --infix
-# --suffix
-# --format
-
-# properties set flags:
-# --namespace
-# --name
-# --value
-
-# properties delete flags:
-# --namespace
-# --name
-
-# so step 1: get namespace and name to be used, step 2: test creating, updating, deleting, etc.
-# properties set: 3 flags - namespace, name, value. All must be set.
