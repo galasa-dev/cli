@@ -35,23 +35,27 @@ func GetProperties(
 	console utils.Console,
 ) error {
 	var err error
-	var chosenFormatter propertiesformatter.PropertyFormatter
+	if name != "" && (prefix != "" || suffix != "" || infix != "") {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION)
+	} else {
+		var chosenFormatter propertiesformatter.PropertyFormatter
 
-	chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
-	if err == nil {
-		var cpsProperty []galasaapi.CpsProperty
-		cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiServerUrl, console)
+		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
 		if err == nil {
-			var outputText string
-
-			//convert galasaapi.CpsProperty into formattable data
-			formattableProperty := FormattablePropertyFromGalasaApi(cpsProperty)
-			outputText, err = chosenFormatter.FormatProperties(formattableProperty)
-
+			var cpsProperty []galasaapi.CpsProperty
+			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiServerUrl, console)
 			if err == nil {
-				console.WriteString(outputText)
-			}
+				var outputText string
 
+				//convert galasaapi.CpsProperty into formattable data
+				formattableProperty := FormattablePropertyFromGalasaApi(cpsProperty)
+				outputText, err = chosenFormatter.FormatProperties(formattableProperty)
+
+				if err == nil {
+					console.WriteString(outputText)
+				}
+
+			}
 		}
 	}
 

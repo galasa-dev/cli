@@ -625,3 +625,27 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, console.ReadText())
 }
+
+func TestInvalidFlagCombinationNameAndQueryParamsErrors(t *testing.T) {
+	//Given...
+	namespace := "validNamespace"
+	name := "property0"
+	prefix := "aPrefix"
+	suffix := "aSuffix"
+	infix := "anInfix"
+	propertiesOutputFormat := "summary"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+
+	//Then
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1097E:")
+}
+
