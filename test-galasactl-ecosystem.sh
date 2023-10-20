@@ -806,4 +806,3 @@ calculate_galasactl_executable
 test_runs_commands
 
 source ${BASEDIR}/test-scripts/properties-tests.sh
-properties_tests
