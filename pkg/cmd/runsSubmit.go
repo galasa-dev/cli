@@ -25,6 +25,7 @@ var (
 		Long:  "Submit a list of tests to the ecosystem, monitor them and wait for them to complete",
 		Args:  cobra.NoArgs,
 		Run:   executeSubmit,
+		Aliases: []string{"runs submit"},
 	}
 
 	// Variables set by cobra's command-line parsing.

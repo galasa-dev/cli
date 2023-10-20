@@ -14,7 +14,7 @@ galasactl properties get [flags]
 
 ```
       --format string   output format for the data returned. Supported formats are: 'summary'. (default "summary")
-  -h, --help            Displays the options for the  properties get command.
+  -h, --help            Displays the options for the properties get command.
       --infix string    Infix(es) that could be part of the property name within the namespace, multiple infixes are supplied as a comma-separated list
       --prefix string   Prefix to match against the start of the property name within the namespace
       --suffix string   Suffix to match against the end of the property name within the namespace
@@ -27,7 +27,7 @@ galasactl properties get [flags]
       --galasahome string   Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
   -l, --log string          File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
   -n, --name string         Name of a property in the namespace. It has no default value.
-  -s, --namespace string    Namespace. A mandatory flag that describes a container for a collection of properties. It has no default value.
+  -s, --namespace string    Namespace. A mandatory flag that describes the container for a collection of properties. It has no default value.
 ```
 
 ### SEE ALSO

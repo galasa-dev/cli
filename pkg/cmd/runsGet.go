@@ -26,6 +26,7 @@ var (
 		Long:  "Get the details of a test runname which ran or is running, displaying the results to the caller",
 		Args:  cobra.NoArgs,
 		Run:   executeRunsGet,
+		Aliases: []string{"runs get"},
 	}
 
 	// Variables set by cobra's command-line parsing.

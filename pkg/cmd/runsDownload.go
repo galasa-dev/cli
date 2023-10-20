@@ -26,6 +26,7 @@ var (
 		Long:  "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
 		Args:  cobra.NoArgs,
 		Run:   executeRunsDownload,
+		Aliases: []string{"runs download"},
 	}
 
 	// Variables set by cobra's command-line parsing.

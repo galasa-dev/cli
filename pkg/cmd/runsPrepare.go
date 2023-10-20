@@ -25,6 +25,7 @@ var (
 		Long:  "Prepares a list of tests from a test catalog providing specific overrides if required",
 		Args:  cobra.NoArgs,
 		Run:   executeAssemble,
+		Aliases: []string{"runs prepare"},
 	}
 
 	portfolioFilename    string

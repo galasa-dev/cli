@@ -136,15 +136,17 @@ func init() {
 
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 
-	Walk(RootCmd, func(c *cobra.Command) {
-		alias := c.NameAndAliases()
-		//alias is in the format c.Name, c.Aliases
-		nameAndAliases := strings.Split(alias, ",")
+	SetHelpFlagForAllCommands(RootCmd, func(cobra *cobra.Command) {
+		alias := cobra.NameAndAliases()
+		//if the command has an alias,
+		//the format would be cobra.Name, cobra.Aliases
+		//otherwise it is just cobra.Name
+		nameAndAliases := strings.Split(alias, ", ")
 		if len(nameAndAliases) > 1 {
 			alias = nameAndAliases[1]
 		}
 
-		c.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
+		cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
 	})
 
 	RootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
@@ -154,9 +156,11 @@ func init() {
 	)
 }
 
-func Walk(c *cobra.Command, f func(*cobra.Command)) {
-	f(c)
-	for _, c := range c.Commands() {
-		Walk(c, f)
+func SetHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {
+	setHelpFlag(command)
+
+	//for all the commands eg properties get, set etc
+	for _, cobraCommand := range command.Commands() {
+		SetHelpFlagForAllCommands(cobraCommand, setHelpFlag)
 	}
 }
