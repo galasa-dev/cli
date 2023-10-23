@@ -135,6 +135,7 @@ function download_dependencies {
         rm -fr build/dependencies
         h2 "Tidying go mod file..."
         go mod tidy
+        rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to tidy go mod. rc=${rc}" ; exit 1 ; fi
     fi
 
     info "Making sure the boot jar we embed is a fresh one from maven."
