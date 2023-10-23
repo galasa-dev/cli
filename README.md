@@ -322,7 +322,7 @@ A complete list of supported parameters for the `runs download` command is avail
 This command retrieves details of properties in a namespace.
 
 Properties in a namespace can be filtered out by using `--prefix`, `--infix` and/or `--suffix`, or `--name`.
-Currently one format is supported: "summary".
+Two formats are supported: 'summary', 'raw'
 
 ### Examples
 `--prefix`, `--infix` and `--suffix` can be used together or separately to get all properties with a matching prefix, infix and/or suffix.
