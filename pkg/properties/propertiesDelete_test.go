@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

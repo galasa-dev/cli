@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/files"
 )
 
 type GalasaHome interface {

@@ -8,7 +8,7 @@ package runs
 import (
 	"regexp"
 
-	"github.com/galasa.dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/errors"
 )
 
 var (

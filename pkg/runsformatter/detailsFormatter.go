@@ -8,7 +8,7 @@ package runsformatter
 import (
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // -----------------------------------------------------
