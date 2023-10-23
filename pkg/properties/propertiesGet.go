@@ -108,6 +108,9 @@ func CreateFormatters() map[string]propertiesformatter.PropertyFormatter {
 	summaryFormatter := propertiesformatter.NewPropertySummaryFormatter()
 	validFormatters[summaryFormatter.GetName()] = summaryFormatter
 
+	rawFormatter := propertiesformatter.NewPropertyRawFormatter()
+	validFormatters[rawFormatter.GetName()] = rawFormatter
+
 	return validFormatters
 }
 
