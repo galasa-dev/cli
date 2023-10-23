@@ -508,30 +508,35 @@ function properties_get_with_prefix_infix_and_suffix {
 }
 
 #--------------------------------------------------------------------------
-# function properties_get_with_name_prefix_infix_and_suffix {
-#     h2 "Performing properties get with name, prefix, infix, and suffix used, expecting an error..."
+function properties_get_with_namespace_raw_format {
+    h2 "Performing properties get with only namespace used, expecting list of properties..."
     
-#     cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
-#     --name get.test.property \
-#     --prefix get \
-#     --suffix property \
-#     --infix test \
-#     --bootstrap $bootstrap \
-#     --log -"
+    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    --bootstrap $bootstrap \
+    --format raw \
+    --log -"
 
-#     info "Command is: $cmd"
+    info "Command is: $cmd"
 
-#     $cmd
+    output_file="properties-get-output.txt"
+    $cmd | tee $output_file
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get properties with namespace used: command failed."
+        exit 1
+    fi
 
-#     rc=$?
-#     if [[ "${rc}" != "1" ]]; then 
-#         error "Failed to recognise getting properties with name, prefix, infix, and suffix used should error."
-#         exit 1
-#     fi
+    # Check that the previous properties set created a property
+    cat $output_file | grep "ecosystemtest|get.test.property|this-shouldn't-be-deleted" -q
 
-#     success "Properties get with name, prefix, infix, and suffix used seems to properly error."
-# }
-# TO BE ADDED IN ONCE PROPERTIES GET CHANGED TO NOT FAIL ON THIS TEST: ADD LOGIC IN TO MAKE FLAGS MUTUALLY EXCLUSIVE + UNIT TEST
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get a list of properties under the namespace"
+        exit 1
+    fi
+    success "Properties get with namespace used seems to be successful."
+}
 
 function properties_tests {
     get_random_property_name_number
@@ -550,7 +555,6 @@ function properties_tests {
     properties_get_with_suffix
     properties_get_with_infix
     properties_get_with_prefix_infix_and_suffix
-    #properties_get_with_name_prefix_infix_and_suffix
 }
 
 calculate_galasactl_executable
