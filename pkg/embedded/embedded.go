@@ -8,7 +8,7 @@ package embedded
 import (
 	"embed"
 
-	"github.com/galasa.dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/props"
 )
 
 const (

@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"net/url"
 
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 
 	"log"
 )
