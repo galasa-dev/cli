@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // Structure used to collect parameters which are sent to the mock, so we can get them back in the

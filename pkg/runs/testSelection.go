@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/launcher"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/spf13/cobra"
 )
 

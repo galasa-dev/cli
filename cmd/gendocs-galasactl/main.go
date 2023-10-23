@@ -13,8 +13,8 @@ import (
 	"regexp"
 	"sort"
 
-	command "github.com/galasa.dev/cli/pkg/cmd"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	command "github.com/galasa-dev/cli/pkg/cmd"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/spf13/cobra/doc"
 )
 

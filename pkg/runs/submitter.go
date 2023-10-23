@@ -15,13 +15,13 @@ import (
 
 	randomGenerator "github.com/satori/go.uuid"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/launcher"
-	"github.com/galasa.dev/cli/pkg/props"
-	"github.com/galasa.dev/cli/pkg/runsformatter"
-	"github.com/galasa.dev/cli/pkg/utils"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/launcher"
+	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/runsformatter"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 type Submitter struct {

@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"strings"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/props"
-	"github.com/galasa.dev/cli/pkg/utils"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 const (

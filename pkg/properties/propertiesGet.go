@@ -11,11 +11,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/propertiesformatter"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/propertiesformatter"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 var (

@@ -9,9 +9,9 @@ package properties
 import (
 	"context"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // DeleteProperty - performs all the logic to implement the `galasactl properties delete` command,
