@@ -322,23 +322,23 @@ A complete list of supported parameters for the `runs download` command is avail
 This command retrieves details of properties in a namespace.
 
 Properties in a namespace can be filtered out by using `--prefix`, `--infix` and/or `--suffix`, or `--name`.
-Two formats are supported: 'summary', 'raw'
+Two formats are supported: 'summary', 'raw', the default is 'summary'.
 
 ### Examples
 `--prefix`, `--infix` and `--suffix` can be used together or separately to get all properties with a matching prefix, infix and/or suffix.
 ```
-galasactl properties get --namespace framework --prefix test --format summary
+galasactl properties get --namespace framework --prefix test
 ```
 ```
-galasactl properties get --namespace framework --infix galasa --suffix test --format summary
+galasactl properties get --namespace framework --infix galasa --suffix test
 ```
 ```
-galasactl properties get --namespace framework --prefix test --infix galasa --suffix stream --format summary
+galasactl properties get --namespace framework --prefix test --infix galasa --suffix stream
 ```
 
 `--name` is used to get a singular property
 ```
-galasactl properties get --namespace framework --name propertyName --format summary
+galasactl properties get --namespace framework --name propertyName
 ```
 
 For a complete list of supported formatters try running the command with a known to be bad formatter name. For example:
@@ -347,6 +347,20 @@ galasactl properties get --name propertyName --format badFormatterName
 ```
 For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_get.md).
 
+`--format` is used to modify the output table
+```
+> galasactl properties get --namespace framework --format summary
+namespace name          value
+framework propertyName0 value0
+framework propertyName1 value1
+>
+```
+```
+> galasactl properties get --namespace framework --format raw
+framework|propertyName0|value0
+framework|propertyName1|value1
+>
+```
 
 ## properties set
 This command attempts to update the value of a property in a namespace, but if the property does not exist in that namespace, it creates the property.
