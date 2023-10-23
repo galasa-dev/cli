@@ -12,9 +12,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/api"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // RemoteLauncher A launcher, which launches and monitors tests on a remote ecosystem via HTTP/HTTPS.

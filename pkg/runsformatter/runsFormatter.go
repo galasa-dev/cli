@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // -----------------------------------------------------

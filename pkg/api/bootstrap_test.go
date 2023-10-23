@@ -8,8 +8,8 @@ package api
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -618,6 +618,33 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 	expectedOutput := `Total:0
 `
 
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestValidNamespaceFormatRawReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validNamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "raw"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+	expectedOutput := `validNamespace|property0|value0
+validNamespace|property1|value1
+validNamespace|property2|value2
+validNamespace|property3|value3
+`
 	//When
 	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
 

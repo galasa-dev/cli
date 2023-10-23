@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/user"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 // Environment is a thin interface layer above the os package which can be mocked out

@@ -6,9 +6,9 @@
 package cmd
 
 import (
-	"github.com/galasa.dev/cli/pkg/embedded"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

@@ -12,7 +12,7 @@ import (
 	pathUtils "path"
 	"runtime"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 // FileSystem is a thin interface layer above the os package which can be mocked out

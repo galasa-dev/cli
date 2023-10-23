@@ -6,7 +6,7 @@
 package api
 
 import (
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 func InitialiseAPI(apiServerUrl string) *galasaapi.APIClient {
