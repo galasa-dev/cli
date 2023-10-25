@@ -34,7 +34,9 @@ func (*PropertyYamlFormatter) GetName() string {
 	totalProperties := len(cpsProperties)
 	counter := 0
 
-	buff.WriteString("apiVersion: galasa-dev/v1alpha1\n")
+	if totalProperties > 0 {
+		buff.WriteString("apiVersion: galasa-dev/v1alpha1\n")
+	}
 	for _, property := range cpsProperties {
 		propertyString := ""
 
