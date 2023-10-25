@@ -7,15 +7,85 @@
 #
 echo "Running script properties-tests.sh"
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
-# This script tests the 'galasactl runs submit' command against a test that is in our ecosystem's testcatalog already
+# This script tests the 'galasactl properties' command against a namespace that is in our ecosystem's cps namespaces already
 # Pre-requesite: the CLI must have been built first so the binaries are present in the /bin directory
 
-# Where is this script executing from ?
-BASEDIR=$(dirname "$0");pushd $BASEDIR 2>&1 >> /dev/null ;BASEDIR=$(pwd);popd 2>&1 >> /dev/null
-export ORIGINAL_DIR=$(pwd)
-cd "${BASEDIR}"
+if [[ "$CALLED_BY_MAIN" == "" ]]; then
+    # Where is this script executing from ?
+    BASEDIR=$(dirname "$0");pushd $BASEDIR 2>&1 >> /dev/null ;BASEDIR=$(pwd);popd 2>&1 >> /dev/null
+    export ORIGINAL_DIR=$(pwd)
+    cd "${BASEDIR}"
 
-source ${BASEDIR}/calculate_galasactl_executables.sh
+    #--------------------------------------------------------------------------
+    #
+    # Set Colors
+    #
+    #--------------------------------------------------------------------------
+    bold=$(tput bold)
+    underline=$(tput sgr 0 1)
+    reset=$(tput sgr0)
+
+    red=$(tput setaf 1)
+    green=$(tput setaf 76)
+    white=$(tput setaf 7)
+    tan=$(tput setaf 202)
+    blue=$(tput setaf 25)
+
+    #--------------------------------------------------------------------------
+    #
+    # Headers and Logging
+    #
+    #--------------------------------------------------------------------------
+    underline() { printf "${underline}${bold}%s${reset}\n" "$@" ;}
+    h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@" ;}
+    h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@" ;}
+    debug() { printf "${white}%s${reset}\n" "$@" ;}
+    info() { printf "${white}➜ %s${reset}\n" "$@" ;}
+    success() { printf "${green}✔ %s${reset}\n" "$@" ;}
+    error() { printf "${red}✖ %s${reset}\n" "$@" ;}
+    warn() { printf "${tan}➜ %s${reset}\n" "$@" ;}
+    bold() { printf "${bold}%s${reset}\n" "$@" ;}
+    note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@" ;}
+
+    #-----------------------------------------------------------------------------------------                   
+    # Process parameters
+    #-----------------------------------------------------------------------------------------                   
+    bootstrap=""
+
+    while [ "$1" != "" ]; do
+        case $1 in
+            --bootstrap )                     shift
+                                            bootstrap="$1"
+                                            ;;
+            -h | --help )                     usage
+                                            exit
+                                            ;;
+            * )                               error "Unexpected argument $1"
+                                            usage
+                                            exit 1
+        esac
+        shift
+    done
+
+    # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
+    if [[ "${bootstrap}" == "" ]]; then
+        export bootstrap="http://galasa-cicsk8s.hursley.ibm.com/bootstrap"
+        info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
+    fi
+
+    info "Running tests against ecosystem bootstrap ${bootstrap}"
+
+    #-----------------------------------------------------------------------------------------                   
+    # Constants
+    #-----------------------------------------------------------------------------------------   
+    export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"   
+    export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}" 
+    export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
+    export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
+    export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
+    export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
+
+fi
 
 # generate a random number to append to test names to avoid multiple running at once overriding each other
 function get_random_property_name_number {
@@ -25,15 +95,17 @@ function get_random_property_name_number {
     echo $PROP_NUM
 }
 
-#--------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------
+# Tests
+#----------------------------------------------------------------------------------------- 
 function properties_create {
     h2 "Performing properties set with name and value parameter used: create..."
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-    cd ${BASEDIR}/temp
+    
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
     --name $prop_name \
     --value test-value \
     --bootstrap $bootstrap \
@@ -50,14 +122,14 @@ function properties_create {
     fi
 
     # check that property has been created
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used: command failed."
@@ -75,7 +147,7 @@ function properties_create {
     fi
 
     # Check that the previous properties set created a property, with the correct value
-    cat $output_file | grep "$prop_name test-value" -q
+    cat $output_file | grep "$prop_name\s+test-value" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -94,10 +166,10 @@ function properties_update {
     h2 "Performing properties set with name and value parameter used: update..."
 
     used -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-    cd ${BASEDIR}/temp
+    
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
     --name $prop_name \
     --value updated-value \
     --bootstrap $bootstrap \
@@ -114,14 +186,14 @@ function properties_update {
     fi
 
     # check that property has been updated
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used, get command failed."
@@ -129,7 +201,7 @@ function properties_update {
     fi
 
     # Check that the previous properties set updated the property value
-    cat $output_file | grep "$prop_name updated-value" -q
+    cat $output_file | grep "$prop_name\s+updated-value" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -146,10 +218,10 @@ function properties_delete {
     h2 "Performing properties delete with name parameter used..."
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-    cd ${BASEDIR}/temp
+    
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="${BASEDIR}/bin/${binary} properties delete --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -165,14 +237,14 @@ function properties_delete {
     fi
 
     # check that property has been updated
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used."
@@ -197,9 +269,8 @@ function properties_delete_invalid_property {
     h2 "Performing properties delete with name parameter used..."
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-    cd ${BASEDIR}/temp
 
-    cmd="${BASEDIR}/bin/${binary} properties delete --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace ecosystemtest \
     --name this.property.shouldnt.exist \
     --bootstrap $bootstrap \
     --log -"
@@ -221,9 +292,8 @@ function properties_delete_without_name {
     h2 "Performing properties delete with name parameter used..."
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-    cd ${BASEDIR}/temp
 
-    cmd="${BASEDIR}/bin/${binary} properties delete --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --log -"
 
@@ -243,10 +313,9 @@ function properties_delete_without_name {
 function properties_set_with_name_without_value {
     h2 "Performing properties set with name parameter, but no value parameter..."
 
-    cd ${BASEDIR}/temp
     prop_name="properties.test.name.$PROP_NUM"
 
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -267,9 +336,7 @@ function properties_set_with_name_without_value {
 function properties_set_without_name_with_value {
     h2 "Performing properties set without name parameter and with value parameter..."
 
-    cd ${BASEDIR}/temp
-
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
     --value random-arbitrary-value \
     --bootstrap $bootstrap \
     --log -"
@@ -290,10 +357,10 @@ function properties_set_without_name_with_value {
 function properties_set_without_name_and_value {
     h2 "Performing properties set without name and value parameter used..."
 
-    cd ${BASEDIR}/temp
+    
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --log -"
 
@@ -312,7 +379,7 @@ function properties_set_without_name_and_value {
 #--------------------------------------------------------------------------
 function properties_get_setup {
     h2 "Performing setup for subsequent properties get commands."
-    cmd="${BASEDIR}/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
     --name get.test.property \
     --value this-shouldnt-be-deleted \
     --bootstrap $bootstrap \
@@ -324,13 +391,13 @@ function properties_get_setup {
 function properties_get_with_namespace {
     h2 "Performing properties get with only namespace used, expecting list of properties..."
     
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -354,14 +421,14 @@ function properties_get_with_namespace {
 function properties_get_with_name {
     h2 "Performing properties get with only name used, expecting list of properties..."
     
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --name get.test.property \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -370,7 +437,7 @@ function properties_get_with_name {
     fi
 
     # Check that the previous properties set created a property
-    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+    cat $output_file | grep "get.test.property\s+this-shouldnt-be-deleted" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -385,14 +452,14 @@ function properties_get_with_name {
 function properties_get_with_prefix {
     h2 "Performing properties get with prefix used, expecting list of properties..."
     
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --prefix get \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -401,7 +468,7 @@ function properties_get_with_prefix {
     fi
 
     # Check that the previous properties set created a property
-    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+    cat $output_file | grep "get.test.property\s+this-shouldnt-be-deleted" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -416,14 +483,14 @@ function properties_get_with_prefix {
 function properties_get_with_suffix {
     h2 "Performing properties get with suffix used, expecting list of properties..."
     
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --suffix property \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -432,7 +499,7 @@ function properties_get_with_suffix {
     fi
 
     # Check that the previous properties set created a property
-    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+    cat $output_file | grep "get.test.property\s+this-shouldnt-be-deleted" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -447,14 +514,14 @@ function properties_get_with_suffix {
 function properties_get_with_infix {
     h2 "Performing properties get with infix used, expecting list of properties..."
     
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --infix test \
     --bootstrap $bootstrap \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -463,7 +530,7 @@ function properties_get_with_infix {
     fi
 
     # Check that the previous properties set created a property
-    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+    cat $output_file | grep "get.test.property\s+this-shouldnt-be-deleted" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -478,7 +545,7 @@ function properties_get_with_infix {
 function properties_get_with_prefix_infix_and_suffix {
     h2 "Performing properties get with prefix, infix, and suffix used, expecting list of properties..."
     
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --prefix get \
     --suffix property \
     --infix test \
@@ -487,7 +554,7 @@ function properties_get_with_prefix_infix_and_suffix {
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
@@ -496,7 +563,7 @@ function properties_get_with_prefix_infix_and_suffix {
     fi
 
     # Check that the previous properties set created a property
-    cat $output_file | grep "get.test.property this-shouldnt-be-deleted" -q -E
+    cat $output_file | grep "get.test.property\s+this-shouldnt-be-deleted" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -511,23 +578,23 @@ function properties_get_with_prefix_infix_and_suffix {
 function properties_get_with_namespace_raw_format {
     h2 "Performing properties get with only namespace used, expecting list of properties..."
     
-    cmd="${BASEDIR}/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --format raw \
     --log -"
 
     info "Command is: $cmd"
 
-    output_file="properties-get-output.txt"
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to get properties with namespace used: command failed."
+        error "Failed to get properties format raw with namespace used: command failed."
         exit 1
     fi
 
     # Check that the previous properties set created a property
-    cat $output_file | grep "ecosystemtest|get.test.property|this-shouldn't-be-deleted" -q
+    cat $output_file | grep "ecosystemtest|get.test.property|this-shouldnt-be-deleted" -q
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
@@ -555,7 +622,12 @@ function properties_tests {
     properties_get_with_suffix
     properties_get_with_infix
     properties_get_with_prefix_infix_and_suffix
+    properties_get_with_namespace_raw_format
 }
 
-calculate_galasactl_executable
-properties_tests
+# checks if it's been called by main, set this variable if it is
+if [[ "$CALLED_BY_MAIN" == "" ]]; then
+    source $BASEDIR/calculate-galasactl-executables.sh
+    calculate_galasactl_executable
+    properties_tests
+fi
