@@ -45,8 +45,7 @@ func GetProperties(
 			var outputText string
 
 			//convert galasaapi.CpsProperty into formattable data
-			formattableProperty := FormattablePropertyFromGalasaApi(cpsProperty)
-			outputText, err = chosenFormatter.FormatProperties(formattableProperty)
+			outputText, err = chosenFormatter.FormatProperties(cpsProperty)
 
 			if err == nil {
 				console.WriteString(outputText)
@@ -106,10 +105,12 @@ func getCpsPropertiesFromRestApi(
 func CreateFormatters() map[string]propertiesformatter.PropertyFormatter {
 	validFormatters := make(map[string]propertiesformatter.PropertyFormatter, 0)
 	summaryFormatter := propertiesformatter.NewPropertySummaryFormatter()
-	validFormatters[summaryFormatter.GetName()] = summaryFormatter
-
 	rawFormatter := propertiesformatter.NewPropertyRawFormatter()
+	yamlFormatter := propertiesformatter.NewPropertyYamlFormatter()
+
+	validFormatters[summaryFormatter.GetName()] = summaryFormatter
 	validFormatters[rawFormatter.GetName()] = rawFormatter
+	validFormatters[yamlFormatter.GetName()] = yamlFormatter
 
 	return validFormatters
 }

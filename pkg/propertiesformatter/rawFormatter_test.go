@@ -2,29 +2,22 @@
 * Copyright contributors to the Galasa project
 *
 * SPDX-License-Identifier: EPL-2.0
-*/
+ */
 
 package propertiesformatter
 
 import (
 	"testing"
+
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
-
-func createFormattableTestForRaw (namespace string, name string, value string) FormattableProperty {
-	FormattableProperty := FormattableProperty{
-		Namespace : namespace,
-		Name : name,
-		Value : value,
-	}
-	return FormattableProperty
-}
  
 func TestRawFormatterNoDataReturnsNothing(t *testing.T) {
 	// For...
 	formatter := NewPropertyRawFormatter()
 	// No data to format...
-	formattableProperty := make([]FormattableProperty, 0)
+	formattableProperty := make([]galasaapi.CpsProperty, 0)
  
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperty)
@@ -39,9 +32,11 @@ func TestRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
 	formatter := NewPropertyRawFormatter()
 	// No data to format...
-	formattableProperties := make([]FormattableProperty, 0)
-	formattableProperty1 := createFormattableTestForRaw("namespace", "name1", "value1")
-	formattableProperties = append(formattableProperties, formattableProperty1)
+	formattableProperties := make([]galasaapi.CpsProperty, 0)
+	property1 := galasaapi.NewCpsProperty()
+	property1.SetName("namespace.name1")
+	property1.SetValue("value1")
+	formattableProperties = append(formattableProperties, *property1)
  
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)
@@ -56,11 +51,15 @@ func TestRawFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// For..
 	formatter := NewPropertyRawFormatter()
 	// No data to format...
-	formattableProperties := make([]FormattableProperty, 0)
-	formattableProperty1 := createFormattableTestForRaw("namespace", "name1", "value1")
-	formattableProperties = append(formattableProperties, formattableProperty1)
-	formattableProperty2 := createFormattableTestForRaw("namespace", "name2", "value2")
-	formattableProperties = append(formattableProperties, formattableProperty2)
+	formattableProperties := make([]galasaapi.CpsProperty, 0)
+	property1 := galasaapi.NewCpsProperty()
+	property1.SetName("namespace.name1")
+	property1.SetValue("value1")
+	formattableProperties = append(formattableProperties, *property1)
+	property2 := galasaapi.NewCpsProperty()
+	property2.SetName("namespace.name2")
+	property2.SetValue("value2")
+	formattableProperties = append(formattableProperties, *property2)
  
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)

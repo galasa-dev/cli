@@ -2,18 +2,20 @@
  * Copyright contributors to the Galasa project
  *
  * SPDX-License-Identifier: EPL-2.0
-*/
+ */
 package propertiesformatter
 
 import (
 	"strings"
-	"github.com/galasa-dev/cli/pkg/utils"
+
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"gopkg.in/yaml.v2"
 )
 
 // -----------------------------------------------------
-// Summary format.
+// Yaml format.
 const (
-	YAML_FORMATTER_NAME = "summary"
+	YAML_FORMATTER_NAME = "yaml"
 )
 
 type PropertyYamlFormatter struct {
@@ -27,24 +29,29 @@ func (*PropertyYamlFormatter) GetName() string {
 	return YAML_FORMATTER_NAME
 }
  
- func (*PropertyYamlFormatter) FormatProperties(cpsProperties []FormattableProperty) (string, error) {
+ func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.CpsProperty) (string, error) {
 	var result string = ""
 	var err error = nil
 	buff := strings.Builder{}
 	totalProperties := len(cpsProperties)
-	counter := 0
 
 	if totalProperties > 0 {
 		buff.WriteString("apiVersion: galasa-dev/v1alpha1\n")
 	}
-	for _, property := range cpsProperties {
+	for index, property := range cpsProperties {
 		propertyString := ""
 
-		propertyString += utils.ConvertToYaml("GalasaProperty", property.Namespace, property.Name, property.Value)
-		if counter != totalProperties -1 {
+		if index > 0 {
 			propertyString += "---\n"
 		}
-		counter ++
+		
+		var yamlRepresentationBytes []byte
+		yamlRepresentationBytes, err = yaml.Marshal(property)
+		if err == nil {
+			yamlStr := string(yamlRepresentationBytes)
+			propertyString += yamlStr
+		}
+
 		buff.WriteString(propertyString)
 	}
 

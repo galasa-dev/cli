@@ -8,23 +8,15 @@ package propertiesformatter
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
-
-func CreateFormattableTest (namespace string, name string, value string) FormattableProperty {
-	FormattableProperty := FormattableProperty{
-		Namespace : namespace,
-		Name : name,
-		Value : value,
-	}
-	return FormattableProperty
-}
 
 func TestSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
 
 	formatter := NewPropertySummaryFormatter()
 	// No data to format...
-	formattableProperty := make([]FormattableProperty, 0)
+	formattableProperty := make([]galasaapi.CpsProperty, 0)
 
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperty)
@@ -38,9 +30,11 @@ func TestSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
 	formatter := NewPropertySummaryFormatter()
 	// No data to format...
-	formattableProperties := make([]FormattableProperty, 0)
-	formattableProperty1 := CreateFormattableTest("namespace", "name1", "value1")
-	formattableProperties = append(formattableProperties, formattableProperty1)
+	formattableProperties := make([]galasaapi.CpsProperty, 0)
+	property1 := galasaapi.NewCpsProperty()
+	property1.SetName("testNamespace.name1")
+	property1.SetValue("value1")
+	formattableProperties = append(formattableProperties, *property1)
  
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)
@@ -48,8 +42,8 @@ func TestSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 	expectedFormattedOutput := 
-`namespace name  value
-namespace name1 value1
+`namespace     name  value
+testNamespace name1 value1
 
 Total:1
 `
@@ -60,21 +54,25 @@ func TestSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// For..
 	formatter := NewPropertySummaryFormatter()
 	// No data to format...
-	formattableProperties := make([]FormattableProperty, 0)
-	formattableProperty1 := CreateFormattableTest("namespace", "name1", "value1")
-	formattableProperties = append(formattableProperties, formattableProperty1)
-	formattableProperty2 := CreateFormattableTest("namespace", "name2", "value2")
-	formattableProperties = append(formattableProperties, formattableProperty2)
+	formattableProperties := make([]galasaapi.CpsProperty, 0)
+	property1 := galasaapi.NewCpsProperty()
+	property1.SetName("testNamespace.name1")
+	property1.SetValue("value1")
+	formattableProperties = append(formattableProperties, *property1)
+	property2 := galasaapi.NewCpsProperty()
+	property2.SetName("testNamespace.name2")
+	property2.SetValue("value2")
+	formattableProperties = append(formattableProperties, *property2)
  
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput :=  
-`namespace name  value
-namespace name1 value1
-namespace name2 value2
+	expectedFormattedOutput := 
+`namespace     name  value
+testNamespace name1 value1
+testNamespace name2 value2
 
 Total:2
 `
