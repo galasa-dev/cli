@@ -55,8 +55,8 @@ func mockDeletePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 			if propertyName == "invalidName" {
 				statusCode = 404
 				namespaceProperties = `{
-					"error_code": 5018
-					"error_message": "GAL5018E: Error occured when trying to access property 'propertyName'. The property name provided is invalid."
+					"error_code": 5018,
+					"error_message": "GAL5018E: Error occured when trying to access property 'invalidName'. The property name provided is invalid."
 				}`
 			} else if propertyName == "validName" {
 				statusCode = 200
@@ -104,7 +104,7 @@ func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1099E")
+	assert.Contains(t, err.Error(), "GAL1099E","Error occured when trying to access namespace 'invalidNamespace'.")
 }
 
 // validnamespace , invalid propertyname
@@ -124,5 +124,43 @@ func TestValidNamespaceAndDeleteInvalidNameNameReturnsError(t *testing.T) {
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1099E:")
+	assert.ErrorContains(t, err, "GAL1099E:","Error occured when trying to access property 'invalidName'.")
+}
+
+func TestNoNamespaceReturnsError(t *testing.T) {
+	//Given...
+	namespace := ""
+	name := "invalidName"
+
+	server := newDeletePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := DeleteProperty(namespace, name, apiServerUrl, console)
+
+	//Then
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1102E:")
+}
+
+func TestNoNameReturnsError(t *testing.T) {
+	//Given...
+	namespace := "namespace"
+	name := ""
+
+	server := newDeletePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := DeleteProperty(namespace, name, apiServerUrl, console)
+
+	//Then
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1101E:")
 }
