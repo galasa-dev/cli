@@ -9,6 +9,7 @@ package propertiesformatter
 import (
 	"fmt"
 	"strings"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 //Print in the following fashion:
@@ -26,20 +27,16 @@ const (
 	HEADER_PROPERTY_VALUE     = "value"
 )
 
-type FormattableProperty struct {
-	Namespace string
-	Name      string
-	Value     string
-}
-
-func NewFormattableProperty() FormattableProperty {
-	this := FormattableProperty{}
-	return this
-}
-
 type PropertyFormatter interface {
-	FormatProperties(propertyResults []FormattableProperty) (string, error)
+	FormatProperties(propertyResults []galasaapi.CpsProperty) (string, error)
 	GetName() string
+}
+
+func GetNameAndNamespace(fullName string) (string, string) {
+	splitName := strings.SplitN(fullName, ".", 2)
+	namespace := splitName[0]
+	name := splitName[1]
+	return namespace, name
 }
 
 // -----------------------------------------------------

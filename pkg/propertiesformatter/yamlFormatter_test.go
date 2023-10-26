@@ -3,7 +3,6 @@
 *
 * SPDX-License-Identifier: EPL-2.0
  */
-
 package propertiesformatter
 
 import (
@@ -12,25 +11,24 @@ import (
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestYamlFormatterNoDataReturnsBlankString(t *testing.T) {
  
-func TestRawFormatterNoDataReturnsNothing(t *testing.T) {
-	// For...
-	formatter := NewPropertyRawFormatter()
+	formatter := NewPropertyYamlFormatter()
 	// No data to format...
 	formattableProperty := make([]galasaapi.CpsProperty, 0)
  
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperty)
  
-	// Then...
 	assert.Nil(t, err)
 	expectedFormattedOutput := ""
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
+func TestYamlFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
-	formatter := NewPropertyRawFormatter()
+	formatter := NewPropertyYamlFormatter()
 	// No data to format...
 	formattableProperties := make([]galasaapi.CpsProperty, 0)
 	property1 := galasaapi.NewCpsProperty()
@@ -43,13 +41,16 @@ func TestRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput := "namespace|name1|value1\n"
+	expectedFormattedOutput := `apiVersion: galasa-dev/v1alpha1
+name: namespace.name1
+value: value1
+`
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestRawFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
+func TestYamlFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// For..
-	formatter := NewPropertyRawFormatter()
+	formatter := NewPropertyYamlFormatter()
 	// No data to format...
 	formattableProperties := make([]galasaapi.CpsProperty, 0)
 	property1 := galasaapi.NewCpsProperty()
@@ -66,7 +67,12 @@ func TestRawFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput :=  "namespace|name1|value1\n"+
-								"namespace|name2|value2\n"
+	expectedFormattedOutput := `apiVersion: galasa-dev/v1alpha1
+name: namespace.name1
+value: value1
+---
+name: namespace.name2
+value: value2
+`
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
