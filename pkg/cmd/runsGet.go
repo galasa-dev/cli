@@ -8,10 +8,10 @@ package cmd
 import (
 	"log"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/runs"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/props"
 
-	"github.com/galasa.dev/cli/pkg/embedded"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,7 +8,7 @@ package utils
 import (
 	"strings"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 const (

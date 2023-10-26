@@ -11,11 +11,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/propertiesformatter"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/propertiesformatter"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 var (
@@ -107,6 +107,9 @@ func CreateFormatters() map[string]propertiesformatter.PropertyFormatter {
 	validFormatters := make(map[string]propertiesformatter.PropertyFormatter, 0)
 	summaryFormatter := propertiesformatter.NewPropertySummaryFormatter()
 	validFormatters[summaryFormatter.GetName()] = summaryFormatter
+
+	rawFormatter := propertiesformatter.NewPropertyRawFormatter()
+	validFormatters[rawFormatter.GetName()] = rawFormatter
 
 	return validFormatters
 }

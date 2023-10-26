@@ -6,11 +6,10 @@
 package utils
 
 import (
-	"github.com/galasa.dev/cli/pkg/embedded"
-	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	"github.com/galasa-dev/cli/pkg/files"
 )
 
-//  galasaErrors "github.com/galasa.dev/cli/pkg/errors"
 
 func InitialiseGalasaHomeFolder(home GalasaHome, fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) error {
 

@@ -8,8 +8,8 @@ package runs
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/runsformatter"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/runsformatter"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
 

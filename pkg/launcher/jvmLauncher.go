@@ -10,14 +10,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	"github.com/galasa.dev/cli/pkg/embedded"
-	"github.com/galasa.dev/cli/pkg/errors"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/props"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	"github.com/galasa-dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // TestLocation the user passes us this information in one string.

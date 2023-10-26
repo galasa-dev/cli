@@ -8,7 +8,7 @@ package embedded
 import (
 	"embed"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 type ReadOnlyFileSystem interface {

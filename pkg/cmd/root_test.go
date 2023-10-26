@@ -9,7 +9,7 @@ import (
 	"errors"
 	"testing"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 

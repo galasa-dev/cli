@@ -9,11 +9,11 @@ import (
 	"log"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/embedded"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

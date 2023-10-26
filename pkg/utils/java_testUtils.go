@@ -5,7 +5,7 @@
  */
 package utils
 
-import "github.com/galasa.dev/cli/pkg/files"
+import "github.com/galasa-dev/cli/pkg/files"
 
 func AddJavaRuntimeToMock(fileSystem files.FileSystem, baseJavaFolderName string) {
 	separator := fileSystem.GetFilePathSeparator()
