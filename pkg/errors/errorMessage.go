@@ -181,7 +181,7 @@ var (
 	GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS          = NewMessageType("GAL1094E: User error: Cannot run test %s on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.", 1094, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_NAMESPACE                   = NewMessageType("GAL1095E: namespace '%s' is invalid. Expected it to be in a format starting with letters, and ending in a number with no non-alphanumeric characters.", 1095, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_QUERY_NAMESPACE_FAILED              = NewMessageType("GAL1096E: Could not query namespace results.", 1096, STACK_TRACE_WANTED)
-	GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION = NewMessageType("GAL1097E: Property --name cannot be set alongside --prefix or --suffix.", 1097, STACK_TRACE_WANTED)
+	GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION = NewMessageType("GAL1097E: Property --name cannot be used alongside --prefix, --suffix, or --infix.", 1097, STACK_TRACE_WANTED)
 	GALASA_ERROR_PUT_PROPERTY_FAILED                 = NewMessageType("GAL1098E: Property '%v' could not be updated. Reason: '%s'", 1098, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_PROPERTY_FAILED              = NewMessageType("GAL1099E: Property '%v' could not be deleted. Reason: '%s'", 1099, STACK_TRACE_WANTED)
 	GALASA_ERROR_POST_PROPERTY_FAILED                = NewMessageType("GAL1100E: Property '%v' could not be created. Reason: '%s'", 1100, STACK_TRACE_WANTED)
