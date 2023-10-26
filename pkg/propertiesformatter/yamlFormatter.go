@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // -----------------------------------------------------
