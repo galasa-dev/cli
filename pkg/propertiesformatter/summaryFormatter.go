@@ -8,6 +8,8 @@ package propertiesformatter
 import (
 	"strconv"
 	"strings"
+
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // -----------------------------------------------------
@@ -27,7 +29,7 @@ func (*PropertySummaryFormatter) GetName() string {
 	return SUMMARY_FORMATTER_NAME
 }
 
-func (*PropertySummaryFormatter) FormatProperties(cpsProperties []FormattableProperty) (string, error) {
+func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.CpsProperty) (string, error) {
 	var result string = ""
 	var err error = nil
 	buff := strings.Builder{}
@@ -41,8 +43,10 @@ func (*PropertySummaryFormatter) FormatProperties(cpsProperties []FormattablePro
 		table = append(table, headers)
 		for _, property := range cpsProperties {
 			var line []string
+			namespace, name := GetNameAndNamespace(*property.Name)
 
-			line = append(line, property.Namespace, property.Name, property.Value)
+			line = append(line, namespace)
+			line = append(line, name, *property.Value)
 			table = append(table, line)
 		}
 
