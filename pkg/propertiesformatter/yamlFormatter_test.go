@@ -12,27 +12,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
-
-	formatter := NewPropertySummaryFormatter()
+func TestYamlFormatterNoDataReturnsBlankString(t *testing.T) {
+ 
+	formatter := NewPropertyYamlFormatter()
 	// No data to format...
 	formattableProperty := make([]galasaapi.CpsProperty, 0)
-
+ 
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperty)
-
+ 
 	assert.Nil(t, err)
-	expectedFormattedOutput := "Total:0\n"
+	expectedFormattedOutput := ""
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
+func TestYamlFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
-	formatter := NewPropertySummaryFormatter()
+	formatter := NewPropertyYamlFormatter()
 	// No data to format...
 	formattableProperties := make([]galasaapi.CpsProperty, 0)
 	property1 := galasaapi.NewCpsProperty()
-	property1.SetName("testNamespace.name1")
+	property1.SetName("namespace.name1")
 	property1.SetValue("value1")
 	formattableProperties = append(formattableProperties, *property1)
  
@@ -41,26 +41,24 @@ func TestSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput := 
-`namespace     name  value
-testNamespace name1 value1
-
-Total:1
+	expectedFormattedOutput := `apiVersion: galasa-dev/v1alpha1
+name: namespace.name1
+value: value1
 `
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
+func TestYamlFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// For..
-	formatter := NewPropertySummaryFormatter()
+	formatter := NewPropertyYamlFormatter()
 	// No data to format...
 	formattableProperties := make([]galasaapi.CpsProperty, 0)
 	property1 := galasaapi.NewCpsProperty()
-	property1.SetName("testNamespace.name1")
+	property1.SetName("namespace.name1")
 	property1.SetValue("value1")
 	formattableProperties = append(formattableProperties, *property1)
 	property2 := galasaapi.NewCpsProperty()
-	property2.SetName("testNamespace.name2")
+	property2.SetName("namespace.name2")
 	property2.SetValue("value2")
 	formattableProperties = append(formattableProperties, *property2)
  
@@ -69,12 +67,12 @@ func TestSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput := 
-`namespace     name  value
-testNamespace name1 value1
-testNamespace name2 value2
-
-Total:2
+	expectedFormattedOutput := `apiVersion: galasa-dev/v1alpha1
+name: namespace.name1
+value: value1
+---
+name: namespace.name2
+value: value2
 `
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
