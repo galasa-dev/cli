@@ -34,7 +34,7 @@ var (
 
 func init() {
 	parentCommand := propertiesCmd
-	propertiesDeleteCmd.MarkFlagRequired("name")
+	propertiesDeleteCmd.MarkPersistentFlagRequired("name")
 	parentCommand.AddCommand(propertiesDeleteCmd)
 }
 

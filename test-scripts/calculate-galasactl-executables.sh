@@ -5,17 +5,6 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-echo "Running script test-galasactl-ecosystem.sh"
-
-# This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
-# This script tests the 'galasactl' commands against the ecosystem
-# Pre-requesite: the CLI must have been built first so the binaries are present in the /bin directory
-
-
-# Where is this script executing from ?
-BASEDIR=$(dirname "$0");pushd $BASEDIR 2>&1 >> /dev/null ;BASEDIR=$(pwd);popd 2>&1 >> /dev/null
-export ORIGINAL_DIR=$(pwd)
-cd "${BASEDIR}"
 
 
 #--------------------------------------------------------------------------
@@ -48,18 +37,6 @@ error() { printf "${red}✖ %s${reset}\n" "$@" ;}
 warn() { printf "${tan}➜ %s${reset}\n" "$@" ;}
 bold() { printf "${bold}%s${reset}\n" "$@" ;}
 note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@" ;}
-
-
-#-----------------------------------------------------------------------------------------                   
-# Functions
-#-----------------------------------------------------------------------------------------                   
-function usage {
-    info "Syntax: test-galasactl-ecosystem.sh --bootstrap [BOOTSTRAP]"
-    cat << EOF
-
-Bootstrap must refer to a remote ecosystem.
-EOF
-}
 
 #-----------------------------------------------------------------------------------------                   
 # Process parameters
@@ -100,12 +77,30 @@ export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
 export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 
 
-CALLED_BY_MAIN="true"
-source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh
-calculate_galasactl_executable
 
-source ${BASEDIR}/test-scripts/runs-tests.sh
-test_runs_commands
+function calculate_galasactl_executable {
+    h2 "Calculate the name of the galasactl executable for this machine/os"
 
-source ${BASEDIR}/test-scripts/properties-tests.sh
-properties_tests
+    raw_os=$(uname -s) # eg: "Darwin"
+    os=""
+    case $raw_os in
+        Darwin*) 
+            os="darwin" 
+            ;;
+        Windows*)
+            os="windows"
+            ;;
+        Linux*)
+            os="linux"
+            ;;
+        *) 
+            error "Failed to recognise which operating system is in use. $raw_os"
+            exit 1
+    esac
+
+    architecture=$(uname -m)
+
+    export binary="galasactl-${os}-${architecture}"
+    info "galasactl binary is ${binary}"
+    success "OK"
+}
