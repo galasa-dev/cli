@@ -605,6 +605,85 @@ function properties_get_with_namespace_raw_format {
     success "Properties get with namespace used seems to be successful."
 }
 
+#--------------------------------------------------------------------------
+function properties_secure_namespace_set {
+    h2 "Performing properties set with name parameter, but no value parameter..."
+
+    prop_name="properties.test.name.$PROP_NUM"
+
+    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace secure \
+    --name $prop_name \
+    --value
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # we expect a return code of 1 as properties set should not be able to run without value used.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to recognise properties set without value should error."
+        exit 1
+    fi
+    success "Properties set with secure namespace created."
+}
+
+#--------------------------------------------------------------------------
+function properties_secure_namespace_delete {
+    h2 "Performing properties delete with name parameter used..."
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+    
+    prop_name="properties.test.name.value.$PROP_NUM"
+
+    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace secure \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties delete command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to delete property, command failed."
+        exit 1
+    fi
+
+    # check that property has been updated
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace secure \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
+    $cmd | tee $output_file
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get property with name used."
+        exit 1
+    fi
+
+    # Check that the previous properties set updated the property value
+    cat $output_file | grep "Total:0" -q
+
+    rc=$?
+    # We expect a return code of 1 because this property should not exist anymore.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to delete property, property remains in namespace."
+        exit 1
+    fi
+
+    success "Properties set with secure namespace deleted successfully."
+}
+
+#--------------------------------------------------------------------------
+
+
+
 function properties_tests {
     get_random_property_name_number
     properties_create
@@ -623,6 +702,8 @@ function properties_tests {
     properties_get_with_infix
     properties_get_with_prefix_infix_and_suffix
     properties_get_with_namespace_raw_format
+    properties_secure_namespace_set
+    properties_secure_namespace_delete
 }
 
 # checks if it's been called by main, set this variable if it is
