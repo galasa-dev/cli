@@ -35,23 +35,25 @@ func GetProperties(
 	console utils.Console,
 ) error {
 	var err error
-	var chosenFormatter propertiesformatter.PropertyFormatter
+	err = checkNameNotUsedWithPrefixSuffixInfix(name, prefix, suffix, infix)
+	if (err == nil) {
+		var chosenFormatter propertiesformatter.PropertyFormatter
 
-	chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
-	if err == nil {
-		var cpsProperty []galasaapi.CpsProperty
-		cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiServerUrl, console)
+		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
 		if err == nil {
-			var outputText string
+			var cpsProperty []galasaapi.CpsProperty
+			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiServerUrl, console)
+			if err == nil {
+				var outputText string
 
 			//convert galasaapi.CpsProperty into formattable data
-			formattableProperty := FormattablePropertyFromGalasaApi(cpsProperty)
-			outputText, err = chosenFormatter.FormatProperties(formattableProperty)
+			outputText, err = chosenFormatter.FormatProperties(cpsProperty)
 
-			if err == nil {
-				console.WriteString(outputText)
+				if err == nil {
+					console.WriteString(outputText)
+				}
+
 			}
-
 		}
 	}
 
@@ -106,10 +108,12 @@ func getCpsPropertiesFromRestApi(
 func CreateFormatters() map[string]propertiesformatter.PropertyFormatter {
 	validFormatters := make(map[string]propertiesformatter.PropertyFormatter, 0)
 	summaryFormatter := propertiesformatter.NewPropertySummaryFormatter()
-	validFormatters[summaryFormatter.GetName()] = summaryFormatter
-
 	rawFormatter := propertiesformatter.NewPropertyRawFormatter()
+	yamlFormatter := propertiesformatter.NewPropertyYamlFormatter()
+
+	validFormatters[summaryFormatter.GetName()] = summaryFormatter
 	validFormatters[rawFormatter.GetName()] = rawFormatter
+	validFormatters[yamlFormatter.GetName()] = yamlFormatter
 
 	return validFormatters
 }
@@ -148,4 +152,12 @@ func GetFormatterNamesString(validFormatters map[string]propertiesformatter.Prop
 	}
 
 	return formatterNames.String()
+}
+
+func checkNameNotUsedWithPrefixSuffixInfix(name string, prefix string, suffix string, infix string) error {
+	var err error
+	if name != "" && (prefix != "" || suffix != "" || infix != "") {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION)
+	}
+	return err
 }

@@ -5,37 +5,42 @@
  */
 package propertiesformatter
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+)
 
 // -----------------------------------------------------
-// Summary format.
- const (
-	 RAW_FORMATTER_NAME = "raw"
- )
+// Raw format.
+const (
+	RAW_FORMATTER_NAME = "raw"
+)
+
+type PropertyRawFormatter struct {
+}
+
+func NewPropertyRawFormatter() PropertyFormatter {
+	return new(PropertyRawFormatter)
+}
  
- type PropertyRawFormatter struct {
- }
+func (*PropertyRawFormatter) GetName() string {
+	return RAW_FORMATTER_NAME
+}
  
- func NewPropertyRawFormatter() PropertyFormatter {
-	 return new(PropertyRawFormatter)
- }
- 
- func (*PropertyRawFormatter) GetName() string {
-	 return RAW_FORMATTER_NAME
- }
- 
- func (*PropertyRawFormatter) FormatProperties(cpsProperties []FormattableProperty) (string, error) {
+func (*PropertyRawFormatter) FormatProperties(cpsProperties []galasaapi.CpsProperty) (string, error) {
 	var result string = ""
 	buff := strings.Builder{}
 	var err error = nil
 	
 	for _, property := range cpsProperties {
-		buff.WriteString(property.Namespace + "|" + 
-		property.Name + "|" + 
-		property.Value + "\n")
+		namespace, name := GetNameAndNamespace(*property.Name)
+		buff.WriteString(namespace + "|" + 
+		name + "|" + 
+		*property.Value + "\n")
 	}
 
 	result = buff.String()
 	return result, err
- }
+}
  

@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/properties"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -66,35 +65,31 @@ func executePropertiesGet(cmd *cobra.Command, args []string) {
 	log.Println("Galasa CLI - Get ecosystem properties")
 
 	//Checks if --name has been provided with one or more of --prefix, --suffix, --infix as they are mutually exclusive
-	if propertyName != "" && (propertiesPrefix != "" || propertiesSuffix != "" || propertiesInfix != "") {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION)
-	} else {
-		// Get the ability to query environment variables.
-		env := utils.NewEnvironment()
+	// Get the ability to query environment variables.
+	env := utils.NewEnvironment()
 
-		galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
-		if err != nil {
-			panic(err)
-		}
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+	if err != nil {
+		panic(err)
+	}
 
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, ecosystemBootstrap, urlService)
-		if err != nil {
-			panic(err)
-		}
+	// Read the bootstrap properties.
+	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+	var bootstrapData *api.BootstrapData
+	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, ecosystemBootstrap, urlService)
+	if err != nil {
+		panic(err)
+	}
 
-		var console = utils.NewRealConsole()
+	var console = utils.NewRealConsole()
 
-		apiServerUrl := bootstrapData.ApiServerURL
-		log.Printf("The API server is at '%s'\n", apiServerUrl)
+	apiServerUrl := bootstrapData.ApiServerURL
+	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-		// Call to process the command in a unit-testable way.
-		err = properties.GetProperties(namespace, propertyName, propertiesPrefix, propertiesSuffix, propertiesInfix, apiServerUrl, propertiesOutputFormat, console)
-		if err != nil {
-			panic(err)
-		}
+	// Call to process the command in a unit-testable way.
+	err = properties.GetProperties(namespace, propertyName, propertiesPrefix, propertiesSuffix, propertiesInfix, apiServerUrl, propertiesOutputFormat, console)
+	if err != nil {
+		panic(err)
 	}
 
 }
