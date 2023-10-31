@@ -164,3 +164,41 @@ func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1098E")
 }
+
+func TestSetNoNamespaceReturnsError(t *testing.T) {
+	//Given...
+	namespace := ""
+	name := "invalidName"
+
+	server := newDeletePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := DeleteProperty(namespace, name, apiServerUrl, console)
+
+	//Then
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1102E:")
+}
+
+func TestSetNoNameReturnsError(t *testing.T) {
+	//Given...
+	namespace := "namespace"
+	name := ""
+
+	server := newDeletePropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := DeleteProperty(namespace, name, apiServerUrl, console)
+
+	//Then
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1101E:")
+}

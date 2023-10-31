@@ -35,8 +35,6 @@ var (
 
 func init() {
 	parentCommand := propertiesCmd
-	parentCommand.MarkPersistentFlagRequired("name")
-	parentCommand.MarkPersistentFlagRequired("namespace")
 	parentCommand.AddCommand(propertiesDeleteCmd)
 }
 
