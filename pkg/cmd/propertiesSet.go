@@ -39,7 +39,7 @@ func init() {
 	propertiesSetCmd.PersistentFlags().StringVar(&propertyValue, "value", "", "the value of the property you want to create")
 	parentCommand := propertiesCmd
 	propertiesSetCmd.MarkFlagRequired("value")
-	propertiesSetCmd.MarkFlagRequired("name")
+	propertiesSetCmd.MarkPersistentFlagRequired("name")
 	parentCommand.AddCommand(propertiesSetCmd)
 }
 

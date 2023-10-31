@@ -101,6 +101,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1098E: Property '{}' could not be updated. Reason: '{}'
 - GAL1099E: Property '{}' could not be deleted. Reason: '{}'
 - GAL1100E: Property '{}' could not be created. Reason: '{}'
+- GAL1101E: name '{}' is invalid. '--name' is a mandatory flag.
+- GAL1102E: namespace '{}' is invalid. '--namespace' is a mandatory flag.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 
