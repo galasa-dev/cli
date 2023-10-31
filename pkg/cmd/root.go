@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -132,11 +133,34 @@ func init() {
 			"An existing file will be overwritten. "+
 			"Specify \"-\" to log to stderr. "+
 			"Defaults to not logging.")
+
 	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+	SetHelpFlagForAllCommands(RootCmd, func(cobra *cobra.Command) {
+		alias := cobra.NameAndAliases()
+		//if the command has an alias,
+		//the format would be cobra.Name, cobra.Aliases
+		//otherwise it is just cobra.Name
+		nameAndAliases := strings.Split(alias, ", ")
+		if len(nameAndAliases) > 1 {
+			alias = nameAndAliases[1]
+		}
+
+		cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
+	})
 
 	RootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
 		"Path to a folder where Galasa will read and write files and configuration settings. "+
 			"The default is '${HOME}/.galasa'. "+
 			"This overrides the GALASA_HOME environment variable which may be set instead.",
 	)
+}
+
+func SetHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {
+	setHelpFlag(command)
+
+	//for all the commands eg properties get, set etc
+	for _, cobraCommand := range command.Commands() {
+		SetHelpFlagForAllCommands(cobraCommand, setHelpFlag)
+	}
 }

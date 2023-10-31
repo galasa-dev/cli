@@ -29,10 +29,6 @@ func DeleteProperty(
 	if err == nil {
 		err = deleteCpsProperty(namespace, name, apiServerUrl, console)
 	}
-	if err == nil {
-		console.WriteString("Successfully deleted '" + name + "' in namespace '" + namespace + "'")
-	}
-
 	return err
 }
 
@@ -67,7 +63,7 @@ func deleteCpsProperty(namespace string,
 	if (resp != nil) && (resp.StatusCode != 200) {
 		var apiError galasaErrors.GalasaAPIError
 		err = apiError.UnmarshalApiError(resp)
-		if err == nil { 
+		if err == nil {
 			//Ensure that the conversion of the error doesn't raise another exception
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, apiError.Message)
 		}

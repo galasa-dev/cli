@@ -27,6 +27,7 @@ var (
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
 		Run:   executePropertiesDelete,
+		Aliases: []string{"properties delete"},
 	}
 
 	// Variables update by cobra's command-line parsing.

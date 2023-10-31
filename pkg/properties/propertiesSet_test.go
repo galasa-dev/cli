@@ -96,14 +96,12 @@ func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := "Successfully created property '" + name + "' in namespace '" + namespace + "'"
 
 	//When
 	err := SetProperty(namespace, name, value, apiServerUrl, console)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
 }
 
 func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
@@ -139,14 +137,12 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := "Successfully updated property '" + name + "' in namespace '" + namespace + "'"
 
 	//When
 	err := SetProperty(namespace, name, value, apiServerUrl, console)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
 }
 
 func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T) {

@@ -32,9 +32,9 @@ func init() {
 			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
 	cmd.PersistentFlags().StringVarP(&namespace, "namespace", "s", "",
-		"Namespace. A container for a collection of properties. "+
+		"Namespace. A mandatory flag that describes the container for a collection of properties. "+
 			"It has no default value.")
-	cmd.MarkFlagRequired("namespace")
+	cmd.MarkPersistentFlagRequired("namespace")
 
 	cmd.PersistentFlags().StringVarP(&propertyName, "name", "n", "",
 		"Name of a property in the namespace. "+
