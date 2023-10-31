@@ -44,8 +44,7 @@ func init() {
 	
 
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.LocalMaven, "localMaven", "",
-		"the url of the remote maven where galasa bundles can be loaded from. "+
-			"Defaults to maven central.")
+		"The url of a local maven repository are where galasa bundles can be loaded from on your local file system. Defaults to your home .m2/repository file.")
 
 	currentGalasaVersion, _ := embedded.GetGalasaVersion()
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.TargetGalasaVersion, "galasaVersion",
