@@ -35,10 +35,7 @@ func SetProperty(
 	if err != nil && strings.Contains(err.Error(), "404") {
 		err = createCpsProperty(namespace, name, value, apiServerUrl, console)
 	}
-
-	if err != nil {
-		console.WriteString(err.Error())
-	}
+	
 	return err
 }
 

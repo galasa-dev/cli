@@ -24,9 +24,6 @@ func DeleteProperty(
 ) error {
 
 	err := deleteCpsProperty(namespace, name, apiServerUrl, console)
-	if err != nil {
-		console.WriteString(err.Error())
-	}
 
 	return err
 }
