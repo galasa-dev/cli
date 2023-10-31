@@ -22,11 +22,11 @@ import (
 
 var (
 	propertiesDeleteCmd = &cobra.Command{
-		Use:   "delete",
-		Short: "Delete a property in a namespace.",
-		Long:  "Delete a property and its value in a namespace",
-		Args:  cobra.NoArgs,
-		Run:   executePropertiesDelete,
+		Use:     "delete",
+		Short:   "Delete a property in a namespace.",
+		Long:    "Delete a property and its value in a namespace",
+		Args:    cobra.NoArgs,
+		Run:     executePropertiesDelete,
 		Aliases: []string{"properties delete"},
 	}
 
@@ -36,6 +36,8 @@ var (
 func init() {
 	parentCommand := propertiesCmd
 	parentCommand.AddCommand(propertiesDeleteCmd)
+
+	addNameProperty(propertiesDeleteCmd, true)
 }
 
 func executePropertiesDelete(cmd *cobra.Command, args []string) {

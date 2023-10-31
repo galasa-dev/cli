@@ -41,6 +41,9 @@ func init() {
 	propertiesSetCmd.MarkFlagRequired("value")
 	propertiesSetCmd.MarkPersistentFlagRequired("name")
 	parentCommand.AddCommand(propertiesSetCmd)
+
+	// The name property is mandatory for set.
+	addNameProperty(propertiesSetCmd, true)
 }
 
 func executePropertiesSet(cmd *cobra.Command, args []string) {

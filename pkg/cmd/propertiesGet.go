@@ -25,11 +25,11 @@ import (
 
 var (
 	propertiesGetCmd = &cobra.Command{
-		Use:   "get",
-		Short: "Get the details of properties in a namespace.",
-		Long:  "Get the details of all properties in a namespace, filtered with flags if present",
-		Args:  cobra.NoArgs,
-		Run:   executePropertiesGet,
+		Use:     "get",
+		Short:   "Get the details of properties in a namespace.",
+		Long:    "Get the details of all properties in a namespace, filtered with flags if present",
+		Args:    cobra.NoArgs,
+		Run:     executePropertiesGet,
 		Aliases: []string{"properties get"},
 	}
 
@@ -48,6 +48,8 @@ func init() {
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 	parentCommand := propertiesCmd
 	parentCommand.AddCommand(propertiesGetCmd)
+
+	addNameProperty(propertiesGetCmd, false)
 }
 
 func executePropertiesGet(cmd *cobra.Command, args []string) {
