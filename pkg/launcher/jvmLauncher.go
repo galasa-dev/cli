@@ -12,7 +12,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
-	"github.com/galasa-dev/cli/pkg/errors"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -74,6 +73,10 @@ type RunsSubmitLocalCmdParameters struct {
 
 	// A list of OBRs, which we hope one of these contains the tests we want to run.
 	Obrs []string
+
+
+	// The local maven repo, eg: file:///home/.m2/repository, where we can load the galasa uber-obr
+	LocalMaven string
 
 	// The remote maven repo, eg: maven central, where we can load the galasa uber-obr
 	RemoteMaven string
@@ -145,6 +148,7 @@ func NewJVMLauncher(
 			launcher.embeddedFileSystem,
 		)
 	}
+	
 
 	return launcher, err
 }
@@ -192,7 +196,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 
 		if len(obrs) < 1 {
 			// There are no obrs ! We have no idea how to find the test!
-			err = galasaErrors.NewGalasaError(errors.GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS, className)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS, className)
 		}
 		if err == nil {
 
@@ -224,7 +228,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 						launcher.bootstrapProps,
 						launcher.galasaHome,
 						launcher.fileSystem, launcher.javaHome, obrs,
-						*testClassToLaunch, launcher.cmdParams.RemoteMaven,
+						*testClassToLaunch, launcher.cmdParams.RemoteMaven, launcher.cmdParams.LocalMaven,
 						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
 						isTraceEnabled,
 						launcher.cmdParams.IsDebugEnabled,
@@ -259,6 +263,19 @@ func (launcher *JvmLauncher) SubmitTestRun(
 	}
 
 	return testRuns, err
+}
+
+func defaultLocalMavenIfNotSet(localMaven string, fileSystem files.FileSystem) (string, error) {
+	var err error
+	returnMavenPath := ""
+	if localMaven == "" {
+		var userHome string
+		userHome, err = fileSystem.GetUserHomeDirPath()
+		returnMavenPath = "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.m2/repository"
+	} else {
+		returnMavenPath = localMaven
+	}
+	return returnMavenPath, err
 }
 
 func buildListOfAllObrs(obrsFromCommandLine []string, obrFromPortfolio string) ([]utils.MavenCoordinates, error) {
@@ -465,6 +482,7 @@ func getCommandSyntax(
 	testObrs []utils.MavenCoordinates,
 	testLocation TestLocation,
 	remoteMaven string,
+	localMaven string,
 	galasaVersionToRun string,
 	overridesFilePath string,
 	isTraceEnabled bool,
@@ -505,17 +523,16 @@ func getCommandSyntax(
 
 		args = append(args, "-Dfile.encoding=UTF-8")
 
-		var userHome string
-		userHome, err = fileSystem.GetUserHomeDirPath()
+
 
 		nativeGalasaHomeFolderPath := galasaHome.GetNativeFolderPath()
 		args = append(args, `-DGALASA_HOME="`+nativeGalasaHomeFolderPath+`"`)
 
 		// --localmaven file://${M2_PATH}/repository/
 		// Note: URLs always have forward-slashes
+		localMaven, err = defaultLocalMavenIfNotSet(localMaven, fileSystem)
 		args = append(args, "--localmaven")
-		localMavenPath := "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.m2/repository"
-		args = append(args, localMavenPath)
+		args = append(args, localMaven)
 
 		// --remotemaven $REMOTE_MAVEN
 		args = append(args, "--remotemaven")
@@ -614,8 +631,8 @@ func calculateDebugPort(debugPort uint32, bootstrapProperties props.JavaProperti
 			var debugPortU64 uint64
 			debugPortU64, err = strconv.ParseUint(bootstrapPropsValue, 10, 32)
 			if err != nil {
-				err = errors.NewGalasaError(
-					errors.GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_PORT_VALUE,
+				err = galasaErrors.NewGalasaError(
+					galasaErrors.GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_PORT_VALUE,
 					bootstrapPropsValue,
 					api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT,
 					strconv.FormatUint(uint64(DEBUG_PORT_DEFAULT), 10),
@@ -642,7 +659,7 @@ func calculateDebugMode(debugMode string, bootstrapProperties props.JavaProperti
 		bootstrapPropsValue, isPresent := bootstrapProperties[api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE]
 		if isPresent {
 			debugMode = bootstrapPropsValue
-			err = checkDebugModeValueIsValid(debugMode, errors.GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_MODE_VALUE)
+			err = checkDebugModeValueIsValid(debugMode, galasaErrors.GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_MODE_VALUE)
 		} else {
 			// Default to 'listen'
 			debugMode = "listen"
@@ -650,13 +667,13 @@ func calculateDebugMode(debugMode string, bootstrapProperties props.JavaProperti
 	}
 
 	if err == nil {
-		err = checkDebugModeValueIsValid(debugMode, errors.GALASA_ERROR_ARG_BAD_DEBUG_MODE_VALUE)
+		err = checkDebugModeValueIsValid(debugMode, galasaErrors.GALASA_ERROR_ARG_BAD_DEBUG_MODE_VALUE)
 	}
 
 	return debugMode, err
 }
 
-func checkDebugModeValueIsValid(debugMode string, errorMessageIfInvalid *errors.MessageType) error {
+func checkDebugModeValueIsValid(debugMode string, errorMessageIfInvalid *galasaErrors.MessageType) error {
 	var err error = nil
 
 	lowerCaseDebugMode := strings.ToLower(debugMode)
@@ -666,7 +683,7 @@ func checkDebugModeValueIsValid(debugMode string, errorMessageIfInvalid *errors.
 	case "attach":
 		break
 	default:
-		err = errors.NewGalasaError(errorMessageIfInvalid, debugMode, api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE)
+		err = galasaErrors.NewGalasaError(errorMessageIfInvalid, debugMode, api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_MODE)
 	}
 
 	return err
