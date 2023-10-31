@@ -28,7 +28,10 @@ func SetProperty(
 	var err error
 	var outputMessage = "Successfully updated property '" + name + "' in namespace '" + namespace + "'"
 
-	err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
+	err = validateInputsAreNotEmpty(namespace, name)
+	if err == nil{
+		err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
+	}
 
 	// if updateProperty() returns an error containing "404 Not Found" due to receiving a
 	// GAL5017E from the api, we know the property does not exist and
