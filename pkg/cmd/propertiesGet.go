@@ -42,14 +42,28 @@ var (
 
 func init() {
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "", "Prefix to match against the start of the property name within the namespace")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesSuffix, "suffix", "", "Suffix to match against the end of the property name within the namespace")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesInfix, "infix", "", "Infix(es) that could be part of the property name within the namespace, multiple infixes are supplied as a comma-separated list")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
-	parentCommand := propertiesCmd
-	parentCommand.AddCommand(propertiesGetCmd)
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "",
+		"Prefix to match against the start of the property name within the namespace."+
+			" Optional. Cannot be used in conjunction with the '--name' option.")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesSuffix, "suffix", "",
+		"Suffix to match against the end of the property name within the namespace."+
+			" Optional. Cannot be used in conjunction with the '--name' option.")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesInfix, "infix", "",
+		"Infix(es) that could be part of the property name within the namespace."+
+			" Multiple infixes can be supplied as a comma-separated list. "+
+			" Optional. Cannot be used in conjunction with the '--name' option.")
+	propertiesGetCmd.PersistentFlags().StringVar(&propertiesOutputFormat, "format", "summary",
+		"output format for the data returned. Supported formats are: "+formatters+".")
 
 	addNameProperty(propertiesGetCmd, false)
+
+	// Name field cannot be used in conjunction wiht the prefix, suffix or infix commands.
+	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "prefix")
+	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "suffix")
+	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "infix")
+
+	parentCommand := propertiesCmd
+	parentCommand.AddCommand(propertiesGetCmd)
 }
 
 func executePropertiesGet(cmd *cobra.Command, args []string) {
