@@ -607,13 +607,13 @@ function properties_get_with_namespace_raw_format {
 
 #--------------------------------------------------------------------------
 function properties_secure_namespace_set {
-    h2 "Performing properties set with name parameter, but no value parameter..."
+    h2 "Performing properties set with secure namespace"
 
-    prop_name="properties.test.name.$PROP_NUM"
+    prop_name="properties.test.name.value.$PROP_NUM"
 
     cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace secure \
     --name $prop_name \
-    --value
+    --value dummy.value
     --bootstrap $bootstrap \
     --log -"
 
@@ -631,7 +631,7 @@ function properties_secure_namespace_set {
 
 #--------------------------------------------------------------------------
 function properties_secure_namespace_delete {
-    h2 "Performing properties delete with name parameter used..."
+    h2 "Performing properties delete with secure namespace used..."
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     
@@ -648,7 +648,7 @@ function properties_secure_namespace_delete {
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties delete command.
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to delete property, command failed."
+        error "Failed to delete secure property, command failed."
         exit 1
     fi
 
