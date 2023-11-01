@@ -1,15 +1,20 @@
-## galasactl properties namespaces
+## galasactl properties namespaces get
 
-Queries namespaces in an ecosystem
+Get a list of namespaces.
 
 ### Synopsis
 
-Allows interaction with the CPS to query namespaces in Galasa Ecosystem
+Get a list of namespaces within the CPS
+
+```
+galasactl properties namespaces get [flags]
+```
 
 ### Options
 
 ```
-  -h, --help   Displays the options for the namespaces command.
+      --format string   output format for the data returned. Supported formats are: 'raw', 'summary', 'yaml'. (default "summary")
+  -h, --help            Displays the options for the namespaces get command.
 ```
 
 ### Options inherited from parent commands
@@ -22,6 +27,5 @@ Allows interaction with the CPS to query namespaces in Galasa Ecosystem
 
 ### SEE ALSO
 
-* [galasactl properties](galasactl_properties.md)	 - Manages properties in an ecosystem
-* [galasactl properties namespaces get](galasactl_properties_namespaces_get.md)	 - Get a list of namespaces.
+* [galasactl properties namespaces](galasactl_properties_namespaces.md)	 - Queries namespaces in an ecosystem
 

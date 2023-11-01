@@ -36,7 +36,8 @@ var (
 func init() {
 	parentCommand := propertiesCmd
 	parentCommand.AddCommand(propertiesDeleteCmd)
-
+	// The namespace properties are mandatory for delete.
+	addNamespaceProperty(propertiesDeleteCmd, true)
 	addNameProperty(propertiesDeleteCmd, true)
 }
 

@@ -679,6 +679,35 @@ function properties_secure_namespace_delete {
 
     success "Properties set with secure namespace deleted successfully."
 }
+#--------------------------------------------------------------------------
+function properties_namespaces_get {
+    h2 "Performing namespaces get, expecting a list of all namespaces in the cps..."
+    
+    cmd="$ORIGINAL_DIR/bin/${binary} properties namespaces get \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
+    $cmd | tee $output_file
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get namespaces from cps: command failed."
+        exit 1
+    fi
+
+    # Check that the previous properties set created a property
+    #cat $output_file | grep "Total:([1-9])+" -q -E
+
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties get command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get a list of namespaces in the cps"
+        exit 1
+    fi
+    success "Properties namespaces get seems to be successful."
+}
 
 #--------------------------------------------------------------------------
 
@@ -704,6 +733,7 @@ function properties_tests {
     properties_get_with_namespace_raw_format
     properties_secure_namespace_set
     properties_secure_namespace_delete
+    #properties_namespaces_get
 }
 
 # checks if it's been called by main, set this variable if it is

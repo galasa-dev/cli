@@ -42,7 +42,8 @@ func init() {
 	propertiesSetCmd.MarkPersistentFlagRequired("name")
 	parentCommand.AddCommand(propertiesSetCmd)
 
-	// The name property is mandatory for set.
+	// The name & namespace properties are mandatory for set.
+	addNamespaceProperty(propertiesSetCmd, true)
 	addNameProperty(propertiesSetCmd, true)
 }
 
