@@ -80,7 +80,6 @@ func executePropertiesGet(cmd *cobra.Command, args []string) {
 
 	log.Println("Galasa CLI - Get ecosystem properties")
 
-	//Checks if --name has been provided with one or more of --prefix, --suffix, --infix as they are mutually exclusive
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
@@ -107,5 +106,4 @@ func executePropertiesGet(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-
 }

@@ -36,7 +36,7 @@ func GetProperties(
 ) error {
 	var err error
 	err = checkNameNotUsedWithPrefixSuffixInfix(name, prefix, suffix, infix)
-	if (err == nil) {
+	if err == nil {
 		var chosenFormatter propertiesformatter.PropertyFormatter
 
 		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
@@ -46,8 +46,7 @@ func GetProperties(
 			if err == nil {
 				var outputText string
 
-			//convert galasaapi.CpsProperty into formattable data
-			outputText, err = chosenFormatter.FormatProperties(cpsProperty)
+				outputText, err = chosenFormatter.FormatProperties(cpsProperty)
 
 				if err == nil {
 					console.WriteString(outputText)
@@ -56,7 +55,6 @@ func GetProperties(
 			}
 		}
 	}
-
 	return err
 }
 
@@ -144,13 +142,12 @@ func GetFormatterNamesString(validFormatters map[string]propertiesformatter.Prop
 	formatterNames := strings.Builder{}
 
 	for count, formatterName := range names {
-
 		if count != 0 {
 			formatterNames.WriteString(", ")
 		}
 		formatterNames.WriteString("'" + formatterName + "'")
-	}
 
+	}
 	return formatterNames.String()
 }
 
