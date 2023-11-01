@@ -14,7 +14,7 @@ galasactl properties delete [flags]
 
 ```
   -h, --help          Displays the options for the properties delete command.
-  -n, --name string   A mandatory field indicatig the name of a property in the namespace.
+  -n, --name string   A mandatory field indicating the name of a property in the namespace.
 ```
 
 ### Options inherited from parent commands

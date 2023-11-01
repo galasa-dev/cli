@@ -50,7 +50,7 @@ func addNameProperty(cmd *cobra.Command, isMandatory bool) {
 	flagName := "name"
 	var description string
 	if isMandatory {
-		description = "A mandatory field indicatig the name of a property in the namespace."
+		description = "A mandatory field indicating the name of a property in the namespace."
 	} else {
 		description = "An optional field indicating the name of a property in the namespace."
 	}
