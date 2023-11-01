@@ -689,23 +689,13 @@ function properties_namespaces_get {
 
     info "Command is: $cmd"
 
-    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
-    $cmd | tee $output_file
+    $cmd
     rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get namespaces from cps: command failed."
         exit 1
     fi
 
-    # Check that the previous properties set created a property
-    #cat $output_file | grep "Total:([1-9])+" -q -E
-
-    rc=$?
-    # We expect a return code of 0 because this is a properly formed properties get command.
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to get a list of namespaces in the cps"
-        exit 1
-    fi
     success "Properties namespaces get seems to be successful."
 }
 
@@ -714,6 +704,7 @@ function properties_namespaces_get {
 
 
 function properties_tests {
+    properties_namespaces_get
     get_random_property_name_number
     properties_create
     properties_update
@@ -733,7 +724,6 @@ function properties_tests {
     properties_get_with_namespace_raw_format
     properties_secure_namespace_set
     properties_secure_namespace_delete
-    #properties_namespaces_get
 }
 
 # checks if it's been called by main, set this variable if it is
