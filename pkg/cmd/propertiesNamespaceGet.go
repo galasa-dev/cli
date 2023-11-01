@@ -22,11 +22,12 @@ import (
 
 var (
 	propertiesNamespaceGetCmd = &cobra.Command{
-		Use:   "namespaces get",
+		Use:   "get",
 		Short: "Get a list of namespaces.",
 		Long:  "Get a list of namespaces within the CPS",
 		Args:  cobra.NoArgs,
 		Run:   executePropertiesNamespaceGet,
+		Aliases: []string{"namespaces get"},
 	}
 
 	namespaceOutputFormat string
@@ -35,7 +36,7 @@ var (
 func init() {
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
 	propertiesNamespaceGetCmd.PersistentFlags().StringVar(&namespaceOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
-	parentCommand := propertiesCmd
+	parentCommand := propertiesNamespaceCmd
 	parentCommand.AddCommand(propertiesNamespaceGetCmd)
 }
 

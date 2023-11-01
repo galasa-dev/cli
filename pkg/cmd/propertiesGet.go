@@ -54,7 +54,9 @@ func init() {
 			" Optional. Cannot be used in conjunction with the '--name' option.")
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesOutputFormat, "format", "summary",
 		"output format for the data returned. Supported formats are: "+formatters+".")
-
+	
+	// The namespace property is mandatory for get.
+	addNamespaceProperty(propertiesGetCmd, true)
 	addNameProperty(propertiesGetCmd, false)
 
 	// Name field cannot be used in conjunction wiht the prefix, suffix or infix commands.

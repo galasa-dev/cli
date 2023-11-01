@@ -11,7 +11,6 @@ Allows interaction with the CPS to create, query and maintain properties in Gala
 ```
   -b, --bootstrap string   Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
   -h, --help               Displays the options for the properties command.
-  -s, --namespace string   Namespace. A mandatory flag that describes the container for a collection of properties.
 ```
 
 ### Options inherited from parent commands
@@ -26,6 +25,6 @@ Allows interaction with the CPS to create, query and maintain properties in Gala
 * [galasactl](galasactl.md)	 - CLI for Galasa
 * [galasactl properties delete](galasactl_properties_delete.md)	 - Delete a property in a namespace.
 * [galasactl properties get](galasactl_properties_get.md)	 - Get the details of properties in a namespace.
-* [galasactl properties namespaces](galasactl_properties_namespaces.md)	 - Get a list of namespaces.
+* [galasactl properties namespaces](galasactl_properties_namespaces.md)	 - Queries namespaces in an ecosystem
 * [galasactl properties set](galasactl_properties_set.md)	 - Set the details of properties in a namespace.
 

@@ -31,18 +31,25 @@ func init() {
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
 			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
-	addNamespaceProperty(cmd)
-
 	parentCmd.AddCommand(propertiesCmd)
 }
 
-func addNamespaceProperty(cmd *cobra.Command) {
+func addNamespaceProperty(cmd *cobra.Command, isMandatory bool) {
 
 	flagName := "namespace"
-	cmd.PersistentFlags().StringVarP(&namespace, flagName, "s", "",
-		"Namespace. A mandatory flag that describes the container for a collection of properties.")
+	var description string
+	if isMandatory {
+		description = "A mandatory flag that describes the container for a collection of properties."
+	} else {
+		description = "An optional flag that describes the container for a collection of properties."
+	}
 
-	cmd.MarkPersistentFlagRequired(flagName)
+	cmd.PersistentFlags().StringVarP(&namespace, flagName, "s", "", description)
+
+	if isMandatory {
+		cmd.MarkPersistentFlagRequired(flagName)
+	}
+
 }
 
 // Some sub-commands need a name field to be mandatory, some don't.
