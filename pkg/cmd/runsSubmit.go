@@ -19,14 +19,6 @@ import (
 )
 
 var (
-	runsSubmitCmd = &cobra.Command{
-		Use:   "submit",
-		Short: "submit a list of tests to the ecosystem",
-		Long:  "Submit a list of tests to the ecosystem, monitor them and wait for them to complete",
-		Args:  cobra.NoArgs,
-		Run:   executeSubmit,
-		Aliases: []string{"runs submit"},
-	}
 
 	// Variables set by cobra's command-line parsing.
 	runsSubmitCmdParams utils.RunsSubmitCmdParameters
@@ -34,7 +26,18 @@ var (
 	submitSelectionFlags = runs.NewTestSelectionFlags()
 )
 
-func init() {
+func createRunsSubmitCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+
+	var err error = nil
+
+	runsSubmitCmd := &cobra.Command{
+		Use:     "submit",
+		Short:   "submit a list of tests to the ecosystem",
+		Long:    "Submit a list of tests to the ecosystem, monitor them and wait for them to complete",
+		Args:    cobra.NoArgs,
+		Run:     executeSubmit,
+		Aliases: []string{"runs submit"},
+	}
 
 	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdParams.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
 
@@ -84,7 +87,17 @@ func init() {
 
 	runs.AddCommandFlags(runsSubmitCmd, submitSelectionFlags)
 
-	runsCmd.AddCommand(runsSubmitCmd)
+	parentCmd.AddCommand(runsSubmitCmd)
+
+	// Add child commands.
+	err = createRunsSubmitCmdChildren(runsSubmitCmd)
+
+	return runsSubmitCmd, err
+}
+
+func createRunsSubmitCmdChildren(runsSubmitCmd *cobra.Command) error {
+	_, err := createRunsSubmitLocalCmd(runsSubmitCmd)
+	return err
 }
 
 func executeSubmit(cmd *cobra.Command, args []string) {

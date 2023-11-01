@@ -13,7 +13,13 @@ import (
 )
 
 var (
-	localInitCmd = &cobra.Command{
+	isDevelopmentLocalInit bool
+)
+
+func createLocalInitCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	localInitCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialises Galasa home folder",
 		Long:  "Initialises Galasa home folder in home directory with all the properties files",
@@ -21,14 +27,13 @@ var (
 		Run:   executeEnvInit,
 	}
 
-	isDevelopmentLocalInit bool
-)
-
-func init() {
 	localInitCmd.Flags().BoolVar(&isDevelopmentLocalInit, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	parentCommand := localCmd
-	parentCommand.AddCommand(localInitCmd)
+	parentCmd.AddCommand(localInitCmd)
+
+	// There are no children commands to add to the command tree from here.
+
+	return localInitCmd, err
 }
 
 func executeEnvInit(cmd *cobra.Command, args []string) {

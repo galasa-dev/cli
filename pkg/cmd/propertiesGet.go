@@ -24,14 +24,6 @@ import (
 //  And then display value of specified property or return empty if not found
 
 var (
-	propertiesGetCmd = &cobra.Command{
-		Use:     "get",
-		Short:   "Get the details of properties in a namespace.",
-		Long:    "Get the details of all properties in a namespace, filtered with flags if present",
-		Args:    cobra.NoArgs,
-		Run:     executePropertiesGet,
-		Aliases: []string{"properties get"},
-	}
 
 	// Variables set by cobra's command-line parsing.
 	propertiesPrefix       string
@@ -41,6 +33,20 @@ var (
 )
 
 func init() {
+}
+
+func createPropertiesGetCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	propertiesGetCmd := &cobra.Command{
+		Use:     "get",
+		Short:   "Get the details of properties in a namespace.",
+		Long:    "Get the details of all properties in a namespace, filtered with flags if present",
+		Args:    cobra.NoArgs,
+		Run:     executePropertiesGet,
+		Aliases: []string{"properties get"},
+	}
+
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesPrefix, "prefix", "",
 		"Prefix to match against the start of the property name within the namespace."+
@@ -62,8 +68,11 @@ func init() {
 	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "suffix")
 	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "infix")
 
-	parentCommand := propertiesCmd
-	parentCommand.AddCommand(propertiesGetCmd)
+	parentCmd.AddCommand(propertiesGetCmd)
+
+	// There are no sub-command children to add to the command tree.
+
+	return propertiesGetCmd, err
 }
 
 func executePropertiesGet(cmd *cobra.Command, args []string) {

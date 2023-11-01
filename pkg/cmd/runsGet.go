@@ -20,15 +20,6 @@ import (
 // And then show the results in a human-readable form.
 
 var (
-	runsGetCmd = &cobra.Command{
-		Use:   "get",
-		Short: "Get the details of a test runname which ran or is running.",
-		Long:  "Get the details of a test runname which ran or is running, displaying the results to the caller",
-		Args:  cobra.NoArgs,
-		Run:   executeRunsGet,
-		Aliases: []string{"runs get"},
-	}
-
 	// Variables set by cobra's command-line parsing.
 	runName            string
 	age                string
@@ -38,7 +29,18 @@ var (
 	isActiveRuns       bool
 )
 
-func init() {
+func createRunsGetCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	runsGetCmd := &cobra.Command{
+		Use:     "get",
+		Short:   "Get the details of a test runname which ran or is running.",
+		Long:    "Get the details of a test runname which ran or is running, displaying the results to the caller",
+		Args:    cobra.NoArgs,
+		Run:     executeRunsGet,
+		Aliases: []string{"runs get"},
+	}
+
 	units := runs.GetTimeUnitsForErrorMessage()
 	formatters := runs.GetFormatterNamesString(runs.CreateFormatters())
 	runsGetCmd.PersistentFlags().StringVar(&runName, "name", "", "the name of the test run we want information about")
@@ -50,8 +52,10 @@ func init() {
 	runsGetCmd.PersistentFlags().StringVar(&requestor, "requestor", "", "the requestor of the test run we want information about")
 	runsGetCmd.PersistentFlags().StringVar(&result, "result", "", "A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example \"--result Failed,Ignored,EnvFail\"")
 	runsGetCmd.PersistentFlags().BoolVar(&isActiveRuns, "active", false, "parameter to retrieve runs that have not finished yet.")
-	parentCommand := runsCmd
-	parentCommand.AddCommand(runsGetCmd)
+
+	parentCmd.AddCommand(runsGetCmd)
+
+	return runsGetCmd, err
 }
 
 func executeRunsGet(cmd *cobra.Command, args []string) {

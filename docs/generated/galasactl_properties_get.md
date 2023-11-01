@@ -14,7 +14,7 @@ galasactl properties get [flags]
 
 ```
       --format string   output format for the data returned. Supported formats are: 'raw', 'summary', 'yaml'. (default "summary")
-  -h, --help            Displays the options for the properties get command.
+  -h, --help            help for get
       --infix string    Infix(es) that could be part of the property name within the namespace. Multiple infixes can be supplied as a comma-separated list.  Optional. Cannot be used in conjunction with the '--name' option.
   -n, --name string     An optional field indicating the name of a property in the namespace.
       --prefix string   Prefix to match against the start of the property name within the namespace. Optional. Cannot be used in conjunction with the '--name' option.

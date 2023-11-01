@@ -20,22 +20,24 @@ import (
 // And then galasactl downloads the artifacts for the given run.
 
 var (
-	runsDownloadCmd = &cobra.Command{
-		Use:   "download",
-		Short: "Download the artifacts of a test run which ran.",
-		Long:  "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
-		Args:  cobra.NoArgs,
-		Run:   executeRunsDownload,
-		Aliases: []string{"runs download"},
-	}
-
 	// Variables set by cobra's command-line parsing.
 	runNameDownload         string
 	runForceDownload        bool
 	runDownloadTargetFolder string
 )
 
-func init() {
+func createRunsDownloadCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	runsDownloadCmd := &cobra.Command{
+		Use:     "download",
+		Short:   "Download the artifacts of a test run which ran.",
+		Long:    "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
+		Args:    cobra.NoArgs,
+		Run:     executeRunsDownload,
+		Aliases: []string{"runs download"},
+	}
+
 	runsDownloadCmd.PersistentFlags().StringVar(&runNameDownload, "name", "", "the name of the test run we want information about")
 	runsDownloadCmd.PersistentFlags().BoolVar(&runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
 	runsDownloadCmd.MarkPersistentFlagRequired("name")
@@ -43,8 +45,11 @@ func init() {
 		"The folder we want to download test run artifacts into. Sub-folders will be created within this location",
 	)
 
-	parentCommand := runsCmd
-	parentCommand.AddCommand(runsDownloadCmd)
+	parentCmd.AddCommand(runsDownloadCmd)
+
+	// There are no children commands of this command to add to the command tree.
+
+	return runsDownloadCmd, err
 }
 
 func executeRunsDownload(cmd *cobra.Command, args []string) {

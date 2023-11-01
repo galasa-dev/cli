@@ -13,7 +13,7 @@ galasactl properties set [flags]
 ### Options
 
 ```
-  -h, --help           Displays the options for the properties set command.
+  -h, --help           help for set
   -n, --name string    A mandatory field indicating the name of a property in the namespace.
       --value string   the value of the property you want to create
 ```

@@ -21,7 +21,14 @@ import (
 //  And then display a successful message or error
 
 var (
-	propertiesSetCmd = &cobra.Command{
+	// Variables set by cobra's command-line parsing.
+	propertyValue string
+)
+
+func createPropertiesSetCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	propertiesSetCmd := &cobra.Command{
 		Use:   "set",
 		Short: "Set the details of properties in a namespace.",
 		Long: "Set the details of a property in a namespace. " +
@@ -31,19 +38,19 @@ var (
 		Aliases: []string{"properties set"},
 	}
 
-	// Variables set by cobra's command-line parsing.
-	propertyValue string
-)
-
-func init() {
 	propertiesSetCmd.PersistentFlags().StringVar(&propertyValue, "value", "", "the value of the property you want to create")
-	parentCommand := propertiesCmd
+
 	propertiesSetCmd.MarkFlagRequired("value")
 	propertiesSetCmd.MarkPersistentFlagRequired("name")
-	parentCommand.AddCommand(propertiesSetCmd)
+
+	parentCmd.AddCommand(propertiesSetCmd)
 
 	// The name property is mandatory for set.
 	addNameProperty(propertiesSetCmd, true)
+
+	// There are no child sub-commands to add to the tree.
+
+	return propertiesSetCmd, err
 }
 
 func executePropertiesSet(cmd *cobra.Command, args []string) {

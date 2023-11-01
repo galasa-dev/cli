@@ -23,9 +23,14 @@ const (
 )
 
 func main() {
-	cmd := command.RootCmd
-	targetFolder := os.Args[1]
-	err := doc.GenMarkdownTree(cmd, targetFolder)
+	var targetFolder string
+
+	cmd, err := command.CreateRootCmd()
+	if err == nil {
+		targetFolder = os.Args[1]
+		err = doc.GenMarkdownTree(cmd, targetFolder)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}

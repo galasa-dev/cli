@@ -20,7 +20,16 @@ import (
 )
 
 var (
-	runsSubmitLocalCmd = &cobra.Command{
+	// Variables set by cobra's command-line parsing.
+	runsSubmitLocalCmdParams launcher.RunsSubmitLocalCmdParameters
+
+	submitLocalSelectionFlags = runs.NewTestSelectionFlags()
+)
+
+func createRunsSubmitLocalCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	runsSubmitLocalCmd := &cobra.Command{
 		Use:     "local",
 		Short:   "submit a list of tests to be run on a local java virtual machine (JVM)",
 		Long:    "Submit a list of tests to a local JVM, monitor them and wait for them to complete",
@@ -29,13 +38,6 @@ var (
 		Aliases: []string{"runs submit local"},
 	}
 
-	// Variables set by cobra's command-line parsing.
-	runsSubmitLocalCmdParams launcher.RunsSubmitLocalCmdParameters
-
-	submitLocalSelectionFlags = runs.NewTestSelectionFlags()
-)
-
-func init() {
 	//currentUserName := runs.GetCurrentUserName()
 
 	runsSubmitLocalCmd.Flags().StringVar(&runsSubmitLocalCmdParams.RemoteMaven, "remoteMaven",
@@ -80,7 +82,11 @@ func init() {
 	runs.AddClassFlag(runsSubmitLocalCmd, submitLocalSelectionFlags, true, "test class names."+
 		" The format of each entry is osgi-bundle-name/java-class-name. Java class names are fully qualified. No .class suffix is needed.")
 
-	runsSubmitCmd.AddCommand(runsSubmitLocalCmd)
+	parentCmd.AddCommand(runsSubmitLocalCmd)
+
+	// There are no children of this commands.
+
+	return runsSubmitLocalCmd, err
 }
 
 func executeSubmitLocal(cmd *cobra.Command, args []string) {

@@ -33,15 +33,6 @@ type GradleCoordinates struct {
 }
 
 var (
-	projectCreateCmd = &cobra.Command{
-		Use:     "create",
-		Short:   "Creates a new Galasa project",
-		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
-		Args:    cobra.NoArgs,
-		Run:     executeCreateProject,
-		Aliases: []string{"project create"},
-	}
-
 	packageName                string
 	force                      bool
 	isOBRProjectRequired       bool
@@ -51,33 +42,49 @@ var (
 	isDevelopmentProjectCreate bool
 )
 
-func init() {
-	cmd := projectCreateCmd
-	parentCommand := projectCmd
+func createProjectCreateCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
 
-	cmd.Flags().StringVar(&packageName, "package", "", "Java package name for tests we create. "+
+	projectCreateCmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Creates a new Galasa project",
+		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
+		Args:    cobra.NoArgs,
+		Run:     executeCreateProject,
+		Aliases: []string{"project create"},
+	}
+
+	projectCreateCmd.Flags().StringVar(&packageName, "package", "", "Java package name for tests we create. "+
 		"Forms part of the project name, maven/gradle group/artifact ID, "+
 		"and OSGi bundle name. It may reflect the name of your organisation or company, "+
 		"the department, function or application under test. "+
 		"For example: dev.galasa.banking.example")
-	cmd.MarkFlagRequired("package")
+	projectCreateCmd.MarkFlagRequired("package")
 
-	cmd.Flags().BoolVar(&isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
+	projectCreateCmd.Flags().BoolVar(&isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	cmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
-	cmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	cmd.Flags().StringVar(&featureNamesCommaSeparated, "features", "feature1",
+	projectCreateCmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
+	projectCreateCmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
+	projectCreateCmd.Flags().StringVar(&featureNamesCommaSeparated, "features", "feature1",
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
 
-	cmd.Flags().BoolVar(&useMaven, "maven", false, "Generate maven build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&useMaven, "maven", false, "Generate maven build artifacts. "+
 		"Can be used in addition to the --gradle flag. "+
 		"If this flag is not used, and the gradle option is not used, then behaviour of this flag defaults to true.")
-	cmd.Flags().BoolVar(&useGradle, "gradle", false, "Generate gradle build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&useGradle, "gradle", false, "Generate gradle build artifacts. "+
 		"Can be used in addition to the --maven flag.")
 
-	parentCommand.AddCommand(cmd)
+	parentCmd.AddCommand(projectCreateCmd)
+
+	// no children commands of project create to add here.
+
+	return projectCreateCmd, err
+}
+
+func init() {
+
 }
 
 func executeCreateProject(cmd *cobra.Command, args []string) {

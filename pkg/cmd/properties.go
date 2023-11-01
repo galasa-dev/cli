@@ -11,29 +11,48 @@ import (
 )
 
 var (
-	propertiesCmd = &cobra.Command{
-		Use:   "properties",
-		Short: "Manages properties in an ecosystem",
-		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
-	}
 	ecosystemBootstrap string
 	namespace          string
 	propertyName       string
 )
 
 func init() {
-	cmd := propertiesCmd
-	parentCmd := RootCmd
 
-	cmd.PersistentFlags().StringVarP(&ecosystemBootstrap, "bootstrap", "b", "",
+}
+
+func createPropertiesCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	propertiesCmd := &cobra.Command{
+		Use:   "properties",
+		Short: "Manages properties in an ecosystem",
+		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
+	}
+
+	propertiesCmd.PersistentFlags().StringVarP(&ecosystemBootstrap, "bootstrap", "b", "",
 		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
 			"If it starts with neither, it is assumed to be a fully-qualified path. "+
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
 			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
-	addNamespaceProperty(cmd)
+	addNamespaceProperty(propertiesCmd)
 
 	parentCmd.AddCommand(propertiesCmd)
+
+	err = createPropertiesCmdChildren(propertiesCmd)
+
+	return propertiesCmd, err
+}
+
+func createPropertiesCmdChildren(propertiesCmd *cobra.Command) error {
+	_, err := createPropertiesGetCmd(propertiesCmd)
+	if err == nil {
+		_, err = createPropertiesSetCmd(propertiesCmd)
+	}
+	if err == nil {
+		_, err = createPropertiesDeleteCmd(propertiesCmd)
+	}
+	return err
 }
 
 func addNamespaceProperty(cmd *cobra.Command) {

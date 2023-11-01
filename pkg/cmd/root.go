@@ -18,13 +18,6 @@ import (
 )
 
 var (
-	RootCmd = &cobra.Command{
-		Use:     "galasactl",
-		Short:   "CLI for Galasa",
-		Long:    `A tool for controlling Galasa resources using the command-line.`,
-		Version: "unknowncliversion-unknowngithash",
-	}
-
 	// The file to which logs are being directed, if any. "" if not.
 	logFileName string
 
@@ -37,18 +30,92 @@ var (
 	CmdParamGalasaHomePath string
 )
 
+func CreateRootCmd() (*cobra.Command, error) {
+	version, err := embedded.GetGalasaCtlVersion()
+	var rootCmd *cobra.Command
+	if err == nil {
+		rootCmd = &cobra.Command{
+			Use:     "galasactl",
+			Short:   "CLI for Galasa",
+			Long:    `A tool for controlling Galasa resources using the command-line.`,
+			Version: version,
+		}
+
+		galasaCtlVersion, err := embedded.GetGalasaCtlVersion()
+		if err != nil {
+			// If that failed, something is very wrong...
+			// like we can't read the file from the embedded file system.
+			// Give up out now with a bad exit code
+			finalWord(err)
+		}
+
+		rootCmd.Version = galasaCtlVersion
+
+		rootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "",
+			"File to which log information will be sent. Any folder referred to must exist. "+
+				"An existing file will be overwritten. "+
+				"Specify \"-\" to log to stderr. "+
+				"Defaults to not logging.")
+
+		rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+		SetHelpFlagForAllCommands(rootCmd, func(cobra *cobra.Command) {
+			alias := cobra.NameAndAliases()
+			//if the command has an alias,
+			//the format would be cobra.Name, cobra.Aliases
+			//otherwise it is just cobra.Name
+			nameAndAliases := strings.Split(alias, ", ")
+			if len(nameAndAliases) > 1 {
+				alias = nameAndAliases[1]
+			}
+
+			cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
+		})
+
+		rootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
+			"Path to a folder where Galasa will read and write files and configuration settings. "+
+				"The default is '${HOME}/.galasa'. "+
+				"This overrides the GALASA_HOME environment variable which may be set instead.",
+		)
+
+		err = createRootCmdChildren(rootCmd)
+	}
+	return rootCmd, err
+}
+
+func createRootCmdChildren(rootCmd *cobra.Command) error {
+	_, err := createLocalCmd(rootCmd)
+	if err == nil {
+		_, err = createProjectCmd(rootCmd)
+	}
+	if err == nil {
+		_, err = createPropertiesCmd(rootCmd)
+	}
+	if err == nil {
+		_, err = createRunsCmd(rootCmd)
+	}
+	return err
+}
+
+// The main entry point into the cmd package.
 func Execute() {
+	var err error
+	var rootCmd *cobra.Command
+	rootCmd, err = CreateRootCmd()
 
-	// Catch execution if a panic happens.
-	defer func() {
-		err := recover()
+	if err == nil {
 
-		// Display the error and exit.
-		finalWord(err)
-	}()
+		// Catch execution if a panic happens.
+		defer func() {
+			err := recover()
 
-	// Execute the command
-	err := RootCmd.Execute()
+			// Display the error and exit.
+			finalWord(err)
+		}()
+
+		// Execute the command
+		err = rootCmd.Execute()
+	}
 	finalWord(err)
 }
 
@@ -115,45 +182,6 @@ func extractErrorDetails(obj interface{}) (string, int, bool) {
 
 func IsInstanceOf(objectPtr interface{}, typePtr interface{}) bool {
 	return reflect.TypeOf(objectPtr) == reflect.TypeOf(typePtr)
-}
-
-func init() {
-	galasaCtlVersion, err := embedded.GetGalasaCtlVersion()
-	if err != nil {
-		// If that failed, something is very wrong...
-		// like we can't read the file from the embedded file system.
-		// Give up out now with a bad exit code
-		finalWord(err)
-	}
-
-	RootCmd.Version = galasaCtlVersion
-
-	RootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "",
-		"File to which log information will be sent. Any folder referred to must exist. "+
-			"An existing file will be overwritten. "+
-			"Specify \"-\" to log to stderr. "+
-			"Defaults to not logging.")
-
-	RootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
-
-	SetHelpFlagForAllCommands(RootCmd, func(cobra *cobra.Command) {
-		alias := cobra.NameAndAliases()
-		//if the command has an alias,
-		//the format would be cobra.Name, cobra.Aliases
-		//otherwise it is just cobra.Name
-		nameAndAliases := strings.Split(alias, ", ")
-		if len(nameAndAliases) > 1 {
-			alias = nameAndAliases[1]
-		}
-
-		cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
-	})
-
-	RootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
-		"Path to a folder where Galasa will read and write files and configuration settings. "+
-			"The default is '${HOME}/.galasa'. "+
-			"This overrides the GALASA_HOME environment variable which may be set instead.",
-	)
 }
 
 func SetHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {

@@ -20,8 +20,10 @@ import (
 //	properties delete --namespace "framework" --name "hello"
 //  And then display a successful message or error
 
-var (
-	propertiesDeleteCmd = &cobra.Command{
+func createPropertiesDeleteCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
+
+	propertiesDeleteCmd := &cobra.Command{
 		Use:     "delete",
 		Short:   "Delete a property in a namespace.",
 		Long:    "Delete a property and its value in a namespace",
@@ -30,14 +32,13 @@ var (
 		Aliases: []string{"properties delete"},
 	}
 
-	// Variables update by cobra's command-line parsing.
-)
-
-func init() {
-	parentCommand := propertiesCmd
-	parentCommand.AddCommand(propertiesDeleteCmd)
+	parentCmd.AddCommand(propertiesDeleteCmd)
 
 	addNameProperty(propertiesDeleteCmd, true)
+
+	// There are no sub-commands to add to the tree.
+
+	return propertiesDeleteCmd, err
 }
 
 func executePropertiesDelete(cmd *cobra.Command, args []string) {

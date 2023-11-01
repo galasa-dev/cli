@@ -19,15 +19,6 @@ import (
 )
 
 var (
-	runsAssembleCmd = &cobra.Command{
-		Use:   "prepare",
-		Short: "prepares a list of tests",
-		Long:  "Prepares a list of tests from a test catalog providing specific overrides if required",
-		Args:  cobra.NoArgs,
-		Run:   executeAssemble,
-		Aliases: []string{"runs prepare"},
-	}
-
 	portfolioFilename    string
 	prepareFlagOverrides *[]string
 	prepareAppend        *bool
@@ -35,14 +26,30 @@ var (
 	prepareSelectionFlags = runs.NewTestSelectionFlags()
 )
 
-func init() {
-	runsAssembleCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
-	prepareFlagOverrides = runsAssembleCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
-	prepareAppend = runsAssembleCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
-	runsAssembleCmd.MarkFlagRequired("portfolio")
-	runs.AddCommandFlags(runsAssembleCmd, prepareSelectionFlags)
+func createRunsPrepareCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+	var err error = nil
 
-	runsCmd.AddCommand(runsAssembleCmd)
+	runsPrepareCmd := &cobra.Command{
+		Use:     "prepare",
+		Short:   "prepares a list of tests",
+		Long:    "Prepares a list of tests from a test catalog providing specific overrides if required",
+		Args:    cobra.NoArgs,
+		Run:     executeAssemble,
+		Aliases: []string{"runs prepare"},
+	}
+
+	runsPrepareCmd.Flags().StringVarP(&portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
+	prepareFlagOverrides = runsPrepareCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
+	prepareAppend = runsPrepareCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
+	runsPrepareCmd.MarkFlagRequired("portfolio")
+
+	runs.AddCommandFlags(runsPrepareCmd, prepareSelectionFlags)
+
+	parentCmd.AddCommand(runsPrepareCmd)
+
+	// There are no sub-command children to add to the command tree.
+
+	return runsPrepareCmd, err
 }
 
 func executeAssemble(cmd *cobra.Command, args []string) {

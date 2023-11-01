@@ -13,6 +13,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCanCreateRootCmd(t *testing.T) {
+	rootCmd, err := CreateRootCmd()
+	assert.Nil(t, err)
+	assert.NotNil(t, rootCmd)
+}
+
 func TestCanGetNormalExitCodeAndErrorTextFromAnError(t *testing.T) {
 	var err = errors.New("my text")
 	errorText, exitCode, isStackTraceWanted := extractErrorDetails(err)

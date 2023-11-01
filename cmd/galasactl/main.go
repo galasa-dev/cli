@@ -6,9 +6,9 @@
 package main
 
 import (
-    "github.com/galasa-dev/cli/pkg/cmd"
+	"github.com/galasa-dev/cli/pkg/cmd"
 )
 
 func main() {
-    cmd.Execute()
+	cmd.Execute()
 }
