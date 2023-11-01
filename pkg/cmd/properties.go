@@ -41,7 +41,7 @@ func addNamespaceProperty(cmd *cobra.Command, isMandatory bool) {
 	if isMandatory {
 		description = "A mandatory flag that describes the container for a collection of properties."
 	} else {
-		description = "A optional flag that describes the container for a collection of properties."
+		description = "An optional flag that describes the container for a collection of properties."
 	}
 
 	cmd.PersistentFlags().StringVarP(&namespace, flagName, "s", "", description)

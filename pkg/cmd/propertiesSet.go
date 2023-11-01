@@ -39,7 +39,6 @@ func init() {
 	propertiesSetCmd.PersistentFlags().StringVar(&propertyValue, "value", "", "the value of the property you want to create")
 	parentCommand := propertiesCmd
 	propertiesSetCmd.MarkFlagRequired("value")
-	propertiesSetCmd.MarkPersistentFlagRequired("name")
 	parentCommand.AddCommand(propertiesSetCmd)
 
 	// The name & namespace properties are mandatory for set.
