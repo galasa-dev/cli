@@ -17,30 +17,29 @@ import (
 )
 
 //Objective: Allow user to do this:
-//	properties delete --namespace "framework" --name "hello"
-//  And then display a successful message or error
+//	properties namespaces get
+//  And then display all namespaces in the cps or returns empty
 
 var (
-	propertiesDeleteCmd = &cobra.Command{
-		Use:     "delete",
-		Short:   "Delete a property in a namespace.",
-		Long:    "Delete a property and its value in a namespace",
-		Args:    cobra.NoArgs,
-		Run:     executePropertiesDelete,
-		Aliases: []string{"properties delete"},
+	propertiesNamespaceGetCmd = &cobra.Command{
+		Use:   "namespaces get",
+		Short: "Get a list of namespaces.",
+		Long:  "Get a list of namespaces within the CPS",
+		Args:  cobra.NoArgs,
+		Run:   executePropertiesNamespaceGet,
 	}
 
-	// Variables update by cobra's command-line parsing.
+	namespaceOutputFormat string
 )
 
 func init() {
+	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
+	propertiesNamespaceGetCmd.PersistentFlags().StringVar(&namespaceOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 	parentCommand := propertiesCmd
-	parentCommand.AddCommand(propertiesDeleteCmd)
-
-	addNameProperty(propertiesDeleteCmd, true)
+	parentCommand.AddCommand(propertiesNamespaceGetCmd)
 }
 
-func executePropertiesDelete(cmd *cobra.Command, args []string) {
+func executePropertiesNamespaceGet(cmd *cobra.Command, args []string) {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
@@ -52,7 +51,7 @@ func executePropertiesDelete(cmd *cobra.Command, args []string) {
 	}
 	isCapturingLogs = true
 
-	log.Println("Galasa CLI - Delete ecosystem properties")
+	log.Println("Galasa CLI - Get ecosystem namespaces")
 
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
@@ -70,11 +69,13 @@ func executePropertiesDelete(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	var console = utils.NewRealConsole()
+
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	// Call to process the command in a unit-testable way.
-	err = properties.DeleteProperty(namespace, propertyName, apiServerUrl)
+	err = properties.GetNamespaceProperties(apiServerUrl, console)
 	if err != nil {
 		panic(err)
 	}

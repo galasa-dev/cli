@@ -13,7 +13,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // DeleteProperty - performs all the logic to implement the `galasactl properties delete` command,
@@ -22,12 +21,11 @@ func DeleteProperty(
 	namespace string,
 	name string,
 	apiServerUrl string,
-	console utils.Console,
 ) error {
 	var err error
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		err = deleteCpsProperty(namespace, name, apiServerUrl, console)
+		err = deleteCpsProperty(namespace, name, apiServerUrl)
 	}
 	return err
 }
@@ -46,7 +44,6 @@ func validateInputsAreNotEmpty(namespace string, name string) error {
 func deleteCpsProperty(namespace string,
 	name string,
 	apiServerUrl string,
-	console utils.Console,
 ) error {
 	var err error = nil
 	var resp *http.Response

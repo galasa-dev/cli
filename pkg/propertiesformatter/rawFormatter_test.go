@@ -1,7 +1,7 @@
 /*
-* Copyright contributors to the Galasa project
-*
-* SPDX-License-Identifier: EPL-2.0
+ * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 
 package propertiesformatter
@@ -12,34 +12,35 @@ import (
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
- 
-func TestRawFormatterNoDataReturnsNothing(t *testing.T) {
+
+//PROPERTIES
+
+func TestPropertiesRawFormatterNoDataReturnsNothing(t *testing.T) {
 	// For...
 	formatter := NewPropertyRawFormatter()
 	// No data to format...
-	formattableProperty := make([]galasaapi.CpsProperty, 0)
- 
+	properties := make([]galasaapi.CpsProperty, 0)
+
 	// When...
-	actualFormattedOutput, err := formatter.FormatProperties(formattableProperty)
- 
+	actualFormattedOutput, err := formatter.FormatProperties(properties)
+
 	// Then...
 	assert.Nil(t, err)
 	expectedFormattedOutput := ""
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
+func TestPropertiesRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
 	formatter := NewPropertyRawFormatter()
-	// No data to format...
-	formattableProperties := make([]galasaapi.CpsProperty, 0)
-	property1 := galasaapi.NewCpsProperty()
-	property1.SetName("namespace.name1")
-	property1.SetValue("value1")
-	formattableProperties = append(formattableProperties, *property1)
- 
+
+	properties := make([]galasaapi.CpsProperty, 0)
+	property1 := CreateProperty("namespace.name1", "value1")
+
+	properties = append(properties, *property1)
+
 	// When...
-	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)
+	actualFormattedOutput, err := formatter.FormatProperties(properties)
 
 	// Then...
 	assert.Nil(t, err)
@@ -47,26 +48,73 @@ func TestRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestRawFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
+func TestPropertiesRawFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// For..
 	formatter := NewPropertyRawFormatter()
-	// No data to format...
-	formattableProperties := make([]galasaapi.CpsProperty, 0)
-	property1 := galasaapi.NewCpsProperty()
-	property1.SetName("namespace.name1")
-	property1.SetValue("value1")
-	formattableProperties = append(formattableProperties, *property1)
-	property2 := galasaapi.NewCpsProperty()
-	property2.SetName("namespace.name2")
-	property2.SetValue("value2")
-	formattableProperties = append(formattableProperties, *property2)
- 
+
+	properties := make([]galasaapi.CpsProperty, 0)
+	property1 := CreateProperty("namespace.name1", "value1")
+	property2 := CreateProperty("namespace.name2", "value2")
+	properties = append(properties, *property1, *property2)
+
 	// When...
-	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)
+	actualFormattedOutput, err := formatter.FormatProperties(properties)
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput :=  "namespace|name1|value1\n"+
-								"namespace|name2|value2\n"
+	expectedFormattedOutput := "namespace|name1|value1\n" +
+		"namespace|name2|value2\n"
+	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
+}
+
+// NAMESPACES
+func TestNamespacesRawFormatterNoDataReturnsNothing(t *testing.T) {
+	// For...
+	formatter := NewPropertyRawFormatter()
+	// No data to format...
+	namespaces := make([]galasaapi.Namespace, 0)
+
+	// When...
+	actualFormattedOutput, err := formatter.FormatNamespaces(namespaces)
+
+	// Then...
+	assert.Nil(t, err)
+	expectedFormattedOutput := ""
+	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
+}
+
+func TestNamespacesRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
+	// For..
+	formatter := NewPropertyRawFormatter()
+
+	namespaces := make([]galasaapi.Namespace, 0)
+	namespace1 := CreateNamespace("namespace1", "normal", "")
+	namespaces = append(namespaces, *namespace1)
+
+	// When...
+	actualFormattedOutput, err := formatter.FormatNamespaces(namespaces)
+
+	// Then...
+	assert.Nil(t, err)
+	expectedFormattedOutput := "namespace1|normal\n"
+	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
+}
+
+func TestNamespacesRawFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
+	// For..
+	formatter := NewPropertyRawFormatter()
+
+	namespaces := make([]galasaapi.Namespace, 0)
+	namespace1 := CreateNamespace("namespace1", "secure", "")
+	namespace2 := CreateNamespace("namespace2", "normal", "")
+	namespaces = append(namespaces, *namespace1, *namespace2)
+
+	// When...
+	actualFormattedOutput, err := formatter.FormatNamespaces(namespaces)
+
+	// Then...
+	assert.Nil(t, err)
+	expectedFormattedOutput := "namespace1|secure\n" +
+		"namespace2|normal\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
