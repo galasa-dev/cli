@@ -26,8 +26,9 @@ var (
 		Short: "Set the details of properties in a namespace.",
 		Long: "Set the details of a property in a namespace. " +
 			"If the property does not exist, a new property is created, otherwise the value for that property will be updated.",
-		Args: cobra.NoArgs,
-		Run:  executePropertiesSet,
+		Args:    cobra.NoArgs,
+		Run:     executePropertiesSet,
+		Aliases: []string{"properties set"},
 	}
 
 	// Variables set by cobra's command-line parsing.
@@ -38,8 +39,11 @@ func init() {
 	propertiesSetCmd.PersistentFlags().StringVar(&propertyValue, "value", "", "the value of the property you want to create")
 	parentCommand := propertiesCmd
 	propertiesSetCmd.MarkFlagRequired("value")
-	propertiesSetCmd.MarkPersistentFlagRequired("name")
 	parentCommand.AddCommand(propertiesSetCmd)
+
+	// The name & namespace properties are mandatory for set.
+	addNamespaceProperty(propertiesSetCmd, true)
+	addNameProperty(propertiesSetCmd, true)
 }
 
 func executePropertiesSet(cmd *cobra.Command, args []string) {
@@ -72,13 +76,11 @@ func executePropertiesSet(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	var console = utils.NewRealConsole()
-
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	// Call to process the command in a unit-testable way.
-	err = properties.SetProperty(namespace, propertyName, propertyValue, apiServerUrl, console)
+	err = properties.SetProperty(namespace, propertyName, propertyValue, apiServerUrl)
 	if err != nil {
 		panic(err)
 	}

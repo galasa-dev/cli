@@ -21,11 +21,12 @@ import (
 
 var (
 	runsSubmitLocalCmd = &cobra.Command{
-		Use:   "local",
-		Short: "submit a list of tests to be run on a local java virtual machine (JVM)",
-		Long:  "Submit a list of tests to a local JVM, monitor them and wait for them to complete",
-		Args:  cobra.NoArgs,
-		Run:   executeSubmitLocal,
+		Use:     "local",
+		Short:   "submit a list of tests to be run on a local java virtual machine (JVM)",
+		Long:    "Submit a list of tests to a local JVM, monitor them and wait for them to complete",
+		Args:    cobra.NoArgs,
+		Run:     executeSubmitLocal,
+		Aliases: []string{"runs submit local"},
 	}
 
 	// Variables set by cobra's command-line parsing.

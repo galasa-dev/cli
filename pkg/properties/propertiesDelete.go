@@ -13,7 +13,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // DeleteProperty - performs all the logic to implement the `galasactl properties delete` command,
@@ -22,17 +21,12 @@ func DeleteProperty(
 	namespace string,
 	name string,
 	apiServerUrl string,
-	console utils.Console,
 ) error {
 	var err error
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		err = deleteCpsProperty(namespace, name, apiServerUrl, console)
+		err = deleteCpsProperty(namespace, name, apiServerUrl)
 	}
-	if err == nil {
-		console.WriteString("Successfully deleted '" + name + "' in namespace '" + namespace + "'")
-	}
-
 	return err
 }
 
@@ -50,7 +44,6 @@ func validateInputsAreNotEmpty(namespace string, name string) error {
 func deleteCpsProperty(namespace string,
 	name string,
 	apiServerUrl string,
-	console utils.Console,
 ) error {
 	var err error = nil
 	var resp *http.Response
@@ -67,7 +60,7 @@ func deleteCpsProperty(namespace string,
 	if (resp != nil) && (resp.StatusCode != 200) {
 		var apiError galasaErrors.GalasaAPIError
 		err = apiError.UnmarshalApiError(resp)
-		if err == nil { 
+		if err == nil {
 			//Ensure that the conversion of the error doesn't raise another exception
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, apiError.Message)
 		}

@@ -9,26 +9,40 @@ package propertiesformatter
 import (
 	"fmt"
 	"strings"
+
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 //Print in the following fashion:
+//PROPERTIES
 // namespace	name	    value
 // framework	property1	value1
 // framework	property2	value2
-// Total:1
+// Total:2
+//NAMESPACES
+// namespace	type
+// framework	normal
+// secure       secure
+// Total:2
 
 // -----------------------------------------------------
-// PropertyFormatter - implementations can take a collection of properties results
+// PropertyFormatter - implementations can take a collection of properties/namespaces results
 // and turn them into a string for display to the user.
 const (
+	//properties display
 	HEADER_PROPERTY_NAMESPACE = "namespace"
 	HEADER_PROPERTY_NAME      = "name"
 	HEADER_PROPERTY_VALUE     = "value"
+
+	//namespaces display
+	HEADER_NAMESPACE      = "namespace"
+	HEADER_NAMESPACE_TYPE = "type"
+	HEADER_NAMESPACE_URL  = "url"
 )
 
 type PropertyFormatter interface {
 	FormatProperties(propertyResults []galasaapi.CpsProperty) (string, error)
+	FormatNamespaces(namespaces []galasaapi.Namespace) (string, error)
 	GetName() string
 }
 

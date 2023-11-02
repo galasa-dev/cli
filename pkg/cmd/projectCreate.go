@@ -34,11 +34,12 @@ type GradleCoordinates struct {
 
 var (
 	projectCreateCmd = &cobra.Command{
-		Use:   "create",
-		Short: "Creates a new Galasa project",
-		Long:  "Creates a new Galasa test project with optional OBR project and build process files",
-		Args:  cobra.NoArgs,
-		Run:   executeCreateProject,
+		Use:     "create",
+		Short:   "Creates a new Galasa project",
+		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
+		Args:    cobra.NoArgs,
+		Run:     executeCreateProject,
+		Aliases: []string{"project create"},
 	}
 
 	packageName                string

@@ -11,8 +11,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,14 +58,15 @@ func mockDeletePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 				}`
 			} else if propertyName == "validName" {
 				statusCode = 200
-				namespaceProperties = `Successfully deleted 'validName' in 'validNamespace'`
+				namespaceProperties = ""
 			}
 		}
 	}
 	w.WriteHeader(statusCode)
 	w.Write([]byte(namespaceProperties))
 }
-func TestUDeletePropertyValueReturnsOk(t *testing.T) {
+
+func TestDeletePropertyValueReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
 	name := "validName"
@@ -76,15 +75,11 @@ func TestUDeletePropertyValueReturnsOk(t *testing.T) {
 	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-	expectedOutput := "Successfully deleted '" + name + "' in namespace '" + namespace + "'"
-
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
 }
 
 // invalid OR empty namespace, valid propertyname
@@ -97,14 +92,12 @@ func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl)
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1099E","Error occured when trying to access namespace 'invalidNamespace'.")
+	assert.Contains(t, err.Error(), "GAL1099E", "Error occured when trying to access namespace 'invalidNamespace'.")
 }
 
 // validnamespace , invalid propertyname
@@ -117,14 +110,12 @@ func TestValidNamespaceAndDeleteInvalidNameNameReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl)
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1099E:","Error occured when trying to access property 'invalidName'.")
+	assert.ErrorContains(t, err, "GAL1099E:", "Error occured when trying to access property 'invalidName'.")
 }
 
 func TestNoNamespaceReturnsError(t *testing.T) {
@@ -136,14 +127,12 @@ func TestNoNamespaceReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl)
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1102E:")
+	assert.ErrorContains(t, err, "GAL1101E:")
 }
 
 func TestNoNameReturnsError(t *testing.T) {
@@ -155,12 +144,10 @@ func TestNoNameReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl, console)
+	err := DeleteProperty(namespace, name, apiServerUrl)
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1101E:")
+	assert.ErrorContains(t, err, "GAL1102E:")
 }

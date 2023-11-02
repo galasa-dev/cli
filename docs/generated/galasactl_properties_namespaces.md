@@ -1,22 +1,15 @@
-## galasactl properties set
+## galasactl properties namespaces
 
-Set the details of properties in a namespace.
+Queries namespaces in an ecosystem
 
 ### Synopsis
 
-Set the details of a property in a namespace. If the property does not exist, a new property is created, otherwise the value for that property will be updated.
-
-```
-galasactl properties set [flags]
-```
+Allows interaction with the CPS to query namespaces in Galasa Ecosystem
 
 ### Options
 
 ```
-  -h, --help               Displays the options for the properties set command.
-  -n, --name string        A mandatory field indicating the name of a property in the namespace.
-  -s, --namespace string   A mandatory flag that describes the container for a collection of properties.
-      --value string       the value of the property you want to create
+  -h, --help   Displays the options for the namespaces command.
 ```
 
 ### Options inherited from parent commands
@@ -30,4 +23,5 @@ galasactl properties set [flags]
 ### SEE ALSO
 
 * [galasactl properties](galasactl_properties.md)	 - Manages properties in an ecosystem
+* [galasactl properties namespaces get](galasactl_properties_namespaces_get.md)	 - Get a list of namespaces.
 

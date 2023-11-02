@@ -224,6 +224,7 @@ Total:4
 	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
 
 	//Then
+
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, console.ReadText())
 }

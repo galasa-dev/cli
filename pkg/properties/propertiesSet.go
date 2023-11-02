@@ -13,7 +13,6 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // SetProperty - performs all the logic to implement the `galasactl properties set` command,
@@ -23,26 +22,21 @@ func SetProperty(
 	name string,
 	value string,
 	apiServerUrl string,
-	console utils.Console,
 ) error {
 	var err error
-	var outputMessage = "Successfully updated property '" + name + "' in namespace '" + namespace + "'"
 
-	err = updateCpsProperty(namespace, name, value, apiServerUrl, console)
+	err = validateInputsAreNotEmpty(namespace, name)
+	if err == nil{
+		err = updateCpsProperty(namespace, name, value, apiServerUrl)
+	}
 
 	// if updateProperty() returns an error containing "404 Not Found" due to receiving a
 	// GAL5017E from the api, we know the property does not exist and
 	// so we assume the user wants to create a new property
 	if err != nil && strings.Contains(err.Error(), "404") {
-		err = createCpsProperty(namespace, name, value, apiServerUrl, console)
-		outputMessage = "Successfully created property '" + name + "' in namespace '" + namespace + "'"
+		err = createCpsProperty(namespace, name, value, apiServerUrl)
 	}
-
-	if err == nil {
-		console.WriteString(outputMessage)
-	} else {
-		console.WriteString(err.Error())
-	}
+	
 	return err
 }
 
@@ -50,7 +44,6 @@ func updateCpsProperty(namespace string,
 	name string,
 	value string,
 	apiServerUrl string,
-	console utils.Console,
 ) error {
 	var err error = nil
 
@@ -74,7 +67,6 @@ func createCpsProperty(namespace string,
 	name string,
 	value string,
 	apiServerUrl string,
-	console utils.Console,
 ) error {
 	var err error = nil
 
