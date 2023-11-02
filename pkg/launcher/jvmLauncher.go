@@ -271,7 +271,9 @@ func defaultLocalMavenIfNotSet(localMaven string, fileSystem files.FileSystem) (
 	if localMaven == "" {
 		var userHome string
 		userHome, err = fileSystem.GetUserHomeDirPath()
-		returnMavenPath = "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.m2/repository"
+		if err == nil {
+			returnMavenPath = "file:///" + strings.ReplaceAll(userHome, "\\", "/") + "/.m2/repository"
+		}
 	} else {
 		returnMavenPath = localMaven
 	}

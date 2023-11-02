@@ -233,7 +233,7 @@ galasactl runs submit local --log -
 - The --obr indicates where the tool can find an OBR which refers to the bundle where all the tests are housed.
 - The --class parameter tells the tool which test class to run. The string is in the format of `<osgi-bundle-id>/<fully-qualified-java-class>`. All the test methods within the class will be run. You can use multiple such flags to test multiple classes.
 - The `JAVA_HOME` environment variable should be set to refer to the JVM to use in which the test will be launched.
-- The --localmaven parameter tells the tool where galasa bundles can be loaded from on your local file system. Defaults to your home .m2/repository file. Please not that this should be in a URL form e.g. `file:///Users/myuserid/.m2/repository`.
+- The --localmaven parameter tells the tool where galasa bundles can be loaded from on your local file system. Defaults to your home .m2/repository file. Please note that this should be in a URL form e.g. `file:///Users/myuserid/.m2/repository`.
 
 - The `--throttle 1` option would mean all your tests run sequentially. A higher throttle value means that local tests run in parallel.
 
