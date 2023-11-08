@@ -44,16 +44,17 @@ func createPropertiesSetCmd(parentCmd *cobra.Command, propertiesCmdValues *Prope
 	propertiesSetCmd.PersistentFlags().StringVar(&propertiesSetCmdValues.propertyValue, "value", "", "the value of the property you want to create")
 
 	propertiesSetCmd.MarkFlagRequired("value")
-	propertiesSetCmd.MarkPersistentFlagRequired("name")
 
 	parentCmd.AddCommand(propertiesSetCmd)
 
-	// The name property is mandatory for set.
+	// The name & namespace properties are mandatory for set.
+	addNamespaceProperty(propertiesSetCmd, true, propertiesCmdValues)
 	addNameProperty(propertiesSetCmd, true, propertiesCmdValues)
 
 	// There are no child sub-commands to add to the tree.
 
 	return propertiesSetCmd, err
+
 }
 
 func executePropertiesSet(cmd *cobra.Command, args []string, propertiesSetCmdValues *PropertiesSetCmdValues, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) {
@@ -84,8 +85,6 @@ func executePropertiesSet(cmd *cobra.Command, args []string, propertiesSetCmdVal
 	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
 	if err == nil {
 
-		var console = utils.NewRealConsole()
-
 		apiServerUrl := bootstrapData.ApiServerURL
 		log.Printf("The API server is at '%s'\n", apiServerUrl)
 
@@ -93,10 +92,11 @@ func executePropertiesSet(cmd *cobra.Command, args []string, propertiesSetCmdVal
 		err = properties.SetProperty(
 			propertiesCmdValues.namespace,
 			propertiesCmdValues.propertyName,
-			propertiesSetCmdValues.propertyValue, apiServerUrl, console)
+			propertiesSetCmdValues.propertyValue, apiServerUrl)
 	}
 
 	if err != nil {
 		panic(err)
 	}
+
 }

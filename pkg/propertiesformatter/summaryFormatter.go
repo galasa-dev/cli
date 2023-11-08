@@ -61,3 +61,34 @@ func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.CpsP
 	result = buff.String()
 	return result, err
 }
+
+func (*PropertySummaryFormatter) FormatNamespaces(namespaces []galasaapi.Namespace) (string, error) {
+	var result string = ""
+	var err error = nil
+	buff := strings.Builder{}
+	totalNamespaces := len(namespaces)
+
+	if totalNamespaces > 0 {
+		var table [][]string
+
+		var headers = []string{HEADER_NAMESPACE, HEADER_NAMESPACE_TYPE}
+
+		table = append(table, headers)
+		for _, namespace := range namespaces {
+			var line []string
+
+			line = append(line, *namespace.Name, *namespace.Type)
+			table = append(table, line)
+		}
+
+		columnLengths := calculateMaxLengthOfEachColumn(table)
+		writeFormattedTableToStringBuilder(table, &buff, columnLengths)
+
+		buff.WriteString("\n")
+
+	}
+	buff.WriteString("Total:" + strconv.Itoa(totalNamespaces) + "\n")
+
+	result = buff.String()
+	return result, err
+}

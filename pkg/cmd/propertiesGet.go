@@ -61,6 +61,8 @@ func createPropertiesGetCmd(parentCmd *cobra.Command, propertiesCmdValues *Prope
 	propertiesGetCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesOutputFormat, "format", "summary",
 		"output format for the data returned. Supported formats are: "+formatters+".")
 
+	// The namespace property is mandatory for get.
+	addNamespaceProperty(propertiesGetCmd, true, propertiesCmdValues)
 	addNameProperty(propertiesGetCmd, false, propertiesCmdValues)
 
 	// Name field cannot be used in conjunction wiht the prefix, suffix or infix commands.
@@ -95,7 +97,6 @@ func executePropertiesGet(
 
 	log.Println("Galasa CLI - Get ecosystem properties")
 
-	//Checks if --name has been provided with one or more of --prefix, --suffix, --infix as they are mutually exclusive
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
@@ -130,5 +131,4 @@ func executePropertiesGet(
 	if err != nil {
 		panic(err)
 	}
-
 }

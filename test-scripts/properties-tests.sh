@@ -679,12 +679,32 @@ function properties_secure_namespace_delete {
 
     success "Properties set with secure namespace deleted successfully."
 }
+#--------------------------------------------------------------------------
+function properties_namespaces_get {
+    h2 "Performing namespaces get, expecting a list of all namespaces in the cps..."
+    
+    cmd="$ORIGINAL_DIR/bin/${binary} properties namespaces get \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get namespaces from cps: command failed."
+        exit 1
+    fi
+
+    success "Properties namespaces get seems to be successful."
+}
 
 #--------------------------------------------------------------------------
 
 
 
 function properties_tests {
+    properties_namespaces_get
     get_random_property_name_number
     properties_create
     properties_update

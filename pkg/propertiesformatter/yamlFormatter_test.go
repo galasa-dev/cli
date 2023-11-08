@@ -12,21 +12,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestYamlFormatterNoDataReturnsBlankString(t *testing.T) {
- 
+// PROPERTIES
+func TestPropertiesYamlFormatterNoDataReturnsBlankString(t *testing.T) {
+
 	formatter := NewPropertyYamlFormatter()
 	// No data to format...
 	formattableProperty := make([]galasaapi.CpsProperty, 0)
- 
+
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperty)
- 
+
 	assert.Nil(t, err)
 	expectedFormattedOutput := ""
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestYamlFormatterSingleDataReturnsCorrectly(t *testing.T) {
+func TestPropertiesYamlFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
 	formatter := NewPropertyYamlFormatter()
 	// No data to format...
@@ -35,7 +36,7 @@ func TestYamlFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	property1.SetName("namespace.name1")
 	property1.SetValue("value1")
 	formattableProperties = append(formattableProperties, *property1)
- 
+
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)
 
@@ -48,7 +49,7 @@ value: value1
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func TestYamlFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
+func TestPropertiesYamlFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// For..
 	formatter := NewPropertyYamlFormatter()
 	// No data to format...
@@ -61,7 +62,7 @@ func TestYamlFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	property2.SetName("namespace.name2")
 	property2.SetValue("value2")
 	formattableProperties = append(formattableProperties, *property2)
- 
+
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(formattableProperties)
 
@@ -73,6 +74,68 @@ value: value1
 ---
 name: namespace.name2
 value: value2
+`
+	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
+}
+
+// NAMESPACES
+func TestNamespacesYamlFormatterNoDataReturnsBlankString(t *testing.T) {
+
+	formatter := NewPropertyYamlFormatter()
+	// No data to format...
+	namespace := make([]galasaapi.Namespace, 0)
+
+	// When...
+	actualFormattedOutput, err := formatter.FormatNamespaces(namespace)
+
+	assert.Nil(t, err)
+	expectedFormattedOutput := ""
+	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
+}
+
+func TestNamespacesYamlFormatterSingleDataReturnsCorrectly(t *testing.T) {
+	// For..
+	formatter := NewPropertyYamlFormatter()
+
+	namespaces := make([]galasaapi.Namespace, 0)
+	namespace1 := CreateNamespace("framework", "normal", "")
+	namespaces = append(namespaces, *namespace1)
+
+	// When...
+	actualFormattedOutput, err := formatter.FormatNamespaces(namespaces)
+
+	// Then...
+	assert.Nil(t, err)
+	expectedFormattedOutput := `apiVersion: galasa-dev/v1alpha1
+name: framework
+propertiesUrl: null
+type: normal
+`
+	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
+}
+
+func TestNamespacesYamlFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
+	// For..
+	formatter := NewPropertyYamlFormatter()
+
+	namespaces := make([]galasaapi.Namespace, 0)
+	namespace1 := CreateNamespace("framework", "normal", "cps/namespaces/normal")
+	namespace2 := CreateNamespace("secure", "secure", "")
+	namespaces = append(namespaces, *namespace1, *namespace2)
+
+	// When...
+	actualFormattedOutput, err := formatter.FormatNamespaces(namespaces)
+
+	// Then...
+	assert.Nil(t, err)
+	expectedFormattedOutput := `apiVersion: galasa-dev/v1alpha1
+name: framework
+propertiesUrl: cps/namespaces/normal
+type: normal
+---
+name: secure
+propertiesUrl: null
+type: secure
 `
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }

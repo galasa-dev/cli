@@ -96,13 +96,14 @@ The `galasactl` tool can generate the following errors:
 - GAL1093E: Failed to submit test (bundle: {}, class: {}). Reason is: {}
 - GAL1094E: User error: Cannot run test {} on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.
 - GAL1095E: namespace '{}' is invalid. Expected it to be in a format starting with letters, and ending in a number with no non-alphanumeric characters.
-- GAL1096E: Could not query namespace results.
-- GAL1097E: Property --name cannot be used alongside --prefix, --suffix, or --infix.
+- GAL1096E: Could not query namespace results. Reason: '{}'
+- GAL1097E: Property --name cannot be set alongside --prefix, --suffix, or --infix.
 - GAL1098E: Property '{}' could not be updated. Reason: '{}'
 - GAL1099E: Property '{}' could not be deleted. Reason: '{}'
 - GAL1100E: Property '{}' could not be created. Reason: '{}'
-- GAL1101E: name '{}' is invalid. '--name' is a mandatory flag.
-- GAL1102E: namespace '{}' is invalid. '--namespace' is a mandatory flag.
+- GAL1101E: namespace '{}' is invalid. '--namespace' is a mandatory flag for this command.
+- GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command.
+- GAL1103E: Could not query CPS results. Reason: '{}'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

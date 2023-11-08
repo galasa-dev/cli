@@ -37,6 +37,7 @@ func createPropertiesDeleteCmd(parentCmd *cobra.Command, propertiesCmdValues *Pr
 	parentCmd.AddCommand(propertiesDeleteCmd)
 
 	addNameProperty(propertiesDeleteCmd, true, propertiesCmdValues)
+	addNamespaceProperty(propertiesDeleteCmd, true, propertiesCmdValues)
 
 	// There are no sub-commands to add to the tree.
 
@@ -73,13 +74,11 @@ func executePropertiesDelete(cmd *cobra.Command, args []string, propertiesCmdVal
 		panic(err)
 	}
 
-	var console = utils.NewRealConsole()
-
 	apiServerUrl := bootstrapData.ApiServerURL
 	log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 	// Call to process the command in a unit-testable way.
-	err = properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiServerUrl, console)
+	err = properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiServerUrl)
 	if err != nil {
 		panic(err)
 	}

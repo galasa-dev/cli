@@ -19,6 +19,7 @@ galasactl runs submit local [flags]
       --debugPort uint32       The port to use when the --debug option causes the testcase to connect to a java debugger. The default value used is 2970 which can be overridden by the 'galasactl.jvm.local.launch.debug.port' property in the bootstrap file, which in turn can be overridden by this explicit parameter on the galasactl command.
       --galasaVersion string   the version of galasa you want to use to run your tests. This should match the version of the galasa obr you built your test bundles against. (default "0.31.0")
   -h, --help                   help for local
+      --localMaven string      The url of a local maven repository are where galasa bundles can be loaded from on your local file system. Defaults to your home .m2/repository file. Please note that this should be in a URL form e.g. 'file:///Users/myuserid/.m2/repository', or 'file://C:/Users/myuserid/.m2/repository'
       --obr strings            The maven coordinates of the obr bundle(s) which refer to your test bundles. The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' Multiple instances of this flag can be used to describe multiple obr bundles.
       --remoteMaven string     the url of the remote maven where galasa bundles can be loaded from. Defaults to maven central. (default "https://repo.maven.apache.org/maven2")
 ```
