@@ -11,7 +11,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -26,7 +25,7 @@ type RunsPrepareCmdValues struct {
 	prepareSelectionFlags *utils.TestSelectionFlagValues
 }
 
-func createRunsPrepareCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createRunsPrepareCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	runsPrepareCmdValues := &RunsPrepareCmdValues{}
@@ -40,7 +39,7 @@ func createRunsPrepareCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs prepare"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executeAssemble(cmd, args, runsPrepareCmdValues, runsCmdValues, rootCmdValues)
+			executeAssemble(factory, cmd, args, runsPrepareCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -58,11 +57,11 @@ func createRunsPrepareCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues
 	return runsPrepareCmd, err
 }
 
-func executeAssemble(cmd *cobra.Command, args []string, runsPrepareCmdValues *RunsPrepareCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
+func executeAssemble(factory Factory, cmd *cobra.Command, args []string, runsPrepareCmdValues *RunsPrepareCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

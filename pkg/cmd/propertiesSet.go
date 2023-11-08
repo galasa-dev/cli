@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/properties"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -25,7 +24,7 @@ type PropertiesSetCmdValues struct {
 	propertyValue string
 }
 
-func createPropertiesSetCmd(parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createPropertiesSetCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 	propertiesSetCmdValues := &PropertiesSetCmdValues{}
 
@@ -37,7 +36,7 @@ func createPropertiesSetCmd(parentCmd *cobra.Command, propertiesCmdValues *Prope
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties set"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executePropertiesSet(cmd, args, propertiesSetCmdValues, propertiesCmdValues, rootCmdValues)
+			executePropertiesSet(factory, cmd, args, propertiesSetCmdValues, propertiesCmdValues, rootCmdValues)
 		},
 	}
 
@@ -57,11 +56,11 @@ func createPropertiesSetCmd(parentCmd *cobra.Command, propertiesCmdValues *Prope
 
 }
 
-func executePropertiesSet(cmd *cobra.Command, args []string, propertiesSetCmdValues *PropertiesSetCmdValues, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) {
+func executePropertiesSet(factory Factory, cmd *cobra.Command, args []string, propertiesSetCmdValues *PropertiesSetCmdValues, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

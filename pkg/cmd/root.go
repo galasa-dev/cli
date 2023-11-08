@@ -32,7 +32,7 @@ type RootCmdValues struct {
 
 var rootCmdValues *RootCmdValues
 
-func CreateRootCmd() (*cobra.Command, error) {
+func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 	// Flags parsed by this command put values into this instance of the structure.
 	rootCmdValues = &RootCmdValues{
 		isCapturingLogs: false,
@@ -81,31 +81,31 @@ func CreateRootCmd() (*cobra.Command, error) {
 					"This overrides the GALASA_HOME environment variable which may be set instead.",
 			)
 
-			err = createRootCmdChildren(rootCmd, rootCmdValues)
+			err = createRootCmdChildren(factory, rootCmd, rootCmdValues)
 		}
 	}
 	return rootCmd, err
 }
 
-func createRootCmdChildren(rootCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createLocalCmd(rootCmd, rootCmdValues)
+func createRootCmdChildren(factory Factory, rootCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
+	_, err := createLocalCmd(factory, rootCmd, rootCmdValues)
 	if err == nil {
-		_, err = createProjectCmd(rootCmd, rootCmdValues)
+		_, err = createProjectCmd(factory, rootCmd, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createPropertiesCmd(rootCmd, rootCmdValues)
+		_, err = createPropertiesCmd(factory, rootCmd, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createRunsCmd(rootCmd, rootCmdValues)
+		_, err = createRunsCmd(factory, rootCmd, rootCmdValues)
 	}
 	return err
 }
 
 // The main entry point into the cmd package.
-func Execute() {
+func Execute(factory Factory) {
 	var err error
 	var rootCmd *cobra.Command
-	rootCmd, err = CreateRootCmd()
+	rootCmd, err = CreateRootCmd(factory)
 
 	if err == nil {
 

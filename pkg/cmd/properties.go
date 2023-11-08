@@ -16,7 +16,7 @@ type PropertiesCmdValues struct {
 	propertyName       string
 }
 
-func createPropertiesCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createPropertiesCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	propertiesCmdValues := &PropertiesCmdValues{}
@@ -35,21 +35,21 @@ func createPropertiesCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues)
 
 	parentCmd.AddCommand(propertiesCmd)
 
-	err = createPropertiesCmdChildren(propertiesCmd, propertiesCmdValues, rootCmdValues)
+	err = createPropertiesCmdChildren(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
 
 	return propertiesCmd, err
 }
 
-func createPropertiesCmdChildren(propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
-	_, err := createPropertiesGetCmd(propertiesCmd, propertiesCmdValues, rootCmdValues)
+func createPropertiesCmdChildren(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+	_, err := createPropertiesGetCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
 	if err == nil {
-		_, err = createPropertiesSetCmd(propertiesCmd, propertiesCmdValues, rootCmdValues)
+		_, err = createPropertiesSetCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createPropertiesDeleteCmd(propertiesCmd, propertiesCmdValues, rootCmdValues)
+		_, err = createPropertiesDeleteCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createPropertiesNamespaceCmd(propertiesCmd, propertiesCmdValues, rootCmdValues)
+		_, err = createPropertiesNamespaceCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
 	}
 	return err
 }

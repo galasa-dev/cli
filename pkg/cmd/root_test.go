@@ -14,7 +14,8 @@ import (
 )
 
 func TestCanCreateRootCmd(t *testing.T) {
-	rootCmd, err := CreateRootCmd()
+	factory := NewMockFactory()
+	rootCmd, err := CreateRootCmd(factory)
 	assert.Nil(t, err)
 	assert.NotNil(t, rootCmd)
 }

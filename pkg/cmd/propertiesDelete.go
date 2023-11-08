@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/properties"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -20,7 +19,7 @@ import (
 //	properties delete --namespace "framework" --name "hello"
 //  And then display a successful message or error
 
-func createPropertiesDeleteCmd(parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createPropertiesDeleteCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	propertiesDeleteCmd := &cobra.Command{
@@ -29,7 +28,7 @@ func createPropertiesDeleteCmd(parentCmd *cobra.Command, propertiesCmdValues *Pr
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			executePropertiesDelete(cmd, args, propertiesCmdValues, rootCmdValues)
+			executePropertiesDelete(factory, cmd, args, propertiesCmdValues, rootCmdValues)
 		},
 		Aliases: []string{"properties delete"},
 	}
@@ -44,11 +43,11 @@ func createPropertiesDeleteCmd(parentCmd *cobra.Command, propertiesCmdValues *Pr
 	return propertiesDeleteCmd, err
 }
 
-func executePropertiesDelete(cmd *cobra.Command, args []string, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) {
+func executePropertiesDelete(factory Factory, cmd *cobra.Command, args []string, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

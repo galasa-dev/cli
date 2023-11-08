@@ -14,7 +14,7 @@ import (
 //	properties namespaces get
 //  And then display all namespaces in the cps or returns empty
 
-func createPropertiesNamespaceCmd(propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createPropertiesNamespaceCmd(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 
 	propertiesNamespaceCmd := &cobra.Command{
 		Use:   "namespaces",
@@ -25,15 +25,15 @@ func createPropertiesNamespaceCmd(propertiesCmd *cobra.Command, propertiesCmdVal
 
 	propertiesCmd.AddCommand(propertiesNamespaceCmd)
 
-	err := createChildCommands(propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
+	err := createChildCommands(factory, propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
 
 	return propertiesNamespaceCmd, err
 }
 
-func createChildCommands(propertiesNamespaceCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+func createChildCommands(factory Factory, propertiesNamespaceCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 
-	_, err = createPropertiesNamespaceGetCmd(propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
+	_, err = createPropertiesNamespaceGetCmd(factory, propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
 
 	return err
 }

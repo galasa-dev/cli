@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createLocalCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createLocalCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 
 	localCmd := &cobra.Command{
 		Use:   "local",
@@ -18,11 +18,11 @@ func createLocalCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*co
 	}
 	parentCmd.AddCommand(localCmd)
 
-	err := createLocalCmdChildren(localCmd, rootCmdValues)
+	err := createLocalCmdChildren(factory, localCmd, rootCmdValues)
 	return localCmd, err
 }
 
-func createLocalCmdChildren(localCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createLocalInitCmd(localCmd, rootCmdValues)
+func createLocalCmdChildren(factory Factory, localCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
+	_, err := createLocalInitCmd(factory, localCmd, rootCmdValues)
 	return err
 }

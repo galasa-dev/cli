@@ -13,7 +13,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -28,6 +27,7 @@ type RunsSubmitLocalCmdValues struct {
 }
 
 func createRunsSubmitLocalCmd(
+	factory Factory,
 	parentCmd *cobra.Command,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,
@@ -48,7 +48,7 @@ func createRunsSubmitLocalCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit local"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executeSubmitLocal(cmd, args, runsSubmitLocalCmdValues, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+			executeSubmitLocal(factory, cmd, args, runsSubmitLocalCmdValues, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -107,6 +107,7 @@ func createRunsSubmitLocalCmd(
 }
 
 func executeSubmitLocal(
+	factory Factory,
 	cmd *cobra.Command,
 	args []string,
 	runsSubmitLocalCmdValues *RunsSubmitLocalCmdValues,
@@ -118,8 +119,7 @@ func executeSubmitLocal(
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
-
+	fileSystem := factory.GetFileSystem()
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 
 	if err == nil {

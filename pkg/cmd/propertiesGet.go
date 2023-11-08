@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/properties"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -31,7 +30,7 @@ type PropertiesGetCmdValues struct {
 	propertiesOutputFormat string
 }
 
-func createPropertiesGetCmd(parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createPropertiesGetCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	propertiesGetCmdValues := &PropertiesGetCmdValues{}
@@ -43,7 +42,7 @@ func createPropertiesGetCmd(parentCmd *cobra.Command, propertiesCmdValues *Prope
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executePropertiesGet(cmd, args, propertiesGetCmdValues, propertiesCmdValues, rootCmdValues)
+			executePropertiesGet(factory, cmd, args, propertiesGetCmdValues, propertiesCmdValues, rootCmdValues)
 		},
 	}
 
@@ -78,6 +77,7 @@ func createPropertiesGetCmd(parentCmd *cobra.Command, propertiesCmdValues *Prope
 }
 
 func executePropertiesGet(
+	factory Factory,
 	cmd *cobra.Command,
 	args []string,
 	propertiesGetCmdValues *PropertiesGetCmdValues,
@@ -87,7 +87,7 @@ func executePropertiesGet(
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

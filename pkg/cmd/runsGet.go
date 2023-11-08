@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ type RunsGetCmdValues struct {
 	isActiveRuns       bool
 }
 
-func createRunsGetCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createRunsGetCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	runsGetCmdValues := &RunsGetCmdValues{}
@@ -41,7 +40,7 @@ func createRunsGetCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, ro
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs get"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executeRunsGet(cmd, args, runsGetCmdValues, runsCmdValues, rootCmdValues)
+			executeRunsGet(factory, cmd, args, runsGetCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -62,12 +61,12 @@ func createRunsGetCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, ro
 	return runsGetCmd, err
 }
 
-func executeRunsGet(cmd *cobra.Command, args []string, runsGetCmdValues *RunsGetCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
+func executeRunsGet(factory Factory, cmd *cobra.Command, args []string, runsGetCmdValues *RunsGetCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
 
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

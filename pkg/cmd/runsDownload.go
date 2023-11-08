@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -26,7 +25,7 @@ type RunsDownloadCmdValues struct {
 	runDownloadTargetFolder string
 }
 
-func createRunsDownloadCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createRunsDownloadCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	runsDownloadCmdValues := &RunsDownloadCmdValues{}
@@ -38,7 +37,7 @@ func createRunsDownloadCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValue
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs download"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executeRunsDownload(cmd, args, runsDownloadCmdValues, runsCmdValues, rootCmdValues)
+			executeRunsDownload(factory, cmd, args, runsDownloadCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -56,12 +55,12 @@ func createRunsDownloadCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValue
 	return runsDownloadCmd, err
 }
 
-func executeRunsDownload(cmd *cobra.Command, args []string, runsDownloadCmdValues *RunsDownloadCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
+func executeRunsDownload(factory Factory, cmd *cobra.Command, args []string, runsDownloadCmdValues *RunsDownloadCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
 
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

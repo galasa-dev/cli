@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/properties"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -25,6 +24,7 @@ type PropertiesNamespaceCmdValues struct {
 }
 
 func createPropertiesNamespaceGetCmd(
+	factory Factory,
 	propertiesNamespaceCmd *cobra.Command,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
@@ -41,7 +41,7 @@ func createPropertiesNamespaceGetCmd(
 		Long:  "Get a list of namespaces within the CPS",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			executePropertiesNamespaceGet(cmd, args, propertiesNamespaceCmdValues, propertiesCmdValues, rootCmdValues)
+			executePropertiesNamespaceGet(factory, cmd, args, propertiesNamespaceCmdValues, propertiesCmdValues, rootCmdValues)
 		},
 		Aliases: []string{"namespaces get"},
 	}
@@ -55,6 +55,7 @@ func createPropertiesNamespaceGetCmd(
 }
 
 func executePropertiesNamespaceGet(
+	factory Factory,
 	cmd *cobra.Command,
 	args []string,
 	propertiesNamespaceCmdValues *PropertiesNamespaceCmdValues,
@@ -64,7 +65,7 @@ func executePropertiesNamespaceGet(
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

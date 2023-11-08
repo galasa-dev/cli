@@ -13,7 +13,7 @@ type RunsCmdValues struct {
 	bootstrap string
 }
 
-func createRunsCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createRunsCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	runsCmdValues := &RunsCmdValues{}
@@ -32,22 +32,22 @@ func createRunsCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cob
 
 	parentCmd.AddCommand(runsCmd)
 
-	err = createRunsCmdChildren(runsCmd, runsCmdValues, rootCmdValues)
+	err = createRunsCmdChildren(factory, runsCmd, runsCmdValues, rootCmdValues)
 
 	return runsCmd, err
 }
 
-func createRunsCmdChildren(runsCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) error {
+func createRunsCmdChildren(factory Factory, runsCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) error {
 
-	_, err := createRunsDownloadCmd(runsCmd, runsCmdValues, rootCmdValues)
+	_, err := createRunsDownloadCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
 	if err == nil {
-		_, err = createRunsGetCmd(runsCmd, runsCmdValues, rootCmdValues)
+		_, err = createRunsGetCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createRunsPrepareCmd(runsCmd, runsCmdValues, rootCmdValues)
+		_, err = createRunsPrepareCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createRunsSubmitCmd(runsCmd, runsCmdValues, rootCmdValues)
+		_, err = createRunsSubmitCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
 	}
 	return err
 }

@@ -16,7 +16,7 @@ type LocalInitCmdValues struct {
 	isDevelopmentLocalInit bool
 }
 
-func createLocalInitCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createLocalInitCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	localInitCmdValues := &LocalInitCmdValues{}
@@ -27,7 +27,7 @@ func createLocalInitCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) 
 		Long:  "Initialises Galasa home folder in home directory with all the properties files",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			executeEnvInit(cmd, args, localInitCmdValues, rootCmdValues)
+			executeEnvInit(cmd, args, factory, localInitCmdValues, rootCmdValues)
 		},
 	}
 
@@ -40,12 +40,12 @@ func createLocalInitCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) 
 	return localInitCmd, err
 }
 
-func executeEnvInit(cmd *cobra.Command, args []string, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) {
+func executeEnvInit(cmd *cobra.Command, args []string, factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) {
 
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

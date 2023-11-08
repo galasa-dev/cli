@@ -42,7 +42,7 @@ type ProjectCreateCmdValues struct {
 	isDevelopmentProjectCreate bool
 }
 
-func createProjectCreateCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	projectCreateCmdValues := &ProjectCreateCmdValues{}
@@ -54,7 +54,7 @@ func createProjectCreateCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValu
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executeCreateProject(cmd, args, projectCreateCmdValues, rootCmdValues)
+			executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmdValues)
 		},
 	}
 
@@ -87,12 +87,12 @@ func createProjectCreateCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValu
 	return projectCreateCmd, err
 }
 
-func executeCreateProject(cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) {
+func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) {
 
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

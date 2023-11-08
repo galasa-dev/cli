@@ -12,13 +12,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
-func createRunsSubmitCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func createRunsSubmitCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 
 	var err error = nil
 
@@ -34,7 +33,7 @@ func createRunsSubmitCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
 		Run: func(cmd *cobra.Command, args []string) {
-			executeSubmit(cmd, args, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+			executeSubmit(factory, cmd, args, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -89,22 +88,22 @@ func createRunsSubmitCmd(parentCmd *cobra.Command, runsCmdValues *RunsCmdValues,
 	parentCmd.AddCommand(runsSubmitCmd)
 
 	// Add child commands.
-	err = createRunsSubmitCmdChildren(runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+	err = createRunsSubmitCmdChildren(factory, runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 
 	return runsSubmitCmd, err
 }
 
-func createRunsSubmitCmdChildren(runsSubmitCmd *cobra.Command, runsSubmitCmdValues *utils.RunsSubmitCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) error {
-	_, err := createRunsSubmitLocalCmd(runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+func createRunsSubmitCmdChildren(factory Factory, runsSubmitCmd *cobra.Command, runsSubmitCmdValues *utils.RunsSubmitCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) error {
+	_, err := createRunsSubmitLocalCmd(factory, runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 	return err
 }
 
-func executeSubmit(cmd *cobra.Command, args []string, runsSubmitCmdValues *utils.RunsSubmitCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
+func executeSubmit(factory Factory, cmd *cobra.Command, args []string, runsSubmitCmdValues *utils.RunsSubmitCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
 
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {

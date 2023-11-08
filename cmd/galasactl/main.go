@@ -10,5 +10,6 @@ import (
 )
 
 func main() {
-	cmd.Execute()
+	factory := cmd.NewRealFactory()
+	cmd.Execute(factory)
 }
