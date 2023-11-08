@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createProjectCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+func createProjectCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 
 	var err error = nil
 
@@ -21,12 +21,12 @@ func createProjectCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
 
 	parentCmd.AddCommand(projectCmd)
 
-	err = createProjectCmdChildren(projectCmd)
+	err = createProjectCmdChildren(projectCmd, rootCmdValues)
 
 	return projectCmd, err
 }
 
-func createProjectCmdChildren(projectCmd *cobra.Command) error {
-	_, err := createProjectCreateCmd(projectCmd)
+func createProjectCmdChildren(projectCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
+	_, err := createProjectCreateCmd(projectCmd, rootCmdValues)
 	return err
 }

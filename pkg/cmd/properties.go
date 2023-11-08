@@ -10,18 +10,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
+type PropertiesCmdValues struct {
 	ecosystemBootstrap string
 	namespace          string
 	propertyName       string
-)
-
-func init() {
-
 }
 
-func createPropertiesCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+func createPropertiesCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
+
+	propertiesCmdValues := &PropertiesCmdValues{}
 
 	propertiesCmd := &cobra.Command{
 		Use:   "properties",
@@ -29,43 +27,43 @@ func createPropertiesCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
 		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
 	}
 
-	propertiesCmd.PersistentFlags().StringVarP(&ecosystemBootstrap, "bootstrap", "b", "",
+	propertiesCmd.PersistentFlags().StringVarP(&propertiesCmdValues.ecosystemBootstrap, "bootstrap", "b", "",
 		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
 			"If it starts with neither, it is assumed to be a fully-qualified path. "+
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
 			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
-	addNamespaceProperty(propertiesCmd)
+	addNamespaceProperty(propertiesCmd, propertiesCmdValues)
 
 	parentCmd.AddCommand(propertiesCmd)
 
-	err = createPropertiesCmdChildren(propertiesCmd)
+	err = createPropertiesCmdChildren(propertiesCmd, propertiesCmdValues, rootCmdValues)
 
 	return propertiesCmd, err
 }
 
-func createPropertiesCmdChildren(propertiesCmd *cobra.Command) error {
-	_, err := createPropertiesGetCmd(propertiesCmd)
+func createPropertiesCmdChildren(propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+	_, err := createPropertiesGetCmd(propertiesCmd, propertiesCmdValues, rootCmdValues)
 	if err == nil {
-		_, err = createPropertiesSetCmd(propertiesCmd)
+		_, err = createPropertiesSetCmd(propertiesCmd, propertiesCmdValues, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createPropertiesDeleteCmd(propertiesCmd)
+		_, err = createPropertiesDeleteCmd(propertiesCmd, propertiesCmdValues, rootCmdValues)
 	}
 	return err
 }
 
-func addNamespaceProperty(cmd *cobra.Command) {
+func addNamespaceProperty(cmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues) {
 
 	flagName := "namespace"
-	cmd.PersistentFlags().StringVarP(&namespace, flagName, "s", "",
+	cmd.PersistentFlags().StringVarP(&propertiesCmdValues.namespace, flagName, "s", "",
 		"Namespace. A mandatory flag that describes the container for a collection of properties.")
 
 	cmd.MarkPersistentFlagRequired(flagName)
 }
 
 // Some sub-commands need a name field to be mandatory, some don't.
-func addNameProperty(cmd *cobra.Command, isMandatory bool) {
+func addNameProperty(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
 	flagName := "name"
 	var description string
 	if isMandatory {
@@ -74,7 +72,7 @@ func addNameProperty(cmd *cobra.Command, isMandatory bool) {
 		description = "An optional field indicating the name of a property in the namespace."
 	}
 
-	cmd.PersistentFlags().StringVarP(&propertyName, flagName, "n", "", description)
+	cmd.PersistentFlags().StringVarP(&propertiesCmdValues.propertyName, flagName, "n", "", description)
 
 	if isMandatory {
 		cmd.MarkPersistentFlagRequired(flagName)

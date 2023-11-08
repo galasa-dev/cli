@@ -17,23 +17,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
+type RootCmdValues struct {
 	// The file to which logs are being directed, if any. "" if not.
 	logFileName string
 
 	// We don't trace anything until this flag is true.
 	// This means that any errors which occur in the cobra framework are not
 	// followed by stack traces all the time.
-	isCapturingLogs bool = false
+	isCapturingLogs bool
 
 	// The path to GALASA_HOME. Over-rides the environment variable.
 	CmdParamGalasaHomePath string
-)
+}
+
+var rootCmdValues *RootCmdValues
 
 func CreateRootCmd() (*cobra.Command, error) {
+	// Flags parsed by this command put values into this instance of the structure.
+	rootCmdValues = &RootCmdValues{
+		isCapturingLogs: false,
+	}
+
 	version, err := embedded.GetGalasaCtlVersion()
 	var rootCmd *cobra.Command
 	if err == nil {
+
 		rootCmd = &cobra.Command{
 			Use:     "galasactl",
 			Short:   "CLI for Galasa",
@@ -42,57 +50,53 @@ func CreateRootCmd() (*cobra.Command, error) {
 		}
 
 		galasaCtlVersion, err := embedded.GetGalasaCtlVersion()
-		if err != nil {
-			// If that failed, something is very wrong...
-			// like we can't read the file from the embedded file system.
-			// Give up out now with a bad exit code
-			finalWord(err)
+		if err == nil {
+
+			rootCmd.Version = galasaCtlVersion
+
+			rootCmd.PersistentFlags().StringVarP(&rootCmdValues.logFileName, "log", "l", "",
+				"File to which log information will be sent. Any folder referred to must exist. "+
+					"An existing file will be overwritten. "+
+					"Specify \"-\" to log to stderr. "+
+					"Defaults to not logging.")
+
+			rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+			SetHelpFlagForAllCommands(rootCmd, func(cobra *cobra.Command) {
+				alias := cobra.NameAndAliases()
+				//if the command has an alias,
+				//the format would be cobra.Name, cobra.Aliases
+				//otherwise it is just cobra.Name
+				nameAndAliases := strings.Split(alias, ", ")
+				if len(nameAndAliases) > 1 {
+					alias = nameAndAliases[1]
+				}
+
+				cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
+			})
+
+			rootCmd.PersistentFlags().StringVarP(&rootCmdValues.CmdParamGalasaHomePath, "galasahome", "", "",
+				"Path to a folder where Galasa will read and write files and configuration settings. "+
+					"The default is '${HOME}/.galasa'. "+
+					"This overrides the GALASA_HOME environment variable which may be set instead.",
+			)
+
+			err = createRootCmdChildren(rootCmd, rootCmdValues)
 		}
-
-		rootCmd.Version = galasaCtlVersion
-
-		rootCmd.PersistentFlags().StringVarP(&logFileName, "log", "l", "",
-			"File to which log information will be sent. Any folder referred to must exist. "+
-				"An existing file will be overwritten. "+
-				"Specify \"-\" to log to stderr. "+
-				"Defaults to not logging.")
-
-		rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
-
-		SetHelpFlagForAllCommands(rootCmd, func(cobra *cobra.Command) {
-			alias := cobra.NameAndAliases()
-			//if the command has an alias,
-			//the format would be cobra.Name, cobra.Aliases
-			//otherwise it is just cobra.Name
-			nameAndAliases := strings.Split(alias, ", ")
-			if len(nameAndAliases) > 1 {
-				alias = nameAndAliases[1]
-			}
-
-			cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
-		})
-
-		rootCmd.PersistentFlags().StringVarP(&CmdParamGalasaHomePath, "galasahome", "", "",
-			"Path to a folder where Galasa will read and write files and configuration settings. "+
-				"The default is '${HOME}/.galasa'. "+
-				"This overrides the GALASA_HOME environment variable which may be set instead.",
-		)
-
-		err = createRootCmdChildren(rootCmd)
 	}
 	return rootCmd, err
 }
 
-func createRootCmdChildren(rootCmd *cobra.Command) error {
-	_, err := createLocalCmd(rootCmd)
+func createRootCmdChildren(rootCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
+	_, err := createLocalCmd(rootCmd, rootCmdValues)
 	if err == nil {
-		_, err = createProjectCmd(rootCmd)
+		_, err = createProjectCmd(rootCmd, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createPropertiesCmd(rootCmd)
+		_, err = createPropertiesCmd(rootCmd, rootCmdValues)
 	}
 	if err == nil {
-		_, err = createRunsCmd(rootCmd)
+		_, err = createRunsCmd(rootCmd, rootCmdValues)
 	}
 	return err
 }
@@ -121,7 +125,7 @@ func Execute() {
 
 func finalWord(obj interface{}) {
 	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
-	if isCapturingLogs {
+	if rootCmdValues.isCapturingLogs {
 		log.Println(text)
 	}
 
@@ -129,11 +133,11 @@ func finalWord(obj interface{}) {
 		fmt.Fprintln(os.Stderr, text)
 	}
 
-	if isStackTraceWanted && isCapturingLogs {
+	if isStackTraceWanted && rootCmdValues.isCapturingLogs {
 		galasaErrors.LogStackTrace()
 	}
 
-	if isCapturingLogs {
+	if rootCmdValues.isCapturingLogs {
 		log.Printf("Exit code is %v", exitCode)
 	}
 

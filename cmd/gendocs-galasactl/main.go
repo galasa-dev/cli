@@ -24,7 +24,6 @@ const (
 
 func main() {
 	var targetFolder string
-
 	cmd, err := command.CreateRootCmd()
 	if err == nil {
 		targetFolder = os.Args[1]

@@ -20,13 +20,14 @@ import (
 //	properties set --namespace "framework" --name "hello" --value "newValue"
 //  And then display a successful message or error
 
-var (
+type PropertiesSetCmdValues struct {
 	// Variables set by cobra's command-line parsing.
 	propertyValue string
-)
+}
 
-func createPropertiesSetCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+func createPropertiesSetCmd(parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
+	propertiesSetCmdValues := &PropertiesSetCmdValues{}
 
 	propertiesSetCmd := &cobra.Command{
 		Use:   "set",
@@ -34,11 +35,13 @@ func createPropertiesSetCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
 		Long: "Set the details of a property in a namespace. " +
 			"If the property does not exist, a new property is created, otherwise the value for that property will be updated.",
 		Args:    cobra.NoArgs,
-		Run:     executePropertiesSet,
 		Aliases: []string{"properties set"},
+		Run: func(cmd *cobra.Command, args []string) {
+			executePropertiesSet(cmd, args, propertiesSetCmdValues, propertiesCmdValues, rootCmdValues)
+		},
 	}
 
-	propertiesSetCmd.PersistentFlags().StringVar(&propertyValue, "value", "", "the value of the property you want to create")
+	propertiesSetCmd.PersistentFlags().StringVar(&propertiesSetCmdValues.propertyValue, "value", "", "the value of the property you want to create")
 
 	propertiesSetCmd.MarkFlagRequired("value")
 	propertiesSetCmd.MarkPersistentFlagRequired("name")
@@ -46,31 +49,31 @@ func createPropertiesSetCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
 	parentCmd.AddCommand(propertiesSetCmd)
 
 	// The name property is mandatory for set.
-	addNameProperty(propertiesSetCmd, true)
+	addNameProperty(propertiesSetCmd, true, propertiesCmdValues)
 
 	// There are no child sub-commands to add to the tree.
 
 	return propertiesSetCmd, err
 }
 
-func executePropertiesSet(cmd *cobra.Command, args []string) {
+func executePropertiesSet(cmd *cobra.Command, args []string, propertiesSetCmdValues *PropertiesSetCmdValues, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := files.NewOSFileSystem()
 
-	err = utils.CaptureLog(fileSystem, logFileName)
+	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {
 		panic(err)
 	}
-	isCapturingLogs = true
+	rootCmdValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Set ecosystem properties")
 
 	// Get the ability to query environment variables.
 	env := utils.NewEnvironment()
 
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, CmdParamGalasaHomePath)
+	galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 	if err != nil {
 		panic(err)
 	}
@@ -78,20 +81,22 @@ func executePropertiesSet(cmd *cobra.Command, args []string) {
 	// Read the bootstrap properties.
 	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, ecosystemBootstrap, urlService)
+	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
+	if err == nil {
+
+		var console = utils.NewRealConsole()
+
+		apiServerUrl := bootstrapData.ApiServerURL
+		log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+		// Call to process the command in a unit-testable way.
+		err = properties.SetProperty(
+			propertiesCmdValues.namespace,
+			propertiesCmdValues.propertyName,
+			propertiesSetCmdValues.propertyValue, apiServerUrl, console)
+	}
+
 	if err != nil {
 		panic(err)
 	}
-
-	var console = utils.NewRealConsole()
-
-	apiServerUrl := bootstrapData.ApiServerURL
-	log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-	// Call to process the command in a unit-testable way.
-	err = properties.SetProperty(namespace, propertyName, propertyValue, apiServerUrl, console)
-	if err != nil {
-		panic(err)
-	}
-
 }

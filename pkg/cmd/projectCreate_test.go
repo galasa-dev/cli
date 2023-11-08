@@ -44,10 +44,11 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	maven := true
 	gradle := false
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -56,12 +57,12 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 		assert.Fail(t, "Golden path should not return an error. %s", err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
-func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool) {
-	parentFolderExists, err := mockFileSystem.DirExists("my.test.pkg")
+func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool, packageName string) {
+	parentFolderExists, err := mockFileSystem.DirExists(packageName)
 	assert.Nil(t, err)
 	assert.True(t, parentFolderExists, "Parent folder was not created.")
 
@@ -305,10 +306,11 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	maven := true
 	gradle := false
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -317,7 +319,7 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
@@ -413,9 +415,10 @@ func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
 	maven := false
 	gradle := true
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+	err := createProject(mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -424,7 +427,7 @@ func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
 		assert.Fail(t, "Creating a Maven project should not return an error. %s", err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
@@ -437,10 +440,11 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 	maven := false
 	gradle := true
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -449,7 +453,7 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
@@ -463,10 +467,11 @@ func TestCanCreateMavenAndGradleProject(t *testing.T) {
 	maven := true
 	gradle := true
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -475,7 +480,7 @@ func TestCanCreateMavenAndGradleProject(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 

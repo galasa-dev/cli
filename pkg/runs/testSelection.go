@@ -12,6 +12,7 @@ import (
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/launcher"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -19,16 +20,6 @@ import (
 // built using explicit parameters.
 // Much of this code is used by the `runs prepare` and the `runs submit` code.
 // Flags to control the test selection are added to both commands.
-
-type TestSelectionFlags struct {
-	bundles     *[]string
-	packages    *[]string
-	tests       *[]string
-	tags        *[]string
-	classes     *[]string
-	stream      string
-	regexSelect *bool
-}
 
 type TestSelection struct {
 	Classes []TestClass
@@ -45,19 +36,19 @@ type TestClass struct {
 	Obr string
 }
 
-func NewTestSelectionFlags() *TestSelectionFlags {
-	flags := new(TestSelectionFlags)
-	flags.bundles = new([]string)
-	flags.packages = new([]string)
-	flags.tests = new([]string)
-	flags.tags = new([]string)
-	flags.classes = new([]string)
-	flags.regexSelect = new(bool)
+func NewTestSelectionFlagValues() *utils.TestSelectionFlagValues {
+	flags := new(utils.TestSelectionFlagValues)
+	flags.Bundles = new([]string)
+	flags.Packages = new([]string)
+	flags.Tests = new([]string)
+	flags.Tags = new([]string)
+	flags.Classes = new([]string)
+	flags.RegexSelect = new(bool)
 	return flags
 }
 
 type TestSelectionFlagValidator interface {
-	Validate(flags *TestSelectionFlags) error
+	Validate(flags *utils.TestSelectionFlagValues) error
 }
 
 type StreamBasedValidator struct {
@@ -67,10 +58,10 @@ func NewStreamBasedValidator() TestSelectionFlagValidator {
 	return new(StreamBasedValidator)
 }
 
-func (*StreamBasedValidator) Validate(flags *TestSelectionFlags) error {
+func (*StreamBasedValidator) Validate(flags *utils.TestSelectionFlagValues) error {
 	var err error = nil
-	if flags.stream == "" {
-		if len(*flags.packages) > 0 || len(*flags.bundles) > 0 || len(*flags.tests) > 0 || len(*flags.classes) > 0 {
+	if flags.Stream == "" {
+		if len(*flags.Packages) > 0 || len(*flags.Bundles) > 0 || len(*flags.Tests) > 0 || len(*flags.Classes) > 0 {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
 		}
 	}
@@ -84,77 +75,77 @@ func NewObrBasedValidator() TestSelectionFlagValidator {
 	return new(ObrBasedValidator)
 }
 
-func (*ObrBasedValidator) Validate(flags *TestSelectionFlags) error {
+func (*ObrBasedValidator) Validate(flags *utils.TestSelectionFlagValues) error {
 	var err error = nil
 	return err
 }
 
 // Adds a ton of flags to a cobra command like 'runs prepare' or 'runs submit'.
 // The flags are consistently added as a result.
-func AddCommandFlags(command *cobra.Command, flags *TestSelectionFlags) {
-	flags.packages = command.Flags().StringSlice("package", make([]string, 0), "packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex")
-	flags.bundles = command.Flags().StringSlice("bundle", make([]string, 0), "bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex")
-	flags.tests = command.Flags().StringSlice("test", make([]string, 0), "test names which will be selected if the name contains this string, or if --regex is specified then matches the regex")
-	flags.tags = command.Flags().StringSlice("tag", make([]string, 0), "tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex")
+func AddCommandFlags(command *cobra.Command, flags *utils.TestSelectionFlagValues) {
+	flags.Packages = command.Flags().StringSlice("package", make([]string, 0), "packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex")
+	flags.Bundles = command.Flags().StringSlice("bundle", make([]string, 0), "bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex")
+	flags.Tests = command.Flags().StringSlice("test", make([]string, 0), "test names which will be selected if the name contains this string, or if --regex is specified then matches the regex")
+	flags.Tags = command.Flags().StringSlice("tag", make([]string, 0), "tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex")
 
-	command.Flags().StringVarP(&flags.stream, "stream", "s", "", "test stream to extract the tests from")
-	flags.regexSelect = command.Flags().Bool("regex", false, "Test selection is performed by using regex")
+	command.Flags().StringVarP(&flags.Stream, "stream", "s", "", "test stream to extract the tests from")
+	flags.RegexSelect = command.Flags().Bool("regex", false, "Test selection is performed by using regex")
 
 	AddClassFlag(command, flags, false, "test class names to run from the specified stream or portfolio."+
 		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
 }
 
-func AddClassFlag(command *cobra.Command, flags *TestSelectionFlags, isRequired bool, helpText string) {
-	flags.classes = command.Flags().StringSlice("class", make([]string, 0), helpText)
+func AddClassFlag(command *cobra.Command, flags *utils.TestSelectionFlagValues, isRequired bool, helpText string) {
+	flags.Classes = command.Flags().StringSlice("class", make([]string, 0), helpText)
 	if isRequired {
 		command.MarkFlagRequired("class")
 	}
 }
 
-func AreSelectionFlagsProvided(flags *TestSelectionFlags) bool {
-	if len(*flags.bundles) > 0 {
+func AreSelectionFlagsProvided(flags *utils.TestSelectionFlagValues) bool {
+	if len(*flags.Bundles) > 0 {
 		return true
 	}
 
-	if len(*flags.packages) > 0 {
+	if len(*flags.Packages) > 0 {
 		return true
 	}
 
-	if len(*flags.tests) > 0 {
+	if len(*flags.Tests) > 0 {
 		return true
 	}
 
-	if len(*flags.tags) > 0 {
+	if len(*flags.Tags) > 0 {
 		return true
 	}
 
-	if len(*flags.classes) > 0 {
+	if len(*flags.Classes) > 0 {
 		return true
 	}
 
-	if flags.stream != "" {
+	if flags.Stream != "" {
 		return true
 	}
 
 	return false
 }
 
-func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) (TestSelection, error) {
+func SelectTests(launcherInstance launcher.Launcher, flags *utils.TestSelectionFlagValues) (TestSelection, error) {
 
 	var testSelection TestSelection
 	var err error
 
 	var testCatalog launcher.TestCatalog
 
-	if flags.stream != "" {
+	if flags.Stream != "" {
 		var availableStreams []string
 		availableStreams, err = GetStreams(launcherInstance)
 		if err == nil {
 
-			err = ValidateStream(availableStreams, flags.stream)
+			err = ValidateStream(availableStreams, flags.Stream)
 			if err == nil {
 
-				testCatalog, err = launcherInstance.GetTestCatalog(flags.stream)
+				testCatalog, err = launcherInstance.GetTestCatalog(flags.Stream)
 				if err == nil {
 					log.Println("Test catalog retrieved")
 				}
@@ -185,11 +176,11 @@ func SelectTests(launcherInstance launcher.Launcher, flags *TestSelectionFlags) 
 	return testSelection, err
 }
 
-func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *TestSelectionFlags) error {
+func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 
 	var err error = nil
 
-	if len(*flags.bundles) < 1 {
+	if len(*flags.Bundles) < 1 {
 		return err
 	}
 
@@ -198,7 +189,7 @@ func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSe
 	}
 	var regexPatterns *[]*regexp.Regexp
 
-	regexPatterns, err = convertRegex(flags.bundles, *flags.regexSelect)
+	regexPatterns, err = convertRegex(flags.Bundles, *flags.RegexSelect)
 	if err == nil {
 		availableClasses := testCatalog["classes"].(map[string]interface{})
 
@@ -215,10 +206,10 @@ func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSe
 	return err
 }
 
-func selectTestsByPackage(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *TestSelectionFlags) error {
+func selectTestsByPackage(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 	var err error = nil
 
-	if len(*flags.packages) < 1 {
+	if len(*flags.Packages) < 1 {
 		return err
 	}
 
@@ -227,7 +218,7 @@ func selectTestsByPackage(testCatalog launcher.TestCatalog, testSelection *TestS
 	}
 
 	var regexPatterns *[]*regexp.Regexp
-	regexPatterns, err = convertRegex(flags.packages, *flags.regexSelect)
+	regexPatterns, err = convertRegex(flags.Packages, *flags.RegexSelect)
 	if err == nil {
 		availableClasses := testCatalog["classes"].(map[string]interface{})
 
@@ -244,11 +235,11 @@ func selectTestsByPackage(testCatalog launcher.TestCatalog, testSelection *TestS
 	return err
 }
 
-func selectTestsByTest(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *TestSelectionFlags) error {
+func selectTestsByTest(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 
 	var err error = nil
 
-	if len(*flags.tests) < 1 {
+	if len(*flags.Tests) < 1 {
 		return err
 	}
 
@@ -256,7 +247,7 @@ func selectTestsByTest(testCatalog launcher.TestCatalog, testSelection *TestSele
 		return err
 	}
 	var regexPatterns *[]*regexp.Regexp
-	regexPatterns, err = convertRegex(flags.tests, *flags.regexSelect)
+	regexPatterns, err = convertRegex(flags.Tests, *flags.RegexSelect)
 	if err == nil {
 		availableClasses := testCatalog["classes"].(map[string]interface{})
 
@@ -273,14 +264,14 @@ func selectTestsByTest(testCatalog launcher.TestCatalog, testSelection *TestSele
 	return err
 }
 
-func selectTestsByClass(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *TestSelectionFlags) error {
+func selectTestsByClass(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 
 	var err error = nil
-	if len(*flags.classes) < 1 {
+	if len(*flags.Classes) < 1 {
 		return err
 	}
 
-	for _, class := range *flags.classes {
+	for _, class := range *flags.Classes {
 		pos := strings.Index(class, "/")
 		if pos < 1 {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CLASS_FORMAT, class)
@@ -300,10 +291,10 @@ func selectTestsByClass(testCatalog launcher.TestCatalog, testSelection *TestSel
 	return err
 }
 
-func selectTestsByTag(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *TestSelectionFlags) error {
+func selectTestsByTag(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 
 	var err error = nil
-	if len(*flags.tags) < 1 {
+	if len(*flags.Tags) < 1 {
 		return err
 	}
 
@@ -312,7 +303,7 @@ func selectTestsByTag(testCatalog launcher.TestCatalog, testSelection *TestSelec
 	}
 
 	var regexPatterns *[]*regexp.Regexp
-	regexPatterns, err = convertRegex(flags.tags, *flags.regexSelect)
+	regexPatterns, err = convertRegex(flags.Tags, *flags.RegexSelect)
 	availableClasses := testCatalog["classes"].(map[string]interface{})
 
 classSearch:
@@ -335,7 +326,7 @@ classSearch:
 	return err
 }
 
-func selectClassByCatalog(testSelection *TestSelection, appendClass map[string]interface{}, flags *TestSelectionFlags) {
+func selectClassByCatalog(testSelection *TestSelection, appendClass map[string]interface{}, flags *utils.TestSelectionFlagValues) {
 
 	bundle := appendClass["bundle"].(string)
 	name := appendClass["name"].(string)
@@ -343,12 +334,12 @@ func selectClassByCatalog(testSelection *TestSelection, appendClass map[string]i
 	selectClass(testSelection, bundle, name, flags)
 }
 
-func selectClass(testSelection *TestSelection, bundle string, name string, flags *TestSelectionFlags) {
+func selectClass(testSelection *TestSelection, bundle string, name string, flags *utils.TestSelectionFlagValues) {
 
 	for _, selectedClass := range testSelection.Classes {
 		if bundle == selectedClass.Bundle &&
 			name == selectedClass.Class &&
-			flags.stream == selectedClass.Stream {
+			flags.Stream == selectedClass.Stream {
 
 			log.Printf("    Test class '%v/%v' is already selected.\n", bundle, name)
 			return // already selected
@@ -358,7 +349,7 @@ func selectClass(testSelection *TestSelection, bundle string, name string, flags
 	newSelectedClass := TestClass{
 		Bundle: bundle,
 		Class:  name,
-		Stream: flags.stream,
+		Stream: flags.Stream,
 	}
 
 	testSelection.Classes = append(testSelection.Classes, newSelectedClass)

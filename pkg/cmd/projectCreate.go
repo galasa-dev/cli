@@ -32,7 +32,7 @@ type GradleCoordinates struct {
 	Name    string
 }
 
-var (
+type ProjectCreateCmdValues struct {
 	packageName                string
 	force                      bool
 	isOBRProjectRequired       bool
@@ -40,40 +40,44 @@ var (
 	useMaven                   bool
 	useGradle                  bool
 	isDevelopmentProjectCreate bool
-)
+}
 
-func createProjectCreateCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
+func createProjectCreateCmd(parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
+
+	projectCreateCmdValues := &ProjectCreateCmdValues{}
 
 	projectCreateCmd := &cobra.Command{
 		Use:     "create",
 		Short:   "Creates a new Galasa project",
 		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
 		Args:    cobra.NoArgs,
-		Run:     executeCreateProject,
 		Aliases: []string{"project create"},
+		Run: func(cmd *cobra.Command, args []string) {
+			executeCreateProject(cmd, args, projectCreateCmdValues, rootCmdValues)
+		},
 	}
 
-	projectCreateCmd.Flags().StringVar(&packageName, "package", "", "Java package name for tests we create. "+
+	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.packageName, "package", "", "Java package name for tests we create. "+
 		"Forms part of the project name, maven/gradle group/artifact ID, "+
 		"and OSGi bundle name. It may reflect the name of your organisation or company, "+
 		"the department, function or application under test. "+
 		"For example: dev.galasa.banking.example")
 	projectCreateCmd.MarkFlagRequired("package")
 
-	projectCreateCmd.Flags().BoolVar(&isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	projectCreateCmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
-	projectCreateCmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	projectCreateCmd.Flags().StringVar(&featureNamesCommaSeparated, "features", "feature1",
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.force, "force", false, "Force-overwrite files which already exist.")
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
+	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.featureNamesCommaSeparated, "features", "feature1",
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
 
-	projectCreateCmd.Flags().BoolVar(&useMaven, "maven", false, "Generate maven build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useMaven, "maven", false, "Generate maven build artifacts. "+
 		"Can be used in addition to the --gradle flag. "+
 		"If this flag is not used, and the gradle option is not used, then behaviour of this flag defaults to true.")
-	projectCreateCmd.Flags().BoolVar(&useGradle, "gradle", false, "Generate gradle build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useGradle, "gradle", false, "Generate gradle build artifacts. "+
 		"Can be used in addition to the --maven flag.")
 
 	parentCmd.AddCommand(projectCreateCmd)
@@ -83,27 +87,30 @@ func createProjectCreateCmd(parentCmd *cobra.Command) (*cobra.Command, error) {
 	return projectCreateCmd, err
 }
 
-func init() {
-
-}
-
-func executeCreateProject(cmd *cobra.Command, args []string) {
+func executeCreateProject(cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) {
 
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := files.NewOSFileSystem()
 
-	err = utils.CaptureLog(fileSystem, logFileName)
+	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err != nil {
 		panic(err)
 	}
-	isCapturingLogs = true
+	rootCmdValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Create project")
 
-	err = createProject(fileSystem, packageName, featureNamesCommaSeparated,
-		isOBRProjectRequired, force, useMaven, useGradle, isDevelopmentProjectCreate)
+	err = createProject(fileSystem,
+		projectCreateCmdValues.packageName,
+		projectCreateCmdValues.featureNamesCommaSeparated,
+		projectCreateCmdValues.isOBRProjectRequired,
+		projectCreateCmdValues.force,
+		projectCreateCmdValues.useMaven,
+		projectCreateCmdValues.useGradle,
+		projectCreateCmdValues.isDevelopmentProjectCreate,
+	)
 
 	// Convey the error to the top level.
 	// Tried doing this with RunE: entry, passing back the error, but we always
