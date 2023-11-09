@@ -26,8 +26,8 @@ func createLocalInitCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues
 		Short: "Initialises Galasa home folder",
 		Long:  "Initialises Galasa home folder in home directory with all the properties files",
 		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			executeEnvInit(cmd, args, factory, localInitCmdValues, rootCmdValues)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeEnvInit(cmd, args, factory, localInitCmdValues, rootCmdValues)
 		},
 	}
 
@@ -40,7 +40,7 @@ func createLocalInitCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues
 	return localInitCmd, err
 }
 
-func executeEnvInit(cmd *cobra.Command, args []string, factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) {
+func executeEnvInit(cmd *cobra.Command, args []string, factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 
@@ -48,17 +48,15 @@ func executeEnvInit(cmd *cobra.Command, args []string, factory Factory, localIni
 	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
-	if err != nil {
-		panic(err)
-	}
-	rootCmdValues.isCapturingLogs = true
+	if err == nil {
 
-	env := utils.NewEnvironment()
+		rootCmdValues.isCapturingLogs = true
 
-	err = localEnvInit(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath, localInitCmdValues.isDevelopmentLocalInit)
-	if err != nil {
-		panic(err)
+		env := factory.GetEnvironment()
+
+		err = localEnvInit(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath, localInitCmdValues.isDevelopmentLocalInit)
 	}
+	return err
 }
 
 func localEnvInit(

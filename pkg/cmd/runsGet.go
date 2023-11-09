@@ -39,8 +39,8 @@ func createRunsGetCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *
 		Long:    "Get the details of a test runname which ran or is running, displaying the results to the caller",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs get"},
-		Run: func(cmd *cobra.Command, args []string) {
-			executeRunsGet(factory, cmd, args, runsGetCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeRunsGet(factory, cmd, args, runsGetCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -61,7 +61,14 @@ func createRunsGetCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *
 	return runsGetCmd, err
 }
 
-func executeRunsGet(factory Factory, cmd *cobra.Command, args []string, runsGetCmdValues *RunsGetCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
+func executeRunsGet(
+	factory Factory,
+	cmd *cobra.Command,
+	args []string,
+	runsGetCmdValues *RunsGetCmdValues,
+	runsCmdValues *RunsCmdValues,
+	rootCmdValues *RootCmdValues,
+) error {
 
 	var err error
 
@@ -69,50 +76,45 @@ func executeRunsGet(factory Factory, cmd *cobra.Command, args []string, runsGetC
 	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
-	if err != nil {
-		panic(err)
+	if err == nil {
+		rootCmdValues.isCapturingLogs = true
+
+		log.Println("Galasa CLI - Get info about a run")
+
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+
+		galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		if err == nil {
+
+			// Read the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			if err == nil {
+
+				var console = factory.GetConsole()
+
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+				timeService := utils.NewRealTimeService()
+
+				// Call to process the command in a unit-testable way.
+				err = runs.GetRuns(
+					runsGetCmdValues.runName,
+					runsGetCmdValues.age,
+					runsGetCmdValues.requestor,
+					runsGetCmdValues.result,
+					runsGetCmdValues.isActiveRuns,
+					runsGetCmdValues.outputFormatString,
+					timeService,
+					console,
+					apiServerUrl,
+				)
+			}
+		}
 	}
-	rootCmdValues.isCapturingLogs = true
 
-	log.Println("Galasa CLI - Get info about a run")
-
-	// Get the ability to query environment variables.
-	env := utils.NewEnvironment()
-
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
-	if err != nil {
-		panic(err)
-	}
-
-	var console = utils.NewRealConsole()
-
-	apiServerUrl := bootstrapData.ApiServerURL
-	log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-	timeService := utils.NewRealTimeService()
-
-	// Call to process the command in a unit-testable way.
-	err = runs.GetRuns(
-		runsGetCmdValues.runName,
-		runsGetCmdValues.age,
-		runsGetCmdValues.requestor,
-		runsGetCmdValues.result,
-		runsGetCmdValues.isActiveRuns,
-		runsGetCmdValues.outputFormatString,
-		timeService,
-		console,
-		apiServerUrl,
-	)
-
-	if err != nil {
-		panic(err)
-	}
+	return err
 }

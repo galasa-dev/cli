@@ -41,8 +41,8 @@ func createPropertiesGetCmd(factory Factory, parentCmd *cobra.Command, propertie
 		Long:    "Get the details of all properties in a namespace, filtered with flags if present",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
-		Run: func(cmd *cobra.Command, args []string) {
-			executePropertiesGet(factory, cmd, args, propertiesGetCmdValues, propertiesCmdValues, rootCmdValues)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executePropertiesGet(factory, cmd, args, propertiesGetCmdValues, propertiesCmdValues, rootCmdValues)
 		},
 	}
 
@@ -83,52 +83,49 @@ func executePropertiesGet(
 	propertiesGetCmdValues *PropertiesGetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
-) {
+) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
-	if err != nil {
-		panic(err)
+	if err == nil {
+
+		rootCmdValues.isCapturingLogs = true
+
+		log.Println("Galasa CLI - Get ecosystem properties")
+
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+
+		galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		if err == nil {
+
+			// Read the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
+			if err == nil {
+
+				var console = factory.GetConsole()
+
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+				// Call to process the command in a unit-testable way.
+				err = properties.GetProperties(
+					propertiesCmdValues.namespace,
+					propertiesCmdValues.propertyName,
+					propertiesGetCmdValues.propertiesPrefix,
+					propertiesGetCmdValues.propertiesSuffix,
+					propertiesGetCmdValues.propertiesInfix,
+					apiServerUrl,
+					propertiesGetCmdValues.propertiesOutputFormat,
+					console,
+				)
+			}
+		}
 	}
-	rootCmdValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Get ecosystem properties")
-
-	// Get the ability to query environment variables.
-	env := utils.NewEnvironment()
-
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
-	if err != nil {
-		panic(err)
-	}
-
-	var console = utils.NewRealConsole()
-
-	apiServerUrl := bootstrapData.ApiServerURL
-	log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-	// Call to process the command in a unit-testable way.
-	err = properties.GetProperties(
-		propertiesCmdValues.namespace,
-		propertiesCmdValues.propertyName,
-		propertiesGetCmdValues.propertiesPrefix,
-		propertiesGetCmdValues.propertiesSuffix,
-		propertiesGetCmdValues.propertiesInfix,
-		apiServerUrl,
-		propertiesGetCmdValues.propertiesOutputFormat,
-		console)
-	if err != nil {
-		panic(err)
-	}
+	return err
 }

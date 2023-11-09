@@ -53,8 +53,8 @@ func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdVa
 		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
-		Run: func(cmd *cobra.Command, args []string) {
-			executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmdValues)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmdValues)
 		},
 	}
 
@@ -87,7 +87,7 @@ func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdVa
 	return projectCreateCmd, err
 }
 
-func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) {
+func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 
@@ -95,30 +95,23 @@ func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, pr
 	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
-	if err != nil {
-		panic(err)
+	if err == nil {
+
+		rootCmdValues.isCapturingLogs = true
+
+		log.Println("Galasa CLI - Create project")
+
+		err = createProject(fileSystem,
+			projectCreateCmdValues.packageName,
+			projectCreateCmdValues.featureNamesCommaSeparated,
+			projectCreateCmdValues.isOBRProjectRequired,
+			projectCreateCmdValues.force,
+			projectCreateCmdValues.useMaven,
+			projectCreateCmdValues.useGradle,
+			projectCreateCmdValues.isDevelopmentProjectCreate,
+		)
 	}
-	rootCmdValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Create project")
-
-	err = createProject(fileSystem,
-		projectCreateCmdValues.packageName,
-		projectCreateCmdValues.featureNamesCommaSeparated,
-		projectCreateCmdValues.isOBRProjectRequired,
-		projectCreateCmdValues.force,
-		projectCreateCmdValues.useMaven,
-		projectCreateCmdValues.useGradle,
-		projectCreateCmdValues.isDevelopmentProjectCreate,
-	)
-
-	// Convey the error to the top level.
-	// Tried doing this with RunE: entry, passing back the error, but we always
-	// got a 'usage' syntax summary for the command which failed.
-	if err != nil {
-		// We can't unit test
-		panic(err)
-	}
+	return err
 }
 
 // createProject will create the following artifacts in the specified file system:

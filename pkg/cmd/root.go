@@ -6,14 +6,9 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"reflect"
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
-	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -48,6 +43,10 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 			Long:    `A tool for controlling Galasa resources using the command-line.`,
 			Version: version,
 		}
+
+		console := factory.GetConsole()
+		rootCmd.SetErr(console)
+		rootCmd.SetOut(console)
 
 		galasaCtlVersion, err := embedded.GetGalasaCtlVersion()
 		if err == nil {
@@ -102,90 +101,31 @@ func createRootCmdChildren(factory Factory, rootCmd *cobra.Command, rootCmdValue
 }
 
 // The main entry point into the cmd package.
-func Execute(factory Factory) {
+func Execute(factory Factory, args []string) error {
 	var err error
 	var rootCmd *cobra.Command
+
+	finalWordHandler := factory.GetFinalWordHandler()
+
 	rootCmd, err = CreateRootCmd(factory)
 
 	if err == nil {
+
+		rootCmd.SetArgs(args)
 
 		// Catch execution if a panic happens.
 		defer func() {
 			err := recover()
 
 			// Display the error and exit.
-			finalWord(err)
+			finalWordHandler.FinalWord(err)
 		}()
 
 		// Execute the command
 		err = rootCmd.Execute()
 	}
-	finalWord(err)
-}
-
-func finalWord(obj interface{}) {
-	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
-	if rootCmdValues.isCapturingLogs {
-		log.Println(text)
-	}
-
-	if exitCode != 0 {
-		fmt.Fprintln(os.Stderr, text)
-	}
-
-	if isStackTraceWanted && rootCmdValues.isCapturingLogs {
-		galasaErrors.LogStackTrace()
-	}
-
-	if rootCmdValues.isCapturingLogs {
-		log.Printf("Exit code is %v", exitCode)
-	}
-
-	os.Exit(exitCode)
-}
-
-func extractErrorDetails(obj interface{}) (string, int, bool) {
-	exitCode := 0
-	errorText := ""
-	var isStackTraceWanted bool = false
-
-	if obj == nil {
-		errorText = "OK"
-	} else {
-		exitCode = 1
-		isStackTraceWanted = true
-
-		// If it's a pointer to a galasa error.
-		galasaErrorPtr, isGalasaError := obj.(*galasaErrors.GalasaError)
-		if isGalasaError {
-			errorType := (galasaErrorPtr).GetMessageType()
-			if errorType.Ordinal == galasaErrors.GALASA_ERROR_TESTS_FAILED.Ordinal {
-				// The failure was because some tests failed, rather than the tool or infrastructure failed.
-				exitCode = 2
-			}
-			// Don't log a stack trace for Galasa errors. We know where they come from.
-			isStackTraceWanted = false
-		}
-
-		err, isErrorType := obj.(error)
-		if isErrorType {
-			errorText = err.Error()
-		} else {
-
-			stringValue, isString := obj.(string)
-			if isString {
-				errorText = stringValue
-			} else {
-				errorText = "unknown error."
-			}
-		}
-	}
-
-	return errorText, exitCode, isStackTraceWanted
-}
-
-func IsInstanceOf(objectPtr interface{}, typePtr interface{}) bool {
-	return reflect.TypeOf(objectPtr) == reflect.TypeOf(typePtr)
+	finalWordHandler.FinalWord(err)
+	return err
 }
 
 func SetHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {

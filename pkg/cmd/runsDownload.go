@@ -36,8 +36,8 @@ func createRunsDownloadCmd(factory Factory, parentCmd *cobra.Command, runsCmdVal
 		Long:    "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs download"},
-		Run: func(cmd *cobra.Command, args []string) {
-			executeRunsDownload(factory, cmd, args, runsDownloadCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeRunsDownload(factory, cmd, args, runsDownloadCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -55,7 +55,14 @@ func createRunsDownloadCmd(factory Factory, parentCmd *cobra.Command, runsCmdVal
 	return runsDownloadCmd, err
 }
 
-func executeRunsDownload(factory Factory, cmd *cobra.Command, args []string, runsDownloadCmdValues *RunsDownloadCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
+func executeRunsDownload(
+	factory Factory,
+	cmd *cobra.Command,
+	args []string,
+	runsDownloadCmdValues *RunsDownloadCmdValues,
+	runsCmdValues *RunsCmdValues,
+	rootCmdValues *RootCmdValues,
+) error {
 
 	var err error
 
@@ -63,46 +70,42 @@ func executeRunsDownload(factory Factory, cmd *cobra.Command, args []string, run
 	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
-	if err != nil {
-		panic(err)
+	if err == nil {
+
+		rootCmdValues.isCapturingLogs = true
+
+		log.Println("Galasa CLI - Download artifacts for a run")
+
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+
+		galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		if err == nil {
+
+			// Read the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			if err == nil {
+
+				var console = factory.GetConsole()
+
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+				timeService := utils.NewRealTimeService()
+				// Call to process the command in a unit-testable way.
+				err = runs.DownloadArtifacts(
+					runsDownloadCmdValues.runNameDownload,
+					runsDownloadCmdValues.runForceDownload,
+					fileSystem,
+					timeService,
+					console,
+					apiServerUrl,
+					runsDownloadCmdValues.runDownloadTargetFolder,
+				)
+			}
+		}
 	}
-	rootCmdValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Download artifacts for a run")
-
-	// Get the ability to query environment variables.
-	env := utils.NewEnvironment()
-
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
-	if err != nil {
-		panic(err)
-	}
-
-	var console = utils.NewRealConsole()
-
-	apiServerUrl := bootstrapData.ApiServerURL
-	log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-	timeService := utils.NewRealTimeService()
-	// Call to process the command in a unit-testable way.
-	err = runs.DownloadArtifacts(
-		runsDownloadCmdValues.runNameDownload,
-		runsDownloadCmdValues.runForceDownload,
-		fileSystem,
-		timeService,
-		console,
-		apiServerUrl,
-		runsDownloadCmdValues.runDownloadTargetFolder,
-	)
-	if err != nil {
-		panic(err)
-	}
+	return err
 }

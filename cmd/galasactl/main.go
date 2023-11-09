@@ -6,10 +6,12 @@
 package main
 
 import (
+	"os"
+
 	"github.com/galasa-dev/cli/pkg/cmd"
 )
 
 func main() {
 	factory := cmd.NewRealFactory()
-	cmd.Execute(factory)
+	cmd.Execute(factory, os.Args[1:])
 }

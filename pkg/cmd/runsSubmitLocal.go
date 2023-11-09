@@ -47,8 +47,8 @@ func createRunsSubmitLocalCmd(
 		Long:    "Submit a list of tests to a local JVM, monitor them and wait for them to complete",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit local"},
-		Run: func(cmd *cobra.Command, args []string) {
-			executeSubmitLocal(factory, cmd, args, runsSubmitLocalCmdValues, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeSubmitLocal(factory, cmd, args, runsSubmitLocalCmdValues, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -114,7 +114,7 @@ func executeSubmitLocal(
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
-) {
+) error {
 
 	var err error = nil
 
@@ -128,7 +128,7 @@ func executeSubmitLocal(
 		log.Println("Galasa CLI - Submit tests (Local)")
 
 		// Get the ability to query environment variables.
-		env := utils.NewEnvironment()
+		env := factory.GetEnvironment()
 
 		// Work out where galasa home is, only once.
 		var galasaHome utils.GalasaHome
@@ -162,7 +162,7 @@ func executeSubmitLocal(
 						processFactory, galasaHome)
 
 					if err == nil {
-						console := utils.NewRealConsole()
+						var console = factory.GetConsole()
 
 						// Do the launching of the tests.
 						submitter := runs.NewSubmitter(
@@ -184,10 +184,5 @@ func executeSubmitLocal(
 		}
 	}
 
-	if err != nil {
-		// Panic. If we could pass an error back we would.
-		// The panic is recovered from in the root command, where
-		// the error is logged/displayed before program exit.
-		panic(err)
-	}
+	return err
 }

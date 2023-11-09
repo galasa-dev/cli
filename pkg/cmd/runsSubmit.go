@@ -32,8 +32,8 @@ func createRunsSubmitCmd(factory Factory, parentCmd *cobra.Command, runsCmdValue
 		Long:    "Submit a list of tests to the ecosystem, monitor them and wait for them to complete",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
-		Run: func(cmd *cobra.Command, args []string) {
-			executeSubmit(factory, cmd, args, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeSubmit(factory, cmd, args, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -98,7 +98,14 @@ func createRunsSubmitCmdChildren(factory Factory, runsSubmitCmd *cobra.Command, 
 	return err
 }
 
-func executeSubmit(factory Factory, cmd *cobra.Command, args []string, runsSubmitCmdValues *utils.RunsSubmitCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) {
+func executeSubmit(
+	factory Factory,
+	cmd *cobra.Command,
+	args []string,
+	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
+	runsCmdValues *RunsCmdValues,
+	rootCmdValues *RootCmdValues,
+) error {
 
 	var err error
 
@@ -106,53 +113,45 @@ func executeSubmit(factory Factory, cmd *cobra.Command, args []string, runsSubmi
 	fileSystem := factory.GetFileSystem()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
-	if err != nil {
-		panic(err)
-	}
-	rootCmdValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Submit tests (Remote)")
-
-	// Get the ability to query environment variables.
-	env := utils.NewEnvironment()
-
-	galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
-	if err != nil {
-		panic(err)
-	}
-
-	timeService := utils.NewRealTimeService()
-	var launcherInstance launcher.Launcher = nil
-
-	// The launcher we are going to use to start/monitor tests.
-	launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
-
-	validator := runs.NewStreamBasedValidator()
-	err = validator.Validate(runsSubmitCmdValues.TestSelectionFlagValues)
-	if err != nil {
-		panic(err)
-	}
-
-	console := utils.NewRealConsole()
-
-	submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console)
-
 	if err == nil {
-		err = submitter.ExecuteSubmitRuns(runsSubmitCmdValues, runsSubmitCmdValues.TestSelectionFlagValues)
+
+		rootCmdValues.isCapturingLogs = true
+
+		log.Println("Galasa CLI - Submit tests (Remote)")
+
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+
+		galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		if err == nil {
+
+			// Read the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			if err == nil {
+
+				timeService := utils.NewRealTimeService()
+				var launcherInstance launcher.Launcher = nil
+
+				// The launcher we are going to use to start/monitor tests.
+				launcherInstance = launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
+
+				validator := runs.NewStreamBasedValidator()
+				err = validator.Validate(runsSubmitCmdValues.TestSelectionFlagValues)
+				if err == nil {
+
+					var console = factory.GetConsole()
+
+					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console)
+
+					if err == nil {
+						err = submitter.ExecuteSubmitRuns(runsSubmitCmdValues, runsSubmitCmdValues.TestSelectionFlagValues)
+					}
+				}
+			}
+		}
 	}
 
-	if err != nil {
-		// Panic. If we could pass an error back we would.
-		// The panic is recovered from in the root command, where
-		// the error is logged/displayed before program exit.
-		panic(err)
-	}
+	return err
 }
