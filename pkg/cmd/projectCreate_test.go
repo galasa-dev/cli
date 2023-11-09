@@ -624,7 +624,7 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	var args []string = []string{"project", "create", "--package", "my.package"}
 
 	// When...
-	Execute(factory, args)
+	err := Execute(factory, args)
 
 	// Then...
 
@@ -637,4 +637,6 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
 	assert.Nil(t, o)
+
+	assert.NotNil(t, err)
 }

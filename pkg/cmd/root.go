@@ -62,19 +62,6 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 
 			rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 
-			SetHelpFlagForAllCommands(rootCmd, func(cobra *cobra.Command) {
-				alias := cobra.NameAndAliases()
-				//if the command has an alias,
-				//the format would be cobra.Name, cobra.Aliases
-				//otherwise it is just cobra.Name
-				nameAndAliases := strings.Split(alias, ", ")
-				if len(nameAndAliases) > 1 {
-					alias = nameAndAliases[1]
-				}
-
-				cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
-			})
-
 			rootCmd.PersistentFlags().StringVarP(&rootCmdValues.CmdParamGalasaHomePath, "galasahome", "", "",
 				"Path to a folder where Galasa will read and write files and configuration settings. "+
 					"The default is '${HOME}/.galasa'. "+
@@ -82,9 +69,28 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 			)
 
 			err = createRootCmdChildren(factory, rootCmd, rootCmdValues)
+
+			if err == nil {
+				sanitiseCommandHelpDescriptions(rootCmd)
+			}
 		}
 	}
 	return rootCmd, err
+}
+
+func sanitiseCommandHelpDescriptions(rootCmd *cobra.Command) {
+	setHelpFlagForAllCommands(rootCmd, func(cobra *cobra.Command) {
+		alias := cobra.NameAndAliases()
+		//if the command has an alias,
+		//the format would be cobra.Name, cobra.Aliases
+		//otherwise it is just cobra.Name
+		nameAndAliases := strings.Split(alias, ", ")
+		if len(nameAndAliases) > 1 {
+			alias = nameAndAliases[1]
+		}
+
+		cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
+	})
 }
 
 func createRootCmdChildren(factory Factory, rootCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
@@ -129,11 +135,11 @@ func Execute(factory Factory, args []string) error {
 	return err
 }
 
-func SetHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {
+func setHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {
 	setHelpFlag(command)
 
 	//for all the commands eg properties get, set etc
 	for _, cobraCommand := range command.Commands() {
-		SetHelpFlagForAllCommands(cobraCommand, setHelpFlag)
+		setHelpFlagForAllCommands(cobraCommand, setHelpFlag)
 	}
 }

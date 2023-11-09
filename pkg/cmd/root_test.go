@@ -30,9 +30,10 @@ func TestVersionFromCommandLine(t *testing.T) {
 	args = append(args, "--version")
 
 	// When...
-	Execute(factory, args)
+	err := Execute(factory, args)
 
 	// Then...
+	assert.Nil(t, err)
 
 	// Lets check that the version came out.
 	console := factory.GetConsole().(*utils.MockConsole)

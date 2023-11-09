@@ -10,6 +10,11 @@ import (
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
+// We use the factory to create instances of various classes.
+// Some are cached, so you get the same one back each time
+// Some are fresh objects created each time.
+// We do this so we can have a real and a mock implementation
+// to make unit testing easier.
 type Factory interface {
 	GetFileSystem() files.FileSystem
 	GetEnvironment() utils.Environment
@@ -17,6 +22,9 @@ type Factory interface {
 	GetConsole() utils.Console
 }
 
+// Allocates real objects with real implementations,
+// none of which are generally great for unit testing.
+// eg: A real file system can leave debris behind when a test runs.
 type RealFactory struct {
 	console utils.Console
 }

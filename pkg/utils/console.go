@@ -50,8 +50,8 @@ func NewMockConsole() *MockConsole {
 	return console
 }
 
-func (data *MockConsole) WriteString(text string) error {
-	_, err := data.text.WriteString(text)
+func (this *MockConsole) WriteString(text string) error {
+	_, err := this.text.WriteString(text)
 	return err
 }
 
