@@ -55,6 +55,8 @@ func GetRuns(
 	var fromAge int
 	var toAge int
 
+	log.Printf("GetRuns entered.")
+
 	if (runName == "") && (age == "") {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_RUNNAME_OR_AGE_SPECIFIED)
 	}
@@ -103,6 +105,7 @@ func GetRuns(
 			}
 		}
 	}
+	log.Printf("GetRuns exiting. err is %v", err)
 	return err
 }
 

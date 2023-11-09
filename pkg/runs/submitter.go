@@ -370,7 +370,8 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 				rasRunID := currentRun.RasRunId
 				if fetchRas && rasRunID != nil {
 
-					rasRun, err := submitter.launcher.GetRunsById(*rasRunID)
+					var rasRun *galasaapi.Run
+					rasRun, err = submitter.launcher.GetRunsById(*rasRunID)
 
 					if err != nil {
 						log.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
@@ -703,7 +704,8 @@ func (submitter *Submitter) checkIfGroupAlreadyInUse(groupName string) (bool, er
 	var err error = nil
 
 	// Just check if it is already in use,  which is perfectly valid for custom group names
-	uuidCheck, err := submitter.launcher.GetRunsByGroup(groupName)
+	var uuidCheck *galasaapi.TestRuns
+	uuidCheck, err = submitter.launcher.GetRunsByGroup(groupName)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
 	} else {

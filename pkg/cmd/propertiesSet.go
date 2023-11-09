@@ -42,7 +42,7 @@ func createPropertiesSetCmd(factory Factory, parentCmd *cobra.Command, propertie
 
 	propertiesSetCmd.PersistentFlags().StringVar(&propertiesSetCmdValues.propertyValue, "value", "", "the value of the property you want to create")
 
-	propertiesSetCmd.MarkFlagRequired("value")
+	propertiesSetCmd.MarkPersistentFlagRequired("value")
 
 	parentCmd.AddCommand(propertiesSetCmd)
 

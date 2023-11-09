@@ -595,7 +595,7 @@ func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolder
 			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/build.gradle.template",
 			TemplateParameters:       gradleProjectTemplateParameters}
 
-		err := fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
+		err = fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
 
 		if err == nil {
 			bndFile := utils.GeneratedFileDef{

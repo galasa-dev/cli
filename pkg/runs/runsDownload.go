@@ -267,7 +267,8 @@ func WriteArtifactToFileSystem(
 	targetFilePath := filepath.Join(runDirectory, artifactPath)
 
 	// Check if a new file should be created or if an existing one should be overwritten.
-	fileExists, err := fileSystem.Exists(targetFilePath)
+	var fileExists bool
+	fileExists, err = fileSystem.Exists(targetFilePath)
 	if err == nil {
 		if fileExists && !shouldOverwrite {
 

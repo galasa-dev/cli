@@ -79,7 +79,8 @@ func executeAssemble(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		var galasaHome utils.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Convert overrides to a map
@@ -115,7 +116,8 @@ func executeAssemble(
 					err = validator.Validate(runsPrepareCmdValues.prepareSelectionFlags)
 					if err == nil {
 
-						testSelection, err := runs.SelectTests(launcher, runsPrepareCmdValues.prepareSelectionFlags)
+						var testSelection runs.TestSelection
+						testSelection, err = runs.SelectTests(launcher, runsPrepareCmdValues.prepareSelectionFlags)
 						if err == nil {
 
 							count := len(testSelection.Classes)

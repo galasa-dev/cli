@@ -48,7 +48,8 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 		rootCmd.SetErr(console)
 		rootCmd.SetOut(console)
 
-		galasaCtlVersion, err := embedded.GetGalasaCtlVersion()
+		var galasaCtlVersion string
+		galasaCtlVersion, err = embedded.GetGalasaCtlVersion()
 		if err == nil {
 
 			rootCmd.Version = galasaCtlVersion

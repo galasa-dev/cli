@@ -79,7 +79,8 @@ func executeRunsDownload(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		galasaHome, err := utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		var galasaHome utils.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties.
