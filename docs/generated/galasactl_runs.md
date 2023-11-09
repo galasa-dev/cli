@@ -10,7 +10,7 @@ Assembles, submits and monitors test runs in Galasa Ecosystem
 
 ```
   -b, --bootstrap string   Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
-  -h, --help               help for runs
+  -h, --help               Displays the options for the runs command.
 ```
 
 ### Options inherited from parent commands

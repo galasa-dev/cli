@@ -14,17 +14,26 @@ import (
 //	properties namespaces get
 //  And then display all namespaces in the cps or returns empty
 
-var (
-	propertiesNamespaceCmd = &cobra.Command{
+func createPropertiesNamespaceCmd(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+
+	propertiesNamespaceCmd := &cobra.Command{
 		Use:   "namespaces",
 		Short: "Queries namespaces in an ecosystem",
 		Long:  "Allows interaction with the CPS to query namespaces in Galasa Ecosystem",
 		Args:  cobra.NoArgs,
 	}
-)
 
-func init() {
+	propertiesCmd.AddCommand(propertiesNamespaceCmd)
 
-	parentCommand := propertiesCmd
-	parentCommand.AddCommand(propertiesNamespaceCmd)
+	err := createChildCommands(factory, propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
+
+	return propertiesNamespaceCmd, err
+}
+
+func createChildCommands(factory Factory, propertiesNamespaceCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+	var err error
+
+	_, err = createPropertiesNamespaceGetCmd(factory, propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
+
+	return err
 }

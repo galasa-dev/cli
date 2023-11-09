@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"sort"
 
-	command "github.com/galasa-dev/cli/pkg/cmd"
+	"github.com/galasa-dev/cli/pkg/cmd"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/spf13/cobra/doc"
 )
@@ -23,9 +23,14 @@ const (
 )
 
 func main() {
-	cmd := command.RootCmd
-	targetFolder := os.Args[1]
-	err := doc.GenMarkdownTree(cmd, targetFolder)
+	var targetFolder string
+	factory := cmd.NewRealFactory()
+	cmd, err := cmd.CreateRootCmd(factory)
+	if err == nil {
+		targetFolder = os.Args[1]
+		err = doc.GenMarkdownTree(cmd, targetFolder)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}

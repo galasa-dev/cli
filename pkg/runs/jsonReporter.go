@@ -35,7 +35,8 @@ func ReportJSON(
 		testReport.Tests = append(testReport.Tests, *run)
 	}
 
-	data, err := json.MarshalIndent(&testReport, "", "  ")
+	var data []byte
+	data, err = json.MarshalIndent(&testReport, "", "  ")
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL, reportJsonFilename, err.Error())
 	}

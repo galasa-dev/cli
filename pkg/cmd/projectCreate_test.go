@@ -44,10 +44,11 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	maven := true
 	gradle := false
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -56,12 +57,12 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 		assert.Fail(t, "Golden path should not return an error. %s", err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
-func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool) {
-	parentFolderExists, err := mockFileSystem.DirExists("my.test.pkg")
+func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool, packageName string) {
+	parentFolderExists, err := mockFileSystem.DirExists(packageName)
 	assert.Nil(t, err)
 	assert.True(t, parentFolderExists, "Parent folder was not created.")
 
@@ -305,10 +306,11 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	maven := true
 	gradle := false
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -317,7 +319,7 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
@@ -413,9 +415,10 @@ func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
 	maven := false
 	gradle := true
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
-	err := createProject(mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+	err := createProject(mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -424,7 +427,7 @@ func TestCanCreateGradleProjectWithNoOBR(t *testing.T) {
 		assert.Fail(t, "Creating a Maven project should not return an error. %s", err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
@@ -437,10 +440,11 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 	maven := false
 	gradle := true
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -449,7 +453,7 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
@@ -463,10 +467,11 @@ func TestCanCreateMavenAndGradleProject(t *testing.T) {
 	maven := true
 	gradle := true
 	isDevelopment := false
+	packageName := "my.test.pkg"
 
 	// When ...
 	err := createProject(
-		mockFileSystem, "my.test.pkg", featureNamesCommandSeparatedList,
+		mockFileSystem, packageName, featureNamesCommandSeparatedList,
 		isObrProjectRequired, forceOverwrite, maven, gradle, isDevelopment)
 
 	// Then...
@@ -475,7 +480,7 @@ func TestCanCreateMavenAndGradleProject(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle)
+	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
@@ -558,4 +563,80 @@ func TestCanCreateGradleProjectDevelopmentModeGeneratesMavenRepoReference(t *tes
 	buildGradleText, err := mockFileSystem.ReadTextFile("my.test.pkg/my.test.pkg.test/build.gradle")
 	assert.Nil(t, err)
 	assert.Contains(t, buildGradleText, "       url 'https://development.galasa.dev/main/maven-repo/obr'", "child build.gradle didn't have an uncommented bleeding edge repo ref.")
+}
+
+func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"project", "create"}
+
+	// When...
+	Execute(factory, args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
+	console := factory.GetConsole().(*utils.MockConsole)
+	text := console.ReadText()
+	assert.Contains(t, text, "Error: required flag(s) \"package\" not set")
+
+	// We expect an exit code of 0 for this command.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+}
+
+func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"project", "create", "--package", "my.pkg", "--maven"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw no output
+	console := factory.GetConsole().(*utils.MockConsole)
+	text := console.ReadText()
+	assert.Equal(t, text, "")
+
+	// We expect an exit code of 0.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	// Check that the default folder was created.
+	fs := factory.GetFileSystem()
+	var isExists bool
+	isExists, err = fs.DirExists("my.pkg")
+	assert.True(t, isExists)
+}
+
+func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"project", "create", "--package", "my.package"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
+	console := factory.GetConsole().(*utils.MockConsole)
+	text := console.ReadText()
+	assert.Contains(t, text, "Error: GAL1089E: Need to use --maven and/or --gradle parameter")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.NotNil(t, err)
 }

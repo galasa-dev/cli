@@ -9,14 +9,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	localCmd = &cobra.Command{
+func createLocalCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+
+	localCmd := &cobra.Command{
 		Use:   "local",
 		Short: "Manipulate local system",
 		Long:  "Manipulate local system",
 	}
-)
+	parentCmd.AddCommand(localCmd)
 
-func init() {
-	RootCmd.AddCommand(localCmd)
+	err := createLocalCmdChildren(factory, localCmd, rootCmdValues)
+	return localCmd, err
+}
+
+func createLocalCmdChildren(factory Factory, localCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
+	_, err := createLocalInitCmd(factory, localCmd, rootCmdValues)
+	return err
 }

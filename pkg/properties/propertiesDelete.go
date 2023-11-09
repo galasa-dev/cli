@@ -9,7 +9,6 @@ package properties
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -26,17 +25,6 @@ func DeleteProperty(
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
 		err = deleteCpsProperty(namespace, name, apiServerUrl)
-	}
-	return err
-}
-
-func validateInputsAreNotEmpty(namespace string, name string) error {
-	var err error
-	if len(strings.TrimSpace(namespace)) == 0 {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_NAMESPACE_FLAG, namespace)
-	}
-	if len(strings.TrimSpace(name)) == 0 {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_NAME_FLAG, name)
 	}
 	return err
 }

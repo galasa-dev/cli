@@ -24,7 +24,7 @@ func NewMockLauncherParams() (
 	*utils.MockEnv,
 	files.FileSystem,
 	embedded.ReadOnlyFileSystem,
-	RunsSubmitLocalCmdParameters,
+	*RunsSubmitLocalCmdParameters,
 	utils.TimeService,
 	ProcessFactory,
 	utils.GalasaHome,
@@ -73,8 +73,8 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	assert.NotNil(t, launcher, "Launcher reference was nil, shouldn't have been.")
 }
 
-func getBasicJvmLaunchParams() RunsSubmitLocalCmdParameters {
-	return RunsSubmitLocalCmdParameters{
+func getBasicJvmLaunchParams() *RunsSubmitLocalCmdParameters {
+	return &RunsSubmitLocalCmdParameters{
 		Obrs:                nil,
 		RemoteMaven:         "",
 		TargetGalasaVersion: "",
