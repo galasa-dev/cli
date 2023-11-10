@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -15,43 +15,43 @@ import (
 // ---------------------------------------------------
 // Functions
 func TestAreSelectionFlagsProvidedDoesntPanicWhenFlagsAreNotSet(t *testing.T) {
-	flags := NewTestSelectionFlags()
+	flags := NewTestSelectionFlagValues()
 	areTheyProvided := AreSelectionFlagsProvided(flags)
 	assert.False(t, areTheyProvided)
 }
 
 func TestAllocatingNewFlagsStructureHasEmptyArrays(t *testing.T) {
-	flags := NewTestSelectionFlags()
+	flags := NewTestSelectionFlagValues()
 	assert.NotNil(t, flags)
-	assert.NotNil(t, flags.bundles)
-	assert.Equal(t, len(*flags.bundles), 0)
+	assert.NotNil(t, flags.Bundles)
+	assert.Equal(t, len(*flags.Bundles), 0)
 
-	assert.NotNil(t, flags.packages)
-	assert.Equal(t, len(*flags.packages), 0)
+	assert.NotNil(t, flags.Packages)
+	assert.Equal(t, len(*flags.Packages), 0)
 
-	assert.NotNil(t, flags.tests)
-	assert.Equal(t, len(*flags.tests), 0)
+	assert.NotNil(t, flags.Tests)
+	assert.Equal(t, len(*flags.Tests), 0)
 
-	assert.NotNil(t, flags.tags)
-	assert.Equal(t, len(*flags.tags), 0)
+	assert.NotNil(t, flags.Tags)
+	assert.Equal(t, len(*flags.Tags), 0)
 
-	assert.NotNil(t, flags.classes)
-	assert.Equal(t, len(*flags.classes), 0)
+	assert.NotNil(t, flags.Classes)
+	assert.Equal(t, len(*flags.Classes), 0)
 
-	assert.NotNil(t, flags.regexSelect)
+	assert.NotNil(t, flags.RegexSelect)
 
-	assert.Empty(t, flags.stream)
+	assert.Empty(t, flags.Stream)
 }
 
 func TestStreamBasedValidatorNoStreamButClassSpecifiedCausesError(t *testing.T) {
-	flags := NewTestSelectionFlags()
+	flags := NewTestSelectionFlagValues()
 	validator := NewStreamBasedValidator()
 	// No stream set.
 
-	*flags.classes = make([]string, 1)
-	(*flags.classes)[0] = "myclass"
+	*flags.Classes = make([]string, 1)
+	(*flags.Classes)[0] = "myclass"
 
-	flags.stream = ""
+	flags.Stream = ""
 
 	err := validator.Validate(flags)
 
@@ -64,14 +64,14 @@ func TestStreamBasedValidatorNoStreamButClassSpecifiedCausesError(t *testing.T) 
 }
 
 func TestStreamBasedValidatorWithStreamAndClassSpecifiedIsOk(t *testing.T) {
-	flags := NewTestSelectionFlags()
+	flags := NewTestSelectionFlagValues()
 	validator := NewStreamBasedValidator()
 	// No stream set.
 
-	*flags.classes = make([]string, 1)
-	(*flags.classes)[0] = "myclass"
+	*flags.Classes = make([]string, 1)
+	(*flags.Classes)[0] = "myclass"
 
-	flags.stream = "myStream"
+	flags.Stream = "myStream"
 
 	err := validator.Validate(flags)
 

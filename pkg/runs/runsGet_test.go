@@ -14,9 +14,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	"github.com/galasa.dev/cli/pkg/formatters"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/runsformatter"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -399,7 +399,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 }
 
 func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
-	validFormatters := make(map[string]formatters.RunsFormatter, 0)
+	validFormatters := make(map[string]runsformatter.RunsFormatter, 0)
 	validFormatters["first"] = nil
 	validFormatters["second"] = nil
 

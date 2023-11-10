@@ -15,13 +15,13 @@ import (
 
 	randomGenerator "github.com/satori/go.uuid"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/formatters"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/launcher"
-	"github.com/galasa.dev/cli/pkg/props"
-	"github.com/galasa.dev/cli/pkg/utils"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/launcher"
+	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/runsformatter"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 type Submitter struct {
@@ -52,24 +52,24 @@ func NewSubmitter(
 }
 
 func (submitter *Submitter) ExecuteSubmitRuns(
-	params utils.RunsSubmitCmdParameters,
-	testSelectionFlags *TestSelectionFlags,
+	params *utils.RunsSubmitCmdValues,
+	TestSelectionFlagValues *utils.TestSelectionFlagValues,
 
 ) error {
 
 	var err error = nil
 
-	err = submitter.validateAndCorrectParams(&params, testSelectionFlags)
+	err = submitter.validateAndCorrectParams(params, TestSelectionFlagValues)
 	if err == nil {
 		var runOverrides map[string]string
-		runOverrides, err = submitter.buildOverrideMap(params)
+		runOverrides, err = submitter.buildOverrideMap(*params)
 		if err == nil {
 			var portfolio *Portfolio
-			portfolio, err = submitter.getPortfolio(params.PortfolioFileName, testSelectionFlags)
+			portfolio, err = submitter.getPortfolio(params.PortfolioFileName, TestSelectionFlagValues)
 			if err == nil {
 				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName)
 				if err == nil {
-					err = submitter.executePortfolio(portfolio, runOverrides, params)
+					err = submitter.executePortfolio(portfolio, runOverrides, *params)
 				}
 			}
 		}
@@ -80,7 +80,7 @@ func (submitter *Submitter) ExecuteSubmitRuns(
 
 func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
 	runOverrides map[string]string,
-	params utils.RunsSubmitCmdParameters,
+	params utils.RunsSubmitCmdValues,
 ) error {
 
 	var err error = nil
@@ -113,7 +113,7 @@ func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
 }
 
 func (submitter *Submitter) executeSubmitRuns(
-	params utils.RunsSubmitCmdParameters,
+	params utils.RunsSubmitCmdValues,
 	readyRuns []TestRun,
 	runOverrides map[string]string,
 ) (map[string]*TestRun, map[string]*TestRun, error) {
@@ -135,6 +135,7 @@ func (submitter *Submitter) executeSubmitRuns(
 		return nil, nil, err
 	}
 
+	currentUser := submitter.GetCurrentUserName()
 	//
 	// Main submit loop
 	//
@@ -144,7 +145,7 @@ func (submitter *Submitter) executeSubmitRuns(
 
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
 			readyRuns, err = submitter.submitRun(params.GroupName, readyRuns, submittedRuns,
-				lostRuns, &runOverrides, params.Trace, params.Requestor, params.RequestType)
+				lostRuns, &runOverrides, params.Trace, currentUser, params.RequestType)
 
 			if err != nil {
 				// Ignore the error and continue to process the list of available runs.
@@ -369,7 +370,8 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 				rasRunID := currentRun.RasRunId
 				if fetchRas && rasRunID != nil {
 
-					rasRun, err := submitter.launcher.GetRunsById(*rasRunID)
+					var rasRun *galasaapi.Run
+					rasRun, err = submitter.launcher.GetRunsById(*rasRunID)
 
 					if err != nil {
 						log.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
@@ -408,7 +410,7 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 
 }
 
-func (submitter *Submitter) createReports(params utils.RunsSubmitCmdParameters,
+func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
 
 	//convert TestRun tests into formattable data
@@ -435,7 +437,7 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdParameters,
 }
 
 func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
-	var formatter = formatters.NewSummaryFormatter()
+	var formatter = runsformatter.NewSummaryFormatter()
 	var err error = nil
 	var outputText string
 
@@ -446,7 +448,7 @@ func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string
 	}
 }
 
-func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitCmdParameters) bool {
+func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitCmdValues) bool {
 
 	// Do we need to ask the RAS for the test structure
 	isRasDetailNeeded := false
@@ -465,15 +467,17 @@ func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitC
 
 func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]string) []TestRun {
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
-
+	currentUser := submitter.GetCurrentUserName()
 	for _, portfolioTest := range portfolio.Classes {
 		newTestrun := TestRun{
-			Bundle:    portfolioTest.Bundle,
-			Class:     portfolioTest.Class,
-			Stream:    portfolioTest.Stream,
-			Obr:       portfolioTest.Obr,
-			Status:    "queued",
-			Overrides: make(map[string]string, 0),
+			Bundle:        portfolioTest.Bundle,
+			Class:         portfolioTest.Class,
+			Stream:        portfolioTest.Stream,
+			Obr:           portfolioTest.Obr,
+			QueuedTimeUTC: submitter.timeService.Now().String(),
+			Requestor:     currentUser,
+			Status:        "queued",
+			Overrides:     make(map[string]string, 0),
 		}
 
 		// load the run overrides
@@ -495,8 +499,8 @@ func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOve
 }
 
 func (submitter *Submitter) validateAndCorrectParams(
-	params *utils.RunsSubmitCmdParameters,
-	submitSelectionFlags *TestSelectionFlags,
+	params *utils.RunsSubmitCmdValues,
+	submitSelectionFlags *utils.TestSelectionFlagValues,
 ) error {
 
 	var err error = nil
@@ -529,13 +533,6 @@ func (submitter *Submitter) validateAndCorrectParams(
 	}
 
 	if err == nil {
-		if params.Requestor == "" {
-			// Requestor has not been set. Default it to the current user id.
-			params.Requestor, err = submitter.env.GetUserName()
-		}
-	}
-
-	if err == nil {
 		// generate a group name if required
 		if params.GroupName == "" {
 			params.GroupName = randomGenerator.NewV4().String()
@@ -555,7 +552,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 }
 
 func (submitter *Submitter) correctOverrideFilePathParameter(
-	params *utils.RunsSubmitCmdParameters,
+	params *utils.RunsSubmitCmdValues,
 ) error {
 	var err error
 	// Correct the default overrideFile path if it wasn't specified.
@@ -577,7 +574,7 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 	return err
 }
 
-func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdParameters) error {
+func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValues) error {
 	var err error = nil
 
 	if err == nil {
@@ -606,7 +603,7 @@ func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdParam
 	return err
 }
 
-func (submitter *Submitter) buildOverrideMap(commandParameters utils.RunsSubmitCmdParameters) (map[string]string, error) {
+func (submitter *Submitter) buildOverrideMap(commandParameters utils.RunsSubmitCmdValues) (map[string]string, error) {
 
 	path := commandParameters.OverrideFilePath
 	runOverrides, err := submitter.loadOverrideFile(path)
@@ -662,7 +659,7 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 	return overrides, nil
 }
 
-func (submitter *Submitter) getPortfolio(portfolioFileName string, submitSelectionFlags *TestSelectionFlags) (*Portfolio, error) {
+func (submitter *Submitter) getPortfolio(portfolioFileName string, submitSelectionFlags *utils.TestSelectionFlagValues) (*Portfolio, error) {
 	// Load the portfolio of tests
 	var portfolio *Portfolio = nil
 	var err error = nil
@@ -707,7 +704,8 @@ func (submitter *Submitter) checkIfGroupAlreadyInUse(groupName string) (bool, er
 	var err error = nil
 
 	// Just check if it is already in use,  which is perfectly valid for custom group names
-	uuidCheck, err := submitter.launcher.GetRunsByGroup(groupName)
+	var uuidCheck *galasaapi.TestRuns
+	uuidCheck, err = submitter.launcher.GetRunsByGroup(groupName)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
 	} else {

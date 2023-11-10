@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,7 +42,8 @@ func TestJsonReportWorks(t *testing.T) {
 		assert.Fail(t, "Report Json failed when it should have passed. "+err.Error())
 	}
 
-	isExists, err := mockFileSystem.Exists("myReportJsonFilename")
+	var isExists bool
+	isExists, err = mockFileSystem.Exists("myReportJsonFilename")
 	if err != nil {
 		assert.Fail(t, "json report does not exist in correct place. "+err.Error())
 	}
@@ -59,6 +60,8 @@ func TestJsonReportWorks(t *testing.T) {
 				"stream": "myStream",
 				"obr": "myOBR",
 				"status": "myStatus",
+				"queued":"",
+				"requestor":"",
 				"result": "PASSED",
 				"overrides": {},
 				"tests": [
@@ -75,7 +78,8 @@ func TestJsonReportWorks(t *testing.T) {
 		]
 	}`
 
-	actualContents, err := mockFileSystem.ReadTextFile("myReportJsonFilename")
+	var actualContents string
+	actualContents, err = mockFileSystem.ReadTextFile("myReportJsonFilename")
 	if err != nil {
 		assert.Fail(t, "Could not read the json file. "+err.Error())
 	}

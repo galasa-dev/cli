@@ -12,11 +12,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/auth"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/utils"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // RemoteLauncher A launcher, which launches and monitors tests on a remote ecosystem via HTTP/HTTPS.
@@ -29,13 +26,13 @@ type RemoteLauncher struct {
 //----------------------------------------------------------------------------------
 
 // NewRemoteLauncher create a remote launcher.
-func NewRemoteLauncher(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) *RemoteLauncher {
+func NewRemoteLauncher(apiServerUrl string, apiClient *galasaapi.APIClient) *RemoteLauncher {
 	log.Printf("NewRemoteLauncher(%s) entered.", apiServerUrl)
 
 	launcher := new(RemoteLauncher)
 
 	// An HTTP client which can communicate with the api server in an ecosystem.
-	launcher.apiClient = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
+	launcher.apiClient = apiClient
 
 	return launcher
 }

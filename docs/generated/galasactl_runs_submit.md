@@ -16,7 +16,7 @@ galasactl runs submit [flags]
       --bundle strings             bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
       --class strings              test class names to run from the specified stream or portfolio. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
   -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
-  -h, --help                       help for submit
+  -h, --help                       Displays the options for the runs submit command.
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
       --overridefile string        path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. Overrides from --override options will take precedence over properties in this property file. A file path of '-' disables reading any properties file.
@@ -28,7 +28,6 @@ galasactl runs submit [flags]
       --reportjson string          json file to record the final results in
       --reportjunit string         junit xml file to record the final results in
       --reportyaml string          yaml file to record the final results in
-      --requestor string           the requestor id to be associated with the test runs. Defaults to the current user id.
       --requesttype string         the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
   -s, --stream string              test stream to extract the tests from
       --tag strings                tags of which tests will be selected from, tags are selected if the name contains this string, or if --regex is specified then matches the regex
@@ -41,7 +40,7 @@ galasactl runs submit [flags]
 ### Options inherited from parent commands
 
 ```
-  -b, --bootstrap string    Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Examples: http://galasa-cicsk8s.hursley.ibm.com/bootstrap , file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
+  -b, --bootstrap string    Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
       --galasahome string   Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
   -l, --log string          File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
 ```

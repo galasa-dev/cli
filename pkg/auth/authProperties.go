@@ -8,12 +8,12 @@ package auth
 import (
 	"path/filepath"
 
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/props"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/utils"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 const (
@@ -28,7 +28,9 @@ func GetAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome)
     authProperties := galasaapi.NewAuthProperties()
 
     galasactlPropertiesFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.properties")
-    galasactlProperties, err := props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
+    
+    var galasactlProperties props.JavaProperties
+    galasactlProperties, err = props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
     if err == nil {
         requiredAuthProperties := getAuthPropertiesList()
         err = validateRequiredGalasactlProperties(requiredAuthProperties, galasactlProperties)

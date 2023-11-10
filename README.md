@@ -268,9 +268,10 @@ galasactl runs submit local --log -
 ```
 
 - The --log - parameter indicates that debugging information should be sent to the console.
-- The --obr indicates where the tool can find an OBR which refers to the bundle where all the tests are housed.
-- The --class parameter tells the tool which test class to run. The string is in the format of `<osgi-bundle-id>/<fully-qualified-java-class>`. All the test methods within the class will be run. You can use multiple such flags to test multiple classes.
+- The --obr indicates where galasactl can find an OBR which refers to the bundle where all the tests are housed.
+- The --class parameter tells galasactl which test class to run. The string is in the format of `<osgi-bundle-id>/<fully-qualified-java-class>`. All the test methods within the class will be run. You can use multiple such flags to test multiple classes.
 - The `JAVA_HOME` environment variable should be set to refer to the JVM to use in which the test will be launched.
+- The --localmaven parameter tells galasactl where galasa bundles can be loaded from on your local file system. Defaults to your home .m2/repository file. Please note that this should be in a URL form e.g. `file:///Users/myuserid/.m2/repository`.
 
 - The `--throttle 1` option would mean all your tests run sequentially. A higher throttle value means that local tests run in parallel.
 
@@ -354,6 +355,75 @@ galasactl runs download --name C1234 --destination /Users/me/my/folder
 
 
 A complete list of supported parameters for the `runs download` command is available [here](./docs/generated/galasactl_runs_download.md).
+
+
+## properties get
+This command retrieves details of properties in a namespace.
+
+Properties in a namespace can be filtered out by using `--prefix`, `--infix` and/or `--suffix`, or `--name`.
+Two formats are supported: 'summary', 'raw', the default is 'summary'.
+
+### Examples
+`--prefix`, `--infix` and `--suffix` can be used together or separately to get all properties with a matching prefix, infix and/or suffix.
+```
+galasactl properties get --namespace framework --prefix test
+```
+```
+galasactl properties get --namespace framework --infix galasa --suffix test
+```
+```
+galasactl properties get --namespace framework --prefix test --infix galasa --suffix stream
+```
+
+`--name` is used to get a singular property
+```
+galasactl properties get --namespace framework --name propertyName
+```
+
+For a complete list of supported formatters try running the command with a known to be bad formatter name. For example:
+```
+galasactl properties get --name propertyName --format badFormatterName
+```
+For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_get.md).
+
+`--format` is used to modify the output table
+```
+> galasactl properties get --namespace framework --format summary
+namespace name          value
+framework propertyName0 value0
+framework propertyName1 value1
+>
+```
+```
+> galasactl properties get --namespace framework --format raw
+framework|propertyName0|value0
+framework|propertyName1|value1
+>
+```
+
+## properties set
+This command attempts to update the value of a property in a namespace, but if the property does not exist in that namespace, it creates the property.
+
+The property to be set is supplied through `--name` and its value through `--value`.
+### Examples
+```
+galasactl properties set --namespace framework --name propertyName --value propertyValue
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_set.md).
+
+
+## properties delete
+This command deletes a property in a namespace.
+
+The property to be deleted is supplied through `--name`.
+### Examples
+```
+galasactl properties delete --namespace framework --name propertyName
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_delete.md).
+
 
 ## Reference Material
 

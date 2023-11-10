@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"log"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
 )
 
 type TestReport struct {
@@ -35,7 +35,8 @@ func ReportJSON(
 		testReport.Tests = append(testReport.Tests, *run)
 	}
 
-	data, err := json.MarshalIndent(&testReport, "", "  ")
+	var data []byte
+	data, err = json.MarshalIndent(&testReport, "", "  ")
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL, reportJsonFilename, err.Error())
 	}

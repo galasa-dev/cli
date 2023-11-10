@@ -9,7 +9,7 @@ Manipulate local system
 ### Options
 
 ```
-  -h, --help   help for local
+  -h, --help   Displays the options for the local command.
 ```
 
 ### Options inherited from parent commands

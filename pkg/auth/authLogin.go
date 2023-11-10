@@ -6,14 +6,15 @@
 package auth
 
 import (
-    "context"
-    "log"
+	"context"
+	"log"
+	"net/http"
 
-    "github.com/galasa.dev/cli/pkg/api"
-    galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-    "github.com/galasa.dev/cli/pkg/files"
-    "github.com/galasa.dev/cli/pkg/galasaapi"
-    "github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // Login - performs all the logic to implement the `galasactl auth login` command
@@ -40,7 +41,9 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 
     apiClient := api.InitialiseAPI(apiServerUrl)
 
-    tokenResponse, httpResponse, err := apiClient.AuthenticationAPIApi.PostAuthenticate(context).
+    var tokenResponse *galasaapi.TokenResponse
+    var httpResponse *http.Response
+    tokenResponse, httpResponse, err = apiClient.AuthenticationAPIApi.PostAuthenticate(context).
         AuthProperties(authProperties).
         Execute()
     defer httpResponse.Body.Close()

@@ -10,9 +10,9 @@ import (
 	"log"
 	"text/template"
 
-	"github.com/galasa.dev/cli/pkg/embedded"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
 )
 
 //---------------------------------------------------------------------------------------------------

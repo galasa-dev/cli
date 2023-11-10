@@ -3,12 +3,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package formatters
+package runsformatter
 
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
 

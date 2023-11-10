@@ -9,8 +9,8 @@ import (
 	"log"
 	"strings"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/launcher"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/launcher"
 )
 
 func GetStreams(launcher launcher.Launcher) ([]string, error) {

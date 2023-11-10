@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 func ValidateResultParameter(resultInputString string, apiClient *galasaapi.APIClient) (string, error) {

@@ -6,8 +6,8 @@
 package runs
 
 import (
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
 	"gopkg.in/yaml.v3"
 )
 
@@ -79,24 +79,24 @@ func ReadPortfolio(fileSystem files.FileSystem, filename string) (*Portfolio, er
 
 	text, err := fileSystem.ReadTextFile(filename)
 	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_OPEN_PORTFOLIO_FILE_FAILED, filename, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_OPEN_PORTFOLIO_FILE_FAILED, filename, err.Error())
 		return nil, err
 	}
 
 	err = yaml.Unmarshal([]byte(text), &portfolio)
 	if err != nil {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_FORMAT, filename, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_FORMAT, filename, err.Error())
 		return nil, err
 	}
 
 	// Check the portfolio file claims to be the correct format version.
 	if portfolio.APIVersion != PORTOLIO_DECLARED_FORMAT_VERSION {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_FORMAT_VERSION, filename, PORTOLIO_DECLARED_FORMAT_VERSION)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_FORMAT_VERSION, filename, PORTOLIO_DECLARED_FORMAT_VERSION)
 		return nil, err
 	}
 
 	if portfolio.Kind != PORTFOLIO_DECLARED_RESOURCE_KIND {
-		err := galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_RESOURCE_KIND, filename, PORTFOLIO_DECLARED_RESOURCE_KIND)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PORTFOLIO_BAD_RESOURCE_KIND, filename, PORTFOLIO_DECLARED_RESOURCE_KIND)
 		return nil, err
 	}
 

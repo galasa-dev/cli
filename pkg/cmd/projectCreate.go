@@ -9,11 +9,11 @@ import (
 	"log"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/embedded"
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
 
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -32,15 +32,7 @@ type GradleCoordinates struct {
 	Name    string
 }
 
-var (
-	projectCreateCmd = &cobra.Command{
-		Use:   "create",
-		Short: "Creates a new Galasa project",
-		Long:  "Creates a new Galasa test project with optional OBR project and build process files",
-		Args:  cobra.NoArgs,
-		Run:   executeCreateProject,
-	}
-
+type ProjectCreateCmdValues struct {
 	packageName                string
 	force                      bool
 	isOBRProjectRequired       bool
@@ -48,62 +40,78 @@ var (
 	useMaven                   bool
 	useGradle                  bool
 	isDevelopmentProjectCreate bool
-)
+}
 
-func init() {
-	cmd := projectCreateCmd
-	parentCommand := projectCmd
+func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+	var err error = nil
 
-	cmd.Flags().StringVar(&packageName, "package", "", "Java package name for tests we create. "+
+	projectCreateCmdValues := &ProjectCreateCmdValues{}
+
+	projectCreateCmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Creates a new Galasa project",
+		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
+		Args:    cobra.NoArgs,
+		Aliases: []string{"project create"},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmdValues)
+		},
+	}
+
+	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.packageName, "package", "", "Java package name for tests we create. "+
 		"Forms part of the project name, maven/gradle group/artifact ID, "+
 		"and OSGi bundle name. It may reflect the name of your organisation or company, "+
 		"the department, function or application under test. "+
 		"For example: dev.galasa.banking.example")
-	cmd.MarkFlagRequired("package")
+	projectCreateCmd.MarkFlagRequired("package")
 
-	cmd.Flags().BoolVar(&isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	cmd.Flags().BoolVar(&force, "force", false, "Force-overwrite files which already exist.")
-	cmd.Flags().BoolVar(&isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	cmd.Flags().StringVar(&featureNamesCommaSeparated, "features", "feature1",
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.force, "force", false, "Force-overwrite files which already exist.")
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
+	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.featureNamesCommaSeparated, "features", "feature1",
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
 
-	cmd.Flags().BoolVar(&useMaven, "maven", false, "Generate maven build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useMaven, "maven", false, "Generate maven build artifacts. "+
 		"Can be used in addition to the --gradle flag. "+
 		"If this flag is not used, and the gradle option is not used, then behaviour of this flag defaults to true.")
-	cmd.Flags().BoolVar(&useGradle, "gradle", false, "Generate gradle build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useGradle, "gradle", false, "Generate gradle build artifacts. "+
 		"Can be used in addition to the --maven flag.")
 
-	parentCommand.AddCommand(cmd)
+	parentCmd.AddCommand(projectCreateCmd)
+
+	// no children commands of project create to add here.
+
+	return projectCreateCmd, err
 }
 
-func executeCreateProject(cmd *cobra.Command, args []string) {
+func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, logFileName)
-	if err != nil {
-		panic(err)
+	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	if err == nil {
+
+		rootCmdValues.isCapturingLogs = true
+
+		log.Println("Galasa CLI - Create project")
+
+		err = createProject(fileSystem,
+			projectCreateCmdValues.packageName,
+			projectCreateCmdValues.featureNamesCommaSeparated,
+			projectCreateCmdValues.isOBRProjectRequired,
+			projectCreateCmdValues.force,
+			projectCreateCmdValues.useMaven,
+			projectCreateCmdValues.useGradle,
+			projectCreateCmdValues.isDevelopmentProjectCreate,
+		)
 	}
-	isCapturingLogs = true
-
-	log.Println("Galasa CLI - Create project")
-
-	err = createProject(fileSystem, packageName, featureNamesCommaSeparated,
-		isOBRProjectRequired, force, useMaven, useGradle, isDevelopmentProjectCreate)
-
-	// Convey the error to the top level.
-	// Tried doing this with RunE: entry, passing back the error, but we always
-	// got a 'usage' syntax summary for the command which failed.
-	if err != nil {
-		// We can't unit test
-		panic(err)
-	}
+	return err
 }
 
 // createProject will create the following artifacts in the specified file system:
@@ -587,7 +595,7 @@ func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolder
 			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/build.gradle.template",
 			TemplateParameters:       gradleProjectTemplateParameters}
 
-		err := fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
+		err = fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
 
 		if err == nil {
 			bndFile := utils.GeneratedFileDef{

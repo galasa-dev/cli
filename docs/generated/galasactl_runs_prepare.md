@@ -16,7 +16,7 @@ galasactl runs prepare [flags]
       --append             Append tests to existing portfolio
       --bundle strings     bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
       --class strings      test class names to run from the specified stream or portfolio. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
-  -h, --help               help for prepare
+  -h, --help               Displays the options for the runs prepare command.
       --override strings   overrides to be sent with the tests (overrides in the portfolio will take precedence)
       --package strings    packages of which tests will be selected from, packages are selected if the name contains this string, or if --regex is specified then matches the regex
   -p, --portfolio string   portfolio to add tests to
@@ -29,7 +29,7 @@ galasactl runs prepare [flags]
 ### Options inherited from parent commands
 
 ```
-  -b, --bootstrap string    Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Examples: http://galasa-cicsk8s.hursley.ibm.com/bootstrap , file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
+  -b, --bootstrap string    Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
       --galasahome string   Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
   -l, --log string          File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
 ```

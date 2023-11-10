@@ -16,9 +16,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/galasa.dev/cli/pkg/api"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -373,7 +373,7 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -405,7 +405,7 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -437,7 +437,7 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1041")
@@ -473,7 +473,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	assert.Nil(t, err)
@@ -519,7 +519,7 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	assert.NotNil(t, err)
@@ -555,7 +555,7 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.path)
@@ -593,7 +593,7 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + dummyArtifact.path)
@@ -634,7 +634,7 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1074")
@@ -665,7 +665,7 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1073")
@@ -705,7 +705,7 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	// U27-1-2023-2023-05-10T06:00:13 	(test did not finish)
@@ -776,7 +776,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	mockTimeService.Sleep(time.Second)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	// U27-1-2023-05-10T06:00:13 	(test did not finish)
@@ -829,7 +829,7 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 	// Then...
 
 	assert.Contains(t, err.Error(), "GAL1083E")
@@ -859,7 +859,7 @@ func TestRunsDownloadWithInvalidRunName(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 
@@ -895,7 +895,7 @@ func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
 	run1FolderName := runName + "-" + mockTimeService.Now().Format("2006-01-02_15:04:05")
@@ -932,7 +932,7 @@ func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiServerUrl, apiClient, "/myfolder")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, "/myfolder")
 
 	// Then...
 	downloadedArtifactExists, _ := mockFileSystem.Exists("/myfolder/" + runName + dummyArtifact.path)

@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package formatters
+package runsformatter
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // -----------------------------------------------------

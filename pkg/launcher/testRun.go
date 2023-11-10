@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"net/url"
 
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 
 	"log"
 )
@@ -63,7 +63,8 @@ func readTestRunFromJsonFile(
 	if err != nil {
 		log.Printf("Failed to parse json file path '%s' into a URL.", jsonFilePath)
 	} else {
-		isExists, err := fileSystem.Exists(url.Path)
+		var isExists bool
+		isExists, err = fileSystem.Exists(url.Path)
 		if err != nil {
 			log.Printf("Failed to check whether the file '%s' exists. Can't read status.", url.Path)
 		} else {

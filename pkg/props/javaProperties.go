@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/galasa.dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/files"
 )
 
 type JavaProperties map[string]string

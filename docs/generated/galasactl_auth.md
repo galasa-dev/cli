@@ -9,7 +9,7 @@ Manages the authentication of users with a Galasa ecosystem
 ### Options
 
 ```
-  -h, --help   help for auth
+  -h, --help   Displays the options for the auth command.
 ```
 
 ### Options inherited from parent commands

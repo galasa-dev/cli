@@ -17,10 +17,10 @@ import (
 	"strconv"
 	"strings"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
-	"github.com/galasa.dev/cli/pkg/utils"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // DownloadArtifacts - performs all the logic to implement the `galasactl runs download` command,
@@ -31,7 +31,6 @@ func DownloadArtifacts(
 	fileSystem files.FileSystem,
 	timeService utils.TimeService,
 	console utils.Console,
-	apiServerUrl string,
 	apiClient *galasaapi.APIClient,
 	runDownloadTargetFolder string,
 ) error {
@@ -264,7 +263,8 @@ func WriteArtifactToFileSystem(
 	targetFilePath := filepath.Join(runDirectory, artifactPath)
 
 	// Check if a new file should be created or if an existing one should be overwritten.
-	fileExists, err := fileSystem.Exists(targetFilePath)
+	var fileExists bool
+	fileExists, err = fileSystem.Exists(targetFilePath)
 	if err == nil {
 		if fileExists && !shouldOverwrite {
 

@@ -11,8 +11,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 
 	"net/http"
@@ -82,7 +82,7 @@ func TestLoginWithBadGalasactlPropertiesFileReturnsError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the galasactl.properties file does not contain valid YAML")
-	assert.ErrorContains(t, err, "GAL1096E")
+	assert.ErrorContains(t, err, "GAL1105E")
 }
 
 func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
@@ -182,7 +182,7 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the API request returns an error")
-	assert.ErrorContains(t, err, "GAL1097E")
+	assert.ErrorContains(t, err, "GAL1106E")
 }
 
 func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
@@ -210,7 +210,7 @@ func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the auth.access.token property is missing")
-	assert.ErrorContains(t, err, "GAL1096E")
+	assert.ErrorContains(t, err, "GAL1105E")
 }
 
 func TestGetAuthenticatedAPIClientWithBearerTokenFileReturnsClient(t *testing.T) {

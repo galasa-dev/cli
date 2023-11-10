@@ -6,15 +6,15 @@
 package auth
 
 import (
-    "fmt"
-    "log"
+	"fmt"
+	"log"
 
-    "github.com/galasa.dev/cli/pkg/files"
-    "github.com/galasa.dev/cli/pkg/utils"
-    galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
-func Logout(fileSystem files.FileSystem, console utils.Console, env utils.Environment, galasaHome utils.GalasaHome) error {
+func Logout(fileSystem files.FileSystem, galasaHome utils.GalasaHome) error {
 
     var err error = nil
     bearerTokenFilePath := fmt.Sprintf("%s/%s", galasaHome.GetNativeFolderPath(), "bearer-token.json")

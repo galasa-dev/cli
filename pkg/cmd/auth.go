@@ -9,14 +9,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	authCmd = &cobra.Command{
+func createAuthCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+
+	var err error = nil
+
+	authCmd := &cobra.Command{
 		Use:   "auth",
 		Short: "Manages the authentication of users with a Galasa ecosystem",
 		Long:  "Manages the authentication of users with a Galasa ecosystem",
 	}
-)
 
-func init() {
-	RootCmd.AddCommand(authCmd)
+	parentCmd.AddCommand(authCmd)
+
+	err = createAuthCmdChildren(factory, authCmd, rootCmdValues)
+
+	return authCmd, err
+}
+
+func createAuthCmdChildren(factory Factory, authCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
+	_, err := createAuthLoginCmd(factory, authCmd, rootCmdValues)
+	if err == nil {
+		_, err = createAuthLogoutCmd(factory, authCmd, rootCmdValues)
+	}
+	return err
 }

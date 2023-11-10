@@ -8,8 +8,8 @@ package runs
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/formatters"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/runsformatter"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,16 +31,17 @@ func CreateMethod(methodName string,
 	return method
 }
 
-func createRunForConverter(queued string, runName string,
+
+func createRunForConverter(
+	runName string,
 	testName string,
+	requestor string,
 	status string,
 	result string,
+	queued string, 
 	methods []galasaapi.TestMethod) galasaapi.Run {
 	run1Id := "ar"
 	bundle := ""
-	// testName = ""
-	requestor := ""
-	// queued := ""
 	startTime := ""
 	endTime := ""
 
@@ -72,7 +73,7 @@ func TestGalasaapiRunHasNoRecordsReturnsNoRecords(t *testing.T) {
 	output := FormattableTestFromGalasaApi(runs, apiServerUrl)
 
 	//Then
-	assert.Equal(t, len(output), 0, "The input record is empty and so should be the output record")
+	assert.Equal(t, 0, len(output), "The input record is empty and so should be the output record")
 
 }
 
@@ -81,8 +82,9 @@ func TestGalasaapiRunHasRecordsReturnsSameAmountOfRecordsWithNoMethods(t *testin
 	methods := make([]galasaapi.TestMethod, 0)
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForConverter("2023-05-04T10:45:29.545323Z", "LongRunName", "TestName", "LongStatus", "Short", methods)
-	run2 := createRunForConverter("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "short", "MyLongResultString", methods)
+	//runName, testName, requestor, status, result, queued, methods
+	run1 := createRunForConverter("LongRunName", "TestName", "requestor", "LongStatus", "Passed", "2023-05-04T10:45:29.545323Z", methods)
+	run2 := createRunForConverter("U456", "MyTestName", "myRequestorString", "Status", "Failed", "2023-05-04T10:55:29.545323Z", methods)
 	runs = append(runs, run1, run2)
 	apiServerUrl := ""
 
@@ -103,8 +105,8 @@ func TestGalasaapiRunHasRecordsReturnsSameAmountOfRecordsWithMethods(t *testing.
 	methods = append(methods, method1, method2)
 
 	runs := make([]galasaapi.Run, 0)
-	run1 := createRunForConverter("2023-05-04T10:45:29.545323Z", "LongRunName", "TestName", "LongStatus", "Short", methods)
-	run2 := createRunForConverter("2023-05-04T10:55:29.545323Z", "U456", "MyTestName", "short", "MyLongResultString", methods)
+	run1 := createRunForConverter("LongRunName", "TestName", "requestor", "LongStatus", "Passed", "2023-05-04T10:45:29.545323Z", methods)
+	run2 := createRunForConverter("U456", "MyTestName", "myRequestorString", "Status", "Failed", "2023-05-04T10:55:29.545323Z", methods)
 	runs = append(runs, run1, run2)
 	apiServerUrl := ""
 
@@ -182,8 +184,8 @@ func TestRunsTestRunHasRecordsReturnsSameAmountofRecords(t *testing.T) {
 
 func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 	//Given
-	var formattableTest []formatters.FormattableTest
-	formattableTest1 := formatters.FormattableTest{
+	var formattableTest []runsformatter.FormattableTest
+	formattableTest1 := runsformatter.FormattableTest{
 		RunId:    "id1",
 		Name:     "formattableTest1",
 		TestName: "testName1",
@@ -191,14 +193,14 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Failed",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor1",
 		Bundle:       "bundle1",
 		ApiServerUrl: "127.0.0.1",
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest2 := formatters.FormattableTest{
+	formattableTest2 := runsformatter.FormattableTest{
 		RunId:    "id2",
 		Name:     "formattableTest2",
 		TestName: "testName2",
@@ -206,14 +208,14 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Failed",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor2",
 		Bundle:       "bundle2",
 		ApiServerUrl: "127.0.0.1",
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest3 := formatters.FormattableTest{
+	formattableTest3 := runsformatter.FormattableTest{
 		RunId:    "id3",
 		Name:     "formattableTest3",
 		TestName: "testName3",
@@ -221,14 +223,14 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Passed",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor3",
 		Bundle:       "bundle3",
 		ApiServerUrl: "137.0.0.1",
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest4 := formatters.FormattableTest{
+	formattableTest4 := runsformatter.FormattableTest{
 		RunId:    "id4",
 		Name:     "formattableTest4",
 		TestName: "testName4",
@@ -236,14 +238,14 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Custard",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor4",
 		Bundle:       "bundle4",
 		ApiServerUrl: "147.0.0.1",
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest5 := formatters.FormattableTest{
+	formattableTest5 := runsformatter.FormattableTest{
 		RunId:    "id5",
 		Name:     "formattableTest5",
 		TestName: "testName5",
@@ -251,14 +253,14 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Doughnuts",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor5",
 		Bundle:       "bundle5",
 		ApiServerUrl: "157.0.0.1",
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest6 := formatters.FormattableTest{
+	formattableTest6 := runsformatter.FormattableTest{
 		RunId:    "id6",
 		Name:     "formattableTest6",
 		TestName: "testName6",
@@ -266,14 +268,14 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Custom",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor6",
 		Bundle:       "bundle6",
 		ApiServerUrl: "167.0.0.1",
 		Methods:      nil,
 		Lost:         false,
 	}
-	formattableTest7 := formatters.FormattableTest{
+	formattableTest7 := runsformatter.FormattableTest{
 		RunId:    "id7",
 		Name:     "formattableTest7",
 		TestName: "testName7",
@@ -281,7 +283,7 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		Result:   "Passed With Defects",
 		//StartTimeUTC  string
 		//EndTimeUTC    string
-		//QueuedTimeUTC string
+		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
 		Requestor:    "Requestor7",
 		Bundle:       "bundle7",
 		ApiServerUrl: "177.0.0.1",

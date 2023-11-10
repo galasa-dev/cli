@@ -8,10 +8,10 @@ package runs
 import (
 	"testing"
 
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/launcher"
-	"github.com/galasa.dev/cli/pkg/props"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/launcher"
+	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -173,7 +173,7 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
 
-	commandParameters := utils.RunsSubmitCmdParameters{
+	commandParameters := utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "/tmp/temp.properties",
 	}
@@ -211,7 +211,7 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
 
-	commandParameters := utils.RunsSubmitCmdParameters{
+	commandParameters := utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "/tmp/temp.wrong.file.properties",
 	}
@@ -247,7 +247,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
 
-	commandParameters := utils.RunsSubmitCmdParameters{
+	commandParameters := utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "",
 	}
@@ -290,7 +290,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 	fileProps["c"] = "d"
 	props.WritePropertiesFile(mockFileSystem, path, fileProps)
 
-	commandParameters := utils.RunsSubmitCmdParameters{
+	commandParameters := utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "",
 	}
@@ -320,7 +320,7 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 	env := utils.NewMockEnv()
 	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
 
-	commandParameters := utils.RunsSubmitCmdParameters{
+	commandParameters := utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "-",
 	}
@@ -357,20 +357,20 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
 
-	commandParameters := &utils.RunsSubmitCmdParameters{
+	commandParameters := &utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
 		OverrideFilePath: "",
 	}
 
 	regexSelectValue := false
-	submitSelectionFlags := &TestSelectionFlags{
-		bundles:     new([]string),
-		packages:    new([]string),
-		tests:       new([]string),
-		tags:        new([]string),
-		classes:     new([]string),
-		stream:      "myStream",
-		regexSelect: &regexSelectValue,
+	submitSelectionFlags := &utils.TestSelectionFlagValues{
+		Bundles:     new([]string),
+		Packages:    new([]string),
+		Tests:       new([]string),
+		Tags:        new([]string),
+		Classes:     new([]string),
+		Stream:      "myStream",
+		RegexSelect: &regexSelectValue,
 	}
 
 	mockLauncher := launcher.NewMockLauncher()
@@ -389,93 +389,6 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, commandParameters.OverrideFilePath)
-}
-
-func TestValidateAndCorrectParametersRespectsExplicitRequestorField(t *testing.T) {
-
-	mockFileSystem := files.NewMockFileSystem()
-	env := utils.NewMockEnv()
-	env.SetUserName("mybaduserid")
-
-	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
-	if err != nil {
-		assert.Fail(t, "Should not have failed! message = %s", err.Error())
-	}
-
-	commandParameters := &utils.RunsSubmitCmdParameters{
-		Requestor: "myvaliduserid",
-	}
-
-	regexSelectValue := false
-	submitSelectionFlags := &TestSelectionFlags{
-		bundles:     new([]string),
-		packages:    new([]string),
-		tests:       new([]string),
-		tags:        new([]string),
-		classes:     new([]string),
-		stream:      "myStream",
-		regexSelect: &regexSelectValue,
-	}
-
-	mockLauncher := launcher.NewMockLauncher()
-
-	mockTimeService := utils.NewMockTimeService()
-	console := utils.NewMockConsole()
-	submitter := NewSubmitter(
-		galasaHome,
-		mockFileSystem,
-		mockLauncher,
-		mockTimeService,
-		env,
-		console,
-	)
-
-	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
-
-	assert.Nil(t, err)
-	assert.Equal(t, commandParameters.Requestor, "myvaliduserid")
-}
-
-func TestValidateAndCorrectParametersDefaultsRequestorFieldFromEnvironment(t *testing.T) {
-
-	mockFileSystem := files.NewMockFileSystem()
-	env := utils.NewMockEnv()
-	env.SetUserName("mybaduserid")
-
-	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
-	if err != nil {
-		assert.Fail(t, "Should not have failed! message = %s", err.Error())
-	}
-
-	commandParameters := &utils.RunsSubmitCmdParameters{}
-
-	regexSelectValue := false
-	submitSelectionFlags := &TestSelectionFlags{
-		bundles:     new([]string),
-		packages:    new([]string),
-		tests:       new([]string),
-		tags:        new([]string),
-		classes:     new([]string),
-		stream:      "myStream",
-		regexSelect: &regexSelectValue,
-	}
-
-	mockLauncher := launcher.NewMockLauncher()
-
-	mockTimeService := utils.NewMockTimeService()
-	console := utils.NewMockConsole()
-	submitter := NewSubmitter(
-		galasaHome,
-		mockFileSystem,
-		mockLauncher,
-		mockTimeService,
-		env,
-		console,
-	)
-	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
-
-	assert.Nil(t, err)
-	assert.Equal(t, commandParameters.Requestor, "mybaduserid")
 }
 
 func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
@@ -497,18 +410,18 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
 
-	commandParameters := &utils.RunsSubmitCmdParameters{}
+	commandParameters := &utils.RunsSubmitCmdValues{}
 	commandParameters.PortfolioFileName = portfolioFilePath
 
 	regexSelectValue := false
-	submitSelectionFlags := &TestSelectionFlags{
-		bundles:     new([]string),
-		packages:    new([]string),
-		tests:       new([]string),
-		tags:        new([]string),
-		classes:     new([]string),
-		stream:      "",
-		regexSelect: &regexSelectValue,
+	submitSelectionFlags := &utils.TestSelectionFlagValues{
+		Bundles:     new([]string),
+		Packages:    new([]string),
+		Tests:       new([]string),
+		Tags:        new([]string),
+		Classes:     new([]string),
+		Stream:      "",
+		RegexSelect: &regexSelectValue,
 	}
 
 	mockLauncher := launcher.NewMockLauncher()
@@ -525,7 +438,7 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 	)
 	// Do the launching of the tests.
 	err = submitter.ExecuteSubmitRuns(
-		*commandParameters,
+		commandParameters,
 		submitSelectionFlags,
 	)
 

@@ -8,19 +8,19 @@ package runs
 import (
 	"sort"
 
-	"github.com/galasa.dev/cli/pkg/formatters"
-	"github.com/galasa.dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/runsformatter"
 )
 
-func orderFormattableTests(formattableTest []formatters.FormattableTest) []formatters.FormattableTest {
-	var orderedFormattableTest []formatters.FormattableTest
+func orderFormattableTests(formattableTest []runsformatter.FormattableTest) []runsformatter.FormattableTest {
+	var orderedFormattableTest []runsformatter.FormattableTest
 
 	//get slice of all result labels in ordered form
 	orderedResultLabels := getAvailableResultLabelsinOrder(formattableTest)
 
 	//formattableTest runs grouped by results
 	//map["passed"] = [run1, run2, ...]
-	runsGroupedByResultsMap := make(map[string][]formatters.FormattableTest)
+	runsGroupedByResultsMap := make(map[string][]runsformatter.FormattableTest)
 	for _, run := range formattableTest {
 		runsGroupedByResultsMap[run.Result] = append(runsGroupedByResultsMap[run.Result], run)
 	}
@@ -32,7 +32,7 @@ func orderFormattableTests(formattableTest []formatters.FormattableTest) []forma
 	return orderedFormattableTest
 }
 
-func getAvailableResultLabelsinOrder(formattableTest []formatters.FormattableTest) []string {
+func getAvailableResultLabelsinOrder(formattableTest []runsformatter.FormattableTest) []string {
 	var orderedResultLabels []string
 	orderedResultLabels = append(orderedResultLabels, RESULT_PASSED)
 	orderedResultLabels = append(orderedResultLabels, RESULT_PASSED_WITH_DEFECTS)
@@ -62,8 +62,8 @@ func getAvailableResultLabelsinOrder(formattableTest []formatters.FormattableTes
 	return orderedResultLabels
 }
 
-func FormattableTestFromGalasaApi(runs []galasaapi.Run, apiServerUrl string) []formatters.FormattableTest {
-	var formattableTest []formatters.FormattableTest
+func FormattableTestFromGalasaApi(runs []galasaapi.Run, apiServerUrl string) []runsformatter.FormattableTest {
+	var formattableTest []runsformatter.FormattableTest
 
 	for _, run := range runs {
 		//Get the data for each TestStructure in runs
@@ -76,8 +76,8 @@ func FormattableTestFromGalasaApi(runs []galasaapi.Run, apiServerUrl string) []f
 	return orderedFormattableTest
 }
 
-func getTestStructureData(run galasaapi.Run, apiServerUrl string) formatters.FormattableTest {
-	newFormattableTest := formatters.NewFormattableTest()
+func getTestStructureData(run galasaapi.Run, apiServerUrl string) runsformatter.FormattableTest {
+	newFormattableTest := runsformatter.NewFormattableTest()
 
 	newFormattableTest.RunId = run.GetRunId()
 	newFormattableTest.ApiServerUrl = apiServerUrl
@@ -96,8 +96,8 @@ func getTestStructureData(run galasaapi.Run, apiServerUrl string) formatters.For
 	return newFormattableTest
 }
 
-func FormattableTestFromTestRun(finishedMap map[string]*TestRun, lostMap map[string]*TestRun) []formatters.FormattableTest {
-	var formattableTest []formatters.FormattableTest
+func FormattableTestFromTestRun(finishedMap map[string]*TestRun, lostMap map[string]*TestRun) []runsformatter.FormattableTest {
+	var formattableTest []runsformatter.FormattableTest
 	for _, run := range finishedMap {
 		isLost := false
 		newFormattableTest := getTestRunData(*run, isLost)
@@ -114,8 +114,8 @@ func FormattableTestFromTestRun(finishedMap map[string]*TestRun, lostMap map[str
 	return orderedFormattableTest
 }
 
-func getTestRunData(run TestRun, isLost bool) formatters.FormattableTest {
-	newFormattableTest := formatters.NewFormattableTest()
+func getTestRunData(run TestRun, isLost bool) runsformatter.FormattableTest {
+	newFormattableTest := runsformatter.NewFormattableTest()
 
 	newFormattableTest.RunId = ""
 	newFormattableTest.ApiServerUrl = ""
@@ -126,8 +126,8 @@ func getTestRunData(run TestRun, isLost bool) formatters.FormattableTest {
 	newFormattableTest.Result = run.Result
 	newFormattableTest.StartTimeUTC = ""
 	newFormattableTest.EndTimeUTC = ""
-	newFormattableTest.QueuedTimeUTC = ""
-	newFormattableTest.Requestor = ""
+	newFormattableTest.QueuedTimeUTC = run.QueuedTimeUTC
+	newFormattableTest.Requestor = run.Requestor
 	newFormattableTest.Bundle = run.Bundle
 	newFormattableTest.Methods = nil
 	newFormattableTest.Lost = isLost

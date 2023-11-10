@@ -6,50 +6,57 @@
 package cmd
 
 import (
-	"github.com/galasa.dev/cli/pkg/embedded"
-	"github.com/galasa.dev/cli/pkg/files"
-	"github.com/galasa.dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-var (
-	localInitCmd = &cobra.Command{
+type LocalInitCmdValues struct {
+	isDevelopmentLocalInit bool
+}
+
+func createLocalInitCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+	var err error = nil
+
+	localInitCmdValues := &LocalInitCmdValues{}
+
+	localInitCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialises Galasa home folder",
 		Long:  "Initialises Galasa home folder in home directory with all the properties files",
 		Args:  cobra.NoArgs,
-		Run:   executeEnvInit,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeEnvInit(cmd, args, factory, localInitCmdValues, rootCmdValues)
+		},
 	}
 
-	isDevelopmentLocalInit bool
-)
+	localInitCmd.Flags().BoolVar(&localInitCmdValues.isDevelopmentLocalInit, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-func init() {
-	localInitCmd.Flags().BoolVar(&isDevelopmentLocalInit, "development", false, "Use bleeding-edge galasa versions and repositories.")
+	parentCmd.AddCommand(localInitCmd)
 
-	parentCommand := localCmd
-	parentCommand.AddCommand(localInitCmd)
+	// There are no children commands to add to the command tree from here.
+
+	return localInitCmd, err
 }
 
-func executeEnvInit(cmd *cobra.Command, args []string) {
+func executeEnvInit(cmd *cobra.Command, args []string, factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 
 	// Operations on the file system will all be relative to the current folder.
-	fileSystem := files.NewOSFileSystem()
+	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, logFileName)
-	if err != nil {
-		panic(err)
+	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	if err == nil {
+
+		rootCmdValues.isCapturingLogs = true
+
+		env := factory.GetEnvironment()
+
+		err = localEnvInit(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath, localInitCmdValues.isDevelopmentLocalInit)
 	}
-	isCapturingLogs = true
-
-	env := utils.NewEnvironment()
-
-	err = localEnvInit(fileSystem, env, CmdParamGalasaHomePath, isDevelopmentLocalInit)
-	if err != nil {
-		panic(err)
-	}
+	return err
 }
 
 func localEnvInit(

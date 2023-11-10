@@ -4,7 +4,7 @@ Log out from a Galasa ecosystem
 
 ### Synopsis
 
-Log out from a Galasa ecosystem
+Log out from a Galasa ecosystem that you have previously logged in to
 
 ```
 galasactl auth logout [flags]
@@ -13,7 +13,7 @@ galasactl auth logout [flags]
 ### Options
 
 ```
-  -h, --help   help for logout
+  -h, --help   Displays the options for the auth logout command.
 ```
 
 ### Options inherited from parent commands

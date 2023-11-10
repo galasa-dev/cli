@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/user"
 
-	galasaErrors "github.com/galasa.dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 // Environment is a thin interface layer above the os package which can be mocked out
@@ -25,8 +25,7 @@ type Environment interface {
 type OSEnvironment struct {
 }
 
-// NewOSFileSystem creates an implementation of the thin file system layer which delegates
-// to the real os package calls.
+// NewOSEnvironment creates a real wrapper over the os environment
 func NewOSEnvironment() *OSEnvironment {
 	env := new(OSEnvironment)
 	return env

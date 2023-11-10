@@ -177,14 +177,23 @@ var (
 	GALASA_ERROR_BAD_BOOTSTRAP_FILE_URL                   = NewMessageType("GAL1091E: '%s' is not a properly formed file URL", 1091, STACK_TRACE_WANTED)
 	GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST               = NewMessageType("GAL1092E: Galasa Ecosystem error: A test was submitted for launch. The galasa runtime is not reporting test progress. "+
 		"The test is lost and may execute but test progress cannot be monitored from this tool. (bundle: %s, class: %s).", 1092, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_FAILED_TO_SUBMIT_TEST      = NewMessageType("GAL1093E: Failed to submit test (bundle: %s, class: %s). Reason is: %s", 1093, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS = NewMessageType("GAL1094E: User error: Cannot run test %s on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.", 1094, STACK_TRACE_NOT_WANTED)
 
-	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE            = NewMessageType("GAL1095E: Unable to delete the bearer token file '%s'.", 1095, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_MISSING_GALASACTL_PROPERTY                    = NewMessageType("GAL1096E: Property '%s' was expected but has not been set in the galasactl.properties file.", 1096, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER       = NewMessageType("GAL1097E: Could not get security bearer token from API server. Reason: '%s'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret", 1097, STACK_TRACE_WANTED)
-	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE             = NewMessageType("GAL1098E: Could not get security bearer token from file '%s'. Reason: '%s'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked", 1098, STACK_TRACE_WANTED)
-	GALASA_ERROR_UNAUTHORIZED					               = NewMessageType("GAL1099E: Unauthorized. Please log in to your ecosystem by running 'galasactl auth login'", 1099, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_SUBMIT_TEST               = NewMessageType("GAL1093E: Failed to submit test (bundle: %s, class: %s). Reason is: %s", 1093, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS          = NewMessageType("GAL1094E: User error: Cannot run test %s on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.", 1094, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_NAMESPACE                   = NewMessageType("GAL1095E: namespace '%s' is invalid. Expected it to be in a format starting with letters, and ending in a number with no non-alphanumeric characters.", 1095, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_QUERY_NAMESPACE_FAILED              = NewMessageType("GAL1096E: Could not query namespace results. Reason: '%s'", 1096, STACK_TRACE_WANTED)
+	GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION = NewMessageType("GAL1097E: Property --name cannot be set alongside --prefix, --suffix, or --infix.", 1097, STACK_TRACE_WANTED)
+	GALASA_ERROR_PUT_PROPERTY_FAILED                 = NewMessageType("GAL1098E: Property '%v' could not be updated. Reason: '%s'", 1098, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_PROPERTY_FAILED              = NewMessageType("GAL1099E: Property '%v' could not be deleted. Reason: '%s'", 1099, STACK_TRACE_WANTED)
+	GALASA_ERROR_POST_PROPERTY_FAILED                = NewMessageType("GAL1100E: Property '%v' could not be created. Reason: '%s'", 1100, STACK_TRACE_WANTED)
+	GALASA_ERROR_MISSING_NAMESPACE_FLAG              = NewMessageType("GAL1101E: namespace '%s' is invalid. '--namespace' is a mandatory flag for this command.", 1101, STACK_TRACE_WANTED)
+	GALASA_ERROR_MISSING_NAME_FLAG                   = NewMessageType("GAL1102E: name '%s' is invalid. '--name' is a mandatory flag for this command.", 1102, STACK_TRACE_WANTED)
+	GALASA_ERROR_QUERY_CPS_FAILED                    = NewMessageType("GAL1103E: Could not query CPS results. Reason: '%s'", 1103, STACK_TRACE_WANTED)
+
+	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE            = NewMessageType("GAL1104E: Unable to delete the bearer token file '%s'.", 1104, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_MISSING_GALASACTL_PROPERTY                    = NewMessageType("GAL1105E: Property '%s' was expected but has not been set in the galasactl.properties file.", 1105, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER       = NewMessageType("GAL1106E: Could not get security bearer token from API server. Reason: '%s'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret", 1106, STACK_TRACE_WANTED)
+	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE             = NewMessageType("GAL1107E: Could not get security bearer token from file '%s'. Reason: '%s'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked", 1107, STACK_TRACE_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

@@ -9,24 +9,45 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	runsCmd = &cobra.Command{
+type RunsCmdValues struct {
+	bootstrap string
+}
+
+func createRunsCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+	var err error = nil
+
+	runsCmdValues := &RunsCmdValues{}
+
+	runsCmd := &cobra.Command{
 		Use:   "runs",
 		Short: "Manage test runs in the ecosystem",
 		Long:  "Assembles, submits and monitors test runs in Galasa Ecosystem",
 	}
-	bootstrap string
-)
 
-func init() {
-	cmd := runsCmd
-	parentCmd := RootCmd
-
-	cmd.PersistentFlags().StringVarP(&bootstrap, "bootstrap", "b", "",
+	runsCmd.PersistentFlags().StringVarP(&runsCmdValues.bootstrap, "bootstrap", "b", "",
 		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
 			"If it starts with neither, it is assumed to be a fully-qualified path. "+
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
-			"Examples: http://galasa-cicsk8s.hursley.ibm.com/bootstrap , file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
+			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
 	parentCmd.AddCommand(runsCmd)
+
+	err = createRunsCmdChildren(factory, runsCmd, runsCmdValues, rootCmdValues)
+
+	return runsCmd, err
+}
+
+func createRunsCmdChildren(factory Factory, runsCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) error {
+
+	_, err := createRunsDownloadCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
+	if err == nil {
+		_, err = createRunsGetCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
+	}
+	if err == nil {
+		_, err = createRunsPrepareCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
+	}
+	if err == nil {
+		_, err = createRunsSubmitCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
+	}
+	return err
 }
