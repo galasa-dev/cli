@@ -60,7 +60,7 @@ done
 
 # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
 if [[ "${bootstrap}" == "" ]]; then
-    export bootstrap="http://galasa-cicsk8s.hursley.ibm.com/bootstrap"
+    export bootstrap="https://galasa-galasa-prod.cicsk8s.hursley.ibm.com/bootstrap"
     info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
 fi
 
