@@ -110,9 +110,11 @@ func executeAssemble(
 				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
 				if err == nil {
 
+					timeService := factory.GetTimeService()
+
 					// Create an API client
 					apiServerUrl := bootstrapData.ApiServerURL
-					apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
+					apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
 					launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
 					validator := runs.NewStreamBasedValidator()

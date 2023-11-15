@@ -91,13 +91,13 @@ func executeRunsDownload(
 			if err == nil {
 
 				var console = factory.GetConsole()
+				timeService := factory.GetTimeService()
 
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
 
-				timeService := utils.NewRealTimeService()
 				// Call to process the command in a unit-testable way.
 				err = runs.DownloadArtifacts(
 					runsDownloadCmdValues.runNameDownload,

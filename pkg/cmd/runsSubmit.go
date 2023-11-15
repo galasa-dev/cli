@@ -133,12 +133,12 @@ func executeSubmit(
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
 			if err == nil {
 
-				timeService := utils.NewRealTimeService()
+				timeService := factory.GetTimeService()
 				var launcherInstance launcher.Launcher = nil
 
 				// The launcher we are going to use to start/monitor tests.
 				apiServerUrl := bootstrapData.ApiServerURL
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome)
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
 				launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
 				validator := runs.NewStreamBasedValidator()

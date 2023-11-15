@@ -20,6 +20,7 @@ type Factory interface {
 	GetEnvironment() utils.Environment
 	GetFinalWordHandler() FinalWordHandler
 	GetConsole() utils.Console
+	GetTimeService() utils.TimeService
 }
 
 // Allocates real objects with real implementations,
@@ -52,4 +53,8 @@ func (this *RealFactory) GetConsole() utils.Console {
 		this.console = utils.NewRealConsole()
 	}
 	return this.console
+}
+
+func (*RealFactory) GetTimeService() utils.TimeService {
+	return utils.NewRealTimeService()
 }

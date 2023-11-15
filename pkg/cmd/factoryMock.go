@@ -15,6 +15,7 @@ type MockFactory struct {
 	fileSystem       files.FileSystem
 	env              utils.Environment
 	console          utils.Console
+	timeService      utils.TimeService
 }
 
 func NewMockFactory() Factory {
@@ -47,4 +48,11 @@ func (this *MockFactory) GetConsole() utils.Console {
 		this.console = utils.NewMockConsole()
 	}
 	return this.console
+}
+
+func (this *MockFactory) GetTimeService() utils.TimeService {
+	if this.timeService == nil {
+		this.timeService = utils.NewMockTimeService()
+	}
+	return this.timeService
 }

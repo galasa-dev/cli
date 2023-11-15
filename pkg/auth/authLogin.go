@@ -62,15 +62,15 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 }
 
 // Gets a new authenticated API client, attempting to log in if a bearer token file does not exist
-func GetAuthenticatedAPIClient(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome) *galasaapi.APIClient {
-    bearerToken, err := GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome)
+func GetAuthenticatedAPIClient(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome, timeService utils.TimeService) *galasaapi.APIClient {
+    bearerToken, err := GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
     if err != nil {
         // Attempt to log in
         log.Printf("Logging in to the Galasa Ecosystem at '%s'", apiServerUrl)
         err = Login(apiServerUrl, fileSystem, galasaHome)
         if err == nil {
             log.Printf("Logged in to the Galasa Ecosystem at '%s' OK", apiServerUrl)
-            bearerToken, err = GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome)
+            bearerToken, err = GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
         }
     }
 
