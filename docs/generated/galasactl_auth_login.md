@@ -1,10 +1,10 @@
 ## galasactl auth login
 
-Authenticate against a Galasa ecosystem
+Log in to a Galasa ecosystem using an existing access token
 
 ### Synopsis
 
-Log in to a Galasa ecosystem using an existing access token
+Log in to a Galasa ecosystem using an existing access token stored in the 'galasactl.properties' file in your GALASA_HOME directory. If you do not have an access token, request one through your ecosystem's web user interface and follow the instructions on the web user interface to populate the 'galasactl.properties' file.
 
 ```
 galasactl auth login [flags]
@@ -26,5 +26,5 @@ galasactl auth login [flags]
 
 ### SEE ALSO
 
-* [galasactl auth](galasactl_auth.md)	 - Manages the authentication of users with a Galasa ecosystem
+* [galasactl auth](galasactl_auth.md)	 - Manages authentication with a Galasa ecosystem
 

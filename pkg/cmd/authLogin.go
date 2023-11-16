@@ -25,8 +25,10 @@ func createAuthLoginCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues
 
 	authLoginCmd := &cobra.Command{
 		Use:   "login",
-		Short: "Authenticate against a Galasa ecosystem",
-		Long:  "Log in to a Galasa ecosystem using an existing access token",
+		Short: "Log in to a Galasa ecosystem using an existing access token",
+		Long:  "Log in to a Galasa ecosystem using an existing access token stored in the 'galasactl.properties' file in your GALASA_HOME directory. " +
+			   "If you do not have an access token, request one through your ecosystem's web user interface " +
+			   "and follow the instructions on the web user interface to populate the 'galasactl.properties' file.",
 		Args:  cobra.NoArgs,
 		Aliases: []string{"auth login"},
 		RunE: func(cmd *cobra.Command, args []string) error {

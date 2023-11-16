@@ -1,10 +1,10 @@
 ## galasactl auth
 
-Manages the authentication of users with a Galasa ecosystem
+Manages authentication with a Galasa ecosystem
 
 ### Synopsis
 
-Manages the authentication of users with a Galasa ecosystem
+Manages authentication with a Galasa ecosystem using access tokens, enabling secure interactions with the ecosystem.
 
 ### Options
 
@@ -22,6 +22,6 @@ Manages the authentication of users with a Galasa ecosystem
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
-* [galasactl auth login](galasactl_auth_login.md)	 - Authenticate against a Galasa ecosystem
+* [galasactl auth login](galasactl_auth_login.md)	 - Log in to a Galasa ecosystem using an existing access token
 * [galasactl auth logout](galasactl_auth_logout.md)	 - Log out from a Galasa ecosystem
 

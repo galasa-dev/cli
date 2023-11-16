@@ -25,5 +25,5 @@ galasactl auth logout [flags]
 
 ### SEE ALSO
 
-* [galasactl auth](galasactl_auth.md)	 - Manages the authentication of users with a Galasa ecosystem
+* [galasactl auth](galasactl_auth.md)	 - Manages authentication with a Galasa ecosystem
 

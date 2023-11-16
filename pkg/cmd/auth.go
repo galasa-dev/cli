@@ -15,8 +15,9 @@ func createAuthCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *Roo
 
 	authCmd := &cobra.Command{
 		Use:   "auth",
-		Short: "Manages the authentication of users with a Galasa ecosystem",
-		Long:  "Manages the authentication of users with a Galasa ecosystem",
+		Short: "Manages authentication with a Galasa ecosystem",
+		Long:  "Manages authentication with a Galasa ecosystem using access tokens, " +
+			   "enabling secure interactions with the ecosystem.",
 	}
 
 	parentCmd.AddCommand(authCmd)
