@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -468,7 +469,8 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockConsole := utils.NewMockConsole()
 
 	mockFileSystem := files.NewMockFileSystem()
-	mockFileSystem.WriteTextFile(runName+dummyTxtArtifact.path, "dummy text file")
+	separator := string(os.PathSeparator)
+	mockFileSystem.WriteTextFile(runName+separator+"artifacts"+separator+"dummy.txt", "dummy text file")
 	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
 
@@ -514,8 +516,9 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	mockTimeService := utils.NewMockTimeService()
 
 	mockFileSystem := files.NewMockFileSystem()
-	mockFileSystem.WriteTextFile(runName+"/dummy.txt", "dummy text file")
-	mockFileSystem.WriteTextFile(runName+"/run.log", "dummy log")
+	separator := string(os.PathSeparator)
+	mockFileSystem.WriteTextFile(runName+separator+"dummy.txt", "dummy text file")
+	mockFileSystem.WriteTextFile(runName+separator+"run.log", "dummy log")
 
 
 	// When...
@@ -596,7 +599,8 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
 	// Then...
-	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + dummyArtifact.path)
+	separator := string(os.PathSeparator)
+	downloadedArtifactExists, _ := mockFileSystem.Exists(runName + separator + "artifacts" + separator + "dummy.txt")
 
 	assert.Nil(t, err)
 	assert.True(t, downloadedArtifactExists)

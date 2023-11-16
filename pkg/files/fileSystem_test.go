@@ -6,6 +6,7 @@
 package files
 
 import (
+	"runtime"
 	"strings"
 	"testing"
 
@@ -78,7 +79,9 @@ func TestGetUserHomeDirReturnsSomething(t *testing.T) {
 	homeDirPath, err := fs.GetUserHomeDirPath()
 	assert.Nil(t, err)
 	assert.NotEmpty(t, homeDirPath)
-	assert.True(t, strings.HasPrefix(homeDirPath, fs.GetFilePathSeparator()))
+	if runtime.GOOS != "windows" {
+		assert.True(t, strings.HasPrefix(homeDirPath, fs.GetFilePathSeparator()))
+	}
 }
 
 func TestMkAllDirCreatesNestOfFoldersOk(t *testing.T) {
