@@ -14,7 +14,8 @@ type MockFactory struct {
 	finalWordHandler FinalWordHandler
 	fileSystem       files.FileSystem
 	env              utils.Environment
-	console          utils.Console
+	stdOutConsole    utils.Console
+	stdErrConsole    utils.Console
 }
 
 func NewMockFactory() Factory {
@@ -42,9 +43,16 @@ func (this *MockFactory) GetFinalWordHandler() FinalWordHandler {
 	return this.finalWordHandler
 }
 
-func (this *MockFactory) GetConsole() utils.Console {
-	if this.console == nil {
-		this.console = utils.NewMockConsole()
+func (this *MockFactory) GetStdOutConsole() utils.Console {
+	if this.stdOutConsole == nil {
+		this.stdOutConsole = utils.NewMockConsole()
 	}
-	return this.console
+	return this.stdOutConsole
+}
+
+func (this *MockFactory) GetStdErrConsole() utils.Console {
+	if this.stdErrConsole == nil {
+		this.stdErrConsole = utils.NewMockConsole()
+	}
+	return this.stdErrConsole
 }
