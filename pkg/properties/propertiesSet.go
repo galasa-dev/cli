@@ -26,7 +26,7 @@ func SetProperty(
 	var err error
 
 	err = validateInputsAreNotEmpty(namespace, name)
-	if err == nil{
+	if err == nil {
 		err = updateCpsProperty(namespace, name, value, apiServerUrl)
 	}
 
@@ -36,7 +36,7 @@ func SetProperty(
 	if err != nil && strings.Contains(err.Error(), "404") {
 		err = createCpsProperty(namespace, name, value, apiServerUrl)
 	}
-	
+
 	return err
 }
 

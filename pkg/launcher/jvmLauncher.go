@@ -114,7 +114,7 @@ func NewJVMLauncher(
 	env utils.Environment,
 	fileSystem files.FileSystem,
 	embeddedFileSystem embedded.ReadOnlyFileSystem,
-	runsSubmitLocalCmdParams RunsSubmitLocalCmdParameters,
+	runsSubmitLocalCmdParams *RunsSubmitLocalCmdParameters,
 	timeService utils.TimeService,
 	processFactory ProcessFactory,
 	galasaHome utils.GalasaHome,
@@ -132,7 +132,7 @@ func NewJVMLauncher(
 	if err == nil {
 		launcher = new(JvmLauncher)
 		launcher.javaHome = javaHome
-		launcher.cmdParams = runsSubmitLocalCmdParams
+		launcher.cmdParams = *runsSubmitLocalCmdParams
 		launcher.env = env
 		launcher.fileSystem = fileSystem
 		launcher.embeddedFileSystem = embeddedFileSystem

@@ -8,7 +8,7 @@ package utils
 // RunsSubmitCmdParameters - Holds variables set by cobra's command-line parsing.
 // We collect the parameters here so that our unit tests can feed in different values
 // easily.
-type RunsSubmitCmdParameters struct {
+type RunsSubmitCmdValues struct {
 	PollIntervalSeconds           int
 	NoExitCodeOnTestFailures      bool
 	ReportYamlFilename            string
@@ -24,4 +24,5 @@ type RunsSubmitCmdParameters struct {
 	ThrottleFileName              string
 	PortfolioFileName             string
 	OverrideFilePath              string
+	TestSelectionFlagValues       *TestSelectionFlagValues
 }
