@@ -87,7 +87,7 @@ func executePropertiesNamespaceGet(
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
 			if err == nil {
 
-				var console = factory.GetConsole()
+				var console = factory.GetStdOutConsole()
 
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)

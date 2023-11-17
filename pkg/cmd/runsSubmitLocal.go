@@ -162,7 +162,7 @@ func executeSubmitLocal(
 						processFactory, galasaHome)
 
 					if err == nil {
-						var console = factory.GetConsole()
+						var console = factory.GetStdOutConsole()
 
 						// Do the launching of the tests.
 						submitter := runs.NewSubmitter(

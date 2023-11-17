@@ -19,14 +19,16 @@ type Factory interface {
 	GetFileSystem() files.FileSystem
 	GetEnvironment() utils.Environment
 	GetFinalWordHandler() FinalWordHandler
-	GetConsole() utils.Console
+	GetStdOutConsole() utils.Console
+	GetStdErrConsole() utils.Console
 }
 
 // Allocates real objects with real implementations,
 // none of which are generally great for unit testing.
 // eg: A real file system can leave debris behind when a test runs.
 type RealFactory struct {
-	console utils.Console
+	stdOutConsole utils.Console
+	stdErrConsole utils.Console
 }
 
 func NewRealFactory() Factory {
@@ -47,9 +49,16 @@ func (*RealFactory) GetFinalWordHandler() FinalWordHandler {
 
 // We only ever expect there to be a single console object, which collects all the
 // command output.
-func (this *RealFactory) GetConsole() utils.Console {
-	if this.console == nil {
-		this.console = utils.NewRealConsole()
+func (this *RealFactory) GetStdOutConsole() utils.Console {
+	if this.stdOutConsole == nil {
+		this.stdOutConsole = utils.NewRealConsole()
 	}
-	return this.console
+	return this.stdOutConsole
+}
+
+func (this *RealFactory) GetStdErrConsole() utils.Console {
+	if this.stdErrConsole == nil {
+		this.stdErrConsole = utils.NewRealConsole()
+	}
+	return this.stdErrConsole
 }

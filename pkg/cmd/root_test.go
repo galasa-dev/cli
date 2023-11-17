@@ -36,7 +36,7 @@ func TestVersionFromCommandLine(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Lets check that the version came out.
-	console := factory.GetConsole().(*utils.MockConsole)
+	console := factory.GetStdOutConsole().(*utils.MockConsole)
 	text := console.ReadText()
 	assert.Contains(t, text, "galasactl version")
 	versionString, _ := embedded.GetGalasaCtlVersion()
@@ -60,7 +60,7 @@ func TestNoParamsFromCommandLine(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	console := factory.GetConsole().(*utils.MockConsole)
+	console := factory.GetStdOutConsole().(*utils.MockConsole)
 	text := console.ReadText()
 	assert.Contains(t, text, "A tool for controlling Galasa resources")
 
