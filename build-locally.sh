@@ -67,7 +67,14 @@ EOF
 }
 
 #--------------------------------------------------------------------------
-#
+function read_boot_jar_version {
+    export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion[ ]*=" | cut -f2 -d"'" )
+    info "Boot jar version is $BOOT_JAR_VERSION"
+}
+
+
+#--------------------------------------------------------------------------
+# 
 # Main script logic
 #
 #--------------------------------------------------------------------------
@@ -118,6 +125,7 @@ if [[ ! -e "../framework/openapi.yaml" ]]; then
     exit 1
 fi
 success "OK"
+
 
 
 #--------------------------------------------------------------------------
@@ -480,11 +488,7 @@ function generate_galasactl_documentation {
     success "Documentation generated - OK"
 }
 
-#--------------------------------------------------------------------------
-function read_boot_jar_version {
-    export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion[ ]*=" | cut -f2 -d"'" )
-    info "Boot jar version is $BOOT_JAR_VERSION"
-}
+
 
 #--------------------------------------------------------------------------
 # Run test using the galasactl locally in a JVM

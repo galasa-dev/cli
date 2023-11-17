@@ -145,7 +145,7 @@ func executeSubmit(
 				err = validator.Validate(runsSubmitCmdValues.TestSelectionFlagValues)
 				if err == nil {
 
-					var console = factory.GetConsole()
+					var console = factory.GetStdOutConsole()
 
 					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console)
 

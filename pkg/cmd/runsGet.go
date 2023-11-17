@@ -95,7 +95,7 @@ func executeRunsGet(
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
 			if err == nil {
 
-				var console = factory.GetConsole()
+				var console = factory.GetStdOutConsole()
 				timeService := factory.GetTimeService()
 
 				apiServerUrl := bootstrapData.ApiServerURL
