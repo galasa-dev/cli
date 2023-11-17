@@ -235,11 +235,11 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED, err.Error())
 	} else {
+		defer httpResponse.Body.Close()
 		for _, artifact := range artifactsList {
 			artifactPaths = append(artifactPaths, artifact.GetPath())
 		}
 	}
-	defer httpResponse.Body.Close()
 	log.Printf("%v artifact path(s) found", len(artifactPaths))
 
 	return artifactPaths, err
