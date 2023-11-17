@@ -577,9 +577,13 @@ func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	console := factory.GetConsole().(*utils.MockConsole)
-	text := console.ReadText()
-	assert.Contains(t, text, "Error: required flag(s) \"package\" not set")
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Contains(t, outText, "Usage:")
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "Error: required flag(s) \"package\" not set")
 
 	// We expect an exit code of 0 for this command.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
@@ -600,9 +604,13 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw no output
-	console := factory.GetConsole().(*utils.MockConsole)
-	text := console.ReadText()
-	assert.Equal(t, text, "")
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Empty(t, outText)
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Empty(t, errText)
 
 	// We expect an exit code of 0.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
@@ -629,9 +637,13 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	console := factory.GetConsole().(*utils.MockConsole)
-	text := console.ReadText()
-	assert.Contains(t, text, "Error: GAL1089E: Need to use --maven and/or --gradle parameter")
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Contains(t, outText, "Usage:")
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "Error: GAL1089E: Need to use --maven and/or --gradle parameter")
 
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
