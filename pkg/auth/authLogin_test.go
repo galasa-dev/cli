@@ -280,6 +280,16 @@ func TestGetAuthenticatedAPIClientWithUnavailableAPIContinuesWithoutToken(t *tes
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 	mockTimeService := utils.NewMockTimeService()
 
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+
+	mockClientId := "dummyId"
+	mockSecret := "shhhh"
+	mockRefreshToken := "abcdefg"
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
+		"GALASA_CLIENT_ID=%s\n"+
+		"GALASA_SECRET=%s\n"+
+		"GALASA_ACCESS_TOKEN=%s", mockClientId, mockSecret, mockRefreshToken))
+
 	server := NewAuthServletMock(t, 500, "")
 	defer server.Close()
 
