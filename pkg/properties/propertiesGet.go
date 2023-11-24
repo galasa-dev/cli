@@ -11,7 +11,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/propertiesformatter"
@@ -30,7 +29,7 @@ func GetProperties(
 	prefix string,
 	suffix string,
 	infix string,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 	propertiesOutputFormat string,
 	console utils.Console,
 ) error {
@@ -42,7 +41,7 @@ func GetProperties(
 		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
 		if err == nil {
 			var cpsProperty []galasaapi.CpsProperty
-			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiServerUrl, console)
+			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
 			if err == nil {
 				var outputText string
 
@@ -66,7 +65,7 @@ func getCpsPropertiesFromRestApi(
 	prefix string,
 	suffix string,
 	infix string,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 	console utils.Console,
 ) ([]galasaapi.CpsProperty, error) {
 
@@ -74,13 +73,10 @@ func getCpsPropertiesFromRestApi(
 
 	var context context.Context = nil
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
-	restClient := api.InitialiseAPI(apiServerUrl)
-
 	var cpsProperties = make([]galasaapi.CpsProperty, 0)
 
 	if name == "" {
-		apicall := restClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace)
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace)
 		if prefix != "" {
 			apicall = apicall.Prefix(prefix)
 		}
@@ -92,7 +88,7 @@ func getCpsPropertiesFromRestApi(
 		}
 		cpsProperties, _, err = apicall.Execute()
 	} else {
-		apicall := restClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name)
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name)
 		cpsProperties, _, err = apicall.Execute()
 	}
 

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -185,13 +186,13 @@ func TestInvalidNamepsaceReturnsError(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Error(t, err)
@@ -208,7 +209,7 @@ func TestValidNamespaceReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -221,7 +222,7 @@ validNamespace property3 value3
 Total:4
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 
@@ -239,14 +240,14 @@ func TestEmptyNamespaceReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
 	expectedOutput := `Total:0
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -263,7 +264,7 @@ func TestValidNamespaceAndPrefixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -274,7 +275,7 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -291,7 +292,7 @@ func TestValidNamespaceAndSuffixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -302,7 +303,7 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -319,7 +320,7 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -330,7 +331,7 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -347,7 +348,7 @@ func TestValidNamespaceWithNoMatchingPrefixAndSuffixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -355,7 +356,7 @@ func TestValidNamespaceWithNoMatchingPrefixAndSuffixReturnsEmpty(t *testing.T) {
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -372,7 +373,7 @@ func TestValidNamespaceAndNoMatchingPrefixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -380,7 +381,7 @@ func TestValidNamespaceAndNoMatchingPrefixReturnsEmpty(t *testing.T) {
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -397,7 +398,7 @@ func TestValidNamespaceAndNoMatchingSuffixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -405,7 +406,7 @@ func TestValidNamespaceAndNoMatchingSuffixReturnsEmpty(t *testing.T) {
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -422,7 +423,7 @@ func TestValidNamespaceWithMatchingInfixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -432,7 +433,7 @@ validNamespace extra.anInfix.extra infixVal
 Total:1
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -449,14 +450,14 @@ func TestValidNamespaceWithNoMatchingInfixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
 	expectedOutput := `Total:0
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -473,7 +474,7 @@ func TestValidNamespaceWithMatchingPrefixAndInfixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -484,7 +485,7 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -501,7 +502,7 @@ func TestValidNamespaceWithMatchingSuffixAndInfixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -512,7 +513,7 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -529,7 +530,7 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixAndInfixReturnsOk(t *testing.T
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -540,7 +541,7 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -557,7 +558,7 @@ func TestValidNamespaceWithValidNameReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -567,7 +568,7 @@ validNamespace property0 value0
 Total:1
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -584,7 +585,7 @@ func TestValidNameWithEmptyValueValidNameReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -595,7 +596,7 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -612,7 +613,7 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -620,7 +621,7 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -637,7 +638,7 @@ func TestValidNamespaceFormatRawReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "raw"
 
 	server := NewPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -647,7 +648,7 @@ validNamespace|property2|value2
 validNamespace|property3|value3
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiServerUrl, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)

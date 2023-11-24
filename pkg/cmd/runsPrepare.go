@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/auth"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
@@ -109,8 +110,12 @@ func executeAssemble(
 				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
 				if err == nil {
 
+					timeService := factory.GetTimeService()
+
 					// Create an API client
-					launcher := launcher.NewRemoteLauncher(bootstrapData.ApiServerURL)
+					apiServerUrl := bootstrapData.ApiServerURL
+					apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
+					launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
 					validator := runs.NewStreamBasedValidator()
 					err = validator.Validate(runsPrepareCmdValues.prepareSelectionFlags)

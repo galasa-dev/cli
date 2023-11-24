@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -45,9 +46,10 @@ func TestValidResultNamePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("Passed", apiServerUrl)
+	result, err := ValidateResultParameter("Passed", apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -59,9 +61,10 @@ func TestValidResultNameLowercasePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("envfail", apiServerUrl)
+	result, err := ValidateResultParameter("envfail", apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -73,9 +76,10 @@ func TestValidResultNameUppercasePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("FAILED", apiServerUrl)
+	result, err := ValidateResultParameter("FAILED", apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -87,9 +91,10 @@ func TestMultipleValidResultNamesMixedCasePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("unKnown,PASSed,Failed", apiServerUrl)
+	result, err := ValidateResultParameter("unKnown,PASSed,Failed", apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -101,9 +106,10 @@ func TestGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("garbage", apiServerUrl)
+	result, err := ValidateResultParameter("garbage", apiClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
@@ -121,9 +127,10 @@ func TestValidResultFollowedByGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("passed,garbage", apiServerUrl)
+	result, err := ValidateResultParameter("passed,garbage", apiClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
@@ -141,9 +148,10 @@ func TestMultipleGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("fail,garbage", apiServerUrl)
+	result, err := ValidateResultParameter("fail,garbage", apiClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
@@ -162,9 +170,10 @@ func TestMixOfValidAndGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("passed,garbage,envfail,rubbish", apiServerUrl)
+	result, err := ValidateResultParameter("passed,garbage,envfail,rubbish", apiClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")

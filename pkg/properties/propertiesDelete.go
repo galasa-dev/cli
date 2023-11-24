@@ -10,8 +10,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
 // DeleteProperty - performs all the logic to implement the `galasactl properties delete` command,
@@ -19,28 +19,25 @@ import (
 func DeleteProperty(
 	namespace string,
 	name string,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 ) error {
 	var err error
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		err = deleteCpsProperty(namespace, name, apiServerUrl)
+		err = deleteCpsProperty(namespace, name, apiClient)
 	}
 	return err
 }
 
 func deleteCpsProperty(namespace string,
 	name string,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 ) error {
 	var err error = nil
 	var resp *http.Response
 	var context context.Context = nil
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
-	restClient := api.InitialiseAPI(apiServerUrl)
-
-	apicall := restClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name)
+	apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name)
 	_, resp, err = apicall.Execute()
 
 	defer resp.Body.Close()

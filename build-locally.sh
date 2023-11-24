@@ -54,9 +54,9 @@ bold() { printf "${bold}%s${reset}\n" "$@"
 note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
 }
 
-#-----------------------------------------------------------------------------------------                   
+#-----------------------------------------------------------------------------------------
 # Functions
-#-----------------------------------------------------------------------------------------                   
+#-----------------------------------------------------------------------------------------
 function usage {
     info "Syntax: build-locally.sh [OPTIONS]"
     cat << EOF
@@ -79,9 +79,9 @@ function read_boot_jar_version {
 #
 #--------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------------------                   
+#-----------------------------------------------------------------------------------------
 # Process parameters
-#-----------------------------------------------------------------------------------------                   
+#-----------------------------------------------------------------------------------------
 build_type=""
 
 while [ "$1" != "" ]; do
@@ -103,7 +103,7 @@ done
 if [[ "${build_type}" == "" ]]; then
     error "Need to use either the --clean or --delta parameter."
     usage
-    exit 1  
+    exit 1
 fi
 
 #--------------------------------------------------------------------------
@@ -119,7 +119,7 @@ if [[ ! -e "../framework" ]]; then
     exit 1
 fi
 
-if [[ ! -e "../framework/openapi.yaml" ]]; then 
+if [[ ! -e "../framework/openapi.yaml" ]]; then
     error "File ../framework/openapi.yaml is not found."
     info "The openapi.yaml file from the framework repository is needed to generate a go client for the rest API"
     exit 1
@@ -156,7 +156,7 @@ function download_dependencies {
     #--------------------------------------------------------------------------
     # Download the dependencies we define in gradle into a local folder
     h2 "Downloading dependencies"
-    gradle --warning-mode all --info --debug installJarsIntoTemplates 
+    gradle --warning-mode all --info --debug installJarsIntoTemplates
     rc=$? ; if [[ "${rc}" != "0" ]]; then  error "Failed to run the gradle build to get our dependencies. rc=${rc}" ; exit 1 ; fi
     success "OK"
 }
@@ -166,13 +166,13 @@ function download_dependencies {
 # Invoke the generator
 function generate_rest_client {
     h2 "Generate the openapi client go code..."
-    
+
     # Pick up and use the openapi generator we just downloaded.
     # We don't know which version it is (dictated by the gradle build), but as there
     # is only one we can just pick the filename up..
     # Should end up being something like: ${BASEDIR}/build/dependencies/openapi-generator-cli-6.2.0.jar
     export OPENAPI_GENERATOR_CLI_JAR=$(ls ${BASEDIR}/build/dependencies/openapi-generator-cli*)
-    
+
 
     if [[ "${build_type}" == "clean" ]]; then
         h2 "Cleaning the generated code out..."
@@ -230,8 +230,8 @@ function calculate_galasactl_executable {
     raw_os=$(uname -s) # eg: "Darwin"
     os=""
     case $raw_os in
-        Darwin*) 
-            os="darwin" 
+        Darwin*)
+            os="darwin"
             ;;
         Windows*)
             os="windows"
@@ -239,7 +239,7 @@ function calculate_galasactl_executable {
         Linux*)
             os="linux"
             ;;
-        *) 
+        *)
             error "Failed to recognise which operating system is in use. $raw_os"
             exit 1
     esac
@@ -275,7 +275,7 @@ function generate_sample_code {
 function build_generated_source_maven {
     h2 "Building the sample project we just generated."
     cd ${BASEDIR}/temp/${PACKAGE_NAME}
-    mvn clean test install 
+    mvn clean test install
     rc=$?
     if [[ "${rc}" != "0" ]]; then
         error " Failed to build the generated source code which galasactl created."
@@ -315,7 +315,7 @@ function build_portfolio {
     info "Command is: $cmd"
     $cmd
     rc=$?
-    if [[ "${rc}" != "0" ]]; then 
+    if [[ "${rc}" != "0" ]]; then
         error "Failed to build a portfolio file"
         exit 1
     fi
@@ -337,7 +337,7 @@ function galasa_home_init {
 
     $cmd
     rc=$?
-    if [[ "${rc}" != "0" ]]; then 
+    if [[ "${rc}" != "0" ]]; then
         error "Failed to initialise galasa home"
         exit 1
     fi
@@ -351,7 +351,7 @@ function galasa_home_init {
 function launch_test_on_ecosystem {
     h2 "Launching test on an ecosystem..."
 
-    if [[ "${GALASA_BOOTSTRAP}" == "" ]]; then 
+    if [[ "${GALASA_BOOTSTRAP}" == "" ]]; then
         error "GALASA_BOOTSTRAP environment variable is not set. It should refer to a remote ecosystem"
         exit 1
     fi
@@ -371,7 +371,7 @@ function launch_test_on_ecosystem {
     $cmd
     rc=$?
     # We expect a return code of '2' because the ecosystem doesn't know about this testcase.
-    if [[ "${rc}" != "2" ]]; then 
+    if [[ "${rc}" != "2" ]]; then
         error "Failed to submit a test to a remote ecosystem, and get Unknown back."
         exit 1
     fi
@@ -405,7 +405,7 @@ function galasa_home_init {
 
     $cmd
     rc=$?
-    if [[ "${rc}" != "0" ]]; then 
+    if [[ "${rc}" != "0" ]]; then
         error "Failed to initialise galasa home"
         exit 1
     fi
@@ -417,7 +417,7 @@ function galasa_home_init {
 function launch_test_on_ecosystem {
     h2 "Launching test on an ecosystem..."
 
-    if [[ "${GALASA_BOOTSTRAP}" == "" ]]; then 
+    if [[ "${GALASA_BOOTSTRAP}" == "" ]]; then
         error "GALASA_BOOTSTRAP environment variable is not set. It should refer to a remote ecosystem"
         exit 1
     fi
@@ -440,7 +440,7 @@ function launch_test_on_ecosystem {
     $cmd
     rc=$?
     # We expect a return code of '2' because the ecosystem doesn't know about this testcase.
-    if [[ "${rc}" != "2" ]]; then 
+    if [[ "${rc}" != "2" ]]; then
         error "Failed to submit a test to a remote ecosystem, and get Unknown back."
         exit 1
     fi
@@ -473,13 +473,13 @@ function generate_galasactl_documentation {
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to generate documentation. rc=${rc}" ; exit 1 ; fi
 
     # The files have a line "###### Auto generated by cobra at 17/12/2022"
-    # As we are (currently) checking-in these .md files, we don't want them to show as 
+    # As we are (currently) checking-in these .md files, we don't want them to show as
     # changed in git (which compares the content, not timestamps).
     # So lets remove these lines from all the .md files.
     info "Removing lines with date/time in, to limit delta changes in git..."
     mkdir -p ${BASEDIR}/build
     temp_file="${BASEDIR}/build/temp.md"
-    for FILE in ${generated_docs_folder}/*; do 
+    for FILE in ${generated_docs_folder}/*; do
         mv -f ${FILE} ${temp_file}
         cat ${temp_file} | grep -v "###### Auto generated by" > ${FILE}
         rm ${temp_file}
@@ -524,6 +524,7 @@ function submit_local_test {
     cmd="${BASEDIR}/bin/${galasactl_command} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
     --class ${BUNDLE}/${JAVA_CLASS} \
+    --remoteMaven ${REMOTE_MAVEN} \
     --throttle 1 \
     --requesttype MikeCLI \
     --poll 10 \
@@ -533,16 +534,14 @@ function submit_local_test {
     # --reportjson myreport.json \
     # --reportyaml myreport.yaml \
 
-    
-    # --noexitcodeontestfailures \
 
-    # --remoteMaven https://development.galasa.dev/main/maven-repo/obr/ \
+    # --noexitcodeontestfailures \
     # --galasaVersion 0.26.0 \
 
     info "Command is ${cmd}"
     $cmd
     rc=$?
-    if [[ "${rc}" != "0" ]]; then 
+    if [[ "${rc}" != "0" ]]; then
         error "Failed to run the test. See details in log file ${LOG_FILE}"
         exit 1
     fi
@@ -556,7 +555,7 @@ function check_artifact_saved_in_ras {
     expected_string_in_test_artifact="Hello Galasa \!"
     grep -R "$expected_string_in_test_artifact" $GALASA_HOME/ras > /dev/null
     rc=$?
-    if [[ "${rc}" != "0" ]]; then 
+    if [[ "${rc}" != "0" ]]; then
         error "Failed to find the string \'$expected_string_in_test_artifact\" in RAS. Test case should have generated it."
         exit 1
     fi
@@ -565,7 +564,7 @@ function check_artifact_saved_in_ras {
 
 function run_test_locally_using_galasactl {
     export LOG_FILE=$1
-    
+
     # Run the Payee tests.
     export TEST_BUNDLE=dev.galasa.example.banking.payee
     export TEST_JAVA_CLASS=dev.galasa.example.banking.payee.TestPayeeExtended

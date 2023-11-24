@@ -13,19 +13,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
-func ValidateResultParameter(resultInputString string, apiServerUrl string) (string, error) {
+func ValidateResultParameter(resultInputString string, apiClient *galasaapi.APIClient) (string, error) {
 	var err error = nil
 	var validResultInputs []string
 	var invalidResultInputs []string
 	var resultQuery string = ""
 
-	restClient := api.InitialiseAPI(apiServerUrl)
 	var context context.Context = nil
-	rasResultNamesData, httpResponse, err := restClient.ResultArchiveStoreAPIApi.GetRasResultNames(context).Execute()
+	rasResultNamesData, httpResponse, err := apiClient.ResultArchiveStoreAPIApi.GetRasResultNames(context).Execute()
 
 	if err == nil {
 		if httpResponse.StatusCode != http.StatusOK {

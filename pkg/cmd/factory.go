@@ -21,6 +21,7 @@ type Factory interface {
 	GetFinalWordHandler() FinalWordHandler
 	GetStdOutConsole() utils.Console
 	GetStdErrConsole() utils.Console
+	GetTimeService() utils.TimeService
 }
 
 // Allocates real objects with real implementations,
@@ -61,4 +62,8 @@ func (this *RealFactory) GetStdErrConsole() utils.Console {
 		this.stdErrConsole = utils.NewRealConsole()
 	}
 	return this.stdErrConsole
+}
+
+func (*RealFactory) GetTimeService() utils.TimeService {
+	return utils.NewRealTimeService()
 }

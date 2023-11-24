@@ -10,7 +10,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
@@ -21,20 +20,20 @@ func SetProperty(
 	namespace string,
 	name string,
 	value string,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 ) error {
 	var err error
 
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		err = updateCpsProperty(namespace, name, value, apiServerUrl)
+		err = updateCpsProperty(namespace, name, value, apiClient)
 	}
 
 	// if updateProperty() returns an error containing "404 Not Found" due to receiving a
 	// GAL5017E from the api, we know the property does not exist and
 	// so we assume the user wants to create a new property
 	if err != nil && strings.Contains(err.Error(), "404") {
-		err = createCpsProperty(namespace, name, value, apiServerUrl)
+		err = createCpsProperty(namespace, name, value, apiClient)
 	}
 
 	return err
@@ -43,16 +42,13 @@ func SetProperty(
 func updateCpsProperty(namespace string,
 	name string,
 	value string,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 ) error {
 	var err error = nil
 
 	var context context.Context = nil
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
-	restClient := api.InitialiseAPI(apiServerUrl)
-
-	apicall := restClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name)
+	apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name)
 	apicall = apicall.Body(value)
 	_, _, err = apicall.Execute()
 
@@ -66,20 +62,17 @@ func updateCpsProperty(namespace string,
 func createCpsProperty(namespace string,
 	name string,
 	value string,
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 ) error {
 	var err error = nil
 
 	var context context.Context = nil
 
-	// An HTTP client which can communicate with the api server in an ecosystem.
-	restClient := api.InitialiseAPI(apiServerUrl)
-
 	var cpsPropertyRequest = galasaapi.NewCreateCpsPropertyRequest()
 	cpsPropertyRequest.SetName(name)
 	cpsPropertyRequest.SetValue(value)
 
-	apicall := restClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).CreateCpsPropertyRequest(*cpsPropertyRequest)
+	apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).CreateCpsPropertyRequest(*cpsPropertyRequest)
 	_, _, err = apicall.Execute()
 
 	if err != nil {
