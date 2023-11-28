@@ -18,10 +18,10 @@ galasactl: \
 gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darwin-x86_64 bin/gendocs-galasactl-linux-x86_64
 
 tests: galasactl-source build/coverage.txt build/coverage.html
-	
+
 build/coverage.out : galasactl-source
 	mkdir -p build
-	go test -v -cover -coverprofile=build/coverage.out -coverpkg pkg/api,./pkg/cmd,./pkg/runsformatter,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/properties,./pkg/propertiesformatter ./pkg/...
+	go test -v -cover -coverprofile=build/coverage.out -coverpkg pkg/api,./pkg/auth,./pkg/cmd,./pkg/runsformatter,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/properties,./pkg/propertiesformatter ./pkg/...
 
 build/coverage.html : build/coverage.out
 	go tool cover -html=build/coverage.out -o build/coverage.html
@@ -33,6 +33,7 @@ build/coverage.txt : build/coverage.out
 galasactl-source : \
 	./cmd/galasactl/*.go \
 	./pkg/api/*.go \
+	./pkg/auth/*.go \
 	./pkg/runsformatter/*.go \
 	./pkg/cmd/*.go \
 	./pkg/utils/*.go \
@@ -44,10 +45,10 @@ galasactl-source : \
 	./pkg/propertiesformatter/*.go \
 	embedded_info
 
-# The build process 
+# The build process
 embedded_info : \
 	pkg/embedded/templates/version/build.properties
-	
+
 
 pkg/embedded/templates/version :
 	mkdir -p $@
@@ -63,7 +64,7 @@ pkg/embedded/templates/version/build.properties : VERSION pkg/embedded/templates
 	# Add the `galasa.framework.version` property based on the build.gradle value.
 	cat build.gradle | grep "def galasaFrameworkVersion" | cut -f2 -d\' | sed "s/^/galasa.framework.version = /" >> $@
 
-bin/galasactl-linux-x86_64 : galasactl-source 
+bin/galasactl-linux-x86_64 : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/galasactl-linux-x86_64 ./cmd/galasactl
 
 bin/galasactl-windows-x86_64.exe : galasactl-source
@@ -73,7 +74,7 @@ bin/galasactl-darwin-x86_64 : galasactl-source
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/galasactl-darwin-x86_64 ./cmd/galasactl
 
 bin/galasactl-darwin-arm64 : galasactl-source
-	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/galasactl-darwin-arm64 ./cmd/galasactl	
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/galasactl-darwin-arm64 ./cmd/galasactl
 
 bin/galasactl-linux-arm64 : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/galasactl-linux-arm64 ./cmd/galasactl
@@ -89,7 +90,7 @@ bin/gendocs-galasactl-darwin-arm64 : galasactl-source
 bin/gendocs-galasactl-linux-x86_64 : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/gendocs-galasactl-linux-x86_64 ./cmd/gendocs-galasactl
 
-bin/gendocs-galasactl-darwin-x86_64 : galasactl-source 
+bin/gendocs-galasactl-darwin-x86_64 : galasactl-source
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/gendocs-galasactl-darwin-x86_64 ./cmd/gendocs-galasactl
 
 clean:

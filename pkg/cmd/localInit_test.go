@@ -31,6 +31,7 @@ func TestCanCreateGalasaHomeFolderWhenNotAlreadyInitialisedNonDevelopmentMode(t 
 	assertCredentialsPropertiesCreated(t, mockFileSystem, galasaDir)
 	assertDSSPropertiesCreated(t, mockFileSystem, galasaDir)
 	assertOverridesPropertiesCreated(t, mockFileSystem, galasaDir)
+	assertGalasactlPropertiesCreated(t, mockFileSystem, galasaDir)
 	assertSettingsXMLCreatedAndContentOk(t, mockFileSystem, m2Dir, isDevelopment)
 }
 
@@ -52,6 +53,7 @@ func TestCanCreateGalasaHomeFolderWhenNotAlreadyInitialisedWithDevelopmentMode(t
 	assertCredentialsPropertiesCreated(t, mockFileSystem, galasaDir)
 	assertDSSPropertiesCreated(t, mockFileSystem, galasaDir)
 	assertOverridesPropertiesCreated(t, mockFileSystem, galasaDir)
+	assertGalasactlPropertiesCreated(t, mockFileSystem, galasaDir)
 	assertSettingsXMLCreatedAndContentOk(t, mockFileSystem, m2Dir, isDevelopment)
 }
 
@@ -68,6 +70,7 @@ func TestCanCreateGalasaHomeFolderWhenAlreadyInitialised(t *testing.T) {
 	mockFileSystem.WriteTextFile(galasaDir+"cps.properties", "")
 	mockFileSystem.WriteTextFile(galasaDir+"credentials.properties", "")
 	mockFileSystem.WriteTextFile(galasaDir+"overrides.properties", "")
+	mockFileSystem.WriteTextFile(galasaDir+"galasactl.properties", "")
 	mockFileSystem.WriteTextFile(m2Dir+"settings.xml", "")
 
 	mockEnv := utils.NewMockEnv()
@@ -106,6 +109,12 @@ func assertOverridesPropertiesCreated(t *testing.T, mockFileSystem files.FileSys
 	testOverridesPropertiesExists, err := mockFileSystem.Exists(galasaDir + "overrides.properties")
 	assert.Nil(t, err)
 	assert.True(t, testOverridesPropertiesExists, "Overrides properties was not created")
+}
+
+func assertGalasactlPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
+	testGalasactlPropertiesExists, err := mockFileSystem.Exists(galasaDir + "galasactl.properties")
+	assert.Nil(t, err)
+	assert.True(t, testGalasactlPropertiesExists, "Galasactl properties was not created")
 }
 
 func assertSettingsXMLCreatedAndContentOk(t *testing.T, mockFileSystem files.FileSystem, m2Dir string, isDevelopment bool) {

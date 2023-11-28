@@ -103,6 +103,9 @@ func createRootCmdChildren(factory Factory, rootCmd *cobra.Command, rootCmdValue
 	if err == nil {
 		_, err = createRunsCmd(factory, rootCmd, rootCmdValues)
 	}
+	if err == nil {
+		_, err = createAuthCmd(factory, rootCmd, rootCmdValues)
+	}
 	return err
 }
 

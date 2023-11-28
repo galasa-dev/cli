@@ -44,6 +44,10 @@ func InitialiseGalasaHomeFolder(home GalasaHome, fileSystem files.FileSystem, em
 		err = createCredentialsPropertiesFile(fileGenerator, galasaHomeDir)
 	}
 
+	if err == nil {
+		err = createGalasactlPropertiesFile(fileGenerator, galasaHomeDir)
+	}
+
 	return err
 }
 
@@ -119,6 +123,25 @@ func createOverridesPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir s
 		FileType:                 "properties",
 		TargetFilePath:           targetPath,
 		EmbeddedTemplateFilePath: "templates/galasahome/overrides.properties",
+		TemplateParameters:       nil,
+	}
+
+	err := fileGenerator.CreateFile(
+		propertyFile,
+		false, // Don't force overwrite
+		false) // Don't error if the file already exists.
+
+	return err
+}
+
+func createGalasactlPropertiesFile(fileGenerator *FileGenerator, galasaHomeDir string) error {
+
+	targetPath := galasaHomeDir + fileGenerator.fileSystem.GetFilePathSeparator() + "galasactl.properties"
+
+	propertyFile := GeneratedFileDef{
+		FileType:                 "properties",
+		TargetFilePath:           targetPath,
+		EmbeddedTemplateFilePath: "templates/galasahome/galasactl.properties",
 		TemplateParameters:       nil,
 	}
 

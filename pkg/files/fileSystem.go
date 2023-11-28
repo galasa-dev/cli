@@ -28,6 +28,7 @@ type FileSystem interface {
 	OutputWarningMessage(string) error
 	MkTempDir() (string, error)
 	DeleteDir(path string)
+	DeleteFile(path string)
 
 	// Creates a file in the file system if it can.
 	Create(path string) (io.Writer, error)
@@ -97,6 +98,10 @@ func (osFS *OSFileSystem) MkTempDir() (string, error) {
 
 func (osFS *OSFileSystem) DeleteDir(path string) {
 	os.RemoveAll(path)
+}
+
+func (osFS *OSFileSystem) DeleteFile(path string) {
+	os.Remove(path)
 }
 
 func (osFS *OSFileSystem) MkdirAll(targetFolderPath string) error {

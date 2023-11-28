@@ -91,6 +91,44 @@ To build a project with Gradle artifacts, use `gradle build publishToMavenLocal`
 
 If you wish the generated code to depend upon the very latest/bleeding-edge of galasa code, then add the `--development` flag. This will add extra settings to the `settings.gradle` file of the parent and the `build.gradle` file of any of the child test projects.
 
+## auth login
+
+Before interacting with a Galasa ecosystem using `galasactl`, you must be authenticated with it. The `auth login` command allows you to log in to an ecosystem provided by your `GALASA_BOOTSTRAP` environment variable or through the `--bootstrap` flag.
+
+Prior to running this command, you must have a `galasactl.properties` file in your `GALASA_HOME` directory, which is automatically created when running `galasactl local init`, that contains a set of `auth` properties with the following format:
+
+```
+GALASA_CLIENT_ID=<a client identifier>
+GALASA_SECRET=<a client secret>
+GALASA_ACCESS_TOKEN=<a personal access token>
+```
+
+These properties can be retrieved by creating a new personal access token from a Galasa ecosystem's web user interface.
+
+On a successful login, a `bearer-token.json` file will be created in your `GALASA_HOME` directory. This file will contain a bearer token that `galasactl` will use to authenticate requests when communicating with a Galasa ecosystem.
+
+If your bearer token expires, `galasactl` will automatically attempt to re-authenticate with your Galasa ecosystem. Alternatively, you can run the `auth login` command again to re-authenticate with your Galasa ecosystem.
+
+### Examples
+
+Logging in to an ecosystem:
+
+```
+galasactl auth login
+```
+
+## auth logout
+
+To log out of a Galasa ecosystem using `galasactl`, you can use the `auth logout` command. If you run a `galasactl` command that interacts with an ecosystem while logged out, `galasactl` will attempt to automatically log in using the properties in your `galasactl.properties` file within your `GALASA_HOME` directory.
+
+### Examples
+
+Logging out of an ecosystem:
+
+```
+galasactl auth logout
+```
+
 ## runs prepare
 
 The purpose of `runs prepare` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.

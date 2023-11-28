@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -95,11 +96,12 @@ func executeRunsGet(
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()
+				timeService := factory.GetTimeService()
 
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				timeService := utils.NewRealTimeService()
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
 
 				// Call to process the command in a unit-testable way.
 				err = runs.GetRuns(
@@ -112,6 +114,7 @@ func executeRunsGet(
 					timeService,
 					console,
 					apiServerUrl,
+					apiClient,
 				)
 			}
 		}

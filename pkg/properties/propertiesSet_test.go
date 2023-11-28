@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -91,11 +92,11 @@ func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := SetProperty(namespace, name, value, apiServerUrl)
+	err := SetProperty(namespace, name, value, apiClient)
 
 	//Then
 	assert.Nil(t, err)
@@ -108,11 +109,11 @@ func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t 
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := SetProperty(namespace, name, value, apiServerUrl)
+	err := SetProperty(namespace, name, value, apiClient)
 
 	//Then
 	assert.Error(t, err)
@@ -128,11 +129,11 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	value := "updatedValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := SetProperty(namespace, name, value, apiServerUrl)
+	err := SetProperty(namespace, name, value, apiClient)
 
 	//Then
 	assert.Nil(t, err)
@@ -145,11 +146,11 @@ func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T
 	value := "updatedValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := SetProperty(namespace, name, value, apiServerUrl)
+	err := SetProperty(namespace, name, value, apiClient)
 
 	//Then
 	assert.NotNil(t, err)
@@ -163,11 +164,11 @@ func TestSetNoNamespaceReturnsError(t *testing.T) {
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := SetProperty(namespace, name, value, apiServerUrl)
+	err := SetProperty(namespace, name, value, apiClient)
 
 	//Then
 	assert.Error(t, err)
@@ -181,11 +182,11 @@ func TestSetNoNameReturnsError(t *testing.T) {
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := SetProperty(namespace, name, value, apiServerUrl)
+	err := SetProperty(namespace, name, value, apiClient)
 
 	//Then
 	assert.Error(t, err)

@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -45,7 +46,7 @@ func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 	//Given...
 	serverState := "populated"
 	server := NewPropertiesNamespaceServletMock(t, serverState)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
@@ -57,7 +58,7 @@ func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 		"Total:3\n"
 
 	//When
-	err := GetNamespaceProperties(apiServerUrl, console)
+	err := GetNamespaceProperties(apiClient, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -68,14 +69,14 @@ func TestEmptyNamespacesPathReturnsOk(t *testing.T) {
 	//Given...
 	serverState := "empty"
 	server := NewPropertiesNamespaceServletMock(t, serverState)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
 	expectedOutput := "Total:0\n"
 
 	//When
-	err := GetNamespaceProperties(apiServerUrl, console)
+	err := GetNamespaceProperties(apiClient, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -86,13 +87,13 @@ func TestInvalidPathReturnsError(t *testing.T) {
 	//Given...
 	serverState := ""
 	server := NewPropertiesNamespaceServletMock(t, serverState)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	console := utils.NewMockConsole()
 
 	//When
-	err := GetNamespaceProperties(apiServerUrl, console)
+	err := GetNamespaceProperties(apiClient, console)
 
 	//Then
 	assert.NotNil(t, err)

@@ -1,24 +1,29 @@
-## galasactl
+## galasactl auth logout
 
-CLI for Galasa
+Log out from a Galasa ecosystem
 
 ### Synopsis
 
-A tool for controlling Galasa resources using the command-line.
+Log out from a Galasa ecosystem that you have previously logged in to
+
+```
+galasactl auth logout [flags]
+```
 
 ### Options
 
 ```
+  -h, --help   Displays the options for the auth logout command.
+```
+
+### Options inherited from parent commands
+
+```
       --galasahome string   Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
-  -h, --help                Displays the options for the galasactl command.
   -l, --log string          File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
 ```
 
 ### SEE ALSO
 
 * [galasactl auth](galasactl_auth.md)	 - Manages authentication with a Galasa ecosystem
-* [galasactl local](galasactl_local.md)	 - Manipulate local system
-* [galasactl project](galasactl_project.md)	 - Manipulate local project source code
-* [galasactl properties](galasactl_properties.md)	 - Manages properties in an ecosystem
-* [galasactl runs](galasactl_runs.md)	 - Manage test runs in the ecosystem
 

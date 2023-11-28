@@ -13,12 +13,16 @@ type MockTimeService struct {
 	MockNow time.Time
 }
 
-func NewMockTimeServiceAsMock() *MockTimeService {
-	return &MockTimeService{MockNow: time.Now()}
+func NewMockTimeServiceAsMock(now time.Time) *MockTimeService {
+	return &MockTimeService{MockNow: now}
 }
 
 func NewMockTimeService() TimeService {
-	return NewMockTimeServiceAsMock()
+	return NewMockTimeServiceAsMock(time.Now())
+}
+
+func NewOverridableMockTimeService(now time.Time) TimeService {
+	return NewMockTimeServiceAsMock(now)
 }
 
 func (ts *MockTimeService) Interrupt(message string) {

@@ -11,6 +11,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -72,11 +74,11 @@ func TestDeletePropertyValueReturnsOk(t *testing.T) {
 	name := "validName"
 
 	server := newDeletePropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl)
+	err := DeleteProperty(namespace, name, apiClient)
 
 	//Then
 	assert.Nil(t, err)
@@ -89,11 +91,11 @@ func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 	name := "validName"
 
 	server := newDeletePropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl)
+	err := DeleteProperty(namespace, name, apiClient)
 
 	//Then
 	assert.NotNil(t, err)
@@ -107,11 +109,11 @@ func TestValidNamespaceAndDeleteInvalidNameNameReturnsError(t *testing.T) {
 	name := "invalidName"
 
 	server := newDeletePropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl)
+	err := DeleteProperty(namespace, name, apiClient)
 
 	//Then
 	assert.Error(t, err)
@@ -124,11 +126,11 @@ func TestNoNamespaceReturnsError(t *testing.T) {
 	name := "invalidName"
 
 	server := newDeletePropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl)
+	err := DeleteProperty(namespace, name, apiClient)
 
 	//Then
 	assert.Error(t, err)
@@ -141,11 +143,11 @@ func TestNoNameReturnsError(t *testing.T) {
 	name := ""
 
 	server := newDeletePropertiesServletMock(t)
-	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
 	//When
-	err := DeleteProperty(namespace, name, apiServerUrl)
+	err := DeleteProperty(namespace, name, apiClient)
 
 	//Then
 	assert.Error(t, err)

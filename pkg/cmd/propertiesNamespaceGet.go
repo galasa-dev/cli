@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/properties"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -88,12 +89,15 @@ func executePropertiesNamespaceGet(
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()
+				timeService := factory.GetTimeService()
 
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
+
 				// Call to process the command in a unit-testable way.
-				err = properties.GetNamespaceProperties(apiServerUrl, console)
+				err = properties.GetNamespaceProperties(apiClient, console)
 			}
 		}
 	}

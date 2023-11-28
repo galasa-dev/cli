@@ -9,7 +9,6 @@ package properties
 import (
 	"context"
 
-	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/propertiesformatter"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -18,7 +17,7 @@ import (
 
 // GetNamespaceProperties - performs all the logic to implement the `galasactl properties namespace get` command
 func GetNamespaceProperties(
-	apiServerUrl string,
+	apiClient *galasaapi.APIClient,
 	console utils.Console,
 ) error {
 	var err error
@@ -29,8 +28,7 @@ func GetNamespaceProperties(
 	chosenFormatter, err = validateOutputFormatFlagValue("summary", validFormatters)
 	if err == nil {
 		var namespaces []galasaapi.Namespace
-		restClient := api.InitialiseAPI(apiServerUrl)
-		namespaces, _, err = restClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).Execute()
+		namespaces, _, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).Execute()
 
 		if err == nil {
 			var outputText string

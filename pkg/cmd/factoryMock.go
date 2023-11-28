@@ -16,6 +16,7 @@ type MockFactory struct {
 	env              utils.Environment
 	stdOutConsole    utils.Console
 	stdErrConsole    utils.Console
+	timeService      utils.TimeService
 }
 
 func NewMockFactory() Factory {
@@ -55,4 +56,11 @@ func (this *MockFactory) GetStdErrConsole() utils.Console {
 		this.stdErrConsole = utils.NewMockConsole()
 	}
 	return this.stdErrConsole
+}
+
+func (this *MockFactory) GetTimeService() utils.TimeService {
+	if this.timeService == nil {
+		this.timeService = utils.NewMockTimeService()
+	}
+	return this.timeService
 }
