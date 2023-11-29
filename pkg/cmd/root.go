@@ -27,12 +27,76 @@ type RootCmdValues struct {
 
 var rootCmdValues *RootCmdValues
 
+type RootCommand struct {
+	values       *RootCmdValues
+	cobraCommand *cobra.Command
+}
+
+// -------------------------------------------------------------------------------
+// Constructor
+// -------------------------------------------------------------------------------
+func NewRootCommand(factory Factory) (*RootCommand, error) {
+	cmd := new(RootCommand)
+
+	err := cmd.init(factory)
+
+	return cmd, err
+}
+
+// -------------------------------------------------------------------------------
+// Public methods
+// -------------------------------------------------------------------------------
+func (cmd *RootCommand) init(factory Factory) error {
+
+	var err error = nil
+
+	// Flags parsed by this command put values into this instance of the structure.
+	cmd.values = &RootCmdValues{
+		isCapturingLogs: false,
+	}
+
+	cmd.cobraCommand, err = newRootCobraCommand(factory, cmd.values)
+
+	// if err == nil {
+	// 	err = createRootCmdChildren(factory, cmd.cobraCommand, rootCmdValues)
+	// }
+
+	return err
+}
+
+func (cmd *RootCommand) GetName() string {
+	return COMMAND_NAME_ROOT
+}
+
+func (cmd *RootCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+//-------------------------------------------------------------------------------
+// Private methods
+//-------------------------------------------------------------------------------
+
+// TODO: make a method on the RootCommand
 func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 	// Flags parsed by this command put values into this instance of the structure.
 	rootCmdValues = &RootCmdValues{
 		isCapturingLogs: false,
 	}
 
+	cobraCommand, err := newRootCobraCommand(factory, rootCmdValues)
+	if err == nil {
+		err = createRootCmdChildren(factory, cobraCommand, rootCmdValues)
+	}
+
+	if err == nil {
+		sanitiseCommandHelpDescriptions(cobraCommand)
+	}
+
+	return cobraCommand, err
+}
+
+// TODO: Turn into an object-method.
+func newRootCobraCommand(factory Factory, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	version, err := embedded.GetGalasaCtlVersion()
 	var rootCmd *cobra.Command
 	if err == nil {
@@ -53,7 +117,7 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 
 			rootCmd.Version = galasaCtlVersion
 
-			rootCmd.PersistentFlags().StringVarP(&rootCmdValues.logFileName, "log", "l", "",
+			rootCmd.PersistentFlags().StringVarP(&(rootCmdValues.logFileName), "log", "l", "",
 				"File to which log information will be sent. Any folder referred to must exist. "+
 					"An existing file will be overwritten. "+
 					"Specify \"-\" to log to stderr. "+
@@ -61,17 +125,12 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 
 			rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 
-			rootCmd.PersistentFlags().StringVarP(&rootCmdValues.CmdParamGalasaHomePath, "galasahome", "", "",
+			rootCmd.PersistentFlags().StringVarP(&(rootCmdValues.CmdParamGalasaHomePath), "galasahome", "", "",
 				"Path to a folder where Galasa will read and write files and configuration settings. "+
 					"The default is '${HOME}/.galasa'. "+
 					"This overrides the GALASA_HOME environment variable which may be set instead.",
 			)
 
-			err = createRootCmdChildren(factory, rootCmd, rootCmdValues)
-
-			if err == nil {
-				sanitiseCommandHelpDescriptions(rootCmd)
-			}
 		}
 	}
 	return rootCmd, err
@@ -112,15 +171,13 @@ func createRootCmdChildren(factory Factory, rootCmd *cobra.Command, rootCmdValue
 // The main entry point into the cmd package.
 func Execute(factory Factory, args []string) error {
 	var err error
-	var rootCmd *cobra.Command
 
 	finalWordHandler := factory.GetFinalWordHandler()
 
-	rootCmd, err = CreateRootCmd(factory)
+	var commands CommandCollection
+	commands, err = NewCommandCollection(factory)
 
 	if err == nil {
-
-		rootCmd.SetArgs(args)
 
 		// Catch execution if a panic happens.
 		defer func() {
@@ -131,7 +188,7 @@ func Execute(factory Factory, args []string) error {
 		}()
 
 		// Execute the command
-		err = rootCmd.Execute()
+		err = commands.Execute(args)
 	}
 	finalWordHandler.FinalWord(err)
 	return err

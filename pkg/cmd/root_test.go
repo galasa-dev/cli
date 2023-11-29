@@ -15,6 +15,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCommandsCollectionHasARootCommand(t *testing.T) {
+	factory := NewMockFactory()
+	commands, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+	assert.NotNil(t, rootCommand)
+}
+
+func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	// When...
+	commands, err := NewCommandCollection(factory)
+	// Then...
+	assert.Nil(t, err)
+	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+
+	assert.Equal(t, rootCommand.GetName(), COMMAND_NAME_ROOT)
+}
+
+func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	// When...
+	commands, err := NewCommandCollection(factory)
+	// Then...
+	assert.Nil(t, err)
+	rootCommand := commands.GetRootCommand()
+
+	assert.NotNil(t, rootCommand.GetCobraCommand())
+}
+
 func TestCanCreateRootCmd(t *testing.T) {
 	factory := NewMockFactory()
 	rootCmd, err := CreateRootCmd(factory)
