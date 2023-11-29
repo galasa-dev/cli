@@ -23,6 +23,7 @@ func TestPropertiesDeleteNoArgsReturnsError(t *testing.T) {
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
 	assert.Contains(t, outText, "Usage:")
+	assert.Contains(t, outText, "galasactl properties delete [flags]")
 
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()

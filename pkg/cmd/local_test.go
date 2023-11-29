@@ -1,8 +1,3 @@
-/*
- * Copyright contributors to the Galasa project
- *
- * SPDX-License-Identifier: EPL-2.0
- */
 package cmd
 
 import (
@@ -12,10 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPropertiesNoCommandsProducesUsageReport(t *testing.T) {
+func TestLocalNoCommandsProducesUsageReport(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	var args []string = []string{"properties"}
+	var args []string = []string{"local"}
 
 	// When...
 	Execute(factory, args)
@@ -24,7 +19,7 @@ func TestPropertiesNoCommandsProducesUsageReport(t *testing.T) {
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
 	assert.Contains(t, outText, "Usage:")
-	assert.Contains(t, outText, "galasactl properties [command]")
+	assert.Contains(t, outText, "galasactl local [command]")
 
 	// We expect an exit code of 0 for this command.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
