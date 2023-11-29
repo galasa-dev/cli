@@ -17,7 +17,7 @@ import (
 // A final word handler can set the exit code of the entire process.
 // Or it could be mocked-out to just collect it and checked in tests.
 type FinalWordHandler interface {
-	FinalWord(interface{})
+	FinalWord(rootCmd GalasaCommand, obj interface{})
 }
 
 // The real implementation of the interface.
@@ -25,10 +25,18 @@ type RealFinalWordHandler struct {
 }
 
 func NewRealFinalWordHandler() FinalWordHandler {
-	return new(RealFinalWordHandler)
+	handler := new(RealFinalWordHandler)
+	handler.init()
+	return handler
 }
 
-func (*RealFinalWordHandler) FinalWord(obj interface{}) {
+func (handler *RealFinalWordHandler) init() {
+}
+
+func (handler *RealFinalWordHandler) FinalWord(rootCmd GalasaCommand, obj interface{}) {
+
+	rootCmdValues := rootCmd.GetValues().(*RootCmdValues)
+
 	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
 	if rootCmdValues.isCapturingLogs {
 		log.Println(text)

@@ -47,11 +47,18 @@ func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 	assert.NotNil(t, rootCommand.GetCobraCommand())
 }
 
-func TestCanCreateRootCmd(t *testing.T) {
+func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
+	// Given...
 	factory := NewMockFactory()
-	rootCmd, err := CreateRootCmd(factory)
+	// When...
+	commands, err := NewCommandCollection(factory)
+	// Then...
 	assert.Nil(t, err)
-	assert.NotNil(t, rootCmd)
+	rootCommand := commands.GetRootCommand()
+
+	values := rootCommand.GetValues()
+	assert.NotNil(t, values)
+	assert.IsType(t, &RootCmdValues{}, values)
 }
 
 func TestVersionFromCommandLine(t *testing.T) {

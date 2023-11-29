@@ -42,7 +42,34 @@ type ProjectCreateCmdValues struct {
 	isDevelopmentProjectCreate bool
 }
 
-func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type ProjectCreateCommand struct {
+	cobraCommand *cobra.Command
+	values       *ProjectCreateCmdValues
+}
+
+func NewProjectCreateCmd(factory Factory, rootCmd GalasaCommand, projectCmd GalasaCommand) (GalasaCommand, error) {
+	var err error = nil
+
+	cmd := new(ProjectCreateCommand)
+	err = cmd.init(factory, rootCmd, projectCmd)
+
+	return cmd, err
+}
+
+func (cmd *ProjectCreateCommand) GetName() string {
+	return COMMAND_NAME_PROJECT_CREATE
+}
+
+func (cmd *ProjectCreateCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *ProjectCreateCommand) GetValues() interface{} {
+	return cmd.values
+}
+
+func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, projectCmd GalasaCommand) error {
+
 	var err error = nil
 
 	projectCreateCmdValues := &ProjectCreateCmdValues{}
@@ -54,7 +81,7 @@ func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdVa
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmdValues)
+			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmd.GetValues().(*RootCmdValues))
 		},
 	}
 
@@ -80,11 +107,12 @@ func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdVa
 	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useGradle, "gradle", false, "Generate gradle build artifacts. "+
 		"Can be used in addition to the --maven flag.")
 
-	parentCmd.AddCommand(projectCreateCmd)
+	projectCmd.GetCobraCommand().AddCommand(projectCreateCmd)
 
-	// no children commands of project create to add here.
+	cmd.cobraCommand = projectCreateCmd
+	cmd.values = projectCreateCmdValues
 
-	return projectCreateCmd, err
+	return err
 }
 
 func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {

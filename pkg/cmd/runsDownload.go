@@ -19,6 +19,9 @@ import (
 //    runs download --name U123 [--force]
 // And then galasactl downloads the artifacts for the given run.
 
+type RunsDownloadCommand struct {
+}
+
 // Variables set by cobra's command-line parsing.
 type RunsDownloadCmdValues struct {
 	runNameDownload         string

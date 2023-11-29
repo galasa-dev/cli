@@ -9,20 +9,40 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createLocalCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type LocalCommand struct {
+	cobraCommand *cobra.Command
+}
 
-	localCmd := &cobra.Command{
+func NewLocalCommand(factory Factory, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(LocalCommand)
+	err := cmd.init(factory, rootCommand)
+	return cmd, err
+}
+
+func (cmd *LocalCommand) init(factory Factory, rootCommand GalasaCommand) error {
+
+	var err error
+
+	localCobraCmd := &cobra.Command{
 		Use:   "local",
 		Short: "Manipulate local system",
 		Long:  "Manipulate local system",
 	}
-	parentCmd.AddCommand(localCmd)
+	rootCommand.GetCobraCommand().AddCommand(localCobraCmd)
 
-	err := createLocalCmdChildren(factory, localCmd, rootCmdValues)
-	return localCmd, err
+	cmd.cobraCommand = localCobraCmd
+
+	return err
 }
 
-func createLocalCmdChildren(factory Factory, localCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createLocalInitCmd(factory, localCmd, rootCmdValues)
-	return err
+func (cmd *LocalCommand) GetName() string {
+	return COMMAND_NAME_LOCAL
+}
+
+func (cmd *LocalCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *LocalCommand) GetValues() interface{} {
+	return nil
 }

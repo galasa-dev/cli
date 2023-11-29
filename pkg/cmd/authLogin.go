@@ -26,16 +26,17 @@ func createAuthLoginCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues
 	authLoginCmd := &cobra.Command{
 		Use:   "login",
 		Short: "Log in to a Galasa ecosystem using an existing access token",
-		Long:  "Log in to a Galasa ecosystem using an existing access token stored in the 'galasactl.properties' file in your GALASA_HOME directory. " +
-			   "If you do not have an access token, request one through your ecosystem's web user interface " +
-			   "and follow the instructions on the web user interface to populate the 'galasactl.properties' file.",
-		Args:  cobra.NoArgs,
+		Long: "Log in to a Galasa ecosystem using an existing access token stored in the 'galasactl.properties' file in your GALASA_HOME directory. " +
+			"If you do not have an access token, request one through your ecosystem's web user interface " +
+			"and follow the instructions on the web user interface to populate the 'galasactl.properties' file.",
+		Args:    cobra.NoArgs,
 		Aliases: []string{"auth login"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return executeAuthLogin(factory, cmd, args, authLoginCmdValues, rootCmdValues)
 		},
 	}
 
+	// TODO: This bootstrap flag is defined in several places. De-duplication is needed. Put it into a function and call it from where it's needed.
 	authLoginCmd.PersistentFlags().StringVarP(&authLoginCmdValues.bootstrap, "bootstrap", "b", "",
 		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
 			"If it starts with neither, it is assumed to be a fully-qualified path. "+

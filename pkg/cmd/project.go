@@ -9,7 +9,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createProjectCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type ProjectCommand struct {
+	cobraCommand *cobra.Command
+}
+
+func NewProjectCmd(factory Factory, rootCmd GalasaCommand) (GalasaCommand, error) {
+	cmd := new(ProjectCommand)
+	err := cmd.init(factory, rootCmd)
+	return cmd, err
+}
+
+func (cmd *ProjectCommand) init(factory Factory, rootCmd GalasaCommand) error {
 
 	var err error = nil
 
@@ -19,14 +29,20 @@ func createProjectCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *
 		Long:  "Creates and manipulates Galasa test project source code",
 	}
 
-	parentCmd.AddCommand(projectCmd)
+	cmd.cobraCommand = projectCmd
+	rootCmd.GetCobraCommand().AddCommand(projectCmd)
 
-	err = createProjectCmdChildren(factory, projectCmd, rootCmdValues)
-
-	return projectCmd, err
+	return err
 }
 
-func createProjectCmdChildren(factory Factory, projectCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createProjectCreateCmd(factory, projectCmd, rootCmdValues)
-	return err
+func (cmd *ProjectCommand) GetName() string {
+	return COMMAND_NAME_PROJECT
+}
+
+func (cmd *ProjectCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *ProjectCommand) GetValues() interface{} {
+	return nil
 }

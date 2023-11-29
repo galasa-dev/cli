@@ -13,6 +13,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCommandCollectionContainsLocalInitCommand(t *testing.T) {
+	factory := NewMockFactory()
+	commands, _ := NewCommandCollection(factory)
+	localInitCommand := commands.GetCommand(COMMAND_NAME_LOCAL_INIT)
+	assert.NotNil(t, localInitCommand)
+	assert.Equal(t, COMMAND_NAME_LOCAL_INIT, localInitCommand.GetName())
+	assert.NotNil(t, localInitCommand.GetValues())
+	assert.IsType(t, &LocalInitCmdValues{}, localInitCommand.GetValues())
+	assert.NotNil(t, localInitCommand.GetCobraCommand())
+}
+
 func TestCanCreateGalasaHomeFolderWhenNotAlreadyInitialisedNonDevelopmentMode(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnv := utils.NewMockEnv()
