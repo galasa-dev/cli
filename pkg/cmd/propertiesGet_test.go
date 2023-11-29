@@ -43,44 +43,44 @@ func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestPropertiesGetWithNamespaceReturnsTable(t *testing.T) {
-	// Given...
-	factory := NewMockFactory()
-	fs := factory.GetFileSystem()
-	homeDir, _ := fs.GetUserHomeDirPath()
-	galasaDir := homeDir + "/.galasa/"
-	fs.WriteTextFile(galasaDir+"bootstrap.properties", "")
-	var args []string = []string{"properties", "get", "--namespace", "framework", "--log", "-"}
+// func TestPropertiesGetWithNamespaceReturnsTable(t *testing.T) {
+// 	// Given...
+// 	factory := NewMockFactory()
+// 	fs := factory.GetFileSystem()
+// 	homeDir, _ := fs.GetUserHomeDirPath()
+// 	galasaDir := homeDir + "/.galasa/"
+// 	fs.WriteTextFile(galasaDir+"bootstrap.properties", "")
+// 	var args []string = []string{"properties", "get", "--namespace", "framework", "--log", "-"}
 
-	var err error
+// 	var err error
 
-	var commands map[string]*cobra.Command
-	var parsedCommandValues map[string]interface{}
+// 	var commands map[string]*cobra.Command
+// 	var parsedCommandValues map[string]interface{}
 
-	commands, parsedCommandValues, err = CreateCommandTree(factory)
-	rootCmd := commands["root"]
-	propsGetCmd := commands["properties get"]
+// 	commands, parsedCommandValues, err = CreateCommandTree(factory)
+// 	rootCmd := commands["root"]
+// 	propsGetCmd := commands["properties get"]
 
-	// TODO: Over-ride the RunE function...
-	propsGetCmd.RunE = propertiesExectuteTestReplacement
+// 	// TODO: Over-ride the RunE function...
+// 	propsGetCmd.RunE = propertiesExectuteTestReplacement
 
-	rootCmd.SetArgs(args)
+// 	rootCmd.SetArgs(args)
 
-	// When...
-	// err := Execute(factory, args)
-	err = rootCmd.Execute()
+// 	// When...
+// 	// err := Execute(factory, args)
+// 	err = rootCmd.Execute()
 
-	// Then...
-	assert.Nil(t, err)
+// 	// Then...
+// 	assert.Nil(t, err)
 
-	propsGetData := parsedCommandValues["properties get"].(PropertiesGetCmdValues)
-	assert.Nil(t, propsGetData.propertiesInfix)
-	assert.Nil(t, propsGetData.propertiesPrefix)
-	assert.Nil(t, propsGetData.propertiesSuffix)
+// 	propsGetData := parsedCommandValues["properties get"].(PropertiesGetCmdValues)
+// 	assert.Nil(t, propsGetData.propertiesInfix)
+// 	assert.Nil(t, propsGetData.propertiesPrefix)
+// 	assert.Nil(t, propsGetData.propertiesSuffix)
 
-	propsData := parsedCommandValues["properties"].(PropertiesCmdValues)
-	assert.Equal(t, "framework", propsData.namespace)
+// 	propsData := parsedCommandValues["properties"].(PropertiesCmdValues)
+// 	assert.Equal(t, "framework", propsData.namespace)
 
-	rootData := parsedCommandValues["root"].(RootCmdValues)
-	assert.Equal(t, "-", rootData.logFileName)
-}
+// 	rootData := parsedCommandValues["root"].(RootCmdValues)
+// 	assert.Equal(t, "-", rootData.logFileName)
+// }

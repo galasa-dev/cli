@@ -25,51 +25,14 @@ type RootCmdValues struct {
 	CmdParamGalasaHomePath string
 }
 
-type GalasaCommand interface {
-	GetCobraCommand() *cobra.Command
-	GetCommandName() string
-	GetParsedData() interface{}
-}
-
-type GalasaRootCommand struct {
-	cobraCommand *cobra.Command
-	parsedValues *RootCmdValues
-}
+var rootCmdValues *RootCmdValues
 
 func CreateRootCmd(factory Factory) (*cobra.Command, error) {
-	commands, _, err := CreateCommandTree(factory)
-	return commands["root"], err
-}
-
-func CreateCommandTree(factory Factory) (map[string]GalasaCommand, error) {
-
-	var galasaCommands map[string]GalasaCommand
-
-	rootGalasaCmd, err := NewRootGalasaCommand(factory)
-
-	if err != nil {
-		err = createRootCmdChildren(factory, rootCmd, rootCmdValues)
-
-		if err == nil {
-			sanitiseCommandHelpDescriptions(rootCmd)
-		}
-	}
-
-	commands[rootGalasaCmd.GetCommandName()] = rootGalasaCmd
-
-	return commands, err
-}
-
-func NewRootGalasaCommand(factory Factory) {
 	// Flags parsed by this command put values into this instance of the structure.
 	rootCmdValues = &RootCmdValues{
 		isCapturingLogs: false,
 	}
 
-	rootCmd, err := CreateRootCobraCommand(factory, rootCmdValues)
-}
-
-func CreateRootCobraCommand(factory Factory, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	version, err := embedded.GetGalasaCtlVersion()
 	var rootCmd *cobra.Command
 	if err == nil {
@@ -103,6 +66,12 @@ func CreateRootCobraCommand(factory Factory, rootCmdValues *RootCmdValues) (*cob
 					"The default is '${HOME}/.galasa'. "+
 					"This overrides the GALASA_HOME environment variable which may be set instead.",
 			)
+
+			err = createRootCmdChildren(factory, rootCmd, rootCmdValues)
+
+			if err == nil {
+				sanitiseCommandHelpDescriptions(rootCmd)
+			}
 		}
 	}
 	return rootCmd, err
