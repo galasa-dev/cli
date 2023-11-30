@@ -13,36 +13,37 @@ type LocalCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewLocalCommand(factory Factory, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewLocalCommand(rootCommand GalasaCommand) (GalasaCommand, error) {
 	cmd := new(LocalCommand)
-	err := cmd.init(factory, rootCommand)
+	err := cmd.init(rootCommand)
 	return cmd, err
 }
 
-func (cmd *LocalCommand) init(factory Factory, rootCommand GalasaCommand) error {
-
+func (cmd *LocalCommand) init(rootCommand GalasaCommand) error {
 	var err error
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand)
+	return err
+}
 
+func (cmd *LocalCommand) createCobraCommand(rootCommand GalasaCommand) (*cobra.Command, error) {
+	var err error
 	localCobraCmd := &cobra.Command{
 		Use:   "local",
 		Short: "Manipulate local system",
 		Long:  "Manipulate local system",
 	}
-	rootCommand.GetCobraCommand().AddCommand(localCobraCmd)
-
-	cmd.cobraCommand = localCobraCmd
-
-	return err
+	rootCommand.CobraCommand().AddCommand(localCobraCmd)
+	return localCobraCmd, err
 }
 
-func (cmd *LocalCommand) GetName() string {
+func (cmd *LocalCommand) Name() string {
 	return COMMAND_NAME_LOCAL
 }
 
-func (cmd *LocalCommand) GetCobraCommand() *cobra.Command {
+func (cmd *LocalCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *LocalCommand) GetValues() interface{} {
+func (cmd *LocalCommand) Values() interface{} {
 	return nil
 }

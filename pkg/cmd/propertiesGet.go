@@ -49,15 +49,15 @@ func NewPropertiesGetCommand(factory Factory, propertiesCommand GalasaCommand, r
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesGetComamnd) GetName() string {
+func (cmd *PropertiesGetComamnd) Name() string {
 	return COMMAND_NAME_PROPERTIES_GET
 }
 
-func (cmd *PropertiesGetComamnd) GetCobraCommand() *cobra.Command {
+func (cmd *PropertiesGetComamnd) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *PropertiesGetComamnd) GetValues() interface{} {
+func (cmd *PropertiesGetComamnd) Values() interface{} {
 	return cmd.values
 }
 
@@ -80,7 +80,7 @@ func (cmd *PropertiesGetComamnd) init(factory Factory, propertiesCommand GalasaC
 		Aliases: []string{"properties get"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return executePropertiesGet(factory, cmd, args, propertiesGetCmdValues,
-				propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+				propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
 		},
 	}
 
@@ -99,15 +99,15 @@ func (cmd *PropertiesGetComamnd) init(factory Factory, propertiesCommand GalasaC
 		"output format for the data returned. Supported formats are: "+formatters+".")
 
 	// The namespace property is mandatory for get.
-	addNamespaceProperty(propertiesGetCobraCmd, true, propertiesCommand.GetValues().(*PropertiesCmdValues))
-	addNameProperty(propertiesGetCobraCmd, false, propertiesCommand.GetValues().(*PropertiesCmdValues))
+	addNamespaceProperty(propertiesGetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
+	addNameProperty(propertiesGetCobraCmd, false, propertiesCommand.Values().(*PropertiesCmdValues))
 
 	// Name field cannot be used in conjunction wiht the prefix, suffix or infix commands.
 	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "prefix")
 	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "suffix")
 	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "infix")
 
-	propertiesCommand.GetCobraCommand().AddCommand(propertiesGetCobraCmd)
+	propertiesCommand.CobraCommand().AddCommand(propertiesGetCobraCmd)
 
 	cmd.cobraCommand = propertiesGetCobraCmd
 

@@ -48,15 +48,15 @@ func NewPropertiesNamespaceGetCommand(
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceGetCommand) GetName() string {
+func (cmd *PropertiesNamespaceGetCommand) Name() string {
 	return COMMAND_NAME_PROPERTIES_NAMESPACE_GET
 }
 
-func (cmd *PropertiesNamespaceGetCommand) GetCobraCommand() *cobra.Command {
+func (cmd *PropertiesNamespaceGetCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *PropertiesNamespaceGetCommand) GetValues() interface{} {
+func (cmd *PropertiesNamespaceGetCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -67,7 +67,7 @@ func (cmd *PropertiesNamespaceGetCommand) init(factory Factory, propertiesNamesp
 	var err error
 	cmd.values = &PropertiesNamespaceGetCmdValues{}
 	cmd.cobraCommand, err = cmd.createPropertiesNamespaceGetCobraCmd(
-		factory, cmd.values, propertiesNamespaceCommand.GetCobraCommand(), propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+		factory, cmd.values, propertiesNamespaceCommand.CobraCommand(), propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
 	return err
 }
 

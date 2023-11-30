@@ -17,8 +17,8 @@ func TestRunsDownloadCommandInCommandCollectionIsAsExpected(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	runsDownloadCommand := commands.GetCommand(COMMAND_NAME_RUNS_DOWNLOAD)
-	assert.Equal(t, COMMAND_NAME_RUNS_DOWNLOAD, runsDownloadCommand.GetName())
-	assert.NotNil(t, runsDownloadCommand.GetValues())
-	assert.IsType(t, &RunsDownloadCmdValues{}, runsDownloadCommand.GetValues())
-	assert.NotNil(t, runsDownloadCommand.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_RUNS_DOWNLOAD, runsDownloadCommand.Name())
+	assert.NotNil(t, runsDownloadCommand.Values())
+	assert.IsType(t, &RunsDownloadCmdValues{}, runsDownloadCommand.Values())
+	assert.NotNil(t, runsDownloadCommand.CobraCommand())
 }

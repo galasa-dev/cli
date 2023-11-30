@@ -30,19 +30,19 @@ func (cmd *ProjectCommand) init(factory Factory, rootCmd GalasaCommand) error {
 	}
 
 	cmd.cobraCommand = projectCmd
-	rootCmd.GetCobraCommand().AddCommand(projectCmd)
+	rootCmd.CobraCommand().AddCommand(projectCmd)
 
 	return err
 }
 
-func (cmd *ProjectCommand) GetName() string {
+func (cmd *ProjectCommand) Name() string {
 	return COMMAND_NAME_PROJECT
 }
 
-func (cmd *ProjectCommand) GetCobraCommand() *cobra.Command {
+func (cmd *ProjectCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *ProjectCommand) GetValues() interface{} {
+func (cmd *ProjectCommand) Values() interface{} {
 	return nil
 }

@@ -43,15 +43,15 @@ func NewRootCommand(factory Factory) (*RootCommand, error) {
 // Public methods
 // -------------------------------------------------------------------------------
 
-func (cmd *RootCommand) GetName() string {
+func (cmd *RootCommand) Name() string {
 	return COMMAND_NAME_ROOT
 }
 
-func (cmd *RootCommand) GetCobraCommand() *cobra.Command {
+func (cmd *RootCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *RootCommand) GetValues() interface{} {
+func (cmd *RootCommand) Values() interface{} {
 	return cmd.values
 }
 

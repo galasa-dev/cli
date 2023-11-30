@@ -26,15 +26,15 @@ func NewAuthCommand(factory Factory, rootCommand GalasaCommand) (GalasaCommand, 
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthCommand) GetName() string {
+func (cmd *AuthCommand) Name() string {
 	return COMMAND_NAME_AUTH
 }
 
-func (cmd *AuthCommand) GetCobraCommand() *cobra.Command {
+func (cmd *AuthCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *AuthCommand) GetValues() interface{} {
+func (cmd *AuthCommand) Values() interface{} {
 	// There are no values.
 	return nil
 }
@@ -44,7 +44,7 @@ func (cmd *AuthCommand) GetValues() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthCommand) init(factory Factory, rootCommand GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createAuthCobraCmd(factory, rootCommand.GetCobraCommand(), rootCommand.GetValues().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createAuthCobraCmd(factory, rootCommand.CobraCommand(), rootCommand.Values().(*RootCmdValues))
 	return err
 }
 

@@ -17,8 +17,8 @@ func TestRunsGetCommandInCommandCollectionIsAsExpected(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	runsGetCommand := commands.GetCommand(COMMAND_NAME_RUNS_GET)
-	assert.Equal(t, COMMAND_NAME_RUNS_GET, runsGetCommand.GetName())
-	assert.NotNil(t, runsGetCommand.GetValues())
-	assert.IsType(t, &RunsGetCmdValues{}, runsGetCommand.GetValues())
-	assert.NotNil(t, runsGetCommand.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_RUNS_GET, runsGetCommand.Name())
+	assert.NotNil(t, runsGetCommand.Values())
+	assert.IsType(t, &RunsGetCmdValues{}, runsGetCommand.Values())
+	assert.NotNil(t, runsGetCommand.CobraCommand())
 }

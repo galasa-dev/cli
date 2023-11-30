@@ -32,7 +32,7 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 	assert.Nil(t, err)
 	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
 
-	assert.Equal(t, rootCommand.GetName(), COMMAND_NAME_ROOT)
+	assert.Equal(t, rootCommand.Name(), COMMAND_NAME_ROOT)
 }
 
 func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
@@ -44,7 +44,7 @@ func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 	assert.Nil(t, err)
 	rootCommand := commands.GetRootCommand()
 
-	assert.NotNil(t, rootCommand.GetCobraCommand())
+	assert.NotNil(t, rootCommand.CobraCommand())
 }
 
 func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
@@ -56,7 +56,7 @@ func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
 	assert.Nil(t, err)
 	rootCommand := commands.GetRootCommand()
 
-	values := rootCommand.GetValues()
+	values := rootCommand.Values()
 	assert.NotNil(t, values)
 	assert.IsType(t, &RootCmdValues{}, values)
 }

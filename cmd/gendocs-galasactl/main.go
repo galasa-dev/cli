@@ -28,7 +28,7 @@ func main() {
 	commands, err := cmd.NewCommandCollection(factory)
 	if err == nil {
 		targetFolder = os.Args[1]
-		err = doc.GenMarkdownTree(commands.GetRootCommand().GetCobraCommand(), targetFolder)
+		err = doc.GenMarkdownTree(commands.GetRootCommand().CobraCommand(), targetFolder)
 	}
 
 	if err != nil {

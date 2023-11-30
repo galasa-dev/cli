@@ -43,15 +43,15 @@ func NewPropertiesSetCommand(factory Factory, propertiesCommand GalasaCommand, r
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesSetCommand) GetName() string {
+func (cmd *PropertiesSetCommand) Name() string {
 	return COMMAND_NAME_PROPERTIES_SET
 }
 
-func (cmd *PropertiesSetCommand) GetCobraCommand() *cobra.Command {
+func (cmd *PropertiesSetCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *PropertiesSetCommand) GetValues() interface{} {
+func (cmd *PropertiesSetCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -71,7 +71,7 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties set"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesSet(factory, cmd, args, propertiesSetCmdValues, propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+			return executePropertiesSet(factory, cmd, args, propertiesSetCmdValues, propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
 		},
 	}
 
@@ -79,11 +79,11 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 
 	propertiesSetCobraCmd.MarkPersistentFlagRequired("value")
 
-	propertiesCommand.GetCobraCommand().AddCommand(propertiesSetCobraCmd)
+	propertiesCommand.CobraCommand().AddCommand(propertiesSetCobraCmd)
 
 	// The name & namespace properties are mandatory for set.
-	addNamespaceProperty(propertiesSetCobraCmd, true, propertiesCommand.GetValues().(*PropertiesCmdValues))
-	addNameProperty(propertiesSetCobraCmd, true, propertiesCommand.GetValues().(*PropertiesCmdValues))
+	addNamespaceProperty(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
+	addNameProperty(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
 
 	cmd.values = propertiesSetCmdValues
 	cmd.cobraCommand = propertiesSetCobraCmd

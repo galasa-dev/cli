@@ -21,7 +21,7 @@ func TestCommandListContainsRunsCommand(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, runsCommand)
-	assert.Equal(t, COMMAND_NAME_RUNS, runsCommand.GetName())
-	assert.NotNil(t, runsCommand.GetValues())
-	assert.IsType(t, &RunsCmdValues{}, runsCommand.GetValues())
+	assert.Equal(t, COMMAND_NAME_RUNS, runsCommand.Name())
+	assert.NotNil(t, runsCommand.Values())
+	assert.IsType(t, &RunsCmdValues{}, runsCommand.Values())
 }

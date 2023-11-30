@@ -35,7 +35,7 @@ func (handler *RealFinalWordHandler) init() {
 
 func (handler *RealFinalWordHandler) FinalWord(rootCmd GalasaCommand, obj interface{}) {
 
-	rootCmdValues := rootCmd.GetValues().(*RootCmdValues)
+	rootCmdValues := rootCmd.Values().(*RootCmdValues)
 
 	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
 	if rootCmdValues.isCapturingLogs {

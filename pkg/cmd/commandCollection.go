@@ -76,7 +76,7 @@ func (commands *CommandCollectionImpl) GetCommand(name string) GalasaCommand {
 
 func (commands *CommandCollectionImpl) Execute(args []string) error {
 
-	rootCmd := commands.GetRootCommand().GetCobraCommand()
+	rootCmd := commands.GetRootCommand().CobraCommand()
 	rootCmd.SetArgs(args)
 
 	// Execute the command
@@ -95,7 +95,7 @@ func (commands *CommandCollectionImpl) init(factory Factory) error {
 	rootCommand, err := NewRootCommand(factory)
 	if err == nil {
 		commands.rootCommand = rootCommand
-		commands.commandMap[rootCommand.GetName()] = rootCommand
+		commands.commandMap[rootCommand.Name()] = rootCommand
 	}
 
 	if err == nil {
@@ -119,7 +119,7 @@ func (commands *CommandCollectionImpl) init(factory Factory) error {
 	}
 
 	if err == nil {
-		sanitiseCommandHelpDescriptions(rootCommand.GetCobraCommand())
+		sanitiseCommandHelpDescriptions(rootCommand.CobraCommand())
 	}
 
 	return err
@@ -128,47 +128,43 @@ func (commands *CommandCollectionImpl) init(factory Factory) error {
 func (commands *CommandCollectionImpl) addAuthCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
 	var authCommand GalasaCommand
+	var authLoginCommand GalasaCommand
+	var authLogoutCommand GalasaCommand
+
 	if err == nil {
 		authCommand, err = NewAuthCommand(factory, rootCommand)
 		if err == nil {
-			commands.commandMap[authCommand.GetName()] = authCommand
+			authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
+			if err == nil {
+				authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
+			}
 		}
 	}
 
 	if err == nil {
-		var authLoginCommand GalasaCommand
-		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[authLoginCommand.GetName()] = authLoginCommand
-		}
+		commands.commandMap[authCommand.Name()] = authCommand
+		commands.commandMap[authLoginCommand.Name()] = authLoginCommand
+		commands.commandMap[authLogoutCommand.Name()] = authLogoutCommand
 	}
 
-	if err == nil {
-		var authLogoutCommand GalasaCommand
-		authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[authLogoutCommand.GetName()] = authLogoutCommand
-		}
-	}
 	return err
 }
 
 func (commands *CommandCollectionImpl) addLocalCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
 	var localCommand GalasaCommand
+	var localInitCommand GalasaCommand
+
 	if err == nil {
-		localCommand, err = NewLocalCommand(factory, rootCommand)
+		localCommand, err = NewLocalCommand(rootCommand)
 		if err == nil {
-			commands.commandMap[localCommand.GetName()] = localCommand
+			localInitCommand, err = NewLocalInitCommand(factory, localCommand, rootCommand)
 		}
 	}
 
 	if err == nil {
-		var localInitCommand GalasaCommand
-		localInitCommand, err = NewLocalInitCommand(factory, localCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[localInitCommand.GetName()] = localInitCommand
-		}
+		commands.commandMap[localCommand.Name()] = localCommand
+		commands.commandMap[localInitCommand.Name()] = localInitCommand
 	}
 	return err
 }
@@ -180,7 +176,7 @@ func (commands *CommandCollectionImpl) addProjectCommands(factory Factory, rootC
 	if err == nil {
 		projectCommand, err = NewProjectCmd(factory, rootCommand)
 		if err == nil {
-			commands.commandMap[projectCommand.GetName()] = projectCommand
+			commands.commandMap[projectCommand.Name()] = projectCommand
 		}
 	}
 
@@ -188,7 +184,7 @@ func (commands *CommandCollectionImpl) addProjectCommands(factory Factory, rootC
 		var projectCreateCommand GalasaCommand
 		projectCreateCommand, err = NewProjectCreateCmd(factory, rootCommand, projectCommand)
 		if err == nil {
-			commands.commandMap[projectCreateCommand.GetName()] = projectCreateCommand
+			commands.commandMap[projectCreateCommand.Name()] = projectCreateCommand
 		}
 	}
 	return err
@@ -197,54 +193,52 @@ func (commands *CommandCollectionImpl) addProjectCommands(factory Factory, rootC
 func (commands *CommandCollectionImpl) addPropertiesCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
 	var propertiesCommand GalasaCommand
+	var propertiesGetCommand GalasaCommand
+	var propertiesDeleteCommand GalasaCommand
+	var propertiesSetCommand GalasaCommand
 
 	if err == nil {
 		propertiesCommand, err = NewPropertiesCommand(factory, rootCommand)
 		if err == nil {
-			commands.commandMap[propertiesCommand.GetName()] = propertiesCommand
+			propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, rootCommand)
+			if err == nil {
+				propertiesSetCommand, err = NewPropertiesSetCommand(factory, propertiesCommand, rootCommand)
+				if err == nil {
+					propertiesDeleteCommand, err = NewPropertiesDeleteCommand(factory, propertiesCommand, rootCommand)
+					if err == nil {
+						err = commands.addPropertiesNamespaceCommands(factory, rootCommand, propertiesCommand)
+					}
+				}
+			}
 		}
 	}
 
 	if err == nil {
-		var propertiesGetCommand GalasaCommand
-		propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[propertiesGetCommand.GetName()] = propertiesGetCommand
-		}
+		commands.commandMap[propertiesCommand.Name()] = propertiesCommand
+		commands.commandMap[propertiesGetCommand.Name()] = propertiesGetCommand
+		commands.commandMap[propertiesSetCommand.Name()] = propertiesSetCommand
+		commands.commandMap[propertiesDeleteCommand.Name()] = propertiesDeleteCommand
 	}
 
-	if err == nil {
-		var propertiesSetCommand GalasaCommand
-		propertiesSetCommand, err = NewPropertiesSetCommand(factory, propertiesCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[propertiesSetCommand.GetName()] = propertiesSetCommand
-		}
-	}
+	return err
+}
 
-	if err == nil {
-		var propertiesDeleteCommand GalasaCommand
-		propertiesDeleteCommand, err = NewPropertiesDeleteCommand(factory, propertiesCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[propertiesDeleteCommand.GetName()] = propertiesDeleteCommand
-		}
-	}
-
+func (commands *CommandCollectionImpl) addPropertiesNamespaceCommands(factory Factory, rootCommand GalasaCommand, propertiesCommand GalasaCommand) error {
+	var err error
 	var propertiesNamespaceCommand GalasaCommand
+	var propertiesNamespaceGetCommand GalasaCommand
+
 	if err == nil {
 		propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(factory, propertiesCommand, rootCommand)
 		if err == nil {
-			commands.commandMap[propertiesNamespaceCommand.GetName()] = propertiesNamespaceCommand
+			propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
 		}
 	}
 
 	if err == nil {
-		var propertiesNamespaceGetCommand GalasaCommand
-		propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[propertiesNamespaceGetCommand.GetName()] = propertiesNamespaceGetCommand
-		}
+		commands.commandMap[propertiesNamespaceCommand.Name()] = propertiesNamespaceCommand
+		commands.commandMap[propertiesNamespaceGetCommand.Name()] = propertiesNamespaceGetCommand
 	}
-
 	return err
 }
 
@@ -252,51 +246,40 @@ func (commands *CommandCollectionImpl) addRunsCommands(factory Factory, rootComm
 
 	var err error
 	var runsCommand GalasaCommand
+	var runsDownloadCommand GalasaCommand
+	var runsGetCommand GalasaCommand
+	var runsPrepareCommand GalasaCommand
+	var runsSubmitCommand GalasaCommand
+	var runsSubmitLocalCommand GalasaCommand
+
 	if err == nil {
 		runsCommand, err = NewRunsCmd(factory, rootCommand)
 		if err == nil {
-			commands.commandMap[runsCommand.GetName()] = runsCommand
+			runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
+			if err == nil {
+				runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, rootCommand)
+				if err == nil {
+					if err == nil {
+						runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
+						if err == nil {
+							runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
+							if err == nil {
+								runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
 	if err == nil {
-		var runsDownloadCommand GalasaCommand
-		runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[runsDownloadCommand.GetName()] = runsDownloadCommand
-		}
-	}
-
-	if err == nil {
-		var runsGetCommand GalasaCommand
-		runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[runsGetCommand.GetName()] = runsGetCommand
-		}
-	}
-
-	if err == nil {
-		var runsPrepareCommand GalasaCommand
-		runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[runsPrepareCommand.GetName()] = runsPrepareCommand
-		}
-	}
-
-	var runsSubmitCommand GalasaCommand
-	if err == nil {
-		runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[runsSubmitCommand.GetName()] = runsSubmitCommand
-		}
-	}
-
-	if err == nil {
-		var runsSubmitLocalCommand GalasaCommand
-		runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
-		if err == nil {
-			commands.commandMap[runsSubmitLocalCommand.GetName()] = runsSubmitLocalCommand
-		}
+		commands.commandMap[runsCommand.Name()] = runsCommand
+		commands.commandMap[runsDownloadCommand.Name()] = runsDownloadCommand
+		commands.commandMap[runsGetCommand.Name()] = runsGetCommand
+		commands.commandMap[runsPrepareCommand.Name()] = runsPrepareCommand
+		commands.commandMap[runsSubmitCommand.Name()] = runsSubmitCommand
+		commands.commandMap[runsSubmitLocalCommand.Name()] = runsSubmitLocalCommand
 	}
 
 	return err

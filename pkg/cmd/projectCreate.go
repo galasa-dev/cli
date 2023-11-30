@@ -56,15 +56,15 @@ func NewProjectCreateCmd(factory Factory, rootCmd GalasaCommand, projectCmd Gala
 	return cmd, err
 }
 
-func (cmd *ProjectCreateCommand) GetName() string {
+func (cmd *ProjectCreateCommand) Name() string {
 	return COMMAND_NAME_PROJECT_CREATE
 }
 
-func (cmd *ProjectCreateCommand) GetCobraCommand() *cobra.Command {
+func (cmd *ProjectCreateCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *ProjectCreateCommand) GetValues() interface{} {
+func (cmd *ProjectCreateCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -81,7 +81,7 @@ func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, pr
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmd.GetValues().(*RootCmdValues))
+			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
@@ -107,7 +107,7 @@ func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, pr
 	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useGradle, "gradle", false, "Generate gradle build artifacts. "+
 		"Can be used in addition to the --maven flag.")
 
-	projectCmd.GetCobraCommand().AddCommand(projectCreateCmd)
+	projectCmd.CobraCommand().AddCommand(projectCreateCmd)
 
 	cmd.cobraCommand = projectCreateCmd
 	cmd.values = projectCreateCmdValues

@@ -18,8 +18,8 @@ func TestRunsSubmitCommandInCommandCollectionIsAsExpected(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	cmd := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT)
-	assert.Equal(t, COMMAND_NAME_RUNS_SUBMIT, cmd.GetName())
-	assert.NotNil(t, cmd.GetValues())
-	assert.IsType(t, &utils.RunsSubmitCmdValues{}, cmd.GetValues())
-	assert.NotNil(t, cmd.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_RUNS_SUBMIT, cmd.Name())
+	assert.NotNil(t, cmd.Values())
+	assert.IsType(t, &utils.RunsSubmitCmdValues{}, cmd.Values())
+	assert.NotNil(t, cmd.CobraCommand())
 }

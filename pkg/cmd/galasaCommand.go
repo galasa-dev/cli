@@ -13,11 +13,11 @@ import (
 // puts things into.
 type GalasaCommand interface {
 	// The name of the galasa command. One of the COMMAND_NAME_* constants.
-	GetName() string
+	Name() string
 
 	// Returns the cobra command which is part of the Galasa command.
-	GetCobraCommand() *cobra.Command
+	CobraCommand() *cobra.Command
 
 	// Returns the data structure associated with this cobra command.
-	GetValues() interface{}
+	Values() interface{}
 }

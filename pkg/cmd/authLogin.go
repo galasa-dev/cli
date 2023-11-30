@@ -35,15 +35,15 @@ func NewAuthLoginCommand(factory Factory, authCommand GalasaCommand, rootCommand
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLoginComamnd) GetName() string {
+func (cmd *AuthLoginComamnd) Name() string {
 	return COMMAND_NAME_AUTH_LOGIN
 }
 
-func (cmd *AuthLoginComamnd) GetCobraCommand() *cobra.Command {
+func (cmd *AuthLoginComamnd) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *AuthLoginComamnd) GetValues() interface{} {
+func (cmd *AuthLoginComamnd) Values() interface{} {
 	return cmd.values
 }
 
@@ -53,9 +53,21 @@ func (cmd *AuthLoginComamnd) GetValues() interface{} {
 func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error = nil
 
-	authLoginCmdValues := &AuthLoginCmdValues{}
+	cmd.values = &AuthLoginCmdValues{}
 
-	authLoginCmd := &cobra.Command{
+	cmd.cobraCommand, err = cmd.createAuthLoginCobraCommand(factory, cmd.values, authCommand, rootCommand)
+
+	return err
+}
+
+func (cmd *AuthLoginComamnd) createAuthLoginCobraCommand(
+	factory Factory, authLoginCmdValues *AuthLoginCmdValues,
+	authCommand GalasaCommand,
+	rootCommand GalasaCommand,
+) (*cobra.Command, error) {
+
+	var err error
+	authLoginCobraCmd := &cobra.Command{
 		Use:   "login",
 		Short: "Log in to a Galasa ecosystem using an existing access token",
 		Long: "Log in to a Galasa ecosystem using an existing access token stored in the 'galasactl.properties' file in your GALASA_HOME directory. " +
@@ -63,25 +75,19 @@ func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, ro
 			"and follow the instructions on the web user interface to populate the 'galasactl.properties' file.",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"auth login"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeAuthLogin(factory, cmd, args, authLoginCmdValues, rootCommand.GetValues().(*RootCmdValues))
+		RunE: func(cobraCommand *cobra.Command, args []string) error {
+			return cmd.executeAuthLogin(factory, authLoginCmdValues, rootCommand.Values().(*RootCmdValues))
 		},
 	}
 
-	addBootstrapFlag(authLoginCmd, &authLoginCmdValues.bootstrap)
+	addBootstrapFlag(authLoginCobraCmd, &authLoginCmdValues.bootstrap)
 
-	authCommand.GetCobraCommand().AddCommand(authLoginCmd)
-
-	cmd.values = authLoginCmdValues
-	cmd.cobraCommand = authLoginCmd
-
-	return err
+	authCommand.CobraCommand().AddCommand(authLoginCobraCmd)
+	return authLoginCobraCmd, err
 }
 
-func executeAuthLogin(
+func (cmd *AuthLoginComamnd) executeAuthLogin(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	authLoginCmdValues *AuthLoginCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

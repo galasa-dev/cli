@@ -35,15 +35,15 @@ func NewRunsSubmitCommand(factory Factory, runsCommand GalasaCommand, rootComman
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsSubmitCommand) GetName() string {
+func (cmd *RunsSubmitCommand) Name() string {
 	return COMMAND_NAME_RUNS_SUBMIT
 }
 
-func (cmd *RunsSubmitCommand) GetCobraCommand() *cobra.Command {
+func (cmd *RunsSubmitCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *RunsSubmitCommand) GetValues() interface{} {
+func (cmd *RunsSubmitCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -57,9 +57,9 @@ func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, r
 	cmd.cobraCommand, err = cmd.createRunsSubmitCobraCmd(
 		factory,
 		cmd.values,
-		runsCommand.GetCobraCommand(),
-		runsCommand.GetValues().(*RunsCmdValues),
-		rootCommand.GetValues().(*RootCmdValues),
+		runsCommand.CobraCommand(),
+		runsCommand.Values().(*RunsCmdValues),
+		rootCommand.Values().(*RootCmdValues),
 	)
 	return err
 }

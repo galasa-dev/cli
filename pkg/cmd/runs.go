@@ -24,15 +24,15 @@ func NewRunsCmd(factory Factory, rootCommand GalasaCommand) (GalasaCommand, erro
 	return cmd, err
 }
 
-func (cmd *RunsCommand) GetName() string {
+func (cmd *RunsCommand) Name() string {
 	return COMMAND_NAME_RUNS
 }
 
-func (cmd *RunsCommand) GetCobraCommand() *cobra.Command {
+func (cmd *RunsCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *RunsCommand) GetValues() interface{} {
+func (cmd *RunsCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -50,7 +50,7 @@ func (cmd *RunsCommand) init(factory Factory, rootCommand GalasaCommand) error {
 
 	addBootstrapFlag(runsCobraCmd, &runsCmdValues.bootstrap)
 
-	rootCommand.GetCobraCommand().AddCommand(runsCobraCmd)
+	rootCommand.CobraCommand().AddCommand(runsCobraCmd)
 
 	cmd.cobraCommand = runsCobraCmd
 	cmd.values = runsCmdValues

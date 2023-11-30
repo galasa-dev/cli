@@ -18,8 +18,8 @@ func TestAuthLoginCommandInCommandCollection(t *testing.T) {
 	authCommand := commands.GetCommand(COMMAND_NAME_AUTH_LOGIN)
 
 	assert.NotNil(t, authCommand)
-	assert.Equal(t, COMMAND_NAME_AUTH_LOGIN, authCommand.GetName())
-	assert.NotNil(t, authCommand.GetValues())
-	assert.IsType(t, &AuthLoginCmdValues{}, authCommand.GetValues())
-	assert.NotNil(t, authCommand.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_AUTH_LOGIN, authCommand.Name())
+	assert.NotNil(t, authCommand.Values())
+	assert.IsType(t, &AuthLoginCmdValues{}, authCommand.Values())
+	assert.NotNil(t, authCommand.CobraCommand())
 }

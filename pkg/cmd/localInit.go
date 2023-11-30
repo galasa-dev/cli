@@ -29,51 +29,47 @@ func NewLocalInitCommand(factory Factory, localCommand GalasaCommand, rootComman
 }
 
 func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, rootCommand GalasaCommand) error {
-	var err error = nil
+	var err error
 
-	localInitCmdValues := &LocalInitCmdValues{}
-
-	localInitCobraCmd := createLocalInitCobraCommand(factory, localInitCmdValues, localCommand, rootCommand)
-
-	cmd.cobraCommand = localInitCobraCmd
-	cmd.values = localInitCmdValues
-
-	// There are no children commands to add to the command tree from here.
+	cmd.values = &LocalInitCmdValues{}
+	cmd.cobraCommand = cmd.createLocalInitCobraCommand(factory, cmd.values, localCommand, rootCommand)
 
 	return err
 }
 
-func (cmd *LocalInitCommand) GetName() string {
+func (cmd *LocalInitCommand) Name() string {
 	return COMMAND_NAME_LOCAL_INIT
 }
 
-func (cmd *LocalInitCommand) GetCobraCommand() *cobra.Command {
+func (cmd *LocalInitCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *LocalInitCommand) GetValues() interface{} {
+func (cmd *LocalInitCommand) Values() interface{} {
 	return cmd.values
 }
 
-func createLocalInitCobraCommand(factory Factory, localInitCmdValues *LocalInitCmdValues, localCommand GalasaCommand, rootCommand GalasaCommand) *cobra.Command {
+func (cmd *LocalInitCommand) createLocalInitCobraCommand(
+	factory Factory, localInitCmdValues *LocalInitCmdValues, localCommand GalasaCommand, rootCommand GalasaCommand) *cobra.Command {
+
 	localInitCobraCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialises Galasa home folder",
 		Long:  "Initialises Galasa home folder in home directory with all the properties files",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeEnvInit(cmd, args, factory, localInitCmdValues, rootCommand.GetValues().(*RootCmdValues))
+		RunE: func(cobraCommand *cobra.Command, args []string) error {
+			return cmd.executeEnvInit(factory, localInitCmdValues, rootCommand.Values().(*RootCmdValues))
 		},
 	}
 
 	localInitCobraCmd.Flags().BoolVar(&localInitCmdValues.isDevelopmentLocalInit, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	localCommand.GetCobraCommand().AddCommand(localInitCobraCmd)
+	localCommand.CobraCommand().AddCommand(localInitCobraCmd)
 
 	return localInitCobraCmd
 }
 
-func executeEnvInit(cmd *cobra.Command, args []string, factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *LocalInitCommand) executeEnvInit(factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 

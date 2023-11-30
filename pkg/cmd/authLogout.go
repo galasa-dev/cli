@@ -30,15 +30,15 @@ func NewAuthLogoutCommand(factory Factory, authCommand GalasaCommand, rootComman
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLogoutCommand) GetName() string {
+func (cmd *AuthLogoutCommand) Name() string {
 	return COMMAND_NAME_AUTH_LOGOUT
 }
 
-func (cmd *AuthLogoutCommand) GetCobraCommand() *cobra.Command {
+func (cmd *AuthLogoutCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *AuthLogoutCommand) GetValues() interface{} {
+func (cmd *AuthLogoutCommand) Values() interface{} {
 	// There are no values.
 	return nil
 }
@@ -48,7 +48,7 @@ func (cmd *AuthLogoutCommand) GetValues() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthLogoutCommand) init(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createAuthLogoutCobraCmd(factory, authCommand.GetCobraCommand(), rootCommand.GetValues().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createAuthLogoutCobraCmd(factory, authCommand.CobraCommand(), rootCommand.Values().(*RootCmdValues))
 	return err
 }
 
@@ -60,8 +60,8 @@ func (cmd *AuthLogoutCommand) createAuthLogoutCobraCmd(factory Factory, parentCm
 		Short:   "Log out from a Galasa ecosystem",
 		Long:    "Log out from a Galasa ecosystem that you have previously logged in to",
 		Aliases: []string{"auth logout"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeAuthLogout(factory, cmd, args, rootCmdValues)
+		RunE: func(cobraCommand *cobra.Command, args []string) error {
+			return cmd.executeAuthLogout(factory, rootCmdValues)
 		},
 	}
 
@@ -70,10 +70,8 @@ func (cmd *AuthLogoutCommand) createAuthLogoutCobraCmd(factory Factory, parentCm
 	return authLogoutCmd, err
 }
 
-func executeAuthLogout(
+func (cmd *AuthLogoutCommand) executeAuthLogout(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	rootCmdValues *RootCmdValues,
 ) error {
 

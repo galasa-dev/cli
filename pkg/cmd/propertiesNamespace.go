@@ -31,15 +31,15 @@ func NewPropertiesNamespaceCommand(factory Factory, propertiesCommand GalasaComm
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceCommand) GetName() string {
+func (cmd *PropertiesNamespaceCommand) Name() string {
 	return COMMAND_NAME_PROPERTIES_NAMESPACE
 }
 
-func (cmd *PropertiesNamespaceCommand) GetCobraCommand() *cobra.Command {
+func (cmd *PropertiesNamespaceCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *PropertiesNamespaceCommand) GetValues() interface{} {
+func (cmd *PropertiesNamespaceCommand) Values() interface{} {
 	// There are no values.
 	return nil
 }
@@ -49,7 +49,7 @@ func (cmd *PropertiesNamespaceCommand) GetValues() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *PropertiesNamespaceCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(factory, propertiesCommand.GetCobraCommand(), propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(factory, propertiesCommand.CobraCommand(), propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
 	return err
 }
 

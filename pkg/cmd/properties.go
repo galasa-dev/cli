@@ -34,15 +34,15 @@ func NewPropertiesCommand(factory Factory, rootCommand GalasaCommand) (GalasaCom
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesCommand) GetName() string {
+func (cmd *PropertiesCommand) Name() string {
 	return COMMAND_NAME_PROPERTIES
 }
 
-func (cmd *PropertiesCommand) GetCobraCommand() *cobra.Command {
+func (cmd *PropertiesCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *PropertiesCommand) GetValues() interface{} {
+func (cmd *PropertiesCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -63,7 +63,7 @@ func (cmd *PropertiesCommand) init(factory Factory, rootCommand GalasaCommand) e
 
 	addBootstrapFlag(propertiesCobraCmd, &propertiesCmdValues.ecosystemBootstrap)
 
-	rootCommand.GetCobraCommand().AddCommand(propertiesCobraCmd)
+	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 
 	cmd.values = propertiesCmdValues
 	cmd.cobraCommand = propertiesCobraCmd

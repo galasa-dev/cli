@@ -17,8 +17,8 @@ func TestRunsPrepareCommandInCommandCollectionIsAsExpected(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	cmd := commands.GetCommand(COMMAND_NAME_RUNS_PREPARE)
-	assert.Equal(t, COMMAND_NAME_RUNS_PREPARE, cmd.GetName())
-	assert.NotNil(t, cmd.GetValues())
-	assert.IsType(t, &RunsPrepareCmdValues{}, cmd.GetValues())
-	assert.NotNil(t, cmd.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_RUNS_PREPARE, cmd.Name())
+	assert.NotNil(t, cmd.Values())
+	assert.IsType(t, &RunsPrepareCmdValues{}, cmd.Values())
+	assert.NotNil(t, cmd.CobraCommand())
 }

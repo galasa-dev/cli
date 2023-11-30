@@ -18,10 +18,10 @@ func TestCommandCollectionContainsLocalInitCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 	localInitCommand := commands.GetCommand(COMMAND_NAME_LOCAL_INIT)
 	assert.NotNil(t, localInitCommand)
-	assert.Equal(t, COMMAND_NAME_LOCAL_INIT, localInitCommand.GetName())
-	assert.NotNil(t, localInitCommand.GetValues())
-	assert.IsType(t, &LocalInitCmdValues{}, localInitCommand.GetValues())
-	assert.NotNil(t, localInitCommand.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_LOCAL_INIT, localInitCommand.Name())
+	assert.NotNil(t, localInitCommand.Values())
+	assert.IsType(t, &LocalInitCmdValues{}, localInitCommand.Values())
+	assert.NotNil(t, localInitCommand.CobraCommand())
 }
 
 func TestCanCreateGalasaHomeFolderWhenNotAlreadyInitialisedNonDevelopmentMode(t *testing.T) {

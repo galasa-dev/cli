@@ -21,6 +21,6 @@ func TestCommandListContainsLocalCommand(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, localCommand)
-	assert.Equal(t, COMMAND_NAME_LOCAL, localCommand.GetName())
-	assert.Nil(t, localCommand.GetValues())
+	assert.Equal(t, COMMAND_NAME_LOCAL, localCommand.Name())
+	assert.Nil(t, localCommand.Values())
 }

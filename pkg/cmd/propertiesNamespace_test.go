@@ -17,7 +17,7 @@ func TestPropertiesNamespaceCommandInCommandCollectionHasName(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesNamespaceCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE)
-	assert.Equal(t, COMMAND_NAME_PROPERTIES_NAMESPACE, propertiesNamespaceCommand.GetName())
-	assert.Nil(t, propertiesNamespaceCommand.GetValues())
-	assert.NotNil(t, propertiesNamespaceCommand.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_PROPERTIES_NAMESPACE, propertiesNamespaceCommand.Name())
+	assert.Nil(t, propertiesNamespaceCommand.Values())
+	assert.NotNil(t, propertiesNamespaceCommand.CobraCommand())
 }

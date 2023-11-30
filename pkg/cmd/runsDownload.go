@@ -43,15 +43,15 @@ func NewRunsDownloadCommand(factory Factory, runsCommand GalasaCommand, rootComm
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsDownloadCommand) GetName() string {
+func (cmd *RunsDownloadCommand) Name() string {
 	return COMMAND_NAME_RUNS_DOWNLOAD
 }
 
-func (cmd *RunsDownloadCommand) GetCobraCommand() *cobra.Command {
+func (cmd *RunsDownloadCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *RunsDownloadCommand) GetValues() interface{} {
+func (cmd *RunsDownloadCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -63,9 +63,9 @@ func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand,
 	var err error
 	cmd.values = &RunsDownloadCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory, cmd.values,
-		runsCommand.GetCobraCommand(),
-		runsCommand.GetValues().(*RunsCmdValues),
-		rootCommand.GetValues().(*RootCmdValues),
+		runsCommand.CobraCommand(),
+		runsCommand.Values().(*RunsCmdValues),
+		rootCommand.Values().(*RootCmdValues),
 	)
 	return err
 }

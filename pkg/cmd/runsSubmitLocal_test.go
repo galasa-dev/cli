@@ -17,8 +17,8 @@ func TestRunsSubmitLocalCommandInCommandCollectionIsAsExpected(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	cmd := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT_LOCAL)
-	assert.Equal(t, COMMAND_NAME_RUNS_SUBMIT_LOCAL, cmd.GetName())
-	assert.NotNil(t, cmd.GetValues())
-	assert.IsType(t, &RunsSubmitLocalCmdValues{}, cmd.GetValues())
-	assert.NotNil(t, cmd.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_RUNS_SUBMIT_LOCAL, cmd.Name())
+	assert.NotNil(t, cmd.Values())
+	assert.IsType(t, &RunsSubmitLocalCmdValues{}, cmd.Values())
+	assert.NotNil(t, cmd.CobraCommand())
 }

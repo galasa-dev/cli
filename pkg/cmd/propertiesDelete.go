@@ -33,15 +33,15 @@ func NewPropertiesDeleteCommand(factory Factory, propertiesCommand GalasaCommand
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesDeleteCommand) GetName() string {
+func (cmd *PropertiesDeleteCommand) Name() string {
 	return COMMAND_NAME_PROPERTIES_DELETE
 }
 
-func (cmd *PropertiesDeleteCommand) GetCobraCommand() *cobra.Command {
+func (cmd *PropertiesDeleteCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *PropertiesDeleteCommand) GetValues() interface{} {
+func (cmd *PropertiesDeleteCommand) Values() interface{} {
 	// There are no values.
 	return nil
 }
@@ -51,7 +51,7 @@ func (cmd *PropertiesDeleteCommand) GetValues() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand.GetCobraCommand(), propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand.CobraCommand(), propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
 	return err
 }
 

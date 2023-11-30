@@ -21,6 +21,6 @@ func TestCommandListContainsProjectCommand(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, projectCommand)
-	assert.Equal(t, COMMAND_NAME_PROJECT, projectCommand.GetName())
-	assert.Nil(t, projectCommand.GetValues())
+	assert.Equal(t, COMMAND_NAME_PROJECT, projectCommand.Name())
+	assert.Nil(t, projectCommand.Values())
 }

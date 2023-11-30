@@ -17,8 +17,8 @@ func TestPropertiesGetCommandInCommandCollectionHasName(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesGetCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES_GET)
-	assert.Equal(t, COMMAND_NAME_PROPERTIES_GET, propertiesGetCommand.GetName())
-	assert.NotNil(t, propertiesGetCommand.GetValues())
-	assert.IsType(t, &PropertiesGetCmdValues{}, propertiesGetCommand.GetValues())
-	assert.NotNil(t, propertiesGetCommand.GetCobraCommand())
+	assert.Equal(t, COMMAND_NAME_PROPERTIES_GET, propertiesGetCommand.Name())
+	assert.NotNil(t, propertiesGetCommand.Values())
+	assert.IsType(t, &PropertiesGetCmdValues{}, propertiesGetCommand.Values())
+	assert.NotNil(t, propertiesGetCommand.CobraCommand())
 }
