@@ -107,7 +107,7 @@ func (cmd *PropertiesGetComamnd) init(factory Factory, propertiesCommand GalasaC
 	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "suffix")
 	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "infix")
 
-	rootCommand.GetCobraCommand().AddCommand(propertiesGetCobraCmd)
+	propertiesCommand.GetCobraCommand().AddCommand(propertiesGetCobraCmd)
 
 	cmd.cobraCommand = propertiesGetCobraCmd
 

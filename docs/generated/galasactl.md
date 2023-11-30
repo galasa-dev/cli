@@ -17,7 +17,6 @@ A tool for controlling Galasa resources using the command-line.
 ### SEE ALSO
 
 * [galasactl auth](galasactl_auth.md)	 - Manages authentication with a Galasa ecosystem
-* [galasactl get](galasactl_get.md)	 - Get the details of properties in a namespace.
 * [galasactl local](galasactl_local.md)	 - Manipulate local system
 * [galasactl project](galasactl_project.md)	 - Manipulate local project source code
 * [galasactl properties](galasactl_properties.md)	 - Manages properties in an ecosystem

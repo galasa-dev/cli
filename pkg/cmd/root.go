@@ -42,19 +42,6 @@ func NewRootCommand(factory Factory) (*RootCommand, error) {
 // -------------------------------------------------------------------------------
 // Public methods
 // -------------------------------------------------------------------------------
-func (cmd *RootCommand) init(factory Factory) error {
-
-	var err error = nil
-
-	// Flags parsed by this command put values into this instance of the structure.
-	cmd.values = &RootCmdValues{
-		isCapturingLogs: false,
-	}
-
-	cmd.cobraCommand, err = newRootCobraCommand(factory, cmd.values)
-
-	return err
-}
 
 func (cmd *RootCommand) GetName() string {
 	return COMMAND_NAME_ROOT
@@ -72,8 +59,21 @@ func (cmd *RootCommand) GetValues() interface{} {
 // Private methods
 //-------------------------------------------------------------------------------
 
-// TODO: Turn into an object-method.
-func newRootCobraCommand(factory Factory, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *RootCommand) init(factory Factory) error {
+
+	var err error = nil
+
+	// Flags parsed by this command put values into this instance of the structure.
+	cmd.values = &RootCmdValues{
+		isCapturingLogs: false,
+	}
+
+	cmd.cobraCommand, err = cmd.newRootCobraCommand(factory, cmd.values)
+
+	return err
+}
+
+func (cmd *RootCommand) newRootCobraCommand(factory Factory, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	version, err := embedded.GetGalasaCtlVersion()
 	var rootCmd *cobra.Command
 	if err == nil {

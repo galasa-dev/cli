@@ -68,12 +68,7 @@ func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, ro
 		},
 	}
 
-	// TODO: This bootstrap flag is defined in several places. De-duplication is needed. Put it into a function and call it from where it's needed.
-	authLoginCmd.PersistentFlags().StringVarP(&authLoginCmdValues.bootstrap, "bootstrap", "b", "",
-		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
-			"If it starts with neither, it is assumed to be a fully-qualified path. "+
-			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
-			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
+	addBootstrapFlag(authLoginCmd, &authLoginCmdValues.bootstrap)
 
 	authCommand.GetCobraCommand().AddCommand(authLoginCmd)
 
