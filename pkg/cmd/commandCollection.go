@@ -50,7 +50,7 @@ const (
 )
 
 // -----------------------------------------------------------------
-// Public functions.
+// Constructors
 // -----------------------------------------------------------------
 func NewCommandCollection(factory Factory) (CommandCollection, error) {
 
@@ -61,31 +61,9 @@ func NewCommandCollection(factory Factory) (CommandCollection, error) {
 	return commands, err
 }
 
-// The main entry point into the cmd package.
-func Execute(factory Factory, args []string) error {
-	var err error
-
-	finalWordHandler := factory.GetFinalWordHandler()
-
-	var commands CommandCollection
-	commands, err = NewCommandCollection(factory)
-
-	if err == nil {
-
-		// Catch execution if a panic happens.
-		defer func() {
-			err := recover()
-
-			// Display the error and exit.
-			finalWordHandler.FinalWord(commands.GetRootCommand(), err)
-		}()
-
-		// Execute the command
-		err = commands.Execute(args)
-	}
-	finalWordHandler.FinalWord(commands.GetRootCommand(), err)
-	return err
-}
+// -----------------------------------------------------------------
+// Public functions
+// -----------------------------------------------------------------
 
 func (commands *CommandCollectionImpl) GetRootCommand() GalasaCommand {
 	return commands.GetCommand(COMMAND_NAME_ROOT)
