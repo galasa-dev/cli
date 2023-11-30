@@ -136,15 +136,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
 
 	parentCmd.AddCommand(runsSubmitCmd)
 
-	// Add child commands.
-	err = createRunsSubmitCmdChildren(factory, runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
-
 	return runsSubmitCmd, err
-}
-
-func createRunsSubmitCmdChildren(factory Factory, runsSubmitCmd *cobra.Command, runsSubmitCmdValues *utils.RunsSubmitCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) error {
-	_, err := createRunsSubmitLocalCmd(factory, runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
-	return err
 }
 
 func executeSubmit(

@@ -46,6 +46,7 @@ const (
 	COMMAND_NAME_RUNS_GET                 = "runs get"
 	COMMAND_NAME_RUNS_PREPARE             = "runs prepare"
 	COMMAND_NAME_RUNS_SUBMIT              = "runs submit"
+	COMMAND_NAME_RUNS_SUBMIT_LOCAL        = "runs submit local"
 )
 
 // -----------------------------------------------------------------
@@ -312,7 +313,13 @@ func (commands *CommandCollectionImpl) addRunsCommands(factory Factory, rootComm
 		}
 	}
 
-	// RunsSubmitLocal
+	if err == nil {
+		var runsSubmitLocalCommand GalasaCommand
+		runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
+		if err == nil {
+			commands.commandMap[runsSubmitLocalCommand.GetName()] = runsSubmitLocalCommand
+		}
+	}
 
 	return err
 }

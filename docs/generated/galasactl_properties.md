@@ -24,7 +24,6 @@ Allows interaction with the CPS to create, query and maintain properties in Gala
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
 * [galasactl properties delete](galasactl_properties_delete.md)	 - Delete a property in a namespace.
-* [galasactl properties get](galasactl_properties_get.md)	 - Get the details of properties in a namespace.
 * [galasactl properties namespaces](galasactl_properties_namespaces.md)	 - Queries namespaces in an ecosystem
 * [galasactl properties set](galasactl_properties_set.md)	 - Set the details of properties in a namespace.
 
