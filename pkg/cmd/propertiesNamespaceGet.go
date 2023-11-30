@@ -20,12 +20,60 @@ import (
 //	properties namespaces get
 //  And then display all namespaces in the cps or returns empty
 
-type PropertiesNamespaceCmdValues struct {
+type PropertiesNamespaceGetCmdValues struct {
 	namespaceOutputFormat string
 }
 
-func createPropertiesNamespaceGetCmd(
+type PropertiesNamespaceGetCommand struct {
+	values       *PropertiesNamespaceGetCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesNamespaceGetCommand(
 	factory Factory,
+	propertiesNamespaceCommand GalasaCommand,
+	propertiesCommand GalasaCommand,
+	rootCommand GalasaCommand,
+) (GalasaCommand, error) {
+
+	cmd := new(PropertiesNamespaceGetCommand)
+
+	err := cmd.init(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesNamespaceGetCommand) GetName() string {
+	return COMMAND_NAME_PROPERTIES_NAMESPACE_GET
+}
+
+func (cmd *PropertiesNamespaceGetCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesNamespaceGetCommand) GetValues() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesNamespaceGetCommand) init(factory Factory, propertiesNamespaceCommand GalasaCommand, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.values = &PropertiesNamespaceGetCmdValues{}
+	cmd.cobraCommand, err = cmd.createPropertiesNamespaceGetCobraCmd(
+		factory, cmd.values, propertiesNamespaceCommand.GetCobraCommand(), propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+	return err
+}
+
+func (cmd *PropertiesNamespaceGetCommand) createPropertiesNamespaceGetCobraCmd(
+	factory Factory,
+	propertiesNamespaceGetCmdValues *PropertiesNamespaceGetCmdValues,
 	propertiesNamespaceCmd *cobra.Command,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
@@ -33,33 +81,30 @@ func createPropertiesNamespaceGetCmd(
 
 	var err error = nil
 
-	// Allocate a memory block into which the parsed values of the command-line parameters are stored.
-	propertiesNamespaceCmdValues := &PropertiesNamespaceCmdValues{}
-
-	propertiesNamespaceGetCmd := &cobra.Command{
+	propertieNamespaceGetCobraCommand := &cobra.Command{
 		Use:   "get",
 		Short: "Get a list of namespaces.",
 		Long:  "Get a list of namespaces within the CPS",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesNamespaceGet(factory, cmd, args, propertiesNamespaceCmdValues, propertiesCmdValues, rootCmdValues)
+			return executePropertiesNamespaceGet(factory, cmd, args, propertiesNamespaceGetCmdValues, propertiesCmdValues, rootCmdValues)
 		},
 		Aliases: []string{"namespaces get"},
 	}
 
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
-	propertiesNamespaceGetCmd.PersistentFlags().StringVar(&propertiesNamespaceCmdValues.namespaceOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
+	propertieNamespaceGetCobraCommand.PersistentFlags().StringVar(&propertiesNamespaceGetCmdValues.namespaceOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 	parentCommand := propertiesNamespaceCmd
-	parentCommand.AddCommand(propertiesNamespaceGetCmd)
+	parentCommand.AddCommand(propertieNamespaceGetCobraCommand)
 
-	return propertiesNamespaceGetCmd, err
+	return propertieNamespaceGetCobraCommand, err
 }
 
 func executePropertiesNamespaceGet(
 	factory Factory,
 	cmd *cobra.Command,
 	args []string,
-	propertiesNamespaceCmdValues *PropertiesNamespaceCmdValues,
+	propertiesNamespaceGetCmdValues *PropertiesNamespaceGetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

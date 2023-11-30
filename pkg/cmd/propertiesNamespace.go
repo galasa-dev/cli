@@ -14,8 +14,48 @@ import (
 //	properties namespaces get
 //  And then display all namespaces in the cps or returns empty
 
-func createPropertiesNamespaceCmd(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type PropertiesNamespaceCommand struct {
+	cobraCommand *cobra.Command
+}
 
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesNamespaceCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(PropertiesNamespaceCommand)
+
+	err := cmd.init(factory, propertiesCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesNamespaceCommand) GetName() string {
+	return COMMAND_NAME_PROPERTIES_NAMESPACE
+}
+
+func (cmd *PropertiesNamespaceCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesNamespaceCommand) GetValues() interface{} {
+	// There are no values.
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesNamespaceCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(factory, propertiesCommand.GetCobraCommand(), propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+	return err
+}
+
+func (cmd *PropertiesNamespaceCommand) createPropertiesNamespaceCobraCmd(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+
+	var err error
 	propertiesNamespaceCmd := &cobra.Command{
 		Use:   "namespaces",
 		Short: "Queries namespaces in an ecosystem",
@@ -25,15 +65,5 @@ func createPropertiesNamespaceCmd(factory Factory, propertiesCmd *cobra.Command,
 
 	propertiesCmd.AddCommand(propertiesNamespaceCmd)
 
-	err := createChildCommands(factory, propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
-
 	return propertiesNamespaceCmd, err
-}
-
-func createChildCommands(factory Factory, propertiesNamespaceCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
-	var err error
-
-	_, err = createPropertiesNamespaceGetCmd(factory, propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
-
-	return err
 }

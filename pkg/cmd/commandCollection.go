@@ -27,19 +27,21 @@ type CommandCollectionImpl struct {
 }
 
 const (
-	COMMAND_NAME_ROOT              = "galasactl"
-	COMMAND_NAME_AUTH              = "auth"
-	COMMAND_NAME_AUTH_LOGIN        = "auth login"
-	COMMAND_NAME_AUTH_LOGOUT       = "auth logout"
-	COMMAND_NAME_PROJECT           = "project"
-	COMMAND_NAME_PROJECT_CREATE    = "project create"
-	COMMAND_NAME_LOCAL             = "local"
-	COMMAND_NAME_LOCAL_INIT        = "local init"
-	COMMAND_NAME_RUNS              = "runs"
-	COMMAND_NAME_PROPERTIES        = "properties"
-	COMMAND_NAME_PROPERTIES_GET    = "properties get"
-	COMMAND_NAME_PROPERTIES_SET    = "properties set"
-	COMMAND_NAME_PROPERTIES_DELETE = "properties delete"
+	COMMAND_NAME_ROOT                     = "galasactl"
+	COMMAND_NAME_AUTH                     = "auth"
+	COMMAND_NAME_AUTH_LOGIN               = "auth login"
+	COMMAND_NAME_AUTH_LOGOUT              = "auth logout"
+	COMMAND_NAME_PROJECT                  = "project"
+	COMMAND_NAME_PROJECT_CREATE           = "project create"
+	COMMAND_NAME_LOCAL                    = "local"
+	COMMAND_NAME_LOCAL_INIT               = "local init"
+	COMMAND_NAME_RUNS                     = "runs"
+	COMMAND_NAME_PROPERTIES               = "properties"
+	COMMAND_NAME_PROPERTIES_GET           = "properties get"
+	COMMAND_NAME_PROPERTIES_SET           = "properties set"
+	COMMAND_NAME_PROPERTIES_DELETE        = "properties delete"
+	COMMAND_NAME_PROPERTIES_NAMESPACE     = "properties namespace"
+	COMMAND_NAME_PROPERTIES_NAMESPACE_GET = "properties namespace get"
 )
 
 // -----------------------------------------------------------------
@@ -244,14 +246,21 @@ func (commands *CommandCollectionImpl) addPropertiesCommands(factory Factory, ro
 		}
 	}
 
-	// if err == nil {
-	// 	_, err = createPropertiesDeleteCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	// }
-	// if err == nil {
-	// 	_, err = createPropertiesNamespaceCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	// }
+	var propertiesNamespaceCommand GalasaCommand
+	if err == nil {
+		propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(factory, propertiesCommand, rootCommand)
+		if err == nil {
+			commands.commandMap[propertiesNamespaceCommand.GetName()] = propertiesNamespaceCommand
+		}
+	}
 
-	// _, err = createPropertiesNamespaceGetCmd(factory, propertiesNamespaceCmd, propertiesCmdValues, rootCmdValues)
+	if err == nil {
+		var propertiesNamespaceGetCommand GalasaCommand
+		propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
+		if err == nil {
+			commands.commandMap[propertiesNamespaceGetCommand.GetName()] = propertiesNamespaceGetCommand
+		}
+	}
 
 	return err
 }
