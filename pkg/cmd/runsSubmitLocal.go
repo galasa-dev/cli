@@ -96,7 +96,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit local"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeSubmitLocal(factory, cmd, args, runsSubmitLocalCmdValues, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+			return executeSubmitLocal(factory, runsSubmitLocalCmdValues, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -154,8 +154,6 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 
 func executeSubmitLocal(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	runsSubmitLocalCmdValues *RunsSubmitLocalCmdValues,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,

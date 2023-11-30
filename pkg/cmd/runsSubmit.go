@@ -82,7 +82,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeSubmit(factory, cmd, args, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+			return executeSubmit(factory, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -141,8 +141,6 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
 
 func executeSubmit(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,

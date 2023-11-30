@@ -87,7 +87,7 @@ func (cmd *PropertiesNamespaceGetCommand) createPropertiesNamespaceGetCobraCmd(
 		Long:  "Get a list of namespaces within the CPS",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesNamespaceGet(factory, cmd, args, propertiesNamespaceGetCmdValues, propertiesCmdValues, rootCmdValues)
+			return executePropertiesNamespaceGet(factory, propertiesNamespaceGetCmdValues, propertiesCmdValues, rootCmdValues)
 		},
 		Aliases: []string{"namespaces get"},
 	}
@@ -102,8 +102,6 @@ func (cmd *PropertiesNamespaceGetCommand) createPropertiesNamespaceGetCobraCmd(
 
 func executePropertiesNamespaceGet(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	propertiesNamespaceGetCmdValues *PropertiesNamespaceGetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,

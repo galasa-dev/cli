@@ -90,7 +90,7 @@ func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, pr
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmd.Values().(*RootCmdValues))
+			return executeCreateProject(factory, projectCreateCmdValues, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
@@ -124,7 +124,7 @@ func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, pr
 	return err
 }
 
-func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {
+func executeCreateProject(factory Factory, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 

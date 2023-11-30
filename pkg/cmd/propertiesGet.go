@@ -84,7 +84,7 @@ func (cmd *PropertiesGetComamnd) createCobraCommand(factory Factory, propertiesG
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesGet(factory, cmd, args, propertiesGetCmdValues,
+			return executePropertiesGet(factory, propertiesGetCmdValues,
 				propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
 		},
 	}
@@ -119,8 +119,6 @@ func (cmd *PropertiesGetComamnd) createCobraCommand(factory Factory, propertiesG
 
 func executePropertiesGet(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	propertiesGetCmdValues *PropertiesGetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,

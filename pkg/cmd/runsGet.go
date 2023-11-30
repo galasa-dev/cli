@@ -89,7 +89,7 @@ func (cmd *RunsGetCommand) createRunsGetCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs get"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeRunsGet(factory, cmd, args, runsGetCmdValues, runsCmdValues, rootCmdValues)
+			return executeRunsGet(factory, runsGetCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -112,8 +112,6 @@ func (cmd *RunsGetCommand) createRunsGetCobraCmd(
 
 func executeRunsGet(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	runsGetCmdValues *RunsGetCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,

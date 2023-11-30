@@ -68,7 +68,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(factory Facto
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesDelete(factory, cmd, args, propertiesCmdValues, rootCmdValues)
+			return executePropertiesDelete(factory, propertiesCmdValues, rootCmdValues)
 		},
 		Aliases: []string{"properties delete"},
 	}
@@ -83,7 +83,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(factory Facto
 	return propertiesDeleteCmd, err
 }
 
-func executePropertiesDelete(factory Factory, cmd *cobra.Command, args []string, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+func executePropertiesDelete(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.

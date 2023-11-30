@@ -71,7 +71,7 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties set"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesSet(factory, cmd, args, propertiesSetCmdValues, propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
+			return executePropertiesSet(factory, propertiesSetCmdValues, propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
 		},
 	}
 
@@ -93,8 +93,6 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 
 func executePropertiesSet(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	propertiesSetCmdValues *PropertiesSetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,

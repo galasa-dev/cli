@@ -86,7 +86,7 @@ func (cmd *RunsPrepareCommand) createRunsPrepareCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs prepare"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeAssemble(factory, cmd, args, runsPrepareCmdValues, runsCmdValues, rootCmdValues)
+			return executeAssemble(factory, runsPrepareCmdValues, runsCmdValues, rootCmdValues)
 		},
 	}
 
@@ -104,8 +104,6 @@ func (cmd *RunsPrepareCommand) createRunsPrepareCobraCmd(
 
 func executeAssemble(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	runsPrepareCmdValues *RunsPrepareCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
