@@ -53,8 +53,13 @@ func (cmd *PropertiesCommand) init(factory Factory, rootCommand GalasaCommand) e
 
 	var err error = nil
 
-	propertiesCmdValues := &PropertiesCmdValues{}
+	cmd.values = &PropertiesCmdValues{}
+	cmd.cobraCommand = cmd.createCobraCommand(factory, cmd.values, rootCommand)
 
+	return err
+}
+
+func (cmd *PropertiesCommand) createCobraCommand(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCommand GalasaCommand) *cobra.Command {
 	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",
 		Short: "Manages properties in an ecosystem",
@@ -65,13 +70,10 @@ func (cmd *PropertiesCommand) init(factory Factory, rootCommand GalasaCommand) e
 
 	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 
-	cmd.values = propertiesCmdValues
-	cmd.cobraCommand = propertiesCobraCmd
-
-	return err
+	return propertiesCobraCmd
 }
 
-func addNamespaceProperty(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
+func addNamespaceFlag(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
 
 	flagName := "namespace"
 	var description string
@@ -90,7 +92,7 @@ func addNamespaceProperty(cmd *cobra.Command, isMandatory bool, propertiesCmdVal
 }
 
 // Some sub-commands need a name field to be mandatory, some don't.
-func addNameProperty(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
+func addPropertyNameFlag(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
 	flagName := "name"
 	var description string
 	if isMandatory {

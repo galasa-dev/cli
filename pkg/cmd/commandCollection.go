@@ -20,7 +20,7 @@ type CommandCollection interface {
 	Execute(args []string) error
 }
 
-type CommandCollectionImpl struct {
+type commandCollectionImpl struct {
 	rootCommand GalasaCommand
 
 	commandMap map[string]GalasaCommand
@@ -54,7 +54,7 @@ const (
 // -----------------------------------------------------------------
 func NewCommandCollection(factory Factory) (CommandCollection, error) {
 
-	commands := new(CommandCollectionImpl)
+	commands := new(commandCollectionImpl)
 
 	err := commands.init(factory)
 
@@ -65,16 +65,16 @@ func NewCommandCollection(factory Factory) (CommandCollection, error) {
 // Public functions
 // -----------------------------------------------------------------
 
-func (commands *CommandCollectionImpl) GetRootCommand() GalasaCommand {
+func (commands *commandCollectionImpl) GetRootCommand() GalasaCommand {
 	return commands.GetCommand(COMMAND_NAME_ROOT)
 }
 
-func (commands *CommandCollectionImpl) GetCommand(name string) GalasaCommand {
+func (commands *commandCollectionImpl) GetCommand(name string) GalasaCommand {
 	cmd, _ := commands.commandMap[name]
 	return cmd
 }
 
-func (commands *CommandCollectionImpl) Execute(args []string) error {
+func (commands *commandCollectionImpl) Execute(args []string) error {
 
 	rootCmd := commands.GetRootCommand().CobraCommand()
 	rootCmd.SetArgs(args)
@@ -88,7 +88,7 @@ func (commands *CommandCollectionImpl) Execute(args []string) error {
 // -----------------------------------------------------------------
 // Private functions.
 // -----------------------------------------------------------------
-func (commands *CommandCollectionImpl) init(factory Factory) error {
+func (commands *commandCollectionImpl) init(factory Factory) error {
 
 	commands.commandMap = make(map[string]GalasaCommand)
 
@@ -125,7 +125,7 @@ func (commands *CommandCollectionImpl) init(factory Factory) error {
 	return err
 }
 
-func (commands *CommandCollectionImpl) addAuthCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
 	var authCommand GalasaCommand
 	var authLoginCommand GalasaCommand
@@ -150,7 +150,7 @@ func (commands *CommandCollectionImpl) addAuthCommands(factory Factory, rootComm
 	return err
 }
 
-func (commands *CommandCollectionImpl) addLocalCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addLocalCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
 	var localCommand GalasaCommand
 	var localInitCommand GalasaCommand
@@ -169,7 +169,7 @@ func (commands *CommandCollectionImpl) addLocalCommands(factory Factory, rootCom
 	return err
 }
 
-func (commands *CommandCollectionImpl) addProjectCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addProjectCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
 
 	var projectCommand GalasaCommand
@@ -190,7 +190,7 @@ func (commands *CommandCollectionImpl) addProjectCommands(factory Factory, rootC
 	return err
 }
 
-func (commands *CommandCollectionImpl) addPropertiesCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addPropertiesCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
 	var propertiesCommand GalasaCommand
 	var propertiesGetCommand GalasaCommand
@@ -223,7 +223,7 @@ func (commands *CommandCollectionImpl) addPropertiesCommands(factory Factory, ro
 	return err
 }
 
-func (commands *CommandCollectionImpl) addPropertiesNamespaceCommands(factory Factory, rootCommand GalasaCommand, propertiesCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory Factory, rootCommand GalasaCommand, propertiesCommand GalasaCommand) error {
 	var err error
 	var propertiesNamespaceCommand GalasaCommand
 	var propertiesNamespaceGetCommand GalasaCommand
@@ -242,7 +242,7 @@ func (commands *CommandCollectionImpl) addPropertiesNamespaceCommands(factory Fa
 	return err
 }
 
-func (commands *CommandCollectionImpl) addRunsCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootCommand GalasaCommand) error {
 
 	var err error
 	var runsCommand GalasaCommand

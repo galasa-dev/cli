@@ -69,8 +69,13 @@ func (cmd *PropertiesGetComamnd) init(factory Factory, propertiesCommand GalasaC
 
 	var err error = nil
 
-	propertiesGetCmdValues := &PropertiesGetCmdValues{}
-	cmd.values = propertiesGetCmdValues
+	cmd.values = &PropertiesGetCmdValues{}
+	cmd.cobraCommand = cmd.createCobraCommand(factory, cmd.values, propertiesCommand, rootCommand)
+
+	return err
+}
+
+func (cmd *PropertiesGetComamnd) createCobraCommand(factory Factory, propertiesGetCmdValues *PropertiesGetCmdValues, propertiesCommand GalasaCommand, rootCommand GalasaCommand) *cobra.Command {
 
 	propertiesGetCobraCmd := &cobra.Command{
 		Use:     "get",
@@ -99,8 +104,8 @@ func (cmd *PropertiesGetComamnd) init(factory Factory, propertiesCommand GalasaC
 		"output format for the data returned. Supported formats are: "+formatters+".")
 
 	// The namespace property is mandatory for get.
-	addNamespaceProperty(propertiesGetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
-	addNameProperty(propertiesGetCobraCmd, false, propertiesCommand.Values().(*PropertiesCmdValues))
+	addNamespaceFlag(propertiesGetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
+	addPropertyNameFlag(propertiesGetCobraCmd, false, propertiesCommand.Values().(*PropertiesCmdValues))
 
 	// Name field cannot be used in conjunction wiht the prefix, suffix or infix commands.
 	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "prefix")
@@ -109,9 +114,7 @@ func (cmd *PropertiesGetComamnd) init(factory Factory, propertiesCommand GalasaC
 
 	propertiesCommand.CobraCommand().AddCommand(propertiesGetCobraCmd)
 
-	cmd.cobraCommand = propertiesGetCobraCmd
-
-	return err
+	return propertiesGetCobraCmd
 }
 
 func executePropertiesGet(

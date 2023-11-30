@@ -75,8 +75,8 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(factory Facto
 
 	parentCmd.AddCommand(propertiesDeleteCmd)
 
-	addNameProperty(propertiesDeleteCmd, true, propertiesCmdValues)
-	addNamespaceProperty(propertiesDeleteCmd, true, propertiesCmdValues)
+	addPropertyNameFlag(propertiesDeleteCmd, true, propertiesCmdValues)
+	addNamespaceFlag(propertiesDeleteCmd, true, propertiesCmdValues)
 
 	// There are no sub-commands to add to the tree.
 

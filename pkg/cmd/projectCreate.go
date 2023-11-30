@@ -47,6 +47,9 @@ type ProjectCreateCommand struct {
 	values       *ProjectCreateCmdValues
 }
 
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
 func NewProjectCreateCmd(factory Factory, rootCmd GalasaCommand, projectCmd GalasaCommand) (GalasaCommand, error) {
 	var err error = nil
 
@@ -56,6 +59,9 @@ func NewProjectCreateCmd(factory Factory, rootCmd GalasaCommand, projectCmd Gala
 	return cmd, err
 }
 
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
 func (cmd *ProjectCreateCommand) Name() string {
 	return COMMAND_NAME_PROJECT_CREATE
 }
@@ -68,6 +74,9 @@ func (cmd *ProjectCreateCommand) Values() interface{} {
 	return cmd.values
 }
 
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
 func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, projectCmd GalasaCommand) error {
 
 	var err error = nil

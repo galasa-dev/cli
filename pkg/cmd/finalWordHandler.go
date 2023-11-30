@@ -26,11 +26,7 @@ type RealFinalWordHandler struct {
 
 func NewRealFinalWordHandler() FinalWordHandler {
 	handler := new(RealFinalWordHandler)
-	handler.init()
 	return handler
-}
-
-func (handler *RealFinalWordHandler) init() {
 }
 
 func (handler *RealFinalWordHandler) FinalWord(rootCmd GalasaCommand, obj interface{}) {

@@ -21,6 +21,9 @@ type LocalInitCmdValues struct {
 	isDevelopmentLocalInit bool
 }
 
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
 func NewLocalInitCommand(factory Factory, localCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
 
 	cmd := new(LocalInitCommand)
@@ -28,15 +31,9 @@ func NewLocalInitCommand(factory Factory, localCommand GalasaCommand, rootComman
 	return cmd, err
 }
 
-func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, rootCommand GalasaCommand) error {
-	var err error
-
-	cmd.values = &LocalInitCmdValues{}
-	cmd.cobraCommand = cmd.createLocalInitCobraCommand(factory, cmd.values, localCommand, rootCommand)
-
-	return err
-}
-
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
 func (cmd *LocalInitCommand) Name() string {
 	return COMMAND_NAME_LOCAL_INIT
 }
@@ -47,6 +44,18 @@ func (cmd *LocalInitCommand) CobraCommand() *cobra.Command {
 
 func (cmd *LocalInitCommand) Values() interface{} {
 	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+
+	cmd.values = &LocalInitCmdValues{}
+	cmd.cobraCommand = cmd.createLocalInitCobraCommand(factory, cmd.values, localCommand, rootCommand)
+
+	return err
 }
 
 func (cmd *LocalInitCommand) createLocalInitCobraCommand(

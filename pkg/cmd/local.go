@@ -13,12 +13,33 @@ type LocalCommand struct {
 	cobraCommand *cobra.Command
 }
 
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
 func NewLocalCommand(rootCommand GalasaCommand) (GalasaCommand, error) {
 	cmd := new(LocalCommand)
 	err := cmd.init(rootCommand)
 	return cmd, err
 }
 
+// ------------------------------------------------------------------------------------------------
+// Public functions
+// ------------------------------------------------------------------------------------------------
+func (cmd *LocalCommand) Name() string {
+	return COMMAND_NAME_LOCAL
+}
+
+func (cmd *LocalCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *LocalCommand) Values() interface{} {
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private functions
+// ------------------------------------------------------------------------------------------------
 func (cmd *LocalCommand) init(rootCommand GalasaCommand) error {
 	var err error
 	cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand)
@@ -34,16 +55,4 @@ func (cmd *LocalCommand) createCobraCommand(rootCommand GalasaCommand) (*cobra.C
 	}
 	rootCommand.CobraCommand().AddCommand(localCobraCmd)
 	return localCobraCmd, err
-}
-
-func (cmd *LocalCommand) Name() string {
-	return COMMAND_NAME_LOCAL
-}
-
-func (cmd *LocalCommand) CobraCommand() *cobra.Command {
-	return cmd.cobraCommand
-}
-
-func (cmd *LocalCommand) Values() interface{} {
-	return nil
 }

@@ -82,8 +82,8 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 	propertiesCommand.CobraCommand().AddCommand(propertiesSetCobraCmd)
 
 	// The name & namespace properties are mandatory for set.
-	addNamespaceProperty(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
-	addNameProperty(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
+	addNamespaceFlag(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
+	addPropertyNameFlag(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
 
 	cmd.values = propertiesSetCmdValues
 	cmd.cobraCommand = propertiesSetCobraCmd

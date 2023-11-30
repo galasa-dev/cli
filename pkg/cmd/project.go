@@ -13,12 +13,33 @@ type ProjectCommand struct {
 	cobraCommand *cobra.Command
 }
 
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
 func NewProjectCmd(factory Factory, rootCmd GalasaCommand) (GalasaCommand, error) {
 	cmd := new(ProjectCommand)
 	err := cmd.init(factory, rootCmd)
 	return cmd, err
 }
 
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *ProjectCommand) Name() string {
+	return COMMAND_NAME_PROJECT
+}
+
+func (cmd *ProjectCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *ProjectCommand) Values() interface{} {
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
 func (cmd *ProjectCommand) init(factory Factory, rootCmd GalasaCommand) error {
 
 	var err error = nil
@@ -33,16 +54,4 @@ func (cmd *ProjectCommand) init(factory Factory, rootCmd GalasaCommand) error {
 	rootCmd.CobraCommand().AddCommand(projectCmd)
 
 	return err
-}
-
-func (cmd *ProjectCommand) Name() string {
-	return COMMAND_NAME_PROJECT
-}
-
-func (cmd *ProjectCommand) CobraCommand() *cobra.Command {
-	return cmd.cobraCommand
-}
-
-func (cmd *ProjectCommand) Values() interface{} {
-	return nil
 }

@@ -9,6 +9,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ------------------------------------------------------------------------------------------------
+// Objectives
+//   Functions which add a flag to a cobra command in a different way,
+//   depending on the command it is being added to.
+// ------------------------------------------------------------------------------------------------
+
 func addBootstrapFlag(cobraCommand *cobra.Command, parsedValueLocation *string) {
 	cobraCommand.PersistentFlags().StringVarP(parsedValueLocation, "bootstrap", "b", "",
 		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
