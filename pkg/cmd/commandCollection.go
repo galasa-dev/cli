@@ -44,6 +44,7 @@ const (
 	COMMAND_NAME_RUNS                     = "runs"
 	COMMAND_NAME_RUNS_DOWNLOAD            = "runs download"
 	COMMAND_NAME_RUNS_GET                 = "runs get"
+	COMMAND_NAME_RUNS_PREPARE             = "runs prepare"
 )
 
 // -----------------------------------------------------------------
@@ -294,9 +295,14 @@ func (commands *CommandCollectionImpl) addRunsCommands(factory Factory, rootComm
 		}
 	}
 
-	// if err == nil {
-	// 	_, err = createRunsPrepareCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
-	// }
+	if err == nil {
+		var runsPrepareCommand GalasaCommand
+		runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
+		if err == nil {
+			commands.commandMap[runsPrepareCommand.GetName()] = runsPrepareCommand
+		}
+	}
+
 	// if err == nil {
 	// 	_, err = createRunsSubmitCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
 	// }

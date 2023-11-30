@@ -26,14 +26,60 @@ type RunsPrepareCmdValues struct {
 	prepareSelectionFlags *utils.TestSelectionFlagValues
 }
 
-func createRunsPrepareCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
-	var err error = nil
+type RunsPrepareCommand struct {
+	values       *RunsPrepareCmdValues
+	cobraCommand *cobra.Command
+}
 
-	runsPrepareCmdValues := &RunsPrepareCmdValues{}
+func NewRunsPrepareCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(RunsPrepareCommand)
+	err := cmd.init(factory, runsCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *RunsPrepareCommand) GetName() string {
+	return COMMAND_NAME_RUNS_PREPARE
+}
+
+func (cmd *RunsPrepareCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *RunsPrepareCommand) GetValues() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *RunsPrepareCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.values = &RunsPrepareCmdValues{}
+	cmd.cobraCommand, err = cmd.createRunsPrepareCobraCmd(
+		factory,
+		cmd.values,
+		runsCommand.GetCobraCommand(),
+		runsCommand.GetValues().(*RunsCmdValues),
+		rootCommand.GetValues().(*RootCmdValues),
+	)
+	return err
+}
+func (cmd *RunsPrepareCommand) createRunsPrepareCobraCmd(
+	factory Factory,
+	runsPrepareCmdValues *RunsPrepareCmdValues,
+	parentCmd *cobra.Command,
+	runsCmdValues *RunsCmdValues,
+	rootCmdValues *RootCmdValues,
+) (*cobra.Command, error) {
+	var err error = nil
 
 	runsPrepareCmdValues.prepareSelectionFlags = runs.NewTestSelectionFlagValues()
 
-	runsPrepareCmd := &cobra.Command{
+	runsPrepareCobraCmd := &cobra.Command{
 		Use:     "prepare",
 		Short:   "prepares a list of tests",
 		Long:    "Prepares a list of tests from a test catalog providing specific overrides if required",
@@ -44,18 +90,16 @@ func createRunsPrepareCmd(factory Factory, parentCmd *cobra.Command, runsCmdValu
 		},
 	}
 
-	runsPrepareCmd.Flags().StringVarP(&runsPrepareCmdValues.portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
-	runsPrepareCmdValues.prepareFlagOverrides = runsPrepareCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
-	runsPrepareCmdValues.prepareAppend = runsPrepareCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
-	runsPrepareCmd.MarkFlagRequired("portfolio")
+	runsPrepareCobraCmd.Flags().StringVarP(&runsPrepareCmdValues.portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
+	runsPrepareCmdValues.prepareFlagOverrides = runsPrepareCobraCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
+	runsPrepareCmdValues.prepareAppend = runsPrepareCobraCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
+	runsPrepareCobraCmd.MarkFlagRequired("portfolio")
 
-	runs.AddCommandFlags(runsPrepareCmd, runsPrepareCmdValues.prepareSelectionFlags)
+	runs.AddCommandFlags(runsPrepareCobraCmd, runsPrepareCmdValues.prepareSelectionFlags)
 
-	parentCmd.AddCommand(runsPrepareCmd)
+	parentCmd.AddCommand(runsPrepareCobraCmd)
 
-	// There are no sub-command children to add to the command tree.
-
-	return runsPrepareCmd, err
+	return runsPrepareCobraCmd, err
 }
 
 func executeAssemble(
