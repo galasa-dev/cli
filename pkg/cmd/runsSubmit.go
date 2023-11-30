@@ -18,11 +18,59 @@ import (
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
-func createRunsSubmitCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type RunsSubmitCommand struct {
+	values       *utils.RunsSubmitCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
+func NewRunsSubmitCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(RunsSubmitCommand)
+	err := cmd.init(factory, runsCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *RunsSubmitCommand) GetName() string {
+	return COMMAND_NAME_RUNS_SUBMIT
+}
+
+func (cmd *RunsSubmitCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *RunsSubmitCommand) GetValues() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.values = &utils.RunsSubmitCmdValues{}
+	cmd.cobraCommand, err = cmd.createRunsSubmitCobraCmd(
+		factory,
+		cmd.values,
+		runsCommand.GetCobraCommand(),
+		runsCommand.GetValues().(*RunsCmdValues),
+		rootCommand.GetValues().(*RootCmdValues),
+	)
+	return err
+}
+
+func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
+	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
+	parentCmd *cobra.Command,
+	runsCmdValues *RunsCmdValues,
+	rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 
 	var err error = nil
-
-	runsSubmitCmdValues := &utils.RunsSubmitCmdValues{}
 
 	submitSelectionFlags := runs.NewTestSelectionFlagValues()
 	runsSubmitCmdValues.TestSelectionFlagValues = submitSelectionFlags

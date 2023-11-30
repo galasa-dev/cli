@@ -45,6 +45,7 @@ const (
 	COMMAND_NAME_RUNS_DOWNLOAD            = "runs download"
 	COMMAND_NAME_RUNS_GET                 = "runs get"
 	COMMAND_NAME_RUNS_PREPARE             = "runs prepare"
+	COMMAND_NAME_RUNS_SUBMIT              = "runs submit"
 )
 
 // -----------------------------------------------------------------
@@ -303,9 +304,13 @@ func (commands *CommandCollectionImpl) addRunsCommands(factory Factory, rootComm
 		}
 	}
 
-	// if err == nil {
-	// 	_, err = createRunsSubmitCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
-	// }
+	var runsSubmitCommand GalasaCommand
+	if err == nil {
+		runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
+		if err == nil {
+			commands.commandMap[runsSubmitCommand.GetName()] = runsSubmitCommand
+		}
+	}
 
 	// RunsSubmitLocal
 
