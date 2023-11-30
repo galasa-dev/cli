@@ -18,7 +18,39 @@ type AuthLoginCmdValues struct {
 	bootstrap string
 }
 
-func createAuthLoginCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type AuthLoginComamnd struct {
+	values       *AuthLoginCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewAuthLoginCommand(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(AuthLoginComamnd)
+	err := cmd.init(factory, authCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *AuthLoginComamnd) GetName() string {
+	return COMMAND_NAME_AUTH_LOGIN
+}
+
+func (cmd *AuthLoginComamnd) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *AuthLoginComamnd) GetValues() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error = nil
 
 	authLoginCmdValues := &AuthLoginCmdValues{}
@@ -32,7 +64,7 @@ func createAuthLoginCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues
 		Args:    cobra.NoArgs,
 		Aliases: []string{"auth login"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeAuthLogin(factory, cmd, args, authLoginCmdValues, rootCmdValues)
+			return executeAuthLogin(factory, cmd, args, authLoginCmdValues, rootCommand.GetValues().(*RootCmdValues))
 		},
 	}
 
@@ -43,11 +75,12 @@ func createAuthLoginCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
 			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
-	parentCmd.AddCommand(authLoginCmd)
+	authCommand.GetCobraCommand().AddCommand(authLoginCmd)
 
-	// There are no sub-command children to add to the command tree.
+	cmd.values = authLoginCmdValues
+	cmd.cobraCommand = authLoginCmd
 
-	return authLoginCmd, err
+	return err
 }
 
 func executeAuthLogin(

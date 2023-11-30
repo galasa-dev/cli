@@ -16,11 +16,50 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type PropertiesDeleteCommand struct {
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesDeleteCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(PropertiesDeleteCommand)
+
+	err := cmd.init(factory, propertiesCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesDeleteCommand) GetName() string {
+	return COMMAND_NAME_PROPERTIES_DELETE
+}
+
+func (cmd *PropertiesDeleteCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesDeleteCommand) GetValues() interface{} {
+	// There are no values.
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand.GetCobraCommand(), propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
+	return err
+}
+
 //Objective: Allow user to do this:
 //	properties delete --namespace "framework" --name "hello"
 //  And then display a successful message or error
 
-func createPropertiesDeleteCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error = nil
 
 	propertiesDeleteCmd := &cobra.Command{

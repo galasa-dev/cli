@@ -44,11 +44,11 @@ func (cmd *AuthCommand) GetValues() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthCommand) init(factory Factory, rootCommand GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = createAuthCmd(factory, rootCommand.GetCobraCommand(), rootCommand.GetValues().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createAuthCobraCmd(factory, rootCommand.GetCobraCommand(), rootCommand.GetValues().(*RootCmdValues))
 	return err
 }
 
-func createAuthCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *AuthCommand) createAuthCobraCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 
 	var err error = nil
 
@@ -61,15 +61,5 @@ func createAuthCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *Roo
 
 	parentCmd.AddCommand(authCmd)
 
-	err = createAuthCmdChildren(factory, authCmd, rootCmdValues)
-
 	return authCmd, err
-}
-
-func createAuthCmdChildren(factory Factory, authCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createAuthLoginCmd(factory, authCmd, rootCmdValues)
-	if err == nil {
-		_, err = createAuthLogoutCmd(factory, authCmd, rootCmdValues)
-	}
-	return err
 }

@@ -27,4 +27,6 @@ func TestAuthCommandInCommandCollectionHasName(t *testing.T) {
 
 	authCommand := commands.GetCommand(COMMAND_NAME_AUTH)
 	assert.Equal(t, COMMAND_NAME_AUTH, authCommand.GetName())
+	assert.Nil(t, authCommand.GetValues())
+	assert.NotNil(t, authCommand.GetCobraCommand())
 }

@@ -25,11 +25,45 @@ type PropertiesSetCmdValues struct {
 	propertyValue string
 }
 
-func createPropertiesSetCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type PropertiesSetCommand struct {
+	values       *PropertiesSetCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesSetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+
+	cmd := new(PropertiesSetCommand)
+	err := cmd.init(factory, propertiesCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesSetCommand) GetName() string {
+	return COMMAND_NAME_PROPERTIES_SET
+}
+
+func (cmd *PropertiesSetCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesSetCommand) GetValues() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+
 	var err error = nil
 	propertiesSetCmdValues := &PropertiesSetCmdValues{}
 
-	propertiesSetCmd := &cobra.Command{
+	propertiesSetCobraCmd := &cobra.Command{
 		Use:   "set",
 		Short: "Set the details of properties in a namespace.",
 		Long: "Set the details of a property in a namespace. " +
@@ -37,24 +71,24 @@ func createPropertiesSetCmd(factory Factory, parentCmd *cobra.Command, propertie
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties set"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesSet(factory, cmd, args, propertiesSetCmdValues, propertiesCmdValues, rootCmdValues)
+			return executePropertiesSet(factory, cmd, args, propertiesSetCmdValues, propertiesCommand.GetValues().(*PropertiesCmdValues), rootCommand.GetValues().(*RootCmdValues))
 		},
 	}
 
-	propertiesSetCmd.PersistentFlags().StringVar(&propertiesSetCmdValues.propertyValue, "value", "", "the value of the property you want to create")
+	propertiesSetCobraCmd.PersistentFlags().StringVar(&propertiesSetCmdValues.propertyValue, "value", "", "the value of the property you want to create")
 
-	propertiesSetCmd.MarkPersistentFlagRequired("value")
+	propertiesSetCobraCmd.MarkPersistentFlagRequired("value")
 
-	parentCmd.AddCommand(propertiesSetCmd)
+	propertiesCommand.GetCobraCommand().AddCommand(propertiesSetCobraCmd)
 
 	// The name & namespace properties are mandatory for set.
-	addNamespaceProperty(propertiesSetCmd, true, propertiesCmdValues)
-	addNameProperty(propertiesSetCmd, true, propertiesCmdValues)
+	addNamespaceProperty(propertiesSetCobraCmd, true, propertiesCommand.GetValues().(*PropertiesCmdValues))
+	addNameProperty(propertiesSetCobraCmd, true, propertiesCommand.GetValues().(*PropertiesCmdValues))
 
-	// There are no child sub-commands to add to the tree.
+	cmd.values = propertiesSetCmdValues
+	cmd.cobraCommand = propertiesSetCobraCmd
 
-	return propertiesSetCmd, err
-
+	return err
 }
 
 func executePropertiesSet(

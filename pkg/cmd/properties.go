@@ -16,41 +16,62 @@ type PropertiesCmdValues struct {
 	propertyName       string
 }
 
-func createPropertiesCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type PropertiesCommand struct {
+	values       *PropertiesCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesCommand(factory Factory, rootCommand GalasaCommand) (GalasaCommand, error) {
+
+	cmd := new(PropertiesCommand)
+	err := cmd.init(factory, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesCommand) GetName() string {
+	return COMMAND_NAME_PROPERTIES
+}
+
+func (cmd *PropertiesCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesCommand) GetValues() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesCommand) init(factory Factory, rootCommand GalasaCommand) error {
+
 	var err error = nil
 
 	propertiesCmdValues := &PropertiesCmdValues{}
 
-	propertiesCmd := &cobra.Command{
+	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",
 		Short: "Manages properties in an ecosystem",
 		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
 	}
 
-	propertiesCmd.PersistentFlags().StringVarP(&propertiesCmdValues.ecosystemBootstrap, "bootstrap", "b", "",
+	propertiesCobraCmd.PersistentFlags().StringVarP(&propertiesCmdValues.ecosystemBootstrap, "bootstrap", "b", "",
 		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
 			"If it starts with neither, it is assumed to be a fully-qualified path. "+
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
 			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 
-	parentCmd.AddCommand(propertiesCmd)
+	rootCommand.GetCobraCommand().AddCommand(propertiesCobraCmd)
 
-	err = createPropertiesCmdChildren(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
+	cmd.values = propertiesCmdValues
+	cmd.cobraCommand = propertiesCobraCmd
 
-	return propertiesCmd, err
-}
-
-func createPropertiesCmdChildren(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
-	_, err := createPropertiesGetCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	if err == nil {
-		_, err = createPropertiesSetCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	}
-	if err == nil {
-		_, err = createPropertiesDeleteCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	}
-	if err == nil {
-		_, err = createPropertiesNamespaceCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	}
 	return err
 }
 
