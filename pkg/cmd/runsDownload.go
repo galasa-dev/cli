@@ -20,6 +20,8 @@ import (
 // And then galasactl downloads the artifacts for the given run.
 
 type RunsDownloadCommand struct {
+	values       *RunsDownloadCmdValues
+	cobraCommand *cobra.Command
 }
 
 // Variables set by cobra's command-line parsing.
@@ -29,12 +31,56 @@ type RunsDownloadCmdValues struct {
 	runDownloadTargetFolder string
 }
 
-func createRunsDownloadCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewRunsDownloadCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(RunsDownloadCommand)
+	err := cmd.init(factory, runsCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *RunsDownloadCommand) GetName() string {
+	return COMMAND_NAME_RUNS_DOWNLOAD
+}
+
+func (cmd *RunsDownloadCommand) GetCobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *RunsDownloadCommand) GetValues() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.values = &RunsDownloadCmdValues{}
+	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory, cmd.values,
+		runsCommand.GetCobraCommand(),
+		runsCommand.GetValues().(*RunsCmdValues),
+		rootCommand.GetValues().(*RootCmdValues),
+	)
+	return err
+}
+
+func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
+	factory Factory,
+	runsDownloadCmdValues *RunsDownloadCmdValues,
+	runsCobraCommand *cobra.Command,
+	runsCmdValues *RunsCmdValues,
+	rootCmdValues *RootCmdValues,
+) (*cobra.Command, error) {
+
 	var err error = nil
 
-	runsDownloadCmdValues := &RunsDownloadCmdValues{}
-
-	runsDownloadCmd := &cobra.Command{
+	runsDownloadCobraCmd := &cobra.Command{
 		Use:     "download",
 		Short:   "Download the artifacts of a test run which ran.",
 		Long:    "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
@@ -45,18 +91,16 @@ func createRunsDownloadCmd(factory Factory, parentCmd *cobra.Command, runsCmdVal
 		},
 	}
 
-	runsDownloadCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runNameDownload, "name", "", "the name of the test run we want information about")
-	runsDownloadCmd.PersistentFlags().BoolVar(&runsDownloadCmdValues.runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
-	runsDownloadCmd.MarkPersistentFlagRequired("name")
-	runsDownloadCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runDownloadTargetFolder, "destination", ".",
+	runsDownloadCobraCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runNameDownload, "name", "", "the name of the test run we want information about")
+	runsDownloadCobraCmd.PersistentFlags().BoolVar(&runsDownloadCmdValues.runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
+	runsDownloadCobraCmd.MarkPersistentFlagRequired("name")
+	runsDownloadCobraCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runDownloadTargetFolder, "destination", ".",
 		"The folder we want to download test run artifacts into. Sub-folders will be created within this location",
 	)
 
-	parentCmd.AddCommand(runsDownloadCmd)
+	runsCobraCommand.AddCommand(runsDownloadCobraCmd)
 
-	// There are no children commands of this command to add to the command tree.
-
-	return runsDownloadCmd, err
+	return runsDownloadCobraCmd, err
 }
 
 func executeRunsDownload(

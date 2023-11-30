@@ -35,13 +35,15 @@ const (
 	COMMAND_NAME_PROJECT_CREATE           = "project create"
 	COMMAND_NAME_LOCAL                    = "local"
 	COMMAND_NAME_LOCAL_INIT               = "local init"
-	COMMAND_NAME_RUNS                     = "runs"
 	COMMAND_NAME_PROPERTIES               = "properties"
 	COMMAND_NAME_PROPERTIES_GET           = "properties get"
 	COMMAND_NAME_PROPERTIES_SET           = "properties set"
 	COMMAND_NAME_PROPERTIES_DELETE        = "properties delete"
 	COMMAND_NAME_PROPERTIES_NAMESPACE     = "properties namespace"
 	COMMAND_NAME_PROPERTIES_NAMESPACE_GET = "properties namespace get"
+	COMMAND_NAME_RUNS                     = "runs"
+	COMMAND_NAME_RUNS_DOWNLOAD            = "runs download"
+	COMMAND_NAME_RUNS_GET                 = "runs get"
 )
 
 // -----------------------------------------------------------------
@@ -276,17 +278,21 @@ func (commands *CommandCollectionImpl) addRunsCommands(factory Factory, rootComm
 		}
 	}
 
-	// var runsDownloadCommand GalasaCommand
-	// if err == nil {
-	// 	runsDownloadCommand, err = NewRunsDownloadCmd(factory, runsCommand, rootCommand)
-	// 	if err == nil {
-	// 		commands.commandMap[runsDownloadCommand.GetName()] = runsDownloadCommand
-	// 	}
-	// }
+	if err == nil {
+		var runsDownloadCommand GalasaCommand
+		runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
+		if err == nil {
+			commands.commandMap[runsDownloadCommand.GetName()] = runsDownloadCommand
+		}
+	}
 
-	// if err == nil {
-	// 	_, err = createRunsGetCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
-	// }
+	if err == nil {
+		var runsGetCommand GalasaCommand
+		runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, rootCommand)
+		if err == nil {
+			commands.commandMap[runsGetCommand.GetName()] = runsGetCommand
+		}
+	}
 
 	// if err == nil {
 	// 	_, err = createRunsPrepareCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
@@ -295,9 +301,7 @@ func (commands *CommandCollectionImpl) addRunsCommands(factory Factory, rootComm
 	// 	_, err = createRunsSubmitCmd(factory, runsCmd, runsCmdValues, rootCmdValues)
 	// }
 
-	// 	if err == nil {
-	// 		_, err = createRunsCmd(factory, rootCmd, rootCmdValues)
-	// 	}
+	// RunsSubmitLocal
 
 	return err
 }
