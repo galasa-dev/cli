@@ -89,7 +89,7 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return executePropertiesGet(factory, cmd.values,
+			return cmd.executePropertiesGet(factory,
 				propertiesCommandValues, rootCommandValues)
 		},
 	}
@@ -122,9 +122,8 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 	return propertiesGetCobraCmd
 }
 
-func executePropertiesGet(
+func (cmd *PropertiesGetCommand) executePropertiesGet(
 	factory Factory,
-	propertiesGetCmdValues *PropertiesGetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -165,11 +164,11 @@ func executePropertiesGet(
 				err = properties.GetProperties(
 					propertiesCmdValues.namespace,
 					propertiesCmdValues.propertyName,
-					propertiesGetCmdValues.propertiesPrefix,
-					propertiesGetCmdValues.propertiesSuffix,
-					propertiesGetCmdValues.propertiesInfix,
+					cmd.values.propertiesPrefix,
+					cmd.values.propertiesSuffix,
+					cmd.values.propertiesInfix,
 					apiClient,
-					propertiesGetCmdValues.propertiesOutputFormat,
+					cmd.values.propertiesOutputFormat,
 					console,
 				)
 			}

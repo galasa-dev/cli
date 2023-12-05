@@ -102,7 +102,7 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return executeCreateProject(factory, cmd.values, rootCmd.Values().(*RootCmdValues))
+			return cmd.executeCreateProject(factory, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
@@ -133,7 +133,7 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 	return projectCreateCmd, err
 }
 
-func executeCreateProject(factory Factory, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *ProjectCreateCommand) executeCreateProject(factory Factory, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 
@@ -148,13 +148,13 @@ func executeCreateProject(factory Factory, projectCreateCmdValues *ProjectCreate
 		log.Println("Galasa CLI - Create project")
 
 		err = createProject(fileSystem,
-			projectCreateCmdValues.packageName,
-			projectCreateCmdValues.featureNamesCommaSeparated,
-			projectCreateCmdValues.isOBRProjectRequired,
-			projectCreateCmdValues.force,
-			projectCreateCmdValues.useMaven,
-			projectCreateCmdValues.useGradle,
-			projectCreateCmdValues.isDevelopmentProjectCreate,
+			cmd.values.packageName,
+			cmd.values.featureNamesCommaSeparated,
+			cmd.values.isOBRProjectRequired,
+			cmd.values.force,
+			cmd.values.useMaven,
+			cmd.values.useGradle,
+			cmd.values.isDevelopmentProjectCreate,
 		)
 	}
 	return err
