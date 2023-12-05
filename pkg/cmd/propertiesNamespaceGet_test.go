@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPropertiesNamespaceGetCommandInCommandCollectionHasName(t *testing.T) {
+func TestPropertiesNamespaceGetCommandInCommandCollection(t *testing.T) {
 
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)

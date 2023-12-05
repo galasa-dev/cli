@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRunsSubmitCommandInCommandCollectionIsAsExpected(t *testing.T) {
+func TestRunsSubmitCommandInCommandCollection(t *testing.T) {
 
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
