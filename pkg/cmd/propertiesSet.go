@@ -25,43 +25,85 @@ type PropertiesSetCmdValues struct {
 	propertyValue string
 }
 
-func createPropertiesSetCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
-	var err error = nil
-	propertiesSetCmdValues := &PropertiesSetCmdValues{}
+type PropertiesSetCommand struct {
+	values       *PropertiesSetCmdValues
+	cobraCommand *cobra.Command
+}
 
-	propertiesSetCmd := &cobra.Command{
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesSetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+
+	cmd := new(PropertiesSetCommand)
+	err := cmd.init(factory, propertiesCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesSetCommand) Name() string {
+	return COMMAND_NAME_PROPERTIES_SET
+}
+
+func (cmd *PropertiesSetCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesSetCommand) Values() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+
+	var err error = nil
+	cmd.values = &PropertiesSetCmdValues{}
+
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesCommand, rootCmd.Values().(*RootCmdValues))
+
+	return err
+}
+
+func (cmd *PropertiesSetCommand) createCobraCommand(
+	factory Factory, 
+	propertiesCommand GalasaCommand, 
+	rootCmdValues *RootCmdValues,
+	) (*cobra.Command, error) {
+
+	var err error = nil
+	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
+
+	propertiesSetCobraCmd := &cobra.Command{
 		Use:   "set",
 		Short: "Set the details of properties in a namespace.",
 		Long: "Set the details of a property in a namespace. " +
 			"If the property does not exist, a new property is created, otherwise the value for that property will be updated.",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties set"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesSet(factory, cmd, args, propertiesSetCmdValues, propertiesCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executePropertiesSet(factory, propertiesCmdValues, rootCmdValues)
 		},
 	}
 
-	propertiesSetCmd.PersistentFlags().StringVar(&propertiesSetCmdValues.propertyValue, "value", "", "the value of the property you want to create")
+	propertiesSetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertyValue, "value", "", "the value of the property you want to create")
+	propertiesSetCobraCmd.MarkPersistentFlagRequired("value")
 
-	propertiesSetCmd.MarkPersistentFlagRequired("value")
-
-	parentCmd.AddCommand(propertiesSetCmd)
+	propertiesCommand.CobraCommand().AddCommand(propertiesSetCobraCmd)
 
 	// The name & namespace properties are mandatory for set.
-	addNamespaceProperty(propertiesSetCmd, true, propertiesCmdValues)
-	addNameProperty(propertiesSetCmd, true, propertiesCmdValues)
+	addNamespaceFlag(propertiesSetCobraCmd, true, propertiesCmdValues)
+	addPropertyNameFlag(propertiesSetCobraCmd, true, propertiesCmdValues)
 
-	// There are no child sub-commands to add to the tree.
-
-	return propertiesSetCmd, err
-
+	return propertiesSetCobraCmd, err
 }
 
-func executePropertiesSet(
+func (cmd *PropertiesSetCommand) executePropertiesSet(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
-	propertiesSetCmdValues *PropertiesSetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -100,7 +142,7 @@ func executePropertiesSet(
 				err = properties.SetProperty(
 					propertiesCmdValues.namespace,
 					propertiesCmdValues.propertyName,
-					propertiesSetCmdValues.propertyValue, apiClient)
+					cmd.values.propertyValue, apiClient)
 			}
 		}
 	}

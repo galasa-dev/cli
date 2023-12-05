@@ -16,7 +16,7 @@ import (
 // A final word handler can set the exit code of the entire process.
 // Or it could be mocked-out to just collect it and checked in tests.
 type FinalWordHandler interface {
-	FinalWord(interface{})
+	FinalWord(rootCmd GalasaCommand, errorToExctractFrom interface{})
 }
 
 // The real implementation of the interface.
@@ -24,11 +24,15 @@ type RealFinalWordHandler struct {
 }
 
 func NewRealFinalWordHandler() FinalWordHandler {
-	return new(RealFinalWordHandler)
+	handler := new(RealFinalWordHandler)
+	return handler
 }
 
-func (*RealFinalWordHandler) FinalWord(obj interface{}) {
-	text, exitCode, isStackTraceWanted := extractErrorDetails(obj)
+func (handler *RealFinalWordHandler) FinalWord(rootCmd GalasaCommand, errorToExctractFrom interface{}) {
+
+	rootCmdValues := rootCmd.Values().(*RootCmdValues)
+
+	text, exitCode, isStackTraceWanted := extractErrorDetails(errorToExctractFrom)
 	if rootCmdValues.isCapturingLogs {
 		log.Println(text)
 	}
@@ -44,19 +48,19 @@ func (*RealFinalWordHandler) FinalWord(obj interface{}) {
 	os.Exit(exitCode)
 }
 
-func extractErrorDetails(obj interface{}) (string, int, bool) {
+func extractErrorDetails(errorToExctractFrom interface{}) (string, int, bool) {
 	exitCode := 0
 	errorText := ""
 	var isStackTraceWanted bool = false
 
-	if obj == nil {
+	if errorToExctractFrom == nil {
 		errorText = "OK"
 	} else {
 		exitCode = 1
 		isStackTraceWanted = true
 
 		// If it's a pointer to a galasa error.
-		galasaErrorPtr, isGalasaError := obj.(*galasaErrors.GalasaError)
+		galasaErrorPtr, isGalasaError := errorToExctractFrom.(*galasaErrors.GalasaError)
 		if isGalasaError {
 			errorType := (galasaErrorPtr).GetMessageType()
 			if errorType.Ordinal == galasaErrors.GALASA_ERROR_TESTS_FAILED.Ordinal {
@@ -67,12 +71,12 @@ func extractErrorDetails(obj interface{}) (string, int, bool) {
 			isStackTraceWanted = false
 		}
 
-		err, isErrorType := obj.(error)
+		err, isErrorType := errorToExctractFrom.(error)
 		if isErrorType {
 			errorText = err.Error()
 		} else {
 
-			stringValue, isString := obj.(string)
+			stringValue, isString := errorToExctractFrom.(string)
 			if isString {
 				errorText = stringValue
 			} else {

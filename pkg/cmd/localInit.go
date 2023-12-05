@@ -12,35 +12,77 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type LocalInitCommand struct {
+	cobraCommand *cobra.Command
+	values       *LocalInitCmdValues
+}
+
 type LocalInitCmdValues struct {
 	isDevelopmentLocalInit bool
 }
 
-func createLocalInitCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
-	var err error = nil
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
+func NewLocalInitCommand(factory Factory, localCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
 
-	localInitCmdValues := &LocalInitCmdValues{}
+	cmd := new(LocalInitCommand)
+	err := cmd.init(factory, localCommand, rootCmd)
+	return cmd, err
+}
 
-	localInitCmd := &cobra.Command{
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *LocalInitCommand) Name() string {
+	return COMMAND_NAME_LOCAL_INIT
+}
+
+func (cmd *LocalInitCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *LocalInitCommand) Values() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, rootCmd GalasaCommand) error {
+	var err error
+
+	cmd.values = &LocalInitCmdValues{}
+	cmd.cobraCommand = cmd.createCobraCommand(factory, localCommand, rootCmd)
+
+	return err
+}
+
+func (cmd *LocalInitCommand) createCobraCommand(
+	factory Factory,
+	localCommand GalasaCommand, 
+	rootCmd GalasaCommand,
+	) *cobra.Command {
+
+	localInitCobraCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialises Galasa home folder",
 		Long:  "Initialises Galasa home folder in home directory with all the properties files",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeEnvInit(cmd, args, factory, localInitCmdValues, rootCmdValues)
+		RunE: func(cobraCommand *cobra.Command, args []string) error {
+			return cmd.executeEnvInit(factory, cmd.values, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
-	localInitCmd.Flags().BoolVar(&localInitCmdValues.isDevelopmentLocalInit, "development", false, "Use bleeding-edge galasa versions and repositories.")
+	localInitCobraCmd.Flags().BoolVar(&cmd.values.isDevelopmentLocalInit, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	parentCmd.AddCommand(localInitCmd)
+	localCommand.CobraCommand().AddCommand(localInitCobraCmd)
 
-	// There are no children commands to add to the command tree from here.
-
-	return localInitCmd, err
+	return localInitCobraCmd
 }
 
-func executeEnvInit(cmd *cobra.Command, args []string, factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *LocalInitCommand) executeEnvInit(factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 

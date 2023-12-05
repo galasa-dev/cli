@@ -9,7 +9,7 @@ Manages authentication with a Galasa ecosystem using access tokens, enabling sec
 ### Options
 
 ```
-  -h, --help   Displays the options for the auth command.
+  -h, --help   Displays the options for the 'auth' command.
 ```
 
 ### Options inherited from parent commands
