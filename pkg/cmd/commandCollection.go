@@ -5,12 +5,6 @@
  */
 package cmd
 
-import (
-	"strings"
-
-	"github.com/spf13/cobra"
-)
-
 type CommandCollection interface {
 	// name - One of the COMMAND_NAME_* constants.
 	GetCommand(name string) GalasaCommand
@@ -119,7 +113,7 @@ func (commands *commandCollectionImpl) init(factory Factory) error {
 	}
 
 	if err == nil {
-		sanitiseCommandHelpDescriptions(rootCommand.CobraCommand())
+		commands.setHelpFlags()
 	}
 
 	return err
@@ -285,28 +279,8 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 	return err
 }
 
-// TODO: Make this an object method.
-func sanitiseCommandHelpDescriptions(rootCmd *cobra.Command) {
-	setHelpFlagForAllCommands(rootCmd, func(cobra *cobra.Command) {
-		alias := cobra.NameAndAliases()
-		//if the command has an alias,
-		//the format would be cobra.Name, cobra.Aliases
-		//otherwise it is just cobra.Name
-		nameAndAliases := strings.Split(alias, ", ")
-		if len(nameAndAliases) > 1 {
-			alias = nameAndAliases[1]
-		}
-
-		cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
-	})
-}
-
-// TODO: Make this an object method.
-func setHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {
-	setHelpFlag(command)
-
-	//for all the commands eg properties get, set etc
-	for _, cobraCommand := range command.Commands() {
-		setHelpFlagForAllCommands(cobraCommand, setHelpFlag)
+func (commands *commandCollectionImpl) setHelpFlags() {
+	for _, command := range commands.commandMap {
+		command.CobraCommand().Flags().BoolP("help", "h", false, "Displays the options for the '"+command.Name()+"' command.")
 	}
 }

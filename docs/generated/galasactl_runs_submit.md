@@ -16,7 +16,7 @@ galasactl runs submit [flags]
       --bundle strings             bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
       --class strings              test class names to run from the specified stream or portfolio. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
   -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
-  -h, --help                       Displays the options for the runs submit command.
+  -h, --help                       Displays the options for the 'runs submit' command.
       --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
       --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
       --overridefile string        path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. Overrides from --override options will take precedence over properties in this property file. A file path of '-' disables reading any properties file.
