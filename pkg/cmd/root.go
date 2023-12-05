@@ -79,10 +79,12 @@ func (cmd *RootCommand) createCobraCommand(factory Factory) (*cobra.Command, err
 	if err == nil {
 
 		rootCmd = &cobra.Command{
-			Use:     "galasactl",
-			Short:   "CLI for Galasa",
-			Long:    `A tool for controlling Galasa resources using the command-line.`,
-			Version: version,
+			Use:          "galasactl",
+			Short:        "CLI for Galasa",
+			Long:         `A tool for controlling Galasa resources using the command-line.`,
+			Version:      version,
+			SilenceUsage: true,
+			// SilenceErrors: true,
 		}
 
 		rootCmd.SetErr(factory.GetStdErrConsole())
