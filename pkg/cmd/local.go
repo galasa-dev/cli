@@ -16,9 +16,9 @@ type LocalCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewLocalCommand(rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewLocalCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
 	cmd := new(LocalCommand)
-	err := cmd.init(rootCommand)
+	err := cmd.init(rootCmd)
 	return cmd, err
 }
 
@@ -40,19 +40,19 @@ func (cmd *LocalCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private functions
 // ------------------------------------------------------------------------------------------------
-func (cmd *LocalCommand) init(rootCommand GalasaCommand) error {
+func (cmd *LocalCommand) init(rootCmd GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
 	return err
 }
 
-func (cmd *LocalCommand) createCobraCommand(rootCommand GalasaCommand) (*cobra.Command, error) {
+func (cmd *LocalCommand) createCobraCommand(rootCmd GalasaCommand) (*cobra.Command, error) {
 	var err error
 	localCobraCmd := &cobra.Command{
 		Use:   "local",
 		Short: "Manipulate local system",
 		Long:  "Manipulate local system",
 	}
-	rootCommand.CobraCommand().AddCommand(localCobraCmd)
+	rootCmd.CobraCommand().AddCommand(localCobraCmd)
 	return localCobraCmd, err
 }

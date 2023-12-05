@@ -16,10 +16,10 @@ type AuthCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewAuthCommand(factory Factory, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewAuthCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
 	cmd := new(AuthCommand)
 
-	cmd.init(factory, rootCommand)
+	cmd.init(rootCmd)
 	return cmd, nil
 }
 
@@ -42,13 +42,13 @@ func (cmd *AuthCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthCommand) init(factory Factory, rootCommand GalasaCommand) error {
+func (cmd *AuthCommand) init(rootCmd GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createAuthCobraCmd(factory, rootCommand.CobraCommand(), rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
 	return err
 }
 
-func (cmd *AuthCommand) createAuthCobraCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *AuthCommand) createCobraCommand(rootCmd GalasaCommand) (*cobra.Command, error) {
 
 	var err error = nil
 
@@ -59,7 +59,7 @@ func (cmd *AuthCommand) createAuthCobraCmd(factory Factory, parentCmd *cobra.Com
 			"enabling secure interactions with the ecosystem.",
 	}
 
-	parentCmd.AddCommand(authCmd)
+	rootCmd.CobraCommand().AddCommand(authCmd)
 
 	return authCmd, err
 }

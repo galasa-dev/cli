@@ -49,9 +49,9 @@ func (cmd *PropertiesDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand.CobraCommand(), propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, rootCmd)
 	return err
 }
 
@@ -59,21 +59,26 @@ func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand Gala
 //	properties delete --namespace "framework" --name "hello"
 //  And then display a successful message or error
 
-func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
+	factory Factory, 
+	propertiesCommand GalasaCommand,
+	rootCmd GalasaCommand) (*cobra.Command, error) {
+	
 	var err error = nil
+	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertiesDeleteCmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a property in a namespace.",
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesDelete(factory, propertiesCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executePropertiesDelete(factory, propertiesCmdValues, rootCmd.Values().(*RootCmdValues))
 		},
 		Aliases: []string{"properties delete"},
 	}
 
-	parentCmd.AddCommand(propertiesDeleteCmd)
+	propertiesCommand.CobraCommand().AddCommand(propertiesDeleteCmd)
 
 	addPropertyNameFlag(propertiesDeleteCmd, true, propertiesCmdValues)
 	addNamespaceFlag(propertiesDeleteCmd, true, propertiesCmdValues)
@@ -83,7 +88,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(factory Facto
 	return propertiesDeleteCmd, err
 }
 
-func executePropertiesDelete(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.

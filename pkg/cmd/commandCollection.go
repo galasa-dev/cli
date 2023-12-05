@@ -132,7 +132,7 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 	var authLogoutCommand GalasaCommand
 
 	if err == nil {
-		authCommand, err = NewAuthCommand(factory, rootCommand)
+		authCommand, err = NewAuthCommand(rootCommand)
 		if err == nil {
 			authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 			if err == nil {
@@ -174,7 +174,7 @@ func (commands *commandCollectionImpl) addProjectCommands(factory Factory, rootC
 
 	var projectCommand GalasaCommand
 	if err == nil {
-		projectCommand, err = NewProjectCmd(factory, rootCommand)
+		projectCommand, err = NewProjectCmd(rootCommand)
 		if err == nil {
 			commands.commandMap[projectCommand.Name()] = projectCommand
 		}
@@ -182,7 +182,7 @@ func (commands *commandCollectionImpl) addProjectCommands(factory Factory, rootC
 
 	if err == nil {
 		var projectCreateCommand GalasaCommand
-		projectCreateCommand, err = NewProjectCreateCmd(factory, rootCommand, projectCommand)
+		projectCreateCommand, err = NewProjectCreateCmd(factory, projectCommand, rootCommand)
 		if err == nil {
 			commands.commandMap[projectCreateCommand.Name()] = projectCreateCommand
 		}
@@ -198,7 +198,7 @@ func (commands *commandCollectionImpl) addPropertiesCommands(factory Factory, ro
 	var propertiesSetCommand GalasaCommand
 
 	if err == nil {
-		propertiesCommand, err = NewPropertiesCommand(factory, rootCommand)
+		propertiesCommand, err = NewPropertiesCommand(rootCommand)
 		if err == nil {
 			propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, rootCommand)
 			if err == nil {
@@ -229,7 +229,7 @@ func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory Fa
 	var propertiesNamespaceGetCommand GalasaCommand
 
 	if err == nil {
-		propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(factory, propertiesCommand, rootCommand)
+		propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(propertiesCommand, rootCommand)
 		if err == nil {
 			propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
 		}
@@ -253,7 +253,7 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 	var runsSubmitLocalCommand GalasaCommand
 
 	if err == nil {
-		runsCommand, err = NewRunsCmd(factory, rootCommand)
+		runsCommand, err = NewRunsCmd(rootCommand)
 		if err == nil {
 			runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
 			if err == nil {

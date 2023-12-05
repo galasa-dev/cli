@@ -31,7 +31,7 @@ type PropertiesGetCmdValues struct {
 	propertiesOutputFormat string
 }
 
-type PropertiesGetComamnd struct {
+type PropertiesGetCommand struct {
 	values       *PropertiesGetCmdValues
 	cobraCommand *cobra.Command
 }
@@ -41,7 +41,7 @@ type PropertiesGetComamnd struct {
 // ------------------------------------------------------------------------------------------------
 func NewPropertiesGetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
 
-	cmd := new(PropertiesGetComamnd)
+	cmd := new(PropertiesGetCommand)
 	err := cmd.init(factory, propertiesCommand, rootCommand)
 	return cmd, err
 }
@@ -49,15 +49,15 @@ func NewPropertiesGetCommand(factory Factory, propertiesCommand GalasaCommand, r
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesGetComamnd) Name() string {
+func (cmd *PropertiesGetCommand) Name() string {
 	return COMMAND_NAME_PROPERTIES_GET
 }
 
-func (cmd *PropertiesGetComamnd) CobraCommand() *cobra.Command {
+func (cmd *PropertiesGetCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *PropertiesGetComamnd) Values() interface{} {
+func (cmd *PropertiesGetCommand) Values() interface{} {
 	return cmd.values
 }
 
@@ -65,47 +65,52 @@ func (cmd *PropertiesGetComamnd) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesGetComamnd) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
 
 	var err error = nil
 
 	cmd.values = &PropertiesGetCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, cmd.values, propertiesCommand, rootCommand)
+	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, rootCommand.Values().(*RootCmdValues))
 
 	return err
 }
 
-func (cmd *PropertiesGetComamnd) createCobraCommand(factory Factory, propertiesGetCmdValues *PropertiesGetCmdValues, propertiesCommand GalasaCommand, rootCommand GalasaCommand) *cobra.Command {
+func (cmd *PropertiesGetCommand) createCobraCommand(
+	factory Factory, 
+	propertiesCommand GalasaCommand, 
+	rootCommandValues *RootCmdValues,
+	) *cobra.Command {
 
+	propertiesCommandValues := propertiesCommand.Values().(*PropertiesCmdValues)
 	propertiesGetCobraCmd := &cobra.Command{
 		Use:     "get",
 		Short:   "Get the details of properties in a namespace.",
 		Long:    "Get the details of all properties in a namespace, filtered with flags if present",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesGet(factory, propertiesGetCmdValues,
-				propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return executePropertiesGet(factory, cmd.values,
+				propertiesCommandValues, rootCommandValues)
 		},
 	}
 
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
-	propertiesGetCobraCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesPrefix, "prefix", "",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesPrefix, "prefix", "",
 		"Prefix to match against the start of the property name within the namespace."+
 			" Optional. Cannot be used in conjunction with the '--name' option.")
-	propertiesGetCobraCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesSuffix, "suffix", "",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesSuffix, "suffix", "",
 		"Suffix to match against the end of the property name within the namespace."+
 			" Optional. Cannot be used in conjunction with the '--name' option.")
-	propertiesGetCobraCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesInfix, "infix", "",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesInfix, "infix", "",
 		"Infix(es) that could be part of the property name within the namespace."+
 			" Multiple infixes can be supplied as a comma-separated list. "+
 			" Optional. Cannot be used in conjunction with the '--name' option.")
-	propertiesGetCobraCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesOutputFormat, "format", "summary",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesOutputFormat, "format", "summary",
 		"output format for the data returned. Supported formats are: "+formatters+".")
 
 	// The namespace property is mandatory for get.
-	addNamespaceFlag(propertiesGetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
-	addPropertyNameFlag(propertiesGetCobraCmd, false, propertiesCommand.Values().(*PropertiesCmdValues))
+	addNamespaceFlag(propertiesGetCobraCmd, true, propertiesCommandValues)
+	addPropertyNameFlag(propertiesGetCobraCmd, false, propertiesCommandValues)
 
 	// Name field cannot be used in conjunction wiht the prefix, suffix or infix commands.
 	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "prefix")

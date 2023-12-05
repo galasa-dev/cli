@@ -68,12 +68,12 @@ func (cmd *RootCommand) init(factory Factory) error {
 		isCapturingLogs: false,
 	}
 
-	cmd.cobraCommand, err = cmd.newRootCobraCommand(factory, cmd.values)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory)
 
 	return err
 }
 
-func (cmd *RootCommand) newRootCobraCommand(factory Factory, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *RootCommand) createCobraCommand(factory Factory) (*cobra.Command, error) {
 	version, err := embedded.GetGalasaCtlVersion()
 	var rootCmd *cobra.Command
 	if err == nil {
@@ -94,7 +94,7 @@ func (cmd *RootCommand) newRootCobraCommand(factory Factory, rootCmdValues *Root
 
 			rootCmd.Version = galasaCtlVersion
 
-			rootCmd.PersistentFlags().StringVarP(&(rootCmdValues.logFileName), "log", "l", "",
+			rootCmd.PersistentFlags().StringVarP(&(cmd.values.logFileName), "log", "l", "",
 				"File to which log information will be sent. Any folder referred to must exist. "+
 					"An existing file will be overwritten. "+
 					"Specify \"-\" to log to stderr. "+
@@ -102,7 +102,7 @@ func (cmd *RootCommand) newRootCobraCommand(factory Factory, rootCmdValues *Root
 
 			rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 
-			rootCmd.PersistentFlags().StringVarP(&(rootCmdValues.CmdParamGalasaHomePath), "galasahome", "", "",
+			rootCmd.PersistentFlags().StringVarP(&(cmd.values.CmdParamGalasaHomePath), "galasahome", "", "",
 				"Path to a folder where Galasa will read and write files and configuration settings. "+
 					"The default is '${HOME}/.galasa'. "+
 					"This overrides the GALASA_HOME environment variable which may be set instead.",

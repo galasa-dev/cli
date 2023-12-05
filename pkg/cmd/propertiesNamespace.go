@@ -21,10 +21,10 @@ type PropertiesNamespaceCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesNamespaceCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesNamespaceCommand(propertiesCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
 	cmd := new(PropertiesNamespaceCommand)
 
-	err := cmd.init(factory, propertiesCommand, rootCommand)
+	err := cmd.init(propertiesCommand, rootCmd)
 	return cmd, err
 }
 
@@ -47,13 +47,16 @@ func (cmd *PropertiesNamespaceCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *PropertiesNamespaceCommand) init(propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(factory, propertiesCommand.CobraCommand(), propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(propertiesCommand, rootCmd)
 	return err
 }
 
-func (cmd *PropertiesNamespaceCommand) createPropertiesNamespaceCobraCmd(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *PropertiesNamespaceCommand) createPropertiesNamespaceCobraCmd(
+	propertiesCommand GalasaCommand,
+	rootCmd GalasaCommand,
+	) (*cobra.Command, error) {
 
 	var err error
 	propertiesNamespaceCmd := &cobra.Command{
@@ -63,7 +66,7 @@ func (cmd *PropertiesNamespaceCommand) createPropertiesNamespaceCobraCmd(factory
 		Args:  cobra.NoArgs,
 	}
 
-	propertiesCmd.AddCommand(propertiesNamespaceCmd)
+	propertiesCommand.CobraCommand().AddCommand(propertiesNamespaceCmd)
 
 	return propertiesNamespaceCmd, err
 }

@@ -70,9 +70,7 @@ func (cmd *RunsSubmitLocalCommand) init(factory Factory, runsSubmitCommand Galas
 
 	cmd.cobraCommand, err = cmd.createRunsSubmitLocalCobraCmd(
 		factory,
-		runsSubmitCommand.CobraCommand(),
-		cmd.values,
-		runsSubmitCommand.Values().(*utils.RunsSubmitCmdValues),
+		runsSubmitCommand,
 		runsCommand.Values().(*RunsCmdValues),
 		rootCommand.Values().(*RootCmdValues),
 	)
@@ -81,9 +79,7 @@ func (cmd *RunsSubmitLocalCommand) init(factory Factory, runsSubmitCommand Galas
 
 func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 	factory Factory,
-	parentCmd *cobra.Command,
-	runsSubmitLocalCmdValues *RunsSubmitLocalCmdValues,
-	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
+	runsSubmitCmd GalasaCommand,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
@@ -95,41 +91,41 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 		Long:    "Submit a list of tests to a local JVM, monitor them and wait for them to complete",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit local"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeSubmitLocal(factory, runsSubmitLocalCmdValues, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), runsCmdValues, rootCmdValues)
 		},
 	}
 
 	//currentUserName := runs.GetCurrentUserName()
 
-	runsSubmitLocalCobraCmd.Flags().StringVar(&runsSubmitLocalCmdValues.runsSubmitLocalCmdParams.RemoteMaven, "remoteMaven",
+	runsSubmitLocalCobraCmd.Flags().StringVar(&cmd.values.runsSubmitLocalCmdParams.RemoteMaven, "remoteMaven",
 		"https://repo.maven.apache.org/maven2",
 		"the url of the remote maven where galasa bundles can be loaded from. "+
 			"Defaults to maven central.")
 
-	runsSubmitLocalCobraCmd.Flags().StringVar(&runsSubmitLocalCmdValues.runsSubmitLocalCmdParams.LocalMaven, "localMaven", "",
+	runsSubmitLocalCobraCmd.Flags().StringVar(&cmd.values.runsSubmitLocalCmdParams.LocalMaven, "localMaven", "",
 		"The url of a local maven repository are where galasa bundles can be loaded from on your local file system. Defaults to your home .m2/repository file. Please note that this should be in a URL form e.g. 'file:///Users/myuserid/.m2/repository', or 'file://C:/Users/myuserid/.m2/repository'")
 
 	currentGalasaVersion, _ := embedded.GetGalasaVersion()
-	runsSubmitLocalCobraCmd.Flags().StringVar(&runsSubmitLocalCmdValues.runsSubmitLocalCmdParams.TargetGalasaVersion, "galasaVersion",
+	runsSubmitLocalCobraCmd.Flags().StringVar(&cmd.values.runsSubmitLocalCmdParams.TargetGalasaVersion, "galasaVersion",
 		currentGalasaVersion,
 		"the version of galasa you want to use to run your tests. "+
 			"This should match the version of the galasa obr you built your test bundles against.")
 
-	runsSubmitLocalCobraCmd.Flags().StringSliceVar(&runsSubmitLocalCmdValues.runsSubmitLocalCmdParams.Obrs, "obr", make([]string, 0),
+	runsSubmitLocalCobraCmd.Flags().StringSliceVar(&cmd.values.runsSubmitLocalCmdParams.Obrs, "obr", make([]string, 0),
 		"The maven coordinates of the obr bundle(s) which refer to your test bundles. "+
 			"The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' "+
 			"Multiple instances of this flag can be used to describe multiple obr bundles.")
 	runsSubmitLocalCobraCmd.MarkFlagRequired("obr")
 
-	runsSubmitLocalCobraCmd.Flags().Uint32Var(&runsSubmitLocalCmdValues.runsSubmitLocalCmdParams.DebugPort, "debugPort", 0,
+	runsSubmitLocalCobraCmd.Flags().Uint32Var(&cmd.values.runsSubmitLocalCmdParams.DebugPort, "debugPort", 0,
 		"The port to use when the --debug option causes the testcase to connect to a java debugger. "+
 			"The default value used is "+strconv.FormatUint(uint64(launcher.DEBUG_PORT_DEFAULT), 10)+" which can be "+
 			"overridden by the '"+api.BOOTSTRAP_PROPERTY_NAME_LOCAL_JVM_LAUNCH_DEBUG_PORT+"' property in the bootstrap file, "+
 			"which in turn can be overridden by this explicit parameter on the galasactl command.",
 	)
 
-	runsSubmitLocalCobraCmd.Flags().StringVar(&runsSubmitLocalCmdValues.runsSubmitLocalCmdParams.DebugMode, "debugMode", "",
+	runsSubmitLocalCobraCmd.Flags().StringVar(&cmd.values.runsSubmitLocalCmdParams.DebugMode, "debugMode", "",
 		"The mode to use when the --debug option causes the testcase to connect to a Java debugger. "+
 			"Valid values are 'listen' or 'attach'. "+
 			"'listen' means the testcase JVM will pause on startup, waiting for the Java debugger to connect to the debug port "+
@@ -139,22 +135,21 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 			"which in turn can be overridden by this explicit parameter on the galasactl command.",
 	)
 
-	runsSubmitLocalCobraCmd.Flags().BoolVar(&runsSubmitLocalCmdValues.runsSubmitLocalCmdParams.IsDebugEnabled, "debug", false,
+	runsSubmitLocalCobraCmd.Flags().BoolVar(&cmd.values.runsSubmitLocalCmdParams.IsDebugEnabled, "debug", false,
 		"When set (or true) the debugger pauses on startup and tries to connect to a Java debugger. "+
 			"The connection is established using the --debugMode and --debugPort values.",
 	)
 
-	runs.AddClassFlag(runsSubmitLocalCobraCmd, runsSubmitLocalCmdValues.submitLocalSelectionFlags, true, "test class names."+
+	runs.AddClassFlag(runsSubmitLocalCobraCmd, cmd.values.submitLocalSelectionFlags, true, "test class names."+
 		" The format of each entry is osgi-bundle-name/java-class-name. Java class names are fully qualified. No .class suffix is needed.")
 
-	parentCmd.AddCommand(runsSubmitLocalCobraCmd)
+	runsSubmitCmd.CobraCommand().AddCommand(runsSubmitLocalCobraCmd)
 
 	return runsSubmitLocalCobraCmd, err
 }
 
-func executeSubmitLocal(
+func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	factory Factory,
-	runsSubmitLocalCmdValues *RunsSubmitLocalCmdValues,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
@@ -195,14 +190,14 @@ func executeSubmitLocal(
 
 				// Validate the test selection parameters.
 				validator := runs.NewObrBasedValidator()
-				err = validator.Validate(runsSubmitLocalCmdValues.submitLocalSelectionFlags)
+				err = validator.Validate(cmd.values.submitLocalSelectionFlags)
 				if err == nil {
 
 					// A launcher is needed to launch anythihng
 					var launcherInstance launcher.Launcher
 					launcherInstance, err = launcher.NewJVMLauncher(
 						bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
-						runsSubmitLocalCmdValues.runsSubmitLocalCmdParams, timeService,
+						cmd.values.runsSubmitLocalCmdParams, timeService,
 						processFactory, galasaHome)
 
 					if err == nil {
@@ -220,7 +215,7 @@ func executeSubmitLocal(
 
 						err = submitter.ExecuteSubmitRuns(
 							runsSubmitCmdValues,
-							runsSubmitLocalCmdValues.submitLocalSelectionFlags,
+							cmd.values.submitLocalSelectionFlags,
 						)
 					}
 				}

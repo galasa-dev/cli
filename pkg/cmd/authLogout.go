@@ -20,10 +20,10 @@ type AuthLogoutCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthLogoutCommand(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewAuthLogoutCommand(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
 	cmd := new(AuthLogoutCommand)
 
-	err := cmd.init(factory, authCommand, rootCommand)
+	err := cmd.init(factory, authCommand, rootCmd)
 	return cmd, err
 }
 
@@ -46,13 +46,13 @@ func (cmd *AuthLogoutCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLogoutCommand) init(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *AuthLogoutCommand) init(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createAuthLogoutCobraCmd(factory, authCommand.CobraCommand(), rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd.Values().(*RootCmdValues))
 	return err
 }
 
-func (cmd *AuthLogoutCommand) createAuthLogoutCobraCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *AuthLogoutCommand) createCobraCmd(factory Factory, authCommand GalasaCommand, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error
 
 	authLogoutCmd := &cobra.Command{
@@ -65,7 +65,7 @@ func (cmd *AuthLogoutCommand) createAuthLogoutCobraCmd(factory Factory, parentCm
 		},
 	}
 
-	parentCmd.AddCommand(authLogoutCmd)
+	authCommand.CobraCommand().AddCommand(authLogoutCmd)
 
 	return authLogoutCmd, err
 }

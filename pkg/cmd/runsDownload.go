@@ -62,9 +62,8 @@ func (cmd *RunsDownloadCommand) Values() interface{} {
 func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error
 	cmd.values = &RunsDownloadCmdValues{}
-	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory, cmd.values,
-		runsCommand.CobraCommand(),
-		runsCommand.Values().(*RunsCmdValues),
+	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory,
+		runsCommand,
 		rootCommand.Values().(*RootCmdValues),
 	)
 	return err
@@ -72,13 +71,12 @@ func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand,
 
 func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 	factory Factory,
-	runsDownloadCmdValues *RunsDownloadCmdValues,
-	runsCobraCommand *cobra.Command,
-	runsCmdValues *RunsCmdValues,
+	runsCommand GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
 	var err error = nil
+	runsCmdValues := runsCommand.Values().(*RunsCmdValues) 
 
 	runsDownloadCobraCmd := &cobra.Command{
 		Use:     "download",
@@ -86,26 +84,25 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 		Long:    "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs download"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeRunsDownload(factory, runsDownloadCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executeRunsDownload(factory, runsCmdValues, rootCmdValues)
 		},
 	}
 
-	runsDownloadCobraCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runNameDownload, "name", "", "the name of the test run we want information about")
-	runsDownloadCobraCmd.PersistentFlags().BoolVar(&runsDownloadCmdValues.runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
+	runsDownloadCobraCmd.PersistentFlags().StringVar(&cmd.values.runNameDownload, "name", "", "the name of the test run we want information about")
+	runsDownloadCobraCmd.PersistentFlags().BoolVar(&cmd.values.runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
 	runsDownloadCobraCmd.MarkPersistentFlagRequired("name")
-	runsDownloadCobraCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runDownloadTargetFolder, "destination", ".",
+	runsDownloadCobraCmd.PersistentFlags().StringVar(&cmd.values.runDownloadTargetFolder, "destination", ".",
 		"The folder we want to download test run artifacts into. Sub-folders will be created within this location",
 	)
 
-	runsCobraCommand.AddCommand(runsDownloadCobraCmd)
+	runsCommand.CobraCommand().AddCommand(runsDownloadCobraCmd)
 
 	return runsDownloadCobraCmd, err
 }
 
-func executeRunsDownload(
+func (cmd *RunsDownloadCommand) executeRunsDownload(
 	factory Factory,
-	runsDownloadCmdValues *RunsDownloadCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -145,13 +142,13 @@ func executeRunsDownload(
 
 				// Call to process the command in a unit-testable way.
 				err = runs.DownloadArtifacts(
-					runsDownloadCmdValues.runNameDownload,
-					runsDownloadCmdValues.runForceDownload,
+					cmd.values.runNameDownload,
+					cmd.values.runForceDownload,
 					fileSystem,
 					timeService,
 					console,
 					apiClient,
-					runsDownloadCmdValues.runDownloadTargetFolder,
+					cmd.values.runDownloadTargetFolder,
 				)
 			}
 		}

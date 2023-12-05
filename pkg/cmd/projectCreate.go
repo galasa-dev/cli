@@ -50,11 +50,11 @@ type ProjectCreateCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewProjectCreateCmd(factory Factory, rootCmd GalasaCommand, projectCmd GalasaCommand) (GalasaCommand, error) {
+func NewProjectCreateCmd(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
 	var err error = nil
 
 	cmd := new(ProjectCreateCommand)
-	err = cmd.init(factory, rootCmd, projectCmd)
+	err = cmd.init(factory, projectCmd, rootCmd)
 
 	return cmd, err
 }
@@ -77,11 +77,23 @@ func (cmd *ProjectCreateCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, projectCmd GalasaCommand) error {
+
+func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) error {
+	var err error
+
+	cmd.values = &ProjectCreateCmdValues{}
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, projectCmd, rootCmd)
+
+	return err
+}
+
+func (cmd *ProjectCreateCommand) createCobraCommand(
+	factory Factory, 
+	projectCmd GalasaCommand, 
+	rootCmd GalasaCommand,
+	) (*cobra.Command, error) {
 
 	var err error = nil
-
-	projectCreateCmdValues := &ProjectCreateCmdValues{}
 
 	projectCreateCmd := &cobra.Command{
 		Use:     "create",
@@ -89,39 +101,36 @@ func (cmd *ProjectCreateCommand) init(factory Factory, rootCmd GalasaCommand, pr
 		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCreateProject(factory, projectCreateCmdValues, rootCmd.Values().(*RootCmdValues))
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return executeCreateProject(factory, cmd.values, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
-	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.packageName, "package", "", "Java package name for tests we create. "+
+	projectCreateCmd.Flags().StringVar(&cmd.values.packageName, "package", "", "Java package name for tests we create. "+
 		"Forms part of the project name, maven/gradle group/artifact ID, "+
 		"and OSGi bundle name. It may reflect the name of your organisation or company, "+
 		"the department, function or application under test. "+
 		"For example: dev.galasa.banking.example")
 	projectCreateCmd.MarkFlagRequired("package")
 
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
+	projectCreateCmd.Flags().BoolVar(&cmd.values.isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.force, "force", false, "Force-overwrite files which already exist.")
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.featureNamesCommaSeparated, "features", "feature1",
+	projectCreateCmd.Flags().BoolVar(&cmd.values.force, "force", false, "Force-overwrite files which already exist.")
+	projectCreateCmd.Flags().BoolVar(&cmd.values.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
+	projectCreateCmd.Flags().StringVar(&cmd.values.featureNamesCommaSeparated, "features", "feature1",
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
 
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useMaven, "maven", false, "Generate maven build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&cmd.values.useMaven, "maven", false, "Generate maven build artifacts. "+
 		"Can be used in addition to the --gradle flag. "+
 		"If this flag is not used, and the gradle option is not used, then behaviour of this flag defaults to true.")
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useGradle, "gradle", false, "Generate gradle build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&cmd.values.useGradle, "gradle", false, "Generate gradle build artifacts. "+
 		"Can be used in addition to the --maven flag.")
 
 	projectCmd.CobraCommand().AddCommand(projectCreateCmd)
 
-	cmd.cobraCommand = projectCreateCmd
-	cmd.values = projectCreateCmdValues
-
-	return err
+	return projectCreateCmd, err
 }
 
 func executeCreateProject(factory Factory, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {

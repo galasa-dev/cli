@@ -59,25 +59,21 @@ func (cmd *RunsPrepareCommand) Values() interface{} {
 func (cmd *RunsPrepareCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error
 	cmd.values = &RunsPrepareCmdValues{}
-	cmd.cobraCommand, err = cmd.createRunsPrepareCobraCmd(
+	cmd.cobraCommand, err = cmd.createCobraCommand(
 		factory,
-		cmd.values,
-		runsCommand.CobraCommand(),
-		runsCommand.Values().(*RunsCmdValues),
+		runsCommand,
 		rootCommand.Values().(*RootCmdValues),
 	)
 	return err
 }
-func (cmd *RunsPrepareCommand) createRunsPrepareCobraCmd(
+func (cmd *RunsPrepareCommand) createCobraCommand(
 	factory Factory,
-	runsPrepareCmdValues *RunsPrepareCmdValues,
-	parentCmd *cobra.Command,
-	runsCmdValues *RunsCmdValues,
+	runsCommand GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 	var err error = nil
 
-	runsPrepareCmdValues.prepareSelectionFlags = runs.NewTestSelectionFlagValues()
+	cmd.values.prepareSelectionFlags = runs.NewTestSelectionFlagValues()
 
 	runsPrepareCobraCmd := &cobra.Command{
 		Use:     "prepare",
@@ -85,26 +81,25 @@ func (cmd *RunsPrepareCommand) createRunsPrepareCobraCmd(
 		Long:    "Prepares a list of tests from a test catalog providing specific overrides if required",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs prepare"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeAssemble(factory, runsPrepareCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executeAssemble(factory, runsCommand.Values().(*RunsCmdValues), rootCmdValues)
 		},
 	}
 
-	runsPrepareCobraCmd.Flags().StringVarP(&runsPrepareCmdValues.portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
-	runsPrepareCmdValues.prepareFlagOverrides = runsPrepareCobraCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
-	runsPrepareCmdValues.prepareAppend = runsPrepareCobraCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
+	runsPrepareCobraCmd.Flags().StringVarP(&cmd.values.portfolioFilename, "portfolio", "p", "", "portfolio to add tests to")
+	cmd.values.prepareFlagOverrides = runsPrepareCobraCmd.Flags().StringSlice("override", make([]string, 0), "overrides to be sent with the tests (overrides in the portfolio will take precedence)")
+	cmd.values.prepareAppend = runsPrepareCobraCmd.Flags().Bool("append", false, "Append tests to existing portfolio")
 	runsPrepareCobraCmd.MarkFlagRequired("portfolio")
 
-	runs.AddCommandFlags(runsPrepareCobraCmd, runsPrepareCmdValues.prepareSelectionFlags)
+	runs.AddCommandFlags(runsPrepareCobraCmd, cmd.values.prepareSelectionFlags)
 
-	parentCmd.AddCommand(runsPrepareCobraCmd)
+	runsCommand.CobraCommand().AddCommand(runsPrepareCobraCmd)
 
 	return runsPrepareCobraCmd, err
 }
 
-func executeAssemble(
+func (cmd *RunsPrepareCommand) executeAssemble(
 	factory Factory,
-	runsPrepareCmdValues *RunsPrepareCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -128,7 +123,7 @@ func executeAssemble(
 
 			// Convert overrides to a map
 			testOverrides := make(map[string]string)
-			for _, override := range *runsPrepareCmdValues.prepareFlagOverrides {
+			for _, override := range *cmd.values.prepareFlagOverrides {
 				pos := strings.Index(override, "=")
 				if pos < 1 {
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
@@ -160,11 +155,11 @@ func executeAssemble(
 					launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
 					validator := runs.NewStreamBasedValidator()
-					err = validator.Validate(runsPrepareCmdValues.prepareSelectionFlags)
+					err = validator.Validate(cmd.values.prepareSelectionFlags)
 					if err == nil {
 
 						var testSelection runs.TestSelection
-						testSelection, err = runs.SelectTests(launcher, runsPrepareCmdValues.prepareSelectionFlags)
+						testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
 						if err == nil {
 
 							count := len(testSelection.Classes)
@@ -181,8 +176,8 @@ func executeAssemble(
 							if err == nil {
 
 								var portfolio *runs.Portfolio
-								if *runsPrepareCmdValues.prepareAppend {
-									portfolio, err = runs.ReadPortfolio(fileSystem, runsPrepareCmdValues.portfolioFilename)
+								if *cmd.values.prepareAppend {
+									portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
 								} else {
 									portfolio = runs.NewPortfolio()
 								}
@@ -190,9 +185,9 @@ func executeAssemble(
 								if err == nil {
 									runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
 
-									err = runs.WritePortfolio(fileSystem, runsPrepareCmdValues.portfolioFilename, portfolio)
+									err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
 									if err == nil {
-										if *runsPrepareCmdValues.prepareAppend {
+										if *cmd.values.prepareAppend {
 											log.Println("Portfolio appended")
 										} else {
 											log.Println("Portfolio created")

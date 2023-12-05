@@ -16,9 +16,9 @@ type ProjectCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewProjectCmd(factory Factory, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewProjectCmd(rootCmd GalasaCommand) (GalasaCommand, error) {
 	cmd := new(ProjectCommand)
-	err := cmd.init(factory, rootCmd)
+	err := cmd.init(rootCmd)
 	return cmd, err
 }
 
@@ -40,9 +40,14 @@ func (cmd *ProjectCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *ProjectCommand) init(factory Factory, rootCmd GalasaCommand) error {
 
-	var err error = nil
+func (cmd *ProjectCommand) init(rootCommand GalasaCommand) error {
+	var err error
+	cmd.cobraCommand = cmd.createProjectCobraCommand(rootCommand)
+	return err
+}
+
+func (cmd *ProjectCommand) createProjectCobraCommand(rootCmd GalasaCommand) *cobra.Command {
 
 	projectCmd := &cobra.Command{
 		Use:   "project",
@@ -50,8 +55,7 @@ func (cmd *ProjectCommand) init(factory Factory, rootCmd GalasaCommand) error {
 		Long:  "Creates and manipulates Galasa test project source code",
 	}
 
-	cmd.cobraCommand = projectCmd
 	rootCmd.CobraCommand().AddCommand(projectCmd)
 
-	return err
+	return projectCmd
 }

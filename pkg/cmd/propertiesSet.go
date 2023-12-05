@@ -58,10 +58,25 @@ func (cmd *PropertiesSetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+
+func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
 
 	var err error = nil
-	propertiesSetCmdValues := &PropertiesSetCmdValues{}
+	cmd.values = &PropertiesSetCmdValues{}
+
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesCommand, rootCmd.Values().(*RootCmdValues))
+
+	return err
+}
+
+func (cmd *PropertiesSetCommand) createCobraCommand(
+	factory Factory, 
+	propertiesCommand GalasaCommand, 
+	rootCmdValues *RootCmdValues,
+	) (*cobra.Command, error) {
+
+	var err error = nil
+	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertiesSetCobraCmd := &cobra.Command{
 		Use:   "set",
@@ -70,30 +85,25 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 			"If the property does not exist, a new property is created, otherwise the value for that property will be updated.",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties set"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesSet(factory, propertiesSetCmdValues, propertiesCommand.Values().(*PropertiesCmdValues), rootCommand.Values().(*RootCmdValues))
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executePropertiesSet(factory, propertiesCmdValues, rootCmdValues)
 		},
 	}
 
-	propertiesSetCobraCmd.PersistentFlags().StringVar(&propertiesSetCmdValues.propertyValue, "value", "", "the value of the property you want to create")
-
+	propertiesSetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertyValue, "value", "", "the value of the property you want to create")
 	propertiesSetCobraCmd.MarkPersistentFlagRequired("value")
 
 	propertiesCommand.CobraCommand().AddCommand(propertiesSetCobraCmd)
 
 	// The name & namespace properties are mandatory for set.
-	addNamespaceFlag(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
-	addPropertyNameFlag(propertiesSetCobraCmd, true, propertiesCommand.Values().(*PropertiesCmdValues))
+	addNamespaceFlag(propertiesSetCobraCmd, true, propertiesCmdValues)
+	addPropertyNameFlag(propertiesSetCobraCmd, true, propertiesCmdValues)
 
-	cmd.values = propertiesSetCmdValues
-	cmd.cobraCommand = propertiesSetCobraCmd
-
-	return err
+	return propertiesSetCobraCmd, err
 }
 
-func executePropertiesSet(
+func (cmd *PropertiesSetCommand) executePropertiesSet(
 	factory Factory,
-	propertiesSetCmdValues *PropertiesSetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -132,7 +142,7 @@ func executePropertiesSet(
 				err = properties.SetProperty(
 					propertiesCmdValues.namespace,
 					propertiesCmdValues.propertyName,
-					propertiesSetCmdValues.propertyValue, apiClient)
+					cmd.values.propertyValue, apiClient)
 			}
 		}
 	}

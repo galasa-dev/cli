@@ -24,10 +24,10 @@ type PropertiesCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesCommand(factory Factory, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
 
 	cmd := new(PropertiesCommand)
-	err := cmd.init(factory, rootCommand)
+	err := cmd.init(rootCmd)
 	return cmd, err
 }
 
@@ -49,24 +49,27 @@ func (cmd *PropertiesCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesCommand) init(factory Factory, rootCommand GalasaCommand) error {
+
+func (cmd *PropertiesCommand) init(rootCmd GalasaCommand) error {
 
 	var err error = nil
 
 	cmd.values = &PropertiesCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, cmd.values, rootCommand)
+	cmd.cobraCommand = cmd.createCobraCommand(rootCmd)
 
 	return err
 }
 
-func (cmd *PropertiesCommand) createCobraCommand(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCommand GalasaCommand) *cobra.Command {
+func (cmd *PropertiesCommand) createCobraCommand(
+	rootCommand GalasaCommand,
+	) *cobra.Command {
 	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",
 		Short: "Manages properties in an ecosystem",
 		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
 	}
 
-	addBootstrapFlag(propertiesCobraCmd, &propertiesCmdValues.ecosystemBootstrap)
+	addBootstrapFlag(propertiesCobraCmd, &cmd.values.ecosystemBootstrap)
 
 	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 

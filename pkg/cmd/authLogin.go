@@ -50,21 +50,21 @@ func (cmd *AuthLoginComamnd) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) error {
 	var err error = nil
 
 	cmd.values = &AuthLoginCmdValues{}
 
-	cmd.cobraCommand, err = cmd.createAuthLoginCobraCommand(factory, cmd.values, authCommand, rootCommand)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, authCommand, rootCmd)
 
 	return err
 }
 
-func (cmd *AuthLoginComamnd) createAuthLoginCobraCommand(
-	factory Factory, authLoginCmdValues *AuthLoginCmdValues,
+func (cmd *AuthLoginComamnd) createCobraCommand(
+	factory Factory,
 	authCommand GalasaCommand,
-	rootCommand GalasaCommand,
-) (*cobra.Command, error) {
+	rootCmd GalasaCommand,
+	) (*cobra.Command, error) {
 
 	var err error
 	authLoginCobraCmd := &cobra.Command{
@@ -76,19 +76,19 @@ func (cmd *AuthLoginComamnd) createAuthLoginCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"auth login"},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthLogin(factory, authLoginCmdValues, rootCommand.Values().(*RootCmdValues))
+			return cmd.executeAuthLogin(factory, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
-	addBootstrapFlag(authLoginCobraCmd, &authLoginCmdValues.bootstrap)
+	addBootstrapFlag(authLoginCobraCmd, &cmd.values.bootstrap)
 
 	authCommand.CobraCommand().AddCommand(authLoginCobraCmd)
+
 	return authLoginCobraCmd, err
 }
 
 func (cmd *AuthLoginComamnd) executeAuthLogin(
 	factory Factory,
-	authLoginCmdValues *AuthLoginCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
 
@@ -115,7 +115,7 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, authLoginCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, cmd.values.bootstrap, urlService)
 		if err == nil {
 			apiServerUrl := bootstrapData.ApiServerURL
 			log.Printf("The API server is at '%s'\n", apiServerUrl)

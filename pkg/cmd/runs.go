@@ -18,11 +18,21 @@ type RunsCommand struct {
 	values       *RunsCmdValues
 }
 
-func NewRunsCmd(factory Factory, rootCommand GalasaCommand) (GalasaCommand, error) {
+
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
+
+func NewRunsCmd(rootCommand GalasaCommand) (GalasaCommand, error) {
 	cmd := new(RunsCommand)
-	err := cmd.init(factory, rootCommand)
+	err := cmd.init(rootCommand)
 	return cmd, err
 }
+
+
+// ------------------------------------------------------------------------------------------------
+// Public functions
+// ------------------------------------------------------------------------------------------------
 
 func (cmd *RunsCommand) Name() string {
 	return COMMAND_NAME_RUNS
@@ -36,11 +46,24 @@ func (cmd *RunsCommand) Values() interface{} {
 	return cmd.values
 }
 
-func (cmd *RunsCommand) init(factory Factory, rootCommand GalasaCommand) error {
+
+// ------------------------------------------------------------------------------------------------
+// Private functions
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *RunsCommand) init(rootCmd GalasaCommand) error {
+
+	var err error = nil
+
+	cmd.values = &RunsCmdValues{}
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+
+	return err
+}
+
+func (cmd *RunsCommand) createCobraCommand(rootCommand GalasaCommand) (*cobra.Command, error) {
 
 	var err error
-
-	runsCmdValues := &RunsCmdValues{}
 
 	runsCobraCmd := &cobra.Command{
 		Use:   "runs",
@@ -48,12 +71,9 @@ func (cmd *RunsCommand) init(factory Factory, rootCommand GalasaCommand) error {
 		Long:  "Assembles, submits and monitors test runs in Galasa Ecosystem",
 	}
 
-	addBootstrapFlag(runsCobraCmd, &runsCmdValues.bootstrap)
+	addBootstrapFlag(runsCobraCmd, &cmd.values.bootstrap)
 
 	rootCommand.CobraCommand().AddCommand(runsCobraCmd)
 
-	cmd.cobraCommand = runsCobraCmd
-	cmd.values = runsCmdValues
-
-	return err
+	return runsCobraCmd, err
 }
