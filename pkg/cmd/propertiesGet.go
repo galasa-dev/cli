@@ -31,57 +31,99 @@ type PropertiesGetCmdValues struct {
 	propertiesOutputFormat string
 }
 
-func createPropertiesGetCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type PropertiesGetCommand struct {
+	values       *PropertiesGetCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesGetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+
+	cmd := new(PropertiesGetCommand)
+	err := cmd.init(factory, propertiesCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesGetCommand) Name() string {
+	return COMMAND_NAME_PROPERTIES_GET
+}
+
+func (cmd *PropertiesGetCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesGetCommand) Values() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+
 	var err error = nil
 
-	propertiesGetCmdValues := &PropertiesGetCmdValues{}
+	cmd.values = &PropertiesGetCmdValues{}
+	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, rootCommand.Values().(*RootCmdValues))
 
-	propertiesGetCmd := &cobra.Command{
+	return err
+}
+
+func (cmd *PropertiesGetCommand) createCobraCommand(
+	factory Factory, 
+	propertiesCommand GalasaCommand, 
+	rootCommandValues *RootCmdValues,
+	) *cobra.Command {
+
+	propertiesCommandValues := propertiesCommand.Values().(*PropertiesCmdValues)
+	propertiesGetCobraCmd := &cobra.Command{
 		Use:     "get",
 		Short:   "Get the details of properties in a namespace.",
 		Long:    "Get the details of all properties in a namespace, filtered with flags if present",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesGet(factory, cmd, args, propertiesGetCmdValues, propertiesCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executePropertiesGet(factory,
+				propertiesCommandValues, rootCommandValues)
 		},
 	}
 
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesPrefix, "prefix", "",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesPrefix, "prefix", "",
 		"Prefix to match against the start of the property name within the namespace."+
 			" Optional. Cannot be used in conjunction with the '--name' option.")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesSuffix, "suffix", "",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesSuffix, "suffix", "",
 		"Suffix to match against the end of the property name within the namespace."+
 			" Optional. Cannot be used in conjunction with the '--name' option.")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesInfix, "infix", "",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesInfix, "infix", "",
 		"Infix(es) that could be part of the property name within the namespace."+
 			" Multiple infixes can be supplied as a comma-separated list. "+
 			" Optional. Cannot be used in conjunction with the '--name' option.")
-	propertiesGetCmd.PersistentFlags().StringVar(&propertiesGetCmdValues.propertiesOutputFormat, "format", "summary",
+	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesOutputFormat, "format", "summary",
 		"output format for the data returned. Supported formats are: "+formatters+".")
 
 	// The namespace property is mandatory for get.
-	addNamespaceProperty(propertiesGetCmd, true, propertiesCmdValues)
-	addNameProperty(propertiesGetCmd, false, propertiesCmdValues)
+	addNamespaceFlag(propertiesGetCobraCmd, true, propertiesCommandValues)
+	addPropertyNameFlag(propertiesGetCobraCmd, false, propertiesCommandValues)
 
 	// Name field cannot be used in conjunction wiht the prefix, suffix or infix commands.
-	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "prefix")
-	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "suffix")
-	propertiesGetCmd.MarkFlagsMutuallyExclusive("name", "infix")
+	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "prefix")
+	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "suffix")
+	propertiesGetCobraCmd.MarkFlagsMutuallyExclusive("name", "infix")
 
-	parentCmd.AddCommand(propertiesGetCmd)
+	propertiesCommand.CobraCommand().AddCommand(propertiesGetCobraCmd)
 
-	// There are no sub-command children to add to the command tree.
-
-	return propertiesGetCmd, err
+	return propertiesGetCobraCmd
 }
 
-func executePropertiesGet(
+func (cmd *PropertiesGetCommand) executePropertiesGet(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
-	propertiesGetCmdValues *PropertiesGetCmdValues,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -122,11 +164,11 @@ func executePropertiesGet(
 				err = properties.GetProperties(
 					propertiesCmdValues.namespace,
 					propertiesCmdValues.propertyName,
-					propertiesGetCmdValues.propertiesPrefix,
-					propertiesGetCmdValues.propertiesSuffix,
-					propertiesGetCmdValues.propertiesInfix,
+					cmd.values.propertiesPrefix,
+					cmd.values.propertiesSuffix,
+					cmd.values.propertiesInfix,
 					apiClient,
-					propertiesGetCmdValues.propertiesOutputFormat,
+					cmd.values.propertiesOutputFormat,
 					console,
 				)
 			}

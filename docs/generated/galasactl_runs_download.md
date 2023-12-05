@@ -15,7 +15,7 @@ galasactl runs download [flags]
 ```
       --destination string   The folder we want to download test run artifacts into. Sub-folders will be created within this location (default ".")
       --force                force artifacts to be overwritten if they already exist
-  -h, --help                 Displays the options for the runs download command.
+  -h, --help                 Displays the options for the 'runs download' command.
       --name string          the name of the test run we want information about
 ```
 

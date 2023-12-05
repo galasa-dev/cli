@@ -42,10 +42,58 @@ type ProjectCreateCmdValues struct {
 	isDevelopmentProjectCreate bool
 }
 
-func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type ProjectCreateCommand struct {
+	cobraCommand *cobra.Command
+	values       *ProjectCreateCmdValues
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
+func NewProjectCreateCmd(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
 	var err error = nil
 
-	projectCreateCmdValues := &ProjectCreateCmdValues{}
+	cmd := new(ProjectCreateCommand)
+	err = cmd.init(factory, projectCmd, rootCmd)
+
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *ProjectCreateCommand) Name() string {
+	return COMMAND_NAME_PROJECT_CREATE
+}
+
+func (cmd *ProjectCreateCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *ProjectCreateCommand) Values() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) error {
+	var err error
+
+	cmd.values = &ProjectCreateCmdValues{}
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, projectCmd, rootCmd)
+
+	return err
+}
+
+func (cmd *ProjectCreateCommand) createCobraCommand(
+	factory Factory, 
+	projectCmd GalasaCommand, 
+	rootCmd GalasaCommand,
+	) (*cobra.Command, error) {
+
+	var err error = nil
 
 	projectCreateCmd := &cobra.Command{
 		Use:     "create",
@@ -53,41 +101,39 @@ func createProjectCreateCmd(factory Factory, parentCmd *cobra.Command, rootCmdVa
 		Long:    "Creates a new Galasa test project with optional OBR project and build process files",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"project create"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCreateProject(factory, cmd, args, projectCreateCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executeCreateProject(factory, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
-	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.packageName, "package", "", "Java package name for tests we create. "+
+	projectCreateCmd.Flags().StringVar(&cmd.values.packageName, "package", "", "Java package name for tests we create. "+
 		"Forms part of the project name, maven/gradle group/artifact ID, "+
 		"and OSGi bundle name. It may reflect the name of your organisation or company, "+
 		"the department, function or application under test. "+
 		"For example: dev.galasa.banking.example")
 	projectCreateCmd.MarkFlagRequired("package")
 
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
+	projectCreateCmd.Flags().BoolVar(&cmd.values.isDevelopmentProjectCreate, "development", false, "Use bleeding-edge galasa versions and repositories.")
 
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.force, "force", false, "Force-overwrite files which already exist.")
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	projectCreateCmd.Flags().StringVar(&projectCreateCmdValues.featureNamesCommaSeparated, "features", "feature1",
+	projectCreateCmd.Flags().BoolVar(&cmd.values.force, "force", false, "Force-overwrite files which already exist.")
+	projectCreateCmd.Flags().BoolVar(&cmd.values.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
+	projectCreateCmd.Flags().StringVar(&cmd.values.featureNamesCommaSeparated, "features", "feature1",
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
 
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useMaven, "maven", false, "Generate maven build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&cmd.values.useMaven, "maven", false, "Generate maven build artifacts. "+
 		"Can be used in addition to the --gradle flag. "+
 		"If this flag is not used, and the gradle option is not used, then behaviour of this flag defaults to true.")
-	projectCreateCmd.Flags().BoolVar(&projectCreateCmdValues.useGradle, "gradle", false, "Generate gradle build artifacts. "+
+	projectCreateCmd.Flags().BoolVar(&cmd.values.useGradle, "gradle", false, "Generate gradle build artifacts. "+
 		"Can be used in addition to the --maven flag.")
 
-	parentCmd.AddCommand(projectCreateCmd)
-
-	// no children commands of project create to add here.
+	projectCmd.CobraCommand().AddCommand(projectCreateCmd)
 
 	return projectCreateCmd, err
 }
 
-func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, projectCreateCmdValues *ProjectCreateCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *ProjectCreateCommand) executeCreateProject(factory Factory, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 
@@ -102,13 +148,13 @@ func executeCreateProject(factory Factory, cmd *cobra.Command, args []string, pr
 		log.Println("Galasa CLI - Create project")
 
 		err = createProject(fileSystem,
-			projectCreateCmdValues.packageName,
-			projectCreateCmdValues.featureNamesCommaSeparated,
-			projectCreateCmdValues.isOBRProjectRequired,
-			projectCreateCmdValues.force,
-			projectCreateCmdValues.useMaven,
-			projectCreateCmdValues.useGradle,
-			projectCreateCmdValues.isDevelopmentProjectCreate,
+			cmd.values.packageName,
+			cmd.values.featureNamesCommaSeparated,
+			cmd.values.isOBRProjectRequired,
+			cmd.values.force,
+			cmd.values.useMaven,
+			cmd.values.useGradle,
+			cmd.values.isDevelopmentProjectCreate,
 		)
 	}
 	return err

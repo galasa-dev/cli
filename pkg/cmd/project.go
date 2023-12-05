@@ -9,9 +9,45 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createProjectCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type ProjectCommand struct {
+	cobraCommand *cobra.Command
+}
 
-	var err error = nil
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
+func NewProjectCmd(rootCmd GalasaCommand) (GalasaCommand, error) {
+	cmd := new(ProjectCommand)
+	err := cmd.init(rootCmd)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *ProjectCommand) Name() string {
+	return COMMAND_NAME_PROJECT
+}
+
+func (cmd *ProjectCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *ProjectCommand) Values() interface{} {
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *ProjectCommand) init(rootCommand GalasaCommand) error {
+	var err error
+	cmd.cobraCommand = cmd.createProjectCobraCommand(rootCommand)
+	return err
+}
+
+func (cmd *ProjectCommand) createProjectCobraCommand(rootCmd GalasaCommand) *cobra.Command {
 
 	projectCmd := &cobra.Command{
 		Use:   "project",
@@ -19,14 +55,7 @@ func createProjectCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *
 		Long:  "Creates and manipulates Galasa test project source code",
 	}
 
-	parentCmd.AddCommand(projectCmd)
+	rootCmd.CobraCommand().AddCommand(projectCmd)
 
-	err = createProjectCmdChildren(factory, projectCmd, rootCmdValues)
-
-	return projectCmd, err
-}
-
-func createProjectCmdChildren(factory Factory, projectCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createProjectCreateCmd(factory, projectCmd, rootCmdValues)
-	return err
+	return projectCmd
 }

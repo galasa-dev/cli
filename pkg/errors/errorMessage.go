@@ -126,7 +126,7 @@ var (
 	GALASA_ERROR_PACKAGE_NAME_BLANK                       = NewMessageType("GAL1040E: Invalid Java package name. Package name should not be blank.", 1040, STACK_TRACE_WANTED)
 	GALASA_ERROR_FAILED_TO_CREATE_FOLDERS                 = NewMessageType("GAL1041E: Failed to create folders '%s'. Reason is '%s'. Check that you have permissions to write to that folder, and that there is enough disk space available and try again.", 1041, STACK_TRACE_WANTED)
 	GALASA_ERROR_FAILED_TO_WRITE_FILE                     = NewMessageType("GAL1042E: Failed to open file '%s' for writing. Reason is '%s'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.", 1042, STACK_TRACE_WANTED)
-	GALASA_ERROR_FAILED_TO_READ_FILE                      = NewMessageType("GAL1043E: Failed to open file '%s' for reading. Reason is '%s'. Check that you have permissions to read the file and try again.", 1043, STACK_TRACE_WANTED)
+	GALASA_ERROR_FAILED_TO_READ_FILE                      = NewMessageType("GAL1043E: Failed to open file '%s' for reading. Reason is '%s'. Check that you have permissions to read the file and try again.", 1043, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_PKG_RESERVED_WORD                = NewMessageType("GAL1044E: Invalid Java package name. Package name '%s' contains the reserved java keyword '%s'.", 1044, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_FEATURE_NAME                     = NewMessageType("GAL1045E: Invalid feature name. Feature name '%s' cannot be used as a java package name. '%s'", 1045, STACK_TRACE_WANTED)
 	GALASA_ERROR_FAILED_TO_FIND_USER_HOME                 = NewMessageType("GAL1046E: Failed to determine the home folder of this user. '%s'", 1046, STACK_TRACE_WANTED)

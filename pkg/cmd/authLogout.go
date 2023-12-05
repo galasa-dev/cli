@@ -13,30 +13,65 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createAuthLogoutCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type AuthLogoutCommand struct {
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewAuthLogoutCommand(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+	cmd := new(AuthLogoutCommand)
+
+	err := cmd.init(factory, authCommand, rootCmd)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *AuthLogoutCommand) Name() string {
+	return COMMAND_NAME_AUTH_LOGOUT
+}
+
+func (cmd *AuthLogoutCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *AuthLogoutCommand) Values() interface{} {
+	// There are no values.
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *AuthLogoutCommand) init(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) error {
+	var err error
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd.Values().(*RootCmdValues))
+	return err
+}
+
+func (cmd *AuthLogoutCommand) createCobraCmd(factory Factory, authCommand GalasaCommand, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error
 
 	authLogoutCmd := &cobra.Command{
-		Use:   "logout",
-		Short: "Log out from a Galasa ecosystem",
-		Long:  "Log out from a Galasa ecosystem that you have previously logged in to",
+		Use:     "logout",
+		Short:   "Log out from a Galasa ecosystem",
+		Long:    "Log out from a Galasa ecosystem that you have previously logged in to",
 		Aliases: []string{"auth logout"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeAuthLogout(factory, cmd, args, rootCmdValues)
+		RunE: func(cobraCommand *cobra.Command, args []string) error {
+			return cmd.executeAuthLogout(factory, rootCmdValues)
 		},
 	}
 
-	parentCmd.AddCommand(authLogoutCmd)
-
-	// There are no sub-command children to add to the command tree.
+	authCommand.CobraCommand().AddCommand(authLogoutCmd)
 
 	return authLogoutCmd, err
 }
 
-func executeAuthLogout(
+func (cmd *AuthLogoutCommand) executeAuthLogout(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
 	rootCmdValues *RootCmdValues,
 ) error {
 

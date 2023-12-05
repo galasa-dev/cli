@@ -652,3 +652,17 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 
 	assert.NotNil(t, err)
 }
+
+func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// When...
+	commands, _ := NewCommandCollection(factory)
+	projectCreateCommand := commands.GetCommand(COMMAND_NAME_PROJECT_CREATE)
+	assert.NotNil(t, projectCreateCommand)
+	assert.IsType(t, &ProjectCreateCmdValues{}, projectCreateCommand.Values())
+	assert.NotNil(t, projectCreateCommand.CobraCommand())
+	assert.Equal(t, COMMAND_NAME_PROJECT_CREATE, projectCreateCommand.Name())
+
+}

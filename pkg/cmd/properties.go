@@ -16,45 +16,67 @@ type PropertiesCmdValues struct {
 	propertyName       string
 }
 
-func createPropertiesCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type PropertiesCommand struct {
+	values       *PropertiesCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
+
+	cmd := new(PropertiesCommand)
+	err := cmd.init(rootCmd)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesCommand) Name() string {
+	return COMMAND_NAME_PROPERTIES
+}
+
+func (cmd *PropertiesCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesCommand) Values() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *PropertiesCommand) init(rootCmd GalasaCommand) error {
+
 	var err error = nil
 
-	propertiesCmdValues := &PropertiesCmdValues{}
+	cmd.values = &PropertiesCmdValues{}
+	cmd.cobraCommand = cmd.createCobraCommand(rootCmd)
 
-	propertiesCmd := &cobra.Command{
+	return err
+}
+
+func (cmd *PropertiesCommand) createCobraCommand(
+	rootCommand GalasaCommand,
+	) *cobra.Command {
+	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",
 		Short: "Manages properties in an ecosystem",
 		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
 	}
 
-	propertiesCmd.PersistentFlags().StringVarP(&propertiesCmdValues.ecosystemBootstrap, "bootstrap", "b", "",
-		"Bootstrap URL. Should start with 'http://' or 'file://'. "+
-			"If it starts with neither, it is assumed to be a fully-qualified path. "+
-			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
-			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
+	addBootstrapFlag(propertiesCobraCmd, &cmd.values.ecosystemBootstrap)
 
-	parentCmd.AddCommand(propertiesCmd)
+	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 
-	err = createPropertiesCmdChildren(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-
-	return propertiesCmd, err
+	return propertiesCobraCmd
 }
 
-func createPropertiesCmdChildren(factory Factory, propertiesCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
-	_, err := createPropertiesGetCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	if err == nil {
-		_, err = createPropertiesSetCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	}
-	if err == nil {
-		_, err = createPropertiesDeleteCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	}
-	if err == nil {
-		_, err = createPropertiesNamespaceCmd(factory, propertiesCmd, propertiesCmdValues, rootCmdValues)
-	}
-	return err
-}
-
-func addNamespaceProperty(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
+func addNamespaceFlag(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
 
 	flagName := "namespace"
 	var description string
@@ -73,7 +95,7 @@ func addNamespaceProperty(cmd *cobra.Command, isMandatory bool, propertiesCmdVal
 }
 
 // Some sub-commands need a name field to be mandatory, some don't.
-func addNameProperty(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
+func addPropertyNameFlag(cmd *cobra.Command, isMandatory bool, propertiesCmdValues *PropertiesCmdValues) {
 	flagName := "name"
 	var description string
 	if isMandatory {

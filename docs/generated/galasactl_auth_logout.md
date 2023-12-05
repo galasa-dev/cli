@@ -13,7 +13,7 @@ galasactl auth logout [flags]
 ### Options
 
 ```
-  -h, --help   Displays the options for the auth logout command.
+  -h, --help   Displays the options for the 'auth logout' command.
 ```
 
 ### Options inherited from parent commands
