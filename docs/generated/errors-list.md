@@ -1,15 +1,15 @@
 ## Errors
 The `galasactl` tool can generate the following errors:
 
-- GAL1001E: Unsupported bootstrap URL {}. Acceptable values start with 'http' or 'https'
-- GAL1002E: Bootstrap url does not end in '/bootstrap'. Bootstrap url is {}
+- GAL1001E: Unsupported bootstrap URL {}. Acceptable values start with 'http' or 'https'. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1002E: Bootstrap url does not end in '/bootstrap'. Bootstrap url is '{}'. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1003E: Bootstrap contents is badly formed. Bootstrap is at {}. Reason is: {}
 - GAL1004E: Failed to load the bootstrap from {}. Reason is {}. If the URL is not resolving, try adding the hostname to your /etc/hosts file. This might especially be needed if communicating over a VPN connection.
 - GAL1005E: Failed to write to 'throttle' file {}. Reason is {}
-- GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio
+- GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1007E: Failed to create report yaml file {}. Reason is {}
 - GAL1008E: Failed to check if group {} exists already. Reason is {}
-- GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test) or --portfolio flag to be specified. Use the --help flag for more details.
+- GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test) or --portfolio flag to be specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1010E: Invalid override '{}'
 - GAL1011E: Failed to encode the yaml file {}. Reason is {}
 - GAL1012E: Failed to prepare test report for writing to json file {}. Reason is {}
@@ -31,25 +31,25 @@ The `galasactl` tool can generate the following errors:
 - GAL1028E: Failed to unmarshal test catalog from REST reply for property '{}', stream '{}'. Reason is {}
 - GAL1029E: Stream '{}' is not found in the ecosystem. There are no streams set up. Ask your Galasa system administrator to add a new stream with the desired name.
 - GAL1030E: Stream '{}' is not found in the ecosystem. Valid streams are:{}. Try again using a valid stream, or ask your Galasa system administrator to add a new stream with the desired name.
-- GAL1031E: Invalid flags. --bundle, --package, --test, --tag, and --class flags can only be specified if --stream is provided.
+- GAL1031E: Invalid flags. --bundle, --package, --test, --tag, and --class flags can only be specified if --stream is provided. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1032E: Invalid select regex '{}'. Reason is {}
 - GAL1033E: Invalid select quoted regex '{}'. Reason is {}
 - GAL1034E: Class '{}' is not format 'bundle/class'
 - GAL1035E: Class '{}' is not format. Name is blank
 - GAL1036E: File '{}' exists. Use the --force flag to overwrite it.
-- GAL1037E: Invalid Java package name '{}' should not contain the '{}' character.
-- GAL1038E: Invalid Java package name '{}' should not start with the '{}' character.
-- GAL1039E: Invalid Java package name '{}' should not end with the '{}' character.
-- GAL1040E: Invalid Java package name. Package name should not be blank.
+- GAL1037E: Invalid Java package name '{}' should not contain the '{}' character. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1038E: Invalid Java package name '{}' should not start with the '{}' character. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1039E: Invalid Java package name '{}' should not end with the '{}' character. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1040E: Invalid Java package name. Package name should not be blank. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1041E: Failed to create folders '{}'. Reason is '{}'. Check that you have permissions to write to that folder, and that there is enough disk space available and try again.
 - GAL1042E: Failed to open file '{}' for writing. Reason is '{}'. Check that you have permissions to write to that folder and file, and that there is enough disk space available and try again.
 - GAL1043E: Failed to open file '{}' for reading. Reason is '{}'. Check that you have permissions to read the file and try again.
-- GAL1044E: Invalid Java package name. Package name '{}' contains the reserved java keyword '{}'.
+- GAL1044E: Invalid Java package name. Package name '{}' contains the reserved java keyword '{}'. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1045E: Invalid feature name. Feature name '{}' cannot be used as a java package name. '{}'
 - GAL1046E: Failed to determine the home folder of this user. '{}'
 - GAL1047E: Cannot create the yaml report in file '{}' as that file already exists.
 - GAL1048E: Failed to read from 'throttle' file '{}'. Reason is '{}'
-- GAL1049E: Invalid value '{}' read from 'throttle' file '{}'. Reason is '{}'
+- GAL1049E: Invalid value '{}' read from 'throttle' file '{}'. Reason is '{}'. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1050E: JAVA_HOME environment variable is not set. It must be for when --local flag is used.
 - GAL1051E: Failed to determine if folder '{}' exists. Reason is '{}'
 - GAL1052E: Folder '{}' is missing. JAVA_HOME environment variable should refer to a folder which contains a 'bin' folder.
@@ -67,7 +67,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1064E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. No slash found.
 - GAL1065E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Too many slashes found.
 - GAL1066E: Badly formed Class parameter '{}'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.
-- GAL1067E: Unsupported value '{}' for parameter --format. Supported values are: {}
+- GAL1067E: Unsupported value '{}' for parameter --format. Supported values are: {}. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1068E: Could not query run results. Reason: '{}'
 - GAL1069E: Could not open log file for writing. '{}' is a directory, the --log parameter should refer to a file path (existing or not), or '-' (the console)
 - GAL1070E: Invalid value '{}' detected for optional property '{}' in bootstrap properties. Valid values are 'listen' or 'attach'. Only used when --debug flag is set. Defaults to 'listen'. Can be overridden with the --debugMode flag.
@@ -78,31 +78,31 @@ The `galasactl` tool can generate the following errors:
 - GAL1075E: run name '{}' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.
 - GAL1076E: Badly formed from or to value '{}' specified in the age parameter. The value could not be converted into an integer value.
 - GAL1077E: Invalid value '{}' detected for age parameter. The 'from' value must be greater than the 'to' value.
-- GAL1078E: Badly formed '--age' parameter value '{}' specified. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
-- GAL1079E: The --age or the --name parameter must be used to identify which test run(s) you want see.
-- GAL1080E: Invalid 'from' value '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
-- GAL1081E: Unable use a negative value '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
-- GAL1082E: Invalid time unit specified '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified.
+- GAL1078E: Badly formed '--age' parameter value '{}' specified. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1079E: The --age or the --name parameter must be used to identify which test run(s) you want see. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1080E: Invalid 'from' value '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1081E: Unable use a negative value '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1082E: Invalid time unit specified '{}' in the '--age' parameter. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1083E: No artifacts to download for run: '{}'
 - GAL1084E: Communications failure while closing an HTTP response. '{}'
 - GAL1085E: Programming logic error. ReadTextFile operation on embedded file system failed. Reason is {}
 - GAL1086E: Communications problem between the command-line tool and the target Galasa Ecosystem. The tool could not retrieve the list of valid result names. Reason: '{}'
 - GAL1087E: Invalid '--result' parameter value: {}. The possible result values currently in the Ecosystem Result Archive Store (RAS) are: {}
-- GAL1088E: --active and --result must not be used at the same time, they are mutually exclusive.
-- GAL1089E: Need to use --maven and/or --gradle parameter
+- GAL1088E: --active and --result must not be used at the same time, they are mutually exclusive. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1089E: Need to use --maven and/or --gradle parameter Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1090E: Could not get username of current requestor. Reason is '{}'
-- GAL1091E: '{}' is not a properly formed file URL
+- GAL1091E: '{}' is not a properly formed file URL Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1092E: Galasa Ecosystem error: A test was submitted for launch. The galasa runtime is not reporting test progress. The test is lost and may execute but test progress cannot be monitored from this tool. (bundle: {}, class: {}).
 - GAL1093E: Failed to submit test (bundle: {}, class: {}). Reason is: {}
-- GAL1094E: User error: Cannot run test {} on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test.
-- GAL1095E: namespace '{}' is invalid. Expected it to be in a format starting with letters, and ending in a number with no non-alphanumeric characters.
+- GAL1094E: User error: Cannot run test {} on a local JVM because no OBR information is available. Supply an OBR using the --obr parameter, or (if using a portfolio) ensure the portfolio contains an OBR for this test. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1095E: namespace '{}' is invalid. Expected it to be in a format starting with letters, and ending in a number with no non-alphanumeric characters. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1096E: Could not query namespace results. Reason: '{}'
-- GAL1097E: Property --name cannot be set alongside --prefix, --suffix, or --infix.
+- GAL1097E: Property --name cannot be set alongside --prefix, --suffix, or --infix. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1098E: Property '{}' could not be updated. Reason: '{}'
 - GAL1099E: Property '{}' could not be deleted. Reason: '{}'
 - GAL1100E: Property '{}' could not be created. Reason: '{}'
-- GAL1101E: namespace '{}' is invalid. '--namespace' is a mandatory flag for this command.
-- GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command.
+- GAL1101E: namespace '{}' is invalid. '--namespace' is a mandatory flag for this command. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1103E: Could not query CPS results. Reason: '{}'
 - GAL1104E: Unable to delete the bearer token file '{}'.
 - GAL1105E: Property '{}' was expected but has not been set in the galasactl.properties file.

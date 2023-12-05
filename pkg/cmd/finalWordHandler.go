@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -34,9 +33,9 @@ func (*RealFinalWordHandler) FinalWord(obj interface{}) {
 		log.Println(text)
 	}
 
-	if exitCode != 0 {
-		fmt.Fprintln(os.Stderr, text)
-	}
+	// if exitCode != 0 {
+	// 	fmt.Fprintln(os.Stderr, text)
+	// }
 
 	if isStackTraceWanted && rootCmdValues.isCapturingLogs {
 		galasaErrors.LogStackTrace()
