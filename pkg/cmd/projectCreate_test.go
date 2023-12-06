@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -572,14 +573,13 @@ func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 	var args []string = []string{"project", "create"}
 
 	// When...
-	Execute(factory, args)
+	errGotBack := Execute(factory, args)
 
 	// Then...
 
+	assert.NotNil(t, errGotBack)
+
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Usage:")
 
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
@@ -602,6 +602,7 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
+	fmt.Printf("error returned by Execute method: %v\n", err)
 
 	// Check what the user saw no output
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
@@ -637,10 +638,6 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Usage:")
-
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
 	assert.Contains(t, errText, "Error: GAL1089E: Need to use --maven and/or --gradle parameter")
@@ -651,4 +648,18 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	assert.Nil(t, o)
 
 	assert.NotNil(t, err)
+}
+
+func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// When...
+	commands, _ := NewCommandCollection(factory)
+	projectCreateCommand := commands.GetCommand(COMMAND_NAME_PROJECT_CREATE)
+	assert.NotNil(t, projectCreateCommand)
+	assert.IsType(t, &ProjectCreateCmdValues{}, projectCreateCommand.Values())
+	assert.NotNil(t, projectCreateCommand.CobraCommand())
+	assert.Equal(t, COMMAND_NAME_PROJECT_CREATE, projectCreateCommand.Name())
+
 }

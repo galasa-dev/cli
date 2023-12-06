@@ -25,10 +25,10 @@ const (
 func main() {
 	var targetFolder string
 	factory := cmd.NewRealFactory()
-	cmd, err := cmd.CreateRootCmd(factory)
+	commands, err := cmd.NewCommandCollection(factory)
 	if err == nil {
 		targetFolder = os.Args[1]
-		err = doc.GenMarkdownTree(cmd, targetFolder)
+		err = doc.GenMarkdownTree(commands.GetRootCommand().CobraCommand(), targetFolder)
 	}
 
 	if err != nil {

@@ -1,3 +1,8 @@
+/*
+ * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package cmd
 
 import (
@@ -25,4 +30,18 @@ func TestLocalNoCommandsProducesUsageReport(t *testing.T) {
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
 	assert.Nil(t, o)
+}
+
+func TestCommandListContainsLocalCommand(t *testing.T) {
+	/// Given...
+	factory := NewMockFactory()
+	commands, _ := NewCommandCollection(factory)
+
+	// When...
+	localCommand := commands.GetCommand(COMMAND_NAME_LOCAL)
+
+	// Then...
+	assert.NotNil(t, localCommand)
+	assert.Equal(t, COMMAND_NAME_LOCAL, localCommand.Name())
+	assert.Nil(t, localCommand.Values())
 }

@@ -9,20 +9,50 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createLocalCmd(factory Factory, parentCmd *cobra.Command, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type LocalCommand struct {
+	cobraCommand *cobra.Command
+}
 
-	localCmd := &cobra.Command{
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
+func NewLocalCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
+	cmd := new(LocalCommand)
+	err := cmd.init(rootCmd)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public functions
+// ------------------------------------------------------------------------------------------------
+func (cmd *LocalCommand) Name() string {
+	return COMMAND_NAME_LOCAL
+}
+
+func (cmd *LocalCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *LocalCommand) Values() interface{} {
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private functions
+// ------------------------------------------------------------------------------------------------
+func (cmd *LocalCommand) init(rootCmd GalasaCommand) error {
+	var err error
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	return err
+}
+
+func (cmd *LocalCommand) createCobraCommand(rootCmd GalasaCommand) (*cobra.Command, error) {
+	var err error
+	localCobraCmd := &cobra.Command{
 		Use:   "local",
 		Short: "Manipulate local system",
 		Long:  "Manipulate local system",
 	}
-	parentCmd.AddCommand(localCmd)
-
-	err := createLocalCmdChildren(factory, localCmd, rootCmdValues)
-	return localCmd, err
-}
-
-func createLocalCmdChildren(factory Factory, localCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createLocalInitCmd(factory, localCmd, rootCmdValues)
-	return err
+	rootCmd.CobraCommand().AddCommand(localCobraCmd)
+	return localCobraCmd, err
 }

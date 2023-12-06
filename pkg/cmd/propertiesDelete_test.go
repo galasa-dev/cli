@@ -106,3 +106,14 @@ func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	outText := stdOutConsole.ReadText()
 	assert.Equal(t, outText, "")
 }
+
+func TestPropertiesDeleteCommandInCommandCollectionHasName(t *testing.T) {
+
+	factory := NewMockFactory()
+	commands, _ := NewCommandCollection(factory)
+
+	propertiesDeleteCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES_DELETE)
+	assert.Equal(t, COMMAND_NAME_PROPERTIES_DELETE, propertiesDeleteCommand.Name())
+	assert.Nil(t, propertiesDeleteCommand.Values())
+	assert.NotNil(t, propertiesDeleteCommand.CobraCommand())
+}

@@ -18,14 +18,59 @@ import (
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
-func createRunsSubmitCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+type RunsSubmitCommand struct {
+	values       *utils.RunsSubmitCmdValues
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors
+// ------------------------------------------------------------------------------------------------
+func NewRunsSubmitCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(RunsSubmitCommand)
+	err := cmd.init(factory, runsCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *RunsSubmitCommand) Name() string {
+	return COMMAND_NAME_RUNS_SUBMIT
+}
+
+func (cmd *RunsSubmitCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *RunsSubmitCommand) Values() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.values = &utils.RunsSubmitCmdValues{}
+	cmd.cobraCommand, err = cmd.createRunsSubmitCobraCmd(
+		factory,
+		runsCommand,
+		rootCommand.Values().(*RootCmdValues),
+	)
+	return err
+}
+
+func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
+	runsCommand GalasaCommand,
+	rootCmdValues *RootCmdValues,
+	) (*cobra.Command, error) {
 
 	var err error = nil
 
-	runsSubmitCmdValues := &utils.RunsSubmitCmdValues{}
-
 	submitSelectionFlags := runs.NewTestSelectionFlagValues()
-	runsSubmitCmdValues.TestSelectionFlagValues = submitSelectionFlags
+	cmd.values.TestSelectionFlagValues = submitSelectionFlags
 
 	runsSubmitCmd := &cobra.Command{
 		Use:     "submit",
@@ -33,20 +78,20 @@ func createRunsSubmitCmd(factory Factory, parentCmd *cobra.Command, runsCmdValue
 		Long:    "Submit a list of tests to the ecosystem, monitor them and wait for them to complete",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeSubmit(factory, cmd, args, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executeSubmit(factory, runsCommand.Values().(*RunsCmdValues), rootCmdValues)
 		},
 	}
 
-	runsSubmitCmd.Flags().StringVarP(&runsSubmitCmdValues.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
+	runsSubmitCmd.Flags().StringVarP(&cmd.values.PortfolioFileName, "portfolio", "p", "", "portfolio containing the tests to run")
 
-	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdValues.ReportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
-	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdValues.ReportJsonFilename, "reportjson", "", "json file to record the final results in")
-	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdValues.ReportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
-	runsSubmitCmd.PersistentFlags().StringVarP(&runsSubmitCmdValues.GroupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
-	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdValues.RequestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
+	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.ReportYamlFilename, "reportyaml", "", "yaml file to record the final results in")
+	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.ReportJsonFilename, "reportjson", "", "json file to record the final results in")
+	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.ReportJunitFilename, "reportjunit", "", "junit xml file to record the final results in")
+	runsSubmitCmd.PersistentFlags().StringVarP(&cmd.values.GroupName, "group", "g", "", "the group name to assign the test runs to, if not provided, a psuedo unique id will be generated")
+	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.RequestType, "requesttype", "CLI", "the type of request, used to allocate a run name. Defaults to CLI.")
 
-	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdValues.ThrottleFileName, "throttlefile", "",
+	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.ThrottleFileName, "throttlefile", "",
 		"a file where the current throttle is stored. Periodically the throttle value is read from the file used. "+
 			"Someone with edit access to the file can change it which dynamically takes effect. "+
 			"Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). "+
@@ -55,23 +100,23 @@ func createRunsSubmitCmd(factory Factory, parentCmd *cobra.Command, runsCmdValue
 			"Optional. If not specified, no throttle file is used.",
 	)
 
-	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdValues.PollIntervalSeconds, "poll", runs.DEFAULT_POLL_INTERVAL_SECONDS,
+	runsSubmitCmd.PersistentFlags().IntVar(&cmd.values.PollIntervalSeconds, "poll", runs.DEFAULT_POLL_INTERVAL_SECONDS,
 		"Optional. The interval time in seconds between successive polls of the test runs status. "+
 			"Defaults to "+strconv.Itoa(runs.DEFAULT_POLL_INTERVAL_SECONDS)+" seconds. "+
 			"If less than 1, then default value is used.")
 
-	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdValues.ProgressReportIntervalMinutes, "progress", runs.DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES,
+	runsSubmitCmd.PersistentFlags().IntVar(&cmd.values.ProgressReportIntervalMinutes, "progress", runs.DEFAULT_PROGRESS_REPORT_INTERVAL_MINUTES,
 		"in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting.")
 
-	runsSubmitCmd.PersistentFlags().IntVar(&runsSubmitCmdValues.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
+	runsSubmitCmd.PersistentFlags().IntVar(&cmd.values.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
 		"how many test runs can be submitted in parallel, 0 or less will disable throttling. 1 causes tests to be run sequentially.")
 
-	runsSubmitCmd.PersistentFlags().StringVar(&runsSubmitCmdValues.OverrideFilePath, "overridefile", "",
+	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.OverrideFilePath, "overridefile", "",
 		"path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. "+
 			"Overrides from --override options will take precedence over properties in this property file. "+
 			"A file path of '-' disables reading any properties file.")
 
-	runsSubmitCmd.PersistentFlags().StringSliceVar(&runsSubmitCmdValues.Overrides, "override", make([]string, 0),
+	runsSubmitCmd.PersistentFlags().StringSliceVar(&cmd.values.Overrides, "override", make([]string, 0),
 		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+
 			"Each override is of the form 'name=value'. Multiple instances of this flag can be used. "+
 			"For example --override=prop1=val1 --override=prop2=val2")
@@ -79,31 +124,20 @@ func createRunsSubmitCmd(factory Factory, parentCmd *cobra.Command, runsCmdValue
 	// The trace flag defaults to 'false' if you don't use it.
 	// If you say '--trace' on it's own, it defaults to 'true'
 	// If you say --trace=false or --trace=true you can set the value explicitly.
-	runsSubmitCmd.PersistentFlags().BoolVar(&runsSubmitCmdValues.Trace, "trace", false, "Trace to be enabled on the test runs")
+	runsSubmitCmd.PersistentFlags().BoolVar(&cmd.values.Trace, "trace", false, "Trace to be enabled on the test runs")
 	runsSubmitCmd.PersistentFlags().Lookup("trace").NoOptDefVal = "true"
 
-	runsSubmitCmd.PersistentFlags().BoolVar(&(runsSubmitCmdValues.NoExitCodeOnTestFailures), "noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
+	runsSubmitCmd.PersistentFlags().BoolVar(&(cmd.values.NoExitCodeOnTestFailures), "noexitcodeontestfailures", false, "set to true if you don't want an exit code to be returned from galasactl if a test fails")
 
 	runs.AddCommandFlags(runsSubmitCmd, submitSelectionFlags)
 
-	parentCmd.AddCommand(runsSubmitCmd)
-
-	// Add child commands.
-	err = createRunsSubmitCmdChildren(factory, runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
+	runsCommand.CobraCommand().AddCommand(runsSubmitCmd)
 
 	return runsSubmitCmd, err
 }
 
-func createRunsSubmitCmdChildren(factory Factory, runsSubmitCmd *cobra.Command, runsSubmitCmdValues *utils.RunsSubmitCmdValues, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) error {
-	_, err := createRunsSubmitLocalCmd(factory, runsSubmitCmd, runsSubmitCmdValues, runsCmdValues, rootCmdValues)
-	return err
-}
-
-func executeSubmit(
+func (cmd *RunsSubmitCommand) executeSubmit(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
-	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -142,7 +176,7 @@ func executeSubmit(
 				launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
 				validator := runs.NewStreamBasedValidator()
-				err = validator.Validate(runsSubmitCmdValues.TestSelectionFlagValues)
+				err = validator.Validate(cmd.values.TestSelectionFlagValues)
 				if err == nil {
 
 					var console = factory.GetStdOutConsole()
@@ -150,7 +184,7 @@ func executeSubmit(
 					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console)
 
 					if err == nil {
-						err = submitter.ExecuteSubmitRuns(runsSubmitCmdValues, runsSubmitCmdValues.TestSelectionFlagValues)
+						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 					}
 				}
 			}

@@ -6,8 +6,6 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/spf13/cobra"
 )
@@ -25,23 +23,68 @@ type RootCmdValues struct {
 	CmdParamGalasaHomePath string
 }
 
-var rootCmdValues *RootCmdValues
+type RootCommand struct {
+	values       *RootCmdValues
+	cobraCommand *cobra.Command
+}
 
-func CreateRootCmd(factory Factory) (*cobra.Command, error) {
+// -------------------------------------------------------------------------------
+// Constructor
+// -------------------------------------------------------------------------------
+func NewRootCommand(factory Factory) (*RootCommand, error) {
+	cmd := new(RootCommand)
+
+	err := cmd.init(factory)
+
+	return cmd, err
+}
+
+// -------------------------------------------------------------------------------
+// Public methods
+// -------------------------------------------------------------------------------
+
+func (cmd *RootCommand) Name() string {
+	return COMMAND_NAME_ROOT
+}
+
+func (cmd *RootCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *RootCommand) Values() interface{} {
+	return cmd.values
+}
+
+//-------------------------------------------------------------------------------
+// Private methods
+//-------------------------------------------------------------------------------
+
+func (cmd *RootCommand) init(factory Factory) error {
+
+	var err error = nil
+
 	// Flags parsed by this command put values into this instance of the structure.
-	rootCmdValues = &RootCmdValues{
+	cmd.values = &RootCmdValues{
 		isCapturingLogs: false,
 	}
 
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory)
+
+	return err
+}
+
+func (cmd *RootCommand) createCobraCommand(factory Factory) (*cobra.Command, error) {
 	version, err := embedded.GetGalasaCtlVersion()
 	var rootCmd *cobra.Command
 	if err == nil {
 
 		rootCmd = &cobra.Command{
-			Use:     "galasactl",
-			Short:   "CLI for Galasa",
-			Long:    `A tool for controlling Galasa resources using the command-line.`,
-			Version: version,
+			Use:          "galasactl",
+			Short:        "CLI for Galasa",
+			Long:         `A tool for controlling Galasa resources using the command-line.`,
+			Version:      version,
+			SilenceUsage: true,
+			// SilenceErrors: true,
 		}
 
 		rootCmd.SetErr(factory.GetStdErrConsole())
@@ -53,7 +96,7 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 
 			rootCmd.Version = galasaCtlVersion
 
-			rootCmd.PersistentFlags().StringVarP(&rootCmdValues.logFileName, "log", "l", "",
+			rootCmd.PersistentFlags().StringVarP(&(cmd.values.logFileName), "log", "l", "",
 				"File to which log information will be sent. Any folder referred to must exist. "+
 					"An existing file will be overwritten. "+
 					"Specify \"-\" to log to stderr. "+
@@ -61,87 +104,13 @@ func CreateRootCmd(factory Factory) (*cobra.Command, error) {
 
 			rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 
-			rootCmd.PersistentFlags().StringVarP(&rootCmdValues.CmdParamGalasaHomePath, "galasahome", "", "",
+			rootCmd.PersistentFlags().StringVarP(&(cmd.values.CmdParamGalasaHomePath), "galasahome", "", "",
 				"Path to a folder where Galasa will read and write files and configuration settings. "+
 					"The default is '${HOME}/.galasa'. "+
 					"This overrides the GALASA_HOME environment variable which may be set instead.",
 			)
 
-			err = createRootCmdChildren(factory, rootCmd, rootCmdValues)
-
-			if err == nil {
-				sanitiseCommandHelpDescriptions(rootCmd)
-			}
 		}
 	}
 	return rootCmd, err
-}
-
-func sanitiseCommandHelpDescriptions(rootCmd *cobra.Command) {
-	setHelpFlagForAllCommands(rootCmd, func(cobra *cobra.Command) {
-		alias := cobra.NameAndAliases()
-		//if the command has an alias,
-		//the format would be cobra.Name, cobra.Aliases
-		//otherwise it is just cobra.Name
-		nameAndAliases := strings.Split(alias, ", ")
-		if len(nameAndAliases) > 1 {
-			alias = nameAndAliases[1]
-		}
-
-		cobra.Flags().BoolP("help", "h", false, "Displays the options for the "+alias+" command.")
-	})
-}
-
-func createRootCmdChildren(factory Factory, rootCmd *cobra.Command, rootCmdValues *RootCmdValues) error {
-	_, err := createLocalCmd(factory, rootCmd, rootCmdValues)
-	if err == nil {
-		_, err = createProjectCmd(factory, rootCmd, rootCmdValues)
-	}
-	if err == nil {
-		_, err = createPropertiesCmd(factory, rootCmd, rootCmdValues)
-	}
-	if err == nil {
-		_, err = createRunsCmd(factory, rootCmd, rootCmdValues)
-	}
-	if err == nil {
-		_, err = createAuthCmd(factory, rootCmd, rootCmdValues)
-	}
-	return err
-}
-
-// The main entry point into the cmd package.
-func Execute(factory Factory, args []string) error {
-	var err error
-	var rootCmd *cobra.Command
-
-	finalWordHandler := factory.GetFinalWordHandler()
-
-	rootCmd, err = CreateRootCmd(factory)
-
-	if err == nil {
-
-		rootCmd.SetArgs(args)
-
-		// Catch execution if a panic happens.
-		defer func() {
-			err := recover()
-
-			// Display the error and exit.
-			finalWordHandler.FinalWord(err)
-		}()
-
-		// Execute the command
-		err = rootCmd.Execute()
-	}
-	finalWordHandler.FinalWord(err)
-	return err
-}
-
-func setHelpFlagForAllCommands(command *cobra.Command, setHelpFlag func(*cobra.Command)) {
-	setHelpFlag(command)
-
-	//for all the commands eg properties get, set etc
-	for _, cobraCommand := range command.Commands() {
-		setHelpFlagForAllCommands(cobraCommand, setHelpFlag)
-	}
 }

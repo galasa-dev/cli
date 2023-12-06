@@ -15,11 +15,50 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCanCreateRootCmd(t *testing.T) {
+func TestCommandsCollectionHasARootCommand(t *testing.T) {
 	factory := NewMockFactory()
-	rootCmd, err := CreateRootCmd(factory)
+	commands, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
-	assert.NotNil(t, rootCmd)
+	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+	assert.NotNil(t, rootCommand)
+}
+
+func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	// When...
+	commands, err := NewCommandCollection(factory)
+	// Then...
+	assert.Nil(t, err)
+	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+
+	assert.Equal(t, rootCommand.Name(), COMMAND_NAME_ROOT)
+}
+
+func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	// When...
+	commands, err := NewCommandCollection(factory)
+	// Then...
+	assert.Nil(t, err)
+	rootCommand := commands.GetRootCommand()
+
+	assert.NotNil(t, rootCommand.CobraCommand())
+}
+
+func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	// When...
+	commands, err := NewCommandCollection(factory)
+	// Then...
+	assert.Nil(t, err)
+	rootCommand := commands.GetRootCommand()
+
+	values := rootCommand.Values()
+	assert.NotNil(t, values)
+	assert.IsType(t, &RootCmdValues{}, values)
 }
 
 func TestVersionFromCommandLine(t *testing.T) {

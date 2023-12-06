@@ -16,35 +16,79 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type PropertiesDeleteCommand struct {
+	cobraCommand *cobra.Command
+}
+
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewPropertiesDeleteCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(PropertiesDeleteCommand)
+
+	err := cmd.init(factory, propertiesCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesDeleteCommand) Name() string {
+	return COMMAND_NAME_PROPERTIES_DELETE
+}
+
+func (cmd *PropertiesDeleteCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *PropertiesDeleteCommand) Values() interface{} {
+	// There are no values.
+	return nil
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+	var err error
+	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, rootCmd)
+	return err
+}
+
 //Objective: Allow user to do this:
 //	properties delete --namespace "framework" --name "hello"
 //  And then display a successful message or error
 
-func createPropertiesDeleteCmd(factory Factory, parentCmd *cobra.Command, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
+	factory Factory, 
+	propertiesCommand GalasaCommand,
+	rootCmd GalasaCommand) (*cobra.Command, error) {
+	
 	var err error = nil
+	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertiesDeleteCmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a property in a namespace.",
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executePropertiesDelete(factory, cmd, args, propertiesCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executePropertiesDelete(factory, propertiesCmdValues, rootCmd.Values().(*RootCmdValues))
 		},
 		Aliases: []string{"properties delete"},
 	}
 
-	parentCmd.AddCommand(propertiesDeleteCmd)
+	propertiesCommand.CobraCommand().AddCommand(propertiesDeleteCmd)
 
-	addNameProperty(propertiesDeleteCmd, true, propertiesCmdValues)
-	addNamespaceProperty(propertiesDeleteCmd, true, propertiesCmdValues)
+	addPropertyNameFlag(propertiesDeleteCmd, true, propertiesCmdValues)
+	addNamespaceFlag(propertiesDeleteCmd, true, propertiesCmdValues)
 
 	// There are no sub-commands to add to the tree.
 
 	return propertiesDeleteCmd, err
 }
 
-func executePropertiesDelete(factory Factory, cmd *cobra.Command, args []string, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.

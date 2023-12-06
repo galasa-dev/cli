@@ -19,6 +19,11 @@ import (
 //    runs download --name U123 [--force]
 // And then galasactl downloads the artifacts for the given run.
 
+type RunsDownloadCommand struct {
+	values       *RunsDownloadCmdValues
+	cobraCommand *cobra.Command
+}
+
 // Variables set by cobra's command-line parsing.
 type RunsDownloadCmdValues struct {
 	runNameDownload         string
@@ -26,41 +31,78 @@ type RunsDownloadCmdValues struct {
 	runDownloadTargetFolder string
 }
 
-func createRunsDownloadCmd(factory Factory, parentCmd *cobra.Command, runsCmdValues *RunsCmdValues, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+// ------------------------------------------------------------------------------------------------
+// Constructors methods
+// ------------------------------------------------------------------------------------------------
+func NewRunsDownloadCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(RunsDownloadCommand)
+	err := cmd.init(factory, runsCommand, rootCommand)
+	return cmd, err
+}
+
+// ------------------------------------------------------------------------------------------------
+// Public methods
+// ------------------------------------------------------------------------------------------------
+func (cmd *RunsDownloadCommand) Name() string {
+	return COMMAND_NAME_RUNS_DOWNLOAD
+}
+
+func (cmd *RunsDownloadCommand) CobraCommand() *cobra.Command {
+	return cmd.cobraCommand
+}
+
+func (cmd *RunsDownloadCommand) Values() interface{} {
+	return cmd.values
+}
+
+// ------------------------------------------------------------------------------------------------
+// Private methods
+// ------------------------------------------------------------------------------------------------
+
+func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	cmd.values = &RunsDownloadCmdValues{}
+	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory,
+		runsCommand,
+		rootCommand.Values().(*RootCmdValues),
+	)
+	return err
+}
+
+func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
+	factory Factory,
+	runsCommand GalasaCommand,
+	rootCmdValues *RootCmdValues,
+) (*cobra.Command, error) {
+
 	var err error = nil
+	runsCmdValues := runsCommand.Values().(*RunsCmdValues) 
 
-	runsDownloadCmdValues := &RunsDownloadCmdValues{}
-
-	runsDownloadCmd := &cobra.Command{
+	runsDownloadCobraCmd := &cobra.Command{
 		Use:     "download",
 		Short:   "Download the artifacts of a test run which ran.",
 		Long:    "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs download"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeRunsDownload(factory, cmd, args, runsDownloadCmdValues, runsCmdValues, rootCmdValues)
+		RunE: func(cobraCmd *cobra.Command, args []string) error {
+			return cmd.executeRunsDownload(factory, runsCmdValues, rootCmdValues)
 		},
 	}
 
-	runsDownloadCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runNameDownload, "name", "", "the name of the test run we want information about")
-	runsDownloadCmd.PersistentFlags().BoolVar(&runsDownloadCmdValues.runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
-	runsDownloadCmd.MarkPersistentFlagRequired("name")
-	runsDownloadCmd.PersistentFlags().StringVar(&runsDownloadCmdValues.runDownloadTargetFolder, "destination", ".",
+	runsDownloadCobraCmd.PersistentFlags().StringVar(&cmd.values.runNameDownload, "name", "", "the name of the test run we want information about")
+	runsDownloadCobraCmd.PersistentFlags().BoolVar(&cmd.values.runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
+	runsDownloadCobraCmd.MarkPersistentFlagRequired("name")
+	runsDownloadCobraCmd.PersistentFlags().StringVar(&cmd.values.runDownloadTargetFolder, "destination", ".",
 		"The folder we want to download test run artifacts into. Sub-folders will be created within this location",
 	)
 
-	parentCmd.AddCommand(runsDownloadCmd)
+	runsCommand.CobraCommand().AddCommand(runsDownloadCobraCmd)
 
-	// There are no children commands of this command to add to the command tree.
-
-	return runsDownloadCmd, err
+	return runsDownloadCobraCmd, err
 }
 
-func executeRunsDownload(
+func (cmd *RunsDownloadCommand) executeRunsDownload(
 	factory Factory,
-	cmd *cobra.Command,
-	args []string,
-	runsDownloadCmdValues *RunsDownloadCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -100,13 +142,13 @@ func executeRunsDownload(
 
 				// Call to process the command in a unit-testable way.
 				err = runs.DownloadArtifacts(
-					runsDownloadCmdValues.runNameDownload,
-					runsDownloadCmdValues.runForceDownload,
+					cmd.values.runNameDownload,
+					cmd.values.runForceDownload,
 					fileSystem,
 					timeService,
 					console,
 					apiClient,
-					runsDownloadCmdValues.runDownloadTargetFolder,
+					cmd.values.runDownloadTargetFolder,
 				)
 			}
 		}
