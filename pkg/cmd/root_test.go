@@ -132,3 +132,33 @@ func TestCanGetTestsFailedExitCodeAndErrorTextFromATestFailedGalasaErrorPointer(
 	assert.Equal(t, 2, exitCode, "Wrong default exit code")
 	assert.False(t, isStackTraceWanted, "We don't want stack trace from galasa errors")
 }
+
+
+func TestRootHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Contains(t, outText, "Displays the options for the 'galasactl' command.")
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Empty(t, errText)
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
