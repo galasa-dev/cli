@@ -29,7 +29,7 @@ func (*PropertySummaryFormatter) GetName() string {
 	return SUMMARY_FORMATTER_NAME
 }
 
-func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.CpsProperty) (string, error) {
+func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.GalasaProperty) (string, error) {
 	var result string = ""
 	var err error = nil
 	buff := strings.Builder{}
@@ -43,10 +43,12 @@ func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.CpsP
 		table = append(table, headers)
 		for _, property := range cpsProperties {
 			var line []string
-			namespace, name := GetNameAndNamespace(*property.Name)
+			namespace := *property.Metadata.Namespace
+			name := *property.Metadata.Name
+			value := *property.Data.Value
 
 			line = append(line, namespace)
-			line = append(line, name, *property.Value)
+			line = append(line, name, value)
 			table = append(table, line)
 		}
 

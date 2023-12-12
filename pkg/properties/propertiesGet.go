@@ -40,7 +40,7 @@ func GetProperties(
 
 		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
 		if err == nil {
-			var cpsProperty []galasaapi.CpsProperty
+			var cpsProperty []galasaapi.GalasaProperty
 			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
 			if err == nil {
 				var outputText string
@@ -67,13 +67,16 @@ func getCpsPropertiesFromRestApi(
 	infix string,
 	apiClient *galasaapi.APIClient,
 	console utils.Console,
-) ([]galasaapi.CpsProperty, error) {
+) ([]galasaapi.GalasaProperty, error) {
 
 	var err error = nil
 
 	var context context.Context = nil
 
-	var cpsProperties = make([]galasaapi.CpsProperty, 0)
+	// // An HTTP client which can communicate with the api server in an ecosystem.
+	// restClient := api.InitialiseAPI(apiServerUrl)
+
+	var cpsProperties = make([]galasaapi.GalasaProperty, 0)
 
 	if name == "" {
 		apicall := apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace)

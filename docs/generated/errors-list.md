@@ -109,6 +109,19 @@ The `galasactl` tool can generate the following errors:
 - GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
 - GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
 - GAL1108E: Invalid bearer token. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
+- GAL1109E: Unable to access the file. Reason: '{}'
+- GAL1110E: Could not retrieve the content of the file provided. Reason: '{}'
+- GAL1111E: Error parsing the file '{}'. The file is not in the expected yaml format. Reason: '{}'. Invalid yaml:'{}'
+- GAL1112E: Error converting the parsed yaml content into a json payload for the http request. Reason: '{}'
+- GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program. This could indicate that the client and Ecosystem have a mis-match in their versions, and the client needs to be upgraded, or downgraded to match. Use the galasactl version` to find the version of this tool.
+HTTP Response status code reported: {}
+The list of errors returned: '{}'
+- GAL1114E: A failure was reported from the Galasa Ecosystem where the Ecosystem is at fault. Please contact your Galasa Ecosystem adminstrator.
+HTTP Response status code reported: {}
+The list of errors returned: {}
+- GAL1115E: An unexpected response was received from the Galasa Ecosystem. Please collect a log using the --log option and contact your Galasa Ecosystem adminstrator.
+HTTP Response status code reported: {}
+The list of errors returned: {}
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

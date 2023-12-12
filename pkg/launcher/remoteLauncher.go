@@ -96,10 +96,10 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 	cpsProperty, _, err := launcher.apiClient.ConfigurationPropertyStoreAPIApi.
 		GetCpsNamespaceCascadeProperty(nil, "framework", "test", "streams").Execute()
 	if err == nil {
-		if cpsProperty.Value == nil {
+		if cpsProperty.Data.Value == nil {
 			streams = make([]string, 0)
 		} else {
-			streams = strings.Split(*cpsProperty.Value, ",")
+			streams = strings.Split(*cpsProperty.Data.Value, ",")
 		}
 	}
 	return streams, err
@@ -109,28 +109,28 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 
 	var err error = nil
 	var testCatalog TestCatalog
-	var cpsProperty *galasaapi.CpsProperty
+	var cpsProperty *galasaapi.GalasaProperty
 
 	cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.GetCpsNamespaceCascadeProperty(
 		nil, "framework", "test.stream."+stream, "location").Execute()
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
-	} else if cpsProperty.Value == nil {
+	} else if cpsProperty.Data.Value == nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
 	}
 
 	if err == nil {
 		catalogString := new(strings.Builder)
 		var resp *http.Response
-		resp, err = http.Get(*cpsProperty.Value)
+		resp, err = http.Get(*cpsProperty.Data.Value)
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, *cpsProperty.Value, stream, err)
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, *cpsProperty.Data.Value, stream, err)
 		} else {
 			defer resp.Body.Close()
 
 			_, err = io.Copy(catalogString, resp.Body)
 			if err != nil {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_COPY_FAILED, *cpsProperty.Value, stream, err)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_COPY_FAILED, *cpsProperty.Data.Value, stream, err)
 			}
 		}
 
@@ -138,7 +138,7 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 			err = json.Unmarshal([]byte(catalogString.String()), &testCatalog)
 			if err != nil {
 				err = galasaErrors.NewGalasaError(
-					galasaErrors.GALASA_ERROR_CATALOG_UNMARSHAL_FAILED, *cpsProperty.Value, stream, err)
+					galasaErrors.GALASA_ERROR_CATALOG_UNMARSHAL_FAILED, *cpsProperty.Data.Value, stream, err)
 			}
 		}
 	}
