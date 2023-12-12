@@ -621,7 +621,7 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	// Check that the default folder was created.
 	fs := factory.GetFileSystem()
 	var isExists bool
-	isExists, err = fs.DirExists("my.pkg")
+	isExists, _ = fs.DirExists("my.pkg")
 	assert.True(t, isExists)
 }
 
