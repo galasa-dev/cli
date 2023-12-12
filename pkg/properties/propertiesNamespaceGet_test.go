@@ -29,9 +29,9 @@ func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, re
 	var body string
 	statusCode = 200
 	if state == "populated" {
-		body = `[{"name" : "framework", "properties_url"  : "/cps/framework/properties","type" : "normal"},` +
-			`{"name" : "secure", "properties_url"  : "/cps/secure/properties","type" : "secure"},` +
-			`{"name" : "anamespace",	"properties_url"  : "/cps/anamespace/properties", "type" : "normal"}]`
+		body = `[{"name" : "framework", "propertiesUrl"  : "/cps/framework/properties","type" : "normal"},` +
+			`{"name" : "secure", "propertiesUrl"  : "/cps/secure/properties","type" : "secure"},` +
+			`{"name" : "anamespace",	"propertiesUrl"  : "/cps/anamespace/properties", "type" : "normal"}]`
 	} else if state == "empty" {
 		body = "[]"
 	} else {
@@ -44,6 +44,7 @@ func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, re
 
 func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 	//Given...
+	namespaceOutputFormat := "summary"
 	serverState := "populated"
 	server := NewPropertiesNamespaceServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
@@ -58,7 +59,7 @@ func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 		"Total:3\n"
 
 	//When
-	err := GetNamespaceProperties(apiClient, console)
+	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -67,6 +68,7 @@ func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 
 func TestEmptyNamespacesPathReturnsOk(t *testing.T) {
 	//Given...
+	namespaceOutputFormat := "summary"
 	serverState := "empty"
 	server := NewPropertiesNamespaceServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
@@ -76,7 +78,7 @@ func TestEmptyNamespacesPathReturnsOk(t *testing.T) {
 	expectedOutput := "Total:0\n"
 
 	//When
-	err := GetNamespaceProperties(apiClient, console)
+	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -85,6 +87,7 @@ func TestEmptyNamespacesPathReturnsOk(t *testing.T) {
 
 func TestInvalidPathReturnsError(t *testing.T) {
 	//Given...
+	namespaceOutputFormat := "summary"
 	serverState := ""
 	server := NewPropertiesNamespaceServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
@@ -93,9 +96,100 @@ func TestInvalidPathReturnsError(t *testing.T) {
 	console := utils.NewMockConsole()
 
 	//When
-	err := GetNamespaceProperties(apiClient, console)
+	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1103E")
+}
+
+func TestMultipleNamespacesRawFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespaceOutputFormat := "raw"
+	serverState := "populated"
+	server := NewPropertiesNamespaceServletMock(t, serverState)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+	expectedOutput := `framework|normal
+secure|secure
+anamespace|normal
+`
+
+	//When
+	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestEmptyNamespacesRawFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespaceOutputFormat := "raw"
+	serverState := "empty"
+	server := NewPropertiesNamespaceServletMock(t, serverState)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+	expectedOutput := ``
+
+	//When
+	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestMultipleNamespacesYamlFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespaceOutputFormat := "yaml"
+	serverState := "populated"
+	server := NewPropertiesNamespaceServletMock(t, serverState)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+	expectedOutput := `apiVersion: galasa-dev/v1alpha1
+name: framework
+propertiesUrl: /cps/framework/properties
+type: normal
+---
+name: secure
+propertiesUrl: /cps/secure/properties
+type: secure
+---
+name: anamespace
+propertiesUrl: /cps/anamespace/properties
+type: normal
+`
+
+	//When
+	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestEmptyNamespacesYamlFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespaceOutputFormat := "yaml"
+	serverState := "empty"
+	server := NewPropertiesNamespaceServletMock(t, serverState)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+	expectedOutput := ``
+
+	//When
+	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, console.ReadText())
 }

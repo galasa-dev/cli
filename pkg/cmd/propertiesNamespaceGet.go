@@ -138,7 +138,7 @@ func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
 
 				// Call to process the command in a unit-testable way.
-				err = properties.GetNamespaceProperties(apiClient, console)
+				err = properties.GetNamespaceProperties(apiClient, cmd.values.namespaceOutputFormat, console)
 			}
 		}
 	}

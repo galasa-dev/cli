@@ -18,6 +18,7 @@ import (
 // GetNamespaceProperties - performs all the logic to implement the `galasactl properties namespace get` command
 func GetNamespaceProperties(
 	apiClient *galasaapi.APIClient,
+	namespaceOutputFormat string,
 	console utils.Console,
 ) error {
 	var err error
@@ -25,7 +26,7 @@ func GetNamespaceProperties(
 	var context context.Context = nil
 
 	//only format so far is the default format, summary
-	chosenFormatter, err = validateOutputFormatFlagValue("summary", validFormatters)
+	chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validFormatters)
 	if err == nil {
 		var namespaces []galasaapi.Namespace
 		namespaces, _, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).Execute()
