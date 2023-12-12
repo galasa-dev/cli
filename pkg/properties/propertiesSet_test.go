@@ -11,8 +11,11 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -92,8 +95,16 @@ func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -109,8 +120,16 @@ func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t 
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -129,8 +148,16 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	value := "updatedValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -146,8 +173,16 @@ func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T
 	value := "updatedValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -164,8 +199,16 @@ func TestSetNoNamespaceReturnsError(t *testing.T) {
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -182,8 +225,16 @@ func TestSetNoNameReturnsError(t *testing.T) {
 	value := "newValue"
 
 	server := newSetPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -191,4 +242,21 @@ func TestSetNoNameReturnsError(t *testing.T) {
 	//Then
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "GAL1102E:")
+}
+
+func TestCreateGalasaPropertyReturnsOk(t *testing.T) {
+	//Given
+	namesapce := "framework"
+	name := "name"
+	value := "value"
+
+	//When
+	property := createGalasaProperty(namesapce, name, value)
+
+	//Then
+	assert.Equal(t, property.GetApiVersion(), APIVERSION)
+	assert.Equal(t, property.GetKind(), KIND)
+	assert.Equal(t, property.Metadata.GetNamespace(), namesapce)
+	assert.Equal(t, property.Metadata.GetName(), name)
+	assert.Equal(t, property.Data.GetValue(), value)
 }

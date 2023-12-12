@@ -700,7 +700,38 @@ function properties_namespaces_get {
 }
 
 #--------------------------------------------------------------------------
+function properties_resources_apply {
+    h2 "Performing resources apply, expecting ..."
 
+    output_file="$ORIGINAL_DIR/temp/properties-apply-output.yaml"
+    echo """apiVersion: galasa-dev/v1alpha1
+kind: GalasaProperty
+metadata:
+  name: filling
+  namespace: doughnuts
+data:
+  value: custard
+""" > $output_file
+
+    cmd="$ORIGINAL_DIR/bin/${binary} resources apply \
+    --bootstrap $bootstrap \
+    - f $output_file \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+
+    rm $output_file
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to apply resources"
+        exit 1
+    fi
+
+    success "Properties resources apply seems to be successful."
+}
+#-------------------------------------------------------------------------------------
 
 
 function properties_tests {
@@ -724,6 +755,7 @@ function properties_tests {
     properties_get_with_namespace_raw_format
     properties_secure_namespace_set
     properties_secure_namespace_delete
+    # properties_resources_apply
 }
 
 # checks if it's been called by main, set this variable if it is

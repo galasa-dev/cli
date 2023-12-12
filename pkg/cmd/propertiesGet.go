@@ -76,10 +76,10 @@ func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaC
 }
 
 func (cmd *PropertiesGetCommand) createCobraCommand(
-	factory Factory, 
-	propertiesCommand GalasaCommand, 
+	factory Factory,
+	propertiesCommand GalasaCommand,
 	rootCommandValues *RootCmdValues,
-	) *cobra.Command {
+) *cobra.Command {
 
 	propertiesCommandValues := propertiesCommand.Values().(*PropertiesCmdValues)
 	propertiesGetCobraCmd := &cobra.Command{

@@ -138,14 +138,6 @@ read_boot_jar_version
 function download_dependencies {
     h2 "Making sure the tools folder is present."
 
-    if [[ "${build_type}" == "clean" ]]; then
-        h2 "Cleaning the dependencies out..."
-        rm -fr build/dependencies
-        h2 "Tidying go mod file..."
-        go mod tidy
-        rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to tidy go mod. rc=${rc}" ; exit 1 ; fi
-    fi
-
     info "Making sure the boot jar we embed is a fresh one from maven."
     rm -fr pkg/embedded/templates/galasahome/lib/*.jar
 
@@ -161,6 +153,21 @@ function download_dependencies {
     success "OK"
 }
 
+
+#--------------------------------------------------------------------------
+function go_mod_tidy {
+    h2 "Tidying up go.mod..."
+
+    if [[ "${build_type}" == "clean" ]]; then
+        h2 "Cleaning the dependencies out..."
+        rm -fr build/dependencies
+        h2 "Tidying go mod file..."
+        go mod tidy
+        rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to tidy go mod. rc=${rc}" ; exit 1 ; fi
+    fi
+
+    success "OK"
+}
 
 #--------------------------------------------------------------------------
 # Invoke the generator
@@ -597,6 +604,7 @@ function cleanup_temp {
 # The steps to build the CLI
 download_dependencies
 generate_rest_client
+go_mod_tidy
 build_executables
 
 

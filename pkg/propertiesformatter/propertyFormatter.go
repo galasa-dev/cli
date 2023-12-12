@@ -37,20 +37,12 @@ const (
 	//namespaces display
 	HEADER_NAMESPACE      = "namespace"
 	HEADER_NAMESPACE_TYPE = "type"
-	HEADER_NAMESPACE_URL  = "url"
 )
 
 type PropertyFormatter interface {
-	FormatProperties(propertyResults []galasaapi.CpsProperty) (string, error)
+	FormatProperties(propertyResults []galasaapi.GalasaProperty) (string, error)
 	FormatNamespaces(namespaces []galasaapi.Namespace) (string, error)
 	GetName() string
-}
-
-func GetNameAndNamespace(fullName string) (string, string) {
-	splitName := strings.SplitN(fullName, ".", 2)
-	namespace := splitName[0]
-	name := splitName[1]
-	return namespace, name
 }
 
 // -----------------------------------------------------

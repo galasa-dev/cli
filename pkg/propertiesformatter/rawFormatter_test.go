@@ -19,7 +19,7 @@ func TestPropertiesRawFormatterNoDataReturnsNothing(t *testing.T) {
 	// For...
 	formatter := NewPropertyRawFormatter()
 	// No data to format...
-	properties := make([]galasaapi.CpsProperty, 0)
+	properties := make([]galasaapi.GalasaProperty, 0)
 
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(properties)
@@ -34,8 +34,8 @@ func TestPropertiesRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
 	formatter := NewPropertyRawFormatter()
 
-	properties := make([]galasaapi.CpsProperty, 0)
-	property1 := CreateProperty("namespace.name1", "value1")
+	properties := make([]galasaapi.GalasaProperty, 0)
+	property1 := CreateMockGalasaProperty("testNamespace", "name1", "value1")
 
 	properties = append(properties, *property1)
 
@@ -44,7 +44,7 @@ func TestPropertiesRawFormatterSingleDataReturnsCorrectly(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput := "namespace|name1|value1\n"
+	expectedFormattedOutput := "testNamespace|name1|value1\n"
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -52,9 +52,9 @@ func TestPropertiesRawFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// For..
 	formatter := NewPropertyRawFormatter()
 
-	properties := make([]galasaapi.CpsProperty, 0)
-	property1 := CreateProperty("namespace.name1", "value1")
-	property2 := CreateProperty("namespace.name2", "value2")
+	properties := make([]galasaapi.GalasaProperty, 0)
+	property1 := CreateMockGalasaProperty("namespace", "name1", "value1")
+	property2 := CreateMockGalasaProperty("namespace", "name2", "value2")
 	properties = append(properties, *property1, *property2)
 
 	// When...
