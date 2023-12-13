@@ -52,3 +52,19 @@ func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"properties", "get"}
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "Error: required flag(s) \"namespace\" not set")
+
+	assert.NotNil(t, err)
+}

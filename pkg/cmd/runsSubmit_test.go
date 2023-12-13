@@ -53,3 +53,31 @@ func TestRunsSubmitHelpFlagSetCorrectly(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestRunsSubmitWithoutFlagsErrors(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"runs", "submit", "local"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Should throw an error asking for flags to be set
+	assert.NotNil(t, err, "err should have been set!")
+	assert.Contains(t, err.Error(), "required flag(s) \"class\", \"obr\" not set")
+}
+
+func TestRunsSubmitExecutesWithPortfolio(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"runs", "submit", "local", "--class", "osgi.bundle/class.path"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Should throw an error asking for flags to be set
+	assert.NotNil(t, err, "err should have been set!")
+	assert.Contains(t, err.Error(), "required flag(s) \"obr\" not set")
+}
