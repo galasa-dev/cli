@@ -896,7 +896,7 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
-func TestValidNamespaceFormatRawReturnsOk(t *testing.T) {
+func TestValidNamespaceRawFormatReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
 	name := ""
@@ -929,4 +929,183 @@ validNamespace|property3|value3
 	//Then
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestEmptyNamespaceRawFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "emptyNamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "raw"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
+	expectedOutput := ``
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestValidNamespaceYamlFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validNamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "yaml"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
+	expectedOutput := `apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property0
+data:
+    value: value0
+---
+apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property1
+data:
+    value: value1
+---
+apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property2
+data:
+    value: value2
+---
+apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property3
+data:
+    value: value3
+`
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestEmptyNamespaceYamlFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "emptyNamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "yaml"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
+	expectedOutput := ``
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestCreateFormattersSummaryReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	summary, err := validateOutputFormatFlagValue("summary", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, summary)
+}
+
+func TestCreateFormattersRawReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	raw, err := validateOutputFormatFlagValue("raw", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, raw)
+}
+
+func TestCreateFormattersHasYamlReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := true
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	yaml, err := validateOutputFormatFlagValue("yaml", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, yaml)
+}
+
+func TestCreateFormattersNoYamlReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	_, err := validateOutputFormatFlagValue("yaml", validFormatters)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1067E")
 }
