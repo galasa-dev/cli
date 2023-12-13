@@ -45,6 +45,7 @@ const (
 	COMMAND_NAME_RESOURCES_APPLY          = "resources apply"
 	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
 	COMMAND_NAME_RESOURCES_UPDATE         = "resources update"
+	COMMAND_NAME_RESOURCES_DELETE         = "resources delete"
 )
 
 // -----------------------------------------------------------------
@@ -292,6 +293,7 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory Factory, roo
 	var resourcesApplyCommand GalasaCommand
 	var resourcesCreateCommand GalasaCommand
 	var resourcesUpdateCommand GalasaCommand
+	var resourcesDeleteCommand GalasaCommand
 
 	if err == nil {
 		resourcesCommand, err = NewResourcesCmd(rootCommand)
@@ -301,6 +303,9 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory Factory, roo
 				resourcesCreateCommand, err = NewResourcesCreateCommand(factory, resourcesCommand, rootCommand)
 				if err == nil {
 					resourcesUpdateCommand, err = NewResourcesUpdateCommand(factory, resourcesCommand, rootCommand)
+					if err == nil {
+						resourcesDeleteCommand, err = NewResourcesDeleteCommand(factory, resourcesCommand, rootCommand)
+					}
 				}
 			}
 		}
@@ -311,6 +316,7 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory Factory, roo
 		commands.commandMap[resourcesApplyCommand.Name()] = resourcesApplyCommand
 		commands.commandMap[resourcesCreateCommand.Name()] = resourcesCreateCommand
 		commands.commandMap[resourcesUpdateCommand.Name()] = resourcesUpdateCommand
+		commands.commandMap[resourcesDeleteCommand.Name()] = resourcesDeleteCommand
 	}
 
 	return err

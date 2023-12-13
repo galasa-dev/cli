@@ -30,32 +30,36 @@ func ApplyResources(
 	var err error
 	var fileContent string
 	var jsonBytes []byte
+	var reqMethod = "POST"
 
 	err = validateFilePathExists(fileSystem, filePath)
 
 	if err == nil {
-		//read yaml file content
 		fileContent, err = getYamlFileContent(fileSystem, filePath)
 
 		if err == nil {
+			//convert resources in yaml file into a json payload
 			jsonBytes, err = yamlToByteArray(fileContent, action)
 		}
 
 		if err == nil {
-			err = sendJsonToApi(jsonBytes, apiServerUrl)
+			if action == "delete"{
+				reqMethod = "DELETE"
+			}
+			err = sendJsonToApi(reqMethod, jsonBytes, apiServerUrl)
 		}
 	}
 	return err
 }
 
-func sendJsonToApi(payload []byte, apiServerUrl string) error {
+func sendJsonToApi(reqMethod string, payload []byte, apiServerUrl string) error {
 
 	var err error
 	var responseBody []byte
 	if err == nil {
 
 		var req *http.Request
-		req, err = http.NewRequest("POST", apiServerUrl+"/resources/", bytes.NewBuffer(payload))
+		req, err = http.NewRequest(reqMethod, apiServerUrl+"/resources/", bytes.NewBuffer(payload))
 
 		if err == nil {
 			req.Header.Set("Content-Type", "application/json")
