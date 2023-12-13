@@ -482,6 +482,46 @@ framework|propertyName1|value1
 ```
 
 
+
+## resources apply
+This command creates or updates resources in the Galasa Ecosystem
+
+For each resource provided in the yaml file, it is either created, if it doesn't already exist, or updated if it already exists. A compiled list of errors is returned if any error occurs for any resource during the process.
+
+### Examples
+```
+galasactl resources apply -f my_resources.yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_apply.md).
+
+## resources create
+This command creates resources in the Galasa Ecosystem
+
+Each resource provided in the yaml file is created. A compiled list of errors is returned if any error occurs for any resource during the process.
+
+### Examples
+```
+galasactl resources create -f my_resources.yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_create.md).
+
+## resources update
+This command updates resources in the Galasa Ecosystem
+
+Each resource provided in the yaml file is updated. A compiled list of errors is returned if any error occurs for any resource during the process.
+
+### Examples
+```
+galasactl resources update -f my_resources.yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_update.md).
+
+
+
+
 ## Reference Material
 
 ### Syntax
