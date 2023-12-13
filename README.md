@@ -451,7 +451,7 @@ For a complete list of supported parameters see [here](./docs/generated/galasact
 ## properties namespaces get
 This command retrieves details of namespaces in the CPS.
 
-The formats supported are: 'summary', 'raw', and 'yaml'. The default is 'summary'.
+The formats supported are: 'summary' and 'raw'. The default is 'summary'.
 
 For a complete list of supported formatters try running the command with a known to be bad formatter name. For example:
 ```
@@ -462,9 +462,6 @@ galasactl properties namespaces get --format badFormatterName
 
 ```
 galasactl namespaces properties get
-```
-```
-galasactl namespaces properties get --format yaml
 ```
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_namespaces_get.md).
@@ -481,13 +478,6 @@ framework propertyName1 value1
 > galasactl namespaces properties get --format raw
 framework|propertyName0|value0
 framework|propertyName1|value1
->
-```
-```
-> galasactl namespaces properties get --format yaml
-name: framework
-propertiesUrl: cps/framework/properties
-type: normal
 >
 ```
 

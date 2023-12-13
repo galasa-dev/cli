@@ -91,7 +91,8 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 		Aliases: []string{"namespaces get"},
 	}
 
-	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
+	namespaceHasYamlFormat := false
+	formatters := properties.GetFormatterNamesString(properties.CreateFormatters(namespaceHasYamlFormat))
 	propertieNamespaceGetCobraCommand.PersistentFlags().StringVar(&cmd.values.namespaceOutputFormat, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 
 	propertiesNamespaceCommand.CobraCommand().AddCommand(propertieNamespaceGetCobraCommand)

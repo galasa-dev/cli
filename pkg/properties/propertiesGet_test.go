@@ -1024,8 +1024,6 @@ data:
 	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
-
-
 func TestEmptyNamespaceYamlFormatReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "emptyNamespace"
@@ -1055,4 +1053,59 @@ func TestEmptyNamespaceYamlFormatReturnsOk(t *testing.T) {
 	//Then
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestCreateFormattersSummaryReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	summary, err := validateOutputFormatFlagValue("summary", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, summary)
+}
+
+func TestCreateFormattersRawReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	raw, err := validateOutputFormatFlagValue("raw", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, raw)
+}
+
+func TestCreateFormattersHasYamlReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := true
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	yaml, err := validateOutputFormatFlagValue("yaml", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, yaml)
+}
+
+func TestCreateFormattersNoYamlReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	_, err := validateOutputFormatFlagValue("yaml", validFormatters)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1067E")
 }
