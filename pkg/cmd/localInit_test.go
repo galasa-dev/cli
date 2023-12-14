@@ -10,6 +10,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -163,6 +164,34 @@ func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
 	assert.Empty(t, errText)
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	localInit := commandCollection.GetCommand("local init")
+	localInit.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"local", "init"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Equal(t, errText, "")
 
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)

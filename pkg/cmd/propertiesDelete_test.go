@@ -121,10 +121,11 @@ func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	fs := factory.GetFileSystem()
-	var args []string = []string{"properties", "delete", "--namespace", "gyro", "--name", "space.ball"}
 	homeDir, _ := fs.GetUserHomeDirPath()
 	galasaDir := homeDir + "/.galasa/"
 	fs.WriteTextFile(galasaDir+"bootstrap.properties", "")
+	
+	var args []string = []string{"properties", "delete", "--namespace", "gyro", "--name", "space.ball"}
 
 	// When...
 	err := Execute(factory, args)
