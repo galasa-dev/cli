@@ -715,6 +715,10 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	errText := stdErrConsole.ReadText()
 	assert.Contains(t, errText, "required flag(s) \"package\" not set")
 
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -742,6 +746,234 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
 	assert.Equal(t, errText, "")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestProjectCreatePackageFlagNoPackageReturnsNoError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	projectCreateCommand := commandCollection.GetCommand("project create")
+	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"project", "create", "--package"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "flag needs an argument: --package")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.NotNil(t, err)
+}
+
+func TestProjectCreatePackageAndFeatureFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	projectCreateCommand := commandCollection.GetCommand("project create")
+	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--features", "comma,seperated,test,list"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Equal(t, errText, "")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	projectCreateCommand := commandCollection.GetCommand("project create")
+	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--force"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Equal(t, errText, "")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	projectCreateCommand := commandCollection.GetCommand("project create")
+	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--obr"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Equal(t, errText, "")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	projectCreateCommand := commandCollection.GetCommand("project create")
+	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--maven"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Equal(t, errText, "")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	projectCreateCommand := commandCollection.GetCommand("project create")
+	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--gradle"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Equal(t, errText, "")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	projectCreateCommand := commandCollection.GetCommand("project create")
+	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--features", "feature,list", "--force", "--obr", "--maven", "--gradle"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Equal(t, errText, "")
+
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Equal(t, outText, "")
 
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
