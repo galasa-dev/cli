@@ -78,8 +78,8 @@ func (commands *commandCollectionImpl) GetCommand(name string) (GalasaCommand, e
 	var err error
 	cmd, _ := commands.commandMap[name]
 	if cmd == nil{
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION, name)
-		log.Printf("Caller tried to lookup %s in the command collection and it was not found.\n", cmd.Name())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION)
+		log.Printf("Caller tried to lookup %s in the command collection and it was not found.\n", name)
 	}
 	return cmd, err
 }
