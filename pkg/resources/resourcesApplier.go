@@ -30,7 +30,6 @@ func ApplyResources(
 	var err error
 	var fileContent string
 	var jsonBytes []byte
-	var reqMethod = "POST"
 
 	err = validateFilePathExists(fileSystem, filePath)
 
@@ -43,23 +42,20 @@ func ApplyResources(
 		}
 
 		if err == nil {
-			if action == "delete"{
-				reqMethod = "DELETE"
-			}
-			err = sendResourcesRequestToServer(reqMethod, jsonBytes, apiServerUrl)
+			err = sendResourcesRequestToServer(jsonBytes, apiServerUrl)
 		}
 	}
 	return err
 }
 
-func sendResourcesRequestToServer(reqMethod string, payloadJsonToSend []byte, apiServerUrl string) error {
+func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string) error {
 
 	var err error
 	var responseBody []byte
 	resourcesApiServerUrl := apiServerUrl + "/resources/"
 
 		var req *http.Request
-		req, err = http.NewRequest(reqMethod, resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))
+		req, err = http.NewRequest("POST", resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))
 
 	if err == nil {
 		req.Header.Set("Content-Type", "application/json")

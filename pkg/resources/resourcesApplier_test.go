@@ -211,7 +211,6 @@ func TestCanApplyEmptyValidResource(t *testing.T) {
 
 func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T) {
 	// Given
-	reqMethod := "POST"
 	// We have a payload we are expecting...
 	// Like this:
 	expectedStringArrivingAtServlet := `{
@@ -244,7 +243,7 @@ func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
-	err := sendResourcesRequestToServer(reqMethod, expectedBytesArrivingAtServlet, mockservletUrl)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
 
 	// Then
 	assert.NotNil(t, err)
@@ -254,7 +253,6 @@ func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T
 
 func TestBadRequestResponseStatusFromServerShowsErrorsReturned(t *testing.T) {
 	// Given
-	reqMethod := "POST"
 	// We have a payload we are expecting...
 	// Like this:
 	expectedStringArrivingAtServlet := `{
@@ -293,7 +291,7 @@ func TestBadRequestResponseStatusFromServerShowsErrorsReturned(t *testing.T) {
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
-	err := sendResourcesRequestToServer(reqMethod, expectedBytesArrivingAtServlet, mockservletUrl)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
 
 	// Then
 	assert.NotNil(t, err)
@@ -303,7 +301,6 @@ func TestBadRequestResponseStatusFromServerShowsErrorsReturned(t *testing.T) {
 
 func TestInternalServerErrorResponseStatusFromServerReturnsServerError(t *testing.T) {
 	// Given
-	reqMethod := "POST"
 
 	// We have a payload we are expecting...
 	// Like this:
@@ -337,7 +334,7 @@ func TestInternalServerErrorResponseStatusFromServerReturnsServerError(t *testin
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
-	err := sendResourcesRequestToServer(reqMethod, expectedBytesArrivingAtServlet, mockservletUrl)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
 
 	// Then
 	assert.NotNil(t, err)
@@ -346,7 +343,6 @@ func TestInternalServerErrorResponseStatusFromServerReturnsServerError(t *testin
 
 func TestResponseStatusCodeFromApiIsAnUnexpectedError(t *testing.T) {
 	// Given
-	reqMethod := "POST"
 
 	// We have a payload we are expecting...
 	// Like this:
@@ -386,7 +382,7 @@ func TestResponseStatusCodeFromApiIsAnUnexpectedError(t *testing.T) {
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
-	err := sendResourcesRequestToServer(reqMethod, expectedBytesArrivingAtServlet, mockservletUrl)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
 
 	// Then
 	assert.NotNil(t, err)
