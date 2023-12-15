@@ -181,8 +181,10 @@ func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	localInit := commandCollection.GetCommand("local init")
-	localInit.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	var localInitCommand GalasaCommand
+	localInitCommand, err = commandCollection.GetCommand("local init")
+	assert.Nil(t, err)
+	localInitCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"local", "init"}
 

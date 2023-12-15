@@ -63,8 +63,10 @@ func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 	factory := NewMockFactory()
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
-
-	propertiesNamespacesGetCommand := commandCollection.GetCommand("properties namespaces get")
+	
+	var propertiesNamespacesGetCommand GalasaCommand
+	propertiesNamespacesGetCommand, err = commandCollection.GetCommand("properties namespaces get")
+	assert.Nil(t, err)
 	assert.NotNil(t, propertiesNamespacesGetCommand)
 	propertiesNamespacesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
@@ -94,7 +96,10 @@ func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesNamespacesGetCommand := commandCollection.GetCommand("properties namespaces get")
+	var propertiesNamespacesGetCommand GalasaCommand
+	propertiesNamespacesGetCommand, err = commandCollection.GetCommand("properties namespaces get")
+	assert.Nil(t, err)
+	assert.NotNil(t, propertiesNamespacesGetCommand)
 	propertiesNamespacesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	// Note: No --maven or --gradle flags here:

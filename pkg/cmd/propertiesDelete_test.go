@@ -126,7 +126,9 @@ func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesDeleteCommand := commandCollection.GetCommand("properties delete")
+	var propertiesDeleteCommand GalasaCommand
+	propertiesDeleteCommand, err = commandCollection.GetCommand("properties delete")
+	assert.Nil(t, err)
 	propertiesDeleteCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 	
 	var args []string = []string{"properties", "delete", "--namespace", "gyro", "--name", "space.ball"}

@@ -62,7 +62,9 @@ func TestAuthLoginNoFlagsReturnsNoError(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	authLoginCommand := commandCollection.GetCommand("auth login")
+	var authLoginCommand GalasaCommand
+	authLoginCommand, err = commandCollection.GetCommand("auth login")
+	assert.Nil(t, err)
 	authLoginCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"auth", "login"}

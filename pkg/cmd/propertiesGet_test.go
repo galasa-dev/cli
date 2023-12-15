@@ -78,7 +78,9 @@ func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty"}
@@ -101,7 +103,9 @@ func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince"}
@@ -124,7 +128,9 @@ func TestPropertiesGetNamespaceNamePrefixFlagsReturnsError(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--prefix", "something"}
@@ -148,7 +154,9 @@ func TestPropertiesGetNamespaceNameSuffixFlagsReturnsError(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--suffix", "something"}
@@ -172,7 +180,9 @@ func TestPropertiesGetNamespaceNameInfixFlagsReturnsError(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--infix", "something"}
@@ -196,7 +206,9 @@ func TestPropertiesGetNamespacePrefixFlagsReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--prefix", "something"}
@@ -219,7 +231,9 @@ func TestPropertiesGetNamespaceSufffixFlagsReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--suffix", "something"}
@@ -242,7 +256,9 @@ func TestPropertiesGetNamespaceInfixFlagsReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--infix", "something"}
@@ -265,7 +281,9 @@ func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--prefix", "something", "--suffix", "suffixthingy", "--infix", "infixthingy"}
@@ -288,7 +306,9 @@ func TestPropertiesGetNamespaceNamePrefixSuffixInfixFlagsReturnsError(t *testing
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
+	assert.Nil(t, err)
 	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--prefix", "something", "--suffix", "suffixthingy", "--infix", "infixthingy"}
