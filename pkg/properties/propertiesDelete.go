@@ -8,6 +8,7 @@ package properties
 
 import (
 	"context"
+	"io"
 	"net/http"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -36,18 +37,28 @@ func deleteCpsProperty(namespace string,
 	var err error = nil
 	var resp *http.Response
 	var context context.Context = nil
+	var responseBody []byte
 
 	apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name)
 	_, resp, err = apicall.Execute()
 
-	defer resp.Body.Close()
+	if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+		defer resp.Body.Close()
 
-	if (resp != nil) && (resp.StatusCode != 200) {
-		var apiError galasaErrors.GalasaAPIError
-		err = apiError.GetApiErrorFromResponse(resp)
+		responseBody, err = io.ReadAll(resp.Body)
 		if err == nil {
-			//Ensure that the conversion of the error doesn't raise another exception
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, apiError.Message)
+			var errorFromServer *galasaErrors.GalasaAPIError
+			errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+
+			if err == nil {
+				//return galasa api error, because status code is not 200 (OK)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
+			} else {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
+			}
+
+		} else {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 		}
 	}
 	return err

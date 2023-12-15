@@ -8,6 +8,7 @@ package errors
 
 import (
 	"encoding/json"
+	"log"
 )
 
 // This function reads an array of galasa API Errors into an array of GalasaAPIError structure so that
@@ -26,11 +27,15 @@ func NewGalasaApiErrorsArray(body []byte) (*GalasaAPIErrorsArray, error) {
 
 	err = json.Unmarshal(body, &jsonArray)
 
+	if err != nil {
+		log.Printf("NewGalasaApiErrorsArray FAIL - %v", err)
+	}
+
 	errorsGathered.errorArray = &jsonArray
 	return errorsGathered, err
 }
 
-// This Function will return a string array of all the error messages within the GalasaAPIErrorsArray array to be
+// // This Function will return a string array of all the error messages within the GalasaAPIErrorsArray array to be
 // displayed in a human readble format
 func (apiErrors *GalasaAPIErrorsArray) GetErrorMessages() []string {
 	var errorString []string
