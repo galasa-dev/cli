@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -72,6 +73,106 @@ func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
 	assert.Contains(t, errText, "Error: required flag(s) \"name\", \"namespace\", \"value\" not set")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.NotNil(t, err)
+}
+
+func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	var propertiesGetCommand GalasaCommand
+	propertiesGetCommand, err = commandCollection.GetCommand("properties set")
+	assert.Nil(t, err)
+	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"properties", "set", "--namespace", "mince", "--name", "pies.are.so.tasty", "--value", "some kinda value"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"properties", "set", "--namespace", "sunshine"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "Error: required flag(s) \"name\", \"value\" not set")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.NotNil(t, err)
+}
+
+func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"properties", "set", "--name", "call.me.little.sunshine"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "Error: required flag(s) \"namespace\", \"value\" not set")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.NotNil(t, err)
+}
+
+func TestPropertiesOnlyValueReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"properties", "set", "--value", "ghost"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "Error: required flag(s) \"name\", \"namespace\" not set")
 
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
