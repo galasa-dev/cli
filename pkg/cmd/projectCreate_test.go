@@ -657,12 +657,13 @@ func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 
 	// When...
 	commands, _ := NewCommandCollection(factory)
-	projectCreateCommand := commands.GetCommand(COMMAND_NAME_PROJECT_CREATE)
+	projectCreateCommand, err := commands.GetCommand(COMMAND_NAME_PROJECT_CREATE)
+	assert.Nil(t, err)
+	
 	assert.NotNil(t, projectCreateCommand)
 	assert.IsType(t, &ProjectCreateCmdValues{}, projectCreateCommand.Values())
 	assert.NotNil(t, projectCreateCommand.CobraCommand())
 	assert.Equal(t, COMMAND_NAME_PROJECT_CREATE, projectCreateCommand.Name())
-
 }
 
 

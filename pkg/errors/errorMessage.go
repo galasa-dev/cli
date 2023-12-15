@@ -206,6 +206,7 @@ var (
 	GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING        = NewMessageType("GAL1117E: The delete operation failed. Unable to process the error information returned from the server.", 1117, STACK_TRACE_WANTED)
 	GALASA_ERROR_RESOURCE_RESPONSE_PARSING               = NewMessageType("GAL1118E: The resource operation failed. Unable to process the error information returned from the server. Reason: '%s'", 1118, STACK_TRACE_WANTED)
 	GALASA_ERROR_RESOURCE_RESP_UNAUTHORIZED_OPERATION    = NewMessageType("GAL1119E: The server thinks you are unauthorized to perform this operation.", 1119, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION     = NewMessageType("GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.", 1120, STACK_TRACE_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

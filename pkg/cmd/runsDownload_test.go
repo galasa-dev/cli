@@ -17,7 +17,9 @@ func TestRunsDownloadCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	runsDownloadCommand := commands.GetCommand(COMMAND_NAME_RUNS_DOWNLOAD)
+	runsDownloadCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_DOWNLOAD)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_RUNS_DOWNLOAD, runsDownloadCommand.Name())
 	assert.NotNil(t, runsDownloadCommand.Values())
 	assert.IsType(t, &RunsDownloadCmdValues{}, runsDownloadCommand.Values())

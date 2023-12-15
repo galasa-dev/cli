@@ -17,7 +17,9 @@ func TestPropertiesSetCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	propertiesSetCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES_SET)
+	propertiesSetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_SET)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_SET, propertiesSetCommand.Name())
 	assert.NotNil(t, propertiesSetCommand.Values())
 	assert.IsType(t, &PropertiesSetCmdValues{}, propertiesSetCommand.Values())

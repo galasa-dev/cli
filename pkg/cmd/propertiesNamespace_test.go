@@ -17,7 +17,9 @@ func TestPropertiesNamespaceCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	propertiesNamespaceCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE)
+	propertiesNamespaceCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_NAMESPACE, propertiesNamespaceCommand.Name())
 	assert.Nil(t, propertiesNamespaceCommand.Values())
 	assert.NotNil(t, propertiesNamespaceCommand.CobraCommand())

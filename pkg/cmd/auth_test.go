@@ -17,7 +17,9 @@ func TestAuthCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	authCommand := commands.GetCommand(COMMAND_NAME_AUTH)
+	authCommand, err := commands.GetCommand(COMMAND_NAME_AUTH)
+	assert.Nil(t, err)
+	
 	assert.NotNil(t, authCommand)
 	assert.Equal(t, COMMAND_NAME_AUTH, authCommand.Name())
 	assert.Nil(t, authCommand.Values())
