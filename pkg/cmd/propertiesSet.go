@@ -1,8 +1,8 @@
 /*
- * Copyright contributors to the Galasa project
- *
- * SPDX-License-Identifier: EPL-2.0
- */
+* Copyright contributors to the Galasa project
+*
+* SPDX-License-Identifier: EPL-2.0
+*/
 
 package cmd
 
@@ -142,7 +142,8 @@ func (cmd *PropertiesSetCommand) executePropertiesSet(
 				err = properties.SetProperty(
 					propertiesCmdValues.namespace,
 					propertiesCmdValues.propertyName,
-					cmd.values.propertyValue, apiClient)
+					cmd.values.propertyValue, 
+					apiClient)
 			}
 		}
 	}

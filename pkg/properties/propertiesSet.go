@@ -14,6 +14,11 @@ import (
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
+var (
+	APIVERSION = "galasa-dev/v1aplha1"
+	KIND       = "GalasaProperty"
+)
+
 // SetProperty - performs all the logic to implement the `galasactl properties set` command,
 // but in a unit-testable manner.
 func SetProperty(
@@ -48,8 +53,9 @@ func updateCpsProperty(namespace string,
 
 	var context context.Context = nil
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name)
-	apicall = apicall.Body(value)
+	property := createGalasaProperty(namespace, name, value)
+
+	apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property)
 	_, _, err = apicall.Execute()
 
 	if err != nil {
@@ -68,11 +74,9 @@ func createCpsProperty(namespace string,
 
 	var context context.Context = nil
 
-	var cpsPropertyRequest = galasaapi.NewCreateCpsPropertyRequest()
-	cpsPropertyRequest.SetName(name)
-	cpsPropertyRequest.SetValue(value)
+	property := createGalasaProperty(namespace, name, value)
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).CreateCpsPropertyRequest(*cpsPropertyRequest)
+	apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property)
 	_, _, err = apicall.Execute()
 
 	if err != nil {
@@ -80,4 +84,22 @@ func createCpsProperty(namespace string,
 	}
 
 	return err
+}
+
+func createGalasaProperty(namespace string, name string, value string) *galasaapi.GalasaProperty {
+	var property = galasaapi.NewGalasaProperty()
+
+	property.SetApiVersion(APIVERSION)
+	property.SetKind(KIND)
+
+	metadata := galasaapi.NewGalasaPropertyMetadata()
+	metadata.SetNamespace(namespace)
+	metadata.SetName(name)
+	property.SetMetadata(*metadata)
+
+	data := galasaapi.NewGalasaPropertyData()
+	data.SetValue(value)
+	property.SetData(*data)
+
+	return property
 }

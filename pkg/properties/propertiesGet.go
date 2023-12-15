@@ -18,7 +18,8 @@ import (
 )
 
 var (
-	validFormatters = CreateFormatters()
+	propertiesHasYamlFormat           = true
+	validPropertyFormatters = CreateFormatters(propertiesHasYamlFormat)
 )
 
 // GetProperties - performs all the logic to implement the `galasactl properties get` command,
@@ -38,9 +39,9 @@ func GetProperties(
 	if err == nil {
 		var chosenFormatter propertiesformatter.PropertyFormatter
 
-		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validFormatters)
+		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
 		if err == nil {
-			var cpsProperty []galasaapi.CpsProperty
+			var cpsProperty []galasaapi.GalasaProperty
 			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
 			if err == nil {
 				var outputText string
@@ -67,13 +68,16 @@ func getCpsPropertiesFromRestApi(
 	infix string,
 	apiClient *galasaapi.APIClient,
 	console utils.Console,
-) ([]galasaapi.CpsProperty, error) {
+) ([]galasaapi.GalasaProperty, error) {
 
 	var err error = nil
 
 	var context context.Context = nil
 
-	var cpsProperties = make([]galasaapi.CpsProperty, 0)
+	// // An HTTP client which can communicate with the api server in an ecosystem.
+	// restClient := api.InitialiseAPI(apiServerUrl)
+
+	var cpsProperties = make([]galasaapi.GalasaProperty, 0)
 
 	if name == "" {
 		apicall := apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace)
@@ -99,15 +103,18 @@ func getCpsPropertiesFromRestApi(
 	return cpsProperties, err
 }
 
-func CreateFormatters() map[string]propertiesformatter.PropertyFormatter {
+func CreateFormatters(hasYamlFormat bool) map[string]propertiesformatter.PropertyFormatter {
 	validFormatters := make(map[string]propertiesformatter.PropertyFormatter, 0)
 	summaryFormatter := propertiesformatter.NewPropertySummaryFormatter()
 	rawFormatter := propertiesformatter.NewPropertyRawFormatter()
-	yamlFormatter := propertiesformatter.NewPropertyYamlFormatter()
 
 	validFormatters[summaryFormatter.GetName()] = summaryFormatter
 	validFormatters[rawFormatter.GetName()] = rawFormatter
-	validFormatters[yamlFormatter.GetName()] = yamlFormatter
+
+	if hasYamlFormat {
+		yamlFormatter := propertiesformatter.NewPropertyYamlFormatter()
+		validFormatters[yamlFormatter.GetName()] = yamlFormatter
+	}
 
 	return validFormatters
 }

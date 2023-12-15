@@ -361,8 +361,12 @@ A complete list of supported parameters for the `runs download` command is avail
 This command retrieves details of properties in a namespace.
 
 Properties in a namespace can be filtered out by using `--prefix`, `--infix` and/or `--suffix`, or `--name`.
-Two formats are supported: 'summary', 'raw', the default is 'summary'.
+The formats supported are: 'summary', 'raw', and 'yaml'. The default is 'summary'.
 
+For a complete list of supported formatters try running the command with a known to be bad formatter name. For example:
+```
+galasactl properties get --namespace framework --format badFormatterName
+```
 ### Examples
 `--prefix`, `--infix` and `--suffix` can be used together or separately to get all properties with a matching prefix, infix and/or suffix.
 ```
@@ -400,6 +404,25 @@ framework|propertyName0|value0
 framework|propertyName1|value1
 >
 ```
+```
+> galasactl properties get --namespace framework --format yaml
+apiVersion: galasa-dev/v1alpha1
+kind: GalasaProperty
+metadata:
+    namespace: framework
+    name: propertyName0
+data:
+    value: value0
+---
+apiVersion: galasa-dev/v1alpha1
+kind: GalasaProperty
+metadata:
+    namespace: validNamespace
+    name: propertyName1
+data:
+    value: value1
+>
+```
 
 ## properties set
 This command attempts to update the value of a property in a namespace, but if the property does not exist in that namespace, it creates the property.
@@ -423,6 +446,80 @@ galasactl properties delete --namespace framework --name propertyName
 ```
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_delete.md).
+
+
+## properties namespaces get
+This command retrieves details of namespaces in the CPS.
+
+The formats supported are: 'summary' and 'raw'. The default is 'summary'.
+
+For a complete list of supported formatters try running the command with a known to be bad formatter name. For example:
+```
+galasactl properties namespaces get --format badFormatterName
+```
+
+### Examples
+
+```
+galasactl namespaces properties get
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_properties_namespaces_get.md).
+
+`--format` is used to modify the output table
+```
+> galasactl namespaces properties get --format summary
+namespace name          value
+framework propertyName0 value0
+framework propertyName1 value1
+>
+```
+```
+> galasactl namespaces properties get --format raw
+framework|propertyName0|value0
+framework|propertyName1|value1
+>
+```
+
+
+
+## resources apply
+This command creates or updates resources in the Galasa Ecosystem
+
+For each resource provided in the yaml file, it is either created, if it doesn't already exist, or updated if it already exists. A compiled list of errors is returned if any error occurs for any resource during the process.
+
+### Examples
+```
+galasactl resources apply -f my_resources.yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_apply.md).
+
+## resources create
+This command creates resources in the Galasa Ecosystem
+
+Each resource provided in the yaml file is created. A compiled list of errors is returned if any error occurs for any resource during the process.
+
+### Examples
+```
+galasactl resources create -f my_resources.yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_create.md).
+
+## resources update
+This command updates resources in the Galasa Ecosystem
+
+Each resource provided in the yaml file is updated. A compiled list of errors is returned if any error occurs for any resource during the process.
+
+### Examples
+```
+galasactl resources update -f my_resources.yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_update.md).
+
+
 
 
 ## Reference Material

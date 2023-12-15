@@ -76,10 +76,10 @@ func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaC
 }
 
 func (cmd *PropertiesGetCommand) createCobraCommand(
-	factory Factory, 
-	propertiesCommand GalasaCommand, 
+	factory Factory,
+	propertiesCommand GalasaCommand,
 	rootCommandValues *RootCmdValues,
-	) *cobra.Command {
+) *cobra.Command {
 
 	propertiesCommandValues := propertiesCommand.Values().(*PropertiesCmdValues)
 	propertiesGetCobraCmd := &cobra.Command{
@@ -94,7 +94,8 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 		},
 	}
 
-	formatters := properties.GetFormatterNamesString(properties.CreateFormatters())
+	propertiesHasYamlFormat := true
+	formatters := properties.GetFormatterNamesString(properties.CreateFormatters(propertiesHasYamlFormat))
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesPrefix, "prefix", "",
 		"Prefix to match against the start of the property name within the namespace."+
 			" Optional. Cannot be used in conjunction with the '--name' option.")

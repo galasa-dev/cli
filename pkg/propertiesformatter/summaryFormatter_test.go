@@ -15,17 +15,26 @@ import (
 //------
 //PROPERTIES testing
 
-func CreateProperty(name string, value string) *galasaapi.CpsProperty {
-	property := galasaapi.NewCpsProperty()
-	property.SetName(name)
-	property.SetValue(value)
+func CreateMockGalasaProperty(namespace string, name string, value string) *galasaapi.GalasaProperty {
+	var property = galasaapi.NewGalasaProperty()
+
+	metadata := galasaapi.NewGalasaPropertyMetadata()
+	metadata.SetNamespace(namespace)
+	metadata.SetName(name)
+	property.SetMetadata(*metadata)
+
+	data := galasaapi.NewGalasaPropertyData()
+	data.SetValue(value)
+	property.SetData(*data)
+
 	return property
 }
+
 func TestPropertiesSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
 
 	formatter := NewPropertySummaryFormatter()
 	// No data to format...
-	properties := make([]galasaapi.CpsProperty, 0)
+	properties := make([]galasaapi.GalasaProperty, 0)
 
 	// When...
 	actualFormattedOutput, err := formatter.FormatProperties(properties)
@@ -39,8 +48,8 @@ func TestPropertiesSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// For..
 	formatter := NewPropertySummaryFormatter()
 	// No data to format...
-	properties := make([]galasaapi.CpsProperty, 0)
-	property1 := CreateProperty("testNamespace.name1", "value1")
+	properties := make([]galasaapi.GalasaProperty, 0)
+	property1 := CreateMockGalasaProperty("testNamespace", "name1", "value1")
 	properties = append(properties, *property1)
 
 	// When...
@@ -61,9 +70,9 @@ func TestPropertiesSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T
 	// For..
 	formatter := NewPropertySummaryFormatter()
 	// No data to format...
-	properties := make([]galasaapi.CpsProperty, 0)
-	property1 := CreateProperty("testNamespace.name1", "value1")
-	property2 := CreateProperty("testNamespace.name2", "value2")
+	properties := make([]galasaapi.GalasaProperty, 0)
+	property1 := CreateMockGalasaProperty("testNamespace", "name1", "value1")
+	property2 := CreateMockGalasaProperty("testNamespace", "name2", "value2")
 	properties = append(properties, *property1, *property2)
 
 	// When...

@@ -19,6 +19,7 @@ const (
 )
 
 type PropertyYamlFormatter struct {
+	PropertyFormatter
 }
 
 func NewPropertyYamlFormatter() PropertyFormatter {
@@ -29,15 +30,12 @@ func (*PropertyYamlFormatter) GetName() string {
 	return YAML_FORMATTER_NAME
 }
 
-func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.CpsProperty) (string, error) {
+func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.GalasaProperty) (string, error) {
 	var result string = ""
 	var err error = nil
 	buff := strings.Builder{}
-	totalProperties := len(cpsProperties)
+	//totalProperties := len(cpsProperties)
 
-	if totalProperties > 0 {
-		buff.WriteString("apiVersion: galasa-dev/v1alpha1\n")
-	}
 	for index, property := range cpsProperties {
 		propertyString := ""
 
@@ -49,37 +47,7 @@ func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.CpsProp
 		yamlRepresentationBytes, err = yaml.Marshal(property)
 		if err == nil {
 			yamlStr := string(yamlRepresentationBytes)
-			propertyString += yamlStr
-		}
-
-		buff.WriteString(propertyString)
-	}
-
-	result = buff.String()
-	return result, err
-}
-
-func (*PropertyYamlFormatter) FormatNamespaces(namespaces []galasaapi.Namespace) (string, error) {
-	var result string = ""
-	var err error = nil
-	buff := strings.Builder{}
-	totalProperties := len(namespaces)
-
-	if totalProperties > 0 {
-		buff.WriteString("apiVersion: galasa-dev/v1alpha1\n")
-	}
-	for index, namespace := range namespaces {
-		propertyString := ""
-
-		if index > 0 {
-			propertyString += "---\n"
-		}
-
-		var yamlRepresentationBytes []byte
-		yamlRepresentationBytes, err = yaml.Marshal(namespace)
-		if err == nil {
-			yamlStr := string(yamlRepresentationBytes)
-			yamlStr = strings.ReplaceAll(yamlStr, "propertiesurl", "propertiesUrl")
+			yamlStr = strings.ReplaceAll(yamlStr, "apiversion", "apiVersion")
 			propertyString += yamlStr
 		}
 

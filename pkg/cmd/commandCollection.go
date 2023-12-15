@@ -41,6 +41,10 @@ const (
 	COMMAND_NAME_RUNS_PREPARE             = "runs prepare"
 	COMMAND_NAME_RUNS_SUBMIT              = "runs submit"
 	COMMAND_NAME_RUNS_SUBMIT_LOCAL        = "runs submit local"
+	COMMAND_NAME_RESOURCES                = "resources"
+	COMMAND_NAME_RESOURCES_APPLY          = "resources apply"
+	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
+	COMMAND_NAME_RESOURCES_UPDATE         = "resources update"
 )
 
 // -----------------------------------------------------------------
@@ -110,6 +114,10 @@ func (commands *commandCollectionImpl) init(factory Factory) error {
 
 	if err == nil {
 		err = commands.addRunsCommands(factory, rootCommand)
+	}
+
+	if err == nil {
+		err = commands.addResourcesCommands(factory, rootCommand)
 	}
 
 	if err == nil {
@@ -253,13 +261,11 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 			if err == nil {
 				runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, rootCommand)
 				if err == nil {
+					runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
 					if err == nil {
-						runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
+						runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
 						if err == nil {
-							runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
-							if err == nil {
-								runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
-							}
+							runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
 						}
 					}
 				}
@@ -274,6 +280,37 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 		commands.commandMap[runsPrepareCommand.Name()] = runsPrepareCommand
 		commands.commandMap[runsSubmitCommand.Name()] = runsSubmitCommand
 		commands.commandMap[runsSubmitLocalCommand.Name()] = runsSubmitLocalCommand
+	}
+
+	return err
+}
+
+func (commands *commandCollectionImpl) addResourcesCommands(factory Factory, rootCommand GalasaCommand) error {
+
+	var err error
+	var resourcesCommand GalasaCommand
+	var resourcesApplyCommand GalasaCommand
+	var resourcesCreateCommand GalasaCommand
+	var resourcesUpdateCommand GalasaCommand
+
+	if err == nil {
+		resourcesCommand, err = NewResourcesCmd(rootCommand)
+		if err == nil {
+			resourcesApplyCommand, err = NewResourcesApplyCommand(factory, resourcesCommand, rootCommand)
+			if err == nil {
+				resourcesCreateCommand, err = NewResourcesCreateCommand(factory, resourcesCommand, rootCommand)
+				if err == nil {
+					resourcesUpdateCommand, err = NewResourcesUpdateCommand(factory, resourcesCommand, rootCommand)
+				}
+			}
+		}
+	}
+
+	if err == nil {
+		commands.commandMap[resourcesCommand.Name()] = resourcesCommand
+		commands.commandMap[resourcesApplyCommand.Name()] = resourcesApplyCommand
+		commands.commandMap[resourcesCreateCommand.Name()] = resourcesCreateCommand
+		commands.commandMap[resourcesUpdateCommand.Name()] = resourcesUpdateCommand
 	}
 
 	return err

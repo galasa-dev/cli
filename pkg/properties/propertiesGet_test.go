@@ -11,8 +11,10 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,8 +74,15 @@ func CheckName(name string) (string, int) {
 	case "property0":
 		namespaceProperties = `[
 		{
-			"name": "validNamespace.property0",
-			"value": "value0"
+			"apiVersion": null,
+			"kind": null,
+			"metadata": {
+				"namespace": "validNamespace",
+				"name": "property0"
+			},
+			"data":{
+				"value": "value0"
+			}
 		}
 	]`
 	case "invalidName": //property name does not exist
@@ -81,8 +90,15 @@ func CheckName(name string) (string, int) {
 	case "emptyValueName": //property name does not exist
 		namespaceProperties = `[
 			{
-				"name": "validNamespace.emptyValueName",
-				"value": ""
+				"apiVersion": null,
+				"kind": null,
+				"metadata": {
+					"namespace": "validNamespace",
+					"name": "emptyValueName"
+				},
+				"data": {
+					"value": ""
+				}
 			}
 		]`
 	}
@@ -95,25 +111,101 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 	if prefixParameter == "aPrefix" && suffixParameter == "aSuffix" {
 
 		if infixParameter == "anInfix" { //for a single infix
-			namespaceProperties = `[{"name": "validNamespace.aPrefix.anInfix.property.aSuffix","value": "prefixSuffixInfixVal"}]`
+			namespaceProperties = `[
+				{
+					"apiVersion": null,
+					"kind": null,
+					"metadata": {
+						"namespace": "validNamespace",
+						"name": "aPrefix.anInfix.property.aSuffix"
+					},
+				    "data": {
+						"value": "prefixSuffixInfixVal"
+					}
+				}
+			]`
+
 		} else { //no infix
-			namespaceProperties = `[{"name": "validNamespace.aPrefix.property.aSuffix","value": "prefixSuffixVal"}]`
+			namespaceProperties = `[
+				{
+					"apiVersion": null,
+					"kind": null,
+					"metadata": {
+						"namespace": "validNamespace",
+						"name": "aPrefix.property.aSuffix"
+					},
+				    "data": {
+						"value": "prefixSuffixVal"
+					}
+				}
+			]`
+
 		}
 
 	} else if suffixParameter == "aSuffix" {
 
 		if infixParameter == "anInfix" {
-			namespaceProperties = `[{"name":"validNamespace.property.anInfix.aSuffix", "value":"suffixInfixVal"}]`
+			namespaceProperties = `[
+				{
+					"apiVersion": null,
+					"kind": null,
+					"metadata": {
+						"namespace": "validNamespace",
+						"name": "property.anInfix.aSuffix"
+					},
+				    "data": {
+						"value": "suffixInfixVal"
+					}
+				}
+			]`
+
 		} else {
-			namespaceProperties = `[{"name":"validNamespace.property.aSuffix", "value":"suffixVal"}]`
+			namespaceProperties = `[
+				{
+					"apiVersion": null,
+					"kind": null,
+					"metadata": {
+						"namespace": "validNamespace",
+						"name": "property.aSuffix"
+					},
+				    "data": {
+						"value": "suffixVal"
+					}
+				}
+			]`
+
 		}
 
 	} else if prefixParameter == "aPrefix" {
 
 		if infixParameter == "anInfix" {
-			namespaceProperties = `[{"name":"validNamespace.aPrefix.property.anInfix", "value":"prefixInfixVal"}]`
+			namespaceProperties = `[
+				{
+					"apiVersion": null,
+					"kind": null,
+					"metadata": {
+						"namespace": "validNamespace",
+						"name": "aPrefix.anInfix.property"
+					},
+				    "data": {
+						"value": "prefixInfixVal"
+					}
+				}
+			]`
 		} else {
-			namespaceProperties = `[{"name":"validNamespace.aPrefix.property", "value":"prefixVal"}]`
+			namespaceProperties = `[
+				{
+					"apiVersion": null,
+					"kind": null,
+					"metadata": {
+						"namespace": "validNamespace",
+						"name": "aPrefix.property"
+					},
+				    "data": {
+						"value": "prefixVal"
+					}
+				}
+			]`
 		}
 
 	}
@@ -129,7 +221,19 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 	//If only the infix parameter is supplied
 	if prefixParameter == "" && suffixParameter == "" {
 		if infixParameter == "anInfix" {
-			namespaceProperties = `[{"name":"validNamespace.extra.anInfix.extra", "value":"infixVal"}]`
+			namespaceProperties = `[
+				{
+					"apiVersion": null,
+					"kind": null,
+					"metadata": {
+						"namespace": "validNamespace",
+						"name": "extra.anInfix.extra"
+					},
+				    "data": {
+						"value": "infixVal"
+					}
+				}
+			]`
 		} else if infixParameter == "noMatchingInfix" { //singular or multiple infixes that do not match
 			namespaceProperties = `[]`
 		}
@@ -146,27 +250,55 @@ func CheckNamespace(namespace string) (int, string) {
 	case "validNamespace":
 		namespaceProperties = `[
 			{
-				"name": "validNamespace.property0",
-				"value": "value0"
+				"apiVersion": null,
+				"kind": null,
+				"metadata": {
+					"namespace": "validNamespace",
+					"name": "property0"
+				},
+				"data": {
+					"value": "value0"
+				}
 			},
 			{
-				"name": "validNamespace.property1",
-				"value": "value1"
+				"apiVersion": null,
+				"kind": null,
+				"metadata": {
+					"namespace": "validNamespace",
+					"name": "property1"
+				},
+				"data": {
+					"value": "value1"
+				}
 			},
 			{
-				"name": "validNamespace.property2",
-				"value": "value2"
+				"apiVersion": null,
+				"kind": null,
+				"metadata": {
+					"namespace": "validNamespace",
+					"name": "property2"
+				},
+				"data": {
+					"value": "value2"
+				}
 			},
 			{
-				"name": "validNamespace.property3",
-				"value": "value3"
+				"apiVersion": null,
+				"kind": null,
+				"metadata": {
+					"namespace": "validNamespace",
+					"name": "property3"
+				},
+				"data": {
+					"value": "value3"
+				}
 			}
 		]`
 	case "invalidNamespace":
 		statusCode = 404
 		namespaceProperties = `{
-		error_code: 5016,
-		error_message: "GAL5016E: Error occured when trying to access namespace 'invalidNamespace'. The Namespace provided is invalid."
+			error_code: 5016,
+			error_message: "GAL5016E: Error occured when trying to access namespace 'invalidNamespace'. The Namespace provided is invalid."
 		}`
 	}
 
@@ -186,13 +318,21 @@ func TestInvalidNamepsaceReturnsError(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Error(t, err)
@@ -209,10 +349,18 @@ func TestValidNamespaceReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name      value
 validNamespace property0 value0
 validNamespace property1 value1
@@ -221,13 +369,13 @@ validNamespace property3 value3
 
 Total:4
 `
+
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
-
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestEmptyNamespaceReturnsEmpty(t *testing.T) {
@@ -240,18 +388,26 @@ func TestEmptyNamespaceReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `Total:0
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceAndPrefixReturnsOk(t *testing.T) {
@@ -264,10 +420,18 @@ func TestValidNamespaceAndPrefixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name             value
 validNamespace aPrefix.property prefixVal
 
@@ -275,11 +439,11 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceAndSuffixReturnsOk(t *testing.T) {
@@ -292,10 +456,18 @@ func TestValidNamespaceAndSuffixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name             value
 validNamespace property.aSuffix suffixVal
 
@@ -303,11 +475,11 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithMatchingPrefixAndSuffixReturnsOk(t *testing.T) {
@@ -320,10 +492,18 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name                     value
 validNamespace aPrefix.property.aSuffix prefixSuffixVal
 
@@ -331,11 +511,11 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithNoMatchingPrefixAndSuffixReturnsEmpty(t *testing.T) {
@@ -348,19 +528,27 @@ func TestValidNamespaceWithNoMatchingPrefixAndSuffixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `Total:0
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceAndNoMatchingPrefixReturnsEmpty(t *testing.T) {
@@ -373,19 +561,27 @@ func TestValidNamespaceAndNoMatchingPrefixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `Total:0
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceAndNoMatchingSuffixReturnsEmpty(t *testing.T) {
@@ -398,19 +594,27 @@ func TestValidNamespaceAndNoMatchingSuffixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `Total:0
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithMatchingInfixReturnsOk(t *testing.T) {
@@ -423,21 +627,29 @@ func TestValidNamespaceWithMatchingInfixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name                value
 validNamespace extra.anInfix.extra infixVal
 
 Total:1
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithNoMatchingInfixReturnsEmpty(t *testing.T) {
@@ -450,18 +662,26 @@ func TestValidNamespaceWithNoMatchingInfixReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `Total:0
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithMatchingPrefixAndInfixReturnsOk(t *testing.T) {
@@ -474,22 +694,30 @@ func TestValidNamespaceWithMatchingPrefixAndInfixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name                     value
-validNamespace aPrefix.property.anInfix prefixInfixVal
+validNamespace aPrefix.anInfix.property prefixInfixVal
 
 Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithMatchingSuffixAndInfixReturnsOk(t *testing.T) {
@@ -502,10 +730,18 @@ func TestValidNamespaceWithMatchingSuffixAndInfixReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name                     value
 validNamespace property.anInfix.aSuffix suffixInfixVal
 
@@ -513,11 +749,11 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithMatchingPrefixAndSuffixAndInfixReturnsOk(t *testing.T) {
@@ -530,10 +766,18 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixAndInfixReturnsOk(t *testing.T
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name                             value
 validNamespace aPrefix.anInfix.property.aSuffix prefixSuffixInfixVal
 
@@ -541,11 +785,11 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNamespaceWithValidNameReturnsOk(t *testing.T) {
@@ -558,21 +802,29 @@ func TestValidNamespaceWithValidNameReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name      value
 validNamespace property0 value0
 
 Total:1
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestValidNameWithEmptyValueValidNameReturnsOk(t *testing.T) {
@@ -585,10 +837,18 @@ func TestValidNameWithEmptyValueValidNameReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `namespace      name           value
 validNamespace emptyValueName 
 
@@ -596,11 +856,11 @@ Total:1
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
 func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
@@ -613,22 +873,30 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 	propertiesOutputFormat := "summary"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `Total:0
 `
 
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
-func TestValidNamespaceFormatRawReturnsOk(t *testing.T) {
+func TestValidNamespaceRawFormatReturnsOk(t *testing.T) {
 	//Given...
 	namespace := "validNamespace"
 	name := ""
@@ -638,19 +906,206 @@ func TestValidNamespaceFormatRawReturnsOk(t *testing.T) {
 	propertiesOutputFormat := "raw"
 
 	server := NewPropertiesServletMock(t)
-	apiClient := api.InitialiseAPI(server.URL)
+	apiServerUrl := server.URL
 	defer server.Close()
 
-	console := utils.NewMockConsole()
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
 	expectedOutput := `validNamespace|property0|value0
 validNamespace|property1|value1
 validNamespace|property2|value2
 validNamespace|property3|value3
 `
 	//When
-	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, console)
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
 
 	//Then
 	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, console.ReadText())
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestEmptyNamespaceRawFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "emptyNamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "raw"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
+	expectedOutput := ``
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestValidNamespaceYamlFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validNamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "yaml"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
+	expectedOutput := `apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property0
+data:
+    value: value0
+---
+apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property1
+data:
+    value: value1
+---
+apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property2
+data:
+    value: value2
+---
+apiVersion: null
+kind: null
+metadata:
+    namespace: validNamespace
+    name: property3
+data:
+    value: value3
+`
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestEmptyNamespaceYamlFormatReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "emptyNamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "yaml"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+
+	expectedOutput := ``
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestCreateFormattersSummaryReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	summary, err := validateOutputFormatFlagValue("summary", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, summary)
+}
+
+func TestCreateFormattersRawReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	raw, err := validateOutputFormatFlagValue("raw", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, raw)
+}
+
+func TestCreateFormattersHasYamlReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := true
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	yaml, err := validateOutputFormatFlagValue("yaml", validFormatters)
+
+	//Then
+	assert.Nil(t, err)
+	assert.NotNil(t, validFormatters)
+	assert.NotNil(t, yaml)
+}
+
+func TestCreateFormattersNoYamlReturnsOk(t *testing.T) {
+	//Given
+	hasYamlFormat := false
+
+	//When
+	validFormatters := CreateFormatters(hasYamlFormat)
+	_, err := validateOutputFormatFlagValue("yaml", validFormatters)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1067E")
 }
