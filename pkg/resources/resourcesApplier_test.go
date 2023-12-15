@@ -13,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -155,7 +154,7 @@ func TestResponseStatusCodeFromApiIsAClientError(t *testing.T) {
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
-	err := sendJsonToApi(expectedBytesArrivingAtServlet, mockservletUrl)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
 
 	// Then
 	assert.NotNil(t, err)
@@ -204,13 +203,12 @@ func TestResponseStatusCodeFromApiIsAServerError(t *testing.T) {
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
-	err := sendJsonToApi(expectedBytesArrivingAtServlet, mockservletUrl)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
 
 	// Then
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1114E")
 }
-
 
 func TestResponseStatusCodeFromApiIsAnUnexpectedError(t *testing.T) {
 	// Given
@@ -253,7 +251,7 @@ func TestResponseStatusCodeFromApiIsAnUnexpectedError(t *testing.T) {
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
-	err := sendJsonToApi(expectedBytesArrivingAtServlet, mockservletUrl)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
 
 	// Then
 	assert.NotNil(t, err)

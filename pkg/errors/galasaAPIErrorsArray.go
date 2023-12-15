@@ -24,13 +24,23 @@ func NewGalasaApiErrorsArray(body []byte) (*GalasaAPIErrorsArray, error) {
 
 	errorsGathered := new(GalasaAPIErrorsArray)
 
-	err = json.Unmarshal(body, &jsonArray)
+	//convert payload into string, check the first char to see if it is an array
+	stringBody := string(body)
+	if string(stringBody[0]) == "[" {
+		//payload returned is an array
+		err = json.Unmarshal(body, &jsonArray)
+	} else {
+		//payload returned is a json object
+		var jsonOne GalasaAPIError
+		err = json.Unmarshal(body, &jsonOne)
+		jsonArray = append(jsonArray, jsonOne)
+	}
 
 	errorsGathered.errorArray = &jsonArray
 	return errorsGathered, err
 }
 
-// This Function will return a string array of all the error messages within the GalasaAPIErrorsArray array to be
+// // This Function will return a string array of all the error messages within the GalasaAPIErrorsArray array to be
 // displayed in a human readble format
 func (apiErrors *GalasaAPIErrorsArray) GetErrorMessages() []string {
 	var errorString []string

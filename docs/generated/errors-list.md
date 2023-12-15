@@ -113,15 +113,12 @@ The `galasactl` tool can generate the following errors:
 - GAL1110E: Could not retrieve the content of the file provided. Reason: '{}'
 - GAL1111E: Error parsing the file '{}'. The file is not in the expected yaml format. Reason: '{}'. Invalid yaml:'{}'
 - GAL1112E: Error converting the parsed yaml content into a json payload for the http request. Reason: '{}'
-- GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program. This could indicate that the client and Ecosystem have a mis-match in their versions, and the client needs to be upgraded, or downgraded to match. Use the galasactl version` to find the version of this tool.
-HTTP Response status code reported: {}
-The list of errors returned: '{}'
-- GAL1114E: A failure was reported from the Galasa Ecosystem where the Ecosystem is at fault. Please contact your Galasa Ecosystem adminstrator.
-HTTP Response status code reported: {}
-The list of errors returned: {}
-- GAL1115E: An unexpected response was received from the Galasa Ecosystem. Please collect a log using the --log option and contact your Galasa Ecosystem adminstrator.
-HTTP Response status code reported: {}
-The list of errors returned: {}
+- GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program. This could indicate that the client and Ecosystem have a mis-match in their versions, and the client needs to be upgraded, or downgraded to match. Use the galasactl version` to find the version of this tool. Errors returned: '{}'
+- GAL1114E: A failure was reported from the Galasa Ecosystem where the Ecosystem is at fault. Please collect a log with the `--log` option and contact your Galasa Ecosystem adminstrator.
+- GAL1115E: An unexpected response was received from the Galasa Ecosystem. Please collect a log using the --log option and contact your Galasa Ecosystem adminstrator. Errors returned: {}
+- GAL1116E: Error reading the HTTP Response body. Reason: '{}'
+- GAL1117E: Unable to retrieve Galasa Api Error. Reason: '{}'
+- GAL1118E: Unable to retrieve the Galasa ApiErrorsArray. Reason: '{}'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 
