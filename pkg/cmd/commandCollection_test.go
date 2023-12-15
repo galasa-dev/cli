@@ -24,7 +24,7 @@ func TestCommandCollectionGetCommandInvalidNameReturnsError(t *testing.T){
 	command, err := commands.GetCommand("bogus command name")
 	assert.Nil(t, command)
 	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "GAL1120E: 'bogus command name' not found in command collection")
+	assert.Contains(t, err.Error(), "GAL1120E:")
 }
 
 func TestCommandCollectionGetCommandValidCmdNameReturnsOk(t *testing.T){

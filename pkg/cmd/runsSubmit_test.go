@@ -18,9 +18,10 @@ func TestRunsSubmitCommandInCommandCollection(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_RUNS_SUBMIT, cmd.Name())
 	assert.NotNil(t, cmd.Values())
 	assert.IsType(t, &utils.RunsSubmitCmdValues{}, cmd.Values())
 	assert.NotNil(t, cmd.CobraCommand())
-	assert.Nil(t, err)
 }

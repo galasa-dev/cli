@@ -17,9 +17,10 @@ func TestRunsGetCommandInCommandCollection(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	runsGetCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_GET)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_RUNS_GET, runsGetCommand.Name())
 	assert.NotNil(t, runsGetCommand.Values())
 	assert.IsType(t, &RunsGetCmdValues{}, runsGetCommand.Values())
 	assert.NotNil(t, runsGetCommand.CobraCommand())
-	assert.Nil(t, err)
 }

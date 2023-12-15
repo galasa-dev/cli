@@ -17,9 +17,10 @@ func TestPropertiesNamespaceGetCommandInCommandCollection(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesNamespaceGetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE_GET)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_NAMESPACE_GET, propertiesNamespaceGetCommand.Name())
 	assert.NotNil(t, propertiesNamespaceGetCommand.Values())
 	assert.IsType(t, &PropertiesNamespaceGetCmdValues{}, propertiesNamespaceGetCommand.Values())
 	assert.NotNil(t, propertiesNamespaceGetCommand.CobraCommand())
-	assert.Nil(t, err)
 }

@@ -20,8 +20,8 @@ func TestCommandsCollectionHasARootCommand(t *testing.T) {
 	commands, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 	rootCommand, err := commands.GetCommand(COMMAND_NAME_ROOT)
-	assert.NotNil(t, rootCommand)
 	assert.Nil(t, err)
+	assert.NotNil(t, rootCommand)
 }
 
 func TestRootCommandInCommandCollectionHasAName(t *testing.T) {

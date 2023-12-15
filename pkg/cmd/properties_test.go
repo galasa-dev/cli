@@ -17,10 +17,11 @@ func TestPropertiesCommandInCommandCollection(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES)
+	assert.Nil(t, err)
+	
 	assert.NotNil(t, propertiesCommand)
 	assert.Equal(t, COMMAND_NAME_PROPERTIES, propertiesCommand.Name())
 	assert.NotNil(t, propertiesCommand.Values())
 	assert.IsType(t, &PropertiesCmdValues{}, propertiesCommand.Values())
 	assert.NotNil(t, propertiesCommand.CobraCommand())
-	assert.Nil(t, err)
 }

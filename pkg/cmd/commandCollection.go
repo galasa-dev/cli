@@ -4,7 +4,12 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package cmd
-import galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+
+import (
+	"log"
+
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+)
 
 type CommandCollection interface {
 	// name - One of the COMMAND_NAME_* constants.
@@ -73,7 +78,8 @@ func (commands *commandCollectionImpl) GetCommand(name string) (GalasaCommand, e
 	var err error
 	cmd, _ := commands.commandMap[name]
 	if cmd == nil{
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND, name)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION, name)
+		log.Printf("Caller tried to lookup %s in the command collection and it was not found.\n", cmd.Name())
 	}
 	return cmd, err
 }

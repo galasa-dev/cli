@@ -18,11 +18,12 @@ func TestPropertiesGetCommandInCommandCollectionHasName(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesGetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_GET)
+	assert.Nil(t, err)
+
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_GET, propertiesGetCommand.Name())
 	assert.NotNil(t, propertiesGetCommand.Values())
 	assert.IsType(t, &PropertiesGetCmdValues{}, propertiesGetCommand.Values())
 	assert.NotNil(t, propertiesGetCommand.CobraCommand())
-	assert.Nil(t, err)
 }
 
 func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {

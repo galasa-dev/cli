@@ -17,9 +17,10 @@ func TestAuthogoutCommandInCommandCollectionHasName(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	authLogoutommand, err := commands.GetCommand(COMMAND_NAME_AUTH_LOGOUT)
+	assert.Nil(t, err)
+	
 	assert.NotNil(t, authLogoutommand)
 	assert.Equal(t, COMMAND_NAME_AUTH_LOGOUT, authLogoutommand.Name())
 	assert.Nil(t, authLogoutommand.Values())
 	assert.NotNil(t, authLogoutommand.CobraCommand())
-	assert.Nil(t, err)
 }
