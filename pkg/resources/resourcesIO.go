@@ -64,7 +64,6 @@ func splitYamlIntoParts(yamlInput string) (parts []string) {
 }
 
 func yamlToByteArray(inputYaml string, action string) ([]byte, error) {
-
 	var err error
 	var jsonBytes []byte
 
