@@ -10,6 +10,7 @@ import (
 
 	// "github.com/galasa-dev/cli/pkg/utils"
 	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,6 +44,66 @@ func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 	outText := stdOutConsole.ReadText()
 	assert.Contains(t, outText, "Displays the options for the 'properties namespace get' command.")
 
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Empty(t, errText)
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	propertiesNamespacesGetCommand := commandCollection.GetCommand("properties namespaces get")
+	assert.NotNil(t, propertiesNamespacesGetCommand)
+	propertiesNamespacesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"properties", "namespaces", "get"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Empty(t, errText)
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	propertiesNamespacesGetCommand := commandCollection.GetCommand("properties namespaces get")
+	propertiesNamespacesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"properties", "namespaces", "get", "--format", "yaml"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
 	assert.Empty(t, errText)
