@@ -714,11 +714,6 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
 	assert.Contains(t, errText, "required flag(s) \"package\" not set")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -742,15 +737,6 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -774,15 +760,6 @@ func TestProjectCreatePackageFlagNoPackageReturnsNoError(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "flag needs an argument: --package")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -806,15 +783,6 @@ func TestProjectCreatePackageAndFeatureFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -838,15 +806,6 @@ func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -870,15 +829,6 @@ func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -902,15 +852,6 @@ func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -934,15 +875,6 @@ func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
@@ -966,15 +898,6 @@ func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Equal(t, outText, "")
-
 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject

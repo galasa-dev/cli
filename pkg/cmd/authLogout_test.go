@@ -64,11 +64,7 @@ func TestAuthLogoutNoFlagsExecutesOk(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "")
 
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()

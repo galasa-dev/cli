@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -68,3 +69,72 @@ func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
 
 	assert.NotNil(t, err)
 }
+
+func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	propertiesGetCommand := commandCollection.GetCommand("properties get")
+	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+	var args []string = []string{"properties", "get", "--namespace", "mince"}
+
+	// When...
+	err = commandCollection.Execute(args)
+
+	// Then...
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.Nil(t, err)
+}
+
+// func TestPropertiesGetNamespaceNamePrefixFlagsReturnsOk(t *testing.T) {
+// 	// Given...
+// 	factory := NewMockFactory()
+// 	commandCollection, err := NewCommandCollection(factory)
+// 	assert.Nil(t, err)
+
+// 	projectCreateCommand := commandCollection.GetCommand("properties delete")
+// 	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+
+// 	var args []string = []string{"properties", "delete", "--namespace", "mince", "--name", "pies.are.so.tasty", "--prefix", "something"}
+
+// 	// When...
+// 	err = commandCollection.Execute(args)
+
+// 	// Then...
+// 	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+// 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+// 	o := finalWordHandler.ReportedObject
+// 	assert.Nil(t, o)
+
+// 	assert.Nil(t, err)
+// }

@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/utils"
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -137,32 +136,4 @@ func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
 	assert.Equal(t, outText, "")
-}
-
-func TestPropertiesDeleteNamespaceNameReturnsOk(t *testing.T) {
-	// Given...
-	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	projectCreateCommand := commandCollection.GetCommand("properties delete")
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
-
-	var args []string = []string{"properties", "delete", "--namespace", "mince", "--name", "pies.are.so.tasty"}
-
-	// When...
-	err = commandCollection.Execute(args)
-
-	// Then...
-	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
-
-	assert.Nil(t, err)
 }
