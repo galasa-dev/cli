@@ -17,10 +17,11 @@ func TestCommandListContainsProjectCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	// When...
-	projectCommand := commands.GetCommand(COMMAND_NAME_PROJECT)
+	projectCommand, err := commands.GetCommand(COMMAND_NAME_PROJECT)
 
 	// Then...
 	assert.NotNil(t, projectCommand)
 	assert.Equal(t, COMMAND_NAME_PROJECT, projectCommand.Name())
 	assert.Nil(t, projectCommand.Values())
+	assert.Nil(t, err)
 }

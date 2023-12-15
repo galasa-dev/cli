@@ -16,9 +16,10 @@ func TestRunsSubmitLocalCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	cmd := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT_LOCAL)
+	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT_LOCAL)
 	assert.Equal(t, COMMAND_NAME_RUNS_SUBMIT_LOCAL, cmd.Name())
 	assert.NotNil(t, cmd.Values())
 	assert.IsType(t, &RunsSubmitLocalCmdValues{}, cmd.Values())
 	assert.NotNil(t, cmd.CobraCommand())
+	assert.Nil(t, err)
 }

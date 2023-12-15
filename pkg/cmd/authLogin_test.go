@@ -15,11 +15,12 @@ func TestAuthLoginCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	authCommand := commands.GetCommand(COMMAND_NAME_AUTH_LOGIN)
+	authCommand, err := commands.GetCommand(COMMAND_NAME_AUTH_LOGIN)
 
 	assert.NotNil(t, authCommand)
 	assert.Equal(t, COMMAND_NAME_AUTH_LOGIN, authCommand.Name())
 	assert.NotNil(t, authCommand.Values())
 	assert.IsType(t, &AuthLoginCmdValues{}, authCommand.Values())
 	assert.NotNil(t, authCommand.CobraCommand())
+	assert.Nil(t, err)
 }

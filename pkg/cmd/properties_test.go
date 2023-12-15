@@ -16,10 +16,11 @@ func TestPropertiesCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	propertiesCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES)
+	propertiesCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.NotNil(t, propertiesCommand)
 	assert.Equal(t, COMMAND_NAME_PROPERTIES, propertiesCommand.Name())
 	assert.NotNil(t, propertiesCommand.Values())
 	assert.IsType(t, &PropertiesCmdValues{}, propertiesCommand.Values())
 	assert.NotNil(t, propertiesCommand.CobraCommand())
+	assert.Nil(t, err)
 }

@@ -19,8 +19,9 @@ func TestCommandsCollectionHasARootCommand(t *testing.T) {
 	factory := NewMockFactory()
 	commands, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
-	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+	rootCommand, err := commands.GetCommand(COMMAND_NAME_ROOT)
 	assert.NotNil(t, rootCommand)
+	assert.Nil(t, err)
 }
 
 func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
@@ -30,7 +31,9 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 	commands, err := NewCommandCollection(factory)
 	// Then...
 	assert.Nil(t, err)
-	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+	var rootCommand GalasaCommand
+	rootCommand, err = commands.GetCommand(COMMAND_NAME_ROOT)
+	assert.Nil(t, err)
 
 	assert.Equal(t, rootCommand.Name(), COMMAND_NAME_ROOT)
 }

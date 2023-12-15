@@ -17,10 +17,11 @@ func TestCommandListContainsLocalCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	// When...
-	localCommand := commands.GetCommand(COMMAND_NAME_LOCAL)
+	localCommand, err := commands.GetCommand(COMMAND_NAME_LOCAL)
 
 	// Then...
 	assert.NotNil(t, localCommand)
 	assert.Equal(t, COMMAND_NAME_LOCAL, localCommand.Name())
 	assert.Nil(t, localCommand.Values())
+	assert.Nil(t, err)
 }

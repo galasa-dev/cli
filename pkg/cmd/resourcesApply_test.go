@@ -16,10 +16,11 @@ func TestResourcesApplyCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	resourcesApplyCommand := commands.GetCommand(COMMAND_NAME_RESOURCES_APPLY)
+	resourcesApplyCommand, err := commands.GetCommand(COMMAND_NAME_RESOURCES_APPLY)
 	assert.NotNil(t, resourcesApplyCommand)
 	assert.Equal(t, COMMAND_NAME_RESOURCES_APPLY, resourcesApplyCommand.Name())
 	assert.NotNil(t, resourcesApplyCommand.Values())
 	assert.IsType(t, &ResourcesApplyCmdValues{}, resourcesApplyCommand.Values())
 	assert.NotNil(t, resourcesApplyCommand.CobraCommand())
+	assert.Nil(t, err)
 }

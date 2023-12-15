@@ -17,11 +17,12 @@ func TestCommandListContainsRunsCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	// When...
-	runsCommand := commands.GetCommand(COMMAND_NAME_RUNS)
+	runsCommand, err := commands.GetCommand(COMMAND_NAME_RUNS)
 
 	// Then...
 	assert.NotNil(t, runsCommand)
 	assert.Equal(t, COMMAND_NAME_RUNS, runsCommand.Name())
 	assert.NotNil(t, runsCommand.Values())
 	assert.IsType(t, &RunsCmdValues{}, runsCommand.Values())
+	assert.Nil(t, err)
 }
