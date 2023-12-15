@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -120,15 +121,16 @@ func TestPropertiesDeleteWithoutNamespace(t *testing.T) {
 func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	fs := factory.GetFileSystem()
-	homeDir, _ := fs.GetUserHomeDirPath()
-	galasaDir := homeDir + "/.galasa/"
-	fs.WriteTextFile(galasaDir+"bootstrap.properties", "")
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	propertiesDeleteCommand := commandCollection.GetCommand("properties delete")
+	propertiesDeleteCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 	
 	var args []string = []string{"properties", "delete", "--namespace", "gyro", "--name", "space.ball"}
 
 	// When...
-	err := Execute(factory, args)
+	err = commandCollection.Execute(args)
 
 	// Then...
 	assert.Nil(t, err)
