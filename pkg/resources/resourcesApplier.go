@@ -75,29 +75,30 @@ func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string)
 			defer resp.Body.Close()
 
 			if statusCode != http.StatusOK && statusCode != http.StatusCreated {
+
 				responseBody, err = io.ReadAll(resp.Body)
-
 				log.Printf("sendResourcesRequestToServer Failed - HTTP response - status code:%v payload:%v", statusCode, string(responseBody))
-				if err == nil {
-					//Get an arraylist of errors for each resource (obtained from the yaml file given in the command)
-					var apiErrors *galasaErrors.GalasaAPIErrorsArray
-					apiErrors, err = galasaErrors.NewGalasaApiErrorsArray(responseBody)
-					if err == nil {
-						//Ensure that the conversion of the error doesn't raise another exception
-						errMessages := apiErrors.GetErrorMessages()
-						responseString := fmt.Sprint(strings.Join(errMessages, "\n"))
 
-						if 400 <= statusCode && statusCode <= 499 {
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_CLIENT_ERROR, statusCode, responseString)
-						} else if 500 <= statusCode && statusCode <= 599 {
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR)
+				if err == nil {
+					//only 400 response status codes are expected to return a list of errors
+					if statusCode == 400 {
+						//Get a list of errors for each resource (obtained from the yaml file given in the command)
+						var errorsFromServer *galasaErrors.GalasaAPIErrorsArray
+						errorsFromServer, err = galasaErrors.NewGalasaApiErrorsArray(responseBody)
+
+						if err == nil {
+							errMessages := errorsFromServer.GetErrorMessages()
+							responseString := fmt.Sprint(strings.Join(errMessages, "\n"))
+							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_BAD_REQUEST, responseString)
 						} else {
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR, statusCode, responseString)
+							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCE_RESPONSE_PARSING, err)
 						}
+					} else if statusCode == 401 {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCE_RESP_UNAUTHORIZED_OPERATION)
+					} else if statusCode == 500 {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR)
 					} else {
-						//error occurred when trying to retrieve the api error
-						//unable to retrieve galasa apiError
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_GET_API_ERRORS_ARRAY, err)
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR)
 					}
 				} else {
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)

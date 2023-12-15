@@ -8,6 +8,7 @@ package errors
 
 import (
 	"encoding/json"
+	"log"
 )
 
 type GalasaAPIError struct {
@@ -25,5 +26,9 @@ func GetApiErrorFromResponse(body []byte) (*GalasaAPIError, error){
 	apiError := new(GalasaAPIError)
 
 	err = json.Unmarshal(body, &apiError)
+
+	if err != nil{
+		log.Printf("GetApiErrorFromResponse FAIL - %v", err)
+	}
 	return apiError, err
 }

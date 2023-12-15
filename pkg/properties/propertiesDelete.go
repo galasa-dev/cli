@@ -44,19 +44,17 @@ func deleteCpsProperty(namespace string,
 
 	if (resp != nil) && (resp.StatusCode != http.StatusOK) {
 		defer resp.Body.Close()
-		
+
 		responseBody, err = io.ReadAll(resp.Body)
-		if err == nil{
-			var apiError *galasaErrors.GalasaAPIError
-			apiError, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+		if err == nil {
+			var errorFromServer *galasaErrors.GalasaAPIError
+			errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
 
 			if err == nil {
 				//return galasa api error, because status code is not 200 (OK)
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, apiError.Message)
-			} else{
-				//error occurred when trying to retrieve the api error
-				//unable to retrieve galasa apiError
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_GET_API_ERROR, err)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
+			} else {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
 			}
 
 		} else {

@@ -8,6 +8,7 @@ package errors
 
 import (
 	"encoding/json"
+	"log"
 )
 
 // This function reads an array of galasa API Errors into an array of GalasaAPIError structure so that
@@ -24,16 +25,10 @@ func NewGalasaApiErrorsArray(body []byte) (*GalasaAPIErrorsArray, error) {
 
 	errorsGathered := new(GalasaAPIErrorsArray)
 
-	//convert payload into string, check the first char to see if it is an array
-	stringBody := string(body)
-	if string(stringBody[0]) == "[" {
-		//payload returned is an array
-		err = json.Unmarshal(body, &jsonArray)
-	} else {
-		//payload returned is a json object
-		var jsonOne GalasaAPIError
-		err = json.Unmarshal(body, &jsonOne)
-		jsonArray = append(jsonArray, jsonOne)
+	err = json.Unmarshal(body, &jsonArray)
+
+	if err != nil {
+		log.Printf("NewGalasaApiErrorsArray FAIL - %v", err)
 	}
 
 	errorsGathered.errorArray = &jsonArray

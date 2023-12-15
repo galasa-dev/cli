@@ -83,27 +83,3 @@ func TestGetApiErrorArrayWithMultipleJsonObjectsParsesInputOk(t *testing.T) {
 	assert.NotNil(t, parsedErrorMessages, "The list of errors inside the parsed structure is nil.")
 	assert.Equal(t, 2, len(parsedErrorMessages), "Wrong number of errors collected!")
 }
-
-func TestGetApiErrorNonArrayErrorInputOk(t *testing.T) {
-	// Given
-
-	bodyString := `{
-        "error_code" : 5000,
-        "error_message" : "GAL5000E: Error occured when trying to access the endpoint. Report the problem to your Galasa Ecosystem owner"
-    }`
-
-	bodyBytes := []byte(bodyString)
-
-	var parsedErrors *GalasaAPIErrorsArray
-	var err error
-
-	// When
-	parsedErrors, err = NewGalasaApiErrorsArray(bodyBytes)
-
-	// Then
-	assert.Nil(t, err, "NewGalasaApiErrorsArray failed with a non-nil error!")
-	assert.NotNil(t, parsedErrors, "NewGalasaApiErrorsArray returned no error, but the parsed structure is nil!")
-	parsedErrorMessages := parsedErrors.GetErrorMessages()
-	assert.NotNil(t, parsedErrorMessages, "The list of errors inside the parsed structure is nil.")
-	assert.Equal(t, 1, len(parsedErrorMessages), "Wrong number of errors collected!")
-}

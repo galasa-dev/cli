@@ -113,7 +113,52 @@ func TestCanApplyValidResources(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestResponseStatusCodeFromApiIsAClientError(t *testing.T) {
+
+
+func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T) {
+	// Given
+
+	// We have a payload we are expecting...
+	// Like this:
+	expectedStringArrivingAtServlet := `{
+        "action": "apply",
+        "data": [
+            {
+                "apiVersion": "galasa-dev/v1alpha1",
+                "data": {
+                    "value": "custard"
+                },
+                "kind": "GalasaProperty",
+                "metadata": {
+                    "name": "filling",
+                    "namespace": "doughnuts"
+                }
+            }
+        ]
+    }`
+
+	expectedBytesArrivingAtServlet := []byte(expectedStringArrivingAtServlet)
+
+	payloadToReturn := `{
+        "error_code" : 2003,
+        "error_message" : "Error: GAL2003 - Invalid yaml format"
+    }`
+
+	bytesToReturn := []byte(payloadToReturn)
+
+	mockServlet := NewMockServlet(t, bytesToReturn, 401, expectedBytesArrivingAtServlet)
+	mockservletUrl := mockServlet.getUrl()
+
+	// When
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl)
+
+	// Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1119E")
+
+}
+
+func TestBadRequestResponseStatusFromServerShowsErrorsReturned(t *testing.T) {
 	// Given
 
 	// We have a payload we are expecting...
@@ -150,7 +195,7 @@ func TestResponseStatusCodeFromApiIsAClientError(t *testing.T) {
 
 	bytesToReturn := []byte(payloadToReturn)
 
-	mockServlet := NewMockServlet(t, bytesToReturn, 403, expectedBytesArrivingAtServlet)
+	mockServlet := NewMockServlet(t, bytesToReturn, 400, expectedBytesArrivingAtServlet)
 	mockservletUrl := mockServlet.getUrl()
 
 	// When
@@ -161,8 +206,7 @@ func TestResponseStatusCodeFromApiIsAClientError(t *testing.T) {
 	assert.Contains(t, err.Error(), "GAL1113E")
 
 }
-
-func TestResponseStatusCodeFromApiIsAServerError(t *testing.T) {
+func TestInternalServerErrorResponseStatusFromServerReturnsServerError(t *testing.T) {
 	// Given
 
 	// We have a payload we are expecting...
@@ -186,20 +230,14 @@ func TestResponseStatusCodeFromApiIsAServerError(t *testing.T) {
 
 	expectedBytesArrivingAtServlet := []byte(expectedStringArrivingAtServlet)
 
-	payloadToReturn := `[
-        {
+	payloadToReturn := `{
             "error_code" : 2003,
             "error_message" : "Error: GAL2003 - Invalid yaml format"
-        },
-        {
-            "error_code": 343,
-            "error_message": "GAL343 - Unable to marshal into json"
-        }
-    ]`
+        }`
 
 	bytesToReturn := []byte(payloadToReturn)
 
-	mockServlet := NewMockServlet(t, bytesToReturn, 501, expectedBytesArrivingAtServlet)
+	mockServlet := NewMockServlet(t, bytesToReturn, 500, expectedBytesArrivingAtServlet)
 	mockservletUrl := mockServlet.getUrl()
 
 	// When

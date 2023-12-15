@@ -199,13 +199,13 @@ var (
 	GALASA_ERROR_COULD_NOT_GET_YAML_CONTENT              = NewMessageType("GAL1110E: Could not retrieve the content of the file provided. Reason: '%s'", 1110, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_UNMARSHAL_YAML                = NewMessageType("GAL1111E: Error parsing the file '{}'. The file is not in the expected yaml format. Reason: '%s'. Invalid yaml:'%s'", 1111, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_MARSHAL_INTO_JSON             = NewMessageType("GAL1112E: Error converting the parsed yaml content into a json payload for the http request. Reason: '%s'", 1112, STACK_TRACE_WANTED)
-	GALASA_ERROR_RESOURCES_RESP_CLIENT_ERROR             = NewMessageType("GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program. "+
-		"This could indicate that the client and Ecosystem have a mis-match in their versions, and the client needs to be upgraded, or downgraded to match. Use the galasactl version` to find the version of this tool. Errors returned: '%v'", 1113, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR     = NewMessageType("GAL1114E: A failure was reported from the Galasa Ecosystem where the Ecosystem is at fault. Please collect a log with the `--log` option and contact your Galasa Ecosystem adminstrator.", 1114, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR = NewMessageType("GAL1115E: An unexpected response was received from the Galasa Ecosystem. Please collect a log using the --log option and contact your Galasa Ecosystem adminstrator. Errors returned: %v", 1115, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY    = NewMessageType("GAL1116E: Error reading the HTTP Response body. Reason: '%s'", 1116, STACK_TRACE_WANTED)
-	GALASA_ERROR_UNABLE_TO_GET_API_ERROR         = NewMessageType("GAL1117E: Unable to retrieve Galasa Api Error. Reason: '%s'", 1117, STACK_TRACE_WANTED)
-	GALASA_ERROR_UNABLE_TO_GET_API_ERRORS_ARRAY  = NewMessageType("GAL1118E: Unable to retrieve the Galasa ApiErrorsArray. Reason: '%s'", 1118, STACK_TRACE_WANTED)
+	GALASA_ERROR_RESOURCES_RESP_BAD_REQUEST              = NewMessageType("GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program or the user input. Errors returned: '%s'", 1113, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR             = NewMessageType("GAL1114E: The resources operation failed due to a problem on the server. Please collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1114, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR         = NewMessageType("GAL1115E: An unexpected response was received from the Galasa Ecosystem. Please collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1115, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY            = NewMessageType("GAL1116E: Error reading the HTTP Response body. Reason: '%s'", 1116, STACK_TRACE_WANTED)
+	GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING        = NewMessageType("GAL1117E: The delete operation failed. Unable to process the error information returned from the server.", 1117, STACK_TRACE_WANTED)
+	GALASA_ERROR_RESOURCE_RESPONSE_PARSING               = NewMessageType("GAL1118E: The resource operation failed. Unable to process the error information returned from the server. Reason: '%s'", 1118, STACK_TRACE_WANTED)
+	GALASA_ERROR_RESOURCE_RESP_UNAUTHORIZED_OPERATION    = NewMessageType("GAL1119E: The server thinks you are unauthorized to perform this operation.", 1119, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
