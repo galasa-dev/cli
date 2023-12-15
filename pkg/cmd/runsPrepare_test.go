@@ -16,7 +16,9 @@ func TestRunsPrepareCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	cmd := commands.GetCommand(COMMAND_NAME_RUNS_PREPARE)
+	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_PREPARE)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_RUNS_PREPARE, cmd.Name())
 	assert.NotNil(t, cmd.Values())
 	assert.IsType(t, &RunsPrepareCmdValues{}, cmd.Values())

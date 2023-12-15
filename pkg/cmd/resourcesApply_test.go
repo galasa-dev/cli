@@ -16,7 +16,9 @@ func TestResourcesApplyCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	resourcesApplyCommand := commands.GetCommand(COMMAND_NAME_RESOURCES_APPLY)
+	resourcesApplyCommand, err := commands.GetCommand(COMMAND_NAME_RESOURCES_APPLY)
+	assert.Nil(t, err)
+	
 	assert.NotNil(t, resourcesApplyCommand)
 	assert.Equal(t, COMMAND_NAME_RESOURCES_APPLY, resourcesApplyCommand.Name())
 	assert.NotNil(t, resourcesApplyCommand.Values())

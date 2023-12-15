@@ -16,7 +16,9 @@ func TestPropertiesDeleteCommandInCommandCollectionHasName(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	propertiesDeleteCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES_DELETE)
+	propertiesDeleteCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_DELETE)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_DELETE, propertiesDeleteCommand.Name())
 	assert.Nil(t, propertiesDeleteCommand.Values())
 	assert.NotNil(t, propertiesDeleteCommand.CobraCommand())

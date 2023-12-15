@@ -17,7 +17,8 @@ func TestCommandListContainsProjectCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	// When...
-	projectCommand := commands.GetCommand(COMMAND_NAME_PROJECT)
+	projectCommand, err := commands.GetCommand(COMMAND_NAME_PROJECT)
+	assert.Nil(t, err)
 
 	// Then...
 	assert.NotNil(t, projectCommand)
