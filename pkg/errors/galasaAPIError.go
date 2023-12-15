@@ -8,8 +8,7 @@ package errors
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
+	"log"
 )
 
 type GalasaAPIError struct {
@@ -21,17 +20,15 @@ type GalasaAPIError struct {
 // the reason for the failure.
 // NOTE: when this function is called ensure that the calling function has the  `defer resp.Body.Close()`
 // called in order to ensure that the response body is closed when the function completes
-func (apiError *GalasaAPIError) GetApiErrorFromResponse(response *http.Response) (error){
+func GetApiErrorFromResponse(body []byte) (*GalasaAPIError, error){
 	var err error
-	var body []byte
-	body, err = io.ReadAll(response.Body)
-	if err == nil {
-		err = apiError.UnmarshalApiError(body)
-	}
-	return err
-}
 
-// This Function is meant to be used to unmarshal the json of a GalasaAPIError from a json string regardless of source
-func (apiError *GalasaAPIError) UnmarshalApiError(body []byte) error {
-	return json.Unmarshal(body, &apiError)
+	apiError := new(GalasaAPIError)
+
+	err = json.Unmarshal(body, &apiError)
+
+	if err != nil{
+		log.Printf("GetApiErrorFromResponse FAIL - %v", err)
+	}
+	return apiError, err
 }

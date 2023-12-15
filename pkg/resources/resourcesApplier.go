@@ -42,66 +42,74 @@ func ApplyResources(
 		}
 
 		if err == nil {
-			err = sendJsonToApi(jsonBytes, apiServerUrl)
+			err = sendResourcesRequestToServer(jsonBytes, apiServerUrl)
 		}
 	}
 	return err
 }
 
-func sendJsonToApi(payload []byte, apiServerUrl string) error {
-
+func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string) error {
 	var err error
 	var responseBody []byte
+	resourcesApiServerUrl := apiServerUrl + "/resources/"
+
+	var req *http.Request
+	req, err = http.NewRequest("POST", resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))
+
 	if err == nil {
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Accept-Encoding", "gzip,deflate,br")
 
-		var req *http.Request
-		req, err = http.NewRequest("POST", apiServerUrl+"/resources/", bytes.NewBuffer(payload))
+		log.Printf("sendResourcesRequestToServer url:%s - payload: '%s'", resourcesApiServerUrl, string(payloadJsonToSend))
 
+		var resp *http.Response
+		client := &http.Client{}
+
+		// A non-2xx status code doesn't cause an error.
+		// If there is an error, the response should be nil
+		resp, err = client.Do(req)
 		if err == nil {
-			req.Header.Set("Content-Type", "application/json")
-			req.Header.Set("Accept", "application/json")
-			req.Header.Set("Accept-Encoding", "gzip,deflate,br")
+			statusCode := resp.StatusCode
 
-			var resp *http.Response
-			client := &http.Client{}
+			defer resp.Body.Close()
 
-			// A non-2xx status code doesn't cause an error.
-			// If there is an error, the response should be nil
-			resp, err = client.Do(req)
-			if err == nil {
-				statusCode := resp.StatusCode
+			if statusCode != http.StatusOK && statusCode != http.StatusCreated {
 
-				defer resp.Body.Close()
+				responseBody, err = io.ReadAll(resp.Body)
+				log.Printf("sendResourcesRequestToServer Failed - HTTP response - status code:%v payload:%v", statusCode, string(responseBody))
 
-				if statusCode != http.StatusOK && statusCode != http.StatusCreated {
-					log.Printf("Response status code is not okay (200 or 201), but rather %v. Error: %v", statusCode, err)
+				if err == nil {
+					//only 400 response status codes are expected to return a list of errors
+					if statusCode == 400 {
+						//Get a list of errors for each resource (obtained from the yaml file given in the command)
+						var errorsFromServer *galasaErrors.GalasaAPIErrorsArray
+						errorsFromServer, err = galasaErrors.NewGalasaApiErrorsArray(responseBody)
 
-					responseBody, err = io.ReadAll(resp.Body)
-					if err == nil {
-						//Get an arraylist of errors for each resource (obtained from the yaml file given in the command)
-						var apiErrors *galasaErrors.GalasaAPIErrorsArray
-						apiErrors, err = galasaErrors.NewGalasaApiErrorsArray(responseBody)
 						if err == nil {
-							//Ensure that the conversion of the error doesn't raise another exception
-							errMessages := apiErrors.GetErrorMessages()
+							errMessages := errorsFromServer.GetErrorMessages()
 							responseString := fmt.Sprint(strings.Join(errMessages, "\n"))
-
-							if 400 <= statusCode && statusCode <= 499 {
-								err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_CLIENT_ERROR, statusCode, responseString)
-							} else if 500 <= statusCode && statusCode <= 599 {
-								err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR, statusCode, responseString)
-							} else {
-								err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR, statusCode, responseString)
-							}
+							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_BAD_REQUEST, responseString)
+						} else {
+							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCE_RESPONSE_PARSING, err)
 						}
+					} else if statusCode == 401 {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCE_RESP_UNAUTHORIZED_OPERATION)
+					} else if statusCode == 500 {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR)
+					} else {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR)
 					}
-
 				} else {
-					log.Println("response Status:", resp.Status)
-					log.Println("response Headers:", resp.Header)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 				}
+
+			} else {
+				log.Println("response Status:", resp.Status)
+				log.Println("response Headers:", resp.Header)
 			}
 		}
 	}
+
 	return err
 }
