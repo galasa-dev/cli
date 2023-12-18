@@ -44,7 +44,7 @@ func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 	// Check what the user saw is reasonable.
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'properties namespace get' command.")
+	assert.Contains(t, outText, "Displays the options for the 'properties namespaces get' command.")
 
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
 	errText := stdErrConsole.ReadText()
