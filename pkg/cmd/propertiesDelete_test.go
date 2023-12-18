@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -93,18 +92,12 @@ func TestPropertiesDeleteWithoutNamespace(t *testing.T) {
 func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesDeleteCommand GalasaCommand
-	propertiesDeleteCommand, err = commandCollection.GetCommand("properties delete")
-	assert.Nil(t, err)
-	propertiesDeleteCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_DELETE, factory, t)
 	
 	var args []string = []string{"properties", "delete", "--namespace", "gyro", "--name", "space.ball"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	assert.Nil(t, err)

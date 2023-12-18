@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,22 +45,16 @@ func TestAuthLoginHelpFlagSetCorrectly(t *testing.T) {
 func TestAuthLoginNoFlagsReturnsNoError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var authLoginCommand GalasaCommand
-	authLoginCommand, err = commandCollection.GetCommand("auth login")
-	assert.Nil(t, err)
-	authLoginCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_AUTH_LOGIN, factory, t)
 
 	var args []string = []string{"auth", "login"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	// Check what the user saw is reasonable.
 	checkOutput("", "", "", factory, t)
-
-	assert.Nil(t, err)
 }

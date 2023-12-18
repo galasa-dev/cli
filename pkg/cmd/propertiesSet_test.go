@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,18 +65,12 @@ func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesSetCommand GalasaCommand
-	propertiesSetCommand, err = commandCollection.GetCommand("properties set")
-	assert.Nil(t, err)
-	propertiesSetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
 	var args []string = []string{"properties", "set", "--namespace", "mince", "--name", "pies.are.so.tasty", "--value", "some kinda value"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)

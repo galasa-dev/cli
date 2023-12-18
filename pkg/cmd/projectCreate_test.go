@@ -13,7 +13,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/utils"
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -662,18 +661,12 @@ func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check what the user saw is reasonable.
@@ -686,18 +679,12 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -708,18 +695,12 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 func TestProjectCreatePackageFlagNoPackageReturnsNoError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "flag needs an argument: --package", "", factory, t)
@@ -730,18 +711,12 @@ func TestProjectCreatePackageFlagNoPackageReturnsNoError(t *testing.T) {
 func TestProjectCreatePackageAndFeatureFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "comma,seperated,test,list"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -752,18 +727,12 @@ func TestProjectCreatePackageAndFeatureFlagsReturnsNoOk(t *testing.T) {
 func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--force"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -774,18 +743,12 @@ func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--obr"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -796,18 +759,12 @@ func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--maven"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -818,18 +775,12 @@ func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--gradle"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -840,18 +791,12 @@ func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var projectCreateCommand GalasaCommand
-	projectCreateCommand, err = commandCollection.GetCommand("project create")
-	assert.Nil(t, err)
-	projectCreateCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "feature,list", "--force", "--obr", "--maven", "--gradle"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)

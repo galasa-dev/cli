@@ -11,6 +11,7 @@ import (
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,6 +35,17 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalE
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
 	assert.Nil(t, o)
+}
+
+func setupTestCommandCollection(command string, factory Factory, t *testing.T) CommandCollection {
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	var cmd GalasaCommand
+	cmd, err = commandCollection.GetCommand(command)
+	assert.Nil(t, err)
+	cmd.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	return commandCollection
 }
 
 func TestCommandsCollectionHasARootCommand(t *testing.T) {

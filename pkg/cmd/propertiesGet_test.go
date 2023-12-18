@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,18 +59,12 @@ func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
 func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check what the user saw was reasonable
@@ -83,18 +76,12 @@ func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -105,18 +92,12 @@ func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
 func TestPropertiesGetNamespaceNamePrefixFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--prefix", "something"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "Error: if any flags in the group [name prefix] are set", "", factory, t)
@@ -128,18 +109,12 @@ func TestPropertiesGetNamespaceNamePrefixFlagsReturnsError(t *testing.T) {
 func TestPropertiesGetNamespaceNameSuffixFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--suffix", "something"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "Error: if any flags in the group [name suffix] are set", "", factory, t)
@@ -151,18 +126,12 @@ func TestPropertiesGetNamespaceNameSuffixFlagsReturnsError(t *testing.T) {
 func TestPropertiesGetNamespaceNameInfixFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--infix", "something"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "Error: if any flags in the group [name infix] are set", "", factory, t)
@@ -174,18 +143,12 @@ func TestPropertiesGetNamespaceNameInfixFlagsReturnsError(t *testing.T) {
 func TestPropertiesGetNamespacePrefixFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--prefix", "something"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -196,18 +159,12 @@ func TestPropertiesGetNamespacePrefixFlagsReturnsOk(t *testing.T) {
 func TestPropertiesGetNamespaceSufffixFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--suffix", "something"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -218,18 +175,12 @@ func TestPropertiesGetNamespaceSufffixFlagsReturnsOk(t *testing.T) {
 func TestPropertiesGetNamespaceInfixFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--infix", "something"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -240,18 +191,12 @@ func TestPropertiesGetNamespaceInfixFlagsReturnsOk(t *testing.T) {
 func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--prefix", "something", "--suffix", "suffixthingy", "--infix", "infixthingy"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)
@@ -262,18 +207,12 @@ func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 func TestPropertiesGetNamespaceNamePrefixSuffixInfixFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties get")
-	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--prefix", "something", "--suffix", "suffixthingy", "--infix", "infixthingy"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check if what the user saw was acceptible

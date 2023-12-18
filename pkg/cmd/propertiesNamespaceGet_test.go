@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,20 +47,13 @@ func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-	
-	var propertiesNamespacesGetCommand GalasaCommand
-	propertiesNamespacesGetCommand, err = commandCollection.GetCommand("properties namespaces get")
-	assert.Nil(t, err)
-	assert.NotNil(t, propertiesNamespacesGetCommand)
-	propertiesNamespacesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
 	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"properties", "namespaces", "get"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check what the user saw is reasonable.
@@ -73,20 +65,13 @@ func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var propertiesNamespacesGetCommand GalasaCommand
-	propertiesNamespacesGetCommand, err = commandCollection.GetCommand("properties namespaces get")
-	assert.Nil(t, err)
-	assert.NotNil(t, propertiesNamespacesGetCommand)
-	propertiesNamespacesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
 	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"properties", "namespaces", "get", "--format", "yaml"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check what the user saw is reasonable.

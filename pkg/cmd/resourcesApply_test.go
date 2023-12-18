@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -65,18 +64,12 @@ func TestResourcesApplyNoFlagsReturnsError(t *testing.T) {
 func TestResourcesApplyNameNamespaceValueReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var resourcesApplyCommand GalasaCommand
-	resourcesApplyCommand, err = commandCollection.GetCommand("resources apply")
-	assert.Nil(t, err)
-	resourcesApplyCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RESOURCES_APPLY, factory, t)
 
 	var args []string = []string{"resources", "apply", "--file", "mince.yaml"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	checkOutput("", "", "", factory, t)

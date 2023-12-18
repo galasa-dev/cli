@@ -10,7 +10,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/utils"
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -167,18 +166,12 @@ func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, err := NewCommandCollection(factory)
-	assert.Nil(t, err)
-
-	var localInitCommand GalasaCommand
-	localInitCommand, err = commandCollection.GetCommand("local init")
-	assert.Nil(t, err)
-	localInitCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_LOCAL_INIT, factory, t)
 
 	var args []string = []string{"local", "init"}
 
 	// When...
-	err = commandCollection.Execute(args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check what the user saw is reasonable.
