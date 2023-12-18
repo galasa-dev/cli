@@ -199,6 +199,7 @@ func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	// Check if what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
@@ -215,9 +216,63 @@ func TestPropertiesGetNamespaceNamePrefixSuffixInfixFlagsReturnsError(t *testing
 	err := commandCollection.Execute(args)
 
 	// Then...
-	// Check if what the user saw was acceptible
-	checkOutput("", "if any flags in the group [name infix] are set", "", factory, t)
-
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name infix] are set")
+
+	// Check if what the user saw was reasonable
+	checkOutput("", "if any flags in the group [name infix] are set", "", factory, t)
+
+}
+
+func TestPropertiesGetNamespaceNoParameterReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
+
+	var args []string = []string{"properties", "get", "--namespace"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "flag needs an argument: --namespace")
+
+	// Check if what the user saw was reasonable
+	checkOutput("", "Error: flag needs an argument: --namespace", "", factory, t)
+}
+
+func TestPropertiesGetNamespaceSuffixNoParameterReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
+
+	var args []string = []string{"properties", "get", "--namespace", "guitar", "--suffix"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "flag needs an argument: --suffix")
+
+	// Check if what the user saw was reasonable
+	checkOutput("", "Error: flag needs an argument: --suffix", "", factory, t)
+}
+
+func TestPropertiesGetNamespaceRepeatedReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
+
+	var args []string = []string{"properties", "get", "--namespace", "wildwest", "--namespace", "whistle"}
+	
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check if what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
 }
