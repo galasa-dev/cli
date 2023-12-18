@@ -39,7 +39,6 @@ func TestRunsHelpFlagSetCorrectly(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-
 	// Check what the user saw is reasonable.
 	checkOutput("Displays the options for the 'runs' command.", "", "", factory, t)
 

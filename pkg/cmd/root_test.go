@@ -172,3 +172,20 @@ func TestRootHelpFlagSetCorrectly(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestRootNoCommandsReturnsUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Usage:\n  galasactl [command]", "", "", factory, t)
+
+	assert.Nil(t, err)
+}

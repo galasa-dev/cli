@@ -62,7 +62,7 @@ func TestResourcesUpdateNoFlagsReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "required flag(s) \"file\" not set")
 }
 
-func TestResourcesUpdateNameNamespaceValueReturnsOk(t *testing.T) {
+func TestResourcesFileFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection := setupTestCommandCollection(COMMAND_NAME_RESOURCES_UPDATE, factory, t)

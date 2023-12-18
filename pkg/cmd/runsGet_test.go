@@ -43,3 +43,30 @@ func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestRunsGetNameDestinationReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
+
+// flags are:
+//   --active
+//   --age
+//   --name
+//   --requestor
+//   --result
+
+// --active and --result are mutually exclusive, and if any extra flags are set it seems --name or --age must be used.
+// --name seems to be mutually exlusive to everything else
