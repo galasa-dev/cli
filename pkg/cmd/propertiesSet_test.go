@@ -88,10 +88,10 @@ func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	var propertiesGetCommand GalasaCommand
-	propertiesGetCommand, err = commandCollection.GetCommand("properties set")
+	var propertiesSetCommand GalasaCommand
+	propertiesSetCommand, err = commandCollection.GetCommand("properties set")
 	assert.Nil(t, err)
-	propertiesGetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	propertiesSetCommand.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
 
 	var args []string = []string{"properties", "set", "--namespace", "mince", "--name", "pies.are.so.tasty", "--value", "some kinda value"}
 
