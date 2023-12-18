@@ -57,3 +57,23 @@ func TestRunsHelpFlagSetCorrectly(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestRunsNoCommandsProducesUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"runs"}
+
+	// When...
+	Execute(factory, args)
+
+	// Then...
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	assert.Contains(t, outText, "Usage:")
+	assert.Contains(t, outText, "galasactl runs [command]")
+
+	// We expect an exit code of 0 for this command.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+}

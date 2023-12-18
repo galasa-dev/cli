@@ -55,3 +55,28 @@ func TestRunsDownloadHelpFlagSetCorrectly(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	// Note: No --maven or --gradle flags here:
+	var args []string = []string{"runs", "download"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	assert.Contains(t, errText, "Error: required flag(s) \"name\" not set")
+
+	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+
+	assert.NotNil(t, err)
+}
