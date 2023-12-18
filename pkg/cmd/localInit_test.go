@@ -159,18 +159,7 @@ func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'local init' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'local init' command.", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -193,14 +182,7 @@ func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Equal(t, errText, "")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }

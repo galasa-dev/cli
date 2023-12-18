@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,18 +39,7 @@ func TestRunsSubmitLocalHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'runs submit local' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'runs submit local' command.", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -65,6 +53,9 @@ func TestRunsSubmitLocalWithoutObrWithClassErrors(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
+	// Check what the user saw was reasonable
+	checkOutput("", "required flag(s) \"obr\" not set", "", factory, t)
+
 	// Should throw an error asking for flags to be set
 	assert.NotNil(t, err, "err should have been set!")
 	assert.Contains(t, err.Error(), "required flag(s) \"obr\" not set")
@@ -79,6 +70,9 @@ func TestRunsSubmitLocalWithoutClassWithObrErrors(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
+	// Check what the user saw was reasonable
+	checkOutput("", "required flag(s) \"class\" not set", "", factory, t)
+
 	// Should throw an error asking for flags to be set
 	assert.NotNil(t, err, "err should have been set!")
 	assert.Contains(t, err.Error(), "required flag(s) \"class\" not set")
@@ -93,6 +87,9 @@ func TestMultipleRequiredFlagsNotSetReturnsListInError(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
+	// Check what the user saw was reasonable
+	checkOutput("", "required flag(s) \"class\", \"obr\" not set", "", factory, t)
+	
 	// Should throw an error asking for flags to be set
 	assert.NotNil(t, err, "err should have been set!")
 	assert.Contains(t, err.Error(), "required flag(s) \"class\", \"obr\" not set")

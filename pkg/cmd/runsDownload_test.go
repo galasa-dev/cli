@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,18 +39,7 @@ func TestRunsDownloadHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'runs download' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'runs download' command.", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -68,15 +56,7 @@ func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"name\" not set")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"name\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
 }

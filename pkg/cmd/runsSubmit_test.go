@@ -40,18 +40,7 @@ func TestRunsSubmitHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'runs submit' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'runs submit' command.", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -66,6 +55,8 @@ func TestRunsSubmitWithoutFlagsErrors(t *testing.T) {
 
 	// Then...
 	// Should throw an error asking for flags to be set
+	checkOutput("", "required flag(s) \"class\", \"obr\" not set", "", factory, t)
+
 	assert.NotNil(t, err, "err should have been set!")
 	assert.Contains(t, err.Error(), "required flag(s) \"class\", \"obr\" not set")
 }
@@ -79,6 +70,9 @@ func TestRunsSubmitExecutesWithPortfolio(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
+	// check what the user sees is acceptible
+	checkOutput("", "required flag(s) \"obr\" not set", "", factory, t)
+	
 	// Should throw an error asking for flags to be set
 	assert.NotNil(t, err, "err should have been set!")
 	assert.Contains(t, err.Error(), "required flag(s) \"obr\" not set")

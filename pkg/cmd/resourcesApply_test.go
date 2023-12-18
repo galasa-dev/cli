@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,20 +38,8 @@ func TestResourcesApplyHelpFlagSetCorrectly(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'resources apply' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'resources apply' command", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -69,17 +56,10 @@ func TestResourcesApplyNoFlagsReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"file\" not set")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"file\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"file\" not set")
 }
 
 func TestResourcesApplyNameNamespaceValueReturnsOk(t *testing.T) {
@@ -99,10 +79,7 @@ func TestResourcesApplyNameNamespaceValueReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }

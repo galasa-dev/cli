@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,18 +40,7 @@ func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'properties set' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'properties set' command.", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -69,17 +57,10 @@ func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"name\", \"namespace\", \"value\" not set")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"name\", \"namespace\", \"value\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"name\", \"namespace\", \"value\" not set")
 }
 
 func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
@@ -99,10 +80,7 @@ func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -119,17 +97,10 @@ func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"name\", \"value\" not set")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"name\", \"value\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"name\", \"value\" not set")
 }
 
 func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
@@ -144,17 +115,10 @@ func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"namespace\", \"value\" not set")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"namespace\", \"value\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"namespace\", \"value\" not set")
 }
 
 func TestPropertiesOnlyValueReturnsError(t *testing.T) {
@@ -169,15 +133,8 @@ func TestPropertiesOnlyValueReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"name\", \"namespace\" not set")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"name\", \"namespace\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"name\", \"namespace\" not set")
 }

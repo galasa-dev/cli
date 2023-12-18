@@ -8,7 +8,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,20 +37,8 @@ func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'properties get' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'properties get' command.", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -64,12 +51,10 @@ func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"namespace\" not set")
+	checkOutput("", "Error: required flag(s) \"namespace\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"namespace\" not set")
 }
 
 func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
@@ -89,10 +74,8 @@ func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -114,10 +97,7 @@ func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -139,10 +119,7 @@ func TestPropertiesGetNamespaceNamePrefixFlagsReturnsError(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: if any flags in the group [name prefix] are set", "", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name prefix] are set")
@@ -165,10 +142,7 @@ func TestPropertiesGetNamespaceNameSuffixFlagsReturnsError(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: if any flags in the group [name suffix] are set", "", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name suffix] are set")
@@ -191,10 +165,7 @@ func TestPropertiesGetNamespaceNameInfixFlagsReturnsError(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: if any flags in the group [name infix] are set", "", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name infix] are set")
@@ -217,10 +188,7 @@ func TestPropertiesGetNamespacePrefixFlagsReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -242,10 +210,7 @@ func TestPropertiesGetNamespaceSufffixFlagsReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -267,10 +232,7 @@ func TestPropertiesGetNamespaceInfixFlagsReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -292,10 +254,7 @@ func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -317,10 +276,8 @@ func TestPropertiesGetNamespaceNamePrefixSuffixInfixFlagsReturnsError(t *testing
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	// Check if what the user saw was acceptible
+	checkOutput("", "if any flags in the group [name infix] are set", "", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name infix] are set")

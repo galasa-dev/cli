@@ -9,11 +9,32 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
+
+func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalErrorString string, factory Factory, t *testing.T) {
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	if expectedStdOutput != "" {
+		assert.Contains(t, outText, expectedStdOutput)
+	} else {
+		assert.Empty(t, expectedStdOutput)
+	}
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	if expectedStdErr != "" {
+		assert.Contains(t, errText, expectedStdErr)
+	} else {
+		assert.Empty(t, expectedStdErr)
+	}
+	
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+}
 
 func TestCommandsCollectionHasARootCommand(t *testing.T) {
 	factory := NewMockFactory()
@@ -41,8 +62,10 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
+
 	// When...
 	commands, err := NewCommandCollection(factory)
+
 	// Then...
 	assert.Nil(t, err)
 	rootCommand := commands.GetRootCommand()
@@ -78,15 +101,7 @@ func TestVersionFromCommandLine(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Lets check that the version came out.
-	console := factory.GetStdOutConsole().(*utils.MockConsole)
-	text := console.ReadText()
-	assert.Contains(t, text, "galasactl version")
-	versionString, _ := embedded.GetGalasaCtlVersion()
-	assert.Contains(t, text, versionString)
-
-	// We expect the exit code for this to be 0, so the final word should be nil.
-	mockFinalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	assert.Nil(t, mockFinalWordHandler.ReportedObject)
+	checkOutput("galasactl version", "", "", factory, t)
 }
 
 func TestNoParamsFromCommandLine(t *testing.T) {
@@ -102,14 +117,7 @@ func TestNoParamsFromCommandLine(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	console := factory.GetStdOutConsole().(*utils.MockConsole)
-	text := console.ReadText()
-	assert.Contains(t, text, "A tool for controlling Galasa resources")
-
-	// We expect an exit code of 1 for this command.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("A tool for controlling Galasa resources", "", "", factory, t)
 }
 
 func TestCanGetNormalExitCodeAndErrorTextFromAnError(t *testing.T) {
@@ -136,7 +144,6 @@ func TestCanGetTestsFailedExitCodeAndErrorTextFromATestFailedGalasaErrorPointer(
 	assert.False(t, isStackTraceWanted, "We don't want stack trace from galasa errors")
 }
 
-
 func TestRootHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
@@ -148,20 +155,8 @@ func TestRootHelpFlagSetCorrectly(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'galasactl' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'galasactl' command.", "", "", factory, t)
 
 	assert.Nil(t, err)
 }

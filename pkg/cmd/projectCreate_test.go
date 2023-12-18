@@ -574,22 +574,13 @@ func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 	var args []string = []string{"project", "create"}
 
 	// When...
-	errGotBack := Execute(factory, args)
+	err := Execute(factory, args)
 
 	// Then...
-
-	assert.NotNil(t, errGotBack)
+	assert.NotNil(t, err)
 
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"package\" not set")
-
-	// We expect an exit code of 0 for this command.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"package\" not set", "", factory, t)
 }
 
 func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
@@ -606,18 +597,7 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	fmt.Printf("error returned by Execute method: %v\n", err)
 
 	// Check what the user saw no output
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Empty(t, outText)
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 0.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	// Check that the default folder was created.
 	fs := factory.GetFileSystem()
@@ -639,16 +619,10 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: GAL1089E: Need to use --maven and/or --gradle parameter")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: GAL1089E: Need to use --maven and/or --gradle parameter", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1089E:")
 }
 
 func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
@@ -680,18 +654,7 @@ func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Contains(t, outText, "Displays the options for the 'project create' command.")
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("Displays the options for the 'project create' command", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -714,15 +677,10 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "required flag(s) \"package\" not set")
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "required flag(s) \"package\" not set", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"package\" not set")
 }
 
 func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
@@ -742,10 +700,7 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -767,10 +722,7 @@ func TestProjectCreatePackageFlagNoPackageReturnsNoError(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "flag needs an argument: --package", "", factory, t)
 
 	assert.NotNil(t, err)
 }
@@ -792,10 +744,7 @@ func TestProjectCreatePackageAndFeatureFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -817,10 +766,7 @@ func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -842,10 +788,7 @@ func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -867,10 +810,7 @@ func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -892,10 +832,7 @@ func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -917,10 +854,7 @@ func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	err = commandCollection.Execute(args)
 
 	// Then...
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	assert.Nil(t, err)
 }
