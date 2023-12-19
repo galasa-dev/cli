@@ -99,6 +99,12 @@ func (cmd *RunsGetCommand) createCobraCommand(
 	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.result, "result", "", "A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example \"--result Failed,Ignored,EnvFail\"")
 	runsGetCobraCmd.PersistentFlags().BoolVar(&cmd.values.isActiveRuns, "active", false, "parameter to retrieve runs that have not finished yet.")
 
+	runsGetCobraCmd.MarkFlagsMutuallyExclusive("name", "age")
+	runsGetCobraCmd.MarkFlagsMutuallyExclusive("name", "requestor")
+	runsGetCobraCmd.MarkFlagsMutuallyExclusive("name", "result")
+	runsGetCobraCmd.MarkFlagsMutuallyExclusive("name", "active")
+	runsGetCobraCmd.MarkFlagsMutuallyExclusive("result", "active")
+
 	runsCommand.CobraCommand().AddCommand(runsGetCobraCmd)
 
 	return runsGetCobraCmd, err
