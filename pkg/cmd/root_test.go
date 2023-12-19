@@ -21,7 +21,7 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalE
 	if expectedStdOutput != "" {
 		assert.Contains(t, outText, expectedStdOutput)
 	} else {
-		assert.Empty(t, expectedStdOutput)
+		assert.Empty(t, outText)
 	}
 
 	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
@@ -29,7 +29,7 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalE
 	if expectedStdErr != "" {
 		assert.Contains(t, errText, expectedStdErr)
 	} else {
-		assert.Empty(t, expectedStdErr)
+		assert.Empty(t, errText)
 	}
 	
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
