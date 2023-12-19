@@ -29,8 +29,7 @@ func TestPropertiesNamespaceGetCommandInCommandCollection(t *testing.T) {
 func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "namespaces", "get", "--help"}
 
 	// When...
@@ -49,7 +48,6 @@ func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 	factory := NewMockFactory()
 	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"properties", "namespaces", "get"}
 
 	// When...
@@ -67,7 +65,6 @@ func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
 	factory := NewMockFactory()
 	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"properties", "namespaces", "get", "--format", "yaml"}
 
 	// When...

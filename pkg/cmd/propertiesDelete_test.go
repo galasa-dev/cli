@@ -27,8 +27,7 @@ func TestPropertiesDeleteCommandInCommandCollectionHasName(t *testing.T) {
 func TestPropertiesDeleteHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "delete", "--help"}
 
 	// When...

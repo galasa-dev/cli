@@ -149,7 +149,6 @@ func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"local", "init", "--help"}
 
 	// When...

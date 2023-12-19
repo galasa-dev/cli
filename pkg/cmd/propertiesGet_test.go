@@ -28,8 +28,7 @@ func TestPropertiesGetCommandInCommandCollectionHasName(t *testing.T) {
 func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "get", "--help"}
 
 	// When...

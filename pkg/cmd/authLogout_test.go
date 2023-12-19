@@ -29,8 +29,7 @@ func TestAuthogoutCommandInCommandCollectionHasName(t *testing.T) {
 func TestAuthLogoutHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"auth", "logout", "--help"}
 
 	// When...

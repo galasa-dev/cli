@@ -30,8 +30,7 @@ func TestPropertiesCommandInCommandCollection(t *testing.T) {
 func TestPropertiesHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "--help"}
 
 	// When...

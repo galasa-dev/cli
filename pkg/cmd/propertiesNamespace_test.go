@@ -28,8 +28,7 @@ func TestPropertiesNamespaceCommandInCommandCollection(t *testing.T) {
 func TestPropertiesNamespaceHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "namespaces", "--help"}
 
 	// When...
@@ -46,8 +45,7 @@ func TestPropertiesNamespaceHelpFlagSetCorrectly(t *testing.T) {
 func TestPropertiesNamespaceProducesUsageReport(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "namespaces"}
 
 	// When...

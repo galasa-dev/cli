@@ -29,8 +29,7 @@ func TestCommandListContainsProjectCommand(t *testing.T) {
 func TestProjectHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"project", "--help"}
 
 	// When...

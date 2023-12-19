@@ -29,8 +29,7 @@ func TestRunsGetCommandInCommandCollection(t *testing.T) {
 func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"runs", "get", "--help"}
 
 	// When...
@@ -163,12 +162,46 @@ func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
 	checkOutput("", "", "", factory, t)
 }
 
-func TestRunsGetAllFlagsReturnsOk(t *testing.T) {
+func TestRunsGetMultipleNameFlagsReturnsOK(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
-	var args []string = []string{"runs", "get", "--name", "C2020", "--age", "12h", "--result", "passed", "--requestor", "galasa", "--format", "summary"}
+	var args []string = []string{"runs", "get", "--name", "C2020", "--name", "C4091"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
+
+func TestRunsGetMultipleResultFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--result", "passed", "--result", "failed"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
+
+func TestRunsGetMultipleRequestorFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--requestor", "root", "--requestor", "galasa"}
 
 	// When...
 	err := commandCollection.Execute(args)

@@ -29,8 +29,7 @@ func TestPropertiesSetCommandInCommandCollection(t *testing.T) {
 func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "set", "--help"}
 
 	// When...
@@ -47,8 +46,7 @@ func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "set"}
 
 	// When...
@@ -81,8 +79,7 @@ func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "set", "--namespace", "sunshine"}
 
 	// When...
@@ -99,8 +96,7 @@ func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"properties", "set", "--name", "call.me.little.sunshine"}
 
 	// When...
@@ -118,7 +114,6 @@ func TestPropertiesOnlyValueReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"properties", "set", "--value", "ghost"}
 
 	// When...

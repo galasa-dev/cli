@@ -29,8 +29,7 @@ func TestResourcesApplyCommandInCommandCollection(t *testing.T) {
 func TestResourcesApplyHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"resources", "apply", "--help"}
 
 	// When...
@@ -46,8 +45,7 @@ func TestResourcesApplyHelpFlagSetCorrectly(t *testing.T) {
 func TestResourcesApplyNoFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"resources", "apply"}
 
 	// When...

@@ -602,6 +602,7 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	fs := factory.GetFileSystem()
 	var isExists bool
 	isExists, err = fs.DirExists("my.pkg")
+	assert.Nil(t, err)
 	assert.True(t, isExists)
 }
 
@@ -643,8 +644,7 @@ func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"project", "create", "--help"}
 
 	// When...

@@ -29,8 +29,7 @@ func TestRunsDownloadCommandInCommandCollection(t *testing.T) {
 func TestRunsDownloadHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"runs", "download", "--help"}
 
 	// When...
@@ -47,7 +46,6 @@ func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"runs", "download"}
 
 	// When...

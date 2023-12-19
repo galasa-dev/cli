@@ -160,7 +160,6 @@ func TestRootHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"--help"}
 
 	// When...
@@ -177,7 +176,6 @@ func TestRootNoCommandsReturnsUsageReport(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{}
 
 	// When...

@@ -29,7 +29,6 @@ func TestAuthLoginHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 
-	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"auth", "login", "--help"}
 
 	// When...

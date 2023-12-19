@@ -30,8 +30,7 @@ func TestRunsSubmitCommandInCommandCollection(t *testing.T) {
 func TestRunsSubmitHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-
-	// Note: No --maven or --gradle flags here:
+	
 	var args []string = []string{"runs", "submit", "--help"}
 
 	// When...
