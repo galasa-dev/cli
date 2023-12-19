@@ -111,7 +111,76 @@ func TestRunsGetResultFlagReturnsOk(t *testing.T) {
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
 }
+
+func TestRunsGetNameFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--name", "gerald"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
+
+func TestRunsGetageFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--age", "10h"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
+
+func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--format", "yaml"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
+
+func TestRunsGetAllFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--name", "C2020", "--age", "12h", "--result", "passed", "--requestor", "galasa", "--format", "summary"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
 // flags are:
+//   --format
 //   --active
 //   --age
 //   --name
