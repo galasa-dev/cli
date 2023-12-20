@@ -91,7 +91,7 @@ func TestPropertiesDeleteWithoutNamespace(t *testing.T) {
 func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_DELETE, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_DELETE, factory, t)
 	
 	var args []string = []string{"properties", "delete", "--namespace", "gyro", "--name", "space.ball"}
 
@@ -102,4 +102,9 @@ func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	assert.Nil(t, err)
 
 	checkOutput("", "", "", factory, t)
+
+	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
+	assert.Nil(t, err)
+	assert.Contains(t, parentCmd.Values().(*PropertiesCmdValues).namespace, "gyro")
+	assert.Contains(t, parentCmd.Values().(*PropertiesCmdValues).propertyName, "space.ball")
 }

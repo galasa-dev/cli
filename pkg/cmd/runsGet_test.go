@@ -46,7 +46,7 @@ func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get"}
 
@@ -63,7 +63,7 @@ func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
 func TestRunsGetActiveFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--active"}
 
@@ -75,12 +75,14 @@ func TestRunsGetActiveFlagReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Equal(t, cmd.Values().(*RunsGetCmdValues).isActiveRuns, true)
 }
 
 func TestRunsGetRequestorFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--requestor", "galasateam"}
 
@@ -92,12 +94,14 @@ func TestRunsGetRequestorFlagReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).requestor, "galasateam")
 }
 
 func TestRunsGetResultFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--result", "passed"}
 
@@ -109,12 +113,14 @@ func TestRunsGetResultFlagReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).result, "passed")
 }
 
 func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection,cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--name", "gerald"}
 
@@ -126,12 +132,14 @@ func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "gerald")
 }
 
 func TestRunsGetageFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--age", "10h"}
 
@@ -143,12 +151,14 @@ func TestRunsGetageFlagReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).age, "10h")
 }
 
 func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--format", "yaml"}
 
@@ -160,12 +170,14 @@ func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).outputFormatString, "yaml")
 }
 
-func TestRunsGetMultipleNameFlagsReturnsOK(t *testing.T) {
+func TestRunsGetMultipleNameOverridesToLast(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--name", "C2020", "--name", "C4091"}
 
@@ -177,12 +189,14 @@ func TestRunsGetMultipleNameFlagsReturnsOK(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "C4091")
 }
 
-func TestRunsGetMultipleResultFlagsReturnsOk(t *testing.T) {
+func TestRunsGetMultipleResultFlagsOverridesToLast(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--result", "passed", "--result", "failed"}
 
@@ -194,12 +208,14 @@ func TestRunsGetMultipleResultFlagsReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).result, "failed")
 }
 
-func TestRunsGetMultipleRequestorFlagsReturnsOk(t *testing.T) {
+func TestRunsGetMultipleRequestorFlagsOverridesToLast(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--requestor", "root", "--requestor", "galasa"}
 
@@ -211,11 +227,6 @@ func TestRunsGetMultipleRequestorFlagsReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).requestor, "galasa")
 }
-// flags are:
-//   --format
-//   --active
-//   --age
-//   --name
-//   --requestor
-//   --result

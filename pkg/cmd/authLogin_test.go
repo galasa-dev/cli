@@ -41,10 +41,10 @@ func TestAuthLoginHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestAuthLoginNoFlagsReturnsNoError(t *testing.T) {
+func TestAuthLoginNoFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_AUTH_LOGIN, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_LOGIN, factory, t)
 
 	var args []string = []string{"auth", "login"}
 

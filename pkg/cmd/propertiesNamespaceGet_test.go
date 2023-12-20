@@ -46,7 +46,7 @@ func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
 	var args []string = []string{"properties", "namespaces", "get"}
 
@@ -63,7 +63,7 @@ func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
 	var args []string = []string{"properties", "namespaces", "get", "--format", "yaml"}
 
@@ -71,8 +71,10 @@ func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+	
 	// Check what the user saw is reasonable.
 	checkOutput("", "", "", factory, t)
 
-	assert.Nil(t, err)
+	assert.Contains(t, cmd.Values().(*PropertiesNamespaceGetCmdValues).namespaceOutputFormat, "yaml")
 }

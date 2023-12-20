@@ -37,7 +37,7 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalE
 	assert.Nil(t, o)
 }
 
-func setupTestCommandCollection(command string, factory Factory, t *testing.T) CommandCollection {
+func setupTestCommandCollection(command string, factory Factory, t *testing.T) (CommandCollection, GalasaCommand) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
@@ -45,7 +45,7 @@ func setupTestCommandCollection(command string, factory Factory, t *testing.T) C
 	cmd, err = commandCollection.GetCommand(command)
 	assert.Nil(t, err)
 	cmd.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
-	return commandCollection
+	return commandCollection, cmd
 }
 
 func TestCommandsCollectionHasARootCommand(t *testing.T) {

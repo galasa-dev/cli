@@ -62,7 +62,7 @@ func TestResourcesApplyNoFlagsReturnsError(t *testing.T) {
 func TestResourcesApplyFileFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RESOURCES_APPLY, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RESOURCES_APPLY, factory, t)
 
 	var args []string = []string{"resources", "apply", "--file", "mince.yaml"}
 
@@ -70,7 +70,11 @@ func TestResourcesApplyFileFlagReturnsOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	checkOutput("", "", "", factory, t)
 
+	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_RESOURCES)
 	assert.Nil(t, err)
+	assert.Contains(t, parentCmd.Values().(*ResourcesCmdValues).filePath, "mince.yaml")
 }

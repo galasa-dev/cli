@@ -165,7 +165,7 @@ func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_LOCAL_INIT, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_LOCAL_INIT, factory, t)
 
 	var args []string = []string{"local", "init"}
 

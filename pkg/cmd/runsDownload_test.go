@@ -61,7 +61,7 @@ func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
 func TestRunsDownloadNameFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "human1"}
 
@@ -69,15 +69,17 @@ func TestRunsDownloadNameFlagReturnsOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	checkOutput("", "", "", factory, t)
 
-	assert.Nil(t, err)
+	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "human1")
 }
 
 func TestRunsDownloadNameNoParameterReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name"}
 
@@ -95,7 +97,7 @@ func TestRunsDownloadNameNoParameterReturnsError(t *testing.T) {
 func TestRunsDownloadDestinationReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--destination", "random/destination"}
 
@@ -113,7 +115,7 @@ func TestRunsDownloadDestinationReturnsError(t *testing.T) {
 func TestRunsDownloadNameDestinationReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--destination", "of/decay"}
 
@@ -125,12 +127,15 @@ func TestRunsDownloadNameDestinationReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "foundations")
+	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runDownloadTargetFolder, "of/decay")
 }
 
 func TestRunsDownloadNameForceReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--force"}
 
@@ -142,12 +147,15 @@ func TestRunsDownloadNameForceReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "foundations")
+	assert.Equal(t, cmd.Values().(*RunsDownloadCmdValues).runForceDownload, true)
 }
 
 func TestRunsDownloadNameDestinationForceReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--destination", "of/decay", "--force"}
 
@@ -159,12 +167,16 @@ func TestRunsDownloadNameDestinationForceReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "foundations")
+	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runDownloadTargetFolder, "of/decay")
+	assert.Equal(t, cmd.Values().(*RunsDownloadCmdValues).runForceDownload, true)
 }
 
-func TestRunsDownloadNameTwiceReturnsOk(t *testing.T) {
+func TestRunsDownloadNameTwiceOverridesToLatestValue(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--name", "chemicals"}
 
@@ -176,4 +188,6 @@ func TestRunsDownloadNameTwiceReturnsOk(t *testing.T) {
 
 	// Check what the user saw was reasonable
 	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "chemicals")
 }

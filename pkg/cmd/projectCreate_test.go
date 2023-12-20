@@ -651,17 +651,16 @@ func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
+	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
 	checkOutput("Displays the options for the 'project create' command", "", "", factory, t)
-
-	assert.Nil(t, err)
 }
 
 func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create"}
 
@@ -669,17 +668,17 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	checkOutput("", "required flag(s) \"package\" not set", "", factory, t)
-
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"package\" not set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "required flag(s) \"package\" not set", "", factory, t)
 }
 
 func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name"}
 
@@ -687,15 +686,17 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
-	checkOutput("", "", "", factory, t)
-
 	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+	
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 }
 
-func TestProjectCreatePackageFlagNoPackageReturnsNoError(t *testing.T) {
+func TestProjectCreatePackageFlagNoPackageReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package"}
 
@@ -703,15 +704,16 @@ func TestProjectCreatePackageFlagNoPackageReturnsNoError(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
-	checkOutput("", "flag needs an argument: --package", "", factory, t)
-
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "flag needs an argument: --package")
+
+	checkOutput("", "flag needs an argument: --package", "", factory, t)
 }
 
-func TestProjectCreatePackageAndFeatureFlagsReturnsNoOk(t *testing.T) {
+func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "comma,seperated,test,list"}
 
@@ -719,15 +721,18 @@ func TestProjectCreatePackageAndFeatureFlagsReturnsNoOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	checkOutput("", "", "", factory, t)
 
-	assert.Nil(t, err)
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).featureNamesCommaSeparated, "comma,seperated,test,list")
 }
 
 func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--force"}
 
@@ -735,15 +740,18 @@ func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
-	checkOutput("", "", "", factory, t)
-
 	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+	
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).force, true)
 }
 
 func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--obr"}
 
@@ -751,15 +759,18 @@ func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	checkOutput("", "", "", factory, t)
 
-	assert.Nil(t, err)
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).isOBRProjectRequired, true)
 }
 
 func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--maven"}
 
@@ -767,15 +778,18 @@ func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	checkOutput("", "", "", factory, t)
 
-	assert.Nil(t, err)
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useMaven, true)
 }
 
 func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--gradle"}
 
@@ -783,15 +797,18 @@ func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	checkOutput("", "", "", factory, t)
 
-	assert.Nil(t, err)
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useGradle, true)
 }
 
 func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "feature,list", "--force", "--obr", "--maven", "--gradle"}
 
@@ -799,7 +816,14 @@ func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
+	assert.Nil(t, err)
+
 	checkOutput("", "", "", factory, t)
 
-	assert.Nil(t, err)
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).featureNamesCommaSeparated, "feature,list")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).force, true)
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).isOBRProjectRequired, true)
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useMaven, true)
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useGradle, true)
 }
