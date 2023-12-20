@@ -94,10 +94,8 @@ func (cmd *RunsGetCommand) createCobraCommand(
 	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.age, "age", "", "the age of the test run(s) we want information about. Supported formats are: 'FROM' or 'FROM:TO', where FROM and TO are each ages,"+
 		" made up of an integer and a time-unit qualifier. Supported time-units are "+units+". If missing, the TO part is defaulted to '0h'. Examples: '--age 1d',"+
 		" '--age 6h:1h' (list test runs which happened from 6 hours ago to 1 hour ago)."+
-		" The TO part must be a smaller time-span than the FROM part." + 
-		" Can be used in conjunction with any other flag.")
-	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+"." + 
-		" Can be used in conjunction with any other flag.")
+		" The TO part must be a smaller time-span than the FROM part.")
+	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.outputFormatString, "format", "summary", "output format for the data returned. Supported formats are: "+formatters+".")
 	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.requestor, "requestor", "", "the requestor of the test run we want information about." + 
 		" Cannot be used in conjunction with --name flag.")
 	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.result, "result", "", "A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example \"--result Failed,Ignored,EnvFail\"." + 
