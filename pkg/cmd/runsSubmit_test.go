@@ -602,3 +602,70 @@ func TestRunsSubmitTraceFlagReturnsOk(t *testing.T) {
 
 	assert.Equal(t, cmd.Values().(*utils.RunsSubmitCmdValues).Trace, true)
 }
+
+
+
+func TestRunsSubmitAllFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
+	
+	var args []string = []string{"runs", "submit", 
+	"--bundle", "bundleParam",
+	"--class", "classParam",
+	"--package", "packageParam",
+	"--tag", "tagParam",
+	"--test", "testParam",
+	"--overridefile", "override/path",
+	"--portfolio", "portfolio.file",
+	"--throttlefile", "throttle.file",
+	"--reportjson", "file.json",
+	"--reportjunit", "file.junit",
+	"--reportyaml", "file.yaml",
+	"--override", "overrideParam",
+	"--group", "namedegroup",
+	"--requesttype", "hiddenfromsight",
+	"--stream", "mambono5",
+	"--poll", "5",
+	"--throttle", "6",
+	"--noexitcodeontestfailures",
+	"--regex",
+	"--trace" }
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Bundles, "bundleParam")
+	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Classes, "classParam")
+	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Packages, "packageParam")
+	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Tags, "tagParam")
+	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Tests, "testParam")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).OverrideFilePath, "override/path")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).PortfolioFileName, "portfolio.file")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).ThrottleFileName, "throttle.file")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).ReportJsonFilename, "file.json")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).ReportJunitFilename, "file.junit")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).ReportYamlFilename, "file.yaml")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).Overrides, "overrideParam")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).GroupName, "namedegroup")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).RequestType, "hiddenfromsight")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Stream, "mambono5")
+	assert.Equal(t, cmd.Values().(*utils.RunsSubmitCmdValues).PollIntervalSeconds, 5)
+	assert.Equal(t, cmd.Values().(*utils.RunsSubmitCmdValues).Throttle, 6)
+	assert.Equal(t, cmd.Values().(*utils.RunsSubmitCmdValues).NoExitCodeOnTestFailures, true)
+	assert.Equal(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.RegexSelect, true)
+	assert.Equal(t, cmd.Values().(*utils.RunsSubmitCmdValues).Trace, true)
+}
+// Flags
+//   --bundle /
+//   --class /
+//   --group /
+//   --noexitcodeontestfailures /
+//   --overrides /
+//   --overridefile /
