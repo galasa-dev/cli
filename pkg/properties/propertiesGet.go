@@ -8,6 +8,7 @@ package properties
 
 import (
 	"context"
+	"log"
 	"sort"
 	"strings"
 
@@ -18,7 +19,7 @@ import (
 )
 
 var (
-	propertiesHasYamlFormat           = true
+	propertiesHasYamlFormat = true
 	validPropertyFormatters = CreateFormatters(propertiesHasYamlFormat)
 )
 
@@ -35,6 +36,7 @@ func GetProperties(
 	console utils.Console,
 ) error {
 	var err error
+
 	err = checkNameNotUsedWithPrefixSuffixInfix(name, prefix, suffix, infix)
 	if err == nil {
 		var chosenFormatter propertiesformatter.PropertyFormatter
@@ -43,6 +45,8 @@ func GetProperties(
 		if err == nil {
 			var cpsProperty []galasaapi.GalasaProperty
 			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
+
+			log.Printf("GetProperties - Galasa Properties collected:%v", cpsProperty)
 			if err == nil {
 				var outputText string
 
@@ -71,11 +75,7 @@ func getCpsPropertiesFromRestApi(
 ) ([]galasaapi.GalasaProperty, error) {
 
 	var err error = nil
-
 	var context context.Context = nil
-
-	// // An HTTP client which can communicate with the api server in an ecosystem.
-	// restClient := api.InitialiseAPI(apiServerUrl)
 
 	var cpsProperties = make([]galasaapi.GalasaProperty, 0)
 

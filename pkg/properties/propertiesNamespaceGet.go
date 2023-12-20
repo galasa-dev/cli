@@ -8,6 +8,7 @@ package properties
 
 import (
 	"context"
+	"log"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -16,12 +17,12 @@ import (
 )
 
 var (
-	namespaceHasYamlFormat             = false
+	namespaceHasYamlFormat   = false
 	validNamespaceFormatters = CreateFormatters(namespaceHasYamlFormat)
 )
 
-// GetNamespaceProperties - performs all the logic to implement the `galasactl properties namespace get` command
-func GetNamespaceProperties(
+// GetPropertiesNamespaces - performs all the logic to implement the `galasactl properties namespace get` command
+func GetPropertiesNamespaces(
 	apiClient *galasaapi.APIClient,
 	namespaceOutputFormat string,
 	console utils.Console,
@@ -30,11 +31,11 @@ func GetNamespaceProperties(
 	var chosenFormatter propertiesformatter.PropertyFormatter
 	var context context.Context = nil
 
-	//only format so far is the default format, summary
 	chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validNamespaceFormatters)
 	if err == nil {
 		var namespaces []galasaapi.Namespace
 		namespaces, _, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).Execute()
+		log.Printf("GetPropertiesNamespaces -  namespaces collected: %v", namespaces)
 
 		if err == nil {
 			var outputText string

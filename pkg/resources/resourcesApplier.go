@@ -62,7 +62,7 @@ func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string)
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Accept-Encoding", "gzip,deflate,br")
 
-		log.Printf("sendResourcesRequestToServer url:%s - payload: '%s'", resourcesApiServerUrl, string(payloadJsonToSend))
+		log.Printf("sendResourcesRequestToServer url:%s - headers:%s - payload: '%s'", resourcesApiServerUrl, req.Header, string(payloadJsonToSend))
 
 		var resp *http.Response
 		client := &http.Client{}

@@ -8,6 +8,7 @@ package properties
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -30,30 +31,30 @@ func SetProperty(
 	var err error
 
 	err = validateInputsAreNotEmpty(namespace, name)
-	if err == nil {
-		err = updateCpsProperty(namespace, name, value, apiClient)
-	}
+	if err == nil{
+		galasaProperty := createGalasaProperty(namespace, name, value)
 
-	// if updateProperty() returns an error containing "404 Not Found" due to receiving a
-	// GAL5017E from the api, we know the property does not exist and
-	// so we assume the user wants to create a new property
-	if err != nil && strings.Contains(err.Error(), "404") {
-		err = createCpsProperty(namespace, name, value, apiClient)
-	}
-
+		log.Printf("SetProperty -  Galasa Property created: %v", galasaProperty)
+		
+		err = updateCpsProperty(namespace, name, galasaProperty, apiClient)
+		
+		// if updateProperty() returns an error containing "404 Not Found" due to receiving a
+		// GAL5017E from the api, we know the property does not exist and
+		// so we assume the user wants to create a new property
+		if err != nil && strings.Contains(err.Error(), "404") {
+			err = createCpsProperty(namespace, name, galasaProperty, apiClient)
+		}
+	}		
 	return err
 }
 
 func updateCpsProperty(namespace string,
 	name string,
-	value string,
+	property *galasaapi.GalasaProperty,
 	apiClient *galasaapi.APIClient,
 ) error {
 	var err error = nil
-
 	var context context.Context = nil
-
-	property := createGalasaProperty(namespace, name, value)
 
 	apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property)
 	_, _, err = apicall.Execute()
@@ -67,20 +68,17 @@ func updateCpsProperty(namespace string,
 
 func createCpsProperty(namespace string,
 	name string,
-	value string,
+	property *galasaapi.GalasaProperty,
 	apiClient *galasaapi.APIClient,
 ) error {
 	var err error = nil
-
 	var context context.Context = nil
-
-	property := createGalasaProperty(namespace, name, value)
 
 	apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property)
 	_, _, err = apicall.Execute()
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, value, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
 	}
 
 	return err
