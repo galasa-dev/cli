@@ -14,12 +14,12 @@ galasactl runs get [flags]
 
 ```
       --active             parameter to retrieve runs that have not finished yet. Cannot be used in conjunction with --name or --result flag.
-      --age string         the age of the test run(s) we want information about. Supported formats are: 'FROM' or 'FROM:TO', where FROM and TO are each ages, made up of an integer and a time-unit qualifier. Supported time-units are 'w' (weeks), 'd' (days), 'h' (hours), 'm' (minutes). If missing, the TO part is defaulted to '0h'. Examples: '--age 1d', '--age 6h:1h' (list test runs which happened from 6 hours ago to 1 hour ago). The TO part must be a smaller time-span than the FROM part. Can be used in conjunction with any other flag.
-      --format string      output format for the data returned. Supported formats are: 'details', 'raw', 'summary'. Can be used in conjunction with any other flag. (default "summary")
+      --age string         the age of the test run(s) we want information about. Supported formats are: 'FROM' or 'FROM:TO', where FROM and TO are each ages, made up of an integer and a time-unit qualifier. Supported time-units are 'w' (weeks), 'd' (days), 'h' (hours), 'm' (minutes). If missing, the TO part is defaulted to '0h'. Examples: '--age 1d', '--age 6h:1h' (list test runs which happened from 6 hours ago to 1 hour ago). The TO part must be a smaller time-span than the FROM part.
+      --format string      output format for the data returned. Supported formats are: 'details', 'raw', 'summary'. (default "summary")
   -h, --help               Displays the options for the 'runs get' command.
       --name string        the name of the test run we want information about. Cannot be used in conjunction with --requestor, --result or --active flags
-      --requestor string   the requestor of the test run we want information about Cannot be used in conjunction with --name flag.
-      --result string      A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example "--result Failed,Ignored,EnvFail" Cannot be used in conjunction with --name or --active flag.
+      --requestor string   the requestor of the test run we want information about. Cannot be used in conjunction with --name flag.
+      --result string      A filter on the test runs we want information about. Optional. Default is to display test runs with any result. Case insensitive. Value can be a single value or a comma-separated list. For example "--result Failed,Ignored,EnvFail". Cannot be used in conjunction with --name or --active flag.
 ```
 
 ### Options inherited from parent commands
