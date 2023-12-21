@@ -26,3 +26,34 @@ func TestCommandListContainsRunsCommand(t *testing.T) {
 	assert.NotNil(t, runsCommand.Values())
 	assert.IsType(t, &RunsCmdValues{}, runsCommand.Values())
 }
+
+
+func TestRunsHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'runs' command.", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestRunsNoCommandsProducesUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"runs"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("Usage:\n  galasactl runs [command]", "", "", factory, t)
+}

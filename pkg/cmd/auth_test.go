@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"testing"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,4 +22,38 @@ func TestAuthCommandInCommandCollection(t *testing.T) {
 	assert.Equal(t, COMMAND_NAME_AUTH, authCommand.Name())
 	assert.Nil(t, authCommand.Values())
 	assert.NotNil(t, authCommand.CobraCommand())
+}
+
+
+
+func TestAuthHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"auth", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'auth' command.", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestAuthNoCommandsProducesUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"auth"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Usage:\n  galasactl auth [command]", "", "", factory, t)
+
+	assert.Nil(t, err)
 }

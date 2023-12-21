@@ -25,3 +25,34 @@ func TestCommandListContainsLocalCommand(t *testing.T) {
 	assert.Equal(t, COMMAND_NAME_LOCAL, localCommand.Name())
 	assert.Nil(t, localCommand.Values())
 }
+
+func TestLocalHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"local", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'local' command", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestLocalNoCommandsProducesUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"local"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("Usage:\n  galasactl local [command]", "", "", factory, t)
+}

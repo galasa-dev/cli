@@ -24,3 +24,36 @@ func TestAuthLoginCommandInCommandCollection(t *testing.T) {
 	assert.IsType(t, &AuthLoginCmdValues{}, authCommand.Values())
 	assert.NotNil(t, authCommand.CobraCommand())
 }
+
+func TestAuthLoginHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"auth", "login", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'auth login' command.", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestAuthLoginNoFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_LOGIN, factory, t)
+
+	var args []string = []string{"auth", "login"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "", "", factory, t)
+}

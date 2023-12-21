@@ -25,3 +25,35 @@ func TestPropertiesCommandInCommandCollection(t *testing.T) {
 	assert.IsType(t, &PropertiesCmdValues{}, propertiesCommand.Values())
 	assert.NotNil(t, propertiesCommand.CobraCommand())
 }
+
+
+func TestPropertiesHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"properties", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'properties' command.", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestPropertiesNoCommandsProducesUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"properties"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.Nil(t, err)
+	// Check what the user saw was reasonable
+	checkOutput("Usage:\n  galasactl properties [command]", "", "", factory, t)
+}

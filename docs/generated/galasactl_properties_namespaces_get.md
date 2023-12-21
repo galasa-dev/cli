@@ -14,7 +14,7 @@ galasactl properties namespaces get [flags]
 
 ```
       --format string   output format for the data returned. Supported formats are: 'raw', 'summary'. (default "summary")
-  -h, --help            Displays the options for the 'properties namespace get' command.
+  -h, --help            Displays the options for the 'properties namespaces get' command.
 ```
 
 ### Options inherited from parent commands

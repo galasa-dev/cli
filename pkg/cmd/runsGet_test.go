@@ -24,3 +24,276 @@ func TestRunsGetCommandInCommandCollection(t *testing.T) {
 	assert.IsType(t, &RunsGetCmdValues{}, runsGetCommand.Values())
 	assert.NotNil(t, runsGetCommand.CobraCommand())
 }
+
+
+func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'runs get' command.", "", "", factory, t)
+}
+
+func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+}
+
+func TestRunsGetActiveFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--active"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Equal(t, cmd.Values().(*RunsGetCmdValues).isActiveRuns, true)
+}
+
+func TestRunsGetRequestorFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--requestor", "galasateam"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).requestor, "galasateam")
+}
+
+func TestRunsGetResultFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--result", "passed"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).result, "passed")
+}
+
+func TestRunsGetNameFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection,cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--name", "gerald"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "gerald")
+}
+
+func TestRunsGetageFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--age", "10h"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).age, "10h")
+}
+
+func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--format", "yaml"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).outputFormatString, "yaml")
+}
+
+func TestRunsGetMultipleNameOverridesToLast(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--name", "C2020", "--name", "C4091"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "C4091")
+}
+
+func TestRunsGetMultipleResultFlagsOverridesToLast(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--result", "passed", "--result", "failed"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).result, "failed")
+}
+
+func TestRunsGetMultipleRequestorFlagsOverridesToLast(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--requestor", "root", "--requestor", "galasa"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).requestor, "galasa")
+}
+
+func TestRunsGetNameRequestorMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--name", "Miller", "--requestor", "root"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [name requestor] are set none of the others can be; [name requestor] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [name requestor] are set none of the others can be; [name requestor] were all set", "", factory, t)
+}
+
+func TestRunsGetNameResultMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--name", "Miller", "--result", "passed"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [name result] are set none of the others can be; [name result] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [name result] are set none of the others can be; [name result] were all set", "", factory, t)
+}
+
+func TestRunsGetNameActiveMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--name", "Miller", "--active"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [name active] are set none of the others can be; [active name] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [name active] are set none of the others can be; [active name] were all set", "", factory, t)
+}
+
+func TestRunsGetResultActiveMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--result", "failed", "--active"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [result active] are set none of the others can be; [active result] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [result active] are set none of the others can be; [active result] were all set", "", factory, t)
+}

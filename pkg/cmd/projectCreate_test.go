@@ -573,22 +573,13 @@ func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 	var args []string = []string{"project", "create"}
 
 	// When...
-	errGotBack := Execute(factory, args)
+	err := Execute(factory, args)
 
 	// Then...
-
-	assert.NotNil(t, errGotBack)
+	assert.NotNil(t, err)
 
 	// Check what the user saw is reasonable.
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: required flag(s) \"package\" not set")
-
-	// We expect an exit code of 0 for this command.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: required flag(s) \"package\" not set", "", factory, t)
 }
 
 func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
@@ -605,23 +596,13 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	fmt.Printf("error returned by Execute method: %v\n", err)
 
 	// Check what the user saw no output
-	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
-	outText := stdOutConsole.ReadText()
-	assert.Empty(t, outText)
-
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Empty(t, errText)
-
-	// We expect an exit code of 0.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "", "", factory, t)
 
 	// Check that the default folder was created.
 	fs := factory.GetFileSystem()
 	var isExists bool
 	isExists, err = fs.DirExists("my.pkg")
+	assert.Nil(t, err)
 	assert.True(t, isExists)
 }
 
@@ -638,16 +619,10 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
-	errText := stdErrConsole.ReadText()
-	assert.Contains(t, errText, "Error: GAL1089E: Need to use --maven and/or --gradle parameter")
-
-	// We expect an exit code of 1 for this command. But it seems that syntax errors caught by cobra still return no error.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("", "Error: GAL1089E: Need to use --maven and/or --gradle parameter", "", factory, t)
 
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1089E:")
 }
 
 func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
@@ -663,4 +638,192 @@ func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 	assert.IsType(t, &ProjectCreateCmdValues{}, projectCreateCommand.Values())
 	assert.NotNil(t, projectCreateCommand.CobraCommand())
 	assert.Equal(t, COMMAND_NAME_PROJECT_CREATE, projectCreateCommand.Name())
+}
+
+
+func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"project", "create", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'project create' command", "", "", factory, t)
+}
+
+func TestProjectCreateNoFlagReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "required flag(s) \"package\" not set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "required flag(s) \"package\" not set", "", factory, t)
+}
+
+func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package", "package.name"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+	
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+}
+
+func TestProjectCreatePackageFlagNoPackageReturnsError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "flag needs an argument: --package")
+
+	checkOutput("", "flag needs an argument: --package", "", factory, t)
+}
+
+func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--features", "comma,seperated,test,list"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).featureNamesCommaSeparated, "comma,seperated,test,list")
+}
+
+func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--force"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+	
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).force, true)
+}
+
+func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--obr"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).isOBRProjectRequired, true)
+}
+
+func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--maven"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useMaven, true)
+}
+
+func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--gradle"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useGradle, true)
+}
+
+func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
+
+	var args []string = []string{"project", "create", "--package", "package.name", "--features", "feature,list", "--force", "--obr", "--maven", "--gradle"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	checkOutput("", "", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
+	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).featureNamesCommaSeparated, "feature,list")
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).force, true)
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).isOBRProjectRequired, true)
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useMaven, true)
+	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useGradle, true)
 }
