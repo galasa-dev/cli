@@ -60,30 +60,27 @@ func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 	checkOutput("", "Error: required flag(s) \"name\", \"namespace\", \"value\" not set", "", factory, t)
 }
 
-//
-// DON"T KNOW WHY THIS TEST ISN'T WORKING
-//
-// func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
-// 	// Given...
-// 	factory := NewMockFactory()
-// 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
+func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_SET, factory, t)
 
-// 	var args []string = []string{"properties", "set", "--namespace", "mince", "--name", "pies.are.so.tasty", "--value", "some kinda value"}
+	var args []string = []string{"properties", "set", "--namespace", "mince", "--name", "pies.are.so.tasty", "--value", "some kinda value"}
 
-// 	// When...
-// 	err := commandCollection.Execute(args)
+	// When...
+	err := commandCollection.Execute(args)
 
-// 	// Then...
-// 	assert.Nil(t, err)
+	// Then...
+	assert.Nil(t, err)
 
-// 	checkOutput("", "", "", factory, t)
+	checkOutput("", "", "", factory, t)
 
-// 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
-// 	assert.Nil(t, err)
-// 	assert.Contains(t, parentCmd.Values().(*PropertiesCmdValues).namespace, "mince")
-// 	assert.Contains(t, parentCmd.Values().(*PropertiesCmdValues).propertyName, "pies.are.so.tasty")
-// 	assert.Contains(t, cmd.Values().(*PropertiesSetCmdValues).propertyValue, "some kinda value")
-// }
+	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
+	assert.Nil(t, err)
+	assert.Contains(t, parentCmd.Values().(*PropertiesCmdValues).namespace, "mince")
+	assert.Contains(t, parentCmd.Values().(*PropertiesCmdValues).propertyName, "pies.are.so.tasty")
+	assert.Contains(t, cmd.Values().(*PropertiesSetCmdValues).propertyValue, "some kinda value")
+}
 
 func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 	// Given...
