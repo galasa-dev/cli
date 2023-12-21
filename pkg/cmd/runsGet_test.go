@@ -36,11 +36,10 @@ func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
+	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
 	checkOutput("Displays the options for the 'runs get' command.", "", "", factory, t)
-
-	assert.Nil(t, err)
 }
 
 func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
@@ -229,4 +228,72 @@ func TestRunsGetMultipleRequestorFlagsOverridesToLast(t *testing.T) {
 	checkOutput("", "", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).requestor, "galasa")
+}
+
+func TestRunsGetNameRequestorMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--name", "Miller", "--requestor", "root"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [name requestor] are set none of the others can be; [name requestor] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [name requestor] are set none of the others can be; [name requestor] were all set", "", factory, t)
+}
+
+func TestRunsGetNameResultMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--name", "Miller", "--result", "passed"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [name result] are set none of the others can be; [name result] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [name result] are set none of the others can be; [name result] were all set", "", factory, t)
+}
+
+func TestRunsGetNameActiveMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--name", "Miller", "--active"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [name active] are set none of the others can be; [active name] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [name active] are set none of the others can be; [active name] were all set", "", factory, t)
+}
+
+func TestRunsGetResultActiveMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"runs", "get", "--result", "failed", "--active"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [result active] are set none of the others can be; [active result] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [result active] are set none of the others can be; [active result] were all set", "", factory, t)
 }

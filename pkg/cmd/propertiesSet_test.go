@@ -53,11 +53,11 @@ func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"name\", \"namespace\", \"value\" not set", "", factory, t)
-
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"name\", \"namespace\", \"value\" not set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: required flag(s) \"name\", \"namespace\", \"value\" not set", "", factory, t)
 }
 
 //
