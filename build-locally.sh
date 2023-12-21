@@ -33,26 +33,16 @@ blue=$(tput setaf 25)
 # Headers and Logging
 #
 #--------------------------------------------------------------------------
-underline() { printf "${underline}${bold}%s${reset}\n" "$@"
-}
-h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@"
-}
-h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@"
-}
-debug() { printf "${white}%s${reset}\n" "$@"
-}
-info() { printf "${white}➜ %s${reset}\n" "$@"
-}
-success() { printf "${green}✔ %s${reset}\n" "$@"
-}
-error() { printf "${red}✖ %s${reset}\n" "$@"
-}
-warn() { printf "${tan}➜ %s${reset}\n" "$@"
-}
-bold() { printf "${bold}%s${reset}\n" "$@"
-}
-note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
-}
+underline() { printf "${underline}${bold}%s${reset}\n" "$@" ;}
+h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@" ;}
+h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@" ;}
+debug() { printf "${white}%s${reset}\n" "$@" ;}
+info() { printf "${white}➜ %s${reset}\n" "$@" ;}
+success() { printf "${green}✔ %s${reset}\n" "$@" ;}
+error() { printf "${red}✖ %s${reset}\n" "$@" ;}
+warn() { printf "${tan}➜ %s${reset}\n" "$@" ;}
+bold() { printf "${bold}%s${reset}\n" "$@" ;}
+note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@" ;}
 
 #-----------------------------------------------------------------------------------------
 # Functions
@@ -111,24 +101,6 @@ h1 "Building the CLI component"
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
-# Check that the ../framework is present.
-h2 "Making sure the openapi yaml file is available..."
-if [[ ! -e "../framework" ]]; then
-    error "../framework is not present. Clone the framework repository."
-    info "The openapi.yaml file from the framework repository is needed to generate a go client for the rest API"
-    exit 1
-fi
-
-if [[ ! -e "../framework/openapi.yaml" ]]; then
-    error "File ../framework/openapi.yaml is not found."
-    info "The openapi.yaml file from the framework repository is needed to generate a go client for the rest API"
-    exit 1
-fi
-success "OK"
-
-
-
-#--------------------------------------------------------------------------
 h2 "Setting versions of things."
 # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/
 read_boot_jar_version
@@ -159,8 +131,6 @@ function go_mod_tidy {
     h2 "Tidying up go.mod..."
 
     if [[ "${build_type}" == "clean" ]]; then
-        h2 "Cleaning the dependencies out..."
-        rm -fr build/dependencies
         h2 "Tidying go mod file..."
         go mod tidy
         rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to tidy go mod. rc=${rc}" ; exit 1 ; fi
@@ -201,6 +171,19 @@ function generate_rest_client {
     success "Code generation part II - OK"
 }
 
+#--------------------------------------------------------------------------
+#
+# Clean out old things if the clean option was specified.
+#
+#--------------------------------------------------------------------------
+function clean {
+    if [[ "${build_type}" == "clean" ]]; then
+        h2 "Cleaning the binaries out..."
+        make clean
+        rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
+        success "Binaries cleaned up - OK"
+    fi
+}
 
 #--------------------------------------------------------------------------
 #
@@ -208,13 +191,6 @@ function generate_rest_client {
 #
 #--------------------------------------------------------------------------
 function build_executables {
-    if [[ "${build_type}" == "clean" ]]; then
-        h2 "Cleaning the binaries out..."
-        make clean
-        rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build binary executable galasactl programs. rc=${rc}" ; exit 1 ; fi
-        success "Binaries cleaned up - OK"
-    fi
-
     h2 "Building new binaries..."
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     make all | tee ${BASEDIR}/build/compile-log.txt
@@ -602,6 +578,7 @@ function cleanup_temp {
 }
 
 # The steps to build the CLI
+clean
 download_dependencies
 generate_rest_client
 go_mod_tidy
