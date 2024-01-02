@@ -9,7 +9,7 @@ Allows interaction with the CPS to query namespaces in Galasa Ecosystem
 ### Options
 
 ```
-  -h, --help   Displays the options for the 'properties namespace' command.
+  -h, --help   Displays the options for the 'properties namespaces' command.
 ```
 
 ### Options inherited from parent commands

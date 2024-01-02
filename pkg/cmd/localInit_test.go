@@ -16,7 +16,9 @@ import (
 func TestCommandCollectionContainsLocalInitCommand(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
-	localInitCommand := commands.GetCommand(COMMAND_NAME_LOCAL_INIT)
+	localInitCommand, err := commands.GetCommand(COMMAND_NAME_LOCAL_INIT)
+	assert.Nil(t, err)
+	
 	assert.NotNil(t, localInitCommand)
 	assert.Equal(t, COMMAND_NAME_LOCAL_INIT, localInitCommand.Name())
 	assert.NotNil(t, localInitCommand.Values())
@@ -141,4 +143,38 @@ func assertSettingsXMLCreatedAndContentOk(t *testing.T, mockFileSystem files.Fil
 	} else {
 		assert.Contains(t, settingsContent, "<!-- To use the bleeding edge version of galasa, use the development obr")
 	}
+}
+
+func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"local", "init", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'local init' command.", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_LOCAL_INIT, factory, t)
+
+	var args []string = []string{"local", "init"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("", "", "", factory, t)
+
+	assert.Nil(t, err)
 }

@@ -17,10 +17,42 @@ func TestCommandListContainsProjectCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 
 	// When...
-	projectCommand := commands.GetCommand(COMMAND_NAME_PROJECT)
+	projectCommand, err := commands.GetCommand(COMMAND_NAME_PROJECT)
+	assert.Nil(t, err)
 
 	// Then...
 	assert.NotNil(t, projectCommand)
 	assert.Equal(t, COMMAND_NAME_PROJECT, projectCommand.Name())
 	assert.Nil(t, projectCommand.Values())
+}
+
+func TestProjectHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"project", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'project' command.", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestProjectNoCommandsProducesUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	var args []string = []string{"project"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("Usage:\n  galasactl project [command]", "", "", factory, t)
 }

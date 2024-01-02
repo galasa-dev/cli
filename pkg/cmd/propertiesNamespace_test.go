@@ -16,8 +16,45 @@ func TestPropertiesNamespaceCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	propertiesNamespaceCommand := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE)
+	propertiesNamespaceCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE)
+	assert.Nil(t, err)
+	
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_NAMESPACE, propertiesNamespaceCommand.Name())
 	assert.Nil(t, propertiesNamespaceCommand.Values())
 	assert.NotNil(t, propertiesNamespaceCommand.CobraCommand())
+}
+
+
+func TestPropertiesNamespaceHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"properties", "namespaces", "--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'properties namespaces' command", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestPropertiesNamespaceProducesUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	
+	var args []string = []string{"properties", "namespaces"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+
+	// Check what the user saw is reasonable.
+	checkOutput("Usage:\n  galasactl properties namespaces [command]", "", "", factory, t)
+
+	assert.Nil(t, err)
 }

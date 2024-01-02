@@ -17,13 +17,16 @@
 def galasaBootJarVersion = '0.31.0'
 def galasaFrameworkVersion = '0.31.0'
 
+// Right now, the REST interface spec is always the same version as the galasa framework bundles.
+def galasaOpenApiYamlVersion = galasaFrameworkVersion
+
 repositories {
     gradlePluginPortal()
-    mavenCentral()
+    mavenLocal()
     maven {
         url "https://development.galasa.dev/main/maven-repo/obr/"
     }
-    mavenLocal()
+    mavenCentral()
 }
 apply plugin: 'java'
 dependencies {
@@ -33,13 +36,29 @@ dependencies {
     // so we can call the api server REST services
     // https://mvnrepository.com/artifact/org.openapitools/openapi-generator
     implementation 'org.openapitools:openapi-generator-cli:6.6.0'
+
+    // Download the openapi.yaml specification for the REST APIs.
+    compileOnly group: "dev.galasa", name: "dev.galasa.framework.api.openapi", version: "$galasaOpenApiYamlVersion", ext: "yaml"
 }
-task downloadDependencies(type: Copy) {
+
+
+
+task downloadRawDependencies(type: Copy) {
     // Download the dependencies onto the local disk.
     from configurations.compileClasspath
     into 'build/dependencies'
     dependsOn configurations.compileClasspath
 }
+
+task downloadDependencies(type: Copy) {
+    // Rename the complex openapi.yaml file into something easier to use elsewhere.
+    // So the path to the new file is build/dependencies/openapi.yaml
+    from "build/dependencies/dev.galasa.framework.api.openapi-${galasaOpenApiYamlVersion}.yaml"
+    into "build/dependencies"
+    rename { fileName -> "openapi.yaml" }
+    dependsOn downloadRawDependencies
+}
+
 //tasks.register('installJarsIntoTemplates', Copy) {
 task installJarsIntoTemplates(type: Copy) {
     // We want to embed some files into the executable.

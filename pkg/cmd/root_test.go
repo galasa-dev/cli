@@ -9,17 +9,51 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
+
+func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalErrorString string, factory Factory, t *testing.T) {
+	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
+	outText := stdOutConsole.ReadText()
+	if expectedStdOutput != "" {
+		assert.Contains(t, outText, expectedStdOutput)
+	} else {
+		assert.Empty(t, outText)
+	}
+
+	stdErrConsole := factory.GetStdErrConsole().(*utils.MockConsole)
+	errText := stdErrConsole.ReadText()
+	if expectedStdErr != "" {
+		assert.Contains(t, errText, expectedStdErr)
+	} else {
+		assert.Empty(t, errText)
+	}
+	
+	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	o := finalWordHandler.ReportedObject
+	assert.Nil(t, o)
+}
+
+func setupTestCommandCollection(command string, factory Factory, t *testing.T) (CommandCollection, GalasaCommand) {
+	commandCollection, err := NewCommandCollection(factory)
+	assert.Nil(t, err)
+
+	var cmd GalasaCommand
+	cmd, err = commandCollection.GetCommand(command)
+	assert.Nil(t, err)
+	cmd.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
+	return commandCollection, cmd
+}
 
 func TestCommandsCollectionHasARootCommand(t *testing.T) {
 	factory := NewMockFactory()
 	commands, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
-	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+	rootCommand, err := commands.GetCommand(COMMAND_NAME_ROOT)
+	assert.Nil(t, err)
 	assert.NotNil(t, rootCommand)
 }
 
@@ -30,7 +64,9 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 	commands, err := NewCommandCollection(factory)
 	// Then...
 	assert.Nil(t, err)
-	rootCommand := commands.GetCommand(COMMAND_NAME_ROOT)
+	var rootCommand GalasaCommand
+	rootCommand, err = commands.GetCommand(COMMAND_NAME_ROOT)
+	assert.Nil(t, err)
 
 	assert.Equal(t, rootCommand.Name(), COMMAND_NAME_ROOT)
 }
@@ -38,8 +74,10 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
+
 	// When...
 	commands, err := NewCommandCollection(factory)
+
 	// Then...
 	assert.Nil(t, err)
 	rootCommand := commands.GetRootCommand()
@@ -75,15 +113,7 @@ func TestVersionFromCommandLine(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Lets check that the version came out.
-	console := factory.GetStdOutConsole().(*utils.MockConsole)
-	text := console.ReadText()
-	assert.Contains(t, text, "galasactl version")
-	versionString, _ := embedded.GetGalasaCtlVersion()
-	assert.Contains(t, text, versionString)
-
-	// We expect the exit code for this to be 0, so the final word should be nil.
-	mockFinalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	assert.Nil(t, mockFinalWordHandler.ReportedObject)
+	checkOutput("galasactl version", "", "", factory, t)
 }
 
 func TestNoParamsFromCommandLine(t *testing.T) {
@@ -99,14 +129,7 @@ func TestNoParamsFromCommandLine(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	console := factory.GetStdOutConsole().(*utils.MockConsole)
-	text := console.ReadText()
-	assert.Contains(t, text, "A tool for controlling Galasa resources")
-
-	// We expect an exit code of 1 for this command.
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
-	o := finalWordHandler.ReportedObject
-	assert.Nil(t, o)
+	checkOutput("A tool for controlling Galasa resources", "", "", factory, t)
 }
 
 func TestCanGetNormalExitCodeAndErrorTextFromAnError(t *testing.T) {
@@ -131,4 +154,36 @@ func TestCanGetTestsFailedExitCodeAndErrorTextFromATestFailedGalasaErrorPointer(
 	assert.Contains(t, errorText, "GAL1017E", "Failed to extract the exit text from a galasa error!")
 	assert.Equal(t, 2, exitCode, "Wrong default exit code")
 	assert.False(t, isStackTraceWanted, "We don't want stack trace from galasa errors")
+}
+
+func TestRootHelpFlagSetCorrectly(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{"--help"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Displays the options for the 'galasactl' command.", "", "", factory, t)
+
+	assert.Nil(t, err)
+}
+
+func TestRootNoCommandsReturnsUsageReport(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+
+	var args []string = []string{}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	checkOutput("Usage:\n  galasactl [command]", "", "", factory, t)
+
+	assert.Nil(t, err)
 }

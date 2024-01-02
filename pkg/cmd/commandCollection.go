@@ -5,9 +5,15 @@
  */
 package cmd
 
+import (
+	"log"
+
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+)
+
 type CommandCollection interface {
 	// name - One of the COMMAND_NAME_* constants.
-	GetCommand(name string) GalasaCommand
+	GetCommand(name string) (GalasaCommand, error)
 
 	GetRootCommand() GalasaCommand
 
@@ -33,8 +39,8 @@ const (
 	COMMAND_NAME_PROPERTIES_GET           = "properties get"
 	COMMAND_NAME_PROPERTIES_SET           = "properties set"
 	COMMAND_NAME_PROPERTIES_DELETE        = "properties delete"
-	COMMAND_NAME_PROPERTIES_NAMESPACE     = "properties namespace"
-	COMMAND_NAME_PROPERTIES_NAMESPACE_GET = "properties namespace get"
+	COMMAND_NAME_PROPERTIES_NAMESPACE     = "properties namespaces"
+	COMMAND_NAME_PROPERTIES_NAMESPACE_GET = "properties namespaces get"
 	COMMAND_NAME_RUNS                     = "runs"
 	COMMAND_NAME_RUNS_DOWNLOAD            = "runs download"
 	COMMAND_NAME_RUNS_GET                 = "runs get"
@@ -65,12 +71,18 @@ func NewCommandCollection(factory Factory) (CommandCollection, error) {
 // -----------------------------------------------------------------
 
 func (commands *commandCollectionImpl) GetRootCommand() GalasaCommand {
-	return commands.GetCommand(COMMAND_NAME_ROOT)
+	cmd, _ := commands.GetCommand(COMMAND_NAME_ROOT)
+	return cmd
 }
 
-func (commands *commandCollectionImpl) GetCommand(name string) GalasaCommand {
+func (commands *commandCollectionImpl) GetCommand(name string) (GalasaCommand, error) {
+	var err error
 	cmd, _ := commands.commandMap[name]
-	return cmd
+	if cmd == nil{
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION)
+		log.Printf("Caller tried to lookup %s in the command collection and it was not found.\n", name)
+	}
+	return cmd, err
 }
 
 func (commands *commandCollectionImpl) Execute(args []string) error {
