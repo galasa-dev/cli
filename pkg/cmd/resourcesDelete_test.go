@@ -16,7 +16,7 @@ func TestResourcesDeleteCommandInCommandCollection(t *testing.T) {
 	factory := NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	resourcesDeleteCommand := commands.GetCommand(COMMAND_NAME_RESOURCES_DELETE)
+	resourcesDeleteCommand, _ := commands.GetCommand(COMMAND_NAME_RESOURCES_DELETE)
 	assert.NotNil(t, resourcesDeleteCommand)
 	assert.Equal(t, COMMAND_NAME_RESOURCES_DELETE, resourcesDeleteCommand.Name())
 	assert.NotNil(t, resourcesDeleteCommand.Values())
