@@ -8,9 +8,11 @@ package properties
 
 import (
 	"context"
+	"log"
 	"io"
 	"net/http"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
@@ -38,27 +40,35 @@ func deleteCpsProperty(namespace string,
 	var resp *http.Response
 	var context context.Context = nil
 	var responseBody []byte
+	var restApiVersion string
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name)
-	_, resp, err = apicall.Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if (resp != nil) && (resp.StatusCode != http.StatusOK) {
-		defer resp.Body.Close()
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
+		_, resp, err = apicall.Execute()
 
-		responseBody, err = io.ReadAll(resp.Body)
-		if err == nil {
-			var errorFromServer *galasaErrors.GalasaAPIError
-			errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+		if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+			defer resp.Body.Close()
 
+			responseBody, err = io.ReadAll(resp.Body)
 			if err == nil {
-				//return galasa api error, because status code is not 200 (OK)
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
-			} else {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
-			}
+				var errorFromServer *galasaErrors.GalasaAPIError
+				errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
 
-		} else {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
+				if err == nil {
+					//return galasa api error, because status code is not 200 (OK)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
+				} else {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
+				}
+
+			} else {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
+			}
 		}
 	}
 	return err

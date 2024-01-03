@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runsformatter"
@@ -171,16 +172,25 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 	var details *galasaapi.Run
 	var httpResponse *http.Response
 
-	for _, run := range runs {
-		runid := run.GetRunId()
-		details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).Execute()
-		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-		} else {
-			if httpResponse.StatusCode != http.StatusOK {
+	var restApiVersion string
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+
+		for _, run := range runs {
+			runid := run.GetRunId()
+			details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).ClientApiVersion(restApiVersion).Execute()
+			if err != nil {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 			} else {
-				runsDetails = append(runsDetails, *details)
+				if httpResponse.StatusCode != http.StatusOK {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+				} else {
+					runsDetails = append(runsDetails, *details)
+				}
 			}
 		}
 	}
@@ -213,55 +223,64 @@ func GetRunsFromRestApi(
 
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
+	var restApiVersion string
 
-	for (!gotAllResults) && (err == nil) {
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-		var runData *galasaapi.RunResults
-		var httpResponse *http.Response
-		log.Printf("Requesting page '%d' ", pageNumberWanted)
-		apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context)
-		if fromAgeMins != 0 {
-			apicall = apicall.From(fromTime)
-		}
-		if toAgeMins != 0 {
-			apicall = apicall.To(toTime)
-		}
-		if runName != "" {
-			apicall = apicall.Runname(runName)
-		}
-		if requestorParameter != "" {
-			apicall = apicall.Requestor(requestorParameter)
-		}
-		if resultParameter != "" {
-			apicall = apicall.Result(resultParameter)
-		}
-		if shouldGetActive {
-			apicall = apicall.Status(activeStatusNames)
-		}
-		apicall = apicall.Page(pageNumberWanted)
-		apicall = apicall.Sort("to:desc")
-		runData, httpResponse, err = apicall.Execute()
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
 
-		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-		} else {
-			if httpResponse.StatusCode != http.StatusOK {
-				httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
-				errString := err.Error() + httpError
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
+		for (!gotAllResults) && (err == nil) {
+
+			var runData *galasaapi.RunResults
+			var httpResponse *http.Response
+			log.Printf("Requesting page '%d' ", pageNumberWanted)
+			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion)
+			if fromAgeMins != 0 {
+				apicall = apicall.From(fromTime)
+			}
+			if toAgeMins != 0 {
+				apicall = apicall.To(toTime)
+			}
+			if runName != "" {
+				apicall = apicall.Runname(runName)
+			}
+			if requestorParameter != "" {
+				apicall = apicall.Requestor(requestorParameter)
+			}
+			if resultParameter != "" {
+				apicall = apicall.Result(resultParameter)
+			}
+			if shouldGetActive {
+				apicall = apicall.Status(activeStatusNames)
+			}
+			apicall = apicall.Page(pageNumberWanted)
+			apicall = apicall.Sort("to:desc")
+			runData, httpResponse, err = apicall.Execute()
+
+			if err != nil {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 			} else {
-
-				// Copy the results from this page into our bigger list of results.
-				runsOnThisPage := runData.GetRuns()
-				// Add all the runs into our set of results.
-				// Note: The ... syntax means 'all of the array', so they all get appended at once.
-				results = append(results, runsOnThisPage...)
-
-				// Have we processed the last page ?
-				if pageNumberWanted == runData.GetNumPages() {
-					gotAllResults = true
+				if httpResponse.StatusCode != http.StatusOK {
+					httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
+					errString := err.Error() + httpError
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
 				} else {
-					pageNumberWanted++
+
+					// Copy the results from this page into our bigger list of results.
+					runsOnThisPage := runData.GetRuns()
+					// Add all the runs into our set of results.
+					// Note: The ... syntax means 'all of the array', so they all get appended at once.
+					results = append(results, runsOnThisPage...)
+
+					// Have we processed the last page ?
+					if pageNumberWanted == runData.GetNumPages() {
+						gotAllResults = true
+					} else {
+						pageNumberWanted++
+					}
 				}
 			}
 		}

@@ -8,7 +8,9 @@ package properties
 
 import (
 	"context"
+	"log"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/propertiesformatter"
@@ -29,24 +31,32 @@ func GetNamespaceProperties(
 	var err error
 	var chosenFormatter propertiesformatter.PropertyFormatter
 	var context context.Context = nil
+	var restApiVersion string
 
-	//only format so far is the default format, summary
-	chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validNamespaceFormatters)
-	if err == nil {
-		var namespaces []galasaapi.Namespace
-		namespaces, _, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		//only format so far is the default format, summary
+		chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validNamespaceFormatters)
 		if err == nil {
-			var outputText string
-
-			outputText, err = chosenFormatter.FormatNamespaces(namespaces)
+			var namespaces []galasaapi.Namespace
+			namespaces, _, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).ClientApiVersion(restApiVersion).Execute()
 
 			if err == nil {
-				console.WriteString(outputText)
-			}
+				var outputText string
 
-		} else {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_CPS_FAILED, err.Error())
+				outputText, err = chosenFormatter.FormatNamespaces(namespaces)
+
+				if err == nil {
+					console.WriteString(outputText)
+				}
+
+			} else {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_CPS_FAILED, err.Error())
+			}
 		}
 	}
 

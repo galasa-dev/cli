@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
@@ -45,10 +46,17 @@ func NewRemoteLauncher(apiServerUrl string, apiClient *galasaapi.APIClient) *Rem
 func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRuns, error) {
 	log.Printf("GetRunsByGroup(%s) entered.", groupName)
 	var (
-		testRuns *galasaapi.TestRuns
-		err      error
+		testRuns       *galasaapi.TestRuns
+		err            error
+		restApiVersion string
 	)
-	testRuns, _, err = launcher.apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		testRuns, _, err = launcher.apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).ClientApiVersion(restApiVersion).Execute()
+	}
 	return testRuns, err
 }
 
@@ -78,14 +86,32 @@ func (launcher *RemoteLauncher) SubmitTestRun(
 
 	var resultGroup *galasaapi.TestRuns
 	var err error
+	var restApiVersion string
 
-	resultGroup, _, err = launcher.apiClient.RunsAPIApi.PostSubmitTestRuns(nil, groupName).TestRunRequest(*testRunRequest).Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		resultGroup, _, err = launcher.apiClient.RunsAPIApi.PostSubmitTestRuns(nil, groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
+	}
 	return resultGroup, err
 }
 
 func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error) {
-	rasRun, _, err := launcher.apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, runId).Execute()
+	var err error
+	var rasRun *galasaapi.Run
+	var restApiVersion string
+
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		rasRun, _, err = launcher.apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, runId).ClientApiVersion(restApiVersion).Execute()
+	}
 	return rasRun, err
 }
 
@@ -93,13 +119,25 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 	var streams []string
 
-	cpsProperty, _, err := launcher.apiClient.ConfigurationPropertyStoreAPIApi.
-		GetCpsNamespaceCascadeProperty(nil, "framework", "test", "streams").Execute()
-	if err == nil {
-		if cpsProperty.Data.Value == nil {
-			streams = make([]string, 0)
-		} else {
-			streams = strings.Split(*cpsProperty.Data.Value, ",")
+	var restApiVersion string
+	var err error
+	var cpsProperty *galasaapi.GalasaProperty
+
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+
+	if err != nil {
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+
+		cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.
+			GetCpsNamespaceCascadeProperty(nil, "framework", "test", "streams").ClientApiVersion(restApiVersion).Execute()
+		if err == nil {
+			if cpsProperty.Data.Value == nil {
+				streams = make([]string, 0)
+			} else {
+				streams = strings.Split(*cpsProperty.Data.Value, ",")
+			}
 		}
 	}
 	return streams, err
@@ -110,35 +148,43 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 	var err error = nil
 	var testCatalog TestCatalog
 	var cpsProperty *galasaapi.GalasaProperty
+	var restApiVersion string
 
-	cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.GetCpsNamespaceCascadeProperty(
-		nil, "framework", "test.stream."+stream, "location").Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
-	} else if cpsProperty.Data.Value == nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
-	}
-
-	if err == nil {
-		catalogString := new(strings.Builder)
-		var resp *http.Response
-		resp, err = http.Get(*cpsProperty.Data.Value)
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.GetCpsNamespaceCascadeProperty(
+			nil, "framework", "test.stream."+stream, "location").ClientApiVersion(restApiVersion).Execute()
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, *cpsProperty.Data.Value, stream, err)
-		} else {
-			defer resp.Body.Close()
-
-			_, err = io.Copy(catalogString, resp.Body)
-			if err != nil {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_COPY_FAILED, *cpsProperty.Data.Value, stream, err)
-			}
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
+		} else if cpsProperty.Data.Value == nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
 		}
 
 		if err == nil {
-			err = json.Unmarshal([]byte(catalogString.String()), &testCatalog)
+			catalogString := new(strings.Builder)
+			var resp *http.Response
+			resp, err = http.Get(*cpsProperty.Data.Value)
 			if err != nil {
-				err = galasaErrors.NewGalasaError(
-					galasaErrors.GALASA_ERROR_CATALOG_UNMARSHAL_FAILED, *cpsProperty.Data.Value, stream, err)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, *cpsProperty.Data.Value, stream, err)
+			} else {
+				defer resp.Body.Close()
+
+				_, err = io.Copy(catalogString, resp.Body)
+				if err != nil {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_COPY_FAILED, *cpsProperty.Data.Value, stream, err)
+				}
+			}
+
+			if err == nil {
+				err = json.Unmarshal([]byte(catalogString.String()), &testCatalog)
+				if err != nil {
+					err = galasaErrors.NewGalasaError(
+						galasaErrors.GALASA_ERROR_CATALOG_UNMARSHAL_FAILED, *cpsProperty.Data.Value, stream, err)
+				}
 			}
 		}
 	}

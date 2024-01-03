@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -38,25 +39,35 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
     var err error = nil
     var context context.Context = nil
     var jwtJsonStr string
+    var restApiVersion string
 
-    apiClient := api.InitialiseAPI(apiServerUrl)
+    restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-    var tokenResponse *galasaapi.TokenResponse
-    var httpResponse *http.Response
-    tokenResponse, httpResponse, err = apiClient.AuthenticationAPIApi.PostAuthenticate(context).
-        AuthProperties(authProperties).
-        Execute()
 
-    if err != nil {
-        log.Println("Failed to retrieve bearer token from API server")
-        err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
+    if err != nil{
+        log.Printf("Failed to retrieve galasactl rest api version from build.properties file")
+        err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
     } else {
-        defer httpResponse.Body.Close()
-        var tokenResponseJson []byte
-        tokenResponseJson, err = tokenResponse.MarshalJSON()
-        jwtJsonStr = string(tokenResponseJson)
-        log.Println("Bearer token received from API server OK")
+        apiClient := api.InitialiseAPI(apiServerUrl)
+
+        var tokenResponse *galasaapi.TokenResponse
+        var httpResponse *http.Response
+        tokenResponse, httpResponse, err = apiClient.AuthenticationAPIApi.PostAuthenticate(context).
+            AuthProperties(authProperties).
+            ClientApiVersion(restApiVersion).
+            Execute()
+        if err != nil {
+            log.Println("Failed to retrieve bearer token from API server")
+            err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
+        } else {
+            defer httpResponse.Body.Close()
+            var tokenResponseJson []byte
+            tokenResponseJson, err = tokenResponse.MarshalJSON()
+            jwtJsonStr = string(tokenResponseJson)
+            log.Println("Bearer token received from API server OK")
+        }
     }
+
     return jwtJsonStr, err
 }
 

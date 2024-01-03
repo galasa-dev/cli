@@ -8,8 +8,10 @@ package properties
 
 import (
 	"context"
+	"log"
 	"strings"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
@@ -53,13 +55,22 @@ func updateCpsProperty(namespace string,
 
 	var context context.Context = nil
 
+	var restApiVersion string
+
 	property := createGalasaProperty(namespace, name, value)
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property)
-	_, _, err = apicall.Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property).ClientApiVersion(restApiVersion)
+		_, _, err = apicall.Execute()
+
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+		}
 	}
 
 	return err
@@ -74,13 +85,22 @@ func createCpsProperty(namespace string,
 
 	var context context.Context = nil
 
+	var restApiVersion string
+
 	property := createGalasaProperty(namespace, name, value)
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property)
-	_, _, err = apicall.Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, value, err.Error())
+		log.Printf("Unable to retrieve galasactl rest api version.")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
+	} else {
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property).ClientApiVersion(restApiVersion)
+		_, _, err = apicall.Execute()
+
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, value, err.Error())
+		}
 	}
 
 	return err
