@@ -64,6 +64,10 @@ pkg/embedded/templates/version/build.properties : VERSION pkg/embedded/templates
 	cat build.gradle | grep "def galasaBootJarVersion" | cut -f2 -d\' | sed "s/^/galasa.boot.jar.version = /" >> $@
 	# Add the `galasa.framework.version` property based on the build.gradle value.
 	cat build.gradle | grep "def galasaFrameworkVersion" | cut -f2 -d\' | sed "s/^/galasa.framework.version = /" >> $@
+	# Add the `galasactl.rest.api.version` property based on the build/dependencies/openapi.yaml value.
+	echo "" >> $@
+	echo "# version of the rest api that is compiled and the client is expecting from the ecosystem." >> $@
+	cat build/dependencies/openapi.yaml | grep "version :" | cut -f2 -d'"' | sed "s/^/galasactl.rest.api.version = /" >> $@
 
 bin/galasactl-linux-x86_64 : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/galasactl-linux-x86_64 ./cmd/galasactl

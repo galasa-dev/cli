@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	PROPERTY_NAME_GALASACTL_VERSION        = "galasactl.version"
-	PROPERTY_NAME_GALASA_BOOT_JAR_VERSION  = "galasa.boot.jar.version"
-	PROPERTY_NAME_GALASA_FRAMEWORK_VERSION = "galasa.framework.version"
+	PROPERTY_NAME_GALASACTL_VERSION          = "galasactl.version"
+	PROPERTY_NAME_GALASA_BOOT_JAR_VERSION    = "galasa.boot.jar.version"
+	PROPERTY_NAME_GALASA_FRAMEWORK_VERSION   = "galasa.framework.version"
+	PROPERTY_NAME_GALASACTL_REST_API_VERSION = "galasactl.rest.api.version"
 )
 
 // Embed all the template files into the go executable, so there are no extra files
@@ -29,9 +30,10 @@ var embeddedFileSystem embed.FS
 var readOnlyFileSystem ReadOnlyFileSystem
 
 type versions struct {
-	galasaFrameworkVersion string
-	galasaBootJarVersion   string
-	galasactlVersion       string
+	galasaFrameworkVersion  string
+	galasaBootJarVersion    string
+	galasactlVersion        string
+	galasactlRestApiVersion string
 }
 
 var (
@@ -75,6 +77,18 @@ func GetGalasaCtlVersion() (string, error) {
 	return version, err
 }
 
+func GetGalasactlRestApiVersion() (string, error) {
+	var err error
+	fs := GetReadOnlyFileSystem()
+	// Note: The cache is set when we read the versions from the embedded file.
+	versionsCache, err = readVersionsFromEmbeddedFile(fs, versionsCache)
+	var version string
+	if err == nil {
+		version = versionsCache.galasactlRestApiVersion
+	}
+	return version, err
+}
+
 func GetReadOnlyFileSystem() ReadOnlyFileSystem {
 	if readOnlyFileSystem == nil {
 		readOnlyFileSystem = NewReadOnlyFileSystem()
@@ -101,6 +115,7 @@ func readVersionsFromEmbeddedFile(fs ReadOnlyFileSystem, versionDataAlreadyKnown
 			versionDataAlreadyKnown.galasaBootJarVersion = properties[PROPERTY_NAME_GALASA_BOOT_JAR_VERSION]
 			versionDataAlreadyKnown.galasaFrameworkVersion = properties[PROPERTY_NAME_GALASA_FRAMEWORK_VERSION]
 			versionDataAlreadyKnown.galasactlVersion = properties[PROPERTY_NAME_GALASACTL_VERSION]
+			versionDataAlreadyKnown.galasactlRestApiVersion = properties[PROPERTY_NAME_GALASACTL_REST_API_VERSION]
 		}
 	}
 	return versionDataAlreadyKnown, err
