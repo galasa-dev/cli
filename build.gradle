@@ -22,11 +22,11 @@ def galasaOpenApiYamlVersion = galasaFrameworkVersion
 
 repositories {
     gradlePluginPortal()
-    mavenCentral()
+    mavenLocal()
     maven {
         url "https://development.galasa.dev/main/maven-repo/obr/"
     }
-    mavenLocal()
+    mavenCentral()
 }
 apply plugin: 'java'
 dependencies {
