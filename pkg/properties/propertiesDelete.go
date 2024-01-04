@@ -27,6 +27,7 @@ func DeleteProperty(
 
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
+		log.Printf("DeleteProperty - Field values are valid")
 		err = deleteCpsProperty(namespace, name, apiClient)
 	}
 	return err
@@ -46,9 +47,9 @@ func deleteCpsProperty(namespace string,
 
 	if (resp != nil) && (resp.StatusCode != http.StatusOK) {
 		defer resp.Body.Close()
-		
+
 		responseBody, err = io.ReadAll(resp.Body)
-		log.Printf("deleteCpsProperty Failed - HTTP response - status code:%v payload:%v", resp.StatusCode, string(responseBody))
+		log.Printf("deleteCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
 
 		if err == nil {
 			var errorFromServer *galasaErrors.GalasaAPIError

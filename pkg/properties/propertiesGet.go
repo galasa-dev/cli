@@ -8,6 +8,7 @@ package properties
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sort"
 	"strings"
@@ -46,7 +47,7 @@ func GetProperties(
 			var cpsProperty []galasaapi.GalasaProperty
 			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
 
-			log.Printf("GetProperties - Galasa Properties collected:%v", cpsProperty)
+			log.Printf("GetProperties - Galasa Properties collected: %s", getCpsPropertyArrayAsString(cpsProperty))
 			if err == nil {
 				var outputText string
 
@@ -160,4 +161,23 @@ func checkNameNotUsedWithPrefixSuffixInfix(name string, prefix string, suffix st
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_PROPERTIES_FLAG_COMBINATION)
 	}
 	return err
+}
+
+func getCpsPropertyArrayAsString(cpsPropertyArray []galasaapi.GalasaProperty) string {
+	propertiesAsString := "["
+
+	for propNumber, property := range cpsPropertyArray {
+		propertiesAsString += fmt.Sprintf("{ApiVersion:'%s', Kind:'%s', Namespace:'%s', Name:'%s', Value:'%s'}",
+			property.GetApiVersion(), property.GetKind(), property.Metadata.GetNamespace(), property.Metadata.GetName(), property.Data.GetValue())
+
+		//if this is not the last property
+		if propNumber != len(cpsPropertyArray)-1 {
+			propertiesAsString += ", "
+		}
+
+	}
+
+	propertiesAsString += "]"
+
+	return propertiesAsString
 }
