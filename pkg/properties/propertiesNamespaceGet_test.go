@@ -24,6 +24,7 @@ func NewPropertiesNamespaceServletMock(t *testing.T, state string) *httptest.Ser
 }
 
 func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, request *http.Request, state string) {
+	assert.NotEmpty(t, request.Header.Get("ClientApiVersion"))
 	writer.Header().Set("Content-Type", "application/json")
 	var statusCode int
 	var body string
