@@ -30,6 +30,7 @@ func newSetPropertiesServletMock(t *testing.T) *httptest.Server {
 }
 
 func mockSetPropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
+	assert.NotEmpty(t, r.Header.Get("ClientApiVersion"))
 	if !strings.Contains(r.URL.Path, "/cps/") {
 		t.Errorf("Expected to request '/cps/', got: %s", r.URL.Path)
 	}

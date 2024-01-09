@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
@@ -57,16 +58,20 @@ func updateCpsProperty(namespace string,
 ) error {
 	var err error = nil
 	var context context.Context = nil
+
+	var restApiVersion string
 	var resp *http.Response = nil
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property)
-	_, resp, err = apicall.Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+	if err == nil {
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property).ClientApiVersion(restApiVersion)
+		_, resp, err = apicall.Execute()
+		log.Printf("updateCpsPtoperty - HTTP response status code: '%v'", resp.StatusCode)
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+		}
 	}
-
-	log.Printf("updateCpsProperty - HTTP response status code: '%v'", resp.StatusCode)
 
 	return err
 }
@@ -78,16 +83,22 @@ func createCpsProperty(namespace string,
 ) error {
 	var err error = nil
 	var context context.Context = nil
+
+	var restApiVersion string
 	var resp *http.Response = nil
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property)
-	_, resp, err = apicall.Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
+	if err == nil {
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property).ClientApiVersion(restApiVersion)
+		_, resp, err = apicall.Execute()
+		log.Printf("createCpsProperty - HTTP response status code: '%v'", resp.StatusCode)
+
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
+		}
 	}
 
-	log.Printf("createCpsProperty - HTTP response status code: '%v'", resp.StatusCode)
 	return err
 }
 

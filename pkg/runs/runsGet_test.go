@@ -89,7 +89,8 @@ const (
 func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultStrings ...string) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
+		clientVersion := r.Header.Get("ClientApiVersion")
+		assert.NotEmpty(t, clientVersion, "Client version header not set.")
 		if strings.Contains(r.URL.Path, "/ras/runs/") {
 			ConfigureServerForDetailsEndpoint(t, w, r, status, runResultStrings...)
 		} else if strings.Contains(r.URL.Path, "/ras/resultnames") {
@@ -97,9 +98,7 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 		} else {
 			ConfigureServerForRasRunsEndpoint(t, w, r, runName, status, runResultStrings...)
 		}
-
 	}))
-
 	return server
 }
 
