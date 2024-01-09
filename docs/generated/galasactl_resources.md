@@ -26,5 +26,6 @@ Allows interaction with the Resources endpoint to create and maintain resources 
 * [galasactl](galasactl.md)	 - CLI for Galasa
 * [galasactl resources apply](galasactl_resources_apply.md)	 - Apply file contents to the ecosystem.
 * [galasactl resources create](galasactl_resources_create.md)	 - Update Galasa Ecosystem resources.
+* [galasactl resources delete](galasactl_resources_delete.md)	 - Delete Galasa Ecosystem resources.
 * [galasactl resources update](galasactl_resources_update.md)	 - Update Galasa Ecosystem resources.
 

@@ -519,6 +519,18 @@ galasactl resources update -f my_resources.yaml
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_update.md).
 
+## resources delete
+This command deletes resources in the Galasa Ecosystem
+
+Each resource provided in the yaml file is deleted. A compiled list of errors is returned if any error occurs for any resource during the process.
+
+### Examples
+```
+galasactl resources delete -f my_resources.yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_delete.md).
+
 
 
 

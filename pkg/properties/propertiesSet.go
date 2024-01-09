@@ -8,6 +8,8 @@ package properties
 
 import (
 	"context"
+	"log"
+	"net/http"
 	"strings"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -31,58 +33,61 @@ func SetProperty(
 
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		err = updateCpsProperty(namespace, name, value, apiClient)
-	}
+		galasaProperty := createGalasaProperty(namespace, name, value)
 
-	// if updateProperty() returns an error containing "404 Not Found" due to receiving a
-	// GAL5017E from the api, we know the property does not exist and
-	// so we assume the user wants to create a new property
-	if err != nil && strings.Contains(err.Error(), "404") {
-		err = createCpsProperty(namespace, name, value, apiClient)
-	}
+		log.Printf("SetProperty - Galasa Property to update/create: ApiVersion:'%s', Kind:'%s', Namespace:'%s', Name:'%s', Value:'%s'",
+			galasaProperty.GetApiVersion(), galasaProperty.GetKind(), galasaProperty.Metadata.GetNamespace(), galasaProperty.Metadata.GetName(), galasaProperty.Data.GetValue())
 
+		err = updateCpsProperty(namespace, name, galasaProperty, apiClient)
+
+		// if updateProperty() returns an error containing "404 Not Found" due to receiving a
+		// GAL5017E from the api, we know the property does not exist and
+		// so we assume the user wants to create a new property
+		if err != nil && strings.Contains(err.Error(), "404") {
+			err = createCpsProperty(namespace, name, galasaProperty, apiClient)
+		}
+	}
 	return err
 }
 
 func updateCpsProperty(namespace string,
 	name string,
-	value string,
+	property *galasaapi.GalasaProperty,
 	apiClient *galasaapi.APIClient,
 ) error {
 	var err error = nil
-
 	var context context.Context = nil
-
-	property := createGalasaProperty(namespace, name, value)
+	var resp *http.Response = nil
 
 	apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property)
-	_, _, err = apicall.Execute()
+	_, resp, err = apicall.Execute()
 
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
 	}
+
+	log.Printf("updateCpsPtoperty - HTTP response status code: '%v'", resp.StatusCode)
 
 	return err
 }
 
 func createCpsProperty(namespace string,
 	name string,
-	value string,
+	property *galasaapi.GalasaProperty,
 	apiClient *galasaapi.APIClient,
 ) error {
 	var err error = nil
-
 	var context context.Context = nil
-
-	property := createGalasaProperty(namespace, name, value)
+	var resp *http.Response = nil
 
 	apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property)
-	_, _, err = apicall.Execute()
+	_, resp, err = apicall.Execute()
 
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, value, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
 	}
 
+	log.Printf("createCpsProperty - HTTP response status code: '%v'", resp.StatusCode)
 	return err
 }
 
