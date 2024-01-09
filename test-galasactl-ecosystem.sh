@@ -101,12 +101,15 @@ export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 
 #disabled for now becuase CLI is stopping a deploy
 
-# CALLED_BY_MAIN="true"
-# source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh
-# calculate_galasactl_executable
+CALLED_BY_MAIN="true"
+source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh
+calculate_galasactl_executable
 
 # source ${BASEDIR}/test-scripts/runs-tests.sh
 # test_runs_commands
 
-# source ${BASEDIR}/test-scripts/properties-tests.sh
-# properties_tests
+source ${BASEDIR}/test-scripts/properties-tests.sh
+properties_tests
+
+source ${BASEDIR}/test-scripts/resources-tests.sh
+resources_tests

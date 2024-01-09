@@ -27,7 +27,7 @@ func DeleteProperty(
 
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		log.Printf("DeleteProperty - Field values are valid")
+		log.Printf("DeleteProperty - Galasa Property field values are valid")
 		err = deleteCpsProperty(namespace, name, apiClient)
 	}
 	return err

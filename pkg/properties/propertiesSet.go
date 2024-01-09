@@ -66,7 +66,7 @@ func updateCpsProperty(namespace string,
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
 	}
 
-	log.Printf("updateCpsPtoperty - HTTP response status code: '%v'", resp.StatusCode)
+	log.Printf("updateCpsProperty - HTTP response status code: '%v'", resp.StatusCode)
 
 	return err
 }
