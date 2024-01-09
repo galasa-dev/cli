@@ -156,8 +156,6 @@ function properties_create {
         exit 1
     fi
 
-   
-
     success "Properties set with name and value used seems to have been created correctly."
 }
 
@@ -236,7 +234,7 @@ function properties_delete {
         exit 1
     fi
 
-    # check that property has been updated
+    # check that property has been deleted
     cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
@@ -247,7 +245,7 @@ function properties_delete {
     output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to get property with name used."
+        error "Failed to delete property with name used."
         exit 1
     fi
 
@@ -652,7 +650,7 @@ function properties_secure_namespace_delete {
         exit 1
     fi
 
-    # check that property has been updated
+    # check that property has been deleted
     cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace secure \
     --name $prop_name \
     --bootstrap $bootstrap \
@@ -698,39 +696,6 @@ function properties_namespaces_get {
 
     success "Properties namespaces get seems to be successful."
 }
-
-#--------------------------------------------------------------------------
-function properties_resources_apply {
-    h2 "Performing resources apply, expecting ..."
-
-    output_file="$ORIGINAL_DIR/temp/properties-apply-output.yaml"
-    echo """apiVersion: galasa-dev/v1alpha1
-kind: GalasaProperty
-metadata:
-  name: filling
-  namespace: doughnuts
-data:
-  value: custard
-""" > $output_file
-
-    cmd="$ORIGINAL_DIR/bin/${binary} resources apply \
-    --bootstrap $bootstrap \
-    - f $output_file \
-    --log -"
-
-    info "Command is: $cmd"
-
-    $cmd
-    rc=$?
-
-    rm $output_file
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to apply resources"
-        exit 1
-    fi
-
-    success "Properties resources apply seems to be successful."
-}
 #-------------------------------------------------------------------------------------
 
 
@@ -755,7 +720,6 @@ function properties_tests {
     properties_get_with_namespace_raw_format
     properties_secure_namespace_set
     properties_secure_namespace_delete
-    # properties_resources_apply
 }
 
 # checks if it's been called by main, set this variable if it is

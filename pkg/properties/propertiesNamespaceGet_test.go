@@ -60,7 +60,7 @@ func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 		"Total:3\n"
 
 	//When
-	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+	err := GetPropertiesNamespaces(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -79,7 +79,7 @@ func TestEmptyNamespacesPathReturnsOk(t *testing.T) {
 	expectedOutput := "Total:0\n"
 
 	//When
-	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+	err := GetPropertiesNamespaces(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -97,7 +97,7 @@ func TestInvalidPathReturnsError(t *testing.T) {
 	console := utils.NewMockConsole()
 
 	//When
-	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+	err := GetPropertiesNamespaces(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.NotNil(t, err)
@@ -119,7 +119,7 @@ anamespace|normal
 `
 
 	//When
-	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+	err := GetPropertiesNamespaces(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -138,7 +138,7 @@ func TestEmptyNamespacesRawFormatReturnsOk(t *testing.T) {
 	expectedOutput := ``
 
 	//When
-	err := GetNamespaceProperties(apiClient, namespaceOutputFormat, console)
+	err := GetPropertiesNamespaces(apiClient, namespaceOutputFormat, console)
 
 	//Then
 	assert.Nil(t, err)

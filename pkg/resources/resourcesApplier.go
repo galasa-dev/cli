@@ -34,10 +34,10 @@ func ApplyResources(
 	err = validateFilePathExists(fileSystem, filePath)
 
 	if err == nil {
-		//read yaml file content
 		fileContent, err = getYamlFileContent(fileSystem, filePath)
 
 		if err == nil {
+			//convert resources in yaml file into a json payload
 			jsonBytes, err = yamlToByteArray(fileContent, action)
 		}
 
@@ -49,19 +49,20 @@ func ApplyResources(
 }
 
 func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string) error {
+
 	var err error
 	var responseBody []byte
 	resourcesApiServerUrl := apiServerUrl + "/resources/"
 
-	var req *http.Request
-	req, err = http.NewRequest("POST", resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))
+		var req *http.Request
+		req, err = http.NewRequest("POST", resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))
 
 	if err == nil {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Accept-Encoding", "gzip,deflate,br")
 
-		log.Printf("sendResourcesRequestToServer url:%s - payload: '%s'", resourcesApiServerUrl, string(payloadJsonToSend))
+		log.Printf("sendResourcesRequestToServer url:%s - headers:%s - payload: '%s'", resourcesApiServerUrl, req.Header, string(payloadJsonToSend))
 
 		var resp *http.Response
 		client := &http.Client{}

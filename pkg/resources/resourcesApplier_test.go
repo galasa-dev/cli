@@ -71,7 +71,7 @@ func (mockServlet *MockServlet) handleRequest(t *testing.T, resp http.ResponseWr
 	resp.Write(payload)
 }
 
-func TestCanApplyValidResources(t *testing.T) {
+func TestCanApplySingleValidResource(t *testing.T) {
 	// Given
 	expectedJsonArrivingInServlet := `{
     "action": "apply",
@@ -113,11 +113,104 @@ func TestCanApplyValidResources(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestCanApplyValidMultipleResources(t *testing.T) {
+	// Given
+	expectedJsonArrivingInServlet := `{
+    "action": "apply",
+    "data": [
+        {
+            "apiVersion": "galasa-dev/v1alpha1",
+            "data": {
+                "value": "custard"
+            },
+            "kind": "GalasaProperty",
+            "metadata": {
+                "name": "filling",
+                "namespace": "doughnuts"
+            }
+        },
+        {
+            "apiVersion": "galasa-dev/v1alpha1",
+            "data": {
+                "value": "custard2"
+            },
+            "kind": "GalasaProperty",
+            "metadata": {
+                "name": "filling2",
+                "namespace": "doughnuts2"
+            }
+        },
+        {
+            "apiVersion": "galasa-dev/v1alpha1",
+            "data": {
+                "value": "custard3"
+            },
+            "kind": "GalasaProperty",
+            "metadata": {
+                "name": "filling3",
+                "namespace": "doughnuts3"
+            }
+        }
+    ]
+}`
 
+	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
+	mockservletUrl := mockServlet.getUrl()
+
+	yamlToApply := validResourcesYamlFileContentMultipleProperties
+
+	action := "apply"
+
+	fs := files.NewOverridableMockFileSystem()
+	filePath := "/my/resources.yaml"
+	fs.WriteTextFile(filePath, yamlToApply)
+
+	// When
+	err := ApplyResources(
+		action,
+		filePath,
+		fs,
+		mockservletUrl,
+	)
+
+	// Then
+	assert.Nil(t, err)
+}
+
+func TestCanApplyEmptyValidResource(t *testing.T) {
+	// Given
+	expectedJsonArrivingInServlet := `{
+    "action": "apply",
+    "data": [
+        null
+    ]
+}`
+
+	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
+	mockservletUrl := mockServlet.getUrl()
+
+	yamlToApply := ""
+
+	action := "apply"
+
+	fs := files.NewOverridableMockFileSystem()
+	filePath := "/my/resources.yaml"
+	fs.WriteTextFile(filePath, yamlToApply)
+
+	// When
+	err := ApplyResources(
+		action,
+		filePath,
+		fs,
+		mockservletUrl,
+	)
+
+	// Then
+	assert.Nil(t, err)
+}
 
 func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T) {
 	// Given
-
 	// We have a payload we are expecting...
 	// Like this:
 	expectedStringArrivingAtServlet := `{
@@ -160,7 +253,6 @@ func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T
 
 func TestBadRequestResponseStatusFromServerShowsErrorsReturned(t *testing.T) {
 	// Given
-
 	// We have a payload we are expecting...
 	// Like this:
 	expectedStringArrivingAtServlet := `{
@@ -206,6 +298,7 @@ func TestBadRequestResponseStatusFromServerShowsErrorsReturned(t *testing.T) {
 	assert.Contains(t, err.Error(), "GAL1113E")
 
 }
+
 func TestInternalServerErrorResponseStatusFromServerReturnsServerError(t *testing.T) {
 	// Given
 
@@ -294,4 +387,142 @@ func TestResponseStatusCodeFromApiIsAnUnexpectedError(t *testing.T) {
 	// Then
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1115E")
+}
+
+func TestCanDeleteSingleValidResource(t *testing.T) {
+	// Given
+	expectedJsonArrivingInServlet := `{
+    "action": "delete",
+    "data": [
+        {
+            "apiVersion": "galasa-dev/v1alpha1",
+            "data": {
+                "value": "custard"
+            },
+            "kind": "GalasaProperty",
+            "metadata": {
+                "name": "filling",
+                "namespace": "doughnuts"
+            }
+        }
+    ]
+}`
+
+	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
+	mockservletUrl := mockServlet.getUrl()
+
+	yamlToApply := validResourcesYamlFileContentSingleProperty
+
+	action := "delete"
+
+	fs := files.NewOverridableMockFileSystem()
+	filePath := "/my/resources.yaml"
+	fs.WriteTextFile(filePath, yamlToApply)
+
+	// When
+	err := ApplyResources(
+		action,
+		filePath,
+		fs,
+		mockservletUrl,
+	)
+
+	// Then
+	assert.Nil(t, err)
+}
+
+func TestCanDeleteValidMultipleResources(t *testing.T) {
+	// Given
+	expectedJsonArrivingInServlet := `{
+    "action": "delete",
+    "data": [
+        {
+            "apiVersion": "galasa-dev/v1alpha1",
+            "data": {
+                "value": "custard"
+            },
+            "kind": "GalasaProperty",
+            "metadata": {
+                "name": "filling",
+                "namespace": "doughnuts"
+            }
+        },
+        {
+            "apiVersion": "galasa-dev/v1alpha1",
+            "data": {
+                "value": "custard2"
+            },
+            "kind": "GalasaProperty",
+            "metadata": {
+                "name": "filling2",
+                "namespace": "doughnuts2"
+            }
+        },
+        {
+            "apiVersion": "galasa-dev/v1alpha1",
+            "data": {
+                "value": "custard3"
+            },
+            "kind": "GalasaProperty",
+            "metadata": {
+                "name": "filling3",
+                "namespace": "doughnuts3"
+            }
+        }
+    ]
+}`
+
+	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
+	mockservletUrl := mockServlet.getUrl()
+
+	yamlToApply := validResourcesYamlFileContentMultipleProperties
+
+	action := "delete"
+
+	fs := files.NewOverridableMockFileSystem()
+	filePath := "/my/resources.yaml"
+	fs.WriteTextFile(filePath, yamlToApply)
+
+	// When
+	err := ApplyResources(
+		action,
+		filePath,
+		fs,
+		mockservletUrl,
+	)
+
+	// Then
+	assert.Nil(t, err)
+}
+
+func TestCanDeleteEmptyValidResource(t *testing.T) {
+	// Given
+	expectedJsonArrivingInServlet := `{
+    "action": "delete",
+    "data": [
+        null
+    ]
+}`
+
+	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
+	mockservletUrl := mockServlet.getUrl()
+
+	yamlToApply := ""
+
+	action := "delete"
+
+	fs := files.NewOverridableMockFileSystem()
+	filePath := "/my/resources.yaml"
+	fs.WriteTextFile(filePath, yamlToApply)
+
+	// When
+	err := ApplyResources(
+		action,
+		filePath,
+		fs,
+		mockservletUrl,
+	)
+
+	// Then
+	assert.Nil(t, err)
 }

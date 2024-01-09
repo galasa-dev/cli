@@ -9,6 +9,7 @@ package properties
 import (
 	"context"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
@@ -24,8 +25,10 @@ func DeleteProperty(
 	apiClient *galasaapi.APIClient,
 ) error {
 	var err error
+
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
+		log.Printf("DeleteProperty - Field values are valid")
 		err = deleteCpsProperty(namespace, name, apiClient)
 	}
 	return err
@@ -51,6 +54,8 @@ func deleteCpsProperty(namespace string,
 			defer resp.Body.Close()
 
 			responseBody, err = io.ReadAll(resp.Body)
+			log.Printf("deleteCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
+
 			if err == nil {
 				var errorFromServer *galasaErrors.GalasaAPIError
 				errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
@@ -59,9 +64,9 @@ func deleteCpsProperty(namespace string,
 					//return galasa api error, because status code is not 200 (OK)
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
 				} else {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
+					//unable to parse response into api error
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
 				}
-
 			} else {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 			}
