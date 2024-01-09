@@ -8,7 +8,6 @@ package properties
 
 import (
 	"context"
-	"log"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -35,10 +34,7 @@ func GetNamespaceProperties(
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 		//only format so far is the default format, summary
 		chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validNamespaceFormatters)
 		if err == nil {

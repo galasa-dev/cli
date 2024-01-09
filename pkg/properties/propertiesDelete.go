@@ -8,7 +8,6 @@ package properties
 
 import (
 	"context"
-	"log"
 	"io"
 	"net/http"
 
@@ -44,10 +43,7 @@ func deleteCpsProperty(namespace string,
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 		apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
 		_, resp, err = apicall.Execute()
 

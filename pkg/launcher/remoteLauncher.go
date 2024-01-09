@@ -51,10 +51,7 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 		restApiVersion string
 	)
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 		testRuns, _, err = launcher.apiClient.RunsAPIApi.GetRunsGroup(nil, groupName).ClientApiVersion(restApiVersion).Execute()
 	}
 	return testRuns, err
@@ -90,10 +87,7 @@ func (launcher *RemoteLauncher) SubmitTestRun(
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 		resultGroup, _, err = launcher.apiClient.RunsAPIApi.PostSubmitTestRuns(nil, groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
 	}
 	return resultGroup, err
@@ -106,10 +100,7 @@ func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 		rasRun, _, err = launcher.apiClient.ResultArchiveStoreAPIApi.GetRasRunById(nil, runId).ClientApiVersion(restApiVersion).Execute()
 	}
 	return rasRun, err
@@ -125,10 +116,7 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 
 		cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.
 			GetCpsNamespaceCascadeProperty(nil, "framework", "test", "streams").ClientApiVersion(restApiVersion).Execute()
@@ -152,10 +140,7 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 		cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.GetCpsNamespaceCascadeProperty(
 			nil, "framework", "test.stream."+stream, "location").ClientApiVersion(restApiVersion).Execute()
 		if err != nil {

@@ -8,7 +8,6 @@ package properties
 
 import (
 	"context"
-	"log"
 	"sort"
 	"strings"
 
@@ -85,10 +84,7 @@ func getCpsPropertiesFromRestApi(
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION)
-	} else {
+	if err == nil {
 		if name == "" {
 			apicall := apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace).ClientApiVersion(restApiVersion)
 			if prefix != "" {

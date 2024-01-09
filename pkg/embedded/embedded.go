@@ -7,8 +7,10 @@ package embedded
 
 import (
 	"embed"
+	"log"
 
 	"github.com/galasa-dev/cli/pkg/props"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 const (
@@ -85,6 +87,9 @@ func GetGalasactlRestApiVersion() (string, error) {
 	var version string
 	if err == nil {
 		version = versionsCache.galasactlRestApiVersion
+	} else {
+		log.Printf("Unable to retrieve galasactl rest api version, creating readable error")
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
 	}
 	return version, err
 }

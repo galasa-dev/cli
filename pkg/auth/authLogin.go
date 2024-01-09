@@ -43,11 +43,7 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 
     restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-
-    if err != nil{
-        log.Printf("Failed to retrieve galasactl rest api version from build.properties file")
-        err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-    } else {
+    if err == nil{
         apiClient := api.InitialiseAPI(apiServerUrl)
 
         var tokenResponse *galasaapi.TokenResponse

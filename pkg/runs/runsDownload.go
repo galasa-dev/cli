@@ -232,10 +232,7 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 	var restApiVersion string
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
+	if err == nil {
 
 		var httpResponse *http.Response
 		var artifactsList []galasaapi.ArtifactIndexEntry
@@ -381,11 +378,7 @@ func GetFileFromRestApi(runId string, artifactPath string, apiClient *galasaapi.
 	var restApiVersion string
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		log.Printf("Unable to retrieve galasactl rest api version.")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION, err.Error())
-	} else {
-		
+	if err == nil {
 
 		fileDownloaded, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
 			GetRasRunArtifactByPath(context.Background(), runId, artifactPath).
