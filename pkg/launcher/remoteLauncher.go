@@ -96,7 +96,7 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 	cpsProperty, _, err := launcher.apiClient.ConfigurationPropertyStoreAPIApi.
 		GetCpsNamespaceCascadeProperty(nil, "framework", "test", "streams").Execute()
 	if err == nil {
-		if cpsProperty.Data.Value == nil {
+		if cpsProperty == nil || cpsProperty.Data == nil || cpsProperty.Data.Value == nil {
 			streams = make([]string, 0)
 		} else {
 			streams = strings.Split(*cpsProperty.Data.Value, ",")
