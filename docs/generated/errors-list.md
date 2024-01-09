@@ -121,6 +121,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1118E: The resource operation failed. Unable to process the error information returned from the server. Reason: '{}'
 - GAL1119E: The server thinks you are unauthorized to perform this operation.
 - GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.
+- GAL1121E: Unable to retrieve rest api version. Reason is: {}. Try downloading the latest version of galasa or rebuilding a clean version.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
@@ -41,29 +42,34 @@ func deleteCpsProperty(namespace string,
 	var resp *http.Response
 	var context context.Context = nil
 	var responseBody []byte
+	var restApiVersion string
 
-	apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name)
-	_, resp, err = apicall.Execute()
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if (resp != nil) && (resp.StatusCode != http.StatusOK) {
-		defer resp.Body.Close()
+	if err == nil {
+		apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
+		_, resp, err = apicall.Execute()
 
-		responseBody, err = io.ReadAll(resp.Body)
-		log.Printf("deleteCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
+		if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+			defer resp.Body.Close()
 
-		if err == nil {
-			var errorFromServer *galasaErrors.GalasaAPIError
-			errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+			responseBody, err = io.ReadAll(resp.Body)
+			log.Printf("deleteCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
 
 			if err == nil {
-				//return galasa api error, because status code is not 200 (OK)
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
-			} else {
-				//unable to parse response into api error
+				var errorFromServer *galasaErrors.GalasaAPIError
+				errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+
+				if err == nil {
+					//return galasa api error, because status code is not 200 (OK)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
+				} else {
+					//unable to parse response into api error
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
+				}
+			} else {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 			}
-		} else {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 		}
 	}
 	return err

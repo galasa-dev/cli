@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/propertiesformatter"
@@ -78,27 +79,37 @@ func getCpsPropertiesFromRestApi(
 	var err error = nil
 	var context context.Context = nil
 
+	var restApiVersion string
+
+	// // An HTTP client which can communicate with the api server in an ecosystem.
+	// restClient := api.InitialiseAPI(apiServerUrl)
+
 	var cpsProperties = make([]galasaapi.GalasaProperty, 0)
 
-	if name == "" {
-		apicall := apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace)
-		if prefix != "" {
-			apicall = apicall.Prefix(prefix)
-		}
-		if suffix != "" {
-			apicall = apicall.Suffix(suffix)
-		}
-		if infix != "" {
-			apicall = apicall.Infix(infix)
-		}
-		cpsProperties, _, err = apicall.Execute()
-	} else {
-		apicall := apiClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name)
-		cpsProperties, _, err = apicall.Execute()
-	}
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_FAILED, err.Error())
+	if err == nil {
+		if name == "" {
+			apicall := apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace).ClientApiVersion(restApiVersion)
+			if prefix != "" {
+				apicall = apicall.Prefix(prefix)
+			}
+			if suffix != "" {
+				apicall = apicall.Suffix(suffix)
+			}
+			if infix != "" {
+				apicall = apicall.Infix(infix)
+			}
+			cpsProperties, _, err = apicall.Execute()
+		} else {
+			apicall := apiClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
+			cpsProperties, _, err = apicall.Execute()
+		}
+		
+
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_FAILED, err.Error())
+		}
 	}
 
 	return cpsProperties, err

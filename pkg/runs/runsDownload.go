@@ -12,11 +12,13 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -227,20 +229,29 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 	var artifactPaths []string
 	log.Println("Retrieving artifact paths for the given run")
 
-	var artifactsList []galasaapi.ArtifactIndexEntry
-	artifactsList, httpResponse, err := apiClient.ResultArchiveStoreAPIApi.
-		GetRasRunArtifactList(context.Background(), runId).
-		Execute()
+	var restApiVersion string
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED, err.Error())
-	} else {
-		defer httpResponse.Body.Close()
-		for _, artifact := range artifactsList {
-			artifactPaths = append(artifactPaths, artifact.GetPath())
+	if err == nil {
+
+		var httpResponse *http.Response
+		var artifactsList []galasaapi.ArtifactIndexEntry
+
+		artifactsList, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
+			GetRasRunArtifactList(context.Background(), runId).
+			ClientApiVersion(restApiVersion).
+			Execute()
+
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED, err.Error())
+		} else {
+			defer httpResponse.Body.Close()
+			for _, artifact := range artifactsList {
+				artifactPaths = append(artifactPaths, artifact.GetPath())
+			}
 		}
+		log.Printf("%v artifact path(s) found", len(artifactPaths))
 	}
-	log.Printf("%v artifact path(s) found", len(artifactPaths))
 
 	return artifactPaths, err
 }
@@ -360,21 +371,30 @@ func GetFileFromRestApi(runId string, artifactPath string, apiClient *galasaapi.
 
 	var err error = nil
 	isFileEmpty := false
+	var httpResponse *http.Response
+	var fileDownloaded *os.File
 	log.Printf("Downloading artifact '%s' from API server", artifactPath)
 
-	fileDownloaded, httpResponse, err := apiClient.ResultArchiveStoreAPIApi.
-		GetRasRunArtifactByPath(context.Background(), runId, artifactPath).
-		Execute()
+	var restApiVersion string
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
-		log.Printf("Failed to download artifact. %s", err.Error())
-	} else {
-		log.Printf("Artifact '%s' http response from API server OK", artifactPath)
+	if err == nil {
 
-		if fileDownloaded == nil {
-			log.Printf("Artifact '%s' http response returned nil file content.", artifactPath)
-			isFileEmpty = true
+		fileDownloaded, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
+			GetRasRunArtifactByPath(context.Background(), runId, artifactPath).
+			ClientApiVersion(restApiVersion).
+			Execute()
+
+		if err != nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
+			log.Printf("Failed to download artifact. %s", err.Error())
+		} else {
+			log.Printf("Artifact '%s' http response from API server OK", artifactPath)
+
+			if fileDownloaded == nil {
+				log.Printf("Artifact '%s' http response returned nil file content.", artifactPath)
+				isFileEmpty = true
+			}
 		}
 	}
 
