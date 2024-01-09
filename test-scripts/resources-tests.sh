@@ -108,14 +108,15 @@ function properties_resources_create {
 
     input_file="$ORIGINAL_DIR/temp/resources-create-input.yaml"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file 
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: $prop_name
   namespace: ecosystemtest
 data:
   value: $prop_value
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources create \
     --bootstrap $bootstrap \
@@ -126,8 +127,6 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to create resource"
         exit 1
@@ -141,12 +140,15 @@ data:
 
     info "Command is: $cmd"
 
-    output_file="$ORIGINAL_DIR/temp/resources-create-output.txt"
-    $cmd | tee $output_file
+    $cmd
+    rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used, get command failed."
         exit 1
     fi
+
+    output_file="$ORIGINAL_DIR/temp/resources-create-output.txt"
+    $cmd | tee $output_file
 
     # Check that the value matches the property created
     cat $output_file | grep "$prop_name\s+$prop_value" -q -E
@@ -158,6 +160,7 @@ data:
         exit 1
     fi
 
+    rm $input_file    
     rm $output_file
 
     success "Resources create seems to be successful."
@@ -174,14 +177,15 @@ function properties_resources_update {
 
     input_file="$ORIGINAL_DIR/temp/resources-update-input.yaml"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file 
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: $prop_name
   namespace: ecosystemtest
 data:
   value: $prop_value
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources update \
     --bootstrap $bootstrap \
@@ -192,8 +196,6 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to update resources"
         exit 1
@@ -206,13 +208,16 @@ data:
     --log -"
 
     info "Command is: $cmd"
-
-    output_file="$ORIGINAL_DIR/temp/resources-update-output.txt"
-    $cmd | tee $output_file
+    
+    $cmd
+    rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used, get command failed."
         exit 1
     fi
+
+    output_file="$ORIGINAL_DIR/temp/resources-update-output.txt"
+    $cmd | tee $output_file
 
     # Check that the previous properties set updated the property value
     cat $output_file | grep "$prop_name\s+$prop_value" -q -E
@@ -224,6 +229,7 @@ data:
         exit 1
     fi
 
+    rm $input_file
     rm $output_file
 
     success "Resources update seems to be successful."
@@ -243,7 +249,8 @@ function properties_resources_apply {
 
     input_file="$ORIGINAL_DIR/temp/resources-apply-input.yaml"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file 
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: $prop_name_to_update
@@ -258,7 +265,7 @@ metadata:
   namespace: ecosystemtest
 data:
   value: $prop_value_to_create
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources apply \
     --bootstrap $bootstrap \
@@ -269,8 +276,6 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to apply resources"
         exit 1
@@ -284,24 +289,27 @@ data:
 
     info "Command is: $cmd"
 
-    output_file="$ORIGINAL_DIR/temp/resources-apply-output.txt"
-    $cmd | tee $output_file
+    $cmd
+    rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used, get command failed."
         exit 1
     fi
 
-    # Check that the previous properties set updated the property value
-    cat $output_file | grep "$prop_name_to_update\s+$prop_value_to_update" -q -E
-    cat $output_file | grep "$prop_name_to_create\s+$prop_value_to_create" -q -E
+    output_file="$ORIGINAL_DIR/temp/resources-apply-output.txt"
+    $cmd | tee $output_file
+
+    # Check that the previous properties applied have correct values
+    grep "$prop_name_to_update\s+$prop_value_to_update | $prop_name_to_create\s+$prop_value_to_create" $output_file -q -E
 
     rc=$?
-    # We expect a return code of 0 because this is a properly formed properties get command.
+    # We expect a return code of 0 because this is a properly formed resources apply command.
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to update property, property not found in namespace."
+        error "The properties to be applied were unable to be updated and/or created"
         exit 1
     fi
 
+    rm $input_file
     rm $output_file
 
     success "Properties resources apply seems to be successful."
@@ -321,7 +329,8 @@ function properties_resources_delete {
 
     input_file="$ORIGINAL_DIR/temp/resources-apply-input.yaml"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file 
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: $prop_name_to_update
@@ -336,7 +345,7 @@ metadata:
   namespace: ecosystemtest
 data:
   value: $prop_value_to_create
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources delete \
     --bootstrap $bootstrap \
@@ -347,8 +356,6 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     # We expect a return code of 0 because this is a properly formed properties delete command.
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to delete property resources, command failed."
@@ -363,12 +370,15 @@ data:
 
     info "Command is: $cmd"
 
-    output_file="$ORIGINAL_DIR/temp/resources-delete-output.txt"
-    $cmd | tee $output_file
+    $cmd
+    rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to delete property resource with name used."
         exit 1
     fi
+
+    output_file="$ORIGINAL_DIR/temp/resources-delete-output.txt"
+    $cmd | tee $output_file
 
     # Check that the previous properties set updated the property value
     cat $output_file | grep "Total:0" -q
@@ -380,6 +390,7 @@ data:
         exit 1
     fi
 
+    rm $input_file
     rm $output_file
 
     success "Resources delete with name used seems to have been deleted correctly."
@@ -393,14 +404,15 @@ function properties_resources_delete_invalid_property {
 
     input_file="$ORIGINAL_DIR/temp/resources-delete-input.yaml"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file 
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: prop.doesnt.exist
   namespace: ecosystemtest
 data:
   value: inexistent
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources delete \
     --bootstrap $bootstrap \
@@ -411,14 +423,15 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     # We expect a return code of 0 because the api would return an OK status (200) 
     # as we want this property to not exist
     if [[ "${rc}" != "0" ]]; then 
         error "Command should have failed due to non existent property."
         exit 1
     fi
+
+    rm $input_file
+
     success "Resources delete with the name of a non existent property correctly throws an error."
 }
 
@@ -430,14 +443,15 @@ function properties_resources_create_with_name_without_value {
 
     input_file="$ORIGINAL_DIR/temp/resources-create-input.yaml"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file 
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: $prop_name
   namespace: ecosystemtest
 data:
   value:
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources create \
     --bootstrap $bootstrap \
@@ -448,13 +462,14 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     # we expect a return code of 1 as properties set should not be able to run without value used.
     if [[ "${rc}" != "1" ]]; then 
         error "Failed to recognise properties set without value should error."
         exit 1
     fi
+
+    rm $input_file
+
     success "Resource create with no value correctly throws an error."
 }
 
@@ -466,14 +481,15 @@ function properties_resources_create_with_invalid_file {
 
     input_file="non_existing_file.txt"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file 
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: $prop_name
   namespace: ecosystemtest
 data:
   value: value
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources create \
     --bootstrap $bootstrap \
@@ -484,13 +500,14 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     # we expect a return code of 1 as properties set should not be able to run without value used.
     if [[ "${rc}" != "1" ]]; then 
         error "Failed to recognise properties set with non-existing file should error."
         exit 1
     fi
+
+    rm $input_file
+
     success "Resource create with non-existing file correctly throws an error."
 }
 #--------------------------------------------------------------------------
@@ -501,14 +518,14 @@ function properties_resources_create_with_non_yaml_file {
 
     input_file="$ORIGINAL_DIR/temp/resources-create-input.txt"
 
-    echo """apiVersion: galasa-dev/v1alpha1
+    cat << EOF > $input_file apiVersion: galasa-dev/v1alpha1
 kind: GalasaProperty
 metadata:
   name: $prop_name
   namespace: ecosystemtest
 data:
   value: value
-""" > $input_file
+EOF
 
     cmd="$ORIGINAL_DIR/bin/${binary} resources create \
     --bootstrap $bootstrap \
@@ -519,19 +536,20 @@ data:
 
     $cmd
     rc=$?
-
-    rm $input_file
     # we expect a return code of 1 as properties set should not be able to run without value used.
     if [[ "${rc}" != "1" ]]; then 
         error "Failed to recognise properties set with non-yaml file should error."
         exit 1
     fi
+
+    rm $input_file
+
     success "Resource create with non-yaml file correctly throws an error."
 }
 
 
 #-------------------------------------------------------------------------------------
-function properties_tests {
+function resources_tests {
     get_random_property_name_number
     properties_resources_create
     properties_resources_update
@@ -547,5 +565,5 @@ function properties_tests {
 if [[ "$CALLED_BY_MAIN" == "" ]]; then
     source $BASEDIR/calculate-galasactl-executables.sh
     calculate_galasactl_executable
-    properties_tests
+    resources_tests
 fi
