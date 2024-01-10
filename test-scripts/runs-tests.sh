@@ -667,8 +667,9 @@ function runs_get_check_result_parameter {
 
     output_file="runs-get-output.txt"
     $cmd | tee $output_file
+    
+    grep -q "result[ ]*:[ ]*$result" $output_file
 
-    cat $output_file | grep "result[ ]*:[ ]*$result" -q
     rc=$?
    
     if [[ "${rc}" != "0" ]]; then 
