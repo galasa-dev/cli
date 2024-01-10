@@ -608,13 +608,11 @@ function properties_get_with_namespace_raw_format {
 function properties_secure_namespace_set {
     h2 "Performing properties set with secure namespace"
 
-    prop_name="properties.secure.namespace.test"
-    prop_value="dummy.value"
-    redacted_value="********"
+    prop_name="properties.secure.namespace"
 
     cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace secure \
     --name $prop_name \
-    --value $prop_value
+    --value dummy.value
     --bootstrap $bootstrap \
     --log -"
 
@@ -645,8 +643,8 @@ function properties_secure_namespace_set {
     output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
     $cmd | tee $output_file
 
-    # Check that the value matches the property created
-    cat $output_file | grep "$prop_name" -q -E
+    # Check that the value returned is redacted
+    cat $output_file | grep "$prop_name\s+[\*]{8}" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
