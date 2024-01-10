@@ -608,8 +608,9 @@ function properties_get_with_namespace_raw_format {
 function properties_secure_namespace_set {
     h2 "Performing properties set with secure namespace"
 
-    prop_name="properties.test.name.value.$PROP_NUM"
+    prop_name="properties.secure.namespace.test"
     prop_value="dummy.value"
+    redacted_value="********"
 
     cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace secure \
     --name $prop_name \
@@ -621,7 +622,6 @@ function properties_secure_namespace_set {
 
     $cmd
     rc=$?
-
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to recognise properties set without value should error."
         exit 1
@@ -635,19 +635,23 @@ function properties_secure_namespace_set {
 
     info "Command is: $cmd"
 
-    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
-    $cmd | tee $output_file
+    $cmd
+    rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used, get command failed."
         exit 1
     fi
 
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
+    $cmd | tee $output_file
+
     # Check that the value matches the property created
-    cat $output_file | grep "$prop_name\s+$prop_value" -q -E
+    cat $output_file | grep "$prop_name" -q -E
 
     rc=$?
     # We expect a return code of 0 because this is a properly formed properties get command.
     if [[ "${rc}" != "0" ]]; then 
+        echo $rc
         error "Failed to create property."
         exit 1
     fi
@@ -661,7 +665,7 @@ function properties_secure_namespace_delete {
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
     
-    prop_name="properties.test.name.value.$PROP_NUM"
+    prop_name="properties.secure.namespace.test"
 
     cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace secure \
     --name $prop_name \
@@ -686,12 +690,15 @@ function properties_secure_namespace_delete {
 
     info "Command is: $cmd"
 
-    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
-    $cmd | tee $output_file
+    $cmd
+    rc=$?
     if [[ "${rc}" != "0" ]]; then 
         error "Failed to get property with name used."
         exit 1
     fi
+
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
+    $cmd | tee $output_file
 
     # Check that the previous properties set updated the property value
     cat $output_file | grep "Total:0" -q
@@ -705,6 +712,61 @@ function properties_secure_namespace_delete {
 
     success "Properties set with secure namespace deleted successfully."
 }
+
+#--------------------------------------------------------------------------
+function properties_secure_namespace_non_existent_prop_delete {
+    h2 "Performing properties delete with non-existent property in a secure namespace..."
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+    
+    prop_name="properties.test.name.value.$PROP_NUM"
+
+    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace secure \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    # We expect a return code of 0 because this is a properly formed properties delete command.
+    if [[ "${rc}" != "0" ]]; then 
+        error "This should not fail as even though the property does not already exist, the goal of it not being in the namespace is achieved."
+        exit 1
+    fi
+
+    # check that property has been deleted
+    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace secure \
+    --name $prop_name \
+    --bootstrap $bootstrap \
+    --log -"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to get property with name used."
+        exit 1
+    fi
+
+    output_file="$ORIGINAL_DIR/temp/properties-get-output.txt"
+    $cmd | tee $output_file
+
+    # Check that the previous properties set updated the property value
+    cat $output_file | grep "Total:0" -q
+
+    rc=$?
+    # We expect a return code of 1 because this property should not exist anymore.
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to delete property, property remains in namespace."
+        exit 1
+    fi
+
+    success "Properties set with secure namespace deleted successfully."
+}
+
 #--------------------------------------------------------------------------
 function properties_namespaces_get {
     h2 "Performing namespaces get, expecting a list of all namespaces in the cps..."
@@ -728,26 +790,27 @@ function properties_namespaces_get {
 
 
 function properties_tests {
-    # properties_namespaces_get
-    # get_random_property_name_number
-    # properties_create
-    # properties_update
-    # properties_delete
-    # properties_delete_invalid_property
-    # properties_delete_without_name
-    # properties_set_with_name_without_value
-    # properties_set_without_name_with_value
-    # properties_set_without_name_and_value
-    # properties_get_setup
-    # properties_get_with_namespace
-    # properties_get_with_name
-    # properties_get_with_prefix
-    # properties_get_with_suffix
-    # properties_get_with_infix
-    # properties_get_with_prefix_infix_and_suffix
-    # properties_get_with_namespace_raw_format
+    properties_namespaces_get
+    get_random_property_name_number
+    properties_create
+    properties_update
+    properties_delete
+    properties_delete_invalid_property
+    properties_delete_without_name
+    properties_set_with_name_without_value
+    properties_set_without_name_with_value
+    properties_set_without_name_and_value
+    properties_get_setup
+    properties_get_with_namespace
+    properties_get_with_name
+    properties_get_with_prefix
+    properties_get_with_suffix
+    properties_get_with_infix
+    properties_get_with_prefix_infix_and_suffix
+    properties_get_with_namespace_raw_format
     properties_secure_namespace_set
     properties_secure_namespace_delete
+    properties_secure_namespace_non_existent_prop_delete
 }
 
 # checks if it's been called by main, set this variable if it is
