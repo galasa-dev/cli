@@ -366,7 +366,7 @@ function runs_get_check_summary_format_output {
     $cmd | tee $output_file
 
     # Check that the full test name is output
-    cat $output_file | grep "${GALASA_TEST_NAME_LONG}" -q
+    grep "${GALASA_TEST_NAME_LONG}" $output_file -q
     rc=$?
     # We expect a return code of '0' because the test name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -379,7 +379,7 @@ function runs_get_check_summary_format_output {
 
     for header in "${headers[@]}"
     do
-        cat $output_file | grep "$header" -q
+        grep ${header} $output_file -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then 
@@ -419,7 +419,7 @@ function runs_get_check_details_format_output {
 
 
     # Check that the full test name is output and formatted
-    cat $output_file | grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}" -q
+    grep "test-name[[:space:]]*:[[:space:]]*${GALASA_TEST_NAME_LONG}" $output_file -q
     rc=$?
     # We expect a return code of '0' because the ecosystem should be able to find this test as we just ran it.
     if [[ "${rc}" != "0" ]]; then 
@@ -432,7 +432,7 @@ function runs_get_check_details_format_output {
 
     for header in "${headers[@]}"
     do
-        cat $output_file | grep "$header" -q
+        grep "${header}" $output_file -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then 
@@ -472,7 +472,7 @@ function runs_get_check_raw_format_output {
     $cmd | tee $output_file
 
     # Check that the full test name is output
-    cat $output_file | grep "${GALASA_TEST_NAME_LONG}" -q
+    grep "${GALASA_TEST_NAME_LONG}" $output_file -q
     rc=$?
     # We expect a return code of '0' because the test name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -511,7 +511,7 @@ function runs_get_check_raw_format_output_with_from_and_to {
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
-    cat $output_file | grep "${run_name}" -q
+    grep "${run_name}" $output_file -q
     rc=$?
     # We expect a return code of '0' because the run name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -542,7 +542,7 @@ function runs_get_check_raw_format_output_with_just_from {
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
-    cat $output_file | grep "${run_name}" -q
+    grep "${run_name}" $output_file -q
     rc=$?
     # We expect a return code of '0' because the run name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -639,7 +639,7 @@ function runs_get_check_requestor_parameter {
     $cmd | tee $output_file
 
     # Check that the run name we just ran is output as we are asking for all tests submitted from 1 hour ago until now.
-    cat $output_file | grep "requestor[ ]*:[ ]*$requestor" -q
+    grep "requestor[ ]*:[ ]*${requestor}" $output_file -q
     rc=$?
     # We expect a return code of '0' because the run name should be output.
     if [[ "${rc}" != "0" ]]; then 
@@ -668,7 +668,7 @@ function runs_get_check_result_parameter {
     output_file="runs-get-output.txt"
     $cmd | tee $output_file
     
-    grep -q "result[ ]*:[ ]*$result" $output_file
+    grep -q "result[ ]*:[ ]*${result}" $output_file
 
     rc=$?
    
