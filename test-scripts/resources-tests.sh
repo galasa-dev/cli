@@ -426,7 +426,7 @@ EOF
     # We expect a return code of 0 because the api would return an OK status (200) 
     # as we want this property to not exist
     if [[ "${rc}" != "0" ]]; then 
-        error "Command should have failed due to non existent property."
+        error "Command should not fail as we expect OK status."
         exit 1
     fi
 
