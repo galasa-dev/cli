@@ -64,7 +64,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 	factory Factory,
 	authCommand GalasaCommand,
 	rootCmd GalasaCommand,
-	) (*cobra.Command, error) {
+) (*cobra.Command, error) {
 
 	var err error
 	authLoginCobraCmd := &cobra.Command{
@@ -125,6 +125,7 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 				apiServerUrl,
 				fileSystem,
 				galasaHome,
+				env,
 			)
 		}
 	}

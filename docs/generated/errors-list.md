@@ -105,7 +105,6 @@ The `galasactl` tool can generate the following errors:
 - GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1103E: Could not query CPS results. Reason: '{}'
 - GAL1104E: Unable to delete the bearer token file '{}'.
-- GAL1105E: Property '{}' was expected but has not been set in the galasactl.properties file.
 - GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
 - GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
 - GAL1108E: Invalid bearer token. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
@@ -122,6 +121,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1119E: The server thinks you are unauthorized to perform this operation.
 - GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.
 - GAL1121E: Unable to retrieve rest api version. Reason is: {}. Try downloading the latest version of galasa or rebuilding a clean version.
+- GAL1122E: Authentication property {} is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '{}' or set as an environment variable.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

@@ -151,7 +151,7 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 
 					// Create an API client
 					apiServerUrl := bootstrapData.ApiServerURL
-					apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
+					apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 					launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
 					validator := runs.NewStreamBasedValidator()

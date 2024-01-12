@@ -34,23 +34,20 @@ func ReadProperties(propertyString string) JavaProperties {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		if strings.HasPrefix(line, "#") {
-			continue
+		if !strings.HasPrefix(line, "#") {
+
+			equalsPos := strings.Index(line, "=")
+			if equalsPos != -1 {
+
+				key := strings.TrimSpace(line[:equalsPos])
+				if key != "" {
+
+					value := strings.TrimSpace(line[equalsPos+1:])
+
+					properties[key] = value
+				}
+			}
 		}
-
-		equalsPos := strings.Index(line, "=")
-		if equalsPos == -1 {
-			continue
-		}
-
-		key := strings.TrimSpace(line[:equalsPos])
-		if key == "" {
-			continue
-		}
-
-		value := strings.TrimSpace(line[equalsPos+1:])
-
-		properties[key] = value
 	}
 
 	return properties

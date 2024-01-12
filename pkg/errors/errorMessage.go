@@ -191,7 +191,6 @@ var (
 	GALASA_ERROR_MISSING_NAME_FLAG                       = NewMessageType("GAL1102E: name '%s' is invalid. '--name' is a mandatory flag for this command."+SEE_COMMAND_REFERENCE, 1102, STACK_TRACE_WANTED)
 	GALASA_ERROR_QUERY_CPS_FAILED                        = NewMessageType("GAL1103E: Could not query CPS results. Reason: '%s'", 1103, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE      = NewMessageType("GAL1104E: Unable to delete the bearer token file '%s'.", 1104, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_MISSING_GALASACTL_PROPERTY              = NewMessageType("GAL1105E: Property '%s' was expected but has not been set in the galasactl.properties file.", 1105, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER = NewMessageType("GAL1106E: Could not get security bearer token from API server. Reason: '%s'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret", 1106, STACK_TRACE_WANTED)
 	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE       = NewMessageType("GAL1107E: Could not get security bearer token from file '%s'. Reason: '%s'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked", 1107, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_BEARER_TOKEN                    = NewMessageType("GAL1108E: Invalid bearer token. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked", 1108, STACK_TRACE_NOT_WANTED)
@@ -208,6 +207,7 @@ var (
 	GALASA_ERROR_RESOURCE_RESP_UNAUTHORIZED_OPERATION    = NewMessageType("GAL1119E: The server thinks you are unauthorized to perform this operation.", 1119, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION     = NewMessageType("GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.", 1120, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION     = NewMessageType("GAL1121E: Unable to retrieve rest api version. Reason is: %s. Try downloading the latest version of galasa or rebuilding a clean version.", 1121, STACK_TRACE_WANTED)
+	GALASA_ERROR_AUTH_PROPERTY_NOT_AVAILABLE             = NewMessageType("GAL1122E: Authentication property %s is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '%s' or set as an environment variable.", 1122, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
