@@ -105,6 +105,8 @@ GALASA_ACCESS_TOKEN=<a personal access token>
 
 These properties can be retrieved by creating a new personal access token from a Galasa ecosystem's web user interface.
 
+If you prefer, these variables can be set as environment variables instead of being read from this file.
+
 On a successful login, a `bearer-token.json` file will be created in your `GALASA_HOME` directory. This file will contain a bearer token that `galasactl` will use to authenticate requests when communicating with a Galasa ecosystem.
 
 If your bearer token expires, `galasactl` will automatically attempt to re-authenticate with your Galasa ecosystem. Alternatively, you can run the `auth login` command again to re-authenticate with your Galasa ecosystem.

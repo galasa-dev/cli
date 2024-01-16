@@ -2,7 +2,7 @@
 * Copyright contributors to the Galasa project
 *
 * SPDX-License-Identifier: EPL-2.0
-*/
+ */
 
 package cmd
 
@@ -70,10 +70,10 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 }
 
 func (cmd *PropertiesSetCommand) createCobraCommand(
-	factory Factory, 
-	propertiesCommand GalasaCommand, 
+	factory Factory,
+	propertiesCommand GalasaCommand,
 	rootCmdValues *RootCmdValues,
-	) (*cobra.Command, error) {
+) (*cobra.Command, error) {
 
 	var err error = nil
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
@@ -136,13 +136,13 @@ func (cmd *PropertiesSetCommand) executePropertiesSet(
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 
 				// Call to process the command in a unit-testable way.
 				err = properties.SetProperty(
 					propertiesCmdValues.namespace,
 					propertiesCmdValues.propertyName,
-					cmd.values.propertyValue, 
+					cmd.values.propertyValue,
 					apiClient)
 			}
 		}

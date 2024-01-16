@@ -60,10 +60,10 @@ func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand Gala
 //  And then display a successful message or error
 
 func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
-	factory Factory, 
+	factory Factory,
 	propertiesCommand GalasaCommand,
 	rootCmd GalasaCommand) (*cobra.Command, error) {
-	
+
 	var err error = nil
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
@@ -119,7 +119,7 @@ func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory Factory, pro
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 
 				// Call to process the command in a unit-testable way.
 				err = properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiClient)

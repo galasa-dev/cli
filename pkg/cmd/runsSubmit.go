@@ -65,7 +65,7 @@ func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, r
 func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
 	runsCommand GalasaCommand,
 	rootCmdValues *RootCmdValues,
-	) (*cobra.Command, error) {
+) (*cobra.Command, error) {
 
 	var err error = nil
 
@@ -172,7 +172,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 
 				// The launcher we are going to use to start/monitor tests.
 				apiServerUrl := bootstrapData.ApiServerURL
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 				launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
 				validator := runs.NewStreamBasedValidator()

@@ -105,7 +105,7 @@ func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -130,7 +130,7 @@ func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t 
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -158,7 +158,7 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -183,7 +183,7 @@ func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -209,7 +209,7 @@ func TestSetNoNamespaceReturnsError(t *testing.T) {
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)
@@ -235,7 +235,7 @@ func TestSetNoNameReturnsError(t *testing.T) {
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService)
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	//When
 	err := SetProperty(namespace, name, value, apiClient)

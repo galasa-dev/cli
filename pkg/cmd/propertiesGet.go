@@ -159,7 +159,7 @@ func (cmd *PropertiesGetCommand) executePropertiesGet(
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService)
+				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 
 				// Call to process the command in a unit-testable way.
 				err = properties.GetProperties(
