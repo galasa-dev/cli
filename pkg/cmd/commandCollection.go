@@ -47,6 +47,8 @@ const (
 	COMMAND_NAME_RUNS_PREPARE             = "runs prepare"
 	COMMAND_NAME_RUNS_SUBMIT              = "runs submit"
 	COMMAND_NAME_RUNS_SUBMIT_LOCAL        = "runs submit local"
+	COMMAND_NAME_RUNS_RESET               = "runs reset"
+	COMMAND_NAME_RUNS_DELETE              = "runs delete"
 	COMMAND_NAME_RESOURCES                = "resources"
 	COMMAND_NAME_RESOURCES_APPLY          = "resources apply"
 	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
@@ -78,7 +80,7 @@ func (commands *commandCollectionImpl) GetRootCommand() GalasaCommand {
 func (commands *commandCollectionImpl) GetCommand(name string) (GalasaCommand, error) {
 	var err error
 	cmd, _ := commands.commandMap[name]
-	if cmd == nil{
+	if cmd == nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION)
 		log.Printf("Caller tried to lookup %s in the command collection and it was not found.\n", name)
 	}
