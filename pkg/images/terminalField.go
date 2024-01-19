@@ -15,8 +15,8 @@ type TerminalField struct {
     FieldIntenseDisplay bool            `json:"fieldIntenseDisplay"`
     FieldSelectorPen    bool            `json:"fieldSelectorPen"`
     FieldModified 		bool            `json:"fieldModified"`
-    ForegroundColor 	rune            `json:"foregroundColour"`
-    BackgroundColor 	rune            `json:"backgroundColour"`
-    Highlight 			rune            `json:"highlight"`
+    ForegroundColor 	string          `json:"foregroundColour"`
+    BackgroundColor 	string          `json:"backgroundColour"`
+    Highlight 			string          `json:"highlight"`
     Contents 			[]FieldContents `json:"contents"`
 }

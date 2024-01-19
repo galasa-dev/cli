@@ -28,6 +28,28 @@ const (
     FONT_HEIGHT = 13
 )
 
+var (
+    DEFAULT_COLOR = color.RGBA{0, 255, 0, 255}
+    NEUTRAL       = color.RGBA{255, 255, 255, 255}
+    RED           = color.RGBA{255, 0, 0, 255}
+    GREEN         = color.RGBA{0, 255, 0, 255}
+    BLUE          = color.RGBA{0, 0, 255, 255}
+    PINK          = color.RGBA{255, 0, 204, 255}
+    TURQUOISE     = color.RGBA{64, 224, 208, 255}
+    YELLOW        = color.RGBA{255, 255, 0, 255}
+
+    colors = map[string]color.RGBA{
+        "d": DEFAULT_COLOR,
+        "r": RED,
+        "g": GREEN,
+        "b": BLUE,
+        "p": PINK,
+        "t": TURQUOISE,
+        "y": YELLOW,
+        "n": NEUTRAL,
+    }
+)
+
 // Renders an RGBA image representation of a 3270 terminal and returns the rendered image
 func RenderTerminalImage(terminalImage TerminalImage) *image.RGBA {
     targetColumnCount := terminalImage.ImageSize.Columns
@@ -49,15 +71,41 @@ func RenderTerminalImage(terminalImage TerminalImage) *image.RGBA {
                     column = 0
                     row++
                 }
-                drawString(img, column, row, string(char))
+                textColor := getColor(field.ForegroundColor)
+                drawString(img, column, row, string(char), textColor)
                 column++
             }
         }
     }
     statusText := getStatusText(terminalImage, terminalImage.ImageSize.Columns, terminalImage.ImageSize.Rows)
-    drawString(img, 0, targetRowCount - 1, statusText)
+    drawString(img, 0, targetRowCount - 1, statusText, DEFAULT_COLOR)
     return img
 }
+
+// Writes a rendered 3270 terminal .png image to the filesystem
+func WritePngImageToDisk(terminalImage TerminalImage, image *image.RGBA, fileSystem files.FileSystem, outputDirectory string) error {
+    var err error = nil
+    var fileWriter io.Writer
+
+    pngFileName := fmt.Sprintf("%s.png", terminalImage.Id)
+
+    // Create the .png file on the filesystem
+    fileWriter, err = fileSystem.Create(filepath.Join(outputDirectory, pngFileName))
+    if err == nil {
+        err = png.Encode(fileWriter, image)
+    }
+    return err
+}
+
+// Converts a given JSON representation of a 3270 terminal into a Terminal struct
+func convertJsonToTerminal(terminalJson string) (Terminal, error) {
+	var terminal Terminal
+	var err error = nil
+	err = json.Unmarshal([]byte(terminalJson), &terminal)
+
+	return terminal, err
+}
+
 
 // Creates a black rectangle image with the given dimensions in pixels
 func createImageBase(imagePixelWidth int, imagePixelHeight int) *image.RGBA {
@@ -92,8 +140,7 @@ func getStatusText(terminalImage TerminalImage, columns int, rows int) string {
 }
 
 // Draws a string of text onto an image at the given column and row (x, y) coordinates
-func drawString(img *image.RGBA, column int, row int, text string) {
-    textColor := color.RGBA{0, 255, 0, 255}
+func drawString(img *image.RGBA, column int, row int, text string, textColor color.RGBA) {
     point := fixed.Point26_6{ X: fixed.I(column * FONT_WIDTH), Y: fixed.I((row + 1) * FONT_HEIGHT)}
 
     drawer := &font.Drawer{
@@ -105,26 +152,11 @@ func drawString(img *image.RGBA, column int, row int, text string) {
     drawer.DrawString(text)
 }
 
-// Writes a rendered 3270 terminal .png image to the filesystem
-func WritePngImageToDisk(terminalImage TerminalImage, image *image.RGBA, fileSystem files.FileSystem, outputDirectory string) error {
-    var err error = nil
-    var fileWriter io.Writer
-
-    pngFileName := fmt.Sprintf("%s.png", terminalImage.Id)
-
-    // Create the .png file on the filesystem
-    fileWriter, err = fileSystem.Create(filepath.Join(outputDirectory, pngFileName))
-    if err == nil {
-        err = png.Encode(fileWriter, image)
+// Returns a color from the colors map that matches the given single-character identifier
+func getColor(colorIdentifier string) color.RGBA {
+    color := DEFAULT_COLOR
+    if matchedColor, ok := colors[colorIdentifier]; ok {
+        color = matchedColor
     }
-    return err
-}
-
-// Converts a given JSON representation of a 3270 terminal into a Terminal struct
-func convertJsonToTerminal(terminalJson string) (Terminal, error) {
-	var terminal Terminal
-	var err error = nil
-	err = json.Unmarshal([]byte(terminalJson), &terminal)
-
-	return terminal, err
+    return color
 }

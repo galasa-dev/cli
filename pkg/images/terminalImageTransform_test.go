@@ -65,10 +65,50 @@ func writeRenderedImageToTempDir(t *testing.T, fs files.FileSystem, terminalImag
     }
 }
 
+func createTextField(row int, column int, text string, textColor string) TerminalField {
+    fieldContents := FieldContents{ Text: text }
+
+    return TerminalField{
+        Row: row,
+        Column: column,
+        Contents: []FieldContents{ fieldContents },
+        ForegroundColor: textColor,
+    }
+}
 
 //----------------------------------------------------
-// Test functions
+// Tests
 //----------------------------------------------------
+func TestWritePngImageToDiskShouldCreateAPngFile(t *testing.T) {
+    // Given...
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
+
+    imageId := t.Name()
+    terminalSize := TerminalSize{
+    Rows: 26,
+    Columns: 80,
+    }
+    terminalImage := TerminalImage{
+    Id: imageId,
+    Sequence: 1,
+    Inbound: true,
+    ImageSize: terminalSize,
+    CursorRow: 0,
+    CursorColumn: 0,
+    }
+
+    // When...
+    image := RenderTerminalImage(terminalImage)
+    err := WritePngImageToDisk(terminalImage, image, fs, tempDir)
+    assert.Nil(t, err, "Should have successfully created a .png file")
+
+    // Then...
+    expectedPngFilePath := filepath.Join(tempDir, imageId + ".png")
+    pngExists, _ := fs.Exists(expectedPngFilePath)
+    assert.True(t, pngExists, "PNG file should have been created at '" + expectedPngFilePath + "'")
+
+}
 func TestRenderEmptyTerminalRendersOk(t *testing.T) {
     // Given...
     fs := files.NewOSFileSystem()
@@ -467,6 +507,53 @@ func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
     CursorRow: 0,
     CursorColumn: 0,
     Fields: []TerminalField{ fullRowField, textField },
+    }
+
+    // When...
+    image := RenderTerminalImage(terminalImage)
+
+    // Then...
+    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+}
+
+func TestRenderTerminaColorsRenderOk(t *testing.T) {
+    // Given...
+    fs := files.NewOSFileSystem()
+
+    imageId := t.Name()
+    terminalSize := TerminalSize{
+    Rows: 26,
+    Columns: 80,
+    }
+
+    defaultField := createTextField(10, 20, "This is the default color", "d")
+    neutralField := createTextField(11, 20, "This is the neutral color", "n")
+    redField := createTextField(12, 20, "This is red", "r")
+    greenField := createTextField(13, 20, "This is green", "g")
+    blueField := createTextField(14, 20, "This is blue", "b")
+    pinkField := createTextField(15, 20, "This is pink", "p")
+    turquoiseField := createTextField(16, 20, "This is turquoise", "t")
+    yellowField := createTextField(17, 20, "This is yellow", "y")
+    unknownColorField := createTextField(18, 20, "This is unknown, should render using the default color", "blah")
+
+    terminalImage := TerminalImage{
+    Id: imageId,
+    Sequence: 1,
+    Inbound: true,
+    ImageSize: terminalSize,
+    CursorRow: 0,
+    CursorColumn: 0,
+    Fields: []TerminalField{
+        defaultField,
+        neutralField,
+        redField,
+        greenField,
+        blueField,
+        pinkField,
+        turquoiseField,
+        yellowField,
+        unknownColorField,
+    },
     }
 
     // When...
