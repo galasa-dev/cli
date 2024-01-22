@@ -17,18 +17,17 @@ import (
 	"strconv"
 	"strings"
 
+    galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
 )
 
-const (
-    FONT_WIDTH = 7
-    FONT_HEIGHT = 13
-)
-
 var (
+    FONT_WIDTH = basicfont.Face7x13.Advance
+    FONT_HEIGHT = basicfont.Face7x13.Height
+
     DEFAULT_COLOR = color.RGBA{0, 255, 0, 255}
     NEUTRAL       = color.RGBA{255, 255, 255, 255}
     RED           = color.RGBA{255, 0, 0, 255}
@@ -97,15 +96,21 @@ func WritePngImageToDisk(terminalImage TerminalImage, image *image.RGBA, fileSys
     return err
 }
 
-// Converts a given JSON representation of a 3270 terminal into a Terminal struct
-func convertJsonToTerminal(terminalJson string) (Terminal, error) {
+// Reads a file containing JSON representations of 3270 terminals and converts the JSON into a Terminal object
+func ConvertJsonToTerminal(fileSystem files.FileSystem, terminalJsonFilePath string) (Terminal, error) {
 	var terminal Terminal
 	var err error = nil
-	err = json.Unmarshal([]byte(terminalJson), &terminal)
+    var terminalJson string
 
+    terminalJson, err = fileSystem.ReadTextFile(terminalJsonFilePath)
+    if err == nil {
+        err = json.Unmarshal([]byte(terminalJson), &terminal)
+        if err != nil {
+            err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TERMINAL_JSON_FORMAT, terminalJsonFilePath, err.Error())
+        }
+    }
 	return terminal, err
 }
-
 
 // Creates a black rectangle image with the given dimensions in pixels
 func createImageBase(imagePixelWidth int, imagePixelHeight int) *image.RGBA {

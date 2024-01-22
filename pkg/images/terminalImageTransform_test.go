@@ -11,6 +11,7 @@ import (
 	"image"
 	"image/png"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
@@ -71,6 +72,13 @@ func createTextField(row int, column int, text string, textColor string) Termina
     return TerminalField{
         Row: row,
         Column: column,
+        Unformatted: false,
+        FieldProtected: false,
+        FieldNumeric: false,
+        FieldDisplay: true,
+        FieldIntenseDisplay: false,
+        FieldSelectorPen: false,
+        FieldModified: false,
         Contents: []FieldContents{ fieldContents },
         ForegroundColor: textColor,
     }
@@ -86,16 +94,16 @@ func TestWritePngImageToDiskShouldCreateAPngFile(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
     }
 
     // When...
@@ -109,22 +117,24 @@ func TestWritePngImageToDiskShouldCreateAPngFile(t *testing.T) {
     assert.True(t, pngExists, "PNG file should have been created at '" + expectedPngFilePath + "'")
 
 }
+
 func TestRenderEmptyTerminalRendersOk(t *testing.T) {
     // Given...
     fs := files.NewOSFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
+
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
     }
 
     // When...
@@ -140,34 +150,45 @@ func TestRenderTerminalWithFieldRendersOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
-    }
-
-    fieldContents := FieldContents{
-        Text: "single text field in the middle",
-    }
-    terminalField := TerminalField{
-        Row: 10,
-        Column: 13,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ fieldContents },
+        Rows: 26,
+        Columns: 80,
     }
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{ terminalField },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ createTextField(10, 13, "single text field in the middle", "d") },
+    }
+
+    // When...
+    image := RenderTerminalImage(terminalImage)
+
+    // Then...
+    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+}
+
+func TestRenderTerminalWithSmallerSizeRendersOk(t *testing.T) {
+    // Given...
+    fs := files.NewOSFileSystem()
+
+    imageId := t.Name()
+    terminalSize := TerminalSize{
+        Rows: 18,
+        Columns: 66,
+    }
+
+    terminalImage := TerminalImage{
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ createTextField(9, 15, "this terminal should be 66x18", "d") },
     }
 
     // When...
@@ -183,34 +204,18 @@ func TestRenderTerminalWithFieldAtOriginRendersOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
-    }
-
-    fieldContents := FieldContents{
-        Text: "^ this is the origin (top left)",
-    }
-    terminalField := TerminalField{
-        Row: 0,
-        Column: 0,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ fieldContents },
+        Rows: 26,
+        Columns: 80,
     }
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{ terminalField },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ createTextField(0, 0, "^ this is the origin (top left)", "d") },
     }
 
     // When...
@@ -226,50 +231,21 @@ func TestRenderTerminalWithFieldAtTopRightRendersOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
 
-    fieldContents := FieldContents{
-        Text: "The '^' should be at the top right",
-    }
-    textField := TerminalField{
-        Row: 10,
-        Column: 20,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ fieldContents },
-    }
-
-    topRightFieldContents := FieldContents{
-        Text: "^",
-    }
-    topRightField := TerminalField{
-        Row: 0,
-        Column: 79,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ topRightFieldContents },
-    }
+    textField := createTextField(10, 20, "The '^' should be at the top right", "d")
+    topRightField := createTextField(0, 79, "^", "d")
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{ topRightField, textField },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ topRightField, textField },
     }
 
     // When...
@@ -285,51 +261,22 @@ func TestRenderTerminalWithFieldAtBottomLeftRendersOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
 
-    fieldContents := FieldContents{
-        Text: "The 'v' should be at the bottom left",
-    }
-    textField := TerminalField{
-        Row: 10,
-        Column: 20,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ fieldContents },
-    }
-
-    topRightFieldContents := FieldContents{
-        Text: "v",
-    }
-    topRightField := TerminalField{
-        Row: 26,
-        Column: 0,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ topRightFieldContents },
-    }
+    textField := createTextField(10, 20, "The 'v' should be at the bottom left", "d")
+    bottomLeftField := createTextField(26, 0, "v", "d")
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: false,
-    Aid: "my-aid",
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{ topRightField, textField },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: false,
+        Aid: "my-aid",
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ bottomLeftField, textField },
     }
 
     // When...
@@ -345,50 +292,21 @@ func TestRenderTerminalWithFieldAtBottomRightRendersOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
 
-    fieldContents := FieldContents{
-        Text: "The 'v' should be at the bottom right",
-    }
-    textField := TerminalField{
-        Row: 10,
-        Column: 20,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ fieldContents },
-    }
-
-    topRightFieldContents := FieldContents{
-        Text: "v",
-    }
-    topRightField := TerminalField{
-        Row: 26,
-        Column: 79,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ topRightFieldContents },
-    }
+    textField := createTextField(10, 20, "The 'v' should be at the bottom right", "d")
+    bottomRightField := createTextField(26, 79, "v", "d")
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{ topRightField, textField },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ bottomRightField, textField },
     }
 
     // When...
@@ -404,50 +322,55 @@ func TestRenderTerminalWithFullRowRendersOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
 
-    guideContents := FieldContents{
-        Text: "0          1          2          3          4          5          6          7",
-    }
-    textField := TerminalField{
-        Row: 10,
-        Column: 0,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ guideContents },
-    }
-
-    fullRowContents := FieldContents{
-        Text: "01234567890123456789012345678901234567890123456789012345678901234567890123456789",
-    }
-    fullRowField := TerminalField{
-        Row: 11,
-        Column: 0,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ fullRowContents },
-    }
+    textField := createTextField(10, 0, "0          1          2          3          4          5          6          7", "d")
+    fullRowField := createTextField(11, 0, "01234567890123456789012345678901234567890123456789012345678901234567890123456789", "d")
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{ fullRowField, textField },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ fullRowField, textField },
+    }
+
+    // When...
+    image := RenderTerminalImage(terminalImage)
+
+    // Then...
+    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+}
+
+func TestRenderTerminalWithFullColumnRendersOk(t *testing.T) {
+    // Given...
+    fs := files.NewOSFileSystem()
+
+    imageId := t.Name()
+    rows := 26
+    terminalSize := TerminalSize{
+        Rows: rows,
+        Columns: 80,
+    }
+
+    terminalFields := make([]TerminalField, 0)
+    for i := 0; i < rows; i++ {
+        terminalFields = append(terminalFields, createTextField(i, 0, strconv.Itoa(i), "d"))
+    }
+    terminalFields = append(terminalFields, createTextField(10, 20, "Each of the 26 rows should have a number in", "d"))
+
+    terminalImage := TerminalImage{
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: terminalFields,
     }
 
     // When...
@@ -463,50 +386,21 @@ func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
 
-    guideContents := FieldContents{
-        Text: "The next row should wrap around and continue on the row below it",
-    }
-    textField := TerminalField{
-        Row: 10,
-        Column: 0,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ guideContents },
-    }
-
-    fullRowContents := FieldContents{
-        Text: "0123456789012345678901234567890123456789012345678901234567890123456789",
-    }
-    fullRowField := TerminalField{
-        Row: 11,
-        Column: 20,
-        Unformatted: false,
-        FieldProtected: false,
-        FieldNumeric: false,
-        FieldDisplay: true,
-        FieldIntenseDisplay: false,
-        FieldSelectorPen: false,
-        FieldModified: false,
-        Contents: []FieldContents{ fullRowContents },
-    }
+    textField := createTextField(10, 0, "The next row should wrap around and continue on the row below it", "d")
+    wrappedField := createTextField(11, 20, "0123456789012345678901234567890123456789012345678901234567890123456789", "d")
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{ fullRowField, textField },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ wrappedField, textField },
     }
 
     // When...
@@ -522,8 +416,8 @@ func TestRenderTerminaColorsRenderOk(t *testing.T) {
 
     imageId := t.Name()
     terminalSize := TerminalSize{
-    Rows: 26,
-    Columns: 80,
+        Rows: 26,
+        Columns: 80,
     }
 
     defaultField := createTextField(10, 20, "This is the default color", "d")
@@ -537,23 +431,23 @@ func TestRenderTerminaColorsRenderOk(t *testing.T) {
     unknownColorField := createTextField(18, 20, "This is unknown, should render using the default color", "blah")
 
     terminalImage := TerminalImage{
-    Id: imageId,
-    Sequence: 1,
-    Inbound: true,
-    ImageSize: terminalSize,
-    CursorRow: 0,
-    CursorColumn: 0,
-    Fields: []TerminalField{
-        defaultField,
-        neutralField,
-        redField,
-        greenField,
-        blueField,
-        pinkField,
-        turquoiseField,
-        yellowField,
-        unknownColorField,
-    },
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{
+            defaultField,
+            neutralField,
+            redField,
+            greenField,
+            blueField,
+            pinkField,
+            turquoiseField,
+            yellowField,
+            unknownColorField,
+        },
     }
 
     // When...
