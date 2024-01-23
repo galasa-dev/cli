@@ -16,14 +16,11 @@ func TestCanCalculateTargetPathsOk(t *testing.T) {
 	fs := files.NewMockFileSystem()
 	renderer := NewImageRenderer()
 	expander := NewImageExpander(fs, renderer).(*ImageExpanderImpl)
-	filePath, folderPath, err := expander.calculateTargetImagePaths("a/b/terminals/c/e.gz")
+	folderPath, err := expander.calculateTargetImagePaths("a/b/terminals/c/e.gz")
 
 	assert.Nil(t, err, "could not get paths when we should have been able to.")
 	if err == nil {
-
-		if assert.Equal(t, "a/b/images/c", folderPath) {
-			assert.Equal(t, "a/b/images/c/e.png", filePath)
-		}
+		assert.Equal(t, "a/b/images/c", folderPath)
 	}
 }
 

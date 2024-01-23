@@ -61,43 +61,32 @@ func (expander *ImageExpanderImpl) ExpandImages(rootFolderPath string) error {
 
 func (expander *ImageExpanderImpl) expandGzFile(gzFilePath string) error {
 	var err error
-	var targetImageFilePath string
+
 	var targetImageFolderPath string
-	targetImageFilePath, targetImageFolderPath, err = expander.calculateTargetImagePaths(gzFilePath)
+	targetImageFolderPath, err = expander.calculateTargetImagePaths(gzFilePath)
 
-	gzip := files.NewGzipFile(expander.fs, gzFilePath)
-	var binaryContent []byte
-	binaryContent, err = gzip.ReadBytes()
-
+	err = expander.fs.MkdirAll(targetImageFolderPath)
 	if err == nil {
-		var imageBytes []byte
-		imageBytes, err = expander.renderer.RenderJsonBytesToImageBytes(binaryContent)
 
-		if err == nil {
-			err = expander.fs.MkdirAll(targetImageFolderPath)
+		gzip := files.NewGzipFile(expander.fs, gzFilePath)
+		var binaryContent []byte
+		binaryContent, err = gzip.ReadBytes()
+		if err != nil {
+			log.Printf("Could not read the contents of hte gzip file. cause:%v\n", err)
+		} else {
+
+			writer := NewImageFileWriter(expander.fs, targetImageFolderPath)
+
 			if err == nil {
-				var isExistsAlready bool
-				isExistsAlready, err = expander.fs.Exists(targetImageFilePath)
-				if err == nil {
-					if isExistsAlready {
-						log.Printf("File %s already exists.\n", targetImageFilePath)
-					} else {
-						err = expander.fs.WriteBinaryFile(targetImageFilePath, imageBytes)
-						if err == nil {
-							expander.expandedFileCounter = expander.expandedFileCounter + 1
-						}
-					}
-				}
+				err = expander.renderer.RenderJsonBytesToImageFiles(binaryContent, writer)
 			}
 		}
 	}
-
 	return err
 }
 
-func (expander *ImageExpanderImpl) calculateTargetImagePaths(gzFilePath string) (string, string, error) {
+func (expander *ImageExpanderImpl) calculateTargetImagePaths(gzFilePath string) (string, error) {
 	var err error
-	var desiredImageFilePath string
 	var desiredImageFolderPath string
 
 	// Figure out the file path of the image we want to create.
@@ -125,10 +114,11 @@ func (expander *ImageExpanderImpl) calculateTargetImagePaths(gzFilePath string) 
 			filePathParts[len(filePathParts)-3] = "images"
 
 			// Roll together all the parts of the files to get the folder and the file
-			desiredImageFilePath = strings.Join(filePathParts, separator)
 			desiredImageFolderPath = strings.Join(filePathParts[:len(filePathParts)-1], separator)
+
+			log.Printf("Expanding gzFile %s to folder %s\n", gzFilePath, desiredImageFolderPath)
 
 		}
 	}
-	return desiredImageFilePath, desiredImageFolderPath, err
+	return desiredImageFolderPath, err
 }
