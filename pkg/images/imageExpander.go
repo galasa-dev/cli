@@ -64,21 +64,27 @@ func (expander *ImageExpanderImpl) expandGzFile(gzFilePath string) error {
 
 	var targetImageFolderPath string
 	targetImageFolderPath, err = expander.calculateTargetImagePaths(gzFilePath)
-
-	err = expander.fs.MkdirAll(targetImageFolderPath)
 	if err == nil {
 
-		gzip := files.NewGzipFile(expander.fs, gzFilePath)
-		var binaryContent []byte
-		binaryContent, err = gzip.ReadBytes()
-		if err != nil {
-			log.Printf("Could not read the contents of hte gzip file. cause:%v\n", err)
-		} else {
+		// Only bother going further if the target folder is non-blank.
+		if targetImageFolderPath != "" {
 
-			writer := NewImageFileWriter(expander.fs, targetImageFolderPath)
-
+			err = expander.fs.MkdirAll(targetImageFolderPath)
 			if err == nil {
-				err = expander.renderer.RenderJsonBytesToImageFiles(binaryContent, writer)
+
+				gzip := files.NewGzipFile(expander.fs, gzFilePath)
+				var binaryContent []byte
+				binaryContent, err = gzip.ReadBytes()
+				if err != nil {
+					log.Printf("Could not read the contents of hte gzip file. cause:%v\n", err)
+				} else {
+
+					writer := NewImageFileWriter(expander.fs, targetImageFolderPath)
+
+					if err == nil {
+						err = expander.renderer.RenderJsonBytesToImageFiles(binaryContent, writer)
+					}
+				}
 			}
 		}
 	}
