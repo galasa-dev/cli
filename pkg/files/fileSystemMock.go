@@ -42,6 +42,7 @@ type MockFileSystem struct {
 	// The New
 	VirtualFunction_MkdirAll             func(targetFolderPath string) error
 	VirtualFunction_WriteTextFile        func(targetFilePath string, desiredContents string) error
+	VirtualFunction_ReadBinaryFile         func(filePath string) ([]byte, error)
 	VirtualFunction_ReadTextFile         func(filePath string) (string, error)
 	VirtualFunction_Exists               func(path string) (bool, error)
 	VirtualFunction_DirExists            func(path string) (bool, error)
@@ -89,6 +90,9 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 	}
 	mockFileSystem.VirtualFunction_WriteTextFile = func(targetFilePath string, desiredContents string) error {
 		return mockFSWriteTextFile(mockFileSystem, targetFilePath, desiredContents)
+	}
+	mockFileSystem.VirtualFunction_ReadBinaryFile = func(filePath string) ([]byte, error) {
+		return mockFSReadBinaryFile(mockFileSystem, filePath)
 	}
 	mockFileSystem.VirtualFunction_ReadTextFile = func(filePath string) (string, error) {
 		return mockFSReadTextFile(mockFileSystem, filePath)
@@ -181,6 +185,11 @@ func (fs *MockFileSystem) WriteTextFile(targetFilePath string, desiredContents s
 	return fs.VirtualFunction_WriteTextFile(targetFilePath, desiredContents)
 }
 
+func (fs *MockFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
+	// Call the virtual function.
+	return fs.VirtualFunction_ReadBinaryFile(filePath)
+}
+
 func (fs *MockFileSystem) ReadTextFile(filePath string) (string, error) {
 	// Call the virtual function.
 	return fs.VirtualFunction_ReadTextFile(filePath)
@@ -257,6 +266,18 @@ func mockFSWriteTextFile(fs MockFileSystem, targetFilePath string, desiredConten
 	nodeToAdd := Node{content: []byte(desiredContents), isDir: false}
 	fs.data[targetFilePath] = &nodeToAdd
 	return nil
+}
+
+func mockFSReadBinaryFile(fs MockFileSystem, filePath string) ([]byte, error) {
+	bytes := make([]byte, 0)
+	var err error = nil
+	node := fs.data[filePath]
+	if node == nil {
+		err = os.ErrNotExist
+	} else {
+		bytes = []byte(node.content)
+	}
+	return bytes, err
 }
 
 func mockFSReadTextFile(fs MockFileSystem, filePath string) (string, error) {

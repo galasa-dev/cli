@@ -131,12 +131,18 @@ func (osFS *OSFileSystem) WriteTextFile(targetFilePath string, desiredContents s
 	return err
 }
 
-func (*OSFileSystem) ReadTextFile(filePath string) (string, error) {
-	text := ""
+func (*OSFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
 	bytes, err := os.ReadFile(filePath)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, filePath, err.Error())
-	} else {
+	}
+	return bytes, err
+}
+
+func (osFS *OSFileSystem) ReadTextFile(filePath string) (string, error) {
+	text := ""
+	bytes, err := osFS.ReadBinaryFile(filePath)
+	if err == nil {
 		text = string(bytes)
 	}
 	return text, err
