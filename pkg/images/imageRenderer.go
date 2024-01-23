@@ -6,7 +6,7 @@
 package images
 
 type ImageRenderer interface {
-	RenderJsonBytesToImageBytes(jsonBinary []byte) ([]byte, error)
+	RenderJsonBytesToImageFiles(jsonBinary []byte, writer ImageFileWriter) error
 }
 
 type ImageRendererImpl struct {
@@ -17,7 +17,10 @@ func NewImageRenderer() ImageRenderer {
 	return renderer
 }
 
-func (renderer *ImageRendererImpl) RenderJsonBytesToImageBytes(jsonBinary []byte) ([]byte, error) {
+func (renderer *ImageRendererImpl) RenderJsonBytesToImageFiles(jsonBinary []byte, writer ImageFileWriter) error {
 	var err error
-	return jsonBinary, err
+
+	// Call the image file writer here...
+
+	return err
 }
