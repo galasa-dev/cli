@@ -228,7 +228,7 @@ func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {
 
 	// Figure out which entries we are going to delete.
 	var keysToRemove []string = make([]string, 0)
-	for key, _ := range fs.data {
+	for key := range fs.data {
 		if strings.HasPrefix(key, pathToDelete) {
 			keysToRemove = append(keysToRemove, key)
 		}

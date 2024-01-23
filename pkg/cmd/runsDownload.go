@@ -11,6 +11,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -163,7 +164,7 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 
 						// Write out a status string to the console about how many files were rendered.
 						count := expander.GetExpandedImageFileCount()
-						message := fmt.Sprintf("Rendered %d image files.\n", count)
+						message := fmt.Sprintf(galasaErrors.GALASA_INFO_RENDERED_IMAGE_COUNT.Template, count)
 						console.WriteString(message)
 					}
 				}
