@@ -84,6 +84,8 @@ func (expander *ImageExpanderImpl) expandGzFile(gzFilePath string) error {
 					if err == nil {
 						err = expander.renderer.RenderJsonBytesToImageFiles(binaryContent, writer)
 					}
+
+					expander.expandedFileCounter = expander.expandedFileCounter + writer.GetImageFilesWrittenCount()
 				}
 			}
 		}

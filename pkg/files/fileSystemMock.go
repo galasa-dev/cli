@@ -42,7 +42,7 @@ type MockFileSystem struct {
 	// The New
 	VirtualFunction_MkdirAll             func(targetFolderPath string) error
 	VirtualFunction_WriteTextFile        func(targetFilePath string, desiredContents string) error
-	VirtualFunction_ReadBinaryFile         func(filePath string) ([]byte, error)
+	VirtualFunction_ReadBinaryFile       func(filePath string) ([]byte, error)
 	VirtualFunction_ReadTextFile         func(filePath string) (string, error)
 	VirtualFunction_Exists               func(path string) (bool, error)
 	VirtualFunction_DirExists            func(path string) (bool, error)
@@ -348,16 +348,4 @@ func (fs *MockFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
 	}
 
 	return collectedFilePaths, err
-}
-
-func (fs *MockFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
-	var err error = nil
-	var bytes []byte
-	node := fs.data[filePath]
-	if node == nil {
-		err = os.ErrNotExist
-	} else {
-		bytes = node.content
-	}
-	return bytes, err
 }

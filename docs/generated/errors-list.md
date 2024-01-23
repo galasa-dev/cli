@@ -122,6 +122,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.
 - GAL1121E: Unable to retrieve rest api version. Reason is: {}. Try downloading the latest version of galasa or rebuilding a clean version.
 - GAL1122E: Authentication property {} is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '{}' or set as an environment variable.
+- GAL1123E: Failed to read 3270 terminal JSON file '{}' because the content is in the wrong format. Reason: {}
 - GAL1226E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1227E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1228E: Internal failure. Contents of gzip could not be decoded. {} error: {}
