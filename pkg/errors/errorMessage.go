@@ -208,7 +208,9 @@ var (
 	GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION     = NewMessageType("GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.", 1120, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION     = NewMessageType("GAL1121E: Unable to retrieve rest api version. Reason is: %s. Try downloading the latest version of galasa or rebuilding a clean version.", 1121, STACK_TRACE_WANTED)
 	GALASA_ERROR_AUTH_PROPERTY_NOT_AVAILABLE             = NewMessageType("GAL1122E: Authentication property %s is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '%s' or set as an environment variable.", 1122, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_BAD_TERMINAL_JSON_FORMAT                = NewMessageType("GAL1123E: Failed to read 3270 terminal JSON file '%s' because the content is in the wrong format. Reason: %s", 1123, STACK_TRACE_WANTED)
+
+	GALASA_ERROR_BAD_TERMINAL_JSON_FORMAT         = NewMessageType("GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: %s", 1123, STACK_TRACE_WANTED)
+	GALASA_ERROR_PNG_ENCODING_FAILED              = NewMessageType("GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: %s", 1124, STACK_TRACE_NOT_WANTED)
 
 	GALASA_ERROR_FAILED_TO_OPEN_GZIP_FILE         = NewMessageType("GAL1226E: Failed to open file '%s' cause: %v. Check that this file exists, and that you have read permissions.", 1226, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_SETUP_READER_GZIP_FILE = NewMessageType("GAL1227E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: %s error: %v", 1227, STACK_TRACE_NOT_WANTED)
