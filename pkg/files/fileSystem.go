@@ -205,12 +205,3 @@ func (osFS *OSFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
 		})
 	return collectedFilePaths, err
 }
-
-func (*OSFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
-	bytes, err := os.ReadFile(filePath)
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, filePath, err.Error())
-		bytes = nil
-	}
-	return bytes, err
-}

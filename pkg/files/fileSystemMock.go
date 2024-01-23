@@ -349,15 +349,3 @@ func (fs *MockFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
 
 	return collectedFilePaths, err
 }
-
-func (fs *MockFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
-	var err error = nil
-	var bytes []byte
-	node := fs.data[filePath]
-	if node == nil {
-		err = os.ErrNotExist
-	} else {
-		bytes = node.content
-	}
-	return bytes, err
-}

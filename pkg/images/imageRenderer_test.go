@@ -6,10 +6,8 @@
 package images
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
-	"image"
-	"image/png"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -21,16 +19,13 @@ import (
 //----------------------------------------------------
 // Utility functions
 //----------------------------------------------------
-func assertTerminalImageMatchesExpectedSnapshot(t *testing.T, fs files.FileSystem, actualImage *image.RGBA, terminalImage TerminalImage) {
-    buf := new(bytes.Buffer)
-    err := png.Encode(buf, actualImage)
-    actualImageBytes := buf.Bytes()
-    assert.Nil(t, err, "Image should successfully be encoded into PNG format")
+func assertTerminalImageMatchesExpectedSnapshot(t *testing.T, actualImageBytes []byte) {
     assert.NotEmpty(t, actualImageBytes, "Image data should not be empty")
+    fs := files.NewOSFileSystem()
 
-    pngImageToCompareAgainst, err := filepath.Glob(filepath.Join("testdata", terminalImage.Id + ".png"))
+    pngImageToCompareAgainst, err := filepath.Glob(filepath.Join("testdata", t.Name() + "*.png"))
     if err != nil || len(pngImageToCompareAgainst) == 0 {
-        writeRenderedImageToTempDir(t, fs, terminalImage, actualImage)
+        writeRenderedImageToTempDir(t, fs, actualImageBytes)
         t.Fatalf("Failed to find expected image to compare against")
     }
 
@@ -40,29 +35,34 @@ func assertTerminalImageMatchesExpectedSnapshot(t *testing.T, fs files.FileSyste
     actualImageSize := len(actualImageBytes)
     expectedImageSize := len(expectedFileBytes)
     if actualImageSize != expectedImageSize {
-        writeRenderedImageToTempDir(t, fs, terminalImage, actualImage)
+        writeRenderedImageToTempDir(t, fs, actualImageBytes)
         t.Fatalf("Rendered image size '%d' does not match the expected image size '%d' ", actualImageSize, expectedImageSize)
     }
 
     for i, actualByte := range actualImageBytes {
         expectedByte := expectedFileBytes[i]
         if actualByte != expectedByte {
-            writeRenderedImageToTempDir(t, fs, terminalImage, actualImage)
+            writeRenderedImageToTempDir(t, fs, actualImageBytes)
             t.Fatalf("Rendered image byte '%s' does not match expected image byte '%s'", string(actualByte), string(expectedByte))
         }
     }
 }
 
-func writeRenderedImageToTempDir(t *testing.T, fs files.FileSystem, terminalImage TerminalImage, actualImage *image.RGBA) {
+func writePngImageToDisk(fileSystem files.FileSystem, actualImageBytes []byte, filePath string) error {
+    return fileSystem.WriteBinaryFile(filePath, actualImageBytes)
+}
+
+func writeRenderedImageToTempDir(t *testing.T, fs files.FileSystem, actualImageBytes []byte) {
     outputDirectory, err := fs.MkTempDir()
+    filePath := filepath.Join(outputDirectory, t.Name() + ".png")
     if err == nil {
-        err = WritePngImageToDisk(terminalImage, actualImage, fs, outputDirectory)
+        err = writePngImageToDisk(fs, actualImageBytes, filePath)
     }
 
     if err != nil {
         t.Log("Failed to write the rendered image to a temporary directory")
     } else {
-        fmt.Printf("Rendered image written to: %s", filepath.Join(outputDirectory, terminalImage.Id + ".png"))
+        fmt.Printf("Rendered image written to: %s", filePath)
     }
 }
 
@@ -84,10 +84,17 @@ func createTextField(row int, column int, text string, textColor string) Termina
     }
 }
 
+func createTerminal(id string, terminalImage TerminalImage) Terminal {
+    return Terminal{
+        Id: id,
+        Images: []TerminalImage{ terminalImage },
+    }
+}
+
 //----------------------------------------------------
 // Tests
 //----------------------------------------------------
-func TestWritePngImageToDiskShouldCreateAPngFile(t *testing.T) {
+func TestRenderEmptyTerminalRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
@@ -97,36 +104,6 @@ func TestWritePngImageToDiskShouldCreateAPngFile(t *testing.T) {
         Rows: 26,
         Columns: 80,
     }
-    terminalImage := TerminalImage{
-        Id: imageId,
-        Sequence: 1,
-        Inbound: true,
-        ImageSize: terminalSize,
-        CursorRow: 0,
-        CursorColumn: 0,
-    }
-
-    // When...
-    image := RenderTerminalImage(terminalImage)
-    err := WritePngImageToDisk(terminalImage, image, fs, tempDir)
-    assert.Nil(t, err, "Should have successfully created a .png file")
-
-    // Then...
-    expectedPngFilePath := filepath.Join(tempDir, imageId + ".png")
-    pngExists, _ := fs.Exists(expectedPngFilePath)
-    assert.True(t, pngExists, "PNG file should have been created at '" + expectedPngFilePath + "'")
-
-}
-
-func TestRenderEmptyTerminalRendersOk(t *testing.T) {
-    // Given...
-    fs := files.NewOSFileSystem()
-
-    imageId := t.Name()
-    terminalSize := TerminalSize{
-        Rows: 26,
-        Columns: 80,
-    }
 
     terminalImage := TerminalImage{
         Id: imageId,
@@ -137,16 +114,28 @@ func TestRenderEmptyTerminalRendersOk(t *testing.T) {
         CursorColumn: 0,
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithFieldRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -164,16 +153,28 @@ func TestRenderTerminalWithFieldRendersOk(t *testing.T) {
         Fields: []TerminalField{ createTextField(10, 13, "single text field in the middle", "d") },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithSmallerSizeRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -191,16 +192,28 @@ func TestRenderTerminalWithSmallerSizeRendersOk(t *testing.T) {
         Fields: []TerminalField{ createTextField(9, 15, "this terminal should be 66x18", "d") },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithFieldAtOriginRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -218,16 +231,28 @@ func TestRenderTerminalWithFieldAtOriginRendersOk(t *testing.T) {
         Fields: []TerminalField{ createTextField(0, 0, "^ this is the origin (top left)", "d") },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithFieldAtTopRightRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -248,16 +273,28 @@ func TestRenderTerminalWithFieldAtTopRightRendersOk(t *testing.T) {
         Fields: []TerminalField{ topRightField, textField },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithFieldAtBottomLeftRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -279,16 +316,28 @@ func TestRenderTerminalWithFieldAtBottomLeftRendersOk(t *testing.T) {
         Fields: []TerminalField{ bottomLeftField, textField },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithFieldAtBottomRightRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -309,16 +358,28 @@ func TestRenderTerminalWithFieldAtBottomRightRendersOk(t *testing.T) {
         Fields: []TerminalField{ bottomRightField, textField },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithFullRowRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -339,16 +400,28 @@ func TestRenderTerminalWithFullRowRendersOk(t *testing.T) {
         Fields: []TerminalField{ fullRowField, textField },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithFullColumnRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     rows := 26
@@ -373,16 +446,28 @@ func TestRenderTerminalWithFullColumnRendersOk(t *testing.T) {
         Fields: terminalFields,
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -403,16 +488,28 @@ func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
         Fields: []TerminalField{ wrappedField, textField },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminaColorsRenderOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -450,16 +547,28 @@ func TestRenderTerminaColorsRenderOk(t *testing.T) {
         },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
 
 func TestRenderTerminaUnicodeTextRendersOk(t *testing.T) {
     // Given...
-    fs := files.NewOSFileSystem()
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -491,9 +600,20 @@ func TestRenderTerminaUnicodeTextRendersOk(t *testing.T) {
         },
     }
 
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer()
+
     // When...
-    image := RenderTerminalImage(terminalImage)
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
 
     // Then...
-    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
 }
