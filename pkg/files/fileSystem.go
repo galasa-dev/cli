@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	pathUtils "path"
+	"path/filepath"
 	"runtime"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -41,6 +42,9 @@ type FileSystem interface {
 	// GetPathSeparator returns the file path separator specific
 	// to this operating system.
 	GetFilePathSeparator() string
+
+	// Gets all the file paths recursively from a starting folder.
+	GetAllFilePaths(rootPath string) ([]string, error)
 }
 
 // TildaExpansion If a file starts with a tilda '~' character, expand it
@@ -183,4 +187,30 @@ func (*OSFileSystem) GetUserHomeDirPath() (string, error) {
 func (OSFileSystem) OutputWarningMessage(message string) error {
 	_, err := os.Stderr.WriteString(message)
 	return err
+}
+
+func (osFS *OSFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
+	var collectedFilePaths []string
+
+	err := filepath.Walk(
+		rootPath,
+		func(path string, info os.FileInfo, err error) error {
+			if err == nil {
+				if !info.IsDir() {
+					// It's not a folder. Only add file names.
+					collectedFilePaths = append(collectedFilePaths, path)
+				}
+			}
+			return err
+		})
+	return collectedFilePaths, err
+}
+
+func (*OSFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
+	bytes, err := os.ReadFile(filePath)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, filePath, err.Error())
+		bytes = nil
+	}
+	return bytes, err
 }

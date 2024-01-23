@@ -6,10 +6,12 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -150,6 +152,21 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 					apiClient,
 					cmd.values.runDownloadTargetFolder,
 				)
+
+				if err == nil {
+					// No error, so try to expand the files.
+					renderer := images.NewImageRenderer()
+					expander := images.NewImageExpander(fileSystem, renderer)
+
+					err = expander.ExpandImages(cmd.values.runDownloadTargetFolder)
+					if err == nil {
+
+						// Write out a status string to the console about how many files were rendered.
+						count := expander.GetExpandedImageFileCount()
+						message := fmt.Sprintf("Rendered %d image files.\n", count)
+						console.WriteString(message)
+					}
+				}
 			}
 		}
 	}

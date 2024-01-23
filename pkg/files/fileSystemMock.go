@@ -333,3 +333,31 @@ func (fs MockFileSystem) GetAllWarningMessages() string {
 	log.Printf("Mock reading back previously collected warnings messages: %s", messages)
 	return messages
 }
+
+func (fs *MockFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
+	var collectedFilePaths []string
+	var err error
+
+	for path, node := range fs.data {
+		if strings.HasPrefix(path, rootPath) {
+			if node.isDir == false {
+				// It's a file. Save it's path to return.
+				collectedFilePaths = append(collectedFilePaths, path)
+			}
+		}
+	}
+
+	return collectedFilePaths, err
+}
+
+func (fs *MockFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
+	var err error = nil
+	var bytes []byte
+	node := fs.data[filePath]
+	if node == nil {
+		err = os.ErrNotExist
+	} else {
+		bytes = node.content
+	}
+	return bytes, err
+}
