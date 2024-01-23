@@ -1,0 +1,3670 @@
+{
+  "id": "term1",
+  "runId": "L1",
+  "sequence": 1,
+  "images": [
+    {
+      "sequence": 1,
+      "id": "term1-1",
+      "inbound": true,
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 4,
+      "cursorRow": 76,
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "WINMVS2D VAMP    "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 18,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "    HIT ENTER FOR LATEST STATUS"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 52,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 53,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SCREEN  IYCXTC40/         "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "           "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 12,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "IBM INTERNAL SYSTEMS MUST BE USED FOR IBM BUSINESS ONLY"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 68,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "          "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                      "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "10:30, WEDNESDAY , DECEMBER  13, 2023                   "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SERVICE   STATUS         | SERVICE   STATUS         | SERVICE   STATUS         ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVSQTSO    UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CVMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2IVMP   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2DTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2ITSO   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " TYPE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 7,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "SERVICE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 16,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "AS SHOWN ABOVE FOR CONNECTION  - USE PF KEYS FOR OTHER MENUS   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 20,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "HELP ?"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "FOR HELP OR"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 39,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " LOGOFF"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 47,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " TO LOGOFF.                                                                                                    "
+            }
+          ]
+        },
+        {
+          "row": 22,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "\u003d\u003d\u003e"
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 3,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "fieldModifed": true,
+          "contents": [
+            {
+              "text": "                                                                            "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 2,
+      "id": "term1-2",
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 12,
+      "cursorRow": 77,
+      "aid": "ENTER",
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "WINMVS2D VAMP    "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 18,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "    HIT ENTER FOR LATEST STATUS"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 52,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 53,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SCREEN  IYCXTC40/         "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "           "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 12,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "IBM INTERNAL SYSTEMS MUST BE USED FOR IBM BUSINESS ONLY"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 68,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "          "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                      "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "10:30, WEDNESDAY , DECEMBER  13, 2023                   "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SERVICE   STATUS         | SERVICE   STATUS         | SERVICE   STATUS         ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVSQTSO    UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CVMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2IVMP   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2DTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2ITSO   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " TYPE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 7,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "SERVICE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 16,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "AS SHOWN ABOVE FOR CONNECTION  - USE PF KEYS FOR OTHER MENUS   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 20,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "HELP ?"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "FOR HELP OR"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 39,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " LOGOFF"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 47,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " TO LOGOFF.                                                                                                    "
+            }
+          ]
+        },
+        {
+          "row": 22,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "\u003d\u003d\u003e"
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 3,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "fieldModifed": true,
+          "contents": [
+            {
+              "text": "MVS2CTSO                                                                    "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "id": "term1-3",
+      "inbound": true,
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 12,
+      "cursorRow": 77,
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "WINMVS2D VAMP    "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 18,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "    HIT ENTER FOR LATEST STATUS"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 52,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 53,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SCREEN  IYCXTC40/         "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "           "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 12,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "IBM INTERNAL SYSTEMS MUST BE USED FOR IBM BUSINESS ONLY"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 68,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "          "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                      "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "10:30, WEDNESDAY , DECEMBER  13, 2023                   "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SERVICE   STATUS         | SERVICE   STATUS         | SERVICE   STATUS         ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVSQTSO    UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CVMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2IVMP   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2DTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2ITSO   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " TYPE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 7,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "SERVICE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 16,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "AS SHOWN ABOVE FOR CONNECTION  - USE PF KEYS FOR OTHER MENUS   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 20,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "HELP ?"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "FOR HELP OR"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 39,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " LOGOFF"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 47,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " TO LOGOFF.                                                                                                    "
+            }
+          ]
+        },
+        {
+          "row": 22,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "\u003d\u003d\u003e"
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 3,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "fieldModifed": true,
+          "contents": [
+            {
+              "text": "MVS2CTSO                                                                    "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 4,
+      "id": "term1-4",
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 12,
+      "cursorRow": 77,
+      "aid": "ENTER",
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "WINMVS2D VAMP    "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 18,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "    HIT ENTER FOR LATEST STATUS"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " "
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 52,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 53,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SCREEN  IYCXTC40/         "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "           "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 12,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "IBM INTERNAL SYSTEMS MUST BE USED FOR IBM BUSINESS ONLY"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 68,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "          "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                      "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "10:30, WEDNESDAY , DECEMBER  13, 2023                   "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "SERVICE   STATUS         | SERVICE   STATUS         | SERVICE   STATUS         ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVSQTSO    UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CVMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HVMP   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2IVMP   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 50,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          "
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29TSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 9,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2CTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 10,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2DTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 11,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2GTSO   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 12,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2HTSO   UP    07:37"
+            }
+          ]
+        },
+        {
+          "row": 13,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS2ITSO   UP    06:48"
+            }
+          ]
+        },
+        {
+          "row": 14,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS26VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 15,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS27VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 16,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS28VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 17,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          "
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "MVS29VMP   UP    07:28"
+            }
+          ]
+        },
+        {
+          "row": 18,
+          "column": 23,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  |                          |                          ................................................................................"
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " TYPE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 7,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "SERVICE "
+            }
+          ]
+        },
+        {
+          "row": 20,
+          "column": 16,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "AS SHOWN ABOVE FOR CONNECTION  - USE PF KEYS FOR OTHER MENUS   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 0,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "                   "
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 20,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "HELP ?"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 27,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "FOR HELP OR"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 39,
+          "fieldProtected": true,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " LOGOFF"
+            }
+          ]
+        },
+        {
+          "row": 21,
+          "column": 47,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": " TO LOGOFF.                                                                                                    "
+            }
+          ]
+        },
+        {
+          "row": 22,
+          "column": 79,
+          "fieldProtected": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "\u003d\u003d\u003e"
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 3,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "fieldModifed": true,
+          "contents": [
+            {
+              "text": "MVS2CTSO                                                                    "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 5,
+      "id": "term1-5",
+      "inbound": true,
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 0,
+      "cursorRow": 23,
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* IBM\u0027s internal systems must only be used for conducting IBM\u0027s business   *"
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* or for purposes authorized by IBM management.                            *"
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " ***"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 5,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 79,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 6,
+      "id": "term1-6",
+      "inbound": true,
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 0,
+      "cursorRow": 23,
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* IBM\u0027s internal systems must only be used for conducting IBM\u0027s business   *"
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* or for purposes authorized by IBM management.                            *"
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " ***"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 5,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 79,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 7,
+      "id": "term1-7",
+      "inbound": true,
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 0,
+      "cursorRow": 30,
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* IBM\u0027s internal systems must only be used for conducting IBM\u0027s business   *"
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* or for purposes authorized by IBM management.                            *"
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " ***"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 5,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "                                                                                                                                                          "
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "IKJ56700A ENTER USERID -"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 25,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 79,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 8,
+      "id": "term1-8",
+      "inbound": true,
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 7,
+      "cursorRow": 30,
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* IBM\u0027s internal systems must only be used for conducting IBM\u0027s business   *"
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* or for purposes authorized by IBM management.                            *"
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " ***"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 5,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "                                                                                                                                                          "
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "IKJ56700A ENTER USERID -"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 25,
+          "fieldDisplay": true,
+          "fieldModifed": true,
+          "contents": [
+            {
+              "text": "                                                      eamonn1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        "
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 79,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 9,
+      "id": "term1-9",
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 7,
+      "cursorRow": 30,
+      "aid": "ENTER",
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* IBM\u0027s internal systems must only be used for conducting IBM\u0027s business   *"
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "* or for purposes authorized by IBM management.                            *"
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*                                                                          *"
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "*--------------------------------------------------------------------------*"
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "column": 77,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "  "
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": " ***"
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "column": 5,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "                                                                                                                                                          "
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 0,
+          "fieldIntenseDisplay": true,
+          "fieldSelectorPen": true,
+          "contents": [
+            {
+              "text": "IKJ56700A ENTER USERID -"
+            }
+          ]
+        },
+        {
+          "row": 8,
+          "column": 25,
+          "fieldDisplay": true,
+          "fieldModifed": true,
+          "contents": [
+            {
+              "text": "                                                      eamonn1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        "
+            }
+          ]
+        },
+        {
+          "row": 23,
+          "column": 79,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 10,
+      "id": "term1-10",
+      "inbound": true,
+      "imageSize": {
+        "columns": 80,
+        "rows": 24
+      },
+      "cursorColumn": 0,
+      "cursorRow": 0,
+      "fields": [
+        {
+          "row": 0,
+          "column": 0,
+          "unformatted": true,
+          "fieldDisplay": true,
+          "contents": [
+            {
+              "text": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "defaultSize": {
+    "columns": 80,
+    "rows": 24
+  }
+}

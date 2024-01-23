@@ -1,0 +1,569 @@
+22/01/2024 06:02:14.768 DEBUG main dev.galasa.framework.FrameworkInitialisation.locateConfigurationPropertyStore - bootstrap property framework.config.store used to determine CPS location.
+22/01/2024 06:02:14.775 DEBUG main dev.galasa.framework.FrameworkInitialisation.locateConfigurationPropertyStore - Configuration Property Store is file:/home/galasa58/galasaconfig/cps.properties
+22/01/2024 06:02:14.775 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseConfigurationPropertyStore - Searching for CPS providers
+22/01/2024 06:02:14.779 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseConfigurationPropertyStore - Found CPS Provider dev.galasa.framework.internal.cps.FpfConfigurationPropertyRegistration
+22/01/2024 06:02:14.847 DEBUG main dev.galasa.framework.FrameworkInitialisation.initialiseConfigurationPropertyStore - Selected CPS Service is dev.galasa.framework.internal.cps.FpfConfigurationPropertyStore
+22/01/2024 06:02:14.879 DEBUG main dev.galasa.framework.FrameworkInitialisation.locateDynamicStatusStore - Obtained value of DSS from CPS
+22/01/2024 06:02:14.879 DEBUG main dev.galasa.framework.FrameworkInitialisation.locateDynamicStatusStore - Dynamic Status Store is file:/home/galasa58/galasaconfig/dss.properties
+22/01/2024 06:02:14.886 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseDynamicStatusStore - Searching for DSS providers
+22/01/2024 06:02:14.888 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseDynamicStatusStore - Found DSS Provider dev.galasa.framework.internal.dss.FpfDynamicStatusStoreRegistration
+22/01/2024 06:02:14.891 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseDynamicStatusStore - Selected DSS Service is dev.galasa.framework.internal.dss.FpfDynamicStatusStore
+22/01/2024 06:02:14.898 INFO  main dev.galasa.framework.FrameworkInitialisation.locateRunName - Submitting test dev.galasa.zos.manager.ivt/dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT
+22/01/2024 06:02:15.002 INFO  main dev.galasa.framework.FrameworkInitialisation.submitRun - Allocated Run Name TESTZB1 to this run
+22/01/2024 06:02:15.002 INFO  main dev.galasa.framework.FrameworkInitialisation.locateRunName - Run name is TESTZB1
+22/01/2024 06:02:15.015 DEBUG main dev.galasa.framework.FrameworkInitialisation.processRASlocationProperty - Adding Result Archive Store location file:/home/galasa58/galasaconfig/ras
+22/01/2024 06:02:15.016 DEBUG main dev.galasa.framework.FrameworkInitialisation.<init> - Result Archive Stores are [file:/home/galasa58/galasaconfig/ras]
+22/01/2024 06:02:15.016 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseResultsArchiveStore - Searching for RAS providers
+22/01/2024 06:02:15.017 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseResultsArchiveStore - Found RAS Provider dev.galasa.framework.internal.ras.directory.DirectoryResultArchiveStoreRegistration
+22/01/2024 06:02:15.140 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseResultsArchiveStore - Selected RAS Service is dev.galasa.framework.internal.ras.directory.DirectoryResultArchiveStoreService
+22/01/2024 06:02:15.141 DEBUG main dev.galasa.framework.FrameworkInitialisation.locateCredentialsStore - Credentials Store is file:/home/galasa58/galasaconfig/credentials.properties
+22/01/2024 06:02:15.141 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseCredentialsStore - Searching for Creds providers
+22/01/2024 06:02:15.142 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseCredentialsStore - Found Creds Provider dev.galasa.framework.internal.creds.FileCredentialsRegistration
+22/01/2024 06:02:15.150 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseCredentialsStore - Selected Credentials Service is dev.galasa.framework.internal.creds.FileCredentialsStore
+22/01/2024 06:02:15.151 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseConfidentialTextService - Searching for Confidential Text Service providers
+22/01/2024 06:02:15.152 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseConfidentialTextService - Found Confidential Text Services Provider dev.galasa.framework.internal.cts.FrameworkConfidentialTextServiceRegistration
+22/01/2024 06:02:15.154 TRACE main dev.galasa.framework.FrameworkInitialisation.initialiseConfidentialTextService - Selected Confidential Text Service is dev.galasa.framework.internal.cts.FrameworkConfidentialTextService
+22/01/2024 06:02:15.156 INFO  main dev.galasa.framework.FrameworkInitialisation.<init> - Framework initialised
+22/01/2024 06:02:15.224 TRACE main dev.galasa.framework.BundleManagement.loadBundle - Installing bundle dev.galasa.zos.manager.ivt
+22/01/2024 06:02:15.238 TRACE main dev.galasa.framework.BundleManagement.addResource - Resouce: dev.galasa.zos.manager.ivt/0.28.0
+22/01/2024 06:02:15.286 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: com.jcraft.jsch
+22/01/2024 06:02:15.286 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: dev.galasa.zos.manager
+22/01/2024 06:02:15.287 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: io.prometheus.simpleclient
+22/01/2024 06:02:15.287 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: org.apache.logging.log4j.slf4j-impl
+22/01/2024 06:02:15.287 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: dev.galasa.artifact.manager
+22/01/2024 06:02:15.287 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: org.assertj.core
+22/01/2024 06:02:15.288 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: dev.galasa.ipnetwork.manager
+22/01/2024 06:02:15.288 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: dev.galasa.core.manager
+22/01/2024 06:02:15.288 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: org.apache.commons.commons-codec
+22/01/2024 06:02:15.289 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: slf4j.api
+22/01/2024 06:02:15.289 TRACE main dev.galasa.framework.BundleManagement.addResource -   RequiredResource: org.apache.velocity.engine-core
+22/01/2024 06:02:15.289 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.artifact.manager:0.25.0:jar
+22/01/2024 06:02:15.290 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.307 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.artifact.manager/0.25.0/dev.galasa.artifact.manager-0.25.0.jar
+22/01/2024 06:02:15.308 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.308 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.artifact.manager/0.25.0/dev.galasa.artifact.manager-0.25.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.310 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.artifact.manager/0.25.0/dev.galasa.artifact.manager-0.25.0.jar
+22/01/2024 06:02:15.314 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact org.assertj:assertj-core:3.11.1:jar
+22/01/2024 06:02:15.315 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.315 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/org/assertj/assertj-core/3.11.1/assertj-core-3.11.1.jar
+22/01/2024 06:02:15.316 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.316 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/assertj/assertj-core/3.11.1/assertj-core-3.11.1.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.364 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/assertj/assertj-core/3.11.1/assertj-core-3.11.1.jar
+22/01/2024 06:02:15.434 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:com.jcraft.jsch:0.1.55:jar
+22/01/2024 06:02:15.435 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.436 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/com.jcraft.jsch/0.1.55/com.jcraft.jsch-0.1.55.jar
+22/01/2024 06:02:15.438 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.438 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/com.jcraft.jsch/0.1.55/com.jcraft.jsch-0.1.55.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.457 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/com.jcraft.jsch/0.1.55/com.jcraft.jsch-0.1.55.jar
+22/01/2024 06:02:15.471 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zos.manager:0.31.0:jar
+22/01/2024 06:02:15.472 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.475 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zos.manager/0.31.0/dev.galasa.zos.manager-0.31.0.jar
+22/01/2024 06:02:15.476 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.486 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zos.manager/0.31.0/dev.galasa.zos.manager-0.31.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.491 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zos.manager/0.31.0/dev.galasa.zos.manager-0.31.0.jar
+22/01/2024 06:02:15.508 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.ipnetwork.manager:0.25.0:jar
+22/01/2024 06:02:15.510 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.510 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.ipnetwork.manager/0.25.0/dev.galasa.ipnetwork.manager-0.25.0.jar
+22/01/2024 06:02:15.512 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.513 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.ipnetwork.manager/0.25.0/dev.galasa.ipnetwork.manager-0.25.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.514 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.ipnetwork.manager/0.25.0/dev.galasa.ipnetwork.manager-0.25.0.jar
+22/01/2024 06:02:15.537 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.core.manager:0.31.0:jar
+22/01/2024 06:02:15.538 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.539 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.core.manager/0.31.0/dev.galasa.core.manager-0.31.0.jar
+22/01/2024 06:02:15.540 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.540 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.core.manager/0.31.0/dev.galasa.core.manager-0.31.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.547 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.core.manager/0.31.0/dev.galasa.core.manager-0.31.0.jar
+22/01/2024 06:02:15.559 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zos.manager.ivt:0.28.0:jar
+22/01/2024 06:02:15.559 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.560 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zos.manager.ivt/0.28.0/dev.galasa.zos.manager.ivt-0.28.0.jar
+22/01/2024 06:02:15.567 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.568 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zos.manager.ivt/0.28.0/dev.galasa.zos.manager.ivt-0.28.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.569 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zos.manager.ivt/0.28.0/dev.galasa.zos.manager.ivt-0.28.0.jar
+22/01/2024 06:02:15.583 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact commons-codec:commons-codec:1.15:jar
+22/01/2024 06:02:15.583 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.584 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/commons-codec/commons-codec/1.15/commons-codec-1.15.jar
+22/01/2024 06:02:15.585 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.585 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/commons-codec/commons-codec/1.15/commons-codec-1.15.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.592 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/commons-codec/commons-codec/1.15/commons-codec-1.15.jar
+22/01/2024 06:02:15.608 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact io.prometheus:simpleclient:0.6.0:jar
+22/01/2024 06:02:15.608 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.609 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/io/prometheus/simpleclient/0.6.0/simpleclient-0.6.0.jar
+22/01/2024 06:02:15.610 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.612 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/io/prometheus/simpleclient/0.6.0/simpleclient-0.6.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.623 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/io/prometheus/simpleclient/0.6.0/simpleclient-0.6.0.jar
+22/01/2024 06:02:15.627 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact org.slf4j:slf4j-api:1.7.30:jar
+22/01/2024 06:02:15.627 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.628 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar
+22/01/2024 06:02:15.630 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.630 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.631 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar
+22/01/2024 06:02:15.647 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact org.apache.logging.log4j:log4j-slf4j-impl:2.17.1:jar
+22/01/2024 06:02:15.648 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.655 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/org/apache/logging/log4j/log4j-slf4j-impl/2.17.1/log4j-slf4j-impl-2.17.1.jar
+22/01/2024 06:02:15.656 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.664 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/logging/log4j/log4j-slf4j-impl/2.17.1/log4j-slf4j-impl-2.17.1.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.666 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/logging/log4j/log4j-slf4j-impl/2.17.1/log4j-slf4j-impl-2.17.1.jar
+22/01/2024 06:02:15.678 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact org.apache.velocity:velocity-engine-core:2.3:jar
+22/01/2024 06:02:15.679 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:15.679 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/org/apache/velocity/velocity-engine-core/2.3/velocity-engine-core-2.3.jar
+22/01/2024 06:02:15.680 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:15.682 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/velocity/velocity-engine-core/2.3/velocity-engine-core-2.3.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:15.690 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/velocity/velocity-engine-core/2.3/velocity-engine-core-2.3.jar
+22/01/2024 06:02:15.755 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Artifact Manager
+22/01/2024 06:02:15.755 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.25.0
+22/01/2024 06:02:15.756 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:43:03 GMT
+22/01/2024 06:02:15.877 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa zOS Manager
+22/01/2024 06:02:15.878 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.31.0
+22/01/2024 06:02:15.887 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:43:00 GMT
+22/01/2024 06:02:15.940 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : IP Network Manager
+22/01/2024 06:02:15.941 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.25.0
+22/01/2024 06:02:15.941 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:42:57 GMT
+22/01/2024 06:02:16.006 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa Core Manager
+22/01/2024 06:02:16.007 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.31.0
+22/01/2024 06:02:16.007 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:43:18 GMT
+22/01/2024 06:02:16.110 TRACE main dev.galasa.framework.BundleManagement.printBundles - Bundle status:
+    0|Active     |     |org.apache.felix.framework (7.0.0)
+    1|Active     |     |org.apache.felix.scr (2.1.14)
+    2|Resolved   |     |dev.galasa.framework.log4j2.bridge (0.25.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    3|Active     |     |org.apache.logging.log4j.api (2.17.1)
+    4|Active     |     |org.apache.logging.log4j.core (2.17.1)
+    5|Active     |     |dev.galasa.framework.maven.repository.spi (0.21.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    6|Active     |     |dev.galasa.framework.maven.repository (0.22.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+    7|Active     |     |org.apache.felix.bundlerepository (2.0.2)
+    8|Active     |     |org.apache.commons.commons-compress (1.21.0)
+    9|Active     |     |dev.galasa (0.21.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+   10|Active     |     |org.apache.bcel (6.7.0)
+   11|Active     |     |org.apache.commons.commons-io (2.9.0)
+   12|Active     |     |com.google.gson (2.10.1)
+   13|Active     |     |dev.galasa.framework (0.31.0-e5fa4bcf12698616946c6ee803b72fcb0a38b26f)
+   14|Active     |     |org.apache.commons.lang3 (3.12.0)
+   15|Active     |     |javax.validation.api (2.0.1.Final)
+   16|Active     |     |dev.galasa.artifact.manager (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   17|Active     |     |org.assertj.core (3.11.1)
+   18|Active     |     |com.jcraft.jsch (0.1.55)
+   19|Active     |     |dev.galasa.zos.manager (0.31.0-dca09fddafb2d83b164ead08760b12526c6091c6)
+   20|Active     |     |dev.galasa.ipnetwork.manager (0.25.0-9cb6dac35cafa3fedd143608b7127f372c17af1e)
+   21|Active     |     |dev.galasa.core.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   22|Active     |     |dev.galasa.zos.manager.ivt (0.28.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   23|Active     |     |org.apache.commons.commons-codec (1.15.0)
+   24|Active     |     |io.prometheus.simpleclient (0.6.0)
+   25|Active     |     |slf4j.api (1.7.30)
+   26|Active     |     |org.apache.logging.log4j.slf4j-impl (2.17.1)
+   27|Active     |     |org.apache.velocity.engine-core (2.3.0)
+22/01/2024 06:02:16.111 DEBUG main dev.galasa.framework.TestRunner.runTest - Loading test class... dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT
+22/01/2024 06:02:16.112 TRACE main dev.galasa.framework.TestRunner.getTestClass - Found Bundle: dev.galasa.zos.manager.ivt
+22/01/2024 06:02:16.139 TRACE main dev.galasa.framework.TestRunner.getTestClass - Found test class: dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT
+22/01/2024 06:02:16.140 DEBUG main dev.galasa.framework.TestRunner.runTest - Test class dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT loaded OK.
+22/01/2024 06:02:16.140 DEBUG main dev.galasa.framework.TestRunner.runTest - Getting test annotations..
+22/01/2024 06:02:16.159 DEBUG main dev.galasa.framework.TestRunner.runTest - Test annotations.. got
+22/01/2024 06:02:16.160 DEBUG main dev.galasa.framework.TestRunner.runTest - Checking testAnnotation and sharedEnvironmentAnnotation
+22/01/2024 06:02:16.160 INFO  main dev.galasa.framework.TestRunner.runTest - Run test: dev.galasa.zos.manager.ivt/dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT
+22/01/2024 06:02:16.162 DEBUG main dev.galasa.framework.TestRunner.runTest - Test runType is TEST
+22/01/2024 06:02:16.167 DEBUG main dev.galasa.framework.TestRunner.runTest - starting heartbeat
+22/01/2024 06:02:16.178 DEBUG main dev.galasa.framework.TestRunner.runTest - heartbeat started ok
+22/01/2024 06:02:16.179 DEBUG main dev.galasa.framework.TestRunner.runTest - It's a local test
+22/01/2024 06:02:16.189 DEBUG main dev.galasa.framework.TestRunner.runTest - state changing to started.
+22/01/2024 06:02:16.193 DEBUG main dev.galasa.framework.TestRunner.runTest - Bundle is loaded ok.
+22/01/2024 06:02:16.273 TRACE main dev.galasa.framework.TestRunManagers.loadBundle - Installing bundle dev.galasa.zosbatch.zosmf.manager
+22/01/2024 06:02:16.283 TRACE main dev.galasa.framework.TestRunManagers.addResource - Resouce: dev.galasa.zosbatch.zosmf.manager/0.31.0
+22/01/2024 06:02:16.384 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: dev.galasa.common
+22/01/2024 06:02:16.385 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: org.apache.httpcomponents.httpcore
+22/01/2024 06:02:16.385 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: jakarta.xml.bind-api
+22/01/2024 06:02:16.385 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: org.apache.httpcomponents.httpclient
+22/01/2024 06:02:16.386 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: dev.galasa.http.manager
+22/01/2024 06:02:16.390 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: dev.galasa.zosmf.manager
+22/01/2024 06:02:16.390 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: com.sun.activation.jakarta.activation
+22/01/2024 06:02:16.391 TRACE main dev.galasa.framework.TestRunManagers.addResource -   RequiredResource: org.apache.felix.configadmin
+22/01/2024 06:02:16.391 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.http.manager:0.31.0:jar
+22/01/2024 06:02:16.392 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.392 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.http.manager/0.31.0/dev.galasa.http.manager-0.31.0.jar
+22/01/2024 06:02:16.393 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.393 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.http.manager/0.31.0/dev.galasa.http.manager-0.31.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.402 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.http.manager/0.31.0/dev.galasa.http.manager-0.31.0.jar
+22/01/2024 06:02:16.410 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zosmf.manager:0.31.0:jar
+22/01/2024 06:02:16.411 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.411 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zosmf.manager/0.31.0/dev.galasa.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:16.414 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.415 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosmf.manager/0.31.0/dev.galasa.zosmf.manager-0.31.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.423 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosmf.manager/0.31.0/dev.galasa.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:16.428 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.common:0.25.0:jar
+22/01/2024 06:02:16.428 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.429 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.common/0.25.0/dev.galasa.common-0.25.0.jar
+22/01/2024 06:02:16.442 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.442 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.common/0.25.0/dev.galasa.common-0.25.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.443 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.common/0.25.0/dev.galasa.common-0.25.0.jar
+22/01/2024 06:02:16.447 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zosbatch.zosmf.manager:0.31.0:jar
+22/01/2024 06:02:16.448 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.448 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zosbatch.zosmf.manager/0.31.0/dev.galasa.zosbatch.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:16.455 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.456 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosbatch.zosmf.manager/0.31.0/dev.galasa.zosbatch.zosmf.manager-0.31.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.461 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosbatch.zosmf.manager/0.31.0/dev.galasa.zosbatch.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:16.467 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact org.apache.httpcomponents:httpcore-osgi:4.4.14:jar
+22/01/2024 06:02:16.467 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.467 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/org/apache/httpcomponents/httpcore-osgi/4.4.14/httpcore-osgi-4.4.14.jar
+22/01/2024 06:02:16.472 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.472 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/httpcomponents/httpcore-osgi/4.4.14/httpcore-osgi-4.4.14.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.495 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/httpcomponents/httpcore-osgi/4.4.14/httpcore-osgi-4.4.14.jar
+22/01/2024 06:02:16.527 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact jakarta.xml.bind:jakarta.xml.bind-api:3.0.0:jar
+22/01/2024 06:02:16.528 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.528 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/jakarta/xml/bind/jakarta.xml.bind-api/3.0.0/jakarta.xml.bind-api-3.0.0.jar
+22/01/2024 06:02:16.529 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.530 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/jakarta/xml/bind/jakarta.xml.bind-api/3.0.0/jakarta.xml.bind-api-3.0.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.531 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/jakarta/xml/bind/jakarta.xml.bind-api/3.0.0/jakarta.xml.bind-api-3.0.0.jar
+22/01/2024 06:02:16.551 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact com.sun.activation:jakarta.activation:2.0.0:jar
+22/01/2024 06:02:16.552 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.552 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/com/sun/activation/jakarta.activation/2.0.0/jakarta.activation-2.0.0.jar
+22/01/2024 06:02:16.553 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.554 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/com/sun/activation/jakarta.activation/2.0.0/jakarta.activation-2.0.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.571 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/com/sun/activation/jakarta.activation/2.0.0/jakarta.activation-2.0.0.jar
+22/01/2024 06:02:16.577 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact org.apache.httpcomponents:httpclient-osgi:4.5.13:jar
+22/01/2024 06:02:16.577 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.579 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/org/apache/httpcomponents/httpclient-osgi/4.5.13/httpclient-osgi-4.5.13.jar
+22/01/2024 06:02:16.580 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.588 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/httpcomponents/httpclient-osgi/4.5.13/httpclient-osgi-4.5.13.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.603 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/httpcomponents/httpclient-osgi/4.5.13/httpclient-osgi-4.5.13.jar
+22/01/2024 06:02:16.634 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact org.apache.felix:org.apache.felix.configadmin:1.9.16:jar
+22/01/2024 06:02:16.639 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:16.640 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/org/apache/felix/org.apache.felix.configadmin/1.9.16/org.apache.felix.configadmin-1.9.16.jar
+22/01/2024 06:02:16.641 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:16.641 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/felix/org.apache.felix.configadmin/1.9.16/org.apache.felix.configadmin-1.9.16.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:16.644 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/org/apache/felix/org.apache.felix.configadmin/1.9.16/org.apache.felix.configadmin-1.9.16.jar
+22/01/2024 06:02:16.717 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : HTTP Manager
+22/01/2024 06:02:16.717 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.31.0
+22/01/2024 06:02:16.717 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:43:25 GMT
+22/01/2024 06:02:16.764 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa zOS/MF Manager
+22/01/2024 06:02:16.765 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.31.0
+22/01/2024 06:02:16.765 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:45:37 GMT
+22/01/2024 06:02:16.830 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa zOS Batch Manager - zOS/MF Implementation
+22/01/2024 06:02:16.830 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.31.0
+22/01/2024 06:02:16.831 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:51:01 GMT
+22/01/2024 06:02:17.113 TRACE main dev.galasa.framework.TestRunManagers.printBundles - Bundle status:
+    0|Active     |     |org.apache.felix.framework (7.0.0)
+    1|Active     |     |org.apache.felix.scr (2.1.14)
+    2|Resolved   |     |dev.galasa.framework.log4j2.bridge (0.25.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    3|Active     |     |org.apache.logging.log4j.api (2.17.1)
+    4|Active     |     |org.apache.logging.log4j.core (2.17.1)
+    5|Active     |     |dev.galasa.framework.maven.repository.spi (0.21.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    6|Active     |     |dev.galasa.framework.maven.repository (0.22.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+    7|Active     |     |org.apache.felix.bundlerepository (2.0.2)
+    8|Active     |     |org.apache.commons.commons-compress (1.21.0)
+    9|Active     |     |dev.galasa (0.21.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+   10|Active     |     |org.apache.bcel (6.7.0)
+   11|Active     |     |org.apache.commons.commons-io (2.9.0)
+   12|Active     |     |com.google.gson (2.10.1)
+   13|Active     |     |dev.galasa.framework (0.31.0-e5fa4bcf12698616946c6ee803b72fcb0a38b26f)
+   14|Active     |     |org.apache.commons.lang3 (3.12.0)
+   15|Active     |     |javax.validation.api (2.0.1.Final)
+   16|Active     |     |dev.galasa.artifact.manager (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   17|Active     |     |org.assertj.core (3.11.1)
+   18|Active     |     |com.jcraft.jsch (0.1.55)
+   19|Active     |     |dev.galasa.zos.manager (0.31.0-dca09fddafb2d83b164ead08760b12526c6091c6)
+   20|Active     |     |dev.galasa.ipnetwork.manager (0.25.0-9cb6dac35cafa3fedd143608b7127f372c17af1e)
+   21|Active     |     |dev.galasa.core.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   22|Active     |     |dev.galasa.zos.manager.ivt (0.28.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   23|Active     |     |org.apache.commons.commons-codec (1.15.0)
+   24|Active     |     |io.prometheus.simpleclient (0.6.0)
+   25|Active     |     |slf4j.api (1.7.30)
+   26|Active     |     |org.apache.logging.log4j.slf4j-impl (2.17.1)
+   27|Active     |     |org.apache.velocity.engine-core (2.3.0)
+   28|Active     |     |dev.galasa.http.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   29|Active     |     |dev.galasa.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   30|Active     |     |dev.galasa.common (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   31|Active     |     |dev.galasa.zosbatch.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   32|Active     |     |org.apache.httpcomponents.httpcore (4.4.14)
+   33|Active     |     |jakarta.xml.bind-api (3.0.0)
+   34|Active     |     |com.sun.activation.jakarta.activation (2.0.0)
+   35|Active     |     |org.apache.httpcomponents.httpclient (4.5.13)
+   36|Active     |     |org.apache.felix.configadmin (1.9.16)
+22/01/2024 06:02:17.114 TRACE main dev.galasa.framework.TestRunManagers.loadBundle - Installing bundle dev.galasa.zosconsole.zosmf.manager
+22/01/2024 06:02:17.115 TRACE main dev.galasa.framework.TestRunManagers.addResource - Resouce: dev.galasa.zosconsole.zosmf.manager/0.31.0
+22/01/2024 06:02:17.191 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zosconsole.zosmf.manager:0.31.0:jar
+22/01/2024 06:02:17.192 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:17.192 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zosconsole.zosmf.manager/0.31.0/dev.galasa.zosconsole.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:17.193 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:17.203 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosconsole.zosmf.manager/0.31.0/dev.galasa.zosconsole.zosmf.manager-0.31.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:17.204 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosconsole.zosmf.manager/0.31.0/dev.galasa.zosconsole.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:17.232 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa zOS Console Manager - zOS/MF Implementation
+22/01/2024 06:02:17.232 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.31.0
+22/01/2024 06:02:17.232 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:51:11 GMT
+22/01/2024 06:02:17.243 TRACE main dev.galasa.framework.TestRunManagers.printBundles - Bundle status:
+    0|Active     |     |org.apache.felix.framework (7.0.0)
+    1|Active     |     |org.apache.felix.scr (2.1.14)
+    2|Resolved   |     |dev.galasa.framework.log4j2.bridge (0.25.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    3|Active     |     |org.apache.logging.log4j.api (2.17.1)
+    4|Active     |     |org.apache.logging.log4j.core (2.17.1)
+    5|Active     |     |dev.galasa.framework.maven.repository.spi (0.21.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    6|Active     |     |dev.galasa.framework.maven.repository (0.22.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+    7|Active     |     |org.apache.felix.bundlerepository (2.0.2)
+    8|Active     |     |org.apache.commons.commons-compress (1.21.0)
+    9|Active     |     |dev.galasa (0.21.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+   10|Active     |     |org.apache.bcel (6.7.0)
+   11|Active     |     |org.apache.commons.commons-io (2.9.0)
+   12|Active     |     |com.google.gson (2.10.1)
+   13|Active     |     |dev.galasa.framework (0.31.0-e5fa4bcf12698616946c6ee803b72fcb0a38b26f)
+   14|Active     |     |org.apache.commons.lang3 (3.12.0)
+   15|Active     |     |javax.validation.api (2.0.1.Final)
+   16|Active     |     |dev.galasa.artifact.manager (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   17|Active     |     |org.assertj.core (3.11.1)
+   18|Active     |     |com.jcraft.jsch (0.1.55)
+   19|Active     |     |dev.galasa.zos.manager (0.31.0-dca09fddafb2d83b164ead08760b12526c6091c6)
+   20|Active     |     |dev.galasa.ipnetwork.manager (0.25.0-9cb6dac35cafa3fedd143608b7127f372c17af1e)
+   21|Active     |     |dev.galasa.core.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   22|Active     |     |dev.galasa.zos.manager.ivt (0.28.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   23|Active     |     |org.apache.commons.commons-codec (1.15.0)
+   24|Active     |     |io.prometheus.simpleclient (0.6.0)
+   25|Active     |     |slf4j.api (1.7.30)
+   26|Active     |     |org.apache.logging.log4j.slf4j-impl (2.17.1)
+   27|Active     |     |org.apache.velocity.engine-core (2.3.0)
+   28|Active     |     |dev.galasa.http.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   29|Active     |     |dev.galasa.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   30|Active     |     |dev.galasa.common (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   31|Active     |     |dev.galasa.zosbatch.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   32|Active     |     |org.apache.httpcomponents.httpcore (4.4.14)
+   33|Active     |     |jakarta.xml.bind-api (3.0.0)
+   34|Active     |     |com.sun.activation.jakarta.activation (2.0.0)
+   35|Active     |     |org.apache.httpcomponents.httpclient (4.5.13)
+   36|Active     |     |org.apache.felix.configadmin (1.9.16)
+   37|Active     |     |dev.galasa.zosconsole.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+22/01/2024 06:02:17.243 TRACE main dev.galasa.framework.TestRunManagers.loadBundle - Installing bundle dev.galasa.zosfile.zosmf.manager
+22/01/2024 06:02:17.265 TRACE main dev.galasa.framework.TestRunManagers.addResource - Resouce: dev.galasa.zosfile.zosmf.manager/0.31.0
+22/01/2024 06:02:17.347 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zosfile.zosmf.manager:0.31.0:jar
+22/01/2024 06:02:17.348 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:17.348 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zosfile.zosmf.manager/0.31.0/dev.galasa.zosfile.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:17.349 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:17.349 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosfile.zosmf.manager/0.31.0/dev.galasa.zosfile.zosmf.manager-0.31.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:17.359 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosfile.zosmf.manager/0.31.0/dev.galasa.zosfile.zosmf.manager-0.31.0.jar
+22/01/2024 06:02:17.376 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa zOS File Manager - zOS/MF Implementation
+22/01/2024 06:02:17.377 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.31.0
+22/01/2024 06:02:17.377 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:51:21 GMT
+22/01/2024 06:02:17.389 TRACE main dev.galasa.framework.TestRunManagers.printBundles - Bundle status:
+    0|Active     |     |org.apache.felix.framework (7.0.0)
+    1|Active     |     |org.apache.felix.scr (2.1.14)
+    2|Resolved   |     |dev.galasa.framework.log4j2.bridge (0.25.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    3|Active     |     |org.apache.logging.log4j.api (2.17.1)
+    4|Active     |     |org.apache.logging.log4j.core (2.17.1)
+    5|Active     |     |dev.galasa.framework.maven.repository.spi (0.21.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    6|Active     |     |dev.galasa.framework.maven.repository (0.22.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+    7|Active     |     |org.apache.felix.bundlerepository (2.0.2)
+    8|Active     |     |org.apache.commons.commons-compress (1.21.0)
+    9|Active     |     |dev.galasa (0.21.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+   10|Active     |     |org.apache.bcel (6.7.0)
+   11|Active     |     |org.apache.commons.commons-io (2.9.0)
+   12|Active     |     |com.google.gson (2.10.1)
+   13|Active     |     |dev.galasa.framework (0.31.0-e5fa4bcf12698616946c6ee803b72fcb0a38b26f)
+   14|Active     |     |org.apache.commons.lang3 (3.12.0)
+   15|Active     |     |javax.validation.api (2.0.1.Final)
+   16|Active     |     |dev.galasa.artifact.manager (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   17|Active     |     |org.assertj.core (3.11.1)
+   18|Active     |     |com.jcraft.jsch (0.1.55)
+   19|Active     |     |dev.galasa.zos.manager (0.31.0-dca09fddafb2d83b164ead08760b12526c6091c6)
+   20|Active     |     |dev.galasa.ipnetwork.manager (0.25.0-9cb6dac35cafa3fedd143608b7127f372c17af1e)
+   21|Active     |     |dev.galasa.core.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   22|Active     |     |dev.galasa.zos.manager.ivt (0.28.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   23|Active     |     |org.apache.commons.commons-codec (1.15.0)
+   24|Active     |     |io.prometheus.simpleclient (0.6.0)
+   25|Active     |     |slf4j.api (1.7.30)
+   26|Active     |     |org.apache.logging.log4j.slf4j-impl (2.17.1)
+   27|Active     |     |org.apache.velocity.engine-core (2.3.0)
+   28|Active     |     |dev.galasa.http.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   29|Active     |     |dev.galasa.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   30|Active     |     |dev.galasa.common (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   31|Active     |     |dev.galasa.zosbatch.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   32|Active     |     |org.apache.httpcomponents.httpcore (4.4.14)
+   33|Active     |     |jakarta.xml.bind-api (3.0.0)
+   34|Active     |     |com.sun.activation.jakarta.activation (2.0.0)
+   35|Active     |     |org.apache.httpcomponents.httpclient (4.5.13)
+   36|Active     |     |org.apache.felix.configadmin (1.9.16)
+   37|Active     |     |dev.galasa.zosconsole.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   38|Active     |     |dev.galasa.zosfile.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+22/01/2024 06:02:17.390 TRACE main dev.galasa.framework.TestRunManagers.loadBundle - Installing bundle dev.galasa.zostsocommand.ssh.manager
+22/01/2024 06:02:17.391 TRACE main dev.galasa.framework.TestRunManagers.addResource - Resouce: dev.galasa.zostsocommand.ssh.manager/0.21.0
+22/01/2024 06:02:17.450 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zostsocommand.ssh.manager:0.21.0:jar
+22/01/2024 06:02:17.451 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:17.451 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zostsocommand.ssh.manager/0.21.0/dev.galasa.zostsocommand.ssh.manager-0.21.0.jar
+22/01/2024 06:02:17.452 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:17.452 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zostsocommand.ssh.manager/0.21.0/dev.galasa.zostsocommand.ssh.manager-0.21.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:17.458 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zostsocommand.ssh.manager/0.21.0/dev.galasa.zostsocommand.ssh.manager-0.21.0.jar
+22/01/2024 06:02:17.478 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa zOS TSO Command Manager - ssh Implementation
+22/01/2024 06:02:17.478 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.21.0
+22/01/2024 06:02:17.479 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:51:59 GMT
+22/01/2024 06:02:17.527 TRACE main dev.galasa.framework.TestRunManagers.printBundles - Bundle status:
+    0|Active     |     |org.apache.felix.framework (7.0.0)
+    1|Active     |     |org.apache.felix.scr (2.1.14)
+    2|Resolved   |     |dev.galasa.framework.log4j2.bridge (0.25.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    3|Active     |     |org.apache.logging.log4j.api (2.17.1)
+    4|Active     |     |org.apache.logging.log4j.core (2.17.1)
+    5|Active     |     |dev.galasa.framework.maven.repository.spi (0.21.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    6|Active     |     |dev.galasa.framework.maven.repository (0.22.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+    7|Active     |     |org.apache.felix.bundlerepository (2.0.2)
+    8|Active     |     |org.apache.commons.commons-compress (1.21.0)
+    9|Active     |     |dev.galasa (0.21.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+   10|Active     |     |org.apache.bcel (6.7.0)
+   11|Active     |     |org.apache.commons.commons-io (2.9.0)
+   12|Active     |     |com.google.gson (2.10.1)
+   13|Active     |     |dev.galasa.framework (0.31.0-e5fa4bcf12698616946c6ee803b72fcb0a38b26f)
+   14|Active     |     |org.apache.commons.lang3 (3.12.0)
+   15|Active     |     |javax.validation.api (2.0.1.Final)
+   16|Active     |     |dev.galasa.artifact.manager (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   17|Active     |     |org.assertj.core (3.11.1)
+   18|Active     |     |com.jcraft.jsch (0.1.55)
+   19|Active     |     |dev.galasa.zos.manager (0.31.0-dca09fddafb2d83b164ead08760b12526c6091c6)
+   20|Active     |     |dev.galasa.ipnetwork.manager (0.25.0-9cb6dac35cafa3fedd143608b7127f372c17af1e)
+   21|Active     |     |dev.galasa.core.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   22|Active     |     |dev.galasa.zos.manager.ivt (0.28.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   23|Active     |     |org.apache.commons.commons-codec (1.15.0)
+   24|Active     |     |io.prometheus.simpleclient (0.6.0)
+   25|Active     |     |slf4j.api (1.7.30)
+   26|Active     |     |org.apache.logging.log4j.slf4j-impl (2.17.1)
+   27|Active     |     |org.apache.velocity.engine-core (2.3.0)
+   28|Active     |     |dev.galasa.http.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   29|Active     |     |dev.galasa.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   30|Active     |     |dev.galasa.common (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   31|Active     |     |dev.galasa.zosbatch.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   32|Active     |     |org.apache.httpcomponents.httpcore (4.4.14)
+   33|Active     |     |jakarta.xml.bind-api (3.0.0)
+   34|Active     |     |com.sun.activation.jakarta.activation (2.0.0)
+   35|Active     |     |org.apache.httpcomponents.httpclient (4.5.13)
+   36|Active     |     |org.apache.felix.configadmin (1.9.16)
+   37|Active     |     |dev.galasa.zosconsole.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   38|Active     |     |dev.galasa.zosfile.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   39|Active     |     |dev.galasa.zostsocommand.ssh.manager (0.21.0-5638ee6566f5b3048c228f559825c95933a03a35)
+22/01/2024 06:02:17.527 TRACE main dev.galasa.framework.TestRunManagers.loadBundle - Installing bundle dev.galasa.zosunixcommand.ssh.manager
+22/01/2024 06:02:17.528 TRACE main dev.galasa.framework.TestRunManagers.addResource - Resouce: dev.galasa.zosunixcommand.ssh.manager/0.21.0
+22/01/2024 06:02:17.606 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Resolving maven artifact dev.galasa:dev.galasa.zosunixcommand.ssh.manager:0.21.0:jar
+22/01/2024 06:02:17.607 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Checking local repository file:/home/galasa58/galasaconfig/repository
+22/01/2024 06:02:17.607 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.fetchArtifact - Looking for file /home/galasa58/galasaconfig/repository/dev/galasa/dev.galasa.zosunixcommand.ssh.manager/0.21.0/dev.galasa.zosunixcommand.ssh.manager-0.21.0.jar
+22/01/2024 06:02:17.609 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Checking file:/home/galasa58/galasaconfig/isolatedrepo/maven
+22/01/2024 06:02:17.610 DEBUG main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Attempting to download file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosunixcommand.ssh.manager/0.21.0/dev.galasa.zosunixcommand.ssh.manager-0.21.0.jar with connection timeout of 300000ms and read timeout of 300000ms 
+22/01/2024 06:02:17.614 TRACE main dev.galasa.framework.maven.repository.internal.GalasaMavenUrlHandlerService.getArtifact - Release artifact downloaded from file:/home/galasa58/galasaconfig/isolatedrepo/maven/dev/galasa/dev.galasa.zosunixcommand.ssh.manager/0.21.0/dev.galasa.zosunixcommand.ssh.manager-0.21.0.jar
+22/01/2024 06:02:17.657 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion - Manager started : Galasa zOS UNIX Command Manager - ssh Implementation
+22/01/2024 06:02:17.657 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -         version : 0.21.0
+22/01/2024 06:02:17.664 TRACE main dev.galasa.framework.ManagerServiceListener.reportBundleVersion -           build : Wed, 17 Jan 2024 15:43:04 GMT
+22/01/2024 06:02:17.697 TRACE main dev.galasa.framework.TestRunManagers.printBundles - Bundle status:
+    0|Active     |     |org.apache.felix.framework (7.0.0)
+    1|Active     |     |org.apache.felix.scr (2.1.14)
+    2|Resolved   |     |dev.galasa.framework.log4j2.bridge (0.25.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    3|Active     |     |org.apache.logging.log4j.api (2.17.1)
+    4|Active     |     |org.apache.logging.log4j.core (2.17.1)
+    5|Active     |     |dev.galasa.framework.maven.repository.spi (0.21.0-0c88959d5c1a3ad3b70276646ae70f4b3ca7f3df)
+    6|Active     |     |dev.galasa.framework.maven.repository (0.22.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+    7|Active     |     |org.apache.felix.bundlerepository (2.0.2)
+    8|Active     |     |org.apache.commons.commons-compress (1.21.0)
+    9|Active     |     |dev.galasa (0.21.0-0133fb9ce73e149dd32a081cab9f14c49a6725e1)
+   10|Active     |     |org.apache.bcel (6.7.0)
+   11|Active     |     |org.apache.commons.commons-io (2.9.0)
+   12|Active     |     |com.google.gson (2.10.1)
+   13|Active     |     |dev.galasa.framework (0.31.0-e5fa4bcf12698616946c6ee803b72fcb0a38b26f)
+   14|Active     |     |org.apache.commons.lang3 (3.12.0)
+   15|Active     |     |javax.validation.api (2.0.1.Final)
+   16|Active     |     |dev.galasa.artifact.manager (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   17|Active     |     |org.assertj.core (3.11.1)
+   18|Active     |     |com.jcraft.jsch (0.1.55)
+   19|Active     |     |dev.galasa.zos.manager (0.31.0-dca09fddafb2d83b164ead08760b12526c6091c6)
+   20|Active     |     |dev.galasa.ipnetwork.manager (0.25.0-9cb6dac35cafa3fedd143608b7127f372c17af1e)
+   21|Active     |     |dev.galasa.core.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   22|Active     |     |dev.galasa.zos.manager.ivt (0.28.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   23|Active     |     |org.apache.commons.commons-codec (1.15.0)
+   24|Active     |     |io.prometheus.simpleclient (0.6.0)
+   25|Active     |     |slf4j.api (1.7.30)
+   26|Active     |     |org.apache.logging.log4j.slf4j-impl (2.17.1)
+   27|Active     |     |org.apache.velocity.engine-core (2.3.0)
+   28|Active     |     |dev.galasa.http.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   29|Active     |     |dev.galasa.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   30|Active     |     |dev.galasa.common (0.25.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   31|Active     |     |dev.galasa.zosbatch.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   32|Active     |     |org.apache.httpcomponents.httpcore (4.4.14)
+   33|Active     |     |jakarta.xml.bind-api (3.0.0)
+   34|Active     |     |com.sun.activation.jakarta.activation (2.0.0)
+   35|Active     |     |org.apache.httpcomponents.httpclient (4.5.13)
+   36|Active     |     |org.apache.felix.configadmin (1.9.16)
+   37|Active     |     |dev.galasa.zosconsole.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   38|Active     |     |dev.galasa.zosfile.zosmf.manager (0.31.0-637fe87cff4420d048d70762b2b87006c1e28367)
+   39|Active     |     |dev.galasa.zostsocommand.ssh.manager (0.21.0-5638ee6566f5b3048c228f559825c95933a03a35)
+   40|Active     |     |dev.galasa.zosunixcommand.ssh.manager (0.21.0-5638ee6566f5b3048c228f559825c95933a03a35)
+22/01/2024 06:02:17.843 DEBUG main dev.galasa.framework.TestRunManagers.<init> - The following Managers are active:-
+22/01/2024 06:02:17.843 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.zos.internal.ZosManagerImpl
+22/01/2024 06:02:17.844 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.ipnetwork.internal.IpNetworkManagerImpl
+22/01/2024 06:02:17.844 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.core.manager.internal.CoreManagerImpl
+22/01/2024 06:02:17.844 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.zostsocommand.ssh.manager.internal.ZosTSOCommandManagerImpl
+22/01/2024 06:02:17.844 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.zosunixcommand.ssh.manager.internal.ZosUNIXCommandManagerImpl
+22/01/2024 06:02:17.844 DEBUG main dev.galasa.framework.TestRunManagers.<init> - The following Managers are sorted in provisioning order:-
+22/01/2024 06:02:17.844 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.zos.internal.ZosManagerImpl
+22/01/2024 06:02:17.845 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.ipnetwork.internal.IpNetworkManagerImpl
+22/01/2024 06:02:17.845 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.core.manager.internal.CoreManagerImpl
+22/01/2024 06:02:17.845 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.zosunixcommand.ssh.manager.internal.ZosUNIXCommandManagerImpl
+22/01/2024 06:02:17.845 DEBUG main dev.galasa.framework.TestRunManagers.reportManagers -    dev.galasa.zostsocommand.ssh.manager.internal.ZosTSOCommandManagerImpl
+22/01/2024 06:02:17.845 DEBUG main dev.galasa.framework.TestRunner.runTest - Test managers ok.
+22/01/2024 06:02:17.845 DEBUG main dev.galasa.framework.TestRunner.runTest - Test class should not be ignored.
+22/01/2024 06:02:17.886 DEBUG main dev.galasa.framework.TestRunner.runTest - Parsing test class...
+22/01/2024 06:02:18.808 TRACE main dev.galasa.framework.TestClassWrapper.parseTestClass - Test Class structure:-
+----------------------- Test Class dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT status=started
+-----------------------     Test Method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT.preFlightTests, type=Test, status=Unknown
+-----------------------     Test Method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT.basicCommandExecution, type=Test, status=Unknown
+22/01/2024 06:02:18.808 DEBUG main dev.galasa.framework.TestRunner.runTest - Instantiating test class...
+22/01/2024 06:02:18.809 DEBUG main dev.galasa.framework.TestRunner.runTest - isRunOK: true
+22/01/2024 06:02:18.809 DEBUG main dev.galasa.framework.TestRunner.runTest - Generating environment...
+22/01/2024 06:02:18.819 INFO  main dev.galasa.framework.TestRunner.generateEnvironment - Starting Provision Generate phase
+22/01/2024 06:02:18.823 INFO  main dev.galasa.zos.internal.ZosManagerImpl.generateZosImage - Searching for a zos DSE Image configured for tag PRIMARY
+22/01/2024 06:02:18.824 INFO  main dev.galasa.zos.internal.ZosManagerImpl.generateZosImage - No DSE Image found, searching for specific zos image for tag PRIMARY
+22/01/2024 06:02:18.827 INFO  main dev.galasa.zos.internal.ZosManagerImpl.generateZosImage - No specific image found for tagPRIMARY selecting image
+22/01/2024 06:02:18.830 INFO  main dev.galasa.zos.internal.ZosManagerImpl.selectNewImage - Searching for cluster ID for tag PRIMARY
+22/01/2024 06:02:18.831 INFO  main dev.galasa.zos.internal.ZosManagerImpl.selectNewImage - No cluster ID found for tag PRIMARY assuming DEFAULT
+22/01/2024 06:02:18.838 INFO  main dev.galasa.zos.internal.ZosManagerImpl.selectNewImage - Searching for list of images for cluster DEFAULT
+22/01/2024 06:02:19.074 INFO  main dev.galasa.zos.internal.ZosManagerImpl.selectNewImage - zOS Image MV2D selected for zosTag 'PRIMARY' with slot name SLOT_TESTZB1
+22/01/2024 06:02:19.107 INFO  main dev.galasa.framework.TestRunner.createEnvironment - Starting Provision Build phase
+22/01/2024 06:02:19.119 INFO  main dev.galasa.framework.TestRunner.runEnvironment - Starting Provision Start phase
+22/01/2024 06:02:19.129 INFO  main dev.galasa.framework.TestRunner.runTestClassWrapper - Running the test class
+22/01/2024 06:02:19.194 INFO  main dev.galasa.framework.TestClassWrapper.runTestMethods - Starting
+----------------------- ****************************************************************************************************
+----------------------- *** Start of test class dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT
+----------------------- ****************************************************************************************************
+22/01/2024 06:02:19.320 INFO  main dev.galasa.framework.GenericMethodWrapper.invoke - Starting
+----------------------- ****************************************************************************************************
+----------------------- *** Start of test method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT#preFlightTests,type=Test
+----------------------- ****************************************************************************************************
+22/01/2024 06:02:19.466 INFO  main dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT.preFlightTests - Using Run ID of: TESTZB1
+22/01/2024 06:02:19.507 INFO  main dev.galasa.framework.GenericMethodWrapper.invoke - Ending
+----------------------- ****************************************************************************************************
+----------------------- *** Passed - Test method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT#preFlightTests,type=Test
+----------------------- ****************************************************************************************************
+22/01/2024 06:02:19.515 INFO  main dev.galasa.framework.GenericMethodWrapper.invoke - Starting
+----------------------- ****************************************************************************************************
+----------------------- *** Start of test method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT#basicCommandExecution,type=Test
+----------------------- ****************************************************************************************************
+22/01/2024 06:02:19.516 DEBUG main dev.galasa.zosunixcommand.ssh.manager.internal.ZosUNIXCommandImpl.issueCommand - About to issue command :tsocmd 'TIME'
+22/01/2024 06:02:20.887 TRACE main dev.galasa.ipnetwork.spi.SSHClient.connect - SSH Client connected to 'winmvs2d.hursley.ibm.com:22
+22/01/2024 06:02:20.899 TRACE main dev.galasa.ipnetwork.spi.SSHClient.issueCommand - Issuing 'tsocmd 'TIME''
+22/01/2024 06:02:21.038 TRACE main dev.galasa.ipnetwork.spi.SSHClient.issueCommand - Received 'TIME
+IKJ56650I TIME-06:02:21 AM. CPU-00:00:00 SERVICE-218 SESSION-00:00:00 JANUARY 22,2024
+
+22/01/2024 06:02:21.039 DEBUG main dev.galasa.zosunixcommand.ssh.manager.internal.ZosUNIXCommandImpl.issueCommand - response :TIME
+IKJ56650I TIME-06:02:21 AM. CPU-00:00:00 SERVICE-218 SESSION-00:00:00 JANUARY 22,2024
+
+22/01/2024 06:02:21.049 INFO  main dev.galasa.framework.GenericMethodWrapper.invoke - Ending
+----------------------- ****************************************************************************************************
+----------------------- *** Passed - Test method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT#basicCommandExecution,type=Test
+----------------------- ****************************************************************************************************
+22/01/2024 06:02:21.137 INFO  main dev.galasa.framework.TestClassWrapper.runTestMethods - Ending
+----------------------- ****************************************************************************************************
+----------------------- *** Passed - Test class dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT
+----------------------- ****************************************************************************************************
+22/01/2024 06:02:21.138 TRACE main dev.galasa.framework.TestClassWrapper.runTestMethods - Finishing Test Class structure:-
+----------------------- Test Class dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT status=running
+-----------------------     Test Method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT.preFlightTests, type=Test, status=finished
+-----------------------     Test Method dev.galasa.zos.manager.ivt.ZosManagerTSOCommandIVT.basicCommandExecution, type=Test, status=finished
+22/01/2024 06:02:21.143 INFO  main dev.galasa.framework.TestRunner.stopEnvironment - Starting Provision Stop phase
+22/01/2024 06:02:21.144 INFO  main dev.galasa.framework.TestRunner.discardEnvironment - Starting Provision Discard phase
+22/01/2024 06:02:21.182 INFO  main dev.galasa.zos.internal.ZosProvisionedImageImpl.freeImage - Discard slot name SLOT_TESTZB1 for zOS Image MV2D
+22/01/2024 06:02:21.183 DEBUG main dev.galasa.framework.TestRunner.runTest - isRunOK: true runType: TEST
+22/01/2024 06:02:21.183 DEBUG main dev.galasa.framework.TestRunner.runTest - Test did not run OK... or runtype is not SHARED_ENVIRONMENT_BUILD
+22/01/2024 06:02:21.214 DEBUG main dev.galasa.framework.TestRunner.runTest - Stopping heartbeat...
+22/01/2024 06:02:21.717 DEBUG main dev.galasa.framework.TestRunner.runTest - Cleaning up managers...
+22/01/2024 06:02:21.718 DEBUG main dev.galasa.framework.TestRunner.runTest - Cleaning up framework...
+22/01/2024 06:02:21.718 INFO  main dev.galasa.framework.Framework.shutdown - Shutting down the framework
+22/01/2024 06:02:21.718 TRACE main dev.galasa.framework.Framework.shutdown - Shutting down the Confidential Text Service
+22/01/2024 06:02:21.718 TRACE main dev.galasa.framework.Framework.shutdown - Shutting down the Credentials Service
+22/01/2024 06:02:21.719 TRACE main dev.galasa.framework.Framework.shutdown - Shutting down the Result Archive Store
+22/01/2024 06:02:21.719 TRACE main dev.galasa.framework.Framework.shutdown - Shutting down the Dynamic Status Store
+22/01/2024 06:02:21.719 TRACE main dev.galasa.framework.Framework.shutdown - Shutting down the Configuration Properties Store
+22/01/2024 06:02:21.719 INFO  main dev.galasa.framework.Framework.shutdown - Framework shutdown

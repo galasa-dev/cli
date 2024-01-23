@@ -21,6 +21,7 @@ type FileSystem interface {
 	// MkdirAll creates all folders in the file system if they don't already exist.
 	MkdirAll(targetFolderPath string) error
 	ReadTextFile(filePath string) (string, error)
+	ReadBinaryFile(filePath string) ([]byte, error)
 	WriteTextFile(targetFilePath string, desiredContents string) error
 	WriteBinaryFile(targetFilePath string, desiredContents []byte) error
 	Exists(path string) (bool, error)
@@ -197,4 +198,13 @@ func (osFS *OSFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
 			return err
 		})
 	return collectedFilePaths, err
+}
+
+func (*OSFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
+	bytes, err := os.ReadFile(filePath)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, filePath, err.Error())
+		bytes = nil
+	}
+	return bytes, err
 }

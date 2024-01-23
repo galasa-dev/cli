@@ -209,6 +209,13 @@ var (
 	GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION     = NewMessageType("GAL1121E: Unable to retrieve rest api version. Reason is: %s. Try downloading the latest version of galasa or rebuilding a clean version.", 1121, STACK_TRACE_WANTED)
 	GALASA_ERROR_AUTH_PROPERTY_NOT_AVAILABLE             = NewMessageType("GAL1122E: Authentication property %s is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '%s' or set as an environment variable.", 1122, STACK_TRACE_NOT_WANTED)
 
+	GALASA_ERROR_FAILED_TO_OPEN_GZIP_FILE         = NewMessageType("GAL1226E: Failed to open file '%s' cause: %v. Check that this file exists, and that you have read permissions.", 1226, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_SETUP_READER_GZIP_FILE = NewMessageType("GAL1227E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: %s error: %v", 1227, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_UNCOMPRESS_GZIP_FILE   = NewMessageType("GAL1228E: Internal failure. Contents of gzip could not be decoded. %v error: %v", 1228, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_COMPRESS_BINARY_DATA   = NewMessageType("GAL1229E: Internal failure. Contents of gzip could not be encoded and compressed. %v error: %v", 1229, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_FLUSH_BINARY_DATA      = NewMessageType("GAL1230E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. %v error: %v", 1230, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_CLOSE_GZIP_FILE        = NewMessageType("GAL1231E: Internal failure. Gzip file could not be closed while encoding and compressing. %v error: %v", 1231, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 	// Information messages...

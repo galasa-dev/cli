@@ -1,0 +1,48 @@
+{
+  "_id": "598269bc3113fe28309f721feca5cd05",
+  "_rev": "24-dae5bed25c1b9a66d2961f64f67e5684",
+  "runName": "C19529",
+  "bundle": "dev.galasa.inttests",
+  "testName": "dev.galasa.inttests.zosTso.local.mvp.ZosTsoLocalJava11UbuntuMvp",
+  "testShortName": "ZosTsoLocalJava11UbuntuMvp",
+  "requestor": "root",
+  "status": "finished",
+  "result": "Passed",
+  "queued": "2024-01-22T06:00:21.111426Z",
+  "startTime": "2024-01-22T06:00:40.099448Z",
+  "endTime": "2024-01-22T06:02:26.819390Z",
+  "methods": [
+    {
+      "className": "dev.galasa.inttests.zosTso.local.mvp.ZosTsoLocalJava11UbuntuMvp",
+      "methodName": "testZosTSOIvtTest",
+      "type": "Test",
+      "befores": [],
+      "afters": [],
+      "status": "finished",
+      "result": "Passed",
+      "runLogStart": 0,
+      "runLogEnd": 0,
+      "startTime": "2024-01-22T06:02:06.261348Z",
+      "endTime": "2024-01-22T06:02:23.265735Z"
+    }
+  ],
+  "logRecordIds": [
+    "598269bc3113fe28309f721feca5f71a",
+    "598269bc3113fe28309f721feca61051",
+    "598269bc3113fe28309f721feca619c1",
+    "598269bc3113fe28309f721feca63693",
+    "598269bc3113fe28309f721feca63eb0",
+    "598269bc3113fe28309f721feca64e67",
+    "598269bc3113fe28309f721feca6567e",
+    "598269bc3113fe28309f721feca65dfa",
+    "598269bc3113fe28309f721feca89fe3",
+    "598269bc3113fe28309f721feca9d8e0",
+    "598269bc3113fe28309f721fecaa8f92",
+    "598269bc3113fe28309f721fecab94f4",
+    "598269bc3113fe28309f721fecaba80c",
+    "598269bc3113fe28309f721fecabd244"
+  ],
+  "artifactRecordIds": [
+    "598269bc3113fe28309f721feca5d677"
+  ]
+}
