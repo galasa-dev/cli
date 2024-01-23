@@ -17,6 +17,10 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+//------------------------
+// WORK IN PROGRESS
+//------------------------
+
 // Implementation of the font.Face interface
 type FallbackFontFace struct {
 	primary   FontEntry
@@ -28,7 +32,6 @@ type FontEntry struct {
 	trueTypeFont *truetype.Font
 }
 
-// TODO: move these methods somewhere else?
 func LoadTrueTypeFont(fontFilePath string) (font.Face, *truetype.Font, error) {
     var err error
     var fontBytes []byte
