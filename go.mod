@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.1.0
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.7.0

@@ -456,3 +456,44 @@ func TestRenderTerminaColorsRenderOk(t *testing.T) {
     // Then...
     assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
 }
+
+func TestRenderTerminaUnicodeTextRendersOk(t *testing.T) {
+    // Given...
+    fs := files.NewOSFileSystem()
+
+    imageId := t.Name()
+    terminalSize := TerminalSize{
+        Rows: 26,
+        Columns: 80,
+    }
+
+    symbolField := createTextField(9, 20, "Symbols: © Ø ® ß ◊ ¥ Ô º ™ € ¢ ∞ § Ω`", "d")
+    greekField := createTextField(10, 20, "Greek: Χαίρετε", "d")
+    japaneseField := createTextField(11, 20, "Japanese: こんにちは", "d")
+    russianField := createTextField(12, 20, "Russian: Здравствуйте", "d")
+    chineseField := createTextField(13, 20, "Chinese: 你好", "d")
+    koreanField := createTextField(14, 20, "Korean: 여보세요", "d")
+
+    terminalImage := TerminalImage{
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{
+            symbolField,
+            greekField,
+            japaneseField,
+            russianField,
+            chineseField,
+            koreanField,
+        },
+    }
+
+    // When...
+    image := RenderTerminalImage(terminalImage)
+
+    // Then...
+    assertTerminalImageMatchesExpectedSnapshot(t, fs, image, terminalImage)
+}

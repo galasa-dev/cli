@@ -17,16 +17,17 @@ import (
 	"strconv"
 	"strings"
 
-    galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/font/gofont/gomono"
 	"golang.org/x/image/math/fixed"
 )
 
 var (
-    FONT_WIDTH = basicfont.Face7x13.Advance
-    FONT_HEIGHT = basicfont.Face7x13.Height
+    FONT_WIDTH = 7
+    FONT_HEIGHT = 13
 
     DEFAULT_COLOR = color.RGBA{0, 255, 0, 255}
     NEUTRAL       = color.RGBA{255, 255, 255, 255}
@@ -52,11 +53,12 @@ var (
 // Renders an RGBA image representation of a 3270 terminal and returns the rendered image
 func RenderTerminalImage(terminalImage TerminalImage) *image.RGBA {
     targetColumnCount := terminalImage.ImageSize.Columns
-    targetRowCount := terminalImage.ImageSize.Rows + 2
+    targetRowCount := terminalImage.ImageSize.Rows + 3
 
     imagePixelWidth := targetColumnCount * FONT_WIDTH
     imagePixelHeight := targetRowCount * FONT_HEIGHT
     img := createImageBase(imagePixelWidth, imagePixelHeight)
+    context := createImageDrawer(img)
 
     for _, field := range terminalImage.Fields {
         column := field.Column
@@ -71,13 +73,13 @@ func RenderTerminalImage(terminalImage TerminalImage) *image.RGBA {
                     row++
                 }
                 textColor := getColor(field.ForegroundColor)
-                drawString(img, column, row, string(char), textColor)
+                drawString(context, column, row, string(char), textColor)
                 column++
             }
         }
     }
     statusText := getStatusText(terminalImage, terminalImage.ImageSize.Columns, terminalImage.ImageSize.Rows)
-    drawString(img, 0, targetRowCount - 1, statusText, DEFAULT_COLOR)
+    drawString(context, 0, targetRowCount - 2, statusText, DEFAULT_COLOR)
     return img
 }
 
@@ -122,6 +124,32 @@ func createImageBase(imagePixelWidth int, imagePixelHeight int) *image.RGBA {
     return img
 }
 
+// Creates a drawer to draw text on a given image
+func createImageDrawer(img *image.RGBA) *font.Drawer {
+    var fontFace font.Face
+    monoFont, err := truetype.Parse(gomono.TTF)
+    if err == nil {
+        fontFace = truetype.NewFace(monoFont, &truetype.Options{})
+    }
+
+    drawer := &font.Drawer{
+        Dst:  img,
+        Face: fontFace,
+    }
+
+    return drawer
+}
+
+// Draws a string of text onto an image at the given column and row (x, y) coordinates
+func drawString(drawer *font.Drawer, column int, row int, text string, textColor color.RGBA) {
+    startPoint := fixed.Point26_6{ X: fixed.I(column * FONT_WIDTH), Y: fixed.I((row + 1) * FONT_HEIGHT)}
+
+    drawer.Src = image.NewUniform(textColor)
+    drawer.Dot = startPoint
+
+    drawer.DrawString(text)
+}
+
 // Returns a string containing the content of the status row to be displayed at the bottom
 // of a 3270 image
 func getStatusText(terminalImage TerminalImage, columns int, rows int) string {
@@ -142,19 +170,6 @@ func getStatusText(terminalImage TerminalImage, columns int, rows int) string {
         buff.WriteString(terminalImage.Aid)
     }
     return buff.String()
-}
-
-// Draws a string of text onto an image at the given column and row (x, y) coordinates
-func drawString(img *image.RGBA, column int, row int, text string, textColor color.RGBA) {
-    point := fixed.Point26_6{ X: fixed.I(column * FONT_WIDTH), Y: fixed.I((row + 1) * FONT_HEIGHT)}
-
-    drawer := &font.Drawer{
-        Dst:  img,
-        Src:  image.NewUniform(textColor),
-        Face: basicfont.Face7x13,
-        Dot:  point,
-    }
-    drawer.DrawString(text)
 }
 
 // Returns a color from the colors map that matches the given single-character identifier
