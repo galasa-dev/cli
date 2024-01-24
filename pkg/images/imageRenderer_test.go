@@ -581,7 +581,7 @@ func TestRenderTerminaUnicodeTextRendersOk(t *testing.T) {
     japaneseField := createTextField(11, 20, "Japanese: こんにちは", "d")
     russianField := createTextField(12, 20, "Russian: Здравствуйте", "d")
     chineseField := createTextField(13, 20, "Chinese: 你好", "d")
-    koreanField := createTextField(14, 20, "Korean: 여보세요", "d")
+    koreanField := createTextField(14, 20, "Korean: 안녕하세요", "d")
 
     terminalImage := TerminalImage{
         Id: imageId,

@@ -25,6 +25,7 @@ const (
 // We can access the "embedded" file system as if they are normal files.
 //
 //go:embed templates/*
+//go:embed fonts/*
 var embeddedFileSystem embed.FS
 
 // An instance of the ReadOnlyFileSystem interface, set once, used many times.

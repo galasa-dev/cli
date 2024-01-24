@@ -6,10 +6,23 @@
 package embedded
 
 import (
+	"io/fs"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+type MockDirEntry struct {
+    os.DirEntry
+    DirName string
+}
+
+func (mockDirEntry MockDirEntry) Name() string {
+    return mockDirEntry.DirName
+}
 
 type MockReadOnlyFileSystem struct {
 	files map[string]string
@@ -31,6 +44,16 @@ func (fs *MockReadOnlyFileSystem) WriteFile(filePath string, content string) {
 func (fs *MockReadOnlyFileSystem) ReadFile(filePath string) ([]byte, error) {
 	content := fs.files[filePath]
 	return []byte(content), nil
+}
+
+func (fs *MockReadOnlyFileSystem) ReadDir(directoryPath string) ([]fs.DirEntry, error) {
+    dirEntries := make([]os.DirEntry, 0)
+    for key := range fs.files {
+        if strings.HasPrefix(key, directoryPath) && key != directoryPath {
+            dirEntries = append(dirEntries, MockDirEntry{DirName: filepath.Base(key)})
+        }
+    }
+    return dirEntries, nil
 }
 
 func TestCanParseVersionsFromEmbeddedFS(t *testing.T) {

@@ -7,56 +7,29 @@ package images
 
 import (
 	"image"
-	"log"
+	"io/fs"
+	"path/filepath"
 
-	"github.com/galasa-dev/cli/pkg/files"
-	"github.com/golang/freetype/truetype"
+	"github.com/galasa-dev/cli/pkg/embedded"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
 )
 
-//------------------------
-// WORK IN PROGRESS
-//------------------------
-
 // Implementation of the font.Face interface
 type FallbackFontFace struct {
-	primary   FontEntry
-	fallbacks []FontEntry
+	primary   font.Face
+	fallbacks []font.Face
 }
 
-type FontEntry struct {
-	fontFace font.Face
-	trueTypeFont *truetype.Font
-}
-
-func LoadTrueTypeFont(fontFilePath string) (font.Face, *truetype.Font, error) {
-    var err error
-    var fontBytes []byte
-    var truetypeFont *truetype.Font
-    var fontFace font.Face
-
-    fs := files.NewOSFileSystem()
-    fontBytes, err = fs.ReadBinaryFile(fontFilePath)
-    if err == nil {
-        truetypeFont, err = truetype.Parse(fontBytes)
-        if err == nil {
-            fontFace = truetype.NewFace(truetypeFont, &truetype.Options{})
-        }
-    }
-    return fontFace, truetypeFont, err
-}
-
-func LoadOpenTypeFont(fontFilePath string) (font.Face, error) {
+// Loads a .ttf or .otf font from the embedded filesystem
+func loadFont(fs embedded.ReadOnlyFileSystem, fontFilePath string) (font.Face, error) {
     var err error
     var fontBytes []byte
     var opentypeFont *opentype.Font
     var fontFace font.Face
 
-    fs := files.NewOSFileSystem()
-    fontBytes, err = fs.ReadBinaryFile(fontFilePath)
+    fontBytes, err = fs.ReadFile(fontFilePath)
     if err == nil {
         opentypeFont, err = opentype.Parse(fontBytes)
         if err == nil {
@@ -66,41 +39,42 @@ func LoadOpenTypeFont(fontFilePath string) (font.Face, error) {
     return fontFace, err
 }
 
-func initFontFaces() font.Face {
-	var err error
-	var fontFace font.Face
-	var font *truetype.Font
-	var primaryFont FontEntry
+// Loads a .ttf or .otf font from the embedded filesystem
+func loadFontsFromDirectory(fileSystem embedded.ReadOnlyFileSystem, fontDirectoryPath string) ([]font.Face, error) {
+    var err error
+	var fontFiles []fs.DirEntry
+	fonts := make([]font.Face, 0)
 
-    fontFace, font, err = LoadTrueTypeFont("NotoSansMono.ttf")
+    fontFiles, err = fileSystem.ReadDir(fontDirectoryPath)
 	if err == nil {
-		primaryFont = FontEntry{fontFace, font}
-	} else {
-		// Use a default mono font
-		log.Println("Could not load primary font, using built-in font")
-		primaryFont = FontEntry{basicfont.Face7x13, nil}
-	}
+		for _, fontFile := range fontFiles {
+			var fontFace font.Face
 
-	fallbackFonts := []FontEntry{}
-    fontFace, err = LoadOpenTypeFont("NotoSansMonoCJKjp.otf")
-	if err == nil {
-		fallbackFonts = append(fallbackFonts, FontEntry{fontFace, nil})
-	} else {
-		log.Println("Failed to load substitute fonts, continuing without additional fonts")
-	}
-
-    return &FallbackFontFace{primary: primaryFont, fallbacks: fallbackFonts}
+			fontFilePath := filepath.Join(fontDirectoryPath, fontFile.Name())
+			fontFace, err = loadFont(fileSystem, fontFilePath)
+			if err == nil {
+				fonts = append(fonts, fontFace)
+			}
+		}
+    }
+    return fonts, err
 }
 
-// Checks whether or not a given glyph is in a truetype font
-func isInTrueTypeFont(font *truetype.Font, glyph rune) bool {
-	return (font != nil) && (font.Index(glyph) != 0)
+func NewFallbackFontFace(primaryFont font.Face) *FallbackFontFace {
+	return &FallbackFontFace{primary: primaryFont}
 }
 
+func (f *FallbackFontFace) AddFallbackFont(fontFace font.Face) {
+	f.fallbacks = append(f.fallbacks, fontFace)
+}
+
+//----------------------------------------------
+// Functions implementing the font.Face interface
+//----------------------------------------------
 func (f *FallbackFontFace) Close() error {
-	err := f.primary.fontFace.Close()
+	err := f.primary.Close()
 	for _, fallback := range f.fallbacks {
-		fallbackErr := fallback.fontFace.Close()
+		fallbackErr := fallback.Close()
 		if fallbackErr != nil && err == nil {
 			err = fallbackErr
 			break
@@ -110,14 +84,14 @@ func (f *FallbackFontFace) Close() error {
 }
 
 func (f *FallbackFontFace) Metrics() font.Metrics {
-	return f.primary.fontFace.Metrics()
+	return f.primary.Metrics()
 }
 
 func (f *FallbackFontFace) Kern(r0 rune, r1 rune) fixed.Int26_6 {
-	kern := f.primary.fontFace.Kern(r0, r1)
+	kern := f.primary.Kern(r0, r1)
 	if kern == 0 {
 		for _, fallback := range f.fallbacks {
-			fallbackKern := fallback.fontFace.Kern(r0, r1)
+			fallbackKern := fallback.Kern(r0, r1)
 			if fallbackKern != 0 {
 				kern = fallbackKern
 				break
@@ -128,11 +102,11 @@ func (f *FallbackFontFace) Kern(r0 rune, r1 rune) fixed.Int26_6 {
 }
 
 func (f *FallbackFontFace) Glyph(dot fixed.Point26_6, r rune) (image.Rectangle, image.Image, image.Point, fixed.Int26_6, bool) {
-	rect, img, point, advance, ok := f.primary.fontFace.Glyph(dot, r)
-	if !isInTrueTypeFont(f.primary.trueTypeFont, r) || !ok {
+	rect, img, point, advance, ok := f.primary.Glyph(dot, r)
+	if !ok {
 		for _, fallback := range f.fallbacks {
-			rect, img, point, advance, ok = fallback.fontFace.Glyph(dot, r)
-			if isInTrueTypeFont(fallback.trueTypeFont, r) || ok {
+			rect, img, point, advance, ok = fallback.Glyph(dot, r)
+			if ok {
 				break
 			}
 		}
@@ -141,11 +115,11 @@ func (f *FallbackFontFace) Glyph(dot fixed.Point26_6, r rune) (image.Rectangle, 
 }
 
 func (f *FallbackFontFace) GlyphAdvance(r rune) (fixed.Int26_6, bool) {
-	advance, ok := f.primary.fontFace.GlyphAdvance(r)
-	if !isInTrueTypeFont(f.primary.trueTypeFont, r) || !ok {
+	advance, ok := f.primary.GlyphAdvance(r)
+	if !ok {
 		for _, fallback := range f.fallbacks {
-			fallbackAdv, fallbackOk := fallback.fontFace.GlyphAdvance(r)
-			if isInTrueTypeFont(fallback.trueTypeFont, r) || fallbackOk {
+			fallbackAdv, fallbackOk := fallback.GlyphAdvance(r)
+			if fallbackOk {
 				advance, ok = fallbackAdv, fallbackOk
 				break
 			}
@@ -155,11 +129,11 @@ func (f *FallbackFontFace) GlyphAdvance(r rune) (fixed.Int26_6, bool) {
 }
 
 func (f *FallbackFontFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.Int26_6, ok bool) {
-	bounds, adv, ok := f.primary.fontFace.GlyphBounds(r)
-	if !isInTrueTypeFont(f.primary.trueTypeFont, r) || !ok {
+	bounds, adv, ok := f.primary.GlyphBounds(r)
+	if !ok {
 		for _, fallback := range f.fallbacks {
-			fallbackBounds, fallbackAdvance, fallbackOk := fallback.fontFace.GlyphBounds(r)
-			if isInTrueTypeFont(fallback.trueTypeFont, r) || ok {
+			fallbackBounds, fallbackAdvance, fallbackOk := fallback.GlyphBounds(r)
+			if ok {
 				bounds, adv, ok = fallbackBounds, fallbackAdvance, fallbackOk
 				break
 			}
