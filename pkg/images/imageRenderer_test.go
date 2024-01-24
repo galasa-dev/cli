@@ -23,7 +23,7 @@ func assertTerminalImageMatchesExpectedSnapshot(t *testing.T, actualImageBytes [
     assert.NotEmpty(t, actualImageBytes, "Image data should not be empty")
     fs := files.NewOSFileSystem()
 
-    pngImageToCompareAgainst, err := filepath.Glob(filepath.Join("testdata", t.Name() + "*.png"))
+    pngImageToCompareAgainst, err := filepath.Glob(filepath.Join("testdata", "renderedimages", t.Name() + "*.png"))
     if err != nil || len(pngImageToCompareAgainst) == 0 {
         writeRenderedImageToTempDir(t, fs, actualImageBytes)
         t.Fatalf("Failed to find expected image to compare against")

@@ -25,8 +25,8 @@ import (
 )
 
 const (
-    PRIMARY_FONT_DIR  = "fonts/primary"
-    FALLBACK_FONT_DIR = "fonts/fallback"
+    PRIMARY_FONT_DIRECTORY  = "fonts/primary"
+    FALLBACK_FONT_DIRECTORY = "fonts/fallbacks"
     FONT_WIDTH = 7
     FONT_HEIGHT = 13
 )
@@ -223,7 +223,7 @@ func loadPrimaryFont(fs embedded.ReadOnlyFileSystem) font.Face {
     var loadedFonts []font.Face
     var primaryFont font.Face
 
-    loadedFonts, err = loadFontsFromDirectory(fs, "fonts/primary")
+    loadedFonts, err = loadFontsFromDirectory(fs, PRIMARY_FONT_DIRECTORY)
 	if err == nil && len(loadedFonts) > 0 {
         primaryFont = loadedFonts[0]
     } else {
@@ -240,7 +240,7 @@ func loadFallbackFonts(fs embedded.ReadOnlyFileSystem, fallbackFontFace *Fallbac
     var loadedFonts []font.Face
 
     // Add any fallback fonts to use in the renderer
-    loadedFonts, err = loadFontsFromDirectory(fs, "fonts/fallbacks")
+    loadedFonts, err = loadFontsFromDirectory(fs, FALLBACK_FONT_DIRECTORY)
 	if err == nil {
         for _, font := range loadedFonts {
             fallbackFontFace.AddFallbackFont(font)
