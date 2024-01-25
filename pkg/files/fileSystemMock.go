@@ -42,7 +42,7 @@ type MockFileSystem struct {
 	// The New
 	VirtualFunction_MkdirAll             func(targetFolderPath string) error
 	VirtualFunction_WriteTextFile        func(targetFilePath string, desiredContents string) error
-	VirtualFunction_ReadBinaryFile         func(filePath string) ([]byte, error)
+	VirtualFunction_ReadBinaryFile       func(filePath string) ([]byte, error)
 	VirtualFunction_ReadTextFile         func(filePath string) (string, error)
 	VirtualFunction_Exists               func(path string) (bool, error)
 	VirtualFunction_DirExists            func(path string) (bool, error)
@@ -228,7 +228,7 @@ func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {
 
 	// Figure out which entries we are going to delete.
 	var keysToRemove []string = make([]string, 0)
-	for key, _ := range fs.data {
+	for key := range fs.data {
 		if strings.HasPrefix(key, pathToDelete) {
 			keysToRemove = append(keysToRemove, key)
 		}
