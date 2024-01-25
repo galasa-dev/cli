@@ -11,6 +11,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -155,7 +156,8 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 
 				if err == nil {
 					// No error, so try to expand the files.
-					renderer := images.NewImageRenderer()
+					embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+					renderer := images.NewImageRenderer(embeddedFileSystem)
 					expander := images.NewImageExpander(fileSystem, renderer)
 
 					err = expander.ExpandImages(cmd.values.runDownloadTargetFolder)

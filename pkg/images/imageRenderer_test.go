@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
@@ -99,6 +100,8 @@ func TestRenderEmptyTerminalRendersOk(t *testing.T) {
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
 
+    embeddedFs := embedded.NewReadOnlyFileSystem()
+
     imageId := t.Name()
     terminalSize := TerminalSize{
         Rows: 26,
@@ -118,7 +121,7 @@ func TestRenderEmptyTerminalRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -136,6 +139,8 @@ func TestRenderTerminalWithFieldRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -157,7 +162,7 @@ func TestRenderTerminalWithFieldRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -175,6 +180,8 @@ func TestRenderTerminalWithSmallerSizeRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -196,7 +203,7 @@ func TestRenderTerminalWithSmallerSizeRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -214,6 +221,8 @@ func TestRenderTerminalWithFieldAtOriginRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -235,7 +244,7 @@ func TestRenderTerminalWithFieldAtOriginRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -253,6 +262,8 @@ func TestRenderTerminalWithFieldAtTopRightRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -277,7 +288,7 @@ func TestRenderTerminalWithFieldAtTopRightRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -295,6 +306,8 @@ func TestRenderTerminalWithFieldAtBottomLeftRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -320,7 +333,7 @@ func TestRenderTerminalWithFieldAtBottomLeftRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -338,6 +351,8 @@ func TestRenderTerminalWithFieldAtBottomRightRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -362,7 +377,7 @@ func TestRenderTerminalWithFieldAtBottomRightRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -380,6 +395,8 @@ func TestRenderTerminalWithFullRowRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -404,7 +421,7 @@ func TestRenderTerminalWithFullRowRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -422,6 +439,8 @@ func TestRenderTerminalWithFullColumnRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     rows := 26
@@ -450,7 +469,7 @@ func TestRenderTerminalWithFullColumnRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -468,6 +487,8 @@ func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -492,7 +513,7 @@ func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -510,6 +531,8 @@ func TestRenderTerminaColorsRenderOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -551,7 +574,7 @@ func TestRenderTerminaColorsRenderOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
@@ -569,6 +592,8 @@ func TestRenderTerminaUnicodeTextRendersOk(t *testing.T) {
     // Given...
     fs := files.NewMockFileSystem()
     tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewReadOnlyFileSystem()
 
     imageId := t.Name()
     terminalSize := TerminalSize{
@@ -604,7 +629,48 @@ func TestRenderTerminaUnicodeTextRendersOk(t *testing.T) {
     terminalJsonBytes, _ := json.Marshal(terminal)
 
     imageFileWriter := NewImageFileWriter(fs, tempDir)
-    imageRenderer := NewImageRenderer()
+    imageRenderer := NewImageRenderer(embeddedFs)
+
+    // When...
+    err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)
+    assert.Nil(t, err, "Should have created a PNG image without error")
+
+    expectedPngFileName := fmt.Sprintf("%s-%05d.png", terminal.Id, terminalImage.Sequence)
+    imageBytes, err := fs.ReadBinaryFile(filepath.Join(tempDir, expectedPngFileName))
+    assert.Nil(t, err, "PNG file should exist and should be readable")
+
+    // Then...
+    assertTerminalImageMatchesExpectedSnapshot(t, imageBytes)
+}
+
+func TestRenderTerminalWithMissingFontDefaultsToMonoFont(t *testing.T) {
+    // Given...
+    fs := files.NewMockFileSystem()
+    tempDir, _ := fs.MkTempDir()
+
+    embeddedFs := embedded.NewMockReadOnlyFileSystem()
+
+    imageId := t.Name()
+    terminalSize := TerminalSize{
+        Rows: 26,
+        Columns: 80,
+    }
+
+    terminalImage := TerminalImage{
+        Id: imageId,
+        Sequence: 1,
+        Inbound: true,
+        ImageSize: terminalSize,
+        CursorRow: 0,
+        CursorColumn: 0,
+        Fields: []TerminalField{ createTextField(10, 13, "this text should be visible", "d") },
+    }
+
+    terminal := createTerminal(imageId, terminalImage)
+    terminalJsonBytes, _ := json.Marshal(terminal)
+
+    imageFileWriter := NewImageFileWriter(fs, tempDir)
+    imageRenderer := NewImageRenderer(embeddedFs)
 
     // When...
     err := imageRenderer.RenderJsonBytesToImageFiles(terminalJsonBytes, imageFileWriter)

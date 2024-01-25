@@ -60,21 +60,33 @@ type ImageRenderer interface {
 
 type ImageRendererImpl struct {
 	drawer font.Drawer
+    fs embedded.ReadOnlyFileSystem
 }
 
-func NewImageRenderer() ImageRenderer {
+func NewImageRenderer(fs embedded.ReadOnlyFileSystem) ImageRenderer {
 	renderer := new(ImageRendererImpl)
 
-	fontFace := initRendererFonts()
+    renderer.fs = fs
+	renderer.initRendererFonts()
+
+	return renderer
+}
+
+// Loads all the fonts to be used in the renderer
+func (renderer *ImageRendererImpl) initRendererFonts() {
+    // Get the primary font to use in the renderer
+    primaryFont := loadPrimaryFont(renderer.fs)
+
+    fallbackFontFace := NewFallbackFontFace(primaryFont)
+    loadFallbackFonts(renderer.fs, fallbackFontFace)
+
 	renderer.drawer = font.Drawer{
-		Face: fontFace,
+		Face: fallbackFontFace,
 	}
 
     // Determine the height and width of characters in the renderer's primary font
-    charHeight = fontFace.Metrics().Ascent.Ceil()
+    charHeight = renderer.drawer.Face.Metrics().Ascent.Ceil()
     charWidth = renderer.drawer.MeasureString(" ").Round()
-
-	return renderer
 }
 
 func (renderer *ImageRendererImpl) RenderJsonBytesToImageFiles(jsonBinary []byte, writer ImageFileWriter) error {
@@ -114,6 +126,7 @@ func (renderer *ImageRendererImpl) renderTerminalImage(terminalImage TerminalIma
             // Field contents can sometimes span multiple rows, so draw each character individually,
             // adjusting the current row whenever the image column boundary is reached
             for _, char := range contents.getCharacters() {
+
                 if column >= targetColumnCount {
                     column = 0
                     row++
@@ -205,21 +218,6 @@ func getColor(colorIdentifier string) color.RGBA {
         color = matchedColor
     }
     return color
-}
-
-// Loads all the fonts to be used in the renderer
-func initRendererFonts() font.Face {
-    var primaryFont font.Face
-
-	fs := embedded.GetReadOnlyFileSystem()
-
-    // Get the primary font to use in the renderer
-    primaryFont = loadPrimaryFont(fs)
-
-    fallbackFontFace := NewFallbackFontFace(primaryFont)
-    loadFallbackFonts(fs, fallbackFontFace)
-
-    return fallbackFontFace
 }
 
 // Loads the primary font to use in the renderer, defaulting to the built-in Face7x13 monospaced font
