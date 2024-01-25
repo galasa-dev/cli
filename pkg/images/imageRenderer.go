@@ -27,11 +27,12 @@ import (
 const (
     PRIMARY_FONT_DIRECTORY  = "fonts/primary"
     FALLBACK_FONT_DIRECTORY = "fonts/fallbacks"
-    FONT_WIDTH = 7
-    FONT_HEIGHT = 13
 )
 
 var (
+    charWidth int
+    charHeight int
+
     DEFAULT_COLOR = color.RGBA{0, 255, 0, 255}
     NEUTRAL       = color.RGBA{255, 255, 255, 255}
     RED           = color.RGBA{255, 0, 0, 255}
@@ -68,6 +69,11 @@ func NewImageRenderer() ImageRenderer {
 	renderer.drawer = font.Drawer{
 		Face: fontFace,
 	}
+
+    // Determine the height and width of characters in the renderer's primary font
+    charHeight = fontFace.Metrics().Ascent.Ceil()
+    charWidth = renderer.drawer.MeasureString(" ").Round()
+
 	return renderer
 }
 
@@ -96,8 +102,8 @@ func (renderer *ImageRendererImpl) renderTerminalImage(terminalImage TerminalIma
     targetColumnCount := terminalImage.ImageSize.Columns
     targetRowCount := terminalImage.ImageSize.Rows + 3
 
-    imagePixelWidth := targetColumnCount * FONT_WIDTH
-    imagePixelHeight := targetRowCount * FONT_HEIGHT
+    imagePixelWidth := targetColumnCount * charWidth
+    imagePixelHeight := targetRowCount * charHeight
     img := createImageBase(imagePixelWidth, imagePixelHeight)
 
     for _, field := range terminalImage.Fields {
@@ -125,8 +131,8 @@ func (renderer *ImageRendererImpl) renderTerminalImage(terminalImage TerminalIma
 
 // Draws a string of text onto an image at the given column and row (x, y) coordinates
 func (renderer *ImageRendererImpl) drawString(img *image.RGBA, column int, row int, text string, textColor color.RGBA) {
-    startPoint := fixed.Point26_6{ X: fixed.I(column * FONT_WIDTH), Y: fixed.I((row + 1) * FONT_HEIGHT)}
 	drawer := renderer.drawer
+    startPoint := fixed.Point26_6{ X: fixed.I(column * charWidth), Y: fixed.I((row + 1) * charHeight)}
 
     drawer.Src = image.NewUniform(textColor)
 	drawer.Dst = img
