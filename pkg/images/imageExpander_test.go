@@ -57,6 +57,7 @@ func TestCalculatesBlankPathIfPathDoesntContainTerminals(t *testing.T) {
 func TestCanExpandAGzFileToAnImageFile(t *testing.T) {
 
 	realFs := files.NewOSFileSystem()
+	embeddedFs := embedded.GetReadOnlyFileSystem()
 
 	var gzContents []byte
 	var err error
@@ -73,7 +74,7 @@ func TestCanExpandAGzFileToAnImageFile(t *testing.T) {
 		assert.Nil(t, err, "could not write real gz contents into the mock file system")
 		if err == nil {
 
-			renderer := NewImageRenderer()
+			renderer := NewImageRenderer(embeddedFs)
 			expander := NewImageExpander(fs, renderer)
 
 			// When...
