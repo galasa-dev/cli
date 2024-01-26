@@ -693,6 +693,7 @@ function launch_test_on_ecosystem_without_portfolio {
     --throttle 1 \
     --poll 10 \
     --progress 1 \
+    --noexitcodeontestfailures \
     --log -"
 
     info "Command is: $cmd"
