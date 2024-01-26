@@ -51,7 +51,7 @@ type MockFileSystem struct {
 	VirtualFunction_MkTempDir            func() (string, error)
 	VirtualFunction_DeleteDir            func(path string)
 	VirtualFunction_DeleteFile           func(path string)
-	VirtualFunction_Create               func(path string) (io.Writer, error)
+	VirtualFunction_Create               func(path string) (io.WriteCloser, error)
 }
 
 // NewMockFileSystem creates an implementation of the thin file system layer which delegates
@@ -80,7 +80,7 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 	// Set up functions inside the structure to call the basic/default mock versions...
 	// These can later be over-ridden on a test-by-test basis.
 
-	mockFileSystem.VirtualFunction_Create = func(path string) (io.Writer, error) {
+	mockFileSystem.VirtualFunction_Create = func(path string) (io.WriteCloser, error) {
 		return mockFSCreate(mockFileSystem, path)
 	}
 
@@ -139,7 +139,7 @@ func (fs *MockFileSystem) SetExecutableExtension(newExtension string) {
 // Interface methods...
 //------------------------------------------------------------------------------------
 
-func (fs *MockFileSystem) Create(path string) (io.Writer, error) {
+func (fs *MockFileSystem) Create(path string) (io.WriteCloser, error) {
 	return fs.VirtualFunction_Create(path)
 }
 
@@ -208,7 +208,7 @@ func (fs MockFileSystem) OutputWarningMessage(message string) error {
 // Default implementations of the methods...
 // ------------------------------------------------------------------------------------
 
-func mockFSCreate(fs MockFileSystem, path string) (io.Writer, error) {
+func mockFSCreate(fs MockFileSystem, path string) (io.WriteCloser, error) {
 	nodeToAdd := Node{content: nil, isDir: false}
 	fs.data[path] = &nodeToAdd
 	writer := NewOverridableMockFile(&fs, path)

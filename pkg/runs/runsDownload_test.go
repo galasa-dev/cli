@@ -365,7 +365,7 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 		return 0, errors.New("simulating failed file write")
 	}
 
-	mockFileSystem.VirtualFunction_Create = func(path string) (io.Writer, error) {
+	mockFileSystem.VirtualFunction_Create = func(path string) (io.WriteCloser, error) {
 		return &mockFile, nil
 	}
 
@@ -397,7 +397,7 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	mockFileSystem := files.NewOverridableMockFileSystem()
 
-	mockFileSystem.VirtualFunction_Create = func(path string) (io.Writer, error) {
+	mockFileSystem.VirtualFunction_Create = func(path string) (io.WriteCloser, error) {
 		return nil, errors.New("simulating failed folder creation")
 	}
 

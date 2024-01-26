@@ -283,9 +283,11 @@ func WriteArtifactToFileSystem(
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANNOT_OVERWRITE_FILE, targetFilePath)
 		} else {
 			// Set up the directory structure and artifact file on the host's file system
-			var newFile io.Writer = nil
+			var newFile io.WriteCloser = nil
 			newFile, err = CreateEmptyArtifactFile(fileSystem, targetFilePath)
 			if err == nil {
+				defer newFile.Close()
+
 				log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
 
 				err = TransferContent(fileDownloaded, newFile, targetFilePath)
@@ -302,7 +304,7 @@ func WriteArtifactToFileSystem(
 
 // Writes the contents of a given source file into a given target file using a buffer
 // to read and write the contents in chunks.
-func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath string) error {
+func TransferContent(sourceFile io.Reader, targetFile io.WriteCloser, targetFilePath string) error {
 
 	log.Printf("TransferContent: Entered. targetFilePath: %s sourceFile type:%s", targetFilePath, reflect.TypeOf(sourceFile))
 
@@ -347,10 +349,10 @@ func TransferContent(sourceFile io.Reader, targetFile io.Writer, targetFilePath 
 
 // Creates an empty file representing an artifact that is being written. Any parent directories that do not exist
 // will be created. Returns the empty file that was created or an error if any file creation operations failed.
-func CreateEmptyArtifactFile(fileSystem files.FileSystem, targetFilePath string) (io.Writer, error) {
+func CreateEmptyArtifactFile(fileSystem files.FileSystem, targetFilePath string) (io.WriteCloser, error) {
 
 	var err error = nil
-	var newFile io.Writer = nil
+	var newFile io.WriteCloser = nil
 
 	targetDirectoryPath := filepath.Dir(targetFilePath)
 	err = fileSystem.MkdirAll(targetDirectoryPath)

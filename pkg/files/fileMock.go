@@ -15,6 +15,7 @@ type MockFile struct {
 
 	// The mock struct contains methods which can be over-ridden on a per-test basis.
 	VirtualFunction_Write func(contents []byte) (int, error)
+	VirtualFunction_Close func() error
 }
 
 // Creates an implementation of a mock file and allows callers to set up different
@@ -32,6 +33,10 @@ func NewOverridableMockFile(fs *MockFileSystem, filePath string) *MockFile {
 		return mockFile.mockFileWrite(data)
 	}
 
+	mockFile.VirtualFunction_Close = func() error {
+		return mockFile.mockFileClose()
+	}
+
 	return &mockFile
 }
 
@@ -43,6 +48,11 @@ func (mockFile *MockFile) Write(contents []byte) (int, error) {
 	return mockFile.VirtualFunction_Write(contents)
 }
 
+func (mockFile *MockFile) Close() error {
+	// Do nothing...
+	return nil
+}
+
 // ------------------------------------------------------------------------------------
 // Default implementations of the methods.
 // ------------------------------------------------------------------------------------
@@ -52,4 +62,9 @@ func (mockFile *MockFile) mockFileWrite(data []byte) (int, error) {
 	fileNode.content = append(fileNode.content, data...)
 
 	return len(data), mockFile.err
+}
+
+func (mockFile *MockFile) mockFileClose() error {
+	// Do nothing...
+	return nil
 }
