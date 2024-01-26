@@ -49,15 +49,11 @@ func assertTerminalImageMatchesExpectedSnapshot(t *testing.T, actualImageBytes [
     }
 }
 
-func writePngImageToDisk(fileSystem files.FileSystem, actualImageBytes []byte, filePath string) error {
-    return fileSystem.WriteBinaryFile(filePath, actualImageBytes)
-}
-
 func writeRenderedImageToTempDir(t *testing.T, fs files.FileSystem, actualImageBytes []byte) {
     outputDirectory, err := fs.MkTempDir()
     filePath := filepath.Join(outputDirectory, t.Name() + ".png")
     if err == nil {
-        err = writePngImageToDisk(fs, actualImageBytes, filePath)
+        err = fs.WriteBinaryFile(filePath, actualImageBytes)
     }
 
     if err != nil {
