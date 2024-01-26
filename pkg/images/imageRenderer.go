@@ -13,17 +13,25 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"log"
 	"strconv"
 	"strings"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
 )
 
+const (
+	PRIMARY_FONT_DIRECTORY  = "fonts/primary"
+	FALLBACK_FONT_DIRECTORY = "fonts/fallbacks"
+)
+
 var (
-	FONT_WIDTH  = 7
-	FONT_HEIGHT = 13
+	charWidth  int
+	charHeight int
 
 	DEFAULT_COLOR = color.RGBA{0, 255, 0, 255}
 	NEUTRAL       = color.RGBA{255, 255, 255, 255}
@@ -51,11 +59,34 @@ type ImageRenderer interface {
 }
 
 type ImageRendererImpl struct {
+	drawer font.Drawer
+	fs     embedded.ReadOnlyFileSystem
 }
 
-func NewImageRenderer() ImageRenderer {
+func NewImageRenderer(fs embedded.ReadOnlyFileSystem) ImageRenderer {
 	renderer := new(ImageRendererImpl)
+
+	renderer.fs = fs
+	renderer.initRendererFonts()
+
 	return renderer
+}
+
+// Loads all the fonts to be used in the renderer
+func (renderer *ImageRendererImpl) initRendererFonts() {
+	// Get the primary font to use in the renderer
+	primaryFont := loadPrimaryFont(renderer.fs)
+
+	fallbackFontFace := NewFallbackFontFace(primaryFont)
+	loadFallbackFonts(renderer.fs, fallbackFontFace)
+
+	renderer.drawer = font.Drawer{
+		Face: fallbackFontFace,
+	}
+
+	// Determine the height and width of characters in the renderer's primary font
+	charHeight = renderer.drawer.Face.Metrics().Ascent.Ceil()
+	charWidth = renderer.drawer.MeasureString(" ").Round()
 }
 
 func (renderer *ImageRendererImpl) RenderJsonBytesToImageFiles(jsonBinary []byte, writer ImageFileWriter) error {
@@ -75,7 +106,7 @@ func (renderer *ImageRendererImpl) RenderJsonBytesToImageFiles(jsonBinary []byte
 				// ie: Don't do all the work if the file already exists.
 				// When the same root folder is scanned for a second time, we want to minimise the work done
 				if isWritable {
-					image := renderTerminalImage(terminalImage)
+					image := renderer.renderTerminalImage(terminalImage)
 
 					var pngImageBytes []byte
 					pngImageBytes, err = encodeImageToPng(image)
@@ -89,6 +120,51 @@ func (renderer *ImageRendererImpl) RenderJsonBytesToImageFiles(jsonBinary []byte
 	return err
 }
 
+// Renders an RGBA image representation of a 3270 terminal and returns the rendered image
+func (renderer *ImageRendererImpl) renderTerminalImage(terminalImage TerminalImage) *image.RGBA {
+	targetColumnCount := terminalImage.ImageSize.Columns
+	targetRowCount := terminalImage.ImageSize.Rows + 3
+
+	imagePixelWidth := targetColumnCount * charWidth
+	imagePixelHeight := targetRowCount * charHeight
+	img := createImageBase(imagePixelWidth, imagePixelHeight)
+
+	for _, field := range terminalImage.Fields {
+		column := field.Column
+		row := field.Row
+
+		for _, contents := range field.Contents {
+			// Field contents can sometimes span multiple rows, so draw each character individually,
+			// adjusting the current row whenever the image column boundary is reached
+			for _, char := range getCharacters(&contents) {
+
+				if column >= targetColumnCount {
+					column = 0
+					row++
+				}
+				textColor := getColor(field.ForegroundColor)
+				renderer.drawString(img, column, row, string(char), textColor)
+				column++
+			}
+		}
+	}
+	statusText := getStatusText(terminalImage, terminalImage.ImageSize.Columns, terminalImage.ImageSize.Rows)
+	renderer.drawString(img, 0, targetRowCount-2, statusText, DEFAULT_COLOR)
+	return img
+}
+
+// Draws a string of text onto an image at the given column and row (x, y) coordinates
+func (renderer *ImageRendererImpl) drawString(img *image.RGBA, column int, row int, text string, textColor color.RGBA) {
+	drawer := renderer.drawer
+	startPoint := fixed.Point26_6{X: fixed.I(column * charWidth), Y: fixed.I((row + 1) * charHeight)}
+
+	drawer.Src = image.NewUniform(textColor)
+	drawer.Dst = img
+	drawer.Dot = startPoint
+
+	drawer.DrawString(text)
+}
+
 // Converts a JSON byte array representing one or more 3270 terminals into a Terminal object
 func convertJsonBytesToTerminal(terminalJsonBytes []byte) (Terminal, error) {
 	var terminal Terminal
@@ -99,39 +175,6 @@ func convertJsonBytesToTerminal(terminalJsonBytes []byte) (Terminal, error) {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TERMINAL_JSON_FORMAT, err.Error())
 	}
 	return terminal, err
-}
-
-// Renders an RGBA image representation of a 3270 terminal and returns the rendered image
-func renderTerminalImage(terminalImage TerminalImage) *image.RGBA {
-	targetColumnCount := terminalImage.ImageSize.Columns
-	targetRowCount := terminalImage.ImageSize.Rows + 3
-
-	imagePixelWidth := targetColumnCount * FONT_WIDTH
-	imagePixelHeight := targetRowCount * FONT_HEIGHT
-	img := createImageBase(imagePixelWidth, imagePixelHeight)
-	context := createImageDrawer(img)
-
-	for _, field := range terminalImage.Fields {
-		column := field.Column
-		row := field.Row
-
-		for _, contents := range field.Contents {
-			// Field contents can sometimes span multiple rows, so draw each character individually,
-			// adjusting the current row whenever the image column boundary is reached
-			for _, char := range getCharacters(&contents) {
-				if column >= targetColumnCount {
-					column = 0
-					row++
-				}
-				textColor := getColor(field.ForegroundColor)
-				drawString(context, column, row, string(char), textColor)
-				column++
-			}
-		}
-	}
-	statusText := getStatusText(terminalImage, terminalImage.ImageSize.Columns, terminalImage.ImageSize.Rows)
-	drawString(context, 0, targetRowCount-2, statusText, DEFAULT_COLOR)
-	return img
 }
 
 func getCharacters(fieldContents *FieldContents) []rune {
@@ -171,26 +214,6 @@ func createImageBase(imagePixelWidth int, imagePixelHeight int) *image.RGBA {
 	return img
 }
 
-// Creates a drawer instance to draw text on a given image
-func createImageDrawer(img *image.RGBA) *font.Drawer {
-	drawer := &font.Drawer{
-		Dst:  img,
-		Face: initFontFaces(),
-	}
-
-	return drawer
-}
-
-// Draws a string of text onto an image at the given column and row (x, y) coordinates
-func drawString(drawer *font.Drawer, column int, row int, text string, textColor color.RGBA) {
-	startPoint := fixed.Point26_6{X: fixed.I(column * FONT_WIDTH), Y: fixed.I((row + 1) * FONT_HEIGHT)}
-
-	drawer.Src = image.NewUniform(textColor)
-	drawer.Dot = startPoint
-
-	drawer.DrawString(text)
-}
-
 // Returns a string containing the content of the status row to be displayed at the bottom
 // of a 3270 image
 func getStatusText(terminalImage TerminalImage, columns int, rows int) string {
@@ -220,4 +243,40 @@ func getColor(colorIdentifier string) color.RGBA {
 		color = matchedColor
 	}
 	return color
+}
+
+// Loads the primary font to use in the renderer, defaulting to the built-in Face7x13 monospaced font
+// if a primary font could not be loaded from the embedded filesystem
+func loadPrimaryFont(fs embedded.ReadOnlyFileSystem) font.Face {
+	var err error
+	var loadedFonts []font.Face
+	var primaryFont font.Face
+
+	loadedFonts, err = loadFontsFromDirectory(fs, PRIMARY_FONT_DIRECTORY)
+	if err == nil && len(loadedFonts) > 0 {
+		primaryFont = loadedFonts[0]
+	} else {
+		// Use a default monospaced font
+		log.Println("Failed to load primary font, using a built-in font instead")
+		primaryFont = basicfont.Face7x13
+	}
+	return primaryFont
+}
+
+// Loads any fallback fonts to use in the renderer when rendering glyphs that are not contained within the primary font
+func loadFallbackFonts(fs embedded.ReadOnlyFileSystem, fallbackFontFace *FallbackFontFace) {
+	var err error
+	var loadedFonts []font.Face
+
+	// Add any fallback fonts to use in the renderer
+	loadedFonts, err = loadFontsFromDirectory(fs, FALLBACK_FONT_DIRECTORY)
+	if err == nil {
+		for _, font := range loadedFonts {
+			fallbackFontFace.AddFallbackFont(font)
+		}
+	} else {
+		// We can continue with the rendering, but certain characters may not appear correctly
+		// if they are not included in the primary font
+		log.Println("Failed to load substitute fonts, continuing without additional fonts")
+	}
 }

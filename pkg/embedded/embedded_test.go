@@ -11,28 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type MockReadOnlyFileSystem struct {
-	files map[string]string
-}
-
-func NewMockReadOnlyFileSystem() *MockReadOnlyFileSystem {
-	fs := MockReadOnlyFileSystem{
-		files: make(map[string]string, 0),
-	}
-	return &fs
-}
-
-// WriteFile - This function is not on the ReadOnlyFileSystem interface, but does allow unit tests
-// to add data files to the mock file system, so the code under test can read it back.
-func (fs *MockReadOnlyFileSystem) WriteFile(filePath string, content string) {
-	fs.files[filePath] = content
-}
-
-func (fs *MockReadOnlyFileSystem) ReadFile(filePath string) ([]byte, error) {
-	content := fs.files[filePath]
-	return []byte(content), nil
-}
-
 func TestCanParseVersionsFromEmbeddedFS(t *testing.T) {
 	propsFileName := "templates/version/build.properties"
 	content := "galasactl.version=myVersion\n" +

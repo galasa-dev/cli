@@ -220,7 +220,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 						job := images.NewPollingJob(
 							"local test run image expander",
 							images.DEFAULT_MILLISECS_BETWEEN_POLLS,
-							func() error { return scanFilesAndExpandImages(fileSystem, galasaHome, console) },
+							func() error { return scanFilesAndExpandImages(fileSystem, embeddedFileSystem, galasaHome, console) },
 						)
 						defer job.Stop()
 						job.Start()
@@ -239,10 +239,10 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	return err
 }
 
-func scanFilesAndExpandImages(fs files.FileSystem, galasaHome utils.GalasaHome, console utils.Console) error {
+func scanFilesAndExpandImages(fs files.FileSystem, embeddedFs embedded.ReadOnlyFileSystem, galasaHome utils.GalasaHome, console utils.Console) error {
 	var err error
 	log.Printf("Starting to scan files to expand .gz files into terminal images. Root folder: %s", galasaHome.GetNativeFolderPath())
-	renderer := images.NewImageRenderer()
+	renderer := images.NewImageRenderer(embeddedFs)
 	expander := images.NewImageExpander(fs, renderer)
 
 	folderToScan := galasaHome.GetNativeFolderPath()

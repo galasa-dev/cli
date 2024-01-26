@@ -10,13 +10,15 @@ import (
 	"os"
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCanCalculateTargetPathsOk(t *testing.T) {
 	fs := files.NewMockFileSystem()
-	renderer := NewImageRenderer()
+	embeddedFs := embedded.NewMockReadOnlyFileSystem()
+	renderer := NewImageRenderer(embeddedFs)
 	expander := NewImageExpander(fs, renderer).(*ImageExpanderImpl)
 	folderPath, err := expander.calculateTargetImagePaths("a/b/terminals/c/e.gz")
 
@@ -28,7 +30,8 @@ func TestCanCalculateTargetPathsOk(t *testing.T) {
 
 func TestCalculatesBlankPathIfPathTooShort(t *testing.T) {
 	fs := files.NewMockFileSystem()
-	renderer := NewImageRenderer()
+	embeddedFs := embedded.NewMockReadOnlyFileSystem()
+	renderer := NewImageRenderer(embeddedFs)
 	expander := NewImageExpander(fs, renderer).(*ImageExpanderImpl)
 	folderPath, err := expander.calculateTargetImagePaths("a/e.gz")
 
@@ -40,7 +43,8 @@ func TestCalculatesBlankPathIfPathTooShort(t *testing.T) {
 
 func TestCalculatesBlankPathIfPathDoesntContainTerminals(t *testing.T) {
 	fs := files.NewMockFileSystem()
-	renderer := NewImageRenderer()
+	embeddedFs := embedded.NewMockReadOnlyFileSystem()
+	renderer := NewImageRenderer(embeddedFs)
 	expander := NewImageExpander(fs, renderer).(*ImageExpanderImpl)
 	folderPath, err := expander.calculateTargetImagePaths("a/b/c/d/e.gz")
 
@@ -53,6 +57,7 @@ func TestCalculatesBlankPathIfPathDoesntContainTerminals(t *testing.T) {
 func TestCanExpandAGzFileToAnImageFile(t *testing.T) {
 
 	realFs := files.NewOSFileSystem()
+	embeddedFs := embedded.GetReadOnlyFileSystem()
 
 	var gzContents []byte
 	var err error
@@ -69,7 +74,7 @@ func TestCanExpandAGzFileToAnImageFile(t *testing.T) {
 		assert.Nil(t, err, "could not write real gz contents into the mock file system")
 		if err == nil {
 
-			renderer := NewImageRenderer()
+			renderer := NewImageRenderer(embeddedFs)
 			expander := NewImageExpander(fs, renderer)
 
 			// When...
