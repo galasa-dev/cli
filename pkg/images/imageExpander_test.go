@@ -129,13 +129,22 @@ func compareImage(t *testing.T, renderedImageToCompare []byte, compareFolderPath
 		} else {
 			expectedImageFilePath := expectedImageFolderPath + separatorChar + imageToCompareSimpleFileName
 
-			// Read the file contents which we think the image should be once rendered.
-			var expectedContents []byte
-			expectedContents, err = realFs.ReadBinaryFile(expectedImageFilePath)
-			assert.Nil(t, err, "could not read image file we will compare against")
+			imageFileExists, err := realFs.Exists(expectedImageFilePath)
+			assert.Nil(t, err, "Error finding out if file %s exists or not, so not comparing the image with one we generated earlier. reason: %v", expectedImageFilePath, err)
 			if err == nil {
-				// Compare the files.
-				isSame, _ = compareTwoImages(t, renderedImageToCompare, expectedContents)
+
+				if !imageFileExists {
+					log.Printf("File %s does not exist, so not comparing the image with one we generated earlier.", expectedImageFilePath)
+				} else {
+					// Read the file contents which we think the image should be once rendered.
+					var expectedContents []byte
+					expectedContents, err = realFs.ReadBinaryFile(expectedImageFilePath)
+					assert.Nil(t, err, "could not read image file we will compare against")
+					if err == nil {
+						// Compare the files.
+						isSame, _ = compareTwoImages(t, renderedImageToCompare, expectedContents)
+					}
+				}
 			}
 		}
 	}

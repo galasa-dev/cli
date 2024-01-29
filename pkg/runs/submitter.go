@@ -535,7 +535,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 	if err == nil {
 		// generate a group name if required
 		if params.GroupName == "" {
-			params.GroupName = randomGenerator.NewV4().String()
+			params.GroupName = randomGenerator.NewString()
 		}
 		log.Printf("Using group name '%v' for test run submission\n", params.GroupName)
 
