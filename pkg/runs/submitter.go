@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	randomGenerator "github.com/satori/go.uuid"
+	randomGenerator "github.com/google/uuid"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
