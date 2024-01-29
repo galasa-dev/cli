@@ -33,7 +33,7 @@ type FileSystem interface {
 	DeleteFile(path string)
 
 	// Creates a file in the file system if it can.
-	Create(path string) (io.Writer, error)
+	Create(path string) (io.WriteCloser, error)
 
 	// Returns the normal extension used for executable files.
 	// ie: The .exe suffix in windows, or "" in unix-like systems.
@@ -78,7 +78,7 @@ func NewOSFileSystem() FileSystem {
 // Interface methods...
 // ------------------------------------------------------------------------------------
 
-func (osFS *OSFileSystem) Create(path string) (io.Writer, error) {
+func (osFS *OSFileSystem) Create(path string) (io.WriteCloser, error) {
 	fileWriter, err := os.Create(path)
 	return fileWriter, err
 }
