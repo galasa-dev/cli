@@ -8,23 +8,23 @@ package cmd
 import "github.com/spf13/cobra"
 
 // Objective: Allow the user to do this:
-//    runs delete --name U123
-// And then galasactl deletes the run by abandoning it.
+//    runs cancel --name U123
+// And then galasactl cancels the run by abandoning it.
 
-type RunsDeleteCommand struct {
-	values       *RunsDeleteCmdValues
+type RunsCancelCommand struct {
+	values       *RunsCancelCmdValues
 	cobraCommand *cobra.Command
 }
 
-type RunsDeleteCmdValues struct {
+type RunsCancelCmdValues struct {
 	runName string
 }
 
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsDeleteCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
-	cmd := new(RunsDeleteCommand)
+func NewRunsCancelCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(RunsCancelCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
 }
@@ -32,25 +32,25 @@ func NewRunsDeleteCommand(factory Factory, runsCommand GalasaCommand, rootComman
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsDeleteCommand) Name() string {
-	return COMMAND_NAME_RUNS_DELETE
+func (cmd *RunsCancelCommand) Name() string {
+	return COMMAND_NAME_RUNS_CANCEL
 }
 
-func (cmd *RunsDeleteCommand) CobraCommand() *cobra.Command {
+func (cmd *RunsCancelCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *RunsDeleteCommand) Values() interface{} {
+func (cmd *RunsCancelCommand) Values() interface{} {
 	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsDeleteCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsCancelCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error
-	cmd.values = &RunsDeleteCmdValues{}
-	cmd.cobraCommand, err = cmd.createRunsDeleteCobraCmd(
+	cmd.values = &RunsCancelCmdValues{}
+	cmd.cobraCommand, err = cmd.createRunsCancelCobraCmd(
 		factory,
 		runsCommand,
 		rootCommand.Values().(*RootCmdValues),
@@ -58,7 +58,7 @@ func (cmd *RunsDeleteCommand) init(factory Factory, runsCommand GalasaCommand, r
 	return err
 }
 
-func (cmd *RunsDeleteCommand) createRunsDeleteCobraCmd(factory Factory,
+func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory Factory,
 	runsCommand GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
@@ -66,27 +66,27 @@ func (cmd *RunsDeleteCommand) createRunsDeleteCobraCmd(factory Factory,
 	var err error = nil
 	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
-	runsDeleteCmd := &cobra.Command{
-		Use:     "delete",
-		Short:   "delete an active run in the ecosystem",
-		Long:    "Delete an active test run in the ecosystem if it is stuck or looping.",
+	runsCancelCmd := &cobra.Command{
+		Use:     "cancel",
+		Short:   "cancel an active run in the ecosystem",
+		Long:    "Cancel an active test run in the ecosystem if it is stuck or looping.",
 		Args:    cobra.NoArgs,
-		Aliases: []string{"runs delete"},
+		Aliases: []string{"runs cancel"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeDelete(factory, runsCmdValues, rootCmdValues)
+			return cmd.executeCancel(factory, runsCmdValues, rootCmdValues)
 		},
 	}
 
-	runsDeleteCmd.PersistentFlags().StringVar(&cmd.values.runName, "name", "", "the name of the test run to delete")
+	runsCancelCmd.PersistentFlags().StringVar(&cmd.values.runName, "name", "", "the name of the test run to cancel")
 
-	runsDeleteCmd.MarkPersistentFlagRequired("name")
+	runsCancelCmd.MarkPersistentFlagRequired("name")
 
-	runsCommand.CobraCommand().AddCommand(runsDeleteCmd)
+	runsCommand.CobraCommand().AddCommand(runsCancelCmd)
 
-	return runsDeleteCmd, err
+	return runsCancelCmd, err
 }
 
-func (cmd *RunsDeleteCommand) executeDelete(
+func (cmd *RunsCancelCommand) executeCancel(
 	factory Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,

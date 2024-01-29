@@ -23,8 +23,10 @@ Assembles, submits and monitors test runs in Galasa Ecosystem
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
+* [galasactl runs cancel](galasactl_runs_cancel.md)	 - cancel an active run in the ecosystem
 * [galasactl runs download](galasactl_runs_download.md)	 - Download the artifacts of a test run which ran.
 * [galasactl runs get](galasactl_runs_get.md)	 - Get the details of a test runname which ran or is running.
 * [galasactl runs prepare](galasactl_runs_prepare.md)	 - prepares a list of tests
+* [galasactl runs reset](galasactl_runs_reset.md)	 - reset an active run in the ecosystem
 * [galasactl runs submit](galasactl_runs_submit.md)	 - submit a list of tests to the ecosystem
 
