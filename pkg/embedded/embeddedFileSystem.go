@@ -7,12 +7,14 @@ package embedded
 
 import (
 	"embed"
+	"io/fs"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
 type ReadOnlyFileSystem interface {
 	ReadFile(filePath string) ([]byte, error)
+	ReadDir(directoryPath string) ([]fs.DirEntry, error)
 }
 
 type EmbeddedFileSystem struct {
@@ -38,4 +40,13 @@ func (fs *EmbeddedFileSystem) ReadFile(filePath string) ([]byte, error) {
 		galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMBEDDED_FS_READ_FAILED, err.Error())
 	}
 	return bytes, err
+}
+
+func (fs *EmbeddedFileSystem) ReadDir(directoryPath string) ([]fs.DirEntry, error) {
+
+	dirEntries, err := fs.embeddedFileSystem.ReadDir(directoryPath)
+	if err != nil {
+		galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMBEDDED_FS_READ_FAILED, err.Error())
+	}
+	return dirEntries, err
 }

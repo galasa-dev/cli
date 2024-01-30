@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	pathUtils "path"
+	"path/filepath"
 	"runtime"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -20,6 +21,7 @@ type FileSystem interface {
 	// MkdirAll creates all folders in the file system if they don't already exist.
 	MkdirAll(targetFolderPath string) error
 	ReadTextFile(filePath string) (string, error)
+	ReadBinaryFile(filePath string) ([]byte, error)
 	WriteTextFile(targetFilePath string, desiredContents string) error
 	WriteBinaryFile(targetFilePath string, desiredContents []byte) error
 	Exists(path string) (bool, error)
@@ -31,7 +33,7 @@ type FileSystem interface {
 	DeleteFile(path string)
 
 	// Creates a file in the file system if it can.
-	Create(path string) (io.Writer, error)
+	Create(path string) (io.WriteCloser, error)
 
 	// Returns the normal extension used for executable files.
 	// ie: The .exe suffix in windows, or "" in unix-like systems.
@@ -40,6 +42,9 @@ type FileSystem interface {
 	// GetPathSeparator returns the file path separator specific
 	// to this operating system.
 	GetFilePathSeparator() string
+
+	// Gets all the file paths recursively from a starting folder.
+	GetAllFilePaths(rootPath string) ([]string, error)
 }
 
 // TildaExpansion If a file starts with a tilda '~' character, expand it
@@ -73,7 +78,7 @@ func NewOSFileSystem() FileSystem {
 // Interface methods...
 // ------------------------------------------------------------------------------------
 
-func (osFS *OSFileSystem) Create(path string) (io.Writer, error) {
+func (osFS *OSFileSystem) Create(path string) (io.WriteCloser, error) {
 	fileWriter, err := os.Create(path)
 	return fileWriter, err
 }
@@ -126,15 +131,21 @@ func (osFS *OSFileSystem) WriteTextFile(targetFilePath string, desiredContents s
 	return err
 }
 
-func (*OSFileSystem) ReadTextFile(filePath string) (string, error) {
+func (osFS *OSFileSystem) ReadTextFile(filePath string) (string, error) {
 	text := ""
-	bytes, err := os.ReadFile(filePath)
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, filePath, err.Error())
-	} else {
+	bytes, err := osFS.ReadBinaryFile(filePath)
+	if err == nil {
 		text = string(bytes)
 	}
 	return text, err
+}
+
+func (*OSFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
+	bytes, err := os.ReadFile(filePath)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, filePath, err.Error())
+	}
+	return bytes, err
 }
 
 func (*OSFileSystem) Exists(path string) (bool, error) {
@@ -176,4 +187,21 @@ func (*OSFileSystem) GetUserHomeDirPath() (string, error) {
 func (OSFileSystem) OutputWarningMessage(message string) error {
 	_, err := os.Stderr.WriteString(message)
 	return err
+}
+
+func (osFS *OSFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
+	var collectedFilePaths []string
+
+	err := filepath.Walk(
+		rootPath,
+		func(path string, info os.FileInfo, err error) error {
+			if err == nil {
+				if !info.IsDir() {
+					// It's not a folder. Only add file names.
+					collectedFilePaths = append(collectedFilePaths, path)
+				}
+			}
+			return err
+		})
+	return collectedFilePaths, err
 }

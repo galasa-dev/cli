@@ -208,9 +208,18 @@ var (
 	GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION     = NewMessageType("GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.", 1120, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION     = NewMessageType("GAL1121E: Unable to retrieve rest api version. Reason is: %s. Try downloading the latest version of galasa or rebuilding a clean version.", 1121, STACK_TRACE_WANTED)
 	GALASA_ERROR_AUTH_PROPERTY_NOT_AVAILABLE             = NewMessageType("GAL1122E: Authentication property %s is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '%s' or set as an environment variable.", 1122, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_BAD_TERMINAL_JSON_FORMAT                = NewMessageType("GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: %s", 1123, STACK_TRACE_WANTED)
+	GALASA_ERROR_PNG_ENCODING_FAILED                     = NewMessageType("GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: %s", 1124, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_OPEN_GZIP_FILE                = NewMessageType("GAL1225E: Failed to open file '%s' cause: %v. Check that this file exists, and that you have read permissions.", 1225, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_SETUP_READER_GZIP_FILE        = NewMessageType("GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: %s error: %v", 1226, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_UNCOMPRESS_GZIP_FILE          = NewMessageType("GAL1227E: Internal failure. Contents of gzip could not be decoded. %v error: %v", 1227, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_COMPRESS_BINARY_DATA          = NewMessageType("GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. %v error: %v", 1228, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_FLUSH_BINARY_DATA             = NewMessageType("GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. %v error: %v", 1229, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_CLOSE_GZIP_FILE               = NewMessageType("GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. %v error: %v", 1230, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 	// Information messages...
 	GALASA_INFO_FOLDER_DOWNLOADED_TO = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_RENDERED_IMAGE_COUNT = NewMessageType("GAL2502I: Rendered %d image files.\n", 2502, STACK_TRACE_NOT_WANTED)
 )

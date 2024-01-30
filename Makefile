@@ -40,6 +40,7 @@ galasactl-source : \
 	./pkg/runs/*.go \
 	./pkg/launcher/*.go \
 	./pkg/files/*.go \
+	./pkg/images/*.go \
 	./pkg/props/*.go \
 	./pkg/properties/*.go \
 	./pkg/propertiesformatter/*.go \
