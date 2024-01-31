@@ -122,6 +122,13 @@ The `galasactl` tool can generate the following errors:
 - GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.
 - GAL1121E: Unable to retrieve rest api version. Reason is: {}. Try downloading the latest version of galasa or rebuilding a clean version.
 - GAL1122E: Authentication property {} is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '{}' or set as an environment variable.
+- GAL1123E: No run found matching run name  '{}'
+- GAL1124E: Error resetting run '{}'. Reason: '{}'
+- GAL1125E: The runs reset operation failed. Unable to process the error information returned from the server.
+- GAL1126E: Error cancelling run '{}'. Reason: '{}'
+- GAL1127E: The runs cancel operation failed. Unable to process the error information returned from the server.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 
+- GAL2502I: Run '{}' has been reset successfully.
+- GAL2503I: Run '{}' has been cancelled successfully.

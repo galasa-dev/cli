@@ -208,9 +208,18 @@ var (
 	GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION     = NewMessageType("GAL1120E: Program logic error. Collect a log using the '--log' option and send to the Galasa development team.", 1120, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_RETRIEVE_REST_API_VERSION     = NewMessageType("GAL1121E: Unable to retrieve rest api version. Reason is: %s. Try downloading the latest version of galasa or rebuilding a clean version.", 1121, STACK_TRACE_WANTED)
 	GALASA_ERROR_AUTH_PROPERTY_NOT_AVAILABLE             = NewMessageType("GAL1122E: Authentication property %s is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '%s' or set as an environment variable.", 1122, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_MULTIPLE_ACTIVE_RUNS_WITH_RUNNAME       = NewMessageType("GAL1123E: Multiple active runs found matching run name '%s'.", 1123, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_NO_ACTIVE_RUNS_WITH_RUNNAME             = NewMessageType("GAL1124E: No active run found matching run name '%s'.", 1124, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RESET_RUN_FAILED                        = NewMessageType("GAL1125E: Error resetting run '%v'. Reason: '%s'", 1125, STACK_TRACE_WANTED)
+	GALASA_ERROR_RESET_RUN_RESPONSE_PARSING              = NewMessageType("GAL1126E: The runs reset operation failed. Unable to process the error information returned from the server.", 1126, STACK_TRACE_WANTED)
+	GALASA_ERROR_CANCEL_RUN_FAILED                       = NewMessageType("GAL1127E: Error cancelling run '%v'. Reason: '%s'", 1127, STACK_TRACE_WANTED)
+	GALASA_ERROR_CANCEL_RUN_RESPONSE_PARSING             = NewMessageType("GAL1128E: The runs cancel operation failed. Unable to process the error information returned from the server.", 1128, STACK_TRACE_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
+
 	// Information messages...
 	GALASA_INFO_FOLDER_DOWNLOADED_TO = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_RUNS_RESET_SUCCESS   = NewMessageType("GAL2502I: Run '%s' has been reset successfully.", 2502, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_RUNS_CANCEL_SUCCESS  = NewMessageType("GAL2503I: Run '%s' has been cancelled successfully.", 2503, STACK_TRACE_NOT_WANTED)
 )
