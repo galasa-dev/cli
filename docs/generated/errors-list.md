@@ -127,8 +127,20 @@ The `galasactl` tool can generate the following errors:
 - GAL1125E: The runs reset operation failed. Unable to process the error information returned from the server.
 - GAL1126E: Error cancelling run '{}'. Reason: '{}'
 - GAL1127E: The runs cancel operation failed. Unable to process the error information returned from the server.
+- GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: {}
+- GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: {}
+- GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
+- GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
+- GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
+- GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. {} error: {}
+- GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. {} error: {}
+- GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. {} error: {}
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
+
+- GAL2502I: Rendered {} image files.
+
+- GAL2502I: Rendered {} image files.
 
 - GAL2502I: Run '{}' has been reset successfully.
 - GAL2503I: Run '{}' has been cancelled successfully.

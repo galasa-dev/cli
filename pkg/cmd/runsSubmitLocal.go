@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -13,6 +14,9 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -213,15 +217,48 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 							console,
 						)
 
+						job := images.NewPollingJob(
+							"local test run image expander",
+							images.DEFAULT_MILLISECS_BETWEEN_POLLS,
+							func() error { return scanFilesAndExpandImages(fileSystem, embeddedFileSystem, galasaHome, console) },
+						)
+						defer job.Stop()
+						job.Start()
+
 						err = submitter.ExecuteSubmitRuns(
 							runsSubmitCmdValues,
 							cmd.values.submitLocalSelectionFlags,
 						)
+
 					}
 				}
 			}
 		}
 	}
 
+	return err
+}
+
+func scanFilesAndExpandImages(fs files.FileSystem, embeddedFs embedded.ReadOnlyFileSystem, galasaHome utils.GalasaHome, console utils.Console) error {
+	var err error
+	log.Printf("Starting to scan files to expand .gz files into terminal images. Root folder: %s", galasaHome.GetNativeFolderPath())
+	renderer := images.NewImageRenderer(embeddedFs)
+	expander := images.NewImageExpander(fs, renderer)
+
+	folderToScan := galasaHome.GetNativeFolderPath()
+
+	err = expander.ExpandImages(folderToScan)
+	if err == nil {
+
+		// Write out a status string to the console about how many files were rendered.
+		count := expander.GetExpandedImageFileCount()
+
+		// Only bother writing out a message if any images have been expanded.
+		if count > 0 {
+			message := fmt.Sprintf(galasaErrors.GALASA_INFO_RENDERED_IMAGE_COUNT.Template, count)
+			console.WriteString(message)
+		}
+	}
+	log.Printf("Scanning of files to expand .gz files into terminal images completed.\n")
 	return err
 }

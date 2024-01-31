@@ -42,6 +42,7 @@ type MockFileSystem struct {
 	// The New
 	VirtualFunction_MkdirAll             func(targetFolderPath string) error
 	VirtualFunction_WriteTextFile        func(targetFilePath string, desiredContents string) error
+	VirtualFunction_ReadBinaryFile       func(filePath string) ([]byte, error)
 	VirtualFunction_ReadTextFile         func(filePath string) (string, error)
 	VirtualFunction_Exists               func(path string) (bool, error)
 	VirtualFunction_DirExists            func(path string) (bool, error)
@@ -89,6 +90,9 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 	}
 	mockFileSystem.VirtualFunction_WriteTextFile = func(targetFilePath string, desiredContents string) error {
 		return mockFSWriteTextFile(mockFileSystem, targetFilePath, desiredContents)
+	}
+	mockFileSystem.VirtualFunction_ReadBinaryFile = func(filePath string) ([]byte, error) {
+		return mockFSReadBinaryFile(mockFileSystem, filePath)
 	}
 	mockFileSystem.VirtualFunction_ReadTextFile = func(filePath string) (string, error) {
 		return mockFSReadTextFile(mockFileSystem, filePath)
@@ -181,6 +185,11 @@ func (fs *MockFileSystem) WriteTextFile(targetFilePath string, desiredContents s
 	return fs.VirtualFunction_WriteTextFile(targetFilePath, desiredContents)
 }
 
+func (fs *MockFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
+	// Call the virtual function.
+	return fs.VirtualFunction_ReadBinaryFile(filePath)
+}
+
 func (fs *MockFileSystem) ReadTextFile(filePath string) (string, error) {
 	// Call the virtual function.
 	return fs.VirtualFunction_ReadTextFile(filePath)
@@ -219,7 +228,7 @@ func mockFSDeleteDir(fs MockFileSystem, pathToDelete string) {
 
 	// Figure out which entries we are going to delete.
 	var keysToRemove []string = make([]string, 0)
-	for key, _ := range fs.data {
+	for key := range fs.data {
 		if strings.HasPrefix(key, pathToDelete) {
 			keysToRemove = append(keysToRemove, key)
 		}
@@ -257,6 +266,18 @@ func mockFSWriteTextFile(fs MockFileSystem, targetFilePath string, desiredConten
 	nodeToAdd := Node{content: []byte(desiredContents), isDir: false}
 	fs.data[targetFilePath] = &nodeToAdd
 	return nil
+}
+
+func mockFSReadBinaryFile(fs MockFileSystem, filePath string) ([]byte, error) {
+	bytes := make([]byte, 0)
+	var err error = nil
+	node := fs.data[filePath]
+	if node == nil {
+		err = os.ErrNotExist
+	} else {
+		bytes = []byte(node.content)
+	}
+	return bytes, err
 }
 
 func mockFSReadTextFile(fs MockFileSystem, filePath string) (string, error) {
@@ -311,4 +332,20 @@ func (fs MockFileSystem) GetAllWarningMessages() string {
 	messages := fs.warningMessageBuffer.String()
 	log.Printf("Mock reading back previously collected warnings messages: %s", messages)
 	return messages
+}
+
+func (fs *MockFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
+	var collectedFilePaths []string
+	var err error
+
+	for path, node := range fs.data {
+		if strings.HasPrefix(path, rootPath) {
+			if node.isDir == false {
+				// It's a file. Save it's path to return.
+				collectedFilePaths = append(collectedFilePaths, path)
+			}
+		}
+	}
+
+	return collectedFilePaths, err
 }

@@ -172,7 +172,7 @@ func TestRunsResetWithActiveRunReturnsOK(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 	textGotBack := mockConsole.ReadText()
-	assert.Contains(t, textGotBack, "GAL2502I")
+	assert.Contains(t, textGotBack, "GAL2503I")
 	assert.Contains(t, textGotBack, runName)
 }
 
@@ -196,7 +196,7 @@ func TestRunsResetWithMultipleActiveRunsReturnsError(t *testing.T) {
 	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
-	assert.Contains(t, err.Error(), "GAL1123")
+	assert.Contains(t, err.Error(), "GAL1131")
 	assert.Contains(t, err.Error(), runName)
 }
 
@@ -220,7 +220,7 @@ func TestRunsResetWithNoActiveRunReturnsError(t *testing.T) {
 	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
-	assert.Contains(t, err.Error(), "GAL1124")
+	assert.Contains(t, err.Error(), "GAL1132")
 	assert.Contains(t, err.Error(), runName)
 }
 
