@@ -38,3 +38,8 @@ pkg/embedded/templates/version/build.properties
 # The galasaapi package is generated.
 pkg/galasaapi/
 
+*.directory
+.attach_pid807
+
+# Don't check-in certificates
+*.der
