@@ -21,7 +21,7 @@ import (
 )
 
 var (
-    BLACK = color.RGBA{0, 0, 0, 0}
+    BLACK = color.RGBA{0, 0, 0, 255}
 )
 
 func TestCanCalculateTargetPathsOk(t *testing.T) {
@@ -179,10 +179,9 @@ func compareTwoImages(t *testing.T, renderedContents []byte, expectedContents []
 					expectedPixelColor := expectedImage.At(column, row)
 					renderedPixelColor := renderedImage.At(column, row)
 
-					// We're ignoring colors here because some pixels may have slight differences in RGB values
-                    // that aren't perceivable, causing tests to fail.
-					// Whenever the expected pixel is black, the rendered pixel should also be black.
-					// Whenever the expected pixel is a color, the rendered pixel should also be a color.
+					// We're ignoring colors because some pixels may have slight differences in RGB values, which
+                    // causes tests to fail. Whenever the expected pixel is black, the rendered pixel should also
+                    // be black, and when the expected pixel is a color, the rendered pixel should also be a color.
 					if (expectedPixelColor == BLACK && renderedPixelColor != BLACK) ||
 						(expectedPixelColor != BLACK && renderedPixelColor == BLACK) {
 						assert.Fail(t, "error", "rendered RGBA value %v does not match expected RGBA value %v at (x: %d, y: %d)", renderedPixelColor, expectedPixelColor, column, row)
