@@ -19,11 +19,11 @@ import (
 )
 
 var (
-	RESET_STATUS = "queued"
-	RESET_RESULT = ""
+	CANCEL_STATUS = "finished"
+	CANCEL_RESULT = "cancelled"
 )
 
-func ResetRun(
+func CancelRun(
 	runName string,
 	timeService utils.TimeService,
 	console utils.Console,
@@ -33,7 +33,7 @@ func ResetRun(
 	var err error
 	var runId string
 
-	log.Printf("ResetRun entered.")
+	log.Printf("CancelRun entered.")
 
 	if runName == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_NAME_FLAG, runName)
@@ -49,12 +49,12 @@ func ResetRun(
 
 		if err == nil {
 
-			updateRunStatusRequest := createUpdateRunStatusRequest(RESET_STATUS, RESET_RESULT)
+			updateRunStatusRequest := createUpdateRunStatusRequest(CANCEL_STATUS, CANCEL_RESULT)
 
-			err = resetRun(runName, runId, updateRunStatusRequest, apiClient)
+			err = cancelRun(runName, runId, updateRunStatusRequest, apiClient)
 
 			if err == nil {
-				consoleErr := console.WriteString(fmt.Sprintf(galasaErrors.GALASA_INFO_RUNS_RESET_SUCCESS.Template, runName))
+				consoleErr := console.WriteString(fmt.Sprintf(galasaErrors.GALASA_INFO_RUNS_CANCEL_SUCCESS.Template, runName))
 
 				// Console error is not as important to report as the original error if there was one.
 				if consoleErr != nil && err == nil {
@@ -66,11 +66,11 @@ func ResetRun(
 
 	}
 
-	log.Printf("ResetRun exiting. err is %v", err)
+	log.Printf("CancelRun exiting. err is %v", err)
 	return err
 }
 
-func resetRun(runName string,
+func cancelRun(runName string,
 	runId string,
 	runStatusUpdateRequest *galasaapi.UpdateRunStatusRequest,
 	apiClient *galasaapi.APIClient,
@@ -100,64 +100,17 @@ func resetRun(runName string,
 				errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
 
 				if err == nil {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESET_RUN_FAILED, runName, errorFromServer.Message)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANCEL_RUN_FAILED, runName, errorFromServer.Message)
 				} else {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESET_RUN_RESPONSE_PARSING)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANCEL_RUN_RESPONSE_PARSING)
 				}
 
 			} else {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err.Error())
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 			}
 		}
 
 	}
 
 	return err
-}
-
-func getRunIdFromRunName(runName string,
-	timeService utils.TimeService,
-	apiClient *galasaapi.APIClient,
-) (string, error) {
-	var err error
-	var runs []galasaapi.Run
-	var runId string
-
-	requestorParameter := ""
-	resultParameter := ""
-	fromAgeHours := 0
-	toAgeHours := 0
-	shouldGetActive := true
-
-	runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, apiClient)
-
-	if err == nil {
-
-		if len(runs) > 1 {
-
-			// More than 1 active run has been found with this runName, cannot tell which to reset, so throw error
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MULTIPLE_ACTIVE_RUNS_WITH_RUNNAME, runName)
-
-		} else if len(runs) == 1 {
-
-			runId = runs[0].GetRunId()
-
-		} else {
-
-			log.Printf("No active runs found matching run name: '%s'", runName)
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_ACTIVE_RUNS_WITH_RUNNAME, runName)
-
-		}
-	}
-
-	return runId, err
-}
-
-func createUpdateRunStatusRequest(status string, result string) *galasaapi.UpdateRunStatusRequest {
-	var updateRunStatusRequest = galasaapi.NewUpdateRunStatusRequest()
-
-	updateRunStatusRequest.SetStatus(status)
-	updateRunStatusRequest.SetResult(result)
-
-	return updateRunStatusRequest
 }

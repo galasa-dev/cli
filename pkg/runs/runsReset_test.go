@@ -95,9 +95,39 @@ const (
 			}]
 		}
 	}`
+	// Another finished run
+	RUN_U121 = `{
+		"runId": "xxx121xxx",
+		"artifacts": [],
+		"testStructure": {
+			"runName": "U121",
+			"bundle": "myBundleId",
+			"testName": "myTestPackage.MyTestName",
+			"testShortName": "MyTestName",
+			"requestor": "unitTesting",
+			"status" : "finished",
+			"result": "Passed",
+			"queued" : "2023-05-10T06:00:13.043037Z",
+			"startTime": "2023-05-10T06:00:36.159003Z",
+			"endTime": "2023-05-10T06:01:36.159003Z",
+			"methods": [{
+				"className": "myTestPackage.MyTestName",
+				"methodName": "myTestMethodName",
+				"type": "test",
+				"status": "finished",
+        		"result": "Passed",
+				"startTime": "2023-05-10T06:00:36.159003Z",
+				"endTime": "2023-05-10T06:01:36.159003Z",
+				"runLogStart":0,
+				"runLogEnd":0,
+				"befores":[], 
+				"afters": []
+			}]
+		}
+	}`
 )
 
-func WriteMockRasRunsPutStatusResponse(
+func WriteMockRasRunsPutStatusQueuedResponse(
 	t *testing.T,
 	writer http.ResponseWriter,
 	req *http.Request,
@@ -108,13 +138,19 @@ func WriteMockRasRunsPutStatusResponse(
 
 	if runName == "U123" {
 		statusCode = 200
-		response = fmt.Sprintf("Successfully updated run %s", runName)
+		response = fmt.Sprintf("Successfully reset run %s", runName)
 		writer.Header().Set("Content-Type", "text/plain")
 	} else if runName == "U120" {
 		statusCode = 400
 		response = `{
 			"error_code": 5049, 
 			"error_message": "GAL5049E: Error occured when trying to reset the run 'U120'. The run has already completed."
+		}`
+		writer.Header().Set("Content-Type", "application/json")
+	} else if runName == "U121" {
+		statusCode = 400
+		response = `{{
+			not for parsing
 		}`
 		writer.Header().Set("Content-Type", "application/json")
 	}
@@ -139,7 +175,7 @@ func NewRunsResetServletMock(
 			WriteMockRasRunsResponse(t, writer, req, runName, runResultStrings)
 		} else if req.URL.Path == "/ras/runs/"+runId {
 			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsPutStatusResponse(t, writer, req, runName)
+			WriteMockRasRunsPutStatusQueuedResponse(t, writer, req, runName)
 		}
 	}))
 
@@ -246,4 +282,52 @@ func TestRunsResetWithInvalidRunNameReturnsError(t *testing.T) {
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1075")
 	assert.Contains(t, err.Error(), runName)
+}
+
+func TestRunsResetWhereOperationFailedServerSideReturnsError(t *testing.T) {
+	// Given ...
+	runName := "U120"
+	runId := "xxx120xxx"
+
+	runResultStrings := []string{RUN_U120}
+
+	server := NewRunsResetServletMock(t, runName, runId, runResultStrings)
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+
+	// Then...
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1133")
+}
+
+func TestRunsResetWhereServerSideResponseCannotBeParsedReturnsError(t *testing.T) {
+	// Given ...
+	runName := "U121"
+	runId := "xxx121xxx"
+
+	runResultStrings := []string{RUN_U121}
+
+	server := NewRunsResetServletMock(t, runName, runId, runResultStrings)
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+
+	// Then...
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "GAL1134")
 }
