@@ -20,8 +20,8 @@
     },
     "forwardPorts": [9080,9443],
     "privileged": true,
-    "remoteUser": "${localEnv:USER}",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/,type=bind",
+    "remoteUser": "root",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/,type=bind",
     "workspaceFolder": "/workspace",
     "postStartCommand": "git config --global --add safe.directory /workspace",
     "mounts": [
