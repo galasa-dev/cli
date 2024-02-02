@@ -24,20 +24,6 @@ func assertTerminalImageMatchesExpectedSnapshot(t *testing.T, actualImageBytes [
 	compareImage(t, actualImageBytes, "./testdata/renderedimages/images-to-compare", t.Name()+".png")
 }
 
-func writeRenderedImageToTempDir(t *testing.T, fs files.FileSystem, actualImageBytes []byte) {
-	outputDirectory, err := fs.MkTempDir()
-	filePath := filepath.Join(outputDirectory, t.Name()+".png")
-	if err == nil {
-		err = fs.WriteBinaryFile(filePath, actualImageBytes)
-	}
-
-	if err != nil {
-		t.Log("Failed to write the rendered image to a temporary directory")
-	} else {
-		fmt.Printf("Rendered image written to: %s", filePath)
-	}
-}
-
 func createTextField(row int, column int, text string, textColor string) TerminalField {
 	fieldContents := FieldContents{Text: text}
 
