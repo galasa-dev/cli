@@ -40,6 +40,8 @@ func (expander *ImageExpanderImpl) GetExpandedImageFileCount() int {
 func (expander *ImageExpanderImpl) ExpandImages(rootFolderPath string) error {
 	var err error
 
+	log.Printf("Expanding any 3270 image descriptions we have into images. Folder scanned: %s\n", rootFolderPath)
+
 	var paths []string
 	paths, err = expander.fs.GetAllFilePaths(rootFolderPath)
 

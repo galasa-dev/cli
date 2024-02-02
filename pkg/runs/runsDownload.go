@@ -172,7 +172,7 @@ func renderImagesInFolder(fileSystem files.FileSystem, folderName string, consol
 
 		// Write out a status string to the console about how many files were rendered.
 		count := expander.GetExpandedImageFileCount()
-		message := fmt.Sprintf(galasaErrors.GALASA_INFO_RENDERED_IMAGE_COUNT.Template, count)
+		message := fmt.Sprintf(galasaErrors.GALASA_INFO_RENDERED_IMAGE_COUNT.Template, count, folderName)
 		console.WriteString(message)
 	}
 	return err
