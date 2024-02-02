@@ -20,107 +20,105 @@ func TestGetAuthPropertiesWithValidPropertiesUnmarshalsAuthProperties(t *testing
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	clientIdValue := "dummyId"
-	secretValue := "dummySecret"
 	accessTokenValue := "abc"
+	clientIdValue := "dummyId"
+	tokenPropertyValue := accessTokenValue + TOKEN_SEPARATOR + clientIdValue
 
 	mockFileSystem.WriteTextFile(
 		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			"GALASA_CLIENT_ID=%s\n"+
-				"GALASA_SECRET=%s\n"+
-				"GALASA_ACCESS_TOKEN=%s", clientIdValue, secretValue, accessTokenValue))
+		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+
 	// When...
 	authProperties, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
-	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and all required properties are present")
+	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and the token property is present")
 	assert.Equal(t, clientIdValue, authProperties.GetClientId())
-	assert.Equal(t, secretValue, authProperties.GetSecret())
 	assert.Equal(t, accessTokenValue, authProperties.GetRefreshToken())
 }
 
-func TestGetAuthPropertiesWithNoClientIdValidPropertiesUnmarshalsAuthPropertiesFails(t *testing.T) {
+func TestGetAuthPropertiesWithNoClientIdInTokenReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	secretValue := "dummySecret"
-	accessTokenValue := "abc"
+	tokenPropertyValue := "this-is-my-access-token"
 
 	mockFileSystem.WriteTextFile(
 		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			// "GALASA_CLIENT_ID=%s\n"+
-			"GALASA_SECRET=%s\n"+
-				"GALASA_ACCESS_TOKEN=%s",
-			// clientIdValue,
-			secretValue, accessTokenValue))
+		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+
 	// When...
 	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
-	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but the client id is missing from the file.")
-	assert.Contains(t, err.Error(), "GAL1122E")
-	assert.Contains(t, err.Error(), "GALASA_CLIENT_ID")
+	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing part of the token value.")
+	assert.Contains(t, err.Error(), "GAL1125E")
+	assert.Contains(t, err.Error(), "GALASA_TOKEN")
 }
 
-func TestGetAuthPropertiesWithNoSecretIdValidPropertiesUnmarshalsAuthPropertiesFails(t *testing.T) {
+func TestGetAuthPropertiesWithSeparatorButNoClientIdReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	clientIdValue := "my-client-id"
-	// secretValue := "dummySecret"
-	accessTokenValue := "abc"
+	tokenPropertyValue := "my-token" + TOKEN_SEPARATOR
 
 	mockFileSystem.WriteTextFile(
 		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			"GALASA_CLIENT_ID=%s\n"+
-				// "GALASA_SECRET=%s\n"+
-				"GALASA_ACCESS_TOKEN=%s",
-			clientIdValue,
-			// secretValue,
-			accessTokenValue))
+		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+
 	// When...
 	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
-	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but the secret is missing from the file.")
-	assert.Contains(t, err.Error(), "GAL1122E")
-	assert.Contains(t, err.Error(), "GALASA_SECRET")
+	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing the client ID part of the token.")
+	assert.Contains(t, err.Error(), "GAL1125E")
+	assert.Contains(t, err.Error(), "GALASA_TOKEN")
 }
 
-func TestGetAuthPropertiesWithNoRefreshTokenIdValidPropertiesUnmarshalsAuthPropertiesFails(t *testing.T) {
+func TestGetAuthPropertiesWithSeparatorButNoAccessTokenReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	clientIdValue := "my-client-id"
-	secretValue := "dummySecret"
-	// accessTokenValue := "abc"
+	tokenPropertyValue := TOKEN_SEPARATOR + "my-client-id"
 
 	mockFileSystem.WriteTextFile(
 		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			"GALASA_CLIENT_ID=%s\n"+
-				"GALASA_SECRET=%s\n",
-			// "GALASA_ACCESS_TOKEN=%s",
-			clientIdValue,
-			secretValue,
-		// accessTokenValue,
-		))
+		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+
 	// When...
 	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
-	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but the secret is missing from the file.")
-	assert.Contains(t, err.Error(), "GAL1122E")
-	assert.Contains(t, err.Error(), "GALASA_ACCESS_TOKEN")
+	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing the access token part of the token.")
+	assert.Contains(t, err.Error(), "GAL1125E")
+	assert.Contains(t, err.Error(), "GALASA_TOKEN")
+}
+
+func TestGetAuthPropertiesWithBadlyFormattedTokenReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	tokenPropertyValue := "this:is:a:token:with:too:many:parts"
+
+	mockFileSystem.WriteTextFile(
+		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
+		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+
+	// When...
+	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+
+	// Then...
+	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but the access token is missing from the file.")
+	assert.Contains(t, err.Error(), "GAL1125E")
+	assert.Contains(t, err.Error(), "GALASA_TOKEN")
 }
 
 func TestGetAuthPropertiesWithEmptyGalasactlPropertiesReturnsError(t *testing.T) {
@@ -135,28 +133,24 @@ func TestGetAuthPropertiesWithEmptyGalasactlPropertiesReturnsError(t *testing.T)
 	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
-	assert.NotNil(t, err, "Should return an error if the galasactl.properties is empty")
+	assert.NotNil(t, err, "Should return an error if the galasactl.properties is empty and an environment variable has not been set")
 	assert.ErrorContains(t, err, "GAL1122E")
 }
 
-func TestGetAuthPropertiesWithMissingPropertiesReturnsError(t *testing.T) {
+func TestGetAuthPropertiesWithMissingTokenPropertyReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	clientIdValue := "dummyId"
-
-	// Create a galasactl.properties file that is missing the GALASA_SECRET and GALASA_ACCESS_TOKEN properties
-	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf("GALASA_CLIENT_ID=%s", clientIdValue))
+	// Create a galasactl.properties file that is missing the GALASA_TOKEN property
+	mockFileSystem.WriteTextFile(mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties", "unknown.value=blah")
 
 	// When...
 	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
-	assert.NotNil(t, err, "Should return an error if the galasactl.properties exists and some required properties are missing")
+	assert.NotNil(t, err, "Should return an error if the galasactl.properties exists and is missing a token property")
 	assert.ErrorContains(t, err, "GAL1122E")
 }
 
@@ -174,65 +168,25 @@ func TestGetAuthPropertiesWithMissingGalasactlPropertiesFileReturnsError(t *test
 	assert.ErrorContains(t, err, "GAL1043E")
 }
 
-func TestGetAuthPropertiesEnvVarsOverridesFileValues(t *testing.T) {
+func TestGetAuthPropertiesTokenEnvVarOverridesFileValue(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	clientIdValue := "client-id-from-file"
-	secretValue := "secret-from-file"
 	accessTokenValue := "token-from-file"
+	clientIdValue := "client-id-from-file"
+	tokenPropertyValue := accessTokenValue + TOKEN_SEPARATOR + clientIdValue
 
 	mockFileSystem.WriteTextFile(
 		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			"GALASA_CLIENT_ID=%s\n"+
-				"GALASA_SECRET=%s\n"+
-				"GALASA_ACCESS_TOKEN=%s", clientIdValue, secretValue, accessTokenValue))
+		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
-	clientIdValue = "client-id-from-env-var"
-	secretValue = "secret-from-env-var"
 	accessTokenValue = "token-from-env-var"
-
-	mockEnvironment.SetEnv(CLIENT_ID_PROPERTY, clientIdValue)
-	mockEnvironment.SetEnv(SECRET_PROPERTY, secretValue)
-	mockEnvironment.SetEnv(ACCESS_TOKEN_PROPERTY, accessTokenValue)
-
-	// When...
-	authProperties, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
-
-	// Then...
-	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and all required properties are present")
-	assert.Equal(t, clientIdValue, authProperties.GetClientId())
-	assert.Equal(t, secretValue, authProperties.GetSecret())
-	assert.Equal(t, accessTokenValue, authProperties.GetRefreshToken())
-}
-
-func TestGetAuthPropertiesClientIDEnvVarOverridesFileValue(t *testing.T) {
-	// Given...
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-
-	clientIdValue := "client-id-from-file"
-	secretValue := "secret-from-file"
-	accessTokenValue := "token-from-file"
-
-	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			"GALASA_CLIENT_ID=%s\n"+
-				"GALASA_SECRET=%s\n"+
-				"GALASA_ACCESS_TOKEN=%s", clientIdValue, secretValue, accessTokenValue))
-
 	clientIdValue = "client-id-from-env-var"
-	// secretValue = "secret-from-env-var"
-	// accessTokenValue = "token-from-env-var"
+	tokenPropertyValue = accessTokenValue + TOKEN_SEPARATOR + clientIdValue
 
-	mockEnvironment.SetEnv(CLIENT_ID_PROPERTY, clientIdValue)
-	// mockEnvironment.SetEnv(SECRET_PROPERTY, secretValue)
-	// mockEnvironment.SetEnv(ACCESS_TOKEN_PROPERTY, accessTokenValue)
+	mockEnvironment.SetEnv(TOKEN_PROPERTY, tokenPropertyValue)
 
 	// When...
 	authProperties, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
@@ -240,76 +194,5 @@ func TestGetAuthPropertiesClientIDEnvVarOverridesFileValue(t *testing.T) {
 	// Then...
 	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and all required properties are present")
 	assert.Equal(t, clientIdValue, authProperties.GetClientId())
-	assert.Equal(t, secretValue, authProperties.GetSecret())
-	assert.Equal(t, accessTokenValue, authProperties.GetRefreshToken())
-}
-
-func TestGetAuthPropertiesSecretEnvVarOverridesFileValue(t *testing.T) {
-	// Given...
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-
-	clientIdValue := "client-id-from-file"
-	secretValue := "secret-from-file"
-	accessTokenValue := "token-from-file"
-
-	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			"GALASA_CLIENT_ID=%s\n"+
-				"GALASA_SECRET=%s\n"+
-				"GALASA_ACCESS_TOKEN=%s", clientIdValue, secretValue, accessTokenValue))
-
-	// clientIdValue = "client-id-from-env-var"
-	secretValue = "secret-from-env-var"
-	// accessTokenValue = "token-from-env-var"
-
-	// mockEnvironment.SetEnv(CLIENT_ID_PROPERTY, clientIdValue)
-	mockEnvironment.SetEnv(SECRET_PROPERTY, secretValue)
-	// mockEnvironment.SetEnv(ACCESS_TOKEN_PROPERTY, accessTokenValue)
-
-	// When...
-	authProperties, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
-
-	// Then...
-	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and all required properties are present")
-	assert.Equal(t, clientIdValue, authProperties.GetClientId())
-	assert.Equal(t, secretValue, authProperties.GetSecret())
-	assert.Equal(t, accessTokenValue, authProperties.GetRefreshToken())
-}
-
-func TestGetAuthPropertiesRefreshTokenEnvVarOverridesFileValue(t *testing.T) {
-	// Given...
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-
-	clientIdValue := "client-id-from-file"
-	secretValue := "secret-from-file"
-	accessTokenValue := "token-from-file"
-
-	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
-		fmt.Sprintf(
-			"GALASA_CLIENT_ID=%s\n"+
-				"GALASA_SECRET=%s\n"+
-				"GALASA_ACCESS_TOKEN=%s", clientIdValue, secretValue, accessTokenValue))
-
-	// clientIdValue = "client-id-from-env-var"
-	// secretValue = "secret-from-env-var"
-	accessTokenValue = "token-from-env-var"
-
-	// mockEnvironment.SetEnv(CLIENT_ID_PROPERTY, clientIdValue)
-	// mockEnvironment.SetEnv(SECRET_PROPERTY, secretValue)
-	mockEnvironment.SetEnv(ACCESS_TOKEN_PROPERTY, accessTokenValue)
-
-	// When...
-	authProperties, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
-
-	// Then...
-	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and all required properties are present")
-	assert.Equal(t, clientIdValue, authProperties.GetClientId())
-	assert.Equal(t, secretValue, authProperties.GetSecret())
 	assert.Equal(t, accessTokenValue, authProperties.GetRefreshToken())
 }
