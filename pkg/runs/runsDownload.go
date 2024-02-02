@@ -22,6 +22,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
@@ -70,7 +71,7 @@ func DownloadArtifacts(
 				var folderName string
 				folderName, err = nameDownloadFolder(runs[0], runName, timeService)
 				if err == nil {
-					err = downloadArtifactsToDirectory(apiClient, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
+					err = downloadArtifactsAndRenderImagesToDirectory(apiClient, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
 				}
 			} else {
 				log.Printf("No artifacts to download for run: '%s'", runName)
@@ -97,7 +98,7 @@ func downloadReRunArtfifacts(
 			for reRunIndex, reRun := range reRunsList {
 				if err == nil {
 					directoryName := nameReRunArtifactDownloadDirectory(reRun, reRunIndex, timeService)
-					err = downloadArtifactsToDirectory(
+					err = downloadArtifactsAndRenderImagesToDirectory(
 						apiClient,
 						directoryName,
 						reRun,
@@ -158,7 +159,26 @@ func nameDownloadFolder(run galasaapi.Run, runName string, timeService utils.Tim
 	return directoryName, err
 }
 
-func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
+func renderImagesInFolder(fileSystem files.FileSystem, folderName string, console utils.Console) error {
+	var err error
+
+	// No error, so try to expand the files.
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+	renderer := images.NewImageRenderer(embeddedFileSystem)
+	expander := images.NewImageExpander(fileSystem, renderer)
+
+	err = expander.ExpandImages(folderName)
+	if err == nil {
+
+		// Write out a status string to the console about how many files were rendered.
+		count := expander.GetExpandedImageFileCount()
+		message := fmt.Sprintf(galasaErrors.GALASA_INFO_RENDERED_IMAGE_COUNT.Template, count)
+		console.WriteString(message)
+	}
+	return err
+}
+
+func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
 	directoryName string,
 	run galasaapi.Run,
 	fileSystem files.FileSystem,
@@ -166,8 +186,7 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 	console utils.Console,
 	runDownloadTargetFolder string,
 ) error {
-
-	runId := run.GetRunId()
+	var err error
 
 	// We want to base the directory we download to on the destination folder.
 	// If the destination folder is "." (current folder/relative)
@@ -176,6 +195,25 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 	if runDownloadTargetFolder != "." {
 		directoryName = filepath.Join(runDownloadTargetFolder, directoryName)
 	}
+
+	err = downloadArtifactsToDirectory(apiClient, directoryName, run, fileSystem, forceDownload, console)
+
+	if err == nil {
+		err = renderImagesInFolder(fileSystem, directoryName, console)
+	}
+
+	return err
+}
+
+func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
+	directoryName string,
+	run galasaapi.Run,
+	fileSystem files.FileSystem,
+	forceDownload bool,
+	console utils.Console,
+) error {
+
+	runId := run.GetRunId()
 
 	filesWrittenOkCount := 0
 
