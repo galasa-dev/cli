@@ -58,6 +58,25 @@ func TestGetAuthPropertiesWithNoClientIdInTokenReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "GALASA_TOKEN")
 }
 
+func TestGetAuthPropertiesWithOnlySeparatorReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	mockFileSystem.WriteTextFile(
+		mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties",
+		fmt.Sprintf("GALASA_TOKEN=%s", TOKEN_SEPARATOR))
+
+	// When...
+	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+
+	// Then...
+	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing the access token and client ID parts of the token.")
+	assert.Contains(t, err.Error(), "GAL1125E")
+	assert.Contains(t, err.Error(), "GALASA_TOKEN")
+}
+
 func TestGetAuthPropertiesWithSeparatorButNoClientIdReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
