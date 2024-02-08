@@ -12,16 +12,34 @@ import (
 )
 
 func returnStructureType(structure interface{}) string {
-    var result string
-	_, ok := structure.(JavaSubmitRunStructure)
-	if ok {
-        result = "java structure"
+	var result string
+
+	_, isJavaStruct := structure.(JavaSubmitRunStructure)
+	if isJavaStruct {
+		result = "java structure"
 	} else {
-        result = "gherkin structure"
-    }
-    return result
+		result = "gherkin structure"
+	}
+
+	return result
 }
-func TestCanDistinguishJavaStructWhenGivenBaseStruct(t *testing.T) {
+
+func createSubmitRunStructure() SubmitRunStructure {
+
+	overridesMap := make(map[string]interface{})
+	overridesMap["map1"] = "string"
+
+	runStruct := SubmitRunStructure{
+		requestor:        "requestor",
+		obrFromPortfolio: " obr",
+		isTraceEnabled:   false,
+		overrides:        overridesMap,
+	}
+
+	return runStruct
+}
+
+func TestCanDistinguishJavaStructWhenFuncOnlyAcceptBaseStruct(t *testing.T) {
 	//Given...
 	javaStruct := JavaSubmitRunStructure{}
 	//When....
@@ -30,7 +48,7 @@ func TestCanDistinguishJavaStructWhenGivenBaseStruct(t *testing.T) {
 	assert.Equal(t, "java structure", structure)
 }
 
-func TestCanDistinguishCherkinStructWhenGivenBaseStruct(t *testing.T) {
+func TestCanDistinguishCherkinStructWhenFuncOnlyAcceptBaseStruct(t *testing.T) {
 	//Given...
 	gherkinStruct := GherkinSubmitRunStructure{}
 	//When....
@@ -39,30 +57,45 @@ func TestCanDistinguishCherkinStructWhenGivenBaseStruct(t *testing.T) {
 	assert.Equal(t, "gherkin structure", structure)
 }
 
-func TestCanRetrieveJavaStructFieldsWhenGivenBaseStruct(t *testing.T){
+func TestCanRetrieveJavaStructFields(t *testing.T) {
 	//Given...
-	overridesMap := make(map[string]interface{})
-
-	runStruct := SubmitRunStructure{
-		requestor : "requestor",
-		obrFromPortfolio : " obr",
-		isTraceEnabled   : false,
-		overrides : overridesMap,
-	}
+	runStruct := createSubmitRunStructure()
 
 	javaStruct := JavaSubmitRunStructure{
 		SubmitRunStructure: runStruct,
-		groupName : "groupName",
-		stream : "stream",
+		groupName:          "groupName",
+		stream:             "stream",
 	}
 
 	//When....
+	structure := returnStructureType(javaStruct)
 
 	//Then....
-	
+	assert.Equal(t, "java structure", structure)
+	assert.Equal(t, "requestor", javaStruct.SubmitRunStructure.requestor)
+	assert.Equal(t, false, javaStruct.SubmitRunStructure.isTraceEnabled)
+	assert.Equal(t, "string", javaStruct.SubmitRunStructure.overrides["map1"])
+	assert.Equal(t, "stream", javaStruct.stream)
+	assert.Equal(t, "", javaStruct.className)
+	assert.Equal(t, "", javaStruct.requestType)
 }
 
+func TestCanRetrieveGherkinStructFields(t *testing.T) {
+	//Given...
+	runStruct := createSubmitRunStructure()
 
+	gherkinStruct := GherkinSubmitRunStructure{
+		SubmitRunStructure: runStruct,
+		gherkinFile:        "gherkin_file.feature",
+	}
 
+	//When....
+	structure := returnStructureType(gherkinStruct)
 
+	//Then....
+	assert.Equal(t, "gherkin structure", structure)
+	assert.Equal(t, "requestor", gherkinStruct.SubmitRunStructure.requestor)
+	assert.Equal(t, "string", gherkinStruct.SubmitRunStructure.overrides["map1"])
+	assert.Equal(t, "gherkin_file.feature", gherkinStruct.gherkinFile)
 
+}
