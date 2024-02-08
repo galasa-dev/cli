@@ -1124,3 +1124,68 @@ func TestLocalMavenSet(t *testing.T) {
 	assert.Contains(t, args, "--localmaven")
 	assert.Contains(t, args, "mavenRepo")
 }
+
+func NewMockGherkinParams() (
+	props.JavaProperties,
+	*utils.MockEnv,
+	files.FileSystem,
+	embedded.ReadOnlyFileSystem,
+	*RunsSubmitLocalCmdParameters,
+	utils.TimeService,
+	ProcessFactory,
+	utils.GalasaHome,
+) {
+	// Given...
+	env := utils.NewMockEnv()
+	env.EnvVars["JAVA_HOME"] = "/java"
+	fs := files.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fs, "/java")
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
+	jvmLaunchParams := getBasicJvmLaunchParams()
+	timeService := utils.NewMockTimeService()
+	mockProcess := NewMockProcess()
+	mockProcessFactory := NewMockProcessFactory(mockProcess)
+
+	bootstrapProps := getBasicBootstrapProperties()
+
+	return bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome
+}
+
+func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	launcher, err := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// When...
+	testRuns, err := launcher.SubmitTestRun(
+		"myGroup",
+		"file:/dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.feature",
+		"myRequestType-UnitTest",
+		"myRequestor",
+		"unitTestStream",
+		"mvn:myGroup/myArtifact/myClassifier/obr",
+		isTraceEnabled,
+		overrides,
+	)
+	if err != nil {
+		assert.Fail(t, "Launcher should have launched command OK")
+	} else {
+		assert.NotNil(t, testRuns, "Returned test runs is nil, should have been an object.")
+
+		assert.Len(t, testRuns.Runs, 1, "Returned test runs array doesn't contain correct number of tests launched.")
+		assert.False(t, *testRuns.Complete, "Returned test runs should not already be complete")
+	}
+}
