@@ -18,7 +18,12 @@ func returnStructureType(structure interface{}) string {
 	if isJavaStruct {
 		result = "java structure"
 	} else {
-		result = "gherkin structure"
+		_, isGherkinStruct := structure.(GherkinSubmitRunStructure)
+		if isGherkinStruct {
+			result = "gherkin structure"
+		} else {
+			result = "unrecognized structure"
+		}
 	}
 
 	return result
@@ -48,13 +53,22 @@ func TestCanDistinguishJavaStructWhenFuncOnlyAcceptBaseStruct(t *testing.T) {
 	assert.Equal(t, "java structure", structure)
 }
 
-func TestCanDistinguishCherkinStructWhenFuncOnlyAcceptBaseStruct(t *testing.T) {
+func TestCanDistinguishGherkinStructWhenFuncOnlyAcceptBaseStruct(t *testing.T) {
 	//Given...
 	gherkinStruct := GherkinSubmitRunStructure{}
 	//When....
 	structure := returnStructureType(gherkinStruct)
 	//Then....
 	assert.Equal(t, "gherkin structure", structure)
+}
+
+func TestCanDistinguishNonJavaAndNonGherkinStructWhenFuncOnlyAcceptBaseStruct(t *testing.T) {
+	//Given...
+	randomStruct := SubmitRunStructure{}
+	//When....
+	structure := returnStructureType(randomStruct)
+	//Then....
+	assert.Equal(t, "unrecognized structure", structure)
 }
 
 func TestCanRetrieveJavaStructFields(t *testing.T) {
