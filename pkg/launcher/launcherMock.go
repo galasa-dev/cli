@@ -22,6 +22,7 @@ type LaunchParameters struct {
 	Stream           string
 	ObrFromPortfolio string
 	IsTraceEnabled   bool
+	GherkinURL       string
 	Overrides        map[string]interface{}
 }
 
@@ -69,6 +70,7 @@ func (launcher *MockLauncher) SubmitTestRun(
 	stream string,
 	obrFromPortfolio string,
 	isTraceEnabled bool,
+	GherkinURL       string,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
 

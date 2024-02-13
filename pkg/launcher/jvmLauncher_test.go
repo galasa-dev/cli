@@ -166,6 +166,7 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 		"unitTestStream",
 		"mvn:myGroup/myArtifact/myClassifier/obr",
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
 		overrides,
 	)
 	if err != nil {
@@ -214,6 +215,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 		"unitTestStream",
 		"mvn:myGroup/myArtifact/myClassifier/obr",
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
 		overrides,
 	)
 
@@ -351,6 +353,7 @@ func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
 		"unitTestStream",
 		"notmaven://group/artifact/version/classifier",
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
 		overrides,
 	)
 
@@ -387,6 +390,7 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 		"unitTestStream",
 		"", // No Obr from the profile record.
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
 		overrides,
 	)
 
@@ -468,6 +472,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -503,6 +508,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -539,6 +545,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -577,6 +584,7 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -648,6 +656,7 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled,
 		debugPort,
@@ -685,6 +694,7 @@ func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -722,6 +732,7 @@ func TestCommandIncludesTwoFlagsFromBootstrapProperties(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -759,6 +770,7 @@ func TestCommandIncludesDefaultDebugPortAndMode(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -797,6 +809,7 @@ func TestCommandDrawsValidDebugPortFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -835,6 +848,7 @@ func TestCommandDrawsInvalidDebugPortFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -873,6 +887,7 @@ func TestCommandDrawsValidDebugModeFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -917,6 +932,7 @@ func TestCommandDrawsInvalidDebugModeFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -953,6 +969,7 @@ func TestCommandDrawsValidDebugModeListenFromCommandLine(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -995,6 +1012,7 @@ func TestCommandDrawsValidDebugModeAttachFromCommandLine(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1037,6 +1055,7 @@ func TestCommandDrawsInvalidDebugModeFromCommandLine(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1075,6 +1094,7 @@ func TestLocalMavenNotSetDefaults(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1114,6 +1134,7 @@ func TestLocalMavenSet(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1172,12 +1193,13 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 	// When...
 	testRuns, err := launcher.SubmitTestRun(
 		"myGroup",
-		"file:/dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.feature",
+		"galasa.dev.example.banking.account/", // No Java Class as this is a gherkin test
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",
 		"mvn:myGroup/myArtifact/myClassifier/obr",
 		isTraceEnabled,
+		"file:///dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.feature",
 		overrides,
 	)
 	if err != nil {
