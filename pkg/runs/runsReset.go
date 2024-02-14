@@ -135,7 +135,8 @@ func getRunIdFromRunName(runName string,
 
 		if len(runs) > 1 {
 
-			// More than 1 active run has been found with this runName, cannot tell which to reset, so throw error
+			// More than 1 active run has been found with this runName, as runs might be stuck in active state like ending...
+			
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MULTIPLE_ACTIVE_RUNS_WITH_RUNNAME, runName)
 
 		} else if len(runs) == 1 {
