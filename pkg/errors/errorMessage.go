@@ -210,6 +210,7 @@ var (
 	GALASA_ERROR_AUTH_PROPERTY_NOT_AVAILABLE             = NewMessageType("GAL1122E: Authentication property %s is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '%s' or set as an environment variable.", 1122, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_BAD_TERMINAL_JSON_FORMAT                = NewMessageType("GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: %s", 1123, STACK_TRACE_WANTED)
 	GALASA_ERROR_PNG_ENCODING_FAILED                     = NewMessageType("GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: %s", 1124, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_BAD_TOKEN_PROPERTY_FORMAT               = NewMessageType("GAL1125E: Authentication property %s is invalid. Please ensure that it the value is made up of two parts that are separated by a '%s'.", 1125, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_OPEN_GZIP_FILE                = NewMessageType("GAL1225E: Failed to open file '%s' cause: %v. Check that this file exists, and that you have read permissions.", 1225, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_SETUP_READER_GZIP_FILE        = NewMessageType("GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: %s error: %v", 1226, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_UNCOMPRESS_GZIP_FILE          = NewMessageType("GAL1227E: Internal failure. Contents of gzip could not be decoded. %v error: %v", 1227, STACK_TRACE_NOT_WANTED)

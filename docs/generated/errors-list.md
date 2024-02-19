@@ -124,6 +124,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1122E: Authentication property {} is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '{}' or set as an environment variable.
 - GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: {}
 - GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: {}
+- GAL1125E: Authentication property {} is invalid. Please ensure that it the value is made up of two parts that are separated by a '{}'.
 - GAL1131E: Multiple active runs found matching run name '{}'.
 - GAL1132E: No active run found matching run name '{}'.
 - GAL1133E: Error resetting run '{}'. Reason: '{}'

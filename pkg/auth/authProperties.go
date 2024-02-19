@@ -8,6 +8,7 @@ package auth
 import (
 	"log"
 	"path/filepath"
+	"strings"
 
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -18,40 +19,39 @@ import (
 )
 
 const (
-	CLIENT_ID_PROPERTY    = "GALASA_CLIENT_ID"
-	SECRET_PROPERTY       = "GALASA_SECRET"
-	ACCESS_TOKEN_PROPERTY = "GALASA_ACCESS_TOKEN"
+	TOKEN_PROPERTY = "GALASA_TOKEN"
+	TOKEN_SEPARATOR = ":"
 )
 
 // Gets authentication properties from the user's galasactl.properties file or from the environment or a mixture.
 func GetAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome, env utils.Environment) (galasaapi.AuthProperties, error) {
 	var err error = nil
+	authProperties := galasaapi.NewAuthProperties()
 
 	// Work out which file we we want to draw properties from.
 	galasactlPropertiesFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.properties")
 
-	// Get the file-based properties if we can
-	authProperties, fileAccessErr := getAuthPropertiesFromFile(fileSystem, galasactlPropertiesFilePath, env)
-	if fileAccessErr != nil {
-		authProperties = *galasaapi.NewAuthProperties()
-	}
+	// Get the file-based token property if we can
+	tokenProperty, fileAccessErr := getPropertyFromFile(fileSystem, galasactlPropertiesFilePath, env, TOKEN_PROPERTY)
 
-	// We now have a structure which may be filled-in with values from the file.
-	// Over-write those values if there is an environment variable set to do that.
-	authProperties.SetClientId(getPropertyWithOverride(env, authProperties.GetClientId(), galasactlPropertiesFilePath, CLIENT_ID_PROPERTY))
-	authProperties.SetRefreshToken(getPropertyWithOverride(env, authProperties.GetRefreshToken(), galasactlPropertiesFilePath, ACCESS_TOKEN_PROPERTY))
-	authProperties.SetSecret(getPropertyWithOverride(env, authProperties.GetSecret(), galasactlPropertiesFilePath, SECRET_PROPERTY))
+	// Over-write the token property value if there is an environment variable set to do that.
+	tokenProperty = getPropertyWithOverride(env, tokenProperty, galasactlPropertiesFilePath, TOKEN_PROPERTY)
 
 	// Make sure all the properties have values that we need.
-	err = checkPropertyIsSet(authProperties.GetClientId(), CLIENT_ID_PROPERTY, galasactlPropertiesFilePath, fileAccessErr)
+	err = checkPropertyIsSet(tokenProperty, TOKEN_PROPERTY, galasactlPropertiesFilePath, fileAccessErr)
 	if err == nil {
-		err = checkPropertyIsSet(authProperties.GetRefreshToken(), ACCESS_TOKEN_PROPERTY, galasactlPropertiesFilePath, fileAccessErr)
+		var refreshToken string
+		var clientId string
+
+		// Get the authentication properties from the token
+		refreshToken, clientId, err = extractPropertiesFromToken(tokenProperty)
 		if err == nil {
-			err = checkPropertyIsSet(authProperties.GetSecret(), SECRET_PROPERTY, galasactlPropertiesFilePath, fileAccessErr)
+			authProperties.SetClientId(clientId)
+			authProperties.SetRefreshToken(refreshToken)
 		}
 	}
 
-	return authProperties, err
+	return *authProperties, err
 }
 
 func checkPropertyIsSet(propertyValue string, propertyName string, galasactlPropertiesFilePath string, fileAccessErr error) error {
@@ -84,24 +84,33 @@ func getPropertyWithOverride(env utils.Environment, valueFromFile string, filePa
 	return value
 }
 
-// Gets authentication properties from the user's galasactl.properties file
-func getAuthPropertiesFromFile(fileSystem files.FileSystem, galasactlPropertiesFilePath string, env utils.Environment) (galasaapi.AuthProperties, error) {
+// Gets a property from the user's galasactl.properties file
+func getPropertyFromFile(fileSystem files.FileSystem, galasactlPropertiesFilePath string, env utils.Environment, propertyName string) (string, error) {
 	var err error = nil
-	authProperties := galasaapi.NewAuthProperties()
-
 	var galasactlProperties props.JavaProperties
 	galasactlProperties, err = props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
-	if err == nil {
-
-		if err == nil {
-			authProperties.SetClientId(galasactlProperties[CLIENT_ID_PROPERTY])
-			authProperties.SetSecret(galasactlProperties[SECRET_PROPERTY])
-			authProperties.SetRefreshToken(galasactlProperties[ACCESS_TOKEN_PROPERTY])
-		}
-
-	} else {
+	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_READ_FILE, galasactlPropertiesFilePath, err.Error())
 	}
 
-	return *authProperties, err
+	return galasactlProperties[propertyName], err
+}
+
+func extractPropertiesFromToken(token string) (string, string, error) {
+	var err error
+	var refreshToken string
+	var clientId string
+
+	// The GALASA_TOKEN property should be in the form {GALASA_ACCESS_TOKEN}:{GALASA_CLIENT_ID},
+	// so it should split into two parts.
+	tokenParts := strings.Split(token, TOKEN_SEPARATOR)
+
+	if len(tokenParts) == 2 && tokenParts[0] != "" && tokenParts[1] != "" {
+		refreshToken = tokenParts[0]
+		clientId = tokenParts[1]
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_TOKEN_PROPERTY_FORMAT, TOKEN_PROPERTY, TOKEN_SEPARATOR)
+	}
+
+	return refreshToken, clientId, err
 }
