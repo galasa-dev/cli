@@ -52,8 +52,32 @@ const (
 			"testShortName": "MyTestName",
 			"requestor": "unitTesting",
 			"status" : "building",
-			"queued" : "2023-05-10T06:00:13.043037Z",
-			"startTime": "2023-05-10T06:00:36.159003Z",
+			"queued" : "2023-05-10T06:00:00.000000Z",
+			"startTime": "2023-05-10T06:05:10.000000Z",
+			"methods": [{
+				"className": "myTestPackage.MyTestName",
+				"methodName": "myTestMethodName",
+				"type": "test",
+				"runLogStart":null,
+				"runLogEnd":null,
+				"befores":[], 
+				"afters": []
+			}]
+		}
+	}`
+	// Another active run
+	RUN_U123_RE_RUN_2 = `{
+		"runId": "xxx124xxx",
+		"artifacts": [],
+		"testStructure": {
+			"runName": "U123",
+			"bundle": "myBundleId",
+			"testName": "myTestPackage.MyTestName",
+			"testShortName": "MyTestName",
+			"requestor": "unitTesting",
+			"status" : "building",
+			"queued" : "2023-05-10T06:00:00.000000Z",
+			"startTime": "2023-05-10T10:10:10.000000Z",
 			"methods": [{
 				"className": "myTestPackage.MyTestName",
 				"methodName": "myTestMethodName",
@@ -186,7 +210,7 @@ func NewRunsResetServletMock(
 // Test methods
 //------------------------------------------------------------------
 
-func TestRunsResetWithActiveRunReturnsOK(t *testing.T) {
+func TestRunsResetWithOneActiveRunReturnsOK(t *testing.T) {
 	// Given ...
 	runName := "U123"
 	runId := "xxx123xxx"
@@ -212,12 +236,12 @@ func TestRunsResetWithActiveRunReturnsOK(t *testing.T) {
 	assert.Contains(t, textGotBack, runName)
 }
 
-func TestRunsResetWithMultipleActiveRunsReturnsError(t *testing.T) {
+func TestRunsResetWithMultipleActiveRunsReturnsOK(t *testing.T) {
 	// Given ...
 	runName := "U123"
-	runId := "xxx123xxx"
+	runId := "xxx122xxx"
 
-	runResultStrings := []string{RUN_U123_FIRST_RUN, RUN_U123_RE_RUN}
+	runResultStrings := []string{RUN_U123_FIRST_RUN, RUN_U123_RE_RUN, RUN_U123_RE_RUN_2}
 
 	server := NewRunsResetServletMock(t, runName, runId, runResultStrings)
 	defer server.Close()
@@ -232,8 +256,10 @@ func TestRunsResetWithMultipleActiveRunsReturnsError(t *testing.T) {
 	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
-	assert.Contains(t, err.Error(), "GAL1131")
-	assert.Contains(t, err.Error(), runName)
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, "GAL2503I")
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestRunsResetWithNoActiveRunReturnsError(t *testing.T) {

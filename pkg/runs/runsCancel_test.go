@@ -74,7 +74,7 @@ func NewRunsCancelServletMock(
 // Test methods
 //------------------------------------------------------------------
 
-func TestRunsCancelWithActiveRunReturnsOK(t *testing.T) {
+func TestRunsCancelWithOneActiveRunReturnsOK(t *testing.T) {
 	// Given ...
 	runName := "U123"
 	runId := "xxx123xxx"
@@ -100,12 +100,12 @@ func TestRunsCancelWithActiveRunReturnsOK(t *testing.T) {
 	assert.Contains(t, textGotBack, runName)
 }
 
-func TestRunsCancelWithMultipleActiveRunsReturnsError(t *testing.T) {
+func TestRunsCancelWithMultipleActiveRunsReturnsOK(t *testing.T) {
 	// Given ...
 	runName := "U123"
-	runId := "xxx123xxx"
+	runId := "xxx122xxx"
 
-	runResultStrings := []string{RUN_U123_FIRST_RUN, RUN_U123_RE_RUN}
+	runResultStrings := []string{RUN_U123_FIRST_RUN, RUN_U123_RE_RUN, RUN_U123_RE_RUN_2}
 
 	server := NewRunsCancelServletMock(t, runName, runId, runResultStrings)
 	defer server.Close()
@@ -120,8 +120,10 @@ func TestRunsCancelWithMultipleActiveRunsReturnsError(t *testing.T) {
 	err := CancelRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
 
 	// Then...
-	assert.Contains(t, err.Error(), "GAL1131")
-	assert.Contains(t, err.Error(), runName)
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, "GAL2504I")
+	assert.Contains(t, textGotBack, runName)
 }
 
 func TestRunsCancelWithNoActiveRunReturnsError(t *testing.T) {
