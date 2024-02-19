@@ -26,8 +26,8 @@ func WriteMockRasRunsPutStatusFinishedResponse(
 	var response string
 
 	if runName == "U123" {
-		statusCode = 200
-		response = fmt.Sprintf("Successfully cancelled run %s", runName)
+		statusCode = 202
+		response = fmt.Sprintf("The request to cancel run %s has been received.", runName)
 		writer.Header().Set("Content-Type", "text/plain")
 	} else if runName == "U120" {
 		statusCode = 400

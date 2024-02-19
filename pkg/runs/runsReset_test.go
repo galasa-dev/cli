@@ -137,8 +137,8 @@ func WriteMockRasRunsPutStatusQueuedResponse(
 	var response string
 
 	if runName == "U123" {
-		statusCode = 200
-		response = fmt.Sprintf("Successfully reset run %s", runName)
+		statusCode = 202
+		response = fmt.Sprintf("The request to reset run %s has been received.", runName)
 		writer.Header().Set("Content-Type", "text/plain")
 	} else if runName == "U120" {
 		statusCode = 400
