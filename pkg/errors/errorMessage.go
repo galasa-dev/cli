@@ -217,7 +217,6 @@ var (
 	GALASA_ERROR_FAILED_TO_COMPRESS_BINARY_DATA          = NewMessageType("GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. %v error: %v", 1228, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_FLUSH_BINARY_DATA             = NewMessageType("GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. %v error: %v", 1229, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_CLOSE_GZIP_FILE               = NewMessageType("GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. %v error: %v", 1230, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_MULTIPLE_ACTIVE_RUNS_WITH_RUNNAME       = NewMessageType("GAL1131E: Multiple active runs found matching run name '%s'.", 1131, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_NO_ACTIVE_RUNS_WITH_RUNNAME             = NewMessageType("GAL1132E: No active run found matching run name '%s'.", 1132, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RESET_RUN_FAILED                        = NewMessageType("GAL1133E: Error resetting run '%v'. Reason: '%s'", 1133, STACK_TRACE_WANTED)
 	GALASA_ERROR_RESET_RUN_RESPONSE_PARSING              = NewMessageType("GAL1134E: The runs reset operation failed. Unable to process the error information returned from the server.", 1134, STACK_TRACE_WANTED)
