@@ -89,7 +89,7 @@ func cancelRun(runName string,
 			UpdateRunStatusRequest(*runStatusUpdateRequest).
 			ClientApiVersion(restApiVersion).Execute()
 
-		if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+		if (resp != nil) && (resp.StatusCode != http.StatusAccepted) {
 			defer resp.Body.Close()
 
 			responseBody, err = io.ReadAll(resp.Body)

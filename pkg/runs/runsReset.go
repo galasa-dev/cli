@@ -89,7 +89,7 @@ func resetRun(runName string,
 			UpdateRunStatusRequest(*runStatusUpdateRequest).
 			ClientApiVersion(restApiVersion).Execute()
 
-		if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+		if (resp != nil) && (resp.StatusCode != http.StatusAccepted) {
 			defer resp.Body.Close()
 
 			responseBody, err = io.ReadAll(resp.Body)
@@ -136,8 +136,7 @@ func getRunIdFromRunName(runName string,
 		if len(runs) > 1 {
 
 			// More than 1 active run has been found with this runName, as runs might be stuck in active state like ending...
-			
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MULTIPLE_ACTIVE_RUNS_WITH_RUNNAME, runName)
+			// So find the run with the first startTime, and attempt to reset that one
 
 		} else if len(runs) == 1 {
 
