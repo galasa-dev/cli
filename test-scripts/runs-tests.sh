@@ -309,68 +309,48 @@ function runs_reset_check_retry_present {
 
     run_name=$1
 
+    h2 "First, launching test on an ecosystem without a portfolio in a background process, so it can be reset."
+
     mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
-    # Create the portfolio.
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs prepare \
-    --bootstrap $bootstrap \
-    --stream inttests \
-    --portfolio portfolio.yaml \
-    --test ${GALASA_TEST_NAME_SHORT} \
-    --log -"
-
-    info "Command is: $cmd"
-
-    $cmd
-    rc=$?
-    # We expect a return code of '0' because this test is in the ecosystem's testcatalog.
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to create a portfolio with a known test from the ecosystem's testcatalog."
-        exit 1
-    fi
-    success "Creating portfolio.yaml worked OK"
-
-    h2 "Launching test on an ecosystem from a portfolio..."
-
-    cd ${BASEDIR}/temp
-
-    runs_submit_log_file="runs-submit-output.txt"
-    json_report_file="report.json"
+    runs_submit_log_file="runs-submit-output-for-reset.txt"
 
     cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
-    --bootstrap ${bootstrap} \
-    --portfolio portfolio.yaml \
+    --bootstrap $bootstrap \
+    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+    --stream inttests
     --throttle 1 \
     --poll 10 \
     --progress 1 \
     --noexitcodeontestfailures \
-    --reportjson ${json_report_file} \
     --log ${runs_submit_log_file}"
+
+    info "Command is: $cmd"
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
     # Start the test running inside a background process... so we can try to reset it while it's running
     $cmd &
 
-    is_done="false"
+    run_name_found="false"
     retries=0
     max=100
     target_line=""
     
     # Loop waiting until we can extract the name of the test run which is running in the background.
-    while [[ "${is_done}" == "false" ]]; do
+    while [[ "${run_name_found}" == "false" ]]; do
         if [[ -e $runs_submit_log_file ]]; then
             success "file exists"
-            target_line=$(cat ${runs_submit_log_file} | grep "submitted")
-            
+            # Check the run has reached building stage before attempting to reset
+            target_line=$(cat ${runs_submit_log_file} | grep "status is now 'building'")
 
             if [[ "$target_line" != "" ]]; then
-                info "Target line is found."
-                is_done="true"
+                info "Target line is found - the test is now building."
+                run_name_found="true"
             fi
         fi    
-        sleep 1
+        sleep 3
         ((retries++))
         if (( $retries > $max )); then 
             error "Too many retries."
@@ -381,55 +361,152 @@ function runs_reset_check_retry_present {
     run_name=$(echo $target_line | cut -f4 -d' ')
     info "Run name is $run_name"
 
-    runs_reset_log_file="runs-reset-output.txt"
+    h2 "Now attempting to reset the run while it's running in the background process."
 
-    # Now attempt to reset the active test run which is running in the background process.
     cmd="${ORIGINAL_DIR}/bin/${binary} runs reset \
     --name ${run_name} \
-    --bootstrap ${bootstrap} \
-    --log "
+    --bootstrap ${bootstrap}"
 
     info "Command is: $cmd"
+    $cmd
 
-    output_file="runs-download-output.txt"
+    h2 "Now using runs get to check when the run is finished."
+
+    runs_get_log_file="runs-get-output-for-reset.txt"
+
+    # Now poll runs get to check when the test is finished
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
 
     is_test_finished="false"
     retries=0
     max=100
     target_line=""
-    # while [[ "${is_test_finished}" == "false" ]]; do
-    #     sleep 5
-    #     # Run the runs reset command
-    #     $cmd | tee $output_file
-    #     # If the test run isn't yet in an active state like building or generating, then it cannot yet be reset
-    #     # Check for test reset confirmation or if not then test not active confirmation, and loop again
-    #     target_line=$(cat ${runs_reset_log_file} | grep "GAL2503I")
-    #     if [[ "$target_line" != "" ]]; then
-    #         success "Target line is found."
-    #     elif 
-    #         success "FOOBAR."
-    #     fi
+    while [[ "${is_test_finished}" == "false" ]]; do
+        sleep 5
 
+        # Run the runs get command
+        $cmd | tee $runs_get_log_file
+        # Check for line in the runs get output to signify the test is finished
+        target_line=$(cat ${runs_get_log_file} | grep "finished")
+        if [[ "$target_line" != "" ]]; then
+            success "Target line is found - the test is finished."
+            is_test_finished="true"
+        fi
 
-    #     # If the test is finished, we can expect to see the location of the json report in the end
-    #     # So we can look for this line to tell if the test is still running or not
-    #     target_line=$(cat ${runs_submit_log_file} | grep "Json test report written to ${json_report_file}")
-    #     # Test has finished as the confirmation of the json test report location is found
-    #     if [[ "$target_line" != "" ]]; then
-    #         success "Target line is found."
-    #         is_test_finished="true"
-    #     fi
+        # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
 
-    #     # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
-    #     ((retries++))
-    #     if (( $retries > $max )); then 
-    #         error "Too many retries."
-    #         exit 1
-    #     fi
-    # done
+    h2 "Now checking if two results for the runName are shown - the original run and the reset run."
 
     # Now check if the runs get shows two runs with a retry.
+    target_line=$(cat ${runs_get_log_file} | grep "Total:2")
+    if [[ "$target_line" != "" ]]; then
+        success "Target line found - the original and reset run were found."
+    fi
+
+}
+
+function runs_cancel_check_test_is_lost {
+
+    h2 "Performing runs cancel on an active test run..."
+
+    run_name=$1
+
+    h2 "First, launching test on an ecosystem without a portfolio in a background process, so it can be cancelled."
+
+    mkdir -p ${BASEDIR}/temp
+    cd ${BASEDIR}/temp
+
+    runs_submit_log_file="runs-submit-output-for-cancel.txt"
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    --bootstrap $bootstrap \
+    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+    --stream inttests
+    --throttle 1 \
+    --poll 10 \
+    --progress 1 \
+    --noexitcodeontestfailures \
+    --log ${runs_submit_log_file}"
+
+    info "Command is: $cmd"
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+
+    # Start the test running inside a background process... so we can try to cancel it while it's running
+    $cmd &
+
+    run_name_found="false"
+    retries=0
+    max=100
+    target_line=""
     
+    # Loop waiting until we can extract the name of the test run which is running in the background.
+    while [[ "${run_name_found}" == "false" ]]; do
+        if [[ -e $runs_submit_log_file ]]; then
+            success "file exists"
+            # Check the run has reached building stage before attempting to cancel
+            target_line=$(cat ${runs_submit_log_file} | grep "status is now 'building'")
+
+            if [[ "$target_line" != "" ]]; then
+                info "Target line is found - the test is now building."
+                run_name_found="true"
+            fi
+        fi    
+        sleep 3
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
+
+    run_name=$(echo $target_line | cut -f4 -d' ')
+    info "Run name is $run_name"
+
+    h2 "Now attempting to cancel the run while it's running in the background process."
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs cancel \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    $cmd
+
+    h2 "Now using the runs submit output to check the run was cancelled."
+
+    is_test_cancelled="false"
+    retries=0
+    max=100
+    target_line=""
+    while [[ "${is_test_cancelled}" == "false" ]]; do
+        sleep 5
+
+        if [[ -e $runs_submit_log_file ]]; then
+            success "file exists"
+            target_line=$(cat ${runs_submit_log_file} | grep "was lost")
+
+            if [[ "$target_line" != "" ]]; then
+                info "Target line is found - the test was cancelled."
+                is_test_cancelled="true"
+            fi
+        fi
+
+        # Give up if we've been waiting for the test to show as cancelled for too long.
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
 
 }
 
@@ -893,39 +970,39 @@ function launch_test_from_unknown_portfolio {
 }
 
 function test_runs_commands {
-    # Launch test on ecosystem without a portfolio ...
-    # launch_test_on_ecosystem_without_portfolio
+    Launch test on ecosystem without a portfolio ...
+    launch_test_on_ecosystem_without_portfolio
 
-    # # Launch test on ecosystem from a portfolio ...
-    # launch_test_on_ecosystem_with_portfolio
+    # Launch test on ecosystem from a portfolio ...
+    launch_test_on_ecosystem_with_portfolio
 
-    # # Query the result ... setting RUN_NAME to hold the one which galasa allocated
-    # get_result_with_runname 
-    # runs_get_check_summary_format_output  $RUN_NAME
-    # runs_get_check_details_format_output  $RUN_NAME
-    # runs_get_check_raw_format_output  $RUN_NAME
+    # Query the result ... setting RUN_NAME to hold the one which galasa allocated
+    get_result_with_runname 
+    runs_get_check_summary_format_output  $RUN_NAME
+    runs_get_check_details_format_output  $RUN_NAME
+    runs_get_check_raw_format_output  $RUN_NAME
 
-    # # Query the result with the age parameter 
-    # runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
-    # runs_get_check_raw_format_output_with_just_from $RUN_NAME
+    # Query the result with the age parameter 
+    runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
+    runs_get_check_raw_format_output_with_just_from $RUN_NAME
 
-    # # Check that the age parameter throws correct errors with invalid values
-    # runs_get_check_raw_format_output_with_no_runname_and_no_age_param
-    # runs_get_check_raw_format_output_with_invalid_age_param
-    # runs_get_check_raw_format_output_with_older_to_than_from_age
-    # runs_get_check_requestor_parameter
-    # runs_get_check_result_parameter
-    # # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
+    # Check that the age parameter throws correct errors with invalid values
+    runs_get_check_raw_format_output_with_no_runname_and_no_age_param
+    runs_get_check_raw_format_output_with_invalid_age_param
+    runs_get_check_raw_format_output_with_older_to_than_from_age
+    runs_get_check_requestor_parameter
+    runs_get_check_result_parameter
+    # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
 
 
 
-    # # Attempt to create a test portfolio with an unknown test ...
-    # create_portfolio_with_unknown_test
+    # Attempt to create a test portfolio with an unknown test ...
+    create_portfolio_with_unknown_test
 
-    # # Attempt to launch a test from an unknown portfolio ...
-    # launch_test_from_unknown_portfolio
+    # Attempt to launch a test from an unknown portfolio ...
+    launch_test_from_unknown_portfolio
 
-    # runs_download_check_folder_names_during_test_run
+    runs_download_check_folder_names_during_test_run
 
     # Attempt to reset an active run...
     runs_reset_check_retry_present
