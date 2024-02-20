@@ -94,7 +94,7 @@ var (
 	GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO           = NewMessageType("GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio."+SEE_COMMAND_REFERENCE, 1006, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML                = NewMessageType("GAL1007E: Failed to create report yaml file %s. Reason is %s", 1007, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK                  = NewMessageType("GAL1008E: Failed to check if group %s exists already. Reason is %s", 1008, STACK_TRACE_WANTED)
-	GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS              = NewMessageType("GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test) or --portfolio flag to be specified."+SEE_COMMAND_REFERENCE, 1009, STACK_TRACE_WANTED)
+	GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS              = NewMessageType("GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test, --gherkin) or --portfolio flag to be specified."+SEE_COMMAND_REFERENCE, 1009, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_INVALID_OVERRIDE                  = NewMessageType("GAL1010E: Invalid override '%v'", 1010, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_REPORT_YAML_ENCODE                = NewMessageType("GAL1011E: Failed to encode the yaml file %s. Reason is %s", 1011, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL               = NewMessageType("GAL1012E: Failed to prepare test report for writing to json file %s. Reason is %s", 1012, STACK_TRACE_WANTED)

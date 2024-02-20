@@ -9,7 +9,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1007E: Failed to create report yaml file {}. Reason is {}
 - GAL1008E: Failed to check if group {} exists already. Reason is {}
-- GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test) or --portfolio flag to be specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test, --gherkin) or --portfolio flag to be specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1010E: Invalid override '{}'
 - GAL1011E: Failed to encode the yaml file {}. Reason is {}
 - GAL1012E: Failed to prepare test report for writing to json file {}. Reason is {}

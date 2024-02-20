@@ -24,6 +24,5 @@ type RunsSubmitCmdValues struct {
 	ThrottleFileName              string
 	PortfolioFileName             string
 	OverrideFilePath              string
-	GherkinUrl					  string
 	TestSelectionFlagValues       *TestSelectionFlagValues
 }

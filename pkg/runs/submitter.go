@@ -67,7 +67,7 @@ func (submitter *Submitter) ExecuteSubmitRuns(
 			var portfolio *Portfolio
 			portfolio, err = submitter.getPortfolio(params.PortfolioFileName, TestSelectionFlagValues)
 			if err == nil {
-				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName, params.GherkinUrl)
+				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName, TestSelectionFlagValues.GherkinUrl)
 				if err == nil {
 					err = submitter.executePortfolio(portfolio, runOverrides, *params)
 				}
@@ -141,13 +141,13 @@ func (submitter *Submitter) executeSubmitRuns(
 	//
 	nextProgressReport := submitter.timeService.Now().Add(progressReportInterval)
 	isThrottleFileLost := false
-	log.Printf("executePortfolio - GherkunURL >"+ params.GherkinUrl)
+	
 	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
-		log.Printf("executePortfolio runs loop - GherkunURL >"+ params.GherkinUrl)
+		
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
-			log.Printf("executePortfolio throttle loop - GherkunURL >"+ params.GherkinUrl)
+			
 			readyRuns, err = submitter.submitRun(params.GroupName, readyRuns, submittedRuns,
-				lostRuns, &runOverrides, params.Trace, currentUser, params.RequestType, params.GherkinUrl)
+				lostRuns, &runOverrides, params.Trace, currentUser, params.RequestType, "")
 
 			if err != nil {
 				// Ignore the error and continue to process the list of available runs.
@@ -306,7 +306,7 @@ func (submitter *Submitter) submitRun(
 			}
 
 			var resultGroup *galasaapi.TestRuns
-			log.Printf("Submit Run - GherkunURL >"+ gherkinUrl)
+			log.Printf("Submit Run - GherkunURL >" + gherkinUrl)
 			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
 				nextRun.Stream, nextRun.Obr, trace, gherkinUrl, submitOverrides)
 			if err != nil {
@@ -531,7 +531,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO)
 		}
 	} else {
-		if !AreSelectionFlagsProvided(submitSelectionFlags) && params.GherkinUrl == "" {
+		if !AreSelectionFlagsProvided(submitSelectionFlags) {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS)
 		}
 	}
@@ -694,11 +694,11 @@ func (submitter *Submitter) GetCurrentUserName() string {
 	return userName
 }
 
-func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string, gherkinUrl string) error {
+func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string, gherkinUrl *[]string) error {
 	var err error = nil
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
 		// Empty portfolio
-		if gherkinUrl == "" {
+		if len(*gherkinUrl) < 1 {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
 		}
 	}

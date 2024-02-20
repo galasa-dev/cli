@@ -136,6 +136,10 @@ func AreSelectionFlagsProvided(flags *utils.TestSelectionFlagValues) bool {
 		return true
 	}
 
+	if len(*flags.GherkinUrl) > 0 {
+		return true
+	}
+
 	if flags.Stream != "" {
 		return true
 	}
@@ -184,9 +188,32 @@ func SelectTests(launcherInstance launcher.Launcher, flags *utils.TestSelectionF
 		if err == nil {
 			err = selectTestsByClass(testCatalog, &testSelection, flags)
 		}
+		if err == nil {
+			err = selectTestsByGherkin(testCatalog, &testSelection, flags)
+		}
 	}
 
 	return testSelection, err
+}
+
+func selectTestsByGherkin(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
+	var err error = nil
+
+	if len(*flags.GherkinUrl) < 1{
+		return err
+	}
+	gherkinUrls := *flags.GherkinUrl
+	for _, gherkin := range gherkinUrls{
+		
+		newSelectedClass := TestClass{
+			GherkinUrl: gherkin,
+		}
+	
+		testSelection.Classes = append(testSelection.Classes, newSelectedClass)
+	}
+
+
+	return err
 }
 
 func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {

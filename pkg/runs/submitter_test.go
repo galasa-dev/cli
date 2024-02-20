@@ -371,6 +371,7 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 		Classes:     new([]string),
 		Stream:      "myStream",
 		RegexSelect: &regexSelectValue,
+		GherkinUrl:  new([]string),
 	}
 
 	mockLauncher := launcher.NewMockLauncher()
@@ -422,6 +423,7 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 		Classes:     new([]string),
 		Stream:      "",
 		RegexSelect: &regexSelectValue,
+		GherkinUrl:  new([]string),
 	}
 
 	mockLauncher := launcher.NewMockLauncher()

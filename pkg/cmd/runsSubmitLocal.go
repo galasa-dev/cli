@@ -120,7 +120,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 		"The maven coordinates of the obr bundle(s) which refer to your test bundles. "+
 			"The format of this parameter is 'mvn:${TEST_OBR_GROUP_ID}/${TEST_OBR_ARTIFACT_ID}/${TEST_OBR_VERSION}/obr' "+
 			"Multiple instances of this flag can be used to describe multiple obr bundles.")
-	runsSubmitLocalCobraCmd.MarkFlagRequired("obr")
+	//runsSubmitLocalCobraCmd.MarkFlagRequired("obr")
 
 	runsSubmitLocalCobraCmd.Flags().Uint32Var(&cmd.values.runsSubmitLocalCmdParams.DebugPort, "debugPort", 0,
 		"The port to use when the --debug option causes the testcase to connect to a java debugger. "+
@@ -149,6 +149,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 
 	runs.AddGherkinFlag(runsSubmitLocalCobraCmd, cmd.values.submitLocalSelectionFlags, false, "Gherkin feature file URL. Should start with 'file://'. ")
 
+	runsSubmitLocalCobraCmd.MarkFlagsRequiredTogether("class","obr")
 	runsSubmitLocalCobraCmd.MarkFlagsOneRequired("class","gherkin")
 
 	runsSubmitCmd.CobraCommand().AddCommand(runsSubmitLocalCobraCmd)
