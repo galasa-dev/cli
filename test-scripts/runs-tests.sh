@@ -303,6 +303,213 @@ function runs_download_check_folder_names_during_test_run {
     success "Downloading artifacts from a running test results in folder names with a timestamp. OK"
 }
 
+function runs_reset_check_retry_present {
+
+    h2 "Performing runs reset on an active test run..."
+
+    run_name=$1
+
+    h2 "First, launching test on an ecosystem without a portfolio in a background process, so it can be reset."
+
+    mkdir -p ${BASEDIR}/temp
+    cd ${BASEDIR}/temp
+
+    runs_submit_log_file="runs-submit-output-for-reset.txt"
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    --bootstrap $bootstrap \
+    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+    --stream inttests
+    --throttle 1 \
+    --poll 10 \
+    --progress 1 \
+    --noexitcodeontestfailures \
+    --log ${runs_submit_log_file}"
+
+    info "Command is: $cmd"
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+
+    # Start the test running inside a background process... so we can try to reset it while it's running
+    $cmd &
+
+    run_name_found="false"
+    retries=0
+    max=100
+    target_line=""
+    
+    # Loop waiting until we can extract the name of the test run which is running in the background.
+    while [[ "${run_name_found}" == "false" ]]; do
+        if [[ -e $runs_submit_log_file ]]; then
+            success "file exists"
+            # Check the run has reached building stage before attempting to reset
+            target_line=$(cat ${runs_submit_log_file} | grep "status is now 'building'")
+
+            if [[ "$target_line" != "" ]]; then
+                info "Target line is found - the test is now building."
+                run_name_found="true"
+            fi
+        fi    
+        sleep 3
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
+
+    run_name=$(echo $target_line | cut -f4 -d' ')
+    info "Run name is $run_name"
+
+    h2 "Now attempting to reset the run while it's running in the background process."
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs reset \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+    $cmd
+
+    h2 "Now using runs get to check when the run is finished."
+
+    runs_get_log_file="runs-get-output-for-reset.txt"
+
+    # Now poll runs get to check when the test is finished
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
+
+    is_test_finished="false"
+    retries=0
+    max=100
+    target_line=""
+    while [[ "${is_test_finished}" == "false" ]]; do
+        sleep 5
+
+        # Run the runs get command
+        $cmd | tee $runs_get_log_file
+        # Check for line in the runs get output to signify the test is finished
+        target_line=$(cat ${runs_get_log_file} | grep "finished")
+        if [[ "$target_line" != "" ]]; then
+            success "Target line is found - the test is finished."
+            is_test_finished="true"
+        fi
+
+        # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
+
+    h2 "Now checking if two results for the runName are shown - the original run and the reset run."
+
+    # Now check if the runs get shows two runs with a retry.
+    target_line=$(cat ${runs_get_log_file} | grep "Total:2")
+    if [[ "$target_line" != "" ]]; then
+        success "Target line found - the original and reset run were found."
+    fi
+
+}
+
+function runs_cancel_check_test_is_lost {
+
+    h2 "Performing runs cancel on an active test run..."
+
+    run_name=$1
+
+    h2 "First, launching test on an ecosystem without a portfolio in a background process, so it can be cancelled."
+
+    mkdir -p ${BASEDIR}/temp
+    cd ${BASEDIR}/temp
+
+    runs_submit_log_file="runs-submit-output-for-cancel.txt"
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    --bootstrap $bootstrap \
+    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+    --stream inttests
+    --throttle 1 \
+    --poll 10 \
+    --progress 1 \
+    --noexitcodeontestfailures \
+    --log ${runs_submit_log_file}"
+
+    info "Command is: $cmd"
+
+    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+
+    # Start the test running inside a background process... so we can try to cancel it while it's running
+    $cmd &
+
+    run_name_found="false"
+    retries=0
+    max=100
+    target_line=""
+    
+    # Loop waiting until we can extract the name of the test run which is running in the background.
+    while [[ "${run_name_found}" == "false" ]]; do
+        if [[ -e $runs_submit_log_file ]]; then
+            success "file exists"
+            # Check the run has reached building stage before attempting to cancel
+            target_line=$(cat ${runs_submit_log_file} | grep "status is now 'building'")
+
+            if [[ "$target_line" != "" ]]; then
+                info "Target line is found - the test is now building."
+                run_name_found="true"
+            fi
+        fi    
+        sleep 3
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
+
+    run_name=$(echo $target_line | cut -f4 -d' ')
+    info "Run name is $run_name"
+
+    h2 "Now attempting to cancel the run while it's running in the background process."
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs cancel \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    $cmd
+
+    h2 "Now using the runs submit output to check the run was cancelled."
+
+    is_test_cancelled="false"
+    retries=0
+    max=100
+    target_line=""
+    while [[ "${is_test_cancelled}" == "false" ]]; do
+        sleep 5
+
+        if [[ -e $runs_submit_log_file ]]; then
+            success "file exists"
+            target_line=$(cat ${runs_submit_log_file} | grep "was lost")
+
+            if [[ "$target_line" != "" ]]; then
+                info "Target line is found - the test was cancelled."
+                is_test_cancelled="true"
+            fi
+        fi
+
+        # Give up if we've been waiting for the test to show as cancelled for too long.
+        ((retries++))
+        if (( $retries > $max )); then 
+            error "Too many retries."
+            exit 1
+        fi
+    done
+
+}
+
 #--------------------------------------------------------------------------
 function get_result_with_runname {
     h2 "Querying the result of the test we just ran..."
@@ -796,6 +1003,12 @@ function test_runs_commands {
     launch_test_from_unknown_portfolio
 
     runs_download_check_folder_names_during_test_run
+
+    # Attempt to reset an active run...
+    runs_reset_check_retry_present
+
+    # Attempt to cancel an active run...
+    runs_cancel_check_test_is_lost
 }
 
 

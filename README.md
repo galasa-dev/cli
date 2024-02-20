@@ -362,6 +362,35 @@ galasactl runs download --name C1234 --destination /Users/me/my/folder
 A complete list of supported parameters for the `runs download` command is available [here](./docs/generated/galasactl_runs_download.md).
 
 
+## runs reset
+
+This command will reset a running test in the Ecosystem that is either stuck in a timeout condition or looping, by requeing the test. Note: The reset command does not wait for the server to complete the act of resetting the test, but if the command succeeds, then the server has accepted the request to reset the test.
+
+
+## Example
+
+The run "C1234" can be reset using the following command:
+
+```
+galasactl runs reset --name C1234
+```
+
+
+## runs cancel
+
+If after running `runs reset` the test is still not able to run through successfully, it can be abandoned with `runs cancel`.
+
+This command will cancel a running test in the Ecosystem. It will not delete any information that is already stored in the RAS about the test, it will only cancel the execution of the test. Note: The cancel command does not wait for the server to complete the act of cancelling the test, but if the command succeeds, then the server has accepted the request to cancel the test.
+
+## Example
+
+The run "C1234" can be cancelled using the following command:
+
+```
+galasactl runs cancel --name C1234
+```
+
+
 ## properties get
 This command retrieves details of properties in a namespace.
 

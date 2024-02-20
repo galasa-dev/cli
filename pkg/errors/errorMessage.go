@@ -217,10 +217,18 @@ var (
 	GALASA_ERROR_FAILED_TO_COMPRESS_BINARY_DATA          = NewMessageType("GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. %v error: %v", 1228, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_FLUSH_BINARY_DATA             = NewMessageType("GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. %v error: %v", 1229, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_CLOSE_GZIP_FILE               = NewMessageType("GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. %v error: %v", 1230, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_NO_ACTIVE_RUNS_WITH_RUNNAME             = NewMessageType("GAL1132E: No active run found matching run name '%s'.", 1132, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RESET_RUN_FAILED                        = NewMessageType("GAL1133E: Error resetting run '%v'. Reason: '%s'", 1133, STACK_TRACE_WANTED)
+	GALASA_ERROR_RESET_RUN_RESPONSE_PARSING              = NewMessageType("GAL1134E: The runs reset operation failed. Unable to process the error information returned from the server.", 1134, STACK_TRACE_WANTED)
+	GALASA_ERROR_CANCEL_RUN_FAILED                       = NewMessageType("GAL1135E: Error cancelling run '%v'. Reason: '%s'", 1135, STACK_TRACE_WANTED)
+	GALASA_ERROR_CANCEL_RUN_RESPONSE_PARSING             = NewMessageType("GAL1136E: The runs cancel operation failed. Unable to process the error information returned from the server.", 1136, STACK_TRACE_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
+
 	// Information messages...
 	GALASA_INFO_FOLDER_DOWNLOADED_TO = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
 	GALASA_INFO_RENDERED_IMAGE_COUNT = NewMessageType("GAL2502I: Rendered %d image files.\n", 2502, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_RUNS_RESET_SUCCESS   = NewMessageType("GAL2503I: Run '%s' has been reset successfully.", 2503, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_RUNS_CANCEL_SUCCESS  = NewMessageType("GAL2504I: Run '%s' has been cancelled successfully.", 2504, STACK_TRACE_NOT_WANTED)
 )
