@@ -144,6 +144,6 @@ func (cmd *RunsCancelCommand) executeCancel(
 		}
 	}
 
-	log.Printf("executeRunsCancel returning %v", err)
+	log.Printf("executeRunsCancel returning %v\n", err)
 	return err
 }

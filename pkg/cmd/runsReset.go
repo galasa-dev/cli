@@ -144,6 +144,6 @@ func (cmd *RunsResetCommand) executeReset(
 		}
 	}
 
-	log.Printf("executeRunsReset returning %v", err)
+	log.Printf("executeRunsReset returning %v\n", err)
 	return err
 }

@@ -33,7 +33,7 @@ func ResetRun(
 	var err error
 	var runId string
 
-	log.Printf("ResetRun entered.")
+	log.Println("ResetRun entered.")
 
 	if runName == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_NAME_FLAG, runName)
@@ -66,7 +66,7 @@ func ResetRun(
 
 	}
 
-	log.Printf("ResetRun exiting. err is %v", err)
+	log.Printf("ResetRun exiting. err is %v\n", err)
 	return err
 }
 
@@ -93,7 +93,7 @@ func resetRun(runName string,
 			defer resp.Body.Close()
 
 			responseBody, err = io.ReadAll(resp.Body)
-			log.Printf("putRasRunStatusById Failed - HTTP Response - Status Code: '%v' Payload: '%v'", resp.StatusCode, string(responseBody))
+			log.Printf("putRasRunStatusById Failed - HTTP Response - Status Code: '%v' Payload: '%v'\n", resp.StatusCode, string(responseBody))
 
 			if err == nil {
 				var errorFromServer *galasaErrors.GalasaAPIError
