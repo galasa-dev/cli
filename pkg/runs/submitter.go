@@ -67,7 +67,7 @@ func (submitter *Submitter) ExecuteSubmitRuns(
 			var portfolio *Portfolio
 			portfolio, err = submitter.getPortfolio(params.PortfolioFileName, TestSelectionFlagValues)
 			if err == nil {
-				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName)
+				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName, params.GherkinUrl)
 				if err == nil {
 					err = submitter.executePortfolio(portfolio, runOverrides, *params)
 				}
@@ -141,9 +141,11 @@ func (submitter *Submitter) executeSubmitRuns(
 	//
 	nextProgressReport := submitter.timeService.Now().Add(progressReportInterval)
 	isThrottleFileLost := false
+	log.Printf("executePortfolio - GherkunURL >"+ params.GherkinUrl)
 	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
-
+		log.Printf("executePortfolio runs loop - GherkunURL >"+ params.GherkinUrl)
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
+			log.Printf("executePortfolio throttle loop - GherkunURL >"+ params.GherkinUrl)
 			readyRuns, err = submitter.submitRun(params.GroupName, readyRuns, submittedRuns,
 				lostRuns, &runOverrides, params.Trace, currentUser, params.RequestType, params.GherkinUrl)
 
@@ -284,7 +286,7 @@ func (submitter *Submitter) submitRun(
 	trace bool,
 	requestor string,
 	requestType string,
-	gherkinUrl string, 
+	gherkinUrl string,
 ) ([]TestRun, error) {
 
 	var err error = nil
@@ -304,6 +306,7 @@ func (submitter *Submitter) submitRun(
 			}
 
 			var resultGroup *galasaapi.TestRuns
+			log.Printf("Submit Run - GherkunURL >"+ gherkinUrl)
 			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
 				nextRun.Stream, nextRun.Obr, trace, gherkinUrl, submitOverrides)
 			if err != nil {
@@ -528,7 +531,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO)
 		}
 	} else {
-		if !AreSelectionFlagsProvided(submitSelectionFlags) {
+		if !AreSelectionFlagsProvided(submitSelectionFlags) && params.GherkinUrl == "" {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS)
 		}
 	}
@@ -691,11 +694,13 @@ func (submitter *Submitter) GetCurrentUserName() string {
 	return userName
 }
 
-func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string) error {
+func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string, gherkinUrl string) error {
 	var err error = nil
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
 		// Empty portfolio
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
+		if gherkinUrl == "" {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
+		}
 	}
 	return err
 }

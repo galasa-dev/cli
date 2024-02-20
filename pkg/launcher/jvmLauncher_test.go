@@ -1193,7 +1193,7 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 	// When...
 	testRuns, err := launcher.SubmitTestRun(
 		"myGroup",
-		"galasa.dev.example.banking.account/", // No Java Class as this is a gherkin test
+		"", // No Java Class as this is a gherkin test
 		"myRequestType-UnitTest",
 		"myRequestor",
 		"unitTestStream",

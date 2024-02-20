@@ -144,8 +144,12 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 			"The connection is established using the --debugMode and --debugPort values.",
 	)
 
-	runs.AddClassFlag(runsSubmitLocalCobraCmd, cmd.values.submitLocalSelectionFlags, true, "test class names."+
+	runs.AddClassFlag(runsSubmitLocalCobraCmd, cmd.values.submitLocalSelectionFlags, false, "test class names."+
 		" The format of each entry is osgi-bundle-name/java-class-name. Java class names are fully qualified. No .class suffix is needed.")
+
+	runs.AddGherkinFlag(runsSubmitLocalCobraCmd, cmd.values.submitLocalSelectionFlags, false, "Gherkin feature file URL. Should start with 'file://'. ")
+
+	runsSubmitLocalCobraCmd.MarkFlagsOneRequired("class","gherkin")
 
 	runsSubmitCmd.CobraCommand().AddCommand(runsSubmitLocalCobraCmd)
 

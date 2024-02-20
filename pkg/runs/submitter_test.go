@@ -453,3 +453,56 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 	}
 
 }
+
+func TestSubmitRunwithGherkinFile(t *testing.T) {
+	mockFileSystem := files.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	env.SetUserName("myuserid")
+
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	groupName := "groupname"
+	var readyRuns []TestRun
+	testRun := TestRun{
+		Name:     	   "mytest",
+		Bundle:        "mybundle",
+		Class:         "myclass",
+		Stream:        "mystream",
+		Obr:           "myobr",
+		Status:        "",
+		QueuedTimeUTC: "",
+		Requestor:     "",
+		Result : 	   "",
+		Overrides:     nil,
+		Tests:         nil,
+	}
+	readyRuns = append(readyRuns, testRun)
+	submittedRuns := make(map[string]*TestRun)
+	lostRuns := make(map[string]*TestRun)
+	runOverrides := new(map[string]string)
+	trace := false
+	requestor := "user"
+	requestType := ""
+	gherkinUrl :="gherkin.feature" 
+
+	run, err := submitter.submitRun(groupName, readyRuns, submittedRuns, lostRuns ,runOverrides ,trace ,requestor ,requestType ,gherkinUrl)
+	assert.Nil(t,err)
+	assert.Empty(t,run)
+
+}

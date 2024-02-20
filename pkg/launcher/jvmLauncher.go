@@ -97,6 +97,9 @@ type RunsSubmitLocalCmdParameters struct {
 	// to talk to the Java debugger (JDB), or whether it should 'listen' on a port
 	// ready for the JDB to attach to.
 	DebugMode string
+
+	// A string containing the url of the gherkin test file to be exceuted
+	GherkinURL string
 }
 
 const (
@@ -186,7 +189,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 		"requestType=%s requestor=%s stream=%s isTraceEnabled=%v",
 		groupName, className, requestType,
 		requestor, stream, isTraceEnabled)
-
+	log.Printf("Submit Run - GherkunURL >"+ gherkinURL)
 	var err error
 	testRuns := new(galasaapi.TestRuns)
 
@@ -218,7 +221,15 @@ func (launcher *JvmLauncher) SubmitTestRun(
 				testRuns.Runs = make([]galasaapi.TestRun, 0)
 
 				var testClassToLaunch *TestLocation
-				testClassToLaunch, err = classNameUserInputToTestClassLocation(className)
+				if className != ""{
+					testClassToLaunch, err = classNameUserInputToTestClassLocation(className)
+				} else {
+					//Set to empty for the command 
+					testClassToLaunch = &TestLocation{
+						OSGiBundleName:         "",
+						QualifiedJavaClassName: "",
+					}
+				}
 
 				if err == nil {
 					var (
@@ -247,7 +258,9 @@ func (launcher *JvmLauncher) SubmitTestRun(
 							launcher.localTests = append(launcher.localTests, localTest)
 
 							localTest.testRun = new(galasaapi.TestRun)
-							localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+							if testClassToLaunch.OSGiBundleName !=""{
+								localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+							}
 							localTest.testRun.SetStream(stream)
 							localTest.testRun.SetGroup(groupName)
 							localTest.testRun.SetRequestor(requestor)
