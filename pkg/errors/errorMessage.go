@@ -229,6 +229,6 @@ var (
 	// Information messages...
 	GALASA_INFO_FOLDER_DOWNLOADED_TO = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
 	GALASA_INFO_RENDERED_IMAGE_COUNT = NewMessageType("GAL2502I: Rendered %d image files.\n", 2502, STACK_TRACE_NOT_WANTED)
-	GALASA_INFO_RUNS_RESET_SUCCESS   = NewMessageType("GAL2503I: Run '%s' has been reset successfully.", 2503, STACK_TRACE_NOT_WANTED)
-	GALASA_INFO_RUNS_CANCEL_SUCCESS  = NewMessageType("GAL2504I: Run '%s' has been cancelled successfully.", 2504, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_RUNS_RESET_SUCCESS   = NewMessageType("GAL2503I: The request to reset run '%s' has been accepted by the server.\n", 2503, STACK_TRACE_NOT_WANTED)
+	GALASA_INFO_RUNS_CANCEL_SUCCESS  = NewMessageType("GAL2504I: The request to cancel run '%s' has been accepted by the server.\n", 2504, STACK_TRACE_NOT_WANTED)
 )

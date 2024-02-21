@@ -141,5 +141,7 @@ The `galasactl` tool can generate the following errors:
 
 - GAL2502I: Rendered {} image files.
 
-- GAL2503I: Run '{}' has been reset successfully.
-- GAL2504I: Run '{}' has been cancelled successfully.
+- GAL2503I: The request to reset run '{}' has been accepted by the server.
+
+- GAL2504I: The request to cancel run '{}' has been accepted by the server.
+
