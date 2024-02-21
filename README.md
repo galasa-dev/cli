@@ -18,6 +18,11 @@ The `--galasahome` command-line flag can override the `GALASA_HOME` environment 
 Note: If you change this to a non-existent and/or non-initialised folder path, then 
 you will have to create and re-initialise the folder using the `galasactl local init` command again. That command will respect the `GALASA_HOME` variable and will create the folder and initialise it were it not to exist.
 
+### GALASA_TOKEN
+In order to authenticate with a Galasa ecosystem, you will need to create a personal access token from the Galasa web user interface.
+
+Once a personal access token has been created, you can either store the token in the galasactl.properties file within your Galasa home folder, or set the token as an environment variable named `GALASA_TOKEN`.
+
 
 ## Syntax
 The syntax is documented in generated documentation [here](docs/generated/galasactl.md)
@@ -95,17 +100,15 @@ If you wish the generated code to depend upon the very latest/bleeding-edge of g
 
 Before interacting with a Galasa ecosystem using `galasactl`, you must be authenticated with it. The `auth login` command allows you to log in to an ecosystem provided by your `GALASA_BOOTSTRAP` environment variable or through the `--bootstrap` flag.
 
-Prior to running this command, you must have a `galasactl.properties` file in your `GALASA_HOME` directory, which is automatically created when running `galasactl local init`, that contains a set of `auth` properties with the following format:
+Prior to running this command, you must have a `galasactl.properties` file in your `GALASA_HOME` directory, which is automatically created when running `galasactl local init`, that contains a `GALASA_TOKEN` property with the following format:
 
 ```
-GALASA_CLIENT_ID=<a client identifier>
-GALASA_SECRET=<a client secret>
-GALASA_ACCESS_TOKEN=<a personal access token>
+GALASA_TOKEN=<your personal access token>
 ```
 
-These properties can be retrieved by creating a new personal access token from a Galasa ecosystem's web user interface.
+A value for the `GALASA_TOKEN` property can be retrieved by creating a new personal access token from a Galasa ecosystem's web user interface.
 
-If you prefer, these variables can be set as environment variables instead of being read from this file.
+If you prefer, this property can be set as an environment variable instead of being read from this file.
 
 On a successful login, a `bearer-token.json` file will be created in your `GALASA_HOME` directory. This file will contain a bearer token that `galasactl` will use to authenticate requests when communicating with a Galasa ecosystem.
 
@@ -357,6 +360,35 @@ galasactl runs download --name C1234 --destination /Users/me/my/folder
 
 
 A complete list of supported parameters for the `runs download` command is available [here](./docs/generated/galasactl_runs_download.md).
+
+
+## runs reset
+
+This command will reset a running test in the Ecosystem that is either stuck in a timeout condition or looping, by requeing the test. Note: The reset command does not wait for the server to complete the act of resetting the test, but if the command succeeds, then the server has accepted the request to reset the test.
+
+
+## Example
+
+The run "C1234" can be reset using the following command:
+
+```
+galasactl runs reset --name C1234
+```
+
+
+## runs cancel
+
+If after running `runs reset` the test is still not able to run through successfully, it can be abandoned with `runs cancel`.
+
+This command will cancel a running test in the Ecosystem. It will not delete any information that is already stored in the RAS about the test, it will only cancel the execution of the test. Note: The cancel command does not wait for the server to complete the act of cancelling the test, but if the command succeeds, then the server has accepted the request to cancel the test.
+
+## Example
+
+The run "C1234" can be cancelled using the following command:
+
+```
+galasactl runs cancel --name C1234
+```
 
 
 ## properties get

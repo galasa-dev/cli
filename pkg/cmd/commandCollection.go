@@ -47,6 +47,8 @@ const (
 	COMMAND_NAME_RUNS_PREPARE             = "runs prepare"
 	COMMAND_NAME_RUNS_SUBMIT              = "runs submit"
 	COMMAND_NAME_RUNS_SUBMIT_LOCAL        = "runs submit local"
+	COMMAND_NAME_RUNS_RESET               = "runs reset"
+	COMMAND_NAME_RUNS_CANCEL              = "runs cancel"
 	COMMAND_NAME_RESOURCES                = "resources"
 	COMMAND_NAME_RESOURCES_APPLY          = "resources apply"
 	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
@@ -78,7 +80,7 @@ func (commands *commandCollectionImpl) GetRootCommand() GalasaCommand {
 func (commands *commandCollectionImpl) GetCommand(name string) (GalasaCommand, error) {
 	var err error
 	cmd, _ := commands.commandMap[name]
-	if cmd == nil{
+	if cmd == nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION)
 		log.Printf("Caller tried to lookup %s in the command collection and it was not found.\n", name)
 	}
@@ -266,6 +268,8 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 	var runsPrepareCommand GalasaCommand
 	var runsSubmitCommand GalasaCommand
 	var runsSubmitLocalCommand GalasaCommand
+	var runsResetCommand GalasaCommand
+	var runsCancelCommand GalasaCommand
 
 	if err == nil {
 		runsCommand, err = NewRunsCmd(rootCommand)
@@ -279,6 +283,12 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 						runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
 						if err == nil {
 							runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
+							if err == nil {
+								runsResetCommand, err = NewRunsResetCommand(factory, runsCommand, rootCommand)
+								if err == nil {
+									runsCancelCommand, err = NewRunsCancelCommand(factory, runsCommand, rootCommand)
+								}
+							}
 						}
 					}
 				}
@@ -293,6 +303,8 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 		commands.commandMap[runsPrepareCommand.Name()] = runsPrepareCommand
 		commands.commandMap[runsSubmitCommand.Name()] = runsSubmitCommand
 		commands.commandMap[runsSubmitLocalCommand.Name()] = runsSubmitLocalCommand
+		commands.commandMap[runsResetCommand.Name()] = runsResetCommand
+		commands.commandMap[runsCancelCommand.Name()] = runsCancelCommand
 	}
 
 	return err
