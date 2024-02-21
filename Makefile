@@ -15,7 +15,7 @@ galasactl: \
 
 # 'gendocs-galasactl' is a command-line tool which generates documentation about the galasactl tool.
 # When executed, the .md produced contain up-to-date information on tool syntax.
-gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-darwin-x86_64 bin/gendocs-galasactl-linux-x86_64
+gendocs-galasactl: bin/gendocs-galasactl-darwin-arm64 bin/gendocs-galasactl-linux-arm64 bin/gendocs-galasactl-darwin-x86_64 bin/gendocs-galasactl-linux-x86_64
 
 tests: galasactl-source build/coverage.txt build/coverage.html
 
@@ -92,6 +92,9 @@ bin/galasactl-linux-s390x : galasactl-source
 
 bin/gendocs-galasactl-darwin-arm64 : galasactl-source
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/gendocs-galasactl-darwin-arm64 ./cmd/gendocs-galasactl
+
+bin/gendocs-galasactl-linux-arm64 : galasactl-source
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/gendocs-galasactl-linux-arm64 ./cmd/gendocs-galasactl
 
 bin/gendocs-galasactl-linux-x86_64 : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/gendocs-galasactl-linux-x86_64 ./cmd/gendocs-galasactl
