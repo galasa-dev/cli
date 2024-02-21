@@ -26,7 +26,9 @@ func TestJsonReportWorks(t *testing.T) {
 		Status:    "myStatus",
 		Result:    "PASSED",
 		Overrides: make(map[string]string, 1),
-		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}}}
+		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}},
+		GherkinUrl: "myfeature",
+	}
 
 	finishedRunsMap := make(map[string]*TestRun, 1)
 	finishedRunsMap["myTestRun"] = &finishedRuns
@@ -73,7 +75,8 @@ func TestJsonReportWorks(t *testing.T) {
 						"name": "method2",
 						"result": "passed"
 					}
-				]
+				],
+				"GherkinUrl":"myfeature"
 			}
 		]
 	}`

@@ -67,7 +67,7 @@ func (submitter *Submitter) ExecuteSubmitRuns(
 			var portfolio *Portfolio
 			portfolio, err = submitter.getPortfolio(params.PortfolioFileName, TestSelectionFlagValues)
 			if err == nil {
-				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName, TestSelectionFlagValues.GherkinUrl)
+				err = submitter.validatePortfolio(portfolio, params.PortfolioFileName)
 				if err == nil {
 					err = submitter.executePortfolio(portfolio, runOverrides, *params)
 				}
@@ -141,13 +141,13 @@ func (submitter *Submitter) executeSubmitRuns(
 	//
 	nextProgressReport := submitter.timeService.Now().Add(progressReportInterval)
 	isThrottleFileLost := false
-	
+
 	for len(readyRuns) > 0 || len(submittedRuns) > 0 || len(rerunRuns) > 0 { // Loop whilst there are runs to submit or are running
-		
+
 		for len(submittedRuns) < throttle && len(readyRuns) > 0 {
-			
+
 			readyRuns, err = submitter.submitRun(params.GroupName, readyRuns, submittedRuns,
-				lostRuns, &runOverrides, params.Trace, currentUser, params.RequestType, "")
+				lostRuns, &runOverrides, params.Trace, currentUser, params.RequestType)
 
 			if err != nil {
 				// Ignore the error and continue to process the list of available runs.
@@ -286,7 +286,6 @@ func (submitter *Submitter) submitRun(
 	trace bool,
 	requestor string,
 	requestType string,
-	gherkinUrl string,
 ) ([]TestRun, error) {
 
 	var err error = nil
@@ -306,9 +305,9 @@ func (submitter *Submitter) submitRun(
 			}
 
 			var resultGroup *galasaapi.TestRuns
-			log.Printf("Submit Run - GherkunURL >" + gherkinUrl)
+			log.Printf("Submit Run - GherkunURL >" + nextRun.GherkinUrl)
 			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
-				nextRun.Stream, nextRun.Obr, trace, gherkinUrl, submitOverrides)
+				nextRun.Stream, nextRun.Obr, trace, nextRun.GherkinUrl, submitOverrides)
 			if err != nil {
 				log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
 				lostRuns[className] = &nextRun
@@ -482,6 +481,7 @@ func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOve
 			Requestor:     currentUser,
 			Status:        "queued",
 			Overrides:     make(map[string]string, 0),
+			GherkinUrl:    portfolioTest.GherkinUrl,
 		}
 
 		// load the run overrides
@@ -495,8 +495,11 @@ func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOve
 		}
 
 		readyRuns = append(readyRuns, newTestrun)
-
-		log.Printf("Added test %v/%v/%v to the ready queue\n", newTestrun.Stream, newTestrun.Bundle, newTestrun.Class)
+		if newTestrun.GherkinUrl == "" {
+			log.Printf("Added test %v/%v/%v to the ready queue\n", newTestrun.Stream, newTestrun.Bundle, newTestrun.Class)
+		} else {
+			log.Printf("Added gherkin test %v to the ready queue\n", newTestrun.GherkinUrl)
+		}
 	}
 
 	return readyRuns
@@ -694,13 +697,11 @@ func (submitter *Submitter) GetCurrentUserName() string {
 	return userName
 }
 
-func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string, gherkinUrl *[]string) error {
+func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string) error {
 	var err error = nil
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
 		// Empty portfolio
-		if len(*gherkinUrl) < 1 {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
-		}
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
 	}
 	return err
 }

@@ -24,11 +24,12 @@ type PortfolioMetadata struct {
 }
 
 type PortfolioClass struct {
-	Bundle    string            `yaml:"bundle"`
-	Class     string            `yaml:"class"`
-	Stream    string            `yaml:"stream"`
-	Obr       string            `yaml:"obr"`
-	Overrides map[string]string `yaml:"overrides"`
+	Bundle     string            `yaml:"bundle"`
+	Class      string            `yaml:"class"`
+	Stream     string            `yaml:"stream"`
+	Obr        string            `yaml:"obr"`
+	Overrides  map[string]string `yaml:"overrides"`
+	GherkinUrl string            `yaml:"gherkin"`
 }
 
 func NewPortfolio() *Portfolio {
@@ -55,11 +56,12 @@ func AddClassesToPortfolio(testSelection *TestSelection, testOverrides *map[stri
 
 	for _, selectedClass := range testSelection.Classes {
 		portfolioClass := PortfolioClass{
-			Bundle:    selectedClass.Bundle,
-			Class:     selectedClass.Class,
-			Stream:    selectedClass.Stream,
-			Obr:       selectedClass.Obr,
-			Overrides: *testOverrides,
+			Bundle:     selectedClass.Bundle,
+			Class:      selectedClass.Class,
+			Stream:     selectedClass.Stream,
+			Obr:        selectedClass.Obr,
+			Overrides:  *testOverrides,
+			GherkinUrl: selectedClass.GherkinUrl,
 		}
 		portfolio.Classes = append(portfolio.Classes, portfolioClass)
 	}

@@ -97,3 +97,24 @@ func TestSelectTestFromGherkinUrlArrayReturnsTests(t *testing.T) {
 	assert.NotNil(t, testSelection)
 	assert.Equal(t, testSelection.Classes[0].GherkinUrl, "gherkin.feature")
 }
+
+func TestSelectTestMultiplesFromGherkinUrlArrayReturnsTests(t *testing.T) {
+	// Given...
+	launcher := launcher.NewMockLauncher()
+	flags := NewTestSelectionFlagValues()
+
+	*flags.GherkinUrl = make([]string, 3)
+	(*flags.GherkinUrl)[0] = "gherkin.feature"
+	(*flags.GherkinUrl)[1] = "test.feature"
+	(*flags.GherkinUrl)[2] = "excellent.feature"
+
+	// When...
+	testSelection, err := SelectTests(launcher, flags)
+
+	// Then...
+	assert.Nil(t, err)
+	assert.NotNil(t, testSelection)
+	assert.Equal(t, testSelection.Classes[0].GherkinUrl, "gherkin.feature")
+	assert.Equal(t, testSelection.Classes[1].GherkinUrl, "test.feature")
+	assert.Equal(t, testSelection.Classes[2].GherkinUrl, "excellent.feature")
+}

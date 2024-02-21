@@ -482,17 +482,7 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 	groupName := "groupname"
 	var readyRuns []TestRun
 	testRun := TestRun{
-		Name:     	   "mytest",
-		Bundle:        "mybundle",
-		Class:         "myclass",
-		Stream:        "mystream",
-		Obr:           "myobr",
-		Status:        "",
-		QueuedTimeUTC: "",
-		Requestor:     "",
-		Result : 	   "",
-		Overrides:     nil,
-		Tests:         nil,
+		GherkinUrl: "gherkin.feature" ,
 	}
 	readyRuns = append(readyRuns, testRun)
 	submittedRuns := make(map[string]*TestRun)
@@ -501,10 +491,94 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 	trace := false
 	requestor := "user"
 	requestType := ""
-	gherkinUrl :="gherkin.feature" 
 
-	run, err := submitter.submitRun(groupName, readyRuns, submittedRuns, lostRuns ,runOverrides ,trace ,requestor ,requestType ,gherkinUrl)
+	run, err := submitter.submitRun(groupName, readyRuns, submittedRuns, lostRuns ,runOverrides ,trace ,requestor ,requestType)
 	assert.Nil(t,err)
 	assert.Empty(t,run)
+	assert.Contains(t, submittedRuns["M100"].GherkinUrl, "gherkin.feature")
 
+}
+
+func TestGetPortfolioReturnsGherkinPortfolio(t *testing.T) {
+	mockFileSystem := files.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	env.SetUserName("myuserid")
+
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	flags := NewTestSelectionFlagValues()
+
+	*flags.GherkinUrl = make([]string, 3)
+	(*flags.GherkinUrl)[0] = "gherkin.feature"
+	(*flags.GherkinUrl)[1] = "test.feature"
+	(*flags.GherkinUrl)[2] = "excellent.feature"
+
+	portfolio, err := submitter.getPortfolio("", flags)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, portfolio)
+	assert.Contains(t, portfolio.Classes[0].GherkinUrl, "gherkin.feature")
+	assert.Contains(t, portfolio.Classes[1].GherkinUrl, "test.feature")
+	assert.Contains(t, portfolio.Classes[2].GherkinUrl, "excellent.feature")
+}
+
+func TestGetReadyRunsFromPortfolioReturnsGherkinReadyRuns(t *testing.T) {
+	mockFileSystem := files.NewMockFileSystem()
+	env := utils.NewMockEnv()
+	env.SetUserName("myuserid")
+
+	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	mockLauncher := launcher.NewMockLauncher()
+
+	mockTimeService := utils.NewMockTimeService()
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		env,
+		console,
+	)
+
+	flags := NewTestSelectionFlagValues()
+
+	*flags.GherkinUrl = make([]string, 3)
+	(*flags.GherkinUrl)[0] = "gherkin.feature"
+	(*flags.GherkinUrl)[1] = "test.feature"
+	(*flags.GherkinUrl)[2] = "excellent.feature"
+
+	portfolio, err := submitter.getPortfolio("", flags)
+	if err != nil {
+		assert.Fail(t, "Should not have failed! message = %s", err.Error())
+	}
+
+	overrides := make(map[string]string)
+
+	readyRuns := submitter.buildListOfRunsToSubmit(portfolio,overrides)
+
+	assert.NotEmpty(t, readyRuns)
+	assert.Contains(t, readyRuns[0].GherkinUrl, "gherkin.feature")
+	assert.Contains(t, readyRuns[1].GherkinUrl, "test.feature")
+	assert.Contains(t, readyRuns[2].GherkinUrl, "excellent.feature")
 }

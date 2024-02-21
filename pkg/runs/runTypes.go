@@ -17,6 +17,7 @@ type TestRun struct {
 	Result        string            `yaml:"result" json:"result"`
 	Overrides     map[string]string `yaml:"overrides" json:"overrides"`
 	Tests         []TestMethod      `yaml:"tests" json:"tests"`
+	GherkinUrl    string            `yaml:"gherkin"`
 }
 
 type TestMethod struct {
