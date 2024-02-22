@@ -167,6 +167,7 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 		"mvn:myGroup/myArtifact/myClassifier/obr",
 		isTraceEnabled,
 		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 	if err != nil {
@@ -216,6 +217,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 		"mvn:myGroup/myArtifact/myClassifier/obr",
 		isTraceEnabled,
 		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 
@@ -354,6 +356,7 @@ func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
 		"notmaven://group/artifact/version/classifier",
 		isTraceEnabled,
 		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 
@@ -391,6 +394,7 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 		"", // No Obr from the profile record.
 		isTraceEnabled,
 		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 
@@ -1194,12 +1198,13 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 	testRuns, err := launcher.SubmitTestRun(
 		"myGroup",
 		"", // No Java Class as this is a gherkin test
-		"myRequestType-UnitTest",
+		"", // No RequestType as this is a gherkin test
 		"myRequestor",
-		"unitTestStream",
-		"mvn:myGroup/myArtifact/myClassifier/obr",
+		"", // No Stream as this is a gherkin test
+		"", // No OBR as this is a gherkin test
 		isTraceEnabled,
 		"file:///dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.feature",
+		"GherkinLog",
 		overrides,
 	)
 	if err != nil {

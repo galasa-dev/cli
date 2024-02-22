@@ -307,10 +307,11 @@ func (submitter *Submitter) submitRun(
 			var resultGroup *galasaapi.TestRuns
 			log.Printf("Submit Run - GherkunURL >" + nextRun.GherkinUrl)
 			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
-				nextRun.Stream, nextRun.Obr, trace, nextRun.GherkinUrl, submitOverrides)
+				nextRun.Stream, nextRun.Obr, trace, nextRun.GherkinUrl, nextRun.GherkinFeature, submitOverrides)
 			if err != nil {
 				log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
 				lostRuns[className] = &nextRun
+				//This is thrown when test submit is run.... Unit test and fix
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
 			} else {
 				if len(resultGroup.GetRuns()) < 1 {
@@ -325,7 +326,11 @@ func (submitter *Submitter) submitRun(
 
 					submittedRuns[nextRun.Name] = &nextRun
 
-					log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
+					if nextRun.GherkinUrl != "" {
+						log.Printf("Run %v submitted - %v\n", nextRun.Name, nextRun.GherkinFeature)
+					} else {
+						log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
+					}
 				}
 			}
 		}
@@ -392,13 +397,20 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 						}
 					}
 				}
-
-				log.Printf("Run %v has finished(%v) - %v/%v/%v\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+				if checkRun.GherkinUrl != "" {
+					log.Printf("Run %v has finished(%v) - %v\n", runName, result, checkRun.GherkinFeature)
+				} else {
+					log.Printf("Run %v has finished(%v) - %v/%v/%v\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+				}
 			} else {
 				// Check to see if there was a status change
 				if checkRun.Status != currentRun.GetStatus() {
 					checkRun.Status = currentRun.GetStatus()
-					log.Printf("    Run %v status is now '%v' - %v/%v/%v\n", runName, checkRun.Status, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+					if checkRun.GherkinUrl != "" {
+						log.Printf("    Run %v status is now '%v' - %v\n", runName, checkRun.Status, checkRun.GherkinFeature)
+					} else {
+						log.Printf("    Run %v status is now '%v' - %v/%v/%v\n", runName, checkRun.Status, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+					}
 				}
 			}
 		}
@@ -472,16 +484,25 @@ func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOve
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
 	currentUser := submitter.GetCurrentUserName()
 	for _, portfolioTest := range portfolio.Classes {
+		var featureName = ""
+		if portfolioTest.GherkinUrl != "" {
+			// split the Gherkin URL and select the last element from the array which should be the feature file name
+			featureSlice := strings.Split(portfolioTest.GherkinUrl, "/")
+			featureName = featureSlice[len(featureSlice)-1]
+			// remove the .feature extension from the url
+			featureName = strings.TrimSuffix(featureName, ".feature")
+		}
 		newTestrun := TestRun{
-			Bundle:        portfolioTest.Bundle,
-			Class:         portfolioTest.Class,
-			Stream:        portfolioTest.Stream,
-			Obr:           portfolioTest.Obr,
-			QueuedTimeUTC: submitter.timeService.Now().String(),
-			Requestor:     currentUser,
-			Status:        "queued",
-			Overrides:     make(map[string]string, 0),
-			GherkinUrl:    portfolioTest.GherkinUrl,
+			Bundle:         portfolioTest.Bundle,
+			Class:          portfolioTest.Class,
+			Stream:         portfolioTest.Stream,
+			Obr:            portfolioTest.Obr,
+			QueuedTimeUTC:  submitter.timeService.Now().String(),
+			Requestor:      currentUser,
+			Status:         "queued",
+			Overrides:      make(map[string]string, 0),
+			GherkinUrl:     portfolioTest.GherkinUrl,
+			GherkinFeature: featureName,
 		}
 
 		// load the run overrides
@@ -498,7 +519,7 @@ func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOve
 		if newTestrun.GherkinUrl == "" {
 			log.Printf("Added test %v/%v/%v to the ready queue\n", newTestrun.Stream, newTestrun.Bundle, newTestrun.Class)
 		} else {
-			log.Printf("Added gherkin test %v to the ready queue\n", newTestrun.GherkinUrl)
+			log.Printf("Added gherkin test %v to the ready queue\n", newTestrun.GherkinFeature)
 		}
 	}
 

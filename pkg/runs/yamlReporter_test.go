@@ -30,7 +30,8 @@ func TestYamlReportWorks(t *testing.T) {
 		Result:    "PASSED",
 		Overrides: make(map[string]string, 1),
 		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}},
-		GherkinUrl: "myfeature",
+		GherkinUrl: "file:///my.feature",
+		GherkinFeature: "my",
 	}
 
 	finishedRunsMap := make(map[string]*TestRun, 1)
@@ -71,7 +72,8 @@ func TestYamlReportWorks(t *testing.T) {
 		result: passed
 	  - name: method2
 		result: passed
-	  gherkin: myfeature`
+	  gherkin: file:///my.feature
+	  feature: my`
 
 	actualContents, err := mockFileSystem.ReadTextFile("myReportYamlFilename")
 	if err != nil {

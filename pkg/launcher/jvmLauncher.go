@@ -74,7 +74,6 @@ type RunsSubmitLocalCmdParameters struct {
 	// A list of OBRs, which we hope one of these contains the tests we want to run.
 	Obrs []string
 
-
 	// The local maven repo, eg: file:///home/.m2/repository, where we can load the galasa uber-obr
 	LocalMaven string
 
@@ -151,7 +150,6 @@ func NewJVMLauncher(
 			launcher.embeddedFileSystem,
 		)
 	}
-	
 
 	return launcher, err
 }
@@ -182,14 +180,18 @@ func (launcher *JvmLauncher) SubmitTestRun(
 	obrFromPortfolio string,
 	isTraceEnabled bool,
 	gherkinURL string,
+	GherkinFeature string,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
 
-	log.Printf("JvmLauncher: SubmitTestRun entered. group=%s className=%s "+
-		"requestType=%s requestor=%s stream=%s isTraceEnabled=%v",
-		groupName, className, requestType,
-		requestor, stream, isTraceEnabled)
-	log.Printf("Submit Run - GherkunURL >"+ gherkinURL)
+	if gherkinURL != "" {
+		log.Printf("JvmLauncher: SubmitTestRun entered. gherkinUrl=%s", GherkinFeature)
+	} else {
+		log.Printf("JvmLauncher: SubmitTestRun entered. group=%s className=%s "+
+			"requestType=%s requestor=%s stream=%s isTraceEnabled=%v",
+			groupName, className, requestType,
+			requestor, stream, isTraceEnabled)
+	}
 	var err error
 	testRuns := new(galasaapi.TestRuns)
 
@@ -198,7 +200,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 	obrs, err = buildListOfAllObrs(launcher.cmdParams.Obrs, obrFromPortfolio)
 	if err == nil {
 
-		if len(obrs) < 1 {
+		if len(obrs) < 1 && gherkinURL == "" {
 			// There are no obrs ! We have no idea how to find the test!
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_OBR_SPECIFIED_ON_INPUTS, className)
 		}
@@ -221,10 +223,10 @@ func (launcher *JvmLauncher) SubmitTestRun(
 				testRuns.Runs = make([]galasaapi.TestRun, 0)
 
 				var testClassToLaunch *TestLocation
-				if className != ""{
+				if className != "" {
 					testClassToLaunch, err = classNameUserInputToTestClassLocation(className)
 				} else {
-					//Set to empty for the command 
+					//Set to empty for the command as this is a Gherkin Test
 					testClassToLaunch = &TestLocation{
 						OSGiBundleName:         "",
 						QualifiedJavaClassName: "",
@@ -258,7 +260,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 							launcher.localTests = append(launcher.localTests, localTest)
 
 							localTest.testRun = new(galasaapi.TestRun)
-							if testClassToLaunch.OSGiBundleName !=""{
+							if testClassToLaunch.OSGiBundleName != "" {
 								localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
 							}
 							localTest.testRun.SetStream(stream)
@@ -541,8 +543,6 @@ func getCommandSyntax(
 
 		args = append(args, "-Dfile.encoding=UTF-8")
 
-
-
 		nativeGalasaHomeFolderPath := galasaHome.GetNativeFolderPath()
 		args = append(args, `-DGALASA_HOME="`+nativeGalasaHomeFolderPath+`"`)
 
@@ -591,7 +591,7 @@ func getCommandSyntax(
 			args = append(args, "--test")
 			args = append(args, testLocation.OSGiBundleName+"/"+testLocation.QualifiedJavaClassName)
 		}
-		
+
 		if isTraceEnabled {
 			args = append(args, "--trace")
 		}
