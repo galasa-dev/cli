@@ -305,7 +305,6 @@ func (submitter *Submitter) submitRun(
 			}
 
 			var resultGroup *galasaapi.TestRuns
-			log.Printf("Submit Run - GherkunURL >" + nextRun.GherkinUrl)
 			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
 				nextRun.Stream, nextRun.Obr, trace, nextRun.GherkinUrl, nextRun.GherkinFeature, submitOverrides)
 			if err != nil {
@@ -484,14 +483,6 @@ func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOve
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
 	currentUser := submitter.GetCurrentUserName()
 	for _, portfolioTest := range portfolio.Classes {
-		var featureName = ""
-		if portfolioTest.GherkinUrl != "" {
-			// split the Gherkin URL and select the last element from the array which should be the feature file name
-			featureSlice := strings.Split(portfolioTest.GherkinUrl, "/")
-			featureName = featureSlice[len(featureSlice)-1]
-			// remove the .feature extension from the url
-			featureName = strings.TrimSuffix(featureName, ".feature")
-		}
 		newTestrun := TestRun{
 			Bundle:         portfolioTest.Bundle,
 			Class:          portfolioTest.Class,
@@ -502,7 +493,7 @@ func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOve
 			Status:         "queued",
 			Overrides:      make(map[string]string, 0),
 			GherkinUrl:     portfolioTest.GherkinUrl,
-			GherkinFeature: featureName,
+			GherkinFeature: submitter.getFeatureFromGherkinUrl(portfolioTest.GherkinUrl),
 		}
 
 		// load the run overrides
@@ -744,4 +735,13 @@ func (submitter *Submitter) checkIfGroupAlreadyInUse(groupName string) (bool, er
 		}
 	}
 	return isInUse, err
+}
+
+func (submitter *Submitter) getFeatureFromGherkinUrl(gherkinURL string) string {
+	// split the Gherkin URL and select the last element from the array which should be the feature file name
+	featureSlice := strings.Split(gherkinURL, "/")
+	featureName := featureSlice[len(featureSlice)-1]
+	// remove the .feature extension from the url
+	featureName = strings.TrimSuffix(featureName, ".feature")
+	return featureName
 }

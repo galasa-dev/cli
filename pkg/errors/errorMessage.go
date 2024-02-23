@@ -217,6 +217,8 @@ var (
 	GALASA_ERROR_FAILED_TO_COMPRESS_BINARY_DATA          = NewMessageType("GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. %v error: %v", 1228, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_FLUSH_BINARY_DATA             = NewMessageType("GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. %v error: %v", 1229, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_CLOSE_GZIP_FILE               = NewMessageType("GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. %v error: %v", 1230, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GHERKIN_URL_BAD_EXTENSION               = NewMessageType("GAL1231E: The gherkin URL supplied is invalid. '%s' does not end with the expected '.feature' extension.", 1231, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GHERKIN_URL_BAD_URL_PREFIX              = NewMessageType("GAL1232E: Unsupported gherkin URL %s. Acceptable values start with 'file://'", 1232, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

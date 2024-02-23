@@ -185,7 +185,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 ) (*galasaapi.TestRuns, error) {
 
 	if gherkinURL != "" {
-		log.Printf("JvmLauncher: SubmitTestRun entered. gherkinUrl=%s", GherkinFeature)
+		log.Printf("JvmLauncher: SubmitTestRun entered. Gherkin Feature=%s", GherkinFeature)
 	} else {
 		log.Printf("JvmLauncher: SubmitTestRun entered. group=%s className=%s "+
 			"requestType=%s requestor=%s stream=%s isTraceEnabled=%v",
@@ -231,6 +231,10 @@ func (launcher *JvmLauncher) SubmitTestRun(
 						OSGiBundleName:         "",
 						QualifiedJavaClassName: "",
 					}
+				}
+
+				if err ==nil && gherkinURL !="" {
+					err = checkGherkinURLisValid(gherkinURL)
 				}
 
 				if err == nil {
@@ -740,4 +744,15 @@ func classNameUserInputToTestClassLocation(classNameUserInput string) (*TestLoca
 	}
 
 	return testClassToLaunch, err
+}
+
+func checkGherkinURLisValid(gherkinURL string) error {
+	var err error
+	if !strings.HasSuffix(gherkinURL, ".feature") {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_GHERKIN_URL_BAD_EXTENSION, gherkinURL)
+	}
+	if !strings.HasPrefix(gherkinURL, "file://") {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_GHERKIN_URL_BAD_URL_PREFIX, gherkinURL)
+	}
+	return err
 }

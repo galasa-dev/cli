@@ -131,6 +131,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. {} error: {}
 - GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. {} error: {}
 - GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. {} error: {}
+- GAL1231E: The gherkin URL supplied is invalid. '{}' does not end with the expected '.feature' extension.
+- GAL1232E: Unsupported gherkin URL {}. Acceptable values start with 'file://'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

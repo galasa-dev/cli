@@ -1216,3 +1216,73 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 		assert.False(t, *testRuns.Complete, "Returned test runs should not already be complete")
 	}
 }
+
+func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	launcher, err := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// When...
+	_, err = launcher.SubmitTestRun(
+		"myGroup",
+		"", // No Java Class as this is a gherkin test
+		"", // No RequestType as this is a gherkin test
+		"myRequestor",
+		"", // No Stream as this is a gherkin test
+		"", // No OBR as this is a gherkin test
+		isTraceEnabled,
+		"file:///dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.future",
+		"GherkinLog",
+		overrides,
+	)
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1231E")
+}
+
+func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	launcher, err := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// When...
+	_, err = launcher.SubmitTestRun(
+		"myGroup",
+		"", // No Java Class as this is a gherkin test
+		"", // No RequestType as this is a gherkin test
+		"myRequestor",
+		"", // No Stream as this is a gherkin test
+		"", // No OBR as this is a gherkin test
+		isTraceEnabled,
+		"https://dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.feature",
+		"GherkinLog",
+		overrides,
+	)
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1232E")
+}
