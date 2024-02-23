@@ -121,10 +121,12 @@ function SubmittingLocalGherkinTest {
         error "Failed to run gherkin test"
         exit 1
     fi
+
+    success "OK"
 }
 
 function SubmittingBadPrefixLocalGherkinTest {
-    h1 "Submitting the bad gherkin feature"
+    h1 "Submitting bad prefix gherkin feature"
 
     cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
     --gherkin $input_file \
@@ -139,10 +141,12 @@ function SubmittingBadPrefixLocalGherkinTest {
         error "Gherkin test did not fail as expected"
         exit 1
     fi
+
+    success "OK"
 }
 
 function SubmittingBadSuffixLocalGherkinTest {
-    h1 "Submitting the bad gherkin feature"
+    h1 "Submitting bad suffix gherkin feature"
 
     cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
     --gherkin file:///gherkin \
@@ -157,6 +161,8 @@ function SubmittingBadSuffixLocalGherkinTest {
         error "Gherkin test did not fail as expected"
         exit 1
     fi
+
+    success "OK"
 }
 
 function test_gherkin_commands {
