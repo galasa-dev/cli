@@ -34,20 +34,24 @@ func SetProperty(
 
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		galasaProperty := createGalasaProperty(namespace, name, value)
+		err = validateNamespaceFormat(namespace)
+		if err == nil {
+			galasaProperty := createGalasaProperty(namespace, name, value)
 
-		log.Printf("SetProperty - Galasa Property to update/create: ApiVersion:'%s', Kind:'%s', Namespace:'%s', Name:'%s', Value:'%s'",
-			galasaProperty.GetApiVersion(), galasaProperty.GetKind(), galasaProperty.Metadata.GetNamespace(), galasaProperty.Metadata.GetName(), galasaProperty.Data.GetValue())
+			log.Printf("SetProperty - Galasa Property to update/create: ApiVersion:'%s', Kind:'%s', Namespace:'%s', Name:'%s', Value:'%s'",
+				galasaProperty.GetApiVersion(), galasaProperty.GetKind(), galasaProperty.Metadata.GetNamespace(), galasaProperty.Metadata.GetName(), galasaProperty.Data.GetValue())
 
-		err = updateCpsProperty(namespace, name, galasaProperty, apiClient)
+			err = updateCpsProperty(namespace, name, galasaProperty, apiClient)
 
-		// if updateProperty() returns an error containing "404 Not Found" due to receiving a
-		// GAL5017E from the api, we know the property does not exist and
-		// so we assume the user wants to create a new property
-		if err != nil && strings.Contains(err.Error(), "404") {
-			err = createCpsProperty(namespace, name, galasaProperty, apiClient)
+			// if updateProperty() returns an error containing "404 Not Found" due to receiving a
+			// GAL5017E from the api, we know the property does not exist and
+			// so we assume the user wants to create a new property
+			if err != nil && strings.Contains(err.Error(), "404") {
+				err = createCpsProperty(namespace, name, galasaProperty, apiClient)
+			}
 		}
 	}
+
 	return err
 }
 

@@ -45,13 +45,13 @@ func mockDeletePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 	statusCode, namespaceProperties = CheckNamespace(namespace)
 	if len(splitUrl) == 5 {
 
-		if namespace == "invalidNamespace" {
+		if namespace == "invalidnamespace" {
 			statusCode = 404
 			namespaceProperties = `{
 				"error_code": 5017,
 				"error_message": "GAL5017E: Error occured when trying to access namespace 'invalidNamespace'. The Namespace provided is invalid."
 				}`
-		} else if namespace == "validNamespace" {
+		} else if namespace == "validnamespace" {
 			propertyName := splitUrl[4]
 			if propertyName == "invalidName" {
 				statusCode = 404
@@ -71,7 +71,7 @@ func mockDeletePropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Re
 
 func TestDeletePropertyValueReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := "validName"
 
 	server := newDeletePropertiesServletMock(t)
@@ -86,7 +86,7 @@ func TestDeletePropertyValueReturnsOk(t *testing.T) {
 }
 
 // invalid OR empty namespace, valid propertyname
-func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
+func TestDeletePropertyWithInvalidNamesapceFormatReturnsError(t *testing.T) {
 	//Given...
 	namespace := "invalidNamespace"
 	name := "validName"
@@ -100,13 +100,13 @@ func TestDeletePropertyWithInvalidNamesapceReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1099E", "Error occured when trying to access namespace 'invalidNamespace'.")
+	assert.Contains(t, err.Error(), "GAL1138E", "Error occured when trying to access namespace 'invalidNamespace'.")
 }
 
 // validnamespace , invalid propertyname
 func TestValidNamespaceAndDeleteInvalidNameNameReturnsError(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := "invalidName"
 
 	server := newDeletePropertiesServletMock(t)

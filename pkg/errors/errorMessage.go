@@ -222,6 +222,9 @@ var (
 	GALASA_ERROR_RESET_RUN_RESPONSE_PARSING              = NewMessageType("GAL1134E: The runs reset operation failed. Unable to process the error information returned from the server.", 1134, STACK_TRACE_WANTED)
 	GALASA_ERROR_CANCEL_RUN_FAILED                       = NewMessageType("GAL1135E: Error cancelling run '%v'. Reason: '%s'", 1135, STACK_TRACE_WANTED)
 	GALASA_ERROR_CANCEL_RUN_RESPONSE_PARSING             = NewMessageType("GAL1136E: The runs cancel operation failed. Unable to process the error information returned from the server.", 1136, STACK_TRACE_WANTED)
+	GALASA_ERROR_FAILED_TO_COMPILE_NAMESPACE_REGEX = NewMessageType("GAL1137E: Unable to compile the regex pattern for Galasa Property field 'namespace'. Reason: '%s'", 1137, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_PROPERTY_NAMESPACE_FORMAT = NewMessageType("GAL1138E: The namespace, '%s', provided does not match formatting requirements. " + 
+	"The namespace must start with a character in the 'a-z' range, followed by characters in the 'a'-'z' or '0'-'9' ranges only.", 1138, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

@@ -41,25 +41,31 @@ func GetProperties(
 
 	err = checkNameNotUsedWithPrefixSuffixInfix(name, prefix, suffix, infix)
 	if err == nil {
-		var chosenFormatter propertiesformatter.PropertyFormatter
 
-		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
+		err = validateNamespaceFormat(namespace)
 		if err == nil {
-			var cpsProperty []galasaapi.GalasaProperty
-			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
 
-			log.Printf("GetProperties - Galasa Properties collected: %s", getCpsPropertyArrayAsString(cpsProperty))
+			var chosenFormatter propertiesformatter.PropertyFormatter
+
+			chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
 			if err == nil {
-				var outputText string
+				var cpsProperty []galasaapi.GalasaProperty
+				cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
 
-				outputText, err = chosenFormatter.FormatProperties(cpsProperty)
-
+				log.Printf("GetProperties - Galasa Properties collected: %s", getCpsPropertyArrayAsString(cpsProperty))
 				if err == nil {
-					console.WriteString(outputText)
-				}
+					var outputText string
 
+					outputText, err = chosenFormatter.FormatProperties(cpsProperty)
+
+					if err == nil {
+						console.WriteString(outputText)
+					}
+
+				}
 			}
 		}
+
 	}
 	return err
 }
@@ -105,7 +111,6 @@ func getCpsPropertiesFromRestApi(
 			apicall := apiClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
 			cpsProperties, _, err = apicall.Execute()
 		}
-		
 
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_FAILED, err.Error())
