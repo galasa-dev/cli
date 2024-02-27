@@ -310,7 +310,6 @@ func (submitter *Submitter) submitRun(
 			if err != nil {
 				log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
 				lostRuns[className] = &nextRun
-				//This is thrown when test submit is run.... Unit test and fix
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
 			} else {
 				if len(resultGroup.GetRuns()) < 1 {
