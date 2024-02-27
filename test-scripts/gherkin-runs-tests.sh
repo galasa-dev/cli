@@ -109,6 +109,7 @@ function SubmittingLocalGherkinTest {
     h1 "Submitting the sample gherkin feature"
 
     cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
+    --remoteMaven https://development.galasa.dev/main/maven-repo/obr \
     --gherkin file://$input_file \
     --log -"
 
@@ -129,6 +130,7 @@ function SubmittingBadPrefixLocalGherkinTest {
     h1 "Submitting bad prefix gherkin feature"
 
     cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
+    --remoteMaven https://development.galasa.dev/main/maven-repo/obr \
     --gherkin $input_file \
     --log -"
 
@@ -149,6 +151,7 @@ function SubmittingBadSuffixLocalGherkinTest {
     h1 "Submitting bad suffix gherkin feature"
 
     cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
+    --remoteMaven https://development.galasa.dev/main/maven-repo/obr \
     --gherkin file:///gherkin \
     --log -"
 
