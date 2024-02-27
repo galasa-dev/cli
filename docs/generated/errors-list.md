@@ -125,16 +125,25 @@ The `galasactl` tool can generate the following errors:
 - GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: {}
 - GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: {}
 - GAL1125E: Authentication property {} is invalid. Please ensure that it the value is made up of two parts that are separated by a '{}'.
+- GAL1132E: No active run found matching run name '{}'.
+- GAL1133E: Error resetting run '{}'. Reason: '{}'
+- GAL1134E: The runs reset operation failed. Unable to process the error information returned from the server.
+- GAL1135E: Error cancelling run '{}'. Reason: '{}'
+- GAL1136E: The runs cancel operation failed. Unable to process the error information returned from the server.
+- GAL1137E: The gherkin URL supplied is invalid. '{}' does not end with the expected '.feature' extension.
+- GAL1138E: Unsupported gherkin URL {}. Acceptable values start with 'file://'
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
 - GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. {} error: {}
 - GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. {} error: {}
 - GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. {} error: {}
-- GAL1231E: The gherkin URL supplied is invalid. '{}' does not end with the expected '.feature' extension.
-- GAL1232E: Unsupported gherkin URL {}. Acceptable values start with 'file://'
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 
 - GAL2502I: Rendered {} image files.
+
+- GAL2503I: The request to reset run '{}' has been accepted by the server.
+
+- GAL2504I: The request to cancel run '{}' has been accepted by the server.
 

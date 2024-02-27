@@ -16,26 +16,23 @@ import (
 )
 
 // Objective: Allow the user to do this:
-//    runs download --name U123 [--force]
-// And then galasactl downloads the artifacts for the given run.
+//    runs cancel --name U123
+// And then galasactl cancels the run by abandoning it.
 
-type RunsDownloadCommand struct {
-	values       *RunsDownloadCmdValues
+type RunsCancelCommand struct {
+	values       *RunsCancelCmdValues
 	cobraCommand *cobra.Command
 }
 
-// Variables set by cobra's command-line parsing.
-type RunsDownloadCmdValues struct {
-	runNameDownload         string
-	runForceDownload        bool
-	runDownloadTargetFolder string
+type RunsCancelCmdValues struct {
+	runName string
 }
 
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsDownloadCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
-	cmd := new(RunsDownloadCommand)
+func NewRunsCancelCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+	cmd := new(RunsCancelCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
 }
@@ -43,34 +40,33 @@ func NewRunsDownloadCommand(factory Factory, runsCommand GalasaCommand, rootComm
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsDownloadCommand) Name() string {
-	return COMMAND_NAME_RUNS_DOWNLOAD
+func (cmd *RunsCancelCommand) Name() string {
+	return COMMAND_NAME_RUNS_CANCEL
 }
 
-func (cmd *RunsDownloadCommand) CobraCommand() *cobra.Command {
+func (cmd *RunsCancelCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *RunsDownloadCommand) Values() interface{} {
+func (cmd *RunsCancelCommand) Values() interface{} {
 	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-
-func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsCancelCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
 	var err error
-	cmd.values = &RunsDownloadCmdValues{}
-	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory,
+	cmd.values = &RunsCancelCmdValues{}
+	cmd.cobraCommand, err = cmd.createRunsCancelCobraCmd(
+		factory,
 		runsCommand,
 		rootCommand.Values().(*RootCmdValues),
 	)
 	return err
 }
 
-func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
-	factory Factory,
+func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory Factory,
 	runsCommand GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
@@ -78,30 +74,27 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 	var err error = nil
 	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
-	runsDownloadCobraCmd := &cobra.Command{
-		Use:     "download",
-		Short:   "Download the artifacts of a test run which ran.",
-		Long:    "Download the artifacts of a test run which ran and store them in a directory within the current working directory",
+	runsCancelCmd := &cobra.Command{
+		Use:     "cancel",
+		Short:   "cancel an active run in the ecosystem",
+		Long:    "Cancel an active test run in the ecosystem if it is stuck or looping.",
 		Args:    cobra.NoArgs,
-		Aliases: []string{"runs download"},
+		Aliases: []string{"runs cancel"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsDownload(factory, runsCmdValues, rootCmdValues)
+			return cmd.executeCancel(factory, runsCmdValues, rootCmdValues)
 		},
 	}
 
-	runsDownloadCobraCmd.PersistentFlags().StringVar(&cmd.values.runNameDownload, "name", "", "the name of the test run we want information about")
-	runsDownloadCobraCmd.PersistentFlags().BoolVar(&cmd.values.runForceDownload, "force", false, "force artifacts to be overwritten if they already exist")
-	runsDownloadCobraCmd.MarkPersistentFlagRequired("name")
-	runsDownloadCobraCmd.PersistentFlags().StringVar(&cmd.values.runDownloadTargetFolder, "destination", ".",
-		"The folder we want to download test run artifacts into. Sub-folders will be created within this location",
-	)
+	runsCancelCmd.PersistentFlags().StringVar(&cmd.values.runName, "name", "", "the name of the test run to cancel")
 
-	runsCommand.CobraCommand().AddCommand(runsDownloadCobraCmd)
+	runsCancelCmd.MarkPersistentFlagRequired("name")
 
-	return runsDownloadCobraCmd, err
+	runsCommand.CobraCommand().AddCommand(runsCancelCmd)
+
+	return runsCancelCmd, err
 }
 
-func (cmd *RunsDownloadCommand) executeRunsDownload(
+func (cmd *RunsCancelCommand) executeCancel(
 	factory Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
@@ -114,10 +107,9 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 	if err == nil {
-
 		rootCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Download artifacts for a run")
+		log.Println("Galasa CLI - Cancel an active run by abandoning it.")
 
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
@@ -126,7 +118,7 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			// Read the bootstrap properties.
+			// Read the bootstrap properties
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
@@ -136,22 +128,22 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 				timeService := factory.GetTimeService()
 
 				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
+				log.Printf("The API Server is at '%s'\n", apiServerUrl)
 
 				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 
-				// Call to process the command in a unit-testable way.
-				err = runs.DownloadArtifacts(
-					cmd.values.runNameDownload,
-					cmd.values.runForceDownload,
-					fileSystem,
+				// Call to process command in unit-testable way.
+				err = runs.CancelRun(
+					cmd.values.runName,
 					timeService,
 					console,
+					apiServerUrl,
 					apiClient,
-					cmd.values.runDownloadTargetFolder,
 				)
 			}
 		}
 	}
+
+	log.Printf("executeRunsCancel returning %v\n", err)
 	return err
 }

@@ -228,6 +228,11 @@ function calculate_galasactl_executable {
     esac
 
     architecture=$(uname -m)
+    case $architecture in
+        aarch64)
+            architecture="arm64"
+            ;;
+    esac
 
     export galasactl_command="galasactl-${os}-${architecture}"
     info "galasactl command is ${galasactl_command}"
@@ -448,7 +453,11 @@ function generate_galasactl_documentation {
         *)          error "Unknown machine type ${unameOut}"
                     exit 1
     esac
+
     architecture="$(uname -m)"
+    case $architecture in
+        aarch64)    architecture=arm64
+    esac
 
     # Call the documentation generator, which builds .md files
     info "Using program ${BASEDIR}/bin/gendocs-galasactl-${machine}-${architecture} to generate the documentation..."

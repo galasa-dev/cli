@@ -1249,7 +1249,7 @@ func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
 	)
 
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1231E")
+	assert.Contains(t, err.Error(), "GAL1137E")
 }
 
 func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
@@ -1284,5 +1284,5 @@ func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
 	)
 
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1232E")
+	assert.Contains(t, err.Error(), "GAL1138E")
 }

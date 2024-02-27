@@ -54,15 +54,17 @@ func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string)
 	var responseBody []byte
 	resourcesApiServerUrl := apiServerUrl + "/resources/"
 
-		var req *http.Request
-		req, err = http.NewRequest("POST", resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))
+	var req *http.Request
+	req, err = http.NewRequest("POST", resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))
 
 	if err == nil {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Accept-Encoding", "gzip,deflate,br")
 
-		log.Printf("sendResourcesRequestToServer url:%s - headers:%s - payload: '%s'", resourcesApiServerUrl, req.Header, string(payloadJsonToSend))
+		// WARNING:
+		// Don't leave the following log statement enabled. It might log secret namespace property values, which would be a security violation.
+		// log.Printf("sendResourcesRequestToServer url:%s - headers:%s - payload: '%s'", resourcesApiServerUrl, req.Header, string(payloadJsonToSend))
 
 		var resp *http.Response
 		client := &http.Client{}
