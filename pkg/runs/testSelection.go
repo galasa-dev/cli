@@ -34,6 +34,9 @@ type TestClass struct {
 
 	// The obr will be set for local runs.
 	Obr string
+
+	//Gherkin URL for local runs
+	GherkinUrl string
 }
 
 func NewTestSelectionFlagValues() *utils.TestSelectionFlagValues {
@@ -44,6 +47,7 @@ func NewTestSelectionFlagValues() *utils.TestSelectionFlagValues {
 	flags.Tags = new([]string)
 	flags.Classes = new([]string)
 	flags.RegexSelect = new(bool)
+	flags.GherkinUrl = new([]string)
 	return flags
 }
 
@@ -93,12 +97,21 @@ func AddCommandFlags(command *cobra.Command, flags *utils.TestSelectionFlagValue
 
 	AddClassFlag(command, flags, false, "test class names to run from the specified stream or portfolio."+
 		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
+
+	AddGherkinFlag(command,flags, false, "Gherkin feature file URL. Should start with 'file://'. ")
 }
 
 func AddClassFlag(command *cobra.Command, flags *utils.TestSelectionFlagValues, isRequired bool, helpText string) {
 	flags.Classes = command.Flags().StringSlice("class", make([]string, 0), helpText)
 	if isRequired {
 		command.MarkFlagRequired("class")
+	}
+}
+
+func AddGherkinFlag(command *cobra.Command, flags *utils.TestSelectionFlagValues, isRequired bool, helpText string) {
+	flags.GherkinUrl = command.Flags().StringSlice("gherkin", make([]string, 0), helpText)
+	if isRequired {
+		command.MarkFlagRequired("gherkin")
 	}
 }
 
@@ -120,6 +133,10 @@ func AreSelectionFlagsProvided(flags *utils.TestSelectionFlagValues) bool {
 	}
 
 	if len(*flags.Classes) > 0 {
+		return true
+	}
+
+	if len(*flags.GherkinUrl) > 0 {
 		return true
 	}
 
@@ -171,9 +188,32 @@ func SelectTests(launcherInstance launcher.Launcher, flags *utils.TestSelectionF
 		if err == nil {
 			err = selectTestsByClass(testCatalog, &testSelection, flags)
 		}
+		if err == nil {
+			err = selectTestsByGherkin(testCatalog, &testSelection, flags)
+		}
 	}
 
 	return testSelection, err
+}
+
+func selectTestsByGherkin(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
+	var err error = nil
+
+	if len(*flags.GherkinUrl) < 1{
+		return err
+	}
+	gherkinUrls := *flags.GherkinUrl
+	for _, gherkin := range gherkinUrls{
+		
+		newSelectedClass := TestClass{
+			GherkinUrl: gherkin,
+		}
+	
+		testSelection.Classes = append(testSelection.Classes, newSelectedClass)
+	}
+
+
+	return err
 }
 
 func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {

@@ -65,6 +65,8 @@ func (launcher *RemoteLauncher) SubmitTestRun(
 	stream string,
 	obrFromPortfolio string,
 	isTraceEnabled bool,
+	GherkinURL       string,
+	GherkinFeature string,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
 

@@ -27,6 +27,8 @@ type Launcher interface {
 		stream string,
 		obrFromPortfolio string,
 		isTraceEnabled bool,
+		gherkinURL string,
+		GherkinFeature string,
 		overrides map[string]interface{},
 	) (*galasaapi.TestRuns, error)
 

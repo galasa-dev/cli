@@ -272,11 +272,19 @@ galasactl runs submit local --log -
           --class dev.galasa.example.banking.account/dev.galasa.example.banking.account.TestAccount
 ```
 
+### Example : Run a single Gherkin test in the local JVM.
+```
+galasactl runs submit local --log -
+          --gherkin file:///path/to/gherkin/file.feature
+```
+
 - The --log - parameter indicates that debugging information should be sent to the console.
 - The --obr indicates where galasactl can find an OBR which refers to the bundle where all the tests are housed.
 - The --class parameter tells galasactl which test class to run. The string is in the format of `<osgi-bundle-id>/<fully-qualified-java-class>`. All the test methods within the class will be run. You can use multiple such flags to test multiple classes.
 - The `JAVA_HOME` environment variable should be set to refer to the JVM to use in which the test will be launched.
 - The --localmaven parameter tells galasactl where galasa bundles can be loaded from on your local file system. Defaults to your home .m2/repository file. Please note that this should be in a URL form e.g. `file:///Users/myuserid/.m2/repository`.
+
+- The --gherkin parameter tells galasactl where gherkin files can be loaded from on your local file system. Please note that this should be in a URL form ending in a `.feature` extension e.g. `file:///Users/myuserid/gherkin/MyGherkinFile.feature`.
 
 - The `--throttle 1` option would mean all your tests run sequentially. A higher throttle value means that local tests run in parallel.
 

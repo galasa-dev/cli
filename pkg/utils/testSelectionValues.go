@@ -13,4 +13,5 @@ type TestSelectionFlagValues struct {
 	Classes     *[]string
 	Stream      string
 	RegexSelect *bool
+	GherkinUrl  *[]string
 }

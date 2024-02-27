@@ -121,7 +121,11 @@ func getTestRunData(run TestRun, isLost bool) runsformatter.FormattableTest {
 	newFormattableTest.ApiServerUrl = ""
 
 	newFormattableTest.Name = run.Name
-	newFormattableTest.TestName = run.Stream + "/" + run.Bundle + "/" + run.Class
+	if run.GherkinUrl != "" {
+		newFormattableTest.TestName = run.GherkinFeature
+	} else {
+		newFormattableTest.TestName = run.Stream + "/" + run.Bundle + "/" + run.Class
+	}
 	newFormattableTest.Status = run.Status
 	newFormattableTest.Result = run.Result
 	newFormattableTest.StartTimeUTC = ""
