@@ -42,9 +42,8 @@ func GetProperties(
 	err = checkNameNotUsedWithPrefixSuffixInfix(name, prefix, suffix, infix)
 	if err == nil {
 
-		err = validateNamespaceFormat(namespace)
+		err = validateFlagStringFormatsForGet(namespace, name, prefix, suffix, infix)
 		if err == nil {
-
 			var chosenFormatter propertiesformatter.PropertyFormatter
 
 			chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
@@ -65,7 +64,6 @@ func GetProperties(
 				}
 			}
 		}
-
 	}
 	return err
 }
@@ -196,4 +194,43 @@ func getCpsPropertyArrayAsString(cpsPropertyArray []galasaapi.GalasaProperty) st
 	propertiesAsString += "]"
 
 	return propertiesAsString
+}
+
+func validateFlagStringFormatsForGet(namespace string, name string, prefix string, suffix string, infix string) error {
+	var err error
+
+	err = validateNamespaceFormat(namespace)
+	if err == nil {
+		if name != "" {
+			err = validatePropertyFieldFormat(name, "name")
+		} else {
+			//prefix, suffix and infix could be provided exclusive of each other,
+			//so we check if a value has been provided for each before validating the value
+			if prefix != "" {
+				err = validatePropertyFieldFormat(prefix, "prefix")
+			}
+			if suffix != "" {
+				err = validatePropertyFieldFormat(suffix, "suffix")
+			}
+			if infix != "" {
+				err = validateInfixes(infix)
+			}
+		}
+	}
+
+	return err
+}
+
+func validateInfixes(infix string) error {
+	var err error
+	//infix could have multiple values separated by a comma, or just a value
+	infixElements := strings.Split(infix, ",")
+	for _, infixElem := range infixElements {
+		err = validatePropertyFieldFormat(infixElem, "infix")
+		if err != nil {
+			//as soon as an invalid value is found, exit the for loop and return
+			break
+		}
+	}
+	return err
 }

@@ -653,6 +653,41 @@ Total:1
 	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
+func TestValidNamespaceWithMatchingInfixesReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validnamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := "anInfix"
+	propertiesOutputFormat := "summary"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+
+	expectedOutput := `namespace      name                value
+validnamespace extra.anInfix.extra infixVal
+
+Total:1
+`
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
 func TestValidNamespaceWithNoMatchingInfixReturnsEmpty(t *testing.T) {
 	//Given...
 	namespace := "validnamespace"
@@ -1141,4 +1176,62 @@ func TestInvalidNamespaceFormatReturnsError(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1138E")
 	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestValidateInfixesWithCommaSeparatedMultipleValidValuesReturnsOk(t *testing.T) {
+	//Given
+	infix := "voilin,cello,clarinet,guitar"
+
+	//When...
+	err := validateInfixes(infix)
+
+	//Then....
+	assert.Nil(t, err)
+}
+
+func TestValidateInfixesWithOneValidValueReturnsOk(t *testing.T) {
+	//Given
+	infix := "voilin"
+
+	//When...
+	err := validateInfixes(infix)
+
+	//Then....
+	assert.Nil(t, err)
+}
+
+func TestValidateInfixesWithCommaSeparateInvalidValuesWithSpaceAfterWordReturnsError(t *testing.T) {
+	//Given
+	infix := "cello,voilin ,clarinet,guitar"
+
+	//When...
+	err := validateInfixes(infix)
+
+	//Then....
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140E")
+}
+
+func TestValidateInfixesWithCommaSeparatedInvalidValuesWithSpaceBeforeWordReturnsError(t *testing.T) {
+	//Given
+	infix := "cello, clarinet,guitar"
+
+	//When...
+	err := validateInfixes(infix)
+
+	//Then....
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140E")
+}
+
+func TestValidateInfixesWithCommaSeparatedOneInvalidValuesWithSpaceReturnsError(t *testing.T) {
+	//Given
+	infix := "cello "
+
+	//When...
+	err := validateInfixes(infix)
+
+	//Then....
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140E")
 }

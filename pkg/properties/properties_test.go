@@ -93,3 +93,100 @@ func TestInvalidNamespaceFormatWithCapitalLetterReturnsError(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1138")
 }
+
+func TestValidPropertyFieldFormatReturnsOk(t *testing.T) {
+	//Given
+	fieldKey := "name"
+	validPropertyFieldFormat := "test.name"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.Nil(t, err)
+}
+
+func TestValidPropertyFieldFormatWithNumbersReturnsOk(t *testing.T) {
+	//Given
+	fieldKey := "name"
+	validPropertyFieldFormat := "test.2.times"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.Nil(t, err)
+}
+
+func TestValidPropertyFieldFormatWithSpecialCharacterReturnsOk(t *testing.T) {
+	//Given
+	fieldKey := "prefix"
+	validPropertyFieldFormat := "prop-test"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.Nil(t, err)
+}
+
+func TestInvalidPropertyFieldFormatStartingWithNumberReturnsError(t *testing.T) {
+	//Given
+	fieldKey := "prefix"
+	validPropertyFieldFormat := "1.time"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140")
+}
+
+func TestValidPropertyFieldFormatWithNumbersAndSpecialCharacterReturnsError(t *testing.T) {
+	//Given
+	fieldKey := "infix"
+	validPropertyFieldFormat := "fr8amework-"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.Nil(t, err)
+}
+
+func TestValidPropertyFieldFormatWithStartingCapitalLetterReturnsError(t *testing.T) {
+	//Given
+	fieldKey := "infix"
+	validPropertyFieldFormat := "Framework"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.Nil(t, err)
+}
+
+func TestValidPropertyFieldFormatWithCapitalLetterReturnsError(t *testing.T) {
+	//Given
+	fieldKey := "suffix"
+	validPropertyFieldFormat := "frameWork"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.Nil(t, err)
+}
+func TestInvalidPropertyFieldFormatSingleCharacterReturnsError(t *testing.T) {
+	//Given
+	fieldKey := "prefix"
+	validPropertyFieldFormat := "t"
+
+	//When
+	err := validatePropertyFieldFormat(validPropertyFieldFormat, fieldKey)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140")
+}
