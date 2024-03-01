@@ -1174,7 +1174,7 @@ func TestInvalidNamespaceFormatReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138E")
+	assert.Contains(t, err.Error(), "GAL1140E")
 	assert.Equal(t, expectedOutput, mockConsole.ReadText())
 }
 
@@ -1209,7 +1209,7 @@ func TestValidateInfixesWithCommaSeparateInvalidValuesWithSpaceAfterWordReturnsE
 
 	//Then....
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1140E")
+	assert.Contains(t, err.Error(), "GAL1142E")
 }
 
 func TestValidateInfixesWithCommaSeparatedInvalidValuesWithSpaceBeforeWordReturnsError(t *testing.T) {
@@ -1221,7 +1221,7 @@ func TestValidateInfixesWithCommaSeparatedInvalidValuesWithSpaceBeforeWordReturn
 
 	//Then....
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1140E")
+	assert.Contains(t, err.Error(), "GAL1142E")
 }
 
 func TestValidateInfixesWithCommaSeparatedOneInvalidValuesWithSpaceReturnsError(t *testing.T) {
@@ -1233,5 +1233,5 @@ func TestValidateInfixesWithCommaSeparatedOneInvalidValuesWithSpaceReturnsError(
 
 	//Then....
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1140E")
+	assert.Contains(t, err.Error(), "GAL1142E")
 }

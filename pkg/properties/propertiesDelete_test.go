@@ -100,7 +100,7 @@ func TestDeletePropertyWithInvalidNamesapceFormatReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138E", "Error occured when trying to access namespace 'invalidNamespace'.")
+	assert.Contains(t, err.Error(), "GAL1140E", "Error occured when trying to access namespace 'invalidNamespace'.")
 }
 
 // validnamespace , invalid propertyname

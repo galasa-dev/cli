@@ -43,7 +43,19 @@ func TestInvalidNamespaceFormatStartingWithNumberReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138")
+	assert.Contains(t, err.Error(), "GAL1140E")
+}
+
+func TestInvalidNamespaceFormatSingleCharReturnsError(t *testing.T) {
+	//Given
+	invalidNamespaceFormat := "f"
+
+	//When
+	err := validateNamespaceFormat(invalidNamespaceFormat)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140E")
 }
 
 func TestInvalidNamespaceFormatWithSpecialCharacterReturnsError(t *testing.T) {
@@ -55,7 +67,7 @@ func TestInvalidNamespaceFormatWithSpecialCharacterReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138")
+	assert.Contains(t, err.Error(), "GAL1140E")
 }
 
 func TestInvalidNamespaceFormatWithNumbersAndSpecialCharacterReturnsError(t *testing.T) {
@@ -67,7 +79,7 @@ func TestInvalidNamespaceFormatWithNumbersAndSpecialCharacterReturnsError(t *tes
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138")
+	assert.Contains(t, err.Error(), "GAL1140E")
 }
 
 func TestInvalidNamespaceFormatWithStartingCapitalLetterReturnsError(t *testing.T) {
@@ -79,7 +91,7 @@ func TestInvalidNamespaceFormatWithStartingCapitalLetterReturnsError(t *testing.
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138")
+	assert.Contains(t, err.Error(), "GAL1140E")
 }
 
 func TestInvalidNamespaceFormatWithCapitalLetterReturnsError(t *testing.T) {
@@ -91,7 +103,7 @@ func TestInvalidNamespaceFormatWithCapitalLetterReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138")
+	assert.Contains(t, err.Error(), "GAL1140E")
 }
 
 func TestValidPropertyFieldFormatReturnsOk(t *testing.T) {
@@ -140,7 +152,7 @@ func TestInvalidPropertyFieldFormatStartingWithNumberReturnsError(t *testing.T) 
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1140")
+	assert.Contains(t, err.Error(), "GAL1142E")
 }
 
 func TestValidPropertyFieldFormatWithNumbersAndSpecialCharacterReturnsError(t *testing.T) {
@@ -188,5 +200,5 @@ func TestInvalidPropertyFieldFormatSingleCharacterReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1140")
+	assert.Contains(t, err.Error(), "GAL1142E")
 }

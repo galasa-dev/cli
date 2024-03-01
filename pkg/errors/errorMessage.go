@@ -94,7 +94,7 @@ var (
 	GALASA_ERROR_SUBMIT_MIX_FLAGS_AND_PORTFOLIO           = NewMessageType("GAL1006E: The submit command does not support mixing of the test selection flags and a portfolio."+SEE_COMMAND_REFERENCE, 1006, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML                = NewMessageType("GAL1007E: Failed to create report yaml file %s. Reason is %s", 1007, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK                  = NewMessageType("GAL1008E: Failed to check if group %s exists already. Reason is %s", 1008, STACK_TRACE_WANTED)
-	GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS              = NewMessageType("GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test) or --portfolio flag to be specified."+SEE_COMMAND_REFERENCE, 1009, STACK_TRACE_WANTED)
+	GALASA_ERROR_SUBMIT_MISSING_ACTION_FLAGS              = NewMessageType("GAL1009E: The submit command requires either test selection flags (eg: --stream, --class, --bundle, --package, --tag, --regex, --test, --gherkin) or --portfolio flag to be specified."+SEE_COMMAND_REFERENCE, 1009, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_INVALID_OVERRIDE                  = NewMessageType("GAL1010E: Invalid override '%v'", 1010, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_REPORT_YAML_ENCODE                = NewMessageType("GAL1011E: Failed to encode the yaml file %s. Reason is %s", 1011, STACK_TRACE_WANTED)
 	GALASA_ERROR_SUBMIT_REPORT_JSON_MARSHAL               = NewMessageType("GAL1012E: Failed to prepare test report for writing to json file %s. Reason is %s", 1012, STACK_TRACE_WANTED)
@@ -222,12 +222,14 @@ var (
 	GALASA_ERROR_RESET_RUN_RESPONSE_PARSING              = NewMessageType("GAL1134E: The runs reset operation failed. Unable to process the error information returned from the server.", 1134, STACK_TRACE_WANTED)
 	GALASA_ERROR_CANCEL_RUN_FAILED                       = NewMessageType("GAL1135E: Error cancelling run '%v'. Reason: '%s'", 1135, STACK_TRACE_WANTED)
 	GALASA_ERROR_CANCEL_RUN_RESPONSE_PARSING             = NewMessageType("GAL1136E: The runs cancel operation failed. Unable to process the error information returned from the server.", 1136, STACK_TRACE_WANTED)
-	GALASA_ERROR_FAILED_TO_COMPILE_NAMESPACE_REGEX       = NewMessageType("GAL1137E: Unable to compile the regex pattern for Galasa Property field 'namespace'. Reason: '%s'", 1137, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_PROPERTY_NAMESPACE_FORMAT       = NewMessageType("GAL1138E: The namespace, '%s', provided does not match formatting requirements. "+
-		"The namespace must start with a character in the 'a-z' range, followed by characters in the 'a'-'z' or '0'-'9' ranges only.", 1138, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_FAILED_TO_COMPILE_PROPERTY_FIELD_REGEX = NewMessageType("GAL1139E: Unable to compile the regex pattern for Galasa Property field '%s'. Reason: '%s'", 1139, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_PROPERTY_FIELD_FORMAT          = NewMessageType("GAL1140E: The %s field value, '%s', provided does not match formatting requirements. "+
-		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.", 1140, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GHERKIN_URL_BAD_EXTENSION               = NewMessageType("GAL1137E: The gherkin URL supplied is invalid. '%s' does not end with the expected '.feature' extension.", 1137, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GHERKIN_URL_BAD_URL_PREFIX              = NewMessageType("GAL1138E: Unsupported gherkin URL %s. Acceptable values start with 'file://'", 1138, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_COMPILE_NAMESPACE_REGEX       = NewMessageType("GAL1139E: Unable to compile the regex pattern for Galasa Property field 'namespace'. Reason: '%s'", 1139, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_PROPERTY_NAMESPACE_FORMAT       = NewMessageType("GAL1140E: The namespace, '%s', provided does not match formatting requirements. "+
+		"The namespace must start with a character in the 'a-z' range, followed by characters in the 'a'-'z' or '0'-'9' ranges only.", 1140, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_COMPILE_PROPERTY_FIELD_REGEX = NewMessageType("GAL1141E: Unable to compile the regex pattern for Galasa Property field '%s'. Reason: '%s'", 1141, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_PROPERTY_FIELD_FORMAT          = NewMessageType("GAL1142E: The %s field value, '%s', provided does not match formatting requirements. "+
+		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.", 1142, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

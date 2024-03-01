@@ -417,3 +417,23 @@ func TestRunsOfTestRunStructArePrintedInSortedOrder(t *testing.T) {
 	assert.Equal(t, "Custard", output[3].Result)
 	assert.Equal(t, "Custom", output[4].Result)
 }
+
+func TestGherkinRunReturnsCorrectFormattableTestly(t *testing.T) {
+	testRun := TestRun{
+		Name:      "",
+		Bundle:    "",
+		Class:     "",
+		Stream:    "",
+		Status:    "myStatus",
+		Result:    "Passed",
+		Overrides: make(map[string]string, 1),
+		Tests:     []TestMethod{{Method: "Scenario1", Result: "passed"}, {Method: "Scenario2", Result: "passed"}},
+		GherkinUrl: "file:///my/directory/path/GherkinFeature.feature",
+		GherkinFeature: "GherkinFeature",
+	}
+
+	output := getTestRunData(testRun, false)
+	assert.Equal(t, "GherkinFeature", output.TestName)
+	assert.Equal(t, "Passed", output.Result)
+	assert.Equal(t, "myStatus", output.Status)
+}

@@ -166,6 +166,8 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 		"unitTestStream",
 		"mvn:myGroup/myArtifact/myClassifier/obr",
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 	if err != nil {
@@ -214,6 +216,8 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 		"unitTestStream",
 		"mvn:myGroup/myArtifact/myClassifier/obr",
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 
@@ -351,6 +355,8 @@ func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
 		"unitTestStream",
 		"notmaven://group/artifact/version/classifier",
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 
@@ -387,6 +393,8 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 		"unitTestStream",
 		"", // No Obr from the profile record.
 		isTraceEnabled,
+		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
 		overrides,
 	)
 
@@ -468,6 +476,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -503,6 +512,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -539,6 +549,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -577,6 +588,7 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -648,6 +660,7 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled,
 		debugPort,
@@ -685,6 +698,7 @@ func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -722,6 +736,7 @@ func TestCommandIncludesTwoFlagsFromBootstrapProperties(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -759,6 +774,7 @@ func TestCommandIncludesDefaultDebugPortAndMode(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -797,6 +813,7 @@ func TestCommandDrawsValidDebugPortFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -835,6 +852,7 @@ func TestCommandDrawsInvalidDebugPortFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -873,6 +891,7 @@ func TestCommandDrawsValidDebugModeFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -917,6 +936,7 @@ func TestCommandDrawsInvalidDebugModeFromBootstrap(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -953,6 +973,7 @@ func TestCommandDrawsValidDebugModeListenFromCommandLine(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -995,6 +1016,7 @@ func TestCommandDrawsValidDebugModeAttachFromCommandLine(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1037,6 +1059,7 @@ func TestCommandDrawsInvalidDebugModeFromCommandLine(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1075,6 +1098,7 @@ func TestLocalMavenNotSetDefaults(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1114,6 +1138,7 @@ func TestLocalMavenSet(t *testing.T) {
 		localMaven,
 		galasaVersionToRun,
 		overridesFilePath,
+		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
 	)
@@ -1123,4 +1148,141 @@ func TestLocalMavenSet(t *testing.T) {
 
 	assert.Contains(t, args, "--localmaven")
 	assert.Contains(t, args, "mavenRepo")
+}
+
+func NewMockGherkinParams() (
+	props.JavaProperties,
+	*utils.MockEnv,
+	files.FileSystem,
+	embedded.ReadOnlyFileSystem,
+	*RunsSubmitLocalCmdParameters,
+	utils.TimeService,
+	ProcessFactory,
+	utils.GalasaHome,
+) {
+	// Given...
+	env := utils.NewMockEnv()
+	env.EnvVars["JAVA_HOME"] = "/java"
+	fs := files.NewMockFileSystem()
+	utils.AddJavaRuntimeToMock(fs, "/java")
+	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
+	jvmLaunchParams := getBasicJvmLaunchParams()
+	timeService := utils.NewMockTimeService()
+	mockProcess := NewMockProcess()
+	mockProcessFactory := NewMockProcessFactory(mockProcess)
+
+	bootstrapProps := getBasicBootstrapProperties()
+
+	return bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome
+}
+
+func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	launcher, err := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// When...
+	testRuns, err := launcher.SubmitTestRun(
+		"myGroup",
+		"", // No Java Class as this is a gherkin test
+		"", // No RequestType as this is a gherkin test
+		"myRequestor",
+		"", // No Stream as this is a gherkin test
+		"", // No OBR as this is a gherkin test
+		isTraceEnabled,
+		"file:///dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.feature",
+		"GherkinLog",
+		overrides,
+	)
+	if err != nil {
+		assert.Fail(t, "Launcher should have launched command OK")
+	} else {
+		assert.NotNil(t, testRuns, "Returned test runs is nil, should have been an object.")
+
+		assert.Len(t, testRuns.Runs, 1, "Returned test runs array doesn't contain correct number of tests launched.")
+		assert.False(t, *testRuns.Complete, "Returned test runs should not already be complete")
+	}
+}
+
+func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	launcher, err := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// When...
+	_, err = launcher.SubmitTestRun(
+		"myGroup",
+		"", // No Java Class as this is a gherkin test
+		"", // No RequestType as this is a gherkin test
+		"myRequestor",
+		"", // No Stream as this is a gherkin test
+		"", // No OBR as this is a gherkin test
+		isTraceEnabled,
+		"file:///dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.future",
+		"GherkinLog",
+		overrides,
+	)
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1137E")
+}
+
+func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	launcher, err := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	if err != nil {
+		assert.Fail(t, "JVM launcher should have been creatable.")
+	}
+	assert.NotNil(t, launcher, "Launcher returned is nil!")
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	// When...
+	_, err = launcher.SubmitTestRun(
+		"myGroup",
+		"", // No Java Class as this is a gherkin test
+		"", // No RequestType as this is a gherkin test
+		"myRequestor",
+		"", // No Stream as this is a gherkin test
+		"", // No OBR as this is a gherkin test
+		isTraceEnabled,
+		"https://dev.galasa.simbank.tests/src/main/java/dev/galasa/simbank/tests/GherkinLog.feature",
+		"GherkinLog",
+		overrides,
+	)
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1138E")
 }

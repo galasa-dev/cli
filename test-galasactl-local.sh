@@ -272,3 +272,7 @@ cleanup_local_maven_repo
 build_generated_source
 
 run_test_locally_using_galasactl
+
+CALLED_BY_MAIN="true"
+source ${BASEDIR}/test-scripts/gherkin-runs-tests.sh
+test_gherkin_commands
