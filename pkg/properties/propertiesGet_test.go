@@ -1146,7 +1146,7 @@ func TestCreateFormattersNoYamlReturnsOk(t *testing.T) {
 	assert.Contains(t, err.Error(), "GAL1067E")
 }
 
-func TestInvalidNamespaceFormatReturnsError(t *testing.T) {
+func TestInvalidNamespaceFormatWithCapitalLettersReturnsError(t *testing.T) {
 	//Given...
 	namespace := "invalidNamespaceFormat"
 	name := ""

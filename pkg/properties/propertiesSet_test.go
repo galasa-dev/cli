@@ -167,7 +167,7 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	assert.Nil(t, err)
 }
 
-func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T) {
+func TestUpdatePropertyWithInvalidNamespaceAndValidNameReturnsError(t *testing.T) {
 	//Given...
 	namespace := "invalidnamespace"
 	name := "validName"
@@ -262,9 +262,9 @@ func TestCreateGalasaPropertyReturnsOk(t *testing.T) {
 	assert.Equal(t, property.Data.GetValue(), value)
 }
 
-func TestInvalidNamesapceFormatReturnsError(t *testing.T) {
+func TestInvalidNamespaceFormatWithStartingNumReturnsError(t *testing.T) {
 	//Given...
-	namespace := "7invalidnamespace"
+	namespace := "7invalidnamespaceformat"
 	name := "validName"
 	value := "updatedValue"
 
@@ -285,5 +285,5 @@ func TestInvalidNamesapceFormatReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1138E")
+	assert.Contains(t, err.Error(), "GAL1140E")
 }
