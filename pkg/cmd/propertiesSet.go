@@ -90,7 +90,7 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 		},
 	}
 
-	propertiesSetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertyValue, "value", "", "the value of the property you want to create")
+	propertiesSetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertyValue, "value", "", "A mandatory flag indicating the value of the property you want to create")
 	propertiesSetCobraCmd.MarkPersistentFlagRequired("value")
 
 	propertiesCommand.CobraCommand().AddCommand(propertiesSetCobraCmd)
