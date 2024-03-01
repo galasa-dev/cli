@@ -41,23 +41,27 @@ func GetProperties(
 
 	err = checkNameNotUsedWithPrefixSuffixInfix(name, prefix, suffix, infix)
 	if err == nil {
-		var chosenFormatter propertiesformatter.PropertyFormatter
 
-		chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
+		err = validateFlagStringFormatsForGet(namespace, name, prefix, suffix, infix)
 		if err == nil {
-			var cpsProperty []galasaapi.GalasaProperty
-			cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
+			var chosenFormatter propertiesformatter.PropertyFormatter
 
-			log.Printf("GetProperties - Galasa Properties collected: %s", getCpsPropertyArrayAsString(cpsProperty))
+			chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
 			if err == nil {
-				var outputText string
+				var cpsProperty []galasaapi.GalasaProperty
+				cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
 
-				outputText, err = chosenFormatter.FormatProperties(cpsProperty)
-
+				log.Printf("GetProperties - Galasa Properties collected: %s", getCpsPropertyArrayAsString(cpsProperty))
 				if err == nil {
-					console.WriteString(outputText)
-				}
+					var outputText string
 
+					outputText, err = chosenFormatter.FormatProperties(cpsProperty)
+
+					if err == nil {
+						console.WriteString(outputText)
+					}
+
+				}
 			}
 		}
 	}
@@ -105,7 +109,6 @@ func getCpsPropertiesFromRestApi(
 			apicall := apiClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
 			cpsProperties, _, err = apicall.Execute()
 		}
-		
 
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_FAILED, err.Error())
@@ -191,4 +194,44 @@ func getCpsPropertyArrayAsString(cpsPropertyArray []galasaapi.GalasaProperty) st
 	propertiesAsString += "]"
 
 	return propertiesAsString
+}
+
+func validateFlagStringFormatsForGet(namespace string, name string, prefix string, suffix string, infix string) error {
+	var err error
+
+	err = validateNamespaceFormat(namespace)
+	if err == nil {
+		if name != "" {
+			err = validatePropertyFieldFormat(name, "name")
+		} else {
+			//prefix, suffix and infix could be provided exclusive of each other,
+			//so we check if a value has been provided for each before validating the value
+			if prefix != "" {
+				err = validatePropertyFieldFormat(prefix, "prefix")
+			}
+			if suffix != "" {
+				err = validatePropertyFieldFormat(suffix, "suffix")
+			}
+			if infix != "" {
+				err = ValidateInfixes(infix)
+			}
+		}
+	}
+
+	return err
+}
+
+func ValidateInfixes(infix string) error {
+	var err error
+	//infix could have multiple values separated by a comma, or just a value
+	infixElements := strings.Split(infix, ",")
+	for _, infixElem := range infixElements {
+		err = validatePropertyFieldFormat(infixElem, "infix")
+		if err != nil {
+			//as soon as an invalid value is found, 
+			//exit the for loop and return
+			break
+		}
+	}
+	return err
 }

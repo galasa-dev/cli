@@ -98,14 +98,20 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters(propertiesHasYamlFormat))
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesPrefix, "prefix", "",
 		"Prefix to match against the start of the property name within the namespace."+
-			" Optional. Cannot be used in conjunction with the '--name' option.")
+			" Optional. Cannot be used in conjunction with the '--name' option." +
+		" The first character of the prefix must be in the 'a'-'z' or 'A'-'Z' ranges, " +
+		"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)")
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesSuffix, "suffix", "",
 		"Suffix to match against the end of the property name within the namespace."+
-			" Optional. Cannot be used in conjunction with the '--name' option.")
+			" Optional. Cannot be used in conjunction with the '--name' option." +
+			" The first character of the suffix must be in the 'a'-'z' or 'A'-'Z' ranges, " +
+			"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)")
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesInfix, "infix", "",
 		"Infix(es) that could be part of the property name within the namespace."+
-			" Multiple infixes can be supplied as a comma-separated list. "+
-			" Optional. Cannot be used in conjunction with the '--name' option.")
+			" Multiple infixes can be supplied as a comma-separated list without spaces. "+
+			" Optional. Cannot be used in conjunction with the '--name' option."+
+			" The first character of each infix must be in the 'a'-'z' or 'A'-'Z' ranges, " +
+			"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)")
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesOutputFormat, "format", "summary",
 		"output format for the data returned. Supported formats are: "+formatters+".")
 

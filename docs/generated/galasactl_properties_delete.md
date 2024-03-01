@@ -14,8 +14,8 @@ galasactl properties delete [flags]
 
 ```
   -h, --help               Displays the options for the 'properties delete' command.
-  -n, --name string        A mandatory field indicating the name of a property in the namespace.
-  -s, --namespace string   A mandatory flag that describes the container for a collection of properties.
+  -n, --name string        A mandatory field indicating the name of a property in the namespace.The first character of the name must be in the 'a'-'z' or 'A'-'Z' ranges, and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)
+  -s, --namespace string   A mandatory flag that describes the container for a collection of properties.The first character of the namespace must be in the 'a'-'z' range, and following characters can be 'a'-'z' or '0'-'9'
 ```
 
 ### Options inherited from parent commands

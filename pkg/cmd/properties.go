@@ -62,7 +62,7 @@ func (cmd *PropertiesCommand) init(rootCmd GalasaCommand) error {
 
 func (cmd *PropertiesCommand) createCobraCommand(
 	rootCommand GalasaCommand,
-	) *cobra.Command {
+) *cobra.Command {
 	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",
 		Short: "Manages properties in an ecosystem",
@@ -85,6 +85,8 @@ func addNamespaceFlag(cmd *cobra.Command, isMandatory bool, propertiesCmdValues 
 	} else {
 		description = "An optional flag that describes the container for a collection of properties."
 	}
+	description += "The first character of the namespace must be in the 'a'-'z' range, " +
+		"and following characters can be 'a'-'z' or '0'-'9'"
 
 	cmd.PersistentFlags().StringVarP(&propertiesCmdValues.namespace, flagName, "s", "", description)
 
@@ -103,6 +105,8 @@ func addPropertyNameFlag(cmd *cobra.Command, isMandatory bool, propertiesCmdValu
 	} else {
 		description = "An optional field indicating the name of a property in the namespace."
 	}
+	description += "The first character of the name must be in the 'a'-'z' or 'A'-'Z' ranges, " +
+		"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)"
 
 	cmd.PersistentFlags().StringVarP(&propertiesCmdValues.propertyName, flagName, "n", "", description)
 

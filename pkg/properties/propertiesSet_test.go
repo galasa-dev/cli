@@ -45,7 +45,7 @@ func mockSetPropertiesServlet(t *testing.T, w http.ResponseWriter, r *http.Reque
 	namespace := splitUrl[2]
 
 	statusCode, response = CheckNamespace(namespace)
-	if namespace == "validNamespace" {
+	if namespace == "validnamespace" {
 		if len(splitUrl) == 5 {
 			propertyName := splitUrl[4]
 			//UPDATE -> cps/ns/properties/name
@@ -91,7 +91,7 @@ func updateProperty(propertyName string) (int, string) {
 // bad value feturn error
 func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := "newName"
 	value := "newValue"
 
@@ -116,7 +116,7 @@ func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 
 func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
 	//Given...
-	namespace := "invalidNamespace"
+	namespace := "invalidnamespace"
 	name := "newName"
 	value := "newValue"
 
@@ -144,7 +144,7 @@ func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t 
 // UPDATING
 func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := "validName"
 	value := "updatedValue"
 
@@ -167,9 +167,9 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	assert.Nil(t, err)
 }
 
-func TestUpdatePropertyWithInvalidNamesapceAndValidNameReturnsError(t *testing.T) {
+func TestUpdatePropertyWithInvalidNamespaceAndValidNameReturnsError(t *testing.T) {
 	//Given...
-	namespace := "invalidNamespace"
+	namespace := "invalidnamespace"
 	name := "validName"
 	value := "updatedValue"
 
@@ -260,4 +260,30 @@ func TestCreateGalasaPropertyReturnsOk(t *testing.T) {
 	assert.Equal(t, property.Metadata.GetNamespace(), namesapce)
 	assert.Equal(t, property.Metadata.GetName(), name)
 	assert.Equal(t, property.Data.GetValue(), value)
+}
+
+func TestInvalidNamespaceFormatWithStartingNumReturnsError(t *testing.T) {
+	//Given...
+	namespace := "7invalidnamespaceformat"
+	name := "validName"
+	value := "updatedValue"
+
+	server := newSetPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+
+	//When
+	err := SetProperty(namespace, name, value, apiClient)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140E")
 }

@@ -78,7 +78,7 @@ func CheckName(name string) (string, int) {
 			"apiVersion": null,
 			"kind": null,
 			"metadata": {
-				"namespace": "validNamespace",
+				"namespace": "validnamespace",
 				"name": "property0"
 			},
 			"data":{
@@ -94,7 +94,7 @@ func CheckName(name string) (string, int) {
 				"apiVersion": null,
 				"kind": null,
 				"metadata": {
-					"namespace": "validNamespace",
+					"namespace": "validnamespace",
 					"name": "emptyValueName"
 				},
 				"data": {
@@ -117,7 +117,7 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 					"apiVersion": null,
 					"kind": null,
 					"metadata": {
-						"namespace": "validNamespace",
+						"namespace": "validnamespace",
 						"name": "aPrefix.anInfix.property.aSuffix"
 					},
 				    "data": {
@@ -132,7 +132,7 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 					"apiVersion": null,
 					"kind": null,
 					"metadata": {
-						"namespace": "validNamespace",
+						"namespace": "validnamespace",
 						"name": "aPrefix.property.aSuffix"
 					},
 				    "data": {
@@ -151,7 +151,7 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 					"apiVersion": null,
 					"kind": null,
 					"metadata": {
-						"namespace": "validNamespace",
+						"namespace": "validnamespace",
 						"name": "property.anInfix.aSuffix"
 					},
 				    "data": {
@@ -166,7 +166,7 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 					"apiVersion": null,
 					"kind": null,
 					"metadata": {
-						"namespace": "validNamespace",
+						"namespace": "validnamespace",
 						"name": "property.aSuffix"
 					},
 				    "data": {
@@ -185,7 +185,7 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 					"apiVersion": null,
 					"kind": null,
 					"metadata": {
-						"namespace": "validNamespace",
+						"namespace": "validnamespace",
 						"name": "aPrefix.anInfix.property"
 					},
 				    "data": {
@@ -199,7 +199,7 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 					"apiVersion": null,
 					"kind": null,
 					"metadata": {
-						"namespace": "validNamespace",
+						"namespace": "validnamespace",
 						"name": "aPrefix.property"
 					},
 				    "data": {
@@ -227,7 +227,7 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 					"apiVersion": null,
 					"kind": null,
 					"metadata": {
-						"namespace": "validNamespace",
+						"namespace": "validnamespace",
 						"name": "extra.anInfix.extra"
 					},
 				    "data": {
@@ -248,13 +248,13 @@ func CheckNamespace(namespace string) (int, string) {
 	namespaceProperties := "[]"
 
 	switch namespace {
-	case "validNamespace":
+	case "validnamespace":
 		namespaceProperties = `[
 			{
 				"apiVersion": null,
 				"kind": null,
 				"metadata": {
-					"namespace": "validNamespace",
+					"namespace": "validnamespace",
 					"name": "property0"
 				},
 				"data": {
@@ -265,7 +265,7 @@ func CheckNamespace(namespace string) (int, string) {
 				"apiVersion": null,
 				"kind": null,
 				"metadata": {
-					"namespace": "validNamespace",
+					"namespace": "validnamespace",
 					"name": "property1"
 				},
 				"data": {
@@ -276,7 +276,7 @@ func CheckNamespace(namespace string) (int, string) {
 				"apiVersion": null,
 				"kind": null,
 				"metadata": {
-					"namespace": "validNamespace",
+					"namespace": "validnamespace",
 					"name": "property2"
 				},
 				"data": {
@@ -287,7 +287,7 @@ func CheckNamespace(namespace string) (int, string) {
 				"apiVersion": null,
 				"kind": null,
 				"metadata": {
-					"namespace": "validNamespace",
+					"namespace": "validnamespace",
 					"name": "property3"
 				},
 				"data": {
@@ -295,11 +295,11 @@ func CheckNamespace(namespace string) (int, string) {
 				}
 			}
 		]`
-	case "invalidNamespace":
+	case "invalidnamespace":
 		statusCode = 404
 		namespaceProperties = `{
 			error_code: 5016,
-			error_message: "GAL5016E: Error occured when trying to access namespace 'invalidNamespace'. The Namespace provided is invalid."
+			error_message: "GAL5016E: Error occured when trying to access namespace 'invalidnamespace'. The Namespace provided is invalid."
 		}`
 	}
 
@@ -311,7 +311,7 @@ func CheckNamespace(namespace string) (int, string) {
 
 func TestInvalidNamepsaceReturnsError(t *testing.T) {
 	//Given...
-	namespace := "invalidNamespace"
+	namespace := "invalidnamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -342,7 +342,7 @@ func TestInvalidNamepsaceReturnsError(t *testing.T) {
 
 func TestValidNamespaceReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -363,10 +363,10 @@ func TestValidNamespaceReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name      value
-validNamespace property0 value0
-validNamespace property1 value1
-validNamespace property2 value2
-validNamespace property3 value3
+validnamespace property0 value0
+validnamespace property1 value1
+validnamespace property2 value2
+validnamespace property3 value3
 
 Total:4
 `
@@ -381,7 +381,7 @@ Total:4
 
 func TestEmptyNamespaceReturnsEmpty(t *testing.T) {
 	//Given...
-	namespace := "emptyNamespace"
+	namespace := "emptynamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -413,7 +413,7 @@ func TestEmptyNamespaceReturnsEmpty(t *testing.T) {
 
 func TestValidNamespaceAndPrefixReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := "aPrefix"
 	suffix := ""
@@ -434,7 +434,7 @@ func TestValidNamespaceAndPrefixReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name             value
-validNamespace aPrefix.property prefixVal
+validnamespace aPrefix.property prefixVal
 
 Total:1
 `
@@ -449,7 +449,7 @@ Total:1
 
 func TestValidNamespaceAndSuffixReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := "aSuffix"
@@ -470,7 +470,7 @@ func TestValidNamespaceAndSuffixReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name             value
-validNamespace property.aSuffix suffixVal
+validnamespace property.aSuffix suffixVal
 
 Total:1
 `
@@ -485,7 +485,7 @@ Total:1
 
 func TestValidNamespaceWithMatchingPrefixAndSuffixReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := "aPrefix"
 	suffix := "aSuffix"
@@ -506,7 +506,7 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name                     value
-validNamespace aPrefix.property.aSuffix prefixSuffixVal
+validnamespace aPrefix.property.aSuffix prefixSuffixVal
 
 Total:1
 `
@@ -521,7 +521,7 @@ Total:1
 
 func TestValidNamespaceWithNoMatchingPrefixAndSuffixReturnsEmpty(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := "noMatchingPrefix"
 	suffix := "noMatchingSuffix"
@@ -554,7 +554,7 @@ func TestValidNamespaceWithNoMatchingPrefixAndSuffixReturnsEmpty(t *testing.T) {
 
 func TestValidNamespaceAndNoMatchingPrefixReturnsEmpty(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := "noMatchingPrefix"
 	suffix := ""
@@ -587,7 +587,7 @@ func TestValidNamespaceAndNoMatchingPrefixReturnsEmpty(t *testing.T) {
 
 func TestValidNamespaceAndNoMatchingSuffixReturnsEmpty(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := "noMatchingSuffix"
@@ -620,7 +620,7 @@ func TestValidNamespaceAndNoMatchingSuffixReturnsEmpty(t *testing.T) {
 
 func TestValidNamespaceWithMatchingInfixReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -641,7 +641,42 @@ func TestValidNamespaceWithMatchingInfixReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name                value
-validNamespace extra.anInfix.extra infixVal
+validnamespace extra.anInfix.extra infixVal
+
+Total:1
+`
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestValidNamespaceWithMatchingInfixesReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validnamespace"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := "anInfix"
+	propertiesOutputFormat := "summary"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+
+	expectedOutput := `namespace      name                value
+validnamespace extra.anInfix.extra infixVal
 
 Total:1
 `
@@ -655,7 +690,7 @@ Total:1
 
 func TestValidNamespaceWithNoMatchingInfixReturnsEmpty(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -687,7 +722,7 @@ func TestValidNamespaceWithNoMatchingInfixReturnsEmpty(t *testing.T) {
 
 func TestValidNamespaceWithMatchingPrefixAndInfixReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := "aPrefix"
 	suffix := ""
@@ -708,7 +743,7 @@ func TestValidNamespaceWithMatchingPrefixAndInfixReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name                     value
-validNamespace aPrefix.anInfix.property prefixInfixVal
+validnamespace aPrefix.anInfix.property prefixInfixVal
 
 Total:1
 `
@@ -723,7 +758,7 @@ Total:1
 
 func TestValidNamespaceWithMatchingSuffixAndInfixReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := "aSuffix"
@@ -744,7 +779,7 @@ func TestValidNamespaceWithMatchingSuffixAndInfixReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name                     value
-validNamespace property.anInfix.aSuffix suffixInfixVal
+validnamespace property.anInfix.aSuffix suffixInfixVal
 
 Total:1
 `
@@ -759,7 +794,7 @@ Total:1
 
 func TestValidNamespaceWithMatchingPrefixAndSuffixAndInfixReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := "aPrefix"
 	suffix := "aSuffix"
@@ -780,7 +815,7 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixAndInfixReturnsOk(t *testing.T
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name                             value
-validNamespace aPrefix.anInfix.property.aSuffix prefixSuffixInfixVal
+validnamespace aPrefix.anInfix.property.aSuffix prefixSuffixInfixVal
 
 Total:1
 `
@@ -795,7 +830,7 @@ Total:1
 
 func TestValidNamespaceWithValidNameReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := "property0"
 	prefix := ""
 	suffix := ""
@@ -816,7 +851,7 @@ func TestValidNamespaceWithValidNameReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name      value
-validNamespace property0 value0
+validnamespace property0 value0
 
 Total:1
 `
@@ -830,7 +865,7 @@ Total:1
 
 func TestValidNameWithEmptyValueValidNameReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := "emptyValueName"
 	prefix := ""
 	suffix := ""
@@ -851,7 +886,7 @@ func TestValidNameWithEmptyValueValidNameReturnsOk(t *testing.T) {
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	expectedOutput := `namespace      name           value
-validNamespace emptyValueName 
+validnamespace emptyValueName 
 
 Total:1
 `
@@ -866,7 +901,7 @@ Total:1
 
 func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := "invalidName"
 	prefix := ""
 	suffix := ""
@@ -899,7 +934,7 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 
 func TestValidNamespaceRawFormatReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -919,10 +954,10 @@ func TestValidNamespaceRawFormatReturnsOk(t *testing.T) {
 
 	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
-	expectedOutput := `validNamespace|property0|value0
-validNamespace|property1|value1
-validNamespace|property2|value2
-validNamespace|property3|value3
+	expectedOutput := `validnamespace|property0|value0
+validnamespace|property1|value1
+validnamespace|property2|value2
+validnamespace|property3|value3
 `
 	//When
 	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
@@ -934,7 +969,7 @@ validNamespace|property3|value3
 
 func TestEmptyNamespaceRawFormatReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "emptyNamespace"
+	namespace := "emptynamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -965,7 +1000,7 @@ func TestEmptyNamespaceRawFormatReturnsOk(t *testing.T) {
 
 func TestValidNamespaceYamlFormatReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "validNamespace"
+	namespace := "validnamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -988,7 +1023,7 @@ func TestValidNamespaceYamlFormatReturnsOk(t *testing.T) {
 	expectedOutput := `apiVersion: null
 kind: null
 metadata:
-    namespace: validNamespace
+    namespace: validnamespace
     name: property0
 data:
     value: value0
@@ -996,7 +1031,7 @@ data:
 apiVersion: null
 kind: null
 metadata:
-    namespace: validNamespace
+    namespace: validnamespace
     name: property1
 data:
     value: value1
@@ -1004,7 +1039,7 @@ data:
 apiVersion: null
 kind: null
 metadata:
-    namespace: validNamespace
+    namespace: validnamespace
     name: property2
 data:
     value: value2
@@ -1012,7 +1047,7 @@ data:
 apiVersion: null
 kind: null
 metadata:
-    namespace: validNamespace
+    namespace: validnamespace
     name: property3
 data:
     value: value3
@@ -1027,7 +1062,7 @@ data:
 
 func TestEmptyNamespaceYamlFormatReturnsOk(t *testing.T) {
 	//Given...
-	namespace := "emptyNamespace"
+	namespace := "emptynamespace"
 	name := ""
 	prefix := ""
 	suffix := ""
@@ -1109,4 +1144,94 @@ func TestCreateFormattersNoYamlReturnsOk(t *testing.T) {
 	//Then
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1067E")
+}
+
+func TestInvalidNamespaceFormatWithCapitalLettersReturnsError(t *testing.T) {
+	//Given...
+	namespace := "invalidNamespaceFormat"
+	name := ""
+	prefix := ""
+	suffix := ""
+	infix := ""
+	propertiesOutputFormat := "raw"
+
+	server := NewPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+
+	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+
+	expectedOutput := ``
+	//When
+	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
+
+	//Then
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1140E")
+	assert.Equal(t, expectedOutput, mockConsole.ReadText())
+}
+
+func TestValidateInfixesWithCommaSeparatedMultipleValidValuesReturnsOk(t *testing.T) {
+	//Given
+	infix := "voilin,cello,clarinet,guitar"
+
+	//When...
+	err := ValidateInfixes(infix)
+
+	//Then....
+	assert.Nil(t, err)
+}
+
+func TestValidateInfixesWithOneValidValueReturnsOk(t *testing.T) {
+	//Given
+	infix := "voilin"
+
+	//When...
+	err := ValidateInfixes(infix)
+
+	//Then....
+	assert.Nil(t, err)
+}
+
+func TestValidateInfixesWithCommaSeparateInvalidValuesWithSpaceAfterWordReturnsError(t *testing.T) {
+	//Given
+	infix := "cello,voilin ,clarinet,guitar"
+
+	//When...
+	err := ValidateInfixes(infix)
+
+	//Then....
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1142E")
+}
+
+func TestValidateInfixesWithCommaSeparatedInvalidValuesWithSpaceBeforeWordReturnsError(t *testing.T) {
+	//Given
+	infix := "cello, clarinet,guitar"
+
+	//When...
+	err := ValidateInfixes(infix)
+
+	//Then....
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1142E")
+}
+
+func TestValidateInfixesWithCommaSeparatedOneInvalidValuesWithSpaceReturnsError(t *testing.T) {
+	//Given
+	infix := "cello "
+
+	//When...
+	err := ValidateInfixes(infix)
+
+	//Then....
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "GAL1142E")
 }

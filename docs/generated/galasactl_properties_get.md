@@ -15,11 +15,11 @@ galasactl properties get [flags]
 ```
       --format string      output format for the data returned. Supported formats are: 'raw', 'summary', 'yaml'. (default "summary")
   -h, --help               Displays the options for the 'properties get' command.
-      --infix string       Infix(es) that could be part of the property name within the namespace. Multiple infixes can be supplied as a comma-separated list.  Optional. Cannot be used in conjunction with the '--name' option.
-  -n, --name string        An optional field indicating the name of a property in the namespace.
-  -s, --namespace string   A mandatory flag that describes the container for a collection of properties.
-      --prefix string      Prefix to match against the start of the property name within the namespace. Optional. Cannot be used in conjunction with the '--name' option.
-      --suffix string      Suffix to match against the end of the property name within the namespace. Optional. Cannot be used in conjunction with the '--name' option.
+      --infix string       Infix(es) that could be part of the property name within the namespace. Multiple infixes can be supplied as a comma-separated list without spaces.  Optional. Cannot be used in conjunction with the '--name' option. The first character of each infix must be in the 'a'-'z' or 'A'-'Z' ranges, and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)
+  -n, --name string        An optional field indicating the name of a property in the namespace.The first character of the name must be in the 'a'-'z' or 'A'-'Z' ranges, and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)
+  -s, --namespace string   A mandatory flag that describes the container for a collection of properties.The first character of the namespace must be in the 'a'-'z' range, and following characters can be 'a'-'z' or '0'-'9'
+      --prefix string      Prefix to match against the start of the property name within the namespace. Optional. Cannot be used in conjunction with the '--name' option. The first character of the prefix must be in the 'a'-'z' or 'A'-'Z' ranges, and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)
+      --suffix string      Suffix to match against the end of the property name within the namespace. Optional. Cannot be used in conjunction with the '--name' option. The first character of the suffix must be in the 'a'-'z' or 'A'-'Z' ranges, and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)
 ```
 
 ### Options inherited from parent commands
