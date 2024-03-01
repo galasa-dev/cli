@@ -213,7 +213,7 @@ func validateFlagStringFormatsForGet(namespace string, name string, prefix strin
 				err = validatePropertyFieldFormat(suffix, "suffix")
 			}
 			if infix != "" {
-				err = validateInfixes(infix)
+				err = ValidateInfixes(infix)
 			}
 		}
 	}
@@ -221,14 +221,15 @@ func validateFlagStringFormatsForGet(namespace string, name string, prefix strin
 	return err
 }
 
-func validateInfixes(infix string) error {
+func ValidateInfixes(infix string) error {
 	var err error
 	//infix could have multiple values separated by a comma, or just a value
 	infixElements := strings.Split(infix, ",")
 	for _, infixElem := range infixElements {
 		err = validatePropertyFieldFormat(infixElem, "infix")
 		if err != nil {
-			//as soon as an invalid value is found, exit the for loop and return
+			//as soon as an invalid value is found, 
+			//exit the for loop and return
 			break
 		}
 	}

@@ -34,7 +34,7 @@ func SetProperty(
 
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
-		err = validateNamespaceFormat(namespace)
+		err = validateNamespaceAndNameFlagStringFormats(namespace, name)
 		if err == nil {
 			galasaProperty := createGalasaProperty(namespace, name, value)
 
@@ -122,4 +122,15 @@ func createGalasaProperty(namespace string, name string, value string) *galasaap
 	property.SetData(*data)
 
 	return property
+}
+
+func validateNamespaceAndNameFlagStringFormats(namespace string, name string) error {
+	var err error
+
+	err = validateNamespaceFormat(namespace)
+	if err == nil {
+		err = validatePropertyFieldFormat(name, "name")
+	}
+
+	return err
 }

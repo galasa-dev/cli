@@ -1183,7 +1183,7 @@ func TestValidateInfixesWithCommaSeparatedMultipleValidValuesReturnsOk(t *testin
 	infix := "voilin,cello,clarinet,guitar"
 
 	//When...
-	err := validateInfixes(infix)
+	err := ValidateInfixes(infix)
 
 	//Then....
 	assert.Nil(t, err)
@@ -1194,7 +1194,7 @@ func TestValidateInfixesWithOneValidValueReturnsOk(t *testing.T) {
 	infix := "voilin"
 
 	//When...
-	err := validateInfixes(infix)
+	err := ValidateInfixes(infix)
 
 	//Then....
 	assert.Nil(t, err)
@@ -1205,7 +1205,7 @@ func TestValidateInfixesWithCommaSeparateInvalidValuesWithSpaceAfterWordReturnsE
 	infix := "cello,voilin ,clarinet,guitar"
 
 	//When...
-	err := validateInfixes(infix)
+	err := ValidateInfixes(infix)
 
 	//Then....
 	assert.NotNil(t, err)
@@ -1217,7 +1217,7 @@ func TestValidateInfixesWithCommaSeparatedInvalidValuesWithSpaceBeforeWordReturn
 	infix := "cello, clarinet,guitar"
 
 	//When...
-	err := validateInfixes(infix)
+	err := ValidateInfixes(infix)
 
 	//Then....
 	assert.NotNil(t, err)
@@ -1229,7 +1229,7 @@ func TestValidateInfixesWithCommaSeparatedOneInvalidValuesWithSpaceReturnsError(
 	infix := "cello "
 
 	//When...
-	err := validateInfixes(infix)
+	err := ValidateInfixes(infix)
 
 	//Then....
 	assert.NotNil(t, err)
