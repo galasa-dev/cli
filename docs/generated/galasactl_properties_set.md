@@ -16,7 +16,7 @@ galasactl properties set [flags]
   -h, --help               Displays the options for the 'properties set' command.
   -n, --name string        A mandatory field indicating the name of a property in the namespace.The first character of the name must be in the 'a'-'z' or 'A'-'Z' ranges, and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)
   -s, --namespace string   A mandatory flag that describes the container for a collection of properties.The first character of the namespace must be in the 'a'-'z' range, and following characters can be 'a'-'z' or '0'-'9'
-      --value string       A mandatory flag indicating the value of the property you want to create. Empty values and values with spaces must be put in quotation marks(). 
+      --value string       A mandatory flag indicating the value of the property you want to create. Empty values and values with spaces must be put in quotation marks. 
 ```
 
 ### Options inherited from parent commands
