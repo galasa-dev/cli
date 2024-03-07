@@ -88,10 +88,10 @@ func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand,
 }
 
 func (cmd *ProjectCreateCommand) createCobraCommand(
-	factory Factory, 
-	projectCmd GalasaCommand, 
+	factory Factory,
+	projectCmd GalasaCommand,
 	rootCmd GalasaCommand,
-	) (*cobra.Command, error) {
+) (*cobra.Command, error) {
 
 	var err error = nil
 
