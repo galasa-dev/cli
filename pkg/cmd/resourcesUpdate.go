@@ -73,7 +73,7 @@ func (cmd *ResourcesUpdateCommand) createCobraCommand(
 		Aliases: []string{"resources update"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return executeResourcesUpdate(factory,
-				cmd, args, resourcesUpdateCommandValues, rootCommandValues)
+				resourcesUpdateCommandValues, rootCommandValues)
 		},
 	}
 
@@ -83,8 +83,6 @@ func (cmd *ResourcesUpdateCommand) createCobraCommand(
 }
 
 func executeResourcesUpdate(factory Factory,
-	resourcesCreateCmd *cobra.Command,
-	args []string,
 	resourcesCmdValues *ResourcesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

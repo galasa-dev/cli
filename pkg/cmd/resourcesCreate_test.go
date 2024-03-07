@@ -18,7 +18,7 @@ func TestResourcesCreateCommandInCommandCollection(t *testing.T) {
 
 	resourcesCreateCommand, err := commands.GetCommand(COMMAND_NAME_RESOURCES_CREATE)
 	assert.Nil(t, err)
-	
+
 	assert.NotNil(t, resourcesCreateCommand)
 	assert.Equal(t, COMMAND_NAME_RESOURCES_CREATE, resourcesCreateCommand.Name())
 	assert.NotNil(t, resourcesCreateCommand.Values())
@@ -29,7 +29,7 @@ func TestResourcesCreateCommandInCommandCollection(t *testing.T) {
 func TestResourcesCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"resources", "create", "--help"}
 
 	// When...
@@ -38,7 +38,7 @@ func TestResourcesCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'resources create' command", "", "", factory, t)
+	checkOutput("Displays the options for the 'resources create' command", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -46,7 +46,7 @@ func TestResourcesCreateHelpFlagSetCorrectly(t *testing.T) {
 func TestResourcesCreateNoFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"resources", "create"}
 
 	// When...
@@ -54,7 +54,7 @@ func TestResourcesCreateNoFlagsReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"file\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"file\" not set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"file\" not set")
@@ -73,7 +73,7 @@ func TestResourcesCreateFileFlagReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_RESOURCES)
 	assert.Nil(t, err)

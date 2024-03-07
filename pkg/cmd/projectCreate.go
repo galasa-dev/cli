@@ -476,7 +476,7 @@ func createTestProject(
 	}
 
 	if err == nil {
-		err = createTestResourceFolder(fileGenerator, targetFolderPath, packageName, forceOverwrite)
+		err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
 	}
 
 	if err == nil {
@@ -541,7 +541,7 @@ func createJavaSourceFolder(fileGenerator *utils.FileGenerator, testFolderPath s
 
 func createTestResourceFolder(
 	fileGenerator *utils.FileGenerator, targetSrcFolderPath string,
-	packageName string, forceOverwrite bool) error {
+	forceOverwrite bool) error {
 
 	var err error
 

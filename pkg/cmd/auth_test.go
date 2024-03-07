@@ -6,8 +6,8 @@
 package cmd
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestAuthCommandInCommandCollection(t *testing.T) {
@@ -17,14 +17,12 @@ func TestAuthCommandInCommandCollection(t *testing.T) {
 
 	authCommand, err := commands.GetCommand(COMMAND_NAME_AUTH)
 	assert.Nil(t, err)
-	
+
 	assert.NotNil(t, authCommand)
 	assert.Equal(t, COMMAND_NAME_AUTH, authCommand.Name())
 	assert.Nil(t, authCommand.Values())
 	assert.NotNil(t, authCommand.CobraCommand())
 }
-
-
 
 func TestAuthHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
@@ -37,7 +35,7 @@ func TestAuthHelpFlagSetCorrectly(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'auth' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'auth' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -53,7 +51,7 @@ func TestAuthNoCommandsProducesUsageReport(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Usage:\n  galasactl auth [command]", "", "", factory, t)
+	checkOutput("Usage:\n  galasactl auth [command]", "", factory, t)
 
 	assert.Nil(t, err)
 }

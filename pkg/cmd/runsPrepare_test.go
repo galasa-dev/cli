@@ -18,18 +18,17 @@ func TestRunsPrepareCommandInCommandCollection(t *testing.T) {
 
 	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_PREPARE)
 	assert.Nil(t, err)
-	
+
 	assert.Equal(t, COMMAND_NAME_RUNS_PREPARE, cmd.Name())
 	assert.NotNil(t, cmd.Values())
 	assert.IsType(t, &RunsPrepareCmdValues{}, cmd.Values())
 	assert.NotNil(t, cmd.CobraCommand())
 }
 
-
 func TestRunsPrepareHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "prepare", "--help"}
 
 	// When...
@@ -38,7 +37,7 @@ func TestRunsPrepareHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'runs prepare' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'runs prepare' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -46,7 +45,7 @@ func TestRunsPrepareHelpFlagSetCorrectly(t *testing.T) {
 func TestRunsPrepareNoParametersReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "prepare"}
 
 	// When...
@@ -55,7 +54,7 @@ func TestRunsPrepareNoParametersReturnsError(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"portfolio\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"portfolio\" not set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"portfolio\" not set")
@@ -65,7 +64,7 @@ func TestRunsPreparePortfolioFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "portfolio.file"}
 
 	// When...
@@ -75,7 +74,7 @@ func TestRunsPreparePortfolioFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "portfolio.file")
 }
@@ -84,7 +83,7 @@ func TestRunsPrepareCheckFlagNoParamsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio"}
 
 	// When...
@@ -93,7 +92,7 @@ func TestRunsPrepareCheckFlagNoParamsReturnsError(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: flag needs an argument: --portfolio", "", factory, t)
+	checkOutput("", "Error: flag needs an argument: --portfolio", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "flag needs an argument: --portfolio")
@@ -103,7 +102,7 @@ func TestRunsPreparePortfolioAppendFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--append"}
 
 	// When...
@@ -113,7 +112,7 @@ func TestRunsPreparePortfolioAppendFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Equal(t, *cmd.Values().(*RunsPrepareCmdValues).prepareAppend, true)
@@ -123,7 +122,7 @@ func TestRunsPreparePortfolioBundlesFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--bundle", "bundle.name"}
 
 	// When...
@@ -133,7 +132,7 @@ func TestRunsPreparePortfolioBundlesFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Bundles, "bundle.name")
@@ -143,7 +142,7 @@ func TestRunsPreparePortfolioBundleFlagCommaSeperatedListValuesSetCorrectly(t *t
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--bundle", "comma,seperated,bundles"}
 
 	// When...
@@ -153,7 +152,7 @@ func TestRunsPreparePortfolioBundleFlagCommaSeperatedListValuesSetCorrectly(t *t
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Bundles, "comma")
@@ -165,7 +164,7 @@ func TestRunsPreparePortfolioClassFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--class", "class.stuff"}
 
 	// When...
@@ -174,7 +173,7 @@ func TestRunsPreparePortfolioClassFlagReturnsOk(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Nil(t, err)
 
@@ -186,7 +185,7 @@ func TestRunsPreparePortfolioClassFlagCommaSeperatedListValuesSetCorrectly(t *te
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--class", "comma,seperated,classes"}
 
 	// When...
@@ -196,7 +195,7 @@ func TestRunsPreparePortfolioClassFlagCommaSeperatedListValuesSetCorrectly(t *te
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Classes, "comma")
@@ -208,7 +207,7 @@ func TestRunsPreparePortfolioOverrideFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--override", "override string one"}
 
 	// When...
@@ -218,7 +217,7 @@ func TestRunsPreparePortfolioOverrideFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareFlagOverrides, "override string one")
@@ -228,7 +227,7 @@ func TestRunsPreparePortfolioOverrideFlagCommaSeperatedListValuesSetCorrectly(t 
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--override", "comma,seperated,overrides"}
 
 	// When...
@@ -238,7 +237,7 @@ func TestRunsPreparePortfolioOverrideFlagCommaSeperatedListValuesSetCorrectly(t 
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareFlagOverrides, "comma")
@@ -250,7 +249,7 @@ func TestRunsPreparePortfolioPackageFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--package", "packagethingy"}
 
 	// When...
@@ -260,7 +259,7 @@ func TestRunsPreparePortfolioPackageFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Packages, "packagethingy")
@@ -270,7 +269,7 @@ func TestRunsPreparePortfolioPackagesFlagCommaSeperatedListValuesSetCorrectly(t 
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--package", "comma,seperated,packages"}
 
 	// When...
@@ -280,7 +279,7 @@ func TestRunsPreparePortfolioPackagesFlagCommaSeperatedListValuesSetCorrectly(t 
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Packages, "comma")
@@ -292,7 +291,7 @@ func TestRunsPreparePortfolioRegexFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--regex"}
 
 	// When...
@@ -302,7 +301,7 @@ func TestRunsPreparePortfolioRegexFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Equal(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.RegexSelect, true)
@@ -312,7 +311,7 @@ func TestRunsPreparePortfolioStreamFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--stream", "arlo.stream"}
 
 	// When...
@@ -322,7 +321,7 @@ func TestRunsPreparePortfolioStreamFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Stream, "arlo.stream")
@@ -332,7 +331,7 @@ func TestRunsPreparePortfolioTagFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--tag", "tag.stuff"}
 
 	// When...
@@ -342,7 +341,7 @@ func TestRunsPreparePortfolioTagFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Tags, "tag.stuff")
@@ -352,7 +351,7 @@ func TestRunsPreparePortfolioTagFlagCommaSeperatedListValuesSetCorrectly(t *test
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--tag", "comma,seperated,tags"}
 
 	// When...
@@ -362,7 +361,7 @@ func TestRunsPreparePortfolioTagFlagCommaSeperatedListValuesSetCorrectly(t *test
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Tags, "comma")
@@ -374,7 +373,7 @@ func TestRunsPreparePortfolioTestFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--test", "test.stuff"}
 
 	// When...
@@ -384,7 +383,7 @@ func TestRunsPreparePortfolioTestFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Tests, "test.stuff")
@@ -394,7 +393,7 @@ func TestRunsPreparePortfolioTestFlagCommaSeperatedListValuesSetCorrectly(t *tes
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
+
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--test", "comma,seperated,tests"}
 
 	// When...
@@ -404,7 +403,7 @@ func TestRunsPreparePortfolioTestFlagCommaSeperatedListValuesSetCorrectly(t *tes
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Tests, "comma")
@@ -416,10 +415,10 @@ func TestRunsPrepareAllFlagsReturnOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
-	
-	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--test", "test,stuff", "--tag", "tag,list", 
-	"--append", "--bundle", "comma,seperated,bundles", "--class", "class,list", "--override", "list,o,overrides", "--package", "package,list",
-"--regex", "--stream", "stream"}
+
+	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--test", "test,stuff", "--tag", "tag,list",
+		"--append", "--bundle", "comma,seperated,bundles", "--class", "class,list", "--override", "list,o,overrides", "--package", "package,list",
+		"--regex", "--stream", "stream"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -428,7 +427,7 @@ func TestRunsPrepareAllFlagsReturnOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsPrepareCmdValues).portfolioFilename, "roo.yaml")
 	assert.Contains(t, *cmd.Values().(*RunsPrepareCmdValues).prepareSelectionFlags.Tests, "test")

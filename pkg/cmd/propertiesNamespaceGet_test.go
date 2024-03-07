@@ -18,18 +18,17 @@ func TestPropertiesNamespaceGetCommandInCommandCollection(t *testing.T) {
 
 	propertiesNamespaceGetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE_GET)
 	assert.Nil(t, err)
-	
+
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_NAMESPACE_GET, propertiesNamespaceGetCommand.Name())
 	assert.NotNil(t, propertiesNamespaceGetCommand.Values())
 	assert.IsType(t, &PropertiesNamespaceGetCmdValues{}, propertiesNamespaceGetCommand.Values())
 	assert.NotNil(t, propertiesNamespaceGetCommand.CobraCommand())
 }
 
-
 func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"properties", "namespaces", "get", "--help"}
 
 	// When...
@@ -38,7 +37,7 @@ func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'properties namespaces get' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'properties namespaces get' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -55,7 +54,7 @@ func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -72,9 +71,9 @@ func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	
+
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*PropertiesNamespaceGetCmdValues).namespaceOutputFormat, "yaml")
 }

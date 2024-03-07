@@ -18,18 +18,17 @@ func TestRunsSubmitLocalCommandInCommandCollection(t *testing.T) {
 
 	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT_LOCAL)
 	assert.Nil(t, err)
-	
+
 	assert.Equal(t, COMMAND_NAME_RUNS_SUBMIT_LOCAL, cmd.Name())
 	assert.NotNil(t, cmd.Values())
 	assert.IsType(t, &RunsSubmitLocalCmdValues{}, cmd.Values())
 	assert.NotNil(t, cmd.CobraCommand())
 }
 
-
 func TestRunsSubmitLocalHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "submit", "local", "--help"}
 
 	// When...
@@ -38,7 +37,7 @@ func TestRunsSubmitLocalHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'runs submit local' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'runs submit local' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -53,7 +52,7 @@ func TestRunsSubmitLocalWithoutObrWithClassErrors(t *testing.T) {
 
 	// Then...
 	// Check what the user saw was reasonable
-	checkOutput("", "if any flags in the group [class obr] are set they must all be set; missing [obr]", "", factory, t)
+	checkOutput("", "if any flags in the group [class obr] are set they must all be set; missing [obr]", factory, t)
 
 	// Should throw an error asking for flags to be set
 	assert.NotNil(t, err, "err should have been set!")
@@ -70,7 +69,7 @@ func TestRunsSubmitLocalWithoutClassWithObrErrors(t *testing.T) {
 
 	// Then...
 	// Check what the user saw was reasonable
-	checkOutput("", "if any flags in the group [class obr] are set they must all be set; missing [class]", "", factory, t)
+	checkOutput("", "if any flags in the group [class obr] are set they must all be set; missing [class]", factory, t)
 
 	// Should throw an error asking for flags to be set
 	assert.NotNil(t, err, "err should have been set!")
@@ -87,8 +86,8 @@ func TestMultipleRequiredFlagsNotSetReturnsListInError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw was reasonable
-	checkOutput("", "at least one of the flags in the group [class gherkin] is required", "", factory, t)
-	
+	checkOutput("", "at least one of the flags in the group [class gherkin] is required", factory, t)
+
 	// Should throw an error asking for flags to be set
 	assert.NotNil(t, err, "err should have been set!")
 	assert.Contains(t, err.Error(), "at least one of the flags in the group [class gherkin] is required")
@@ -98,7 +97,7 @@ func TestRunsSubmitLocalClassObrFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
+
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr"}
 
 	// When...
@@ -108,7 +107,7 @@ func TestRunsSubmitLocalClassObrFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -118,7 +117,7 @@ func TestRunsSubmitLocalDebugFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
+
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--debug"}
 
 	// When...
@@ -128,7 +127,7 @@ func TestRunsSubmitLocalDebugFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -139,7 +138,7 @@ func TestRunsSubmitLocalDebugModeFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
+
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--debugMode", "slow"}
 
 	// When...
@@ -149,7 +148,7 @@ func TestRunsSubmitLocalDebugModeFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -160,7 +159,7 @@ func TestRunsSubmitLocalDebugPortFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
+
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--debugPort", "5000"}
 
 	// When...
@@ -170,7 +169,7 @@ func TestRunsSubmitLocalDebugPortFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -181,7 +180,7 @@ func TestRunsSubmitLocalGalasaVersionFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
+
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--galasaVersion", "0.1.0"}
 
 	// When...
@@ -191,7 +190,7 @@ func TestRunsSubmitLocalGalasaVersionFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -202,7 +201,7 @@ func TestRunsSubmitLocalLocalMavenFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
+
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--localMaven", "maven/repo/location"}
 
 	// When...
@@ -212,7 +211,7 @@ func TestRunsSubmitLocalLocalMavenFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -223,7 +222,7 @@ func TestRunsSubmitLocalRemoteMavenFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
+
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--remoteMaven", "remote.maven.location"}
 
 	// When...
@@ -233,7 +232,7 @@ func TestRunsSubmitLocalRemoteMavenFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -244,16 +243,16 @@ func TestRunsSubmitLocalAllFlagsWorkTogether(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
-	var args []string = []string{"runs", "submit", "local", 
-	"--class", "my.class", 
-	"--obr", "mvn:a.big.ol.obr", 
-	"--galasaVersion", "0.1.0",
-	"--debug", 
-	"--debugMode", "thorough", 
-	"--debugPort", "515", 
-	"--localMaven", "local/maven/location",
-	"--remoteMaven", "remote.maven.location"}
+
+	var args []string = []string{"runs", "submit", "local",
+		"--class", "my.class",
+		"--obr", "mvn:a.big.ol.obr",
+		"--galasaVersion", "0.1.0",
+		"--debug",
+		"--debugMode", "thorough",
+		"--debugPort", "515",
+		"--localMaven", "local/maven/location",
+		"--remoteMaven", "remote.maven.location"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -262,7 +261,7 @@ func TestRunsSubmitLocalAllFlagsWorkTogether(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.Classes, "my.class")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.Obrs, "mvn:a.big.ol.obr")
@@ -278,15 +277,15 @@ func TestRunsSubmitLocaGherkinFlagsWork(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
-	
-	var args []string = []string{"runs", "submit", "local", 
-	"--gherkin", "gherkin.feature", 
-	"--galasaVersion", "0.1.0",
-	"--debug", 
-	"--debugMode", "thorough", 
-	"--debugPort", "515", 
-	"--localMaven", "local/maven/location",
-	"--remoteMaven", "remote.maven.location"}
+
+	var args []string = []string{"runs", "submit", "local",
+		"--gherkin", "gherkin.feature",
+		"--galasaVersion", "0.1.0",
+		"--debug",
+		"--debugMode", "thorough",
+		"--debugPort", "515",
+		"--localMaven", "local/maven/location",
+		"--remoteMaven", "remote.maven.location"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -295,7 +294,7 @@ func TestRunsSubmitLocaGherkinFlagsWork(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, *cmd.Values().(*RunsSubmitLocalCmdValues).submitLocalSelectionFlags.GherkinUrl, "gherkin.feature")
 	assert.Contains(t, cmd.Values().(*RunsSubmitLocalCmdValues).runsSubmitLocalCmdParams.TargetGalasaVersion, "0.1.0")
