@@ -18,7 +18,7 @@ func TestPropertiesCommandInCommandCollection(t *testing.T) {
 
 	propertiesCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
-	
+
 	assert.NotNil(t, propertiesCommand)
 	assert.Equal(t, COMMAND_NAME_PROPERTIES, propertiesCommand.Name())
 	assert.NotNil(t, propertiesCommand.Values())
@@ -26,11 +26,10 @@ func TestPropertiesCommandInCommandCollection(t *testing.T) {
 	assert.NotNil(t, propertiesCommand.CobraCommand())
 }
 
-
 func TestPropertiesHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"properties", "--help"}
 
 	// When...
@@ -39,7 +38,7 @@ func TestPropertiesHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'properties' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'properties' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -55,5 +54,5 @@ func TestPropertiesNoCommandsProducesUsageReport(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 	// Check what the user saw was reasonable
-	checkOutput("Usage:\n  galasactl properties [command]", "", "", factory, t)
+	checkOutput("Usage:\n  galasactl properties [command]", "", factory, t)
 }

@@ -18,18 +18,17 @@ func TestRunsGetCommandInCommandCollection(t *testing.T) {
 
 	runsGetCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_GET)
 	assert.Nil(t, err)
-	
+
 	assert.Equal(t, COMMAND_NAME_RUNS_GET, runsGetCommand.Name())
 	assert.NotNil(t, runsGetCommand.Values())
 	assert.IsType(t, &RunsGetCmdValues{}, runsGetCommand.Values())
 	assert.NotNil(t, runsGetCommand.CobraCommand())
 }
 
-
 func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "get", "--help"}
 
 	// When...
@@ -39,7 +38,7 @@ func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'runs get' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'runs get' command.", "", factory, t)
 }
 
 func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
@@ -56,7 +55,7 @@ func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 }
 
 func TestRunsGetActiveFlagReturnsOk(t *testing.T) {
@@ -73,7 +72,7 @@ func TestRunsGetActiveFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Equal(t, cmd.Values().(*RunsGetCmdValues).isActiveRuns, true)
 }
@@ -92,7 +91,7 @@ func TestRunsGetRequestorFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).requestor, "galasateam")
 }
@@ -111,7 +110,7 @@ func TestRunsGetResultFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).result, "passed")
 }
@@ -119,7 +118,7 @@ func TestRunsGetResultFlagReturnsOk(t *testing.T) {
 func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection,cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--name", "gerald"}
 
@@ -130,7 +129,7 @@ func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "gerald")
 }
@@ -149,7 +148,7 @@ func TestRunsGetageFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).age, "10h")
 }
@@ -168,7 +167,7 @@ func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).outputFormatString, "yaml")
 }
@@ -187,7 +186,7 @@ func TestRunsGetMultipleNameOverridesToLast(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "C4091")
 }
@@ -206,7 +205,7 @@ func TestRunsGetMultipleResultFlagsOverridesToLast(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).result, "failed")
 }
@@ -225,7 +224,7 @@ func TestRunsGetMultipleRequestorFlagsOverridesToLast(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).requestor, "galasa")
 }
@@ -233,7 +232,7 @@ func TestRunsGetMultipleRequestorFlagsOverridesToLast(t *testing.T) {
 func TestRunsGetNameRequestorMutuallyExclusive(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "get", "--name", "Miller", "--requestor", "root"}
 
 	// When...
@@ -244,13 +243,13 @@ func TestRunsGetNameRequestorMutuallyExclusive(t *testing.T) {
 	assert.Contains(t, err.Error(), "if any flags in the group [name requestor] are set none of the others can be; [name requestor] were all set")
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: if any flags in the group [name requestor] are set none of the others can be; [name requestor] were all set", "", factory, t)
+	checkOutput("", "Error: if any flags in the group [name requestor] are set none of the others can be; [name requestor] were all set", factory, t)
 }
 
 func TestRunsGetNameResultMutuallyExclusive(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "get", "--name", "Miller", "--result", "passed"}
 
 	// When...
@@ -261,13 +260,13 @@ func TestRunsGetNameResultMutuallyExclusive(t *testing.T) {
 	assert.Contains(t, err.Error(), "if any flags in the group [name result] are set none of the others can be; [name result] were all set")
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: if any flags in the group [name result] are set none of the others can be; [name result] were all set", "", factory, t)
+	checkOutput("", "Error: if any flags in the group [name result] are set none of the others can be; [name result] were all set", factory, t)
 }
 
 func TestRunsGetNameActiveMutuallyExclusive(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "get", "--name", "Miller", "--active"}
 
 	// When...
@@ -278,13 +277,13 @@ func TestRunsGetNameActiveMutuallyExclusive(t *testing.T) {
 	assert.Contains(t, err.Error(), "if any flags in the group [name active] are set none of the others can be; [active name] were all set")
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: if any flags in the group [name active] are set none of the others can be; [active name] were all set", "", factory, t)
+	checkOutput("", "Error: if any flags in the group [name active] are set none of the others can be; [active name] were all set", factory, t)
 }
 
 func TestRunsGetResultActiveMutuallyExclusive(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "get", "--result", "failed", "--active"}
 
 	// When...
@@ -295,5 +294,5 @@ func TestRunsGetResultActiveMutuallyExclusive(t *testing.T) {
 	assert.Contains(t, err.Error(), "if any flags in the group [result active] are set none of the others can be; [active result] were all set")
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: if any flags in the group [result active] are set none of the others can be; [active result] were all set", "", factory, t)
+	checkOutput("", "Error: if any flags in the group [result active] are set none of the others can be; [active result] were all set", factory, t)
 }

@@ -38,7 +38,7 @@ func TestResourcesHelpFlagSetCorrectly(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'resources' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'resources' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -55,5 +55,5 @@ func TestResourcesNoCommandsProducesUsageReport(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("Usage:\n  galasactl resources [command]", "", "", factory, t)
+	checkOutput("Usage:\n  galasactl resources [command]", "", factory, t)
 }

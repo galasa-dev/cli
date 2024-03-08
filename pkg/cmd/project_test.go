@@ -29,7 +29,7 @@ func TestCommandListContainsProjectCommand(t *testing.T) {
 func TestProjectHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"project", "--help"}
 
 	// When...
@@ -37,7 +37,7 @@ func TestProjectHelpFlagSetCorrectly(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'project' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'project' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -54,5 +54,5 @@ func TestProjectNoCommandsProducesUsageReport(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("Usage:\n  galasactl project [command]", "", "", factory, t)
+	checkOutput("Usage:\n  galasactl project [command]", "", factory, t)
 }

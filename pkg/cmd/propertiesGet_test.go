@@ -28,7 +28,7 @@ func TestPropertiesGetCommandInCommandCollectionHasName(t *testing.T) {
 func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"properties", "get", "--help"}
 
 	// When...
@@ -36,7 +36,7 @@ func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'properties get' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'properties get' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -49,7 +49,7 @@ func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
 	err := Execute(factory, args)
 
 	// Then...
-	checkOutput("", "Error: required flag(s) \"namespace\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"namespace\" not set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"namespace\" not set")
@@ -69,7 +69,7 @@ func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
@@ -90,7 +90,7 @@ func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
@@ -108,7 +108,7 @@ func TestPropertiesGetNamespaceNamePrefixFlagsReturnsError(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
-	checkOutput("", "Error: if any flags in the group [name prefix] are set", "", factory, t)
+	checkOutput("", "Error: if any flags in the group [name prefix] are set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name prefix] are set")
@@ -125,7 +125,7 @@ func TestPropertiesGetNamespaceNameSuffixFlagsReturnsError(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
-	checkOutput("", "Error: if any flags in the group [name suffix] are set", "", factory, t)
+	checkOutput("", "Error: if any flags in the group [name suffix] are set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name suffix] are set")
@@ -142,7 +142,7 @@ func TestPropertiesGetNamespaceNameInfixFlagsReturnsError(t *testing.T) {
 	err := commandCollection.Execute(args)
 
 	// Then...
-	checkOutput("", "Error: if any flags in the group [name infix] are set", "", factory, t)
+	checkOutput("", "Error: if any flags in the group [name infix] are set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [name infix] are set")
@@ -161,7 +161,7 @@ func TestPropertiesGetNamespacePrefixFlagsReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
@@ -182,7 +182,7 @@ func TestPropertiesGetNamespaceSufffixFlagsReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
@@ -203,7 +203,7 @@ func TestPropertiesGetNamespaceInfixFlagsReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
@@ -225,7 +225,7 @@ func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check if what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
@@ -250,7 +250,7 @@ func TestPropertiesGetNameAndPrefixSuffixInfixMutuallyExclusive(t *testing.T) {
 	assert.Contains(t, err.Error(), "if any flags in the group [name infix] are set")
 
 	// Check if what the user saw was reasonable
-	checkOutput("", "if any flags in the group [name infix] are set", "", factory, t)
+	checkOutput("", "if any flags in the group [name infix] are set", factory, t)
 }
 
 func TestPropertiesGetNamespaceNoParameterReturnsError(t *testing.T) {
@@ -268,7 +268,7 @@ func TestPropertiesGetNamespaceNoParameterReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "flag needs an argument: --namespace")
 
 	// Check if what the user saw was reasonable
-	checkOutput("", "Error: flag needs an argument: --namespace", "", factory, t)
+	checkOutput("", "Error: flag needs an argument: --namespace", factory, t)
 }
 
 func TestPropertiesGetNamespaceSuffixNoParameterReturnsError(t *testing.T) {
@@ -286,7 +286,7 @@ func TestPropertiesGetNamespaceSuffixNoParameterReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "flag needs an argument: --suffix")
 
 	// Check if what the user saw was reasonable
-	checkOutput("", "Error: flag needs an argument: --suffix", "", factory, t)
+	checkOutput("", "Error: flag needs an argument: --suffix", factory, t)
 }
 
 func TestPropertiesGetNamespaceRepeatedOverridesToLast(t *testing.T) {
@@ -295,7 +295,7 @@ func TestPropertiesGetNamespaceRepeatedOverridesToLast(t *testing.T) {
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "wildwest", "--namespace", "whistle"}
-	
+
 	// When...
 	err := commandCollection.Execute(args)
 
@@ -303,7 +303,7 @@ func TestPropertiesGetNamespaceRepeatedOverridesToLast(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check if what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)

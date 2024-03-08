@@ -18,18 +18,17 @@ func TestPropertiesSetCommandInCommandCollection(t *testing.T) {
 
 	propertiesSetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_SET)
 	assert.Nil(t, err)
-	
+
 	assert.Equal(t, COMMAND_NAME_PROPERTIES_SET, propertiesSetCommand.Name())
 	assert.NotNil(t, propertiesSetCommand.Values())
 	assert.IsType(t, &PropertiesSetCmdValues{}, propertiesSetCommand.Values())
 	assert.NotNil(t, propertiesSetCommand.CobraCommand())
 }
 
-
 func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"properties", "set", "--help"}
 
 	// When...
@@ -38,7 +37,7 @@ func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'properties set' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'properties set' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -46,7 +45,7 @@ func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"properties", "set"}
 
 	// When...
@@ -57,7 +56,7 @@ func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "required flag(s) \"name\", \"namespace\", \"value\" not set")
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"name\", \"namespace\", \"value\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"name\", \"namespace\", \"value\" not set", factory, t)
 }
 
 func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
@@ -73,7 +72,7 @@ func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_PROPERTIES)
 	assert.Nil(t, err)
@@ -85,7 +84,7 @@ func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"properties", "set", "--namespace", "sunshine"}
 
 	// When...
@@ -93,7 +92,7 @@ func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"name\", \"value\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"name\", \"value\" not set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"name\", \"value\" not set")
@@ -102,7 +101,7 @@ func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"properties", "set", "--name", "call.me.little.sunshine"}
 
 	// When...
@@ -110,7 +109,7 @@ func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"namespace\", \"value\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"namespace\", \"value\" not set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"namespace\", \"value\" not set")
@@ -127,7 +126,7 @@ func TestPropertiesOnlyValueReturnsError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"name\", \"namespace\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"name\", \"namespace\" not set", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"name\", \"namespace\" not set")
