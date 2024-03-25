@@ -12,11 +12,42 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
+)
+
+var (
+	validStructureJsonFileContent = `{
+        "runName": "L0",
+        "bundle": "dev.galasa.examples.banking.account",
+        "testName": "dev.galasa.examples.banking.account.TestAccount",
+        "testShortName": "TestAccount",
+        "requestor": "unknown",
+        "status": "finished",
+        "result": "Passed",
+        "queued": "2024-03-14T10:11:02.185556Z",
+        "startTime": "2024-03-14T10:11:02.221697Z",
+        "endTime": "2024-03-14T10:11:02.439849Z",
+        "methods": [
+          {
+            "className": "dev.galasa.examples.banking.account.TestAccount",
+            "methodName": "simpleSampleTest",
+            "type": "Test",
+            "befores": [],
+            "afters": [],
+            "status": "finished",
+            "result": "Passed",
+            "runLogStart": 0,
+            "runLogEnd": 0,
+            "startTime": "2024-03-14T10:11:02.413588Z",
+            "endTime": "2024-03-14T10:11:02.428472Z"
+        }
+      ]
+    }`
 )
 
 func NewMockLauncherParams() (
@@ -446,7 +477,7 @@ func getDefaultCommandSyntaxTestParameters() (
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	return bootstrapProps, env, galasaHome, fs, javaHome, testObrs, testLocation,
-		remoteMaven,localMaven, galasaVersionToRun, overridesFilePath, isTraceEnabled
+		remoteMaven, localMaven, galasaVersionToRun, overridesFilePath, isTraceEnabled
 }
 
 func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
@@ -1285,4 +1316,197 @@ func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1138E")
+}
+
+func TestSetTestStructureFromRasFileValidFileContentReturnsOk(t *testing.T) {
+	//Given...
+	var run = galasaapi.NewRun()
+	run.SetRunId("L0")
+	jsonFileName := "structure.json"
+
+	_, _, fs, _,
+		_, _, _, galasaHome := NewMockLauncherParams()
+
+	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
+	fs.WriteTextFile(jsonFilePath, validStructureJsonFileContent)
+
+	//When...
+	err := setTestStructureFromRasFile(run, jsonFilePath, fs)
+
+	//Then...
+	assert.Nil(t, err)
+	assert.Equal(t, "L0", run.GetRunId())
+	assert.True(t, run.HasTestStructure())
+	assert.Equal(t, "simpleSampleTest", run.GetTestStructure().Methods[0].GetMethodName())
+}
+
+func TestSetTestStructureFromRasFileInvalidFileContentReturnsError(t *testing.T) {
+	//Given...
+	var run = galasaapi.NewRun()
+	run.SetRunId("L0")
+	jsonFileName := "structure.json"
+	//improper key-value pair in 'methods'
+	invalidStructureJsonFileContent := `{
+		"runName": "L0",
+		"bundle": "dev.galasa.examples.banking.account",
+		"testName": "dev.galasa.examples.banking.account.TestAccount",
+		"testShortName": "TestAccount",
+		"requestor": "unknown",
+		"status": "finished",
+		"result": "Passed",
+		"queued": "2024-03-14T10:11:02.185556Z",
+		"startTime": "2024-03-14T10:11:02.221697Z",
+		"endTime": "2024-03-14T10:11:02.439849Z",
+		"methods": [
+			{
+			"className": "dev.galasa.examples.banking.account.TestAccount",
+			"methodName": "simpleSampleTest",
+			"type": "Test",
+			"befores": [],
+			"afters": [],
+			"status": "finished",
+			"result": "Passed",
+			"runLogStart": 0,
+			"runLogEnd": 0,
+			"new":
+			"startTime": "2024-03-14T10:11:02.413588Z",
+			"endTime": "2024-03-14T10:11:02.428472Z"
+		}
+		]
+	}`
+	_, _, fs, _,
+		_, _, _, galasaHome := NewMockLauncherParams()
+
+	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
+	fs.WriteTextFile(jsonFilePath, invalidStructureJsonFileContent)
+
+	//When...
+	err := setTestStructureFromRasFile(run, jsonFilePath, fs)
+
+	//Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "error unmarshalling json file into TestStructure")
+}
+
+func TestSetTestStructureFromRasFileEmptyFileContentReturnsError(t *testing.T) {
+	//Given...
+	var run = galasaapi.NewRun()
+	run.SetRunId("L0")
+	jsonFileName := "structure.json"
+
+	_, _, fs, _,
+		_, _, _, galasaHome := NewMockLauncherParams()
+
+	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
+	fs.WriteTextFile(jsonFilePath, "")
+	//When...
+	err := setTestStructureFromRasFile(run, jsonFilePath, fs)
+
+	//Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "file '/User/Home/testuser/.galasa/structure.json' is empty. Status could not be read")
+}
+
+func TestSetTestStructureFromRasFileInvalidFilePathReturnsError(t *testing.T) {
+	//Given...
+	var run = galasaapi.NewRun()
+	run.SetRunId("L0")
+	jsonFileName := "structure.json"
+
+	_, _, fs, _,
+		_, _, _, _ := NewMockLauncherParams()
+
+	invalidJsonFilePath := "invalidJsonFilePath/" + jsonFileName
+
+	//When...
+	err := setTestStructureFromRasFile(run, invalidJsonFilePath, fs)
+
+	//Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "file 'invalidJsonFilePath/structure.json' does not exist")
+}
+
+func TestCreateRunFromLocalTestValidRasFolderPathReturnsOk(t *testing.T) {
+	//Given...
+	_, _, fs, _,
+		_, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+
+	localTest := NewLocalTest(timeService, fs, mockProcessFactory)
+	localTest.runId = "L0"
+	localTest.rasFolderPathUrl = galasaHome.GetNativeFolderPath()
+
+	jsonFilePath := localTest.rasFolderPathUrl + "/" + localTest.runId + "/structure.json"
+	fs.WriteTextFile(jsonFilePath, validStructureJsonFileContent)
+
+	//When...
+	run, err := createRunFromLocalTest(localTest)
+
+	//Then...
+	assert.Nil(t, err)
+	assert.Equal(t, run.GetRunId(), localTest.runId)
+	assert.Equal(t, "L0", run.TestStructure.GetRunName())
+	assert.Equal(t, "dev.galasa.examples.banking.account", run.TestStructure.GetBundle())
+	assert.Equal(t, "Passed", run.TestStructure.GetResult())
+	assert.Equal(t, "simpleSampleTest", run.GetTestStructure().Methods[0].GetMethodName())
+}
+
+func TestCreateRunFromLocalTestInvalidRasFolderPathReturnsError(t *testing.T) {
+	//Given...
+	_, _, fs, _,
+		_, timeService, mockProcessFactory, _ := NewMockLauncherParams()
+
+	localTest := NewLocalTest(timeService, fs, mockProcessFactory)
+	localTest.runId = "L0"
+	localTest.rasFolderPathUrl = ""
+
+	//When...
+	_, err := createRunFromLocalTest(localTest)
+
+	//Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Don't have enough information to find the structure.json in the RAS folder")
+}
+
+func TestGetRunsByIdReturnsOk(t *testing.T) {
+	// Given...
+	bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, _, galasaHome := NewMockLauncherParams()
+
+	mockProcess := NewMockProcess()
+	mockProcessFactory := NewMockProcessFactory(mockProcess)
+
+	launcher, _ := NewJVMLauncher(
+		bootstrapProps, env, fs, embeddedReadOnlyFS,
+		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+
+	isTraceEnabled := true
+	var overrides map[string]interface{} = make(map[string]interface{})
+
+	launcher.SubmitTestRun(
+		"myGroup",
+		"galasa.dev.examples.banking.account/galasa.dev.examples.banking.account.TestAccount",
+		"CLI",
+		"unknown",
+		"unitTestStream",
+		"mvn:myGroup/myArtifact/myClassifier/obr",
+		isTraceEnabled,
+		"", // No Gherkin URL supplied
+		"", // No Gherkin Feature supplied
+		overrides,
+	)
+
+	// Wait for the child process to complete...
+	mockProcess.Wait()
+
+	fs.WriteTextFile("/temp/ras/L12345/structure.json", validStructureJsonFileContent)
+
+	// When...
+	run, err := launcher.GetRunsById("L12345")
+
+	// Then...
+	assert.Nil(t, err)
+	assert.Equal(t, "L12345", run.GetRunId())
+	assert.Equal(t, "dev.galasa.examples.banking.account", run.TestStructure.GetBundle())
+	assert.Equal(t, "Passed", run.TestStructure.GetResult())
+	assert.Equal(t, "simpleSampleTest", run.GetTestStructure().Methods[0].GetMethodName())
 }

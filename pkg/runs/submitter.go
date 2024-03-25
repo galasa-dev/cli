@@ -305,6 +305,7 @@ func (submitter *Submitter) submitRun(
 			}
 
 			var resultGroup *galasaapi.TestRuns
+			log.Printf("submitRun - %s, %s", className, requestType)
 			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
 				nextRun.Stream, nextRun.Obr, trace, nextRun.GherkinUrl, nextRun.GherkinFeature, submitOverrides)
 			if err != nil {
@@ -378,13 +379,14 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 
 					var rasRun *galasaapi.Run
 					rasRun, err = submitter.launcher.GetRunsById(*rasRunID)
-
 					if err != nil {
-						log.Printf("Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
+						log.Printf("runsFetchCurrentStatus - Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
 					} else {
 						checkRun.Tests = make([]TestMethod, 0)
 
 						testStructure := rasRun.GetTestStructure()
+						log.Printf("runsFetchCurrentStatus - testStructure- %v", testStructure)
+
 						for _, testMethod := range testStructure.GetMethods() {
 							test := TestMethod{
 								Method: testMethod.GetMethodName(),
@@ -479,6 +481,7 @@ func (submitter *Submitter) isRasDetailNeededForReports(params utils.RunsSubmitC
 }
 
 func (submitter *Submitter) buildListOfRunsToSubmit(portfolio *Portfolio, runOverrides map[string]string) []TestRun {
+	log.Printf("buildListOfRunsToSubmit - portfolio %v, runOverrides %v", portfolio, runOverrides)
 	readyRuns := make([]TestRun, 0, len(portfolio.Classes))
 	currentUser := submitter.GetCurrentUserName()
 	for _, portfolioTest := range portfolio.Classes {

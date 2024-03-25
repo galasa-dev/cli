@@ -8,6 +8,7 @@ package runs
 import (
 	"encoding/xml"
 	"log"
+	"sort"
 	"strings"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -60,7 +61,12 @@ func ReportJunit(
 	testSuites.Time = 0
 	testSuites.Testsuite = make([]JunitTestSuite, 0)
 
-	for _, run := range finishedRuns {
+	//sort the key values of the finishedRun tests in alphabetical order
+	sortedFinishedRunsKeys := sortFinishedRunsKeys(finishedRuns)
+
+	for _, key := range sortedFinishedRunsKeys {
+		//retrieve each run, based on the alphabetical order of the finishedMaps keys
+		run := finishedRuns[key]
 		var testSuite JunitTestSuite
 
 		testSuite.ID = run.Name
@@ -111,4 +117,16 @@ func ReportJunit(
 		}
 	}
 	return err
+}
+
+func sortFinishedRunsKeys(finishedRuns map[string]*TestRun) []string {
+
+	var finishedRunsKeys = make([]string, 0)
+
+	for key := range finishedRuns {
+		finishedRunsKeys = append(finishedRunsKeys, key)
+	}
+	sort.Strings(finishedRunsKeys)
+
+	return finishedRunsKeys
 }
