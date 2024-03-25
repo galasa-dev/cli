@@ -37,7 +37,7 @@ func TestLocalHelpFlagSetCorrectly(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'local' command", "", "", factory, t)
+	checkOutput("Displays the options for the 'local' command", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -54,5 +54,5 @@ func TestLocalNoCommandsProducesUsageReport(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("Usage:\n  galasactl local [command]", "", "", factory, t)
+	checkOutput("Usage:\n  galasactl local [command]", "", factory, t)
 }

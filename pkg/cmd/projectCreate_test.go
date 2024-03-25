@@ -579,7 +579,7 @@ func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"package\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"package\" not set", factory, t)
 }
 
 func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
@@ -596,7 +596,7 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	fmt.Printf("error returned by Execute method: %v\n", err)
 
 	// Check what the user saw no output
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	// Check that the default folder was created.
 	fs := factory.GetFileSystem()
@@ -619,7 +619,7 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: GAL1089E: Need to use --maven and/or --gradle parameter", "", factory, t)
+	checkOutput("", "Error: GAL1089E: Need to use --maven and/or --gradle parameter", factory, t)
 
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1089E:")
@@ -633,18 +633,17 @@ func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 	projectCreateCommand, err := commands.GetCommand(COMMAND_NAME_PROJECT_CREATE)
 	assert.Nil(t, err)
-	
+
 	assert.NotNil(t, projectCreateCommand)
 	assert.IsType(t, &ProjectCreateCmdValues{}, projectCreateCommand.Values())
 	assert.NotNil(t, projectCreateCommand.CobraCommand())
 	assert.Equal(t, COMMAND_NAME_PROJECT_CREATE, projectCreateCommand.Name())
 }
 
-
 func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"project", "create", "--help"}
 
 	// When...
@@ -654,7 +653,7 @@ func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'project create' command", "", "", factory, t)
+	checkOutput("Displays the options for the 'project create' command", "", factory, t)
 }
 
 func TestProjectCreateNoFlagReturnsError(t *testing.T) {
@@ -672,7 +671,7 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "required flag(s) \"package\" not set")
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "required flag(s) \"package\" not set", "", factory, t)
+	checkOutput("", "required flag(s) \"package\" not set", factory, t)
 }
 
 func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
@@ -688,8 +687,8 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
-	
+	checkOutput("", "", factory, t)
+
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 }
 
@@ -707,7 +706,7 @@ func TestProjectCreatePackageFlagNoPackageReturnsError(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "flag needs an argument: --package")
 
-	checkOutput("", "flag needs an argument: --package", "", factory, t)
+	checkOutput("", "flag needs an argument: --package", factory, t)
 }
 
 func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
@@ -723,7 +722,7 @@ func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).featureNamesCommaSeparated, "comma,seperated,test,list")
@@ -742,8 +741,8 @@ func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
-	
+	checkOutput("", "", factory, t)
+
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).force, true)
 }
@@ -761,7 +760,7 @@ func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).isOBRProjectRequired, true)
@@ -780,7 +779,7 @@ func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useMaven, true)
@@ -799,7 +798,7 @@ func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useGradle, true)
@@ -818,7 +817,7 @@ func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).packageName, "package.name")
 	assert.Contains(t, cmd.Values().(*ProjectCreateCmdValues).featureNamesCommaSeparated, "feature,list")

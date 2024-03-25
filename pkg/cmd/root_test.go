@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalErrorString string, factory Factory, t *testing.T) {
+func checkOutput(expectedStdOutput string, expectedStdErr string, factory Factory, t *testing.T) {
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
 	if expectedStdOutput != "" {
@@ -31,7 +31,7 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, expectedFinalE
 	} else {
 		assert.Empty(t, errText)
 	}
-	
+
 	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
 	assert.Nil(t, o)
@@ -113,7 +113,7 @@ func TestVersionFromCommandLine(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Lets check that the version came out.
-	checkOutput("galasactl version", "", "", factory, t)
+	checkOutput("galasactl version", "", factory, t)
 }
 
 func TestNoParamsFromCommandLine(t *testing.T) {
@@ -129,7 +129,7 @@ func TestNoParamsFromCommandLine(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("A tool for controlling Galasa resources", "", "", factory, t)
+	checkOutput("A tool for controlling Galasa resources", "", factory, t)
 }
 
 func TestCanGetNormalExitCodeAndErrorTextFromAnError(t *testing.T) {
@@ -167,7 +167,7 @@ func TestRootHelpFlagSetCorrectly(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'galasactl' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'galasactl' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -183,7 +183,7 @@ func TestRootNoCommandsReturnsUsageReport(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Usage:\n  galasactl [command]", "", "", factory, t)
+	checkOutput("Usage:\n  galasactl [command]", "", factory, t)
 
 	assert.Nil(t, err)
 }

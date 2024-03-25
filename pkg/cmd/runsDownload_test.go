@@ -18,18 +18,17 @@ func TestRunsDownloadCommandInCommandCollection(t *testing.T) {
 
 	runsDownloadCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_DOWNLOAD)
 	assert.Nil(t, err)
-	
+
 	assert.Equal(t, COMMAND_NAME_RUNS_DOWNLOAD, runsDownloadCommand.Name())
 	assert.NotNil(t, runsDownloadCommand.Values())
 	assert.IsType(t, &RunsDownloadCmdValues{}, runsDownloadCommand.Values())
 	assert.NotNil(t, runsDownloadCommand.CobraCommand())
 }
 
-
 func TestRunsDownloadHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	
+
 	var args []string = []string{"runs", "download", "--help"}
 
 	// When...
@@ -39,7 +38,7 @@ func TestRunsDownloadHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'runs download' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'runs download' command.", "", factory, t)
 }
 
 func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
@@ -55,7 +54,7 @@ func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"name\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"name\" not set", factory, t)
 }
 
 func TestRunsDownloadNameFlagReturnsOk(t *testing.T) {
@@ -71,7 +70,7 @@ func TestRunsDownloadNameFlagReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "human1")
 }
@@ -91,7 +90,7 @@ func TestRunsDownloadNameNoParameterReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "flag needs an argument: --name")
 
 	// Check what the user saw was reasonable
-	checkOutput("", "Error: flag needs an argument: --name", "", factory, t)
+	checkOutput("", "Error: flag needs an argument: --name", factory, t)
 }
 
 func TestRunsDownloadDestinationReturnsError(t *testing.T) {
@@ -109,7 +108,7 @@ func TestRunsDownloadDestinationReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "required flag(s) \"name\" not set")
 
 	// Check what the user saw was reasonable
-	checkOutput("", "Error: required flag(s) \"name\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"name\" not set", factory, t)
 }
 
 func TestRunsDownloadNameDestinationReturnsOk(t *testing.T) {
@@ -126,7 +125,7 @@ func TestRunsDownloadNameDestinationReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "foundations")
 	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runDownloadTargetFolder, "of/decay")
@@ -146,7 +145,7 @@ func TestRunsDownloadNameForceReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "foundations")
 	assert.Equal(t, cmd.Values().(*RunsDownloadCmdValues).runForceDownload, true)
@@ -166,7 +165,7 @@ func TestRunsDownloadNameDestinationForceReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "foundations")
 	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runDownloadTargetFolder, "of/decay")
@@ -187,7 +186,7 @@ func TestRunsDownloadNameTwiceOverridesToLatestValue(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsDownloadCmdValues).runNameDownload, "chemicals")
 }

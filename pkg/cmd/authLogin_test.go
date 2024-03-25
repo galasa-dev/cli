@@ -36,7 +36,7 @@ func TestAuthLoginHelpFlagSetCorrectly(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'auth login' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'auth login' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -55,5 +55,5 @@ func TestAuthLoginNoFlagsReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 }

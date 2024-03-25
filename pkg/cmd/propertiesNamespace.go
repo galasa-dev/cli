@@ -24,7 +24,7 @@ type PropertiesNamespaceCommand struct {
 func NewPropertiesNamespaceCommand(propertiesCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
 	cmd := new(PropertiesNamespaceCommand)
 
-	err := cmd.init(propertiesCommand, rootCmd)
+	err := cmd.init(propertiesCommand)
 	return cmd, err
 }
 
@@ -47,16 +47,15 @@ func (cmd *PropertiesNamespaceCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceCommand) init(propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *PropertiesNamespaceCommand) init(propertiesCommand GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(propertiesCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(propertiesCommand)
 	return err
 }
 
 func (cmd *PropertiesNamespaceCommand) createPropertiesNamespaceCobraCmd(
 	propertiesCommand GalasaCommand,
-	rootCmd GalasaCommand,
-	) (*cobra.Command, error) {
+) (*cobra.Command, error) {
 
 	var err error
 	propertiesNamespaceCmd := &cobra.Command{

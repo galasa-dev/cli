@@ -6,6 +6,8 @@
 package launcher
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -233,7 +235,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 					}
 				}
 
-				if err ==nil && gherkinURL !="" {
+				if err == nil && gherkinURL != "" {
 					err = checkGherkinURLisValid(gherkinURL)
 				}
 
@@ -457,7 +459,91 @@ func (launcher *JvmLauncher) GetRunsByGroup(groupName string) (*galasaapi.TestRu
 // GetRunsById gets the Run information for the run with a specific run identifier
 func (launcher *JvmLauncher) GetRunsById(runId string) (*galasaapi.Run, error) {
 	log.Printf("JvmLauncher: GetRunsById entered. runId=%s", runId)
-	return nil, nil
+
+	var run *galasaapi.Run
+	var err error
+
+	for _, localTest := range launcher.localTests {
+
+		testRunId := localTest.runId
+
+		if testRunId == runId {
+			log.Printf("JvmLauncher: GetRunsById - testRunId '%s' matches with what we're looking for: runId '%s'", testRunId, runId)
+			run, err = createRunFromLocalTest(localTest)
+		}
+	}
+
+	//if we didn't find testRun with same runId log and move on to next run
+	if run == nil {
+		log.Printf("JvmLauncher: GetRunsById - could not find testRun '%s'", runId)
+	} else {
+		log.Printf("JvmLauncher: GetRunsById(testRunId=%s) - testRun returned:%v\n", runId, run.RunId)
+	}
+
+	return run, err
+}
+
+func createRunFromLocalTest(localTest *LocalTest) (*galasaapi.Run, error) {
+
+	var run = galasaapi.NewRun()
+	var err error
+
+	run.SetRunId(localTest.runId)
+
+	if localTest.rasFolderPathUrl == "" {
+		err = fmt.Errorf("createRunFromLocalTest - Don't have enough information to find the structure.json in the RAS folder")
+		log.Printf("%v", err.Error())
+	} else {
+		jsonFilePath := strings.TrimPrefix(localTest.rasFolderPathUrl, "file:///") + "/" + localTest.runId + "/structure.json"
+		log.Printf("createRunFromLocalTest - Reading latest test status from '%s'\n", jsonFilePath)
+
+		err = setTestStructureFromRasFile(run, jsonFilePath, localTest.fileSystem)
+	}
+
+	return run, err
+}
+
+func setTestStructureFromRasFile(run *galasaapi.Run, jsonFilePath string, fileSystem files.FileSystem) error {
+
+	var testStructure = galasaapi.NewTestStructure()
+	var err error
+	var isExists bool
+	var jsonContent string
+
+	isExists, err = fileSystem.Exists(jsonFilePath)
+	if err != nil {
+		err = fmt.Errorf("error opening file - %v", err.Error())
+	} else {
+		if !isExists {
+			err = fmt.Errorf("file '%s' does not exist", jsonFilePath)
+		} else {
+			jsonContent, err = fileSystem.ReadTextFile(jsonFilePath)
+
+			if err != nil {
+				err = fmt.Errorf("file '%s' could not be read", jsonFilePath)
+			} else {
+				if len(jsonContent) <= 0 {
+					err = fmt.Errorf("file '%s' is empty. Status could not be read", jsonFilePath)
+				} else {
+					jsonContentBytes := []byte(jsonContent)
+
+					err = json.Unmarshal(jsonContentBytes, &testStructure)
+
+					if err != nil {
+						err = fmt.Errorf("error unmarshalling json file into TestStructure - %v", err.Error())
+					} else {
+						log.Printf("setTestStructureFromRasFile - testStructure unmarshalled successfully")
+						run.SetTestStructure(*testStructure)
+					}
+				}
+			}
+		}
+	}
+
+	if err != nil {
+		log.Printf("setTestStructureFromRasFile - %v", err.Error())
+	}
+	return err
 }
 
 // GetStreams gets a list of streams available on this launcher

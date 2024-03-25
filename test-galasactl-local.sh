@@ -230,7 +230,9 @@ function submit_local_test {
     --requesttype automated-test \
     --poll 10 \
     --progress 1 \
-    --log -
+    --log - \
+    --reportjunit junitReport.xml \
+    --reportjson jsonReport.json
 
     # Uncomment this if testing that a test that should fail, fails
     # --noexitcodeontestfailures \
@@ -252,8 +254,57 @@ function run_test_locally_using_galasactl {
     export TEST_OBR_ARTIFACT_ID=dev.galasa.example.banking.obr
     export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
+    export totalTests=1
+    export failedTests=0
+    export testName="simpleSampleTest"
+    export testResult="Passed"
 
     submit_local_test $TEST_BUNDLE $TEST_JAVA_CLASS $TEST_OBR_GROUP_ID $TEST_OBR_ARTIFACT_ID $TEST_OBR_VERSION
+    check_junit_report $totalTests $failedTests
+    check_json_report $testName $testResult
+}
+
+function check_junit_report {
+
+    cd ${BASEDIR}/temp/*banking
+
+    totalTests=$1
+    failedTests=$2
+    
+    junitReportFile="junitReport.xml"
+    stringToFind="name=\"Galasa test run\" tests=\"${totalTests}\" failures=\"${failedTests}\""
+    
+    echo "string to find: "${stringToFind}
+
+    if ! grep -q "${stringToFind}" ${junitReportFile}; then
+        error "Junit report not created properly"
+        exit 1
+    fi
+    success "Junit report was created successfully"  
+}
+
+function check_json_report {
+
+    cd ${BASEDIR}/temp/*banking
+
+    testName=$1
+    testResult=$2
+    
+    jsonReportFile="jsonReport.json"
+    stringToFind="      \"tests\": \\[
+        {
+          \"name\": \"${testName}\",
+          \"result\": \"${testResult}\"
+        }
+      ]"
+    
+    echo "string to find: "${stringToFind}
+
+    if ! grep -q "${stringToFind}" ${jsonReportFile}; then
+        error "Json report not created properly"
+        exit 1
+    fi
+    success "Json report was created successfully"  
 }
 
 function cleanup_local_maven_repo {

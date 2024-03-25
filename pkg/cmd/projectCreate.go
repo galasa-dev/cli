@@ -88,10 +88,10 @@ func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand,
 }
 
 func (cmd *ProjectCreateCommand) createCobraCommand(
-	factory Factory, 
-	projectCmd GalasaCommand, 
+	factory Factory,
+	projectCmd GalasaCommand,
 	rootCmd GalasaCommand,
-	) (*cobra.Command, error) {
+) (*cobra.Command, error) {
 
 	var err error = nil
 
@@ -476,7 +476,7 @@ func createTestProject(
 	}
 
 	if err == nil {
-		err = createTestResourceFolder(fileGenerator, targetFolderPath, packageName, forceOverwrite)
+		err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
 	}
 
 	if err == nil {
@@ -541,7 +541,7 @@ func createJavaSourceFolder(fileGenerator *utils.FileGenerator, testFolderPath s
 
 func createTestResourceFolder(
 	fileGenerator *utils.FileGenerator, targetSrcFolderPath string,
-	packageName string, forceOverwrite bool) error {
+	forceOverwrite bool) error {
 
 	var err error
 

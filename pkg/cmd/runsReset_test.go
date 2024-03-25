@@ -38,7 +38,7 @@ func TestRunsResetHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'runs reset' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'runs reset' command.", "", factory, t)
 }
 
 func TestRunsResetNoFlagsReturnsError(t *testing.T) {
@@ -54,7 +54,7 @@ func TestRunsResetNoFlagsReturnsError(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "Error: required flag(s) \"name\" not set", "", factory, t)
+	checkOutput("", "Error: required flag(s) \"name\" not set", factory, t)
 }
 
 func TestRunsResetNameFlagReturnsOk(t *testing.T) {
@@ -70,7 +70,7 @@ func TestRunsResetNameFlagReturnsOk(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsResetCmdValues).runName, "name")
 }
@@ -90,7 +90,7 @@ func TestRunsResetNameNoParameterReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "flag needs an argument: --name")
 
 	// Check what the user saw was reasonable
-	checkOutput("", "Error: flag needs an argument: --name", "", factory, t)
+	checkOutput("", "Error: flag needs an argument: --name", factory, t)
 }
 
 func TestRunsResetUnknownParameterReturnsError(t *testing.T) {
@@ -108,7 +108,7 @@ func TestRunsResetUnknownParameterReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "unknown flag: --random")
 
 	// Check what the user saw was reasonable
-	checkOutput("", "Error: unknown flag: --random", "", factory, t)
+	checkOutput("", "Error: unknown flag: --random", factory, t)
 }
 
 func TestRunsResetNameTwiceOverridesToLatestValue(t *testing.T) {
@@ -125,7 +125,7 @@ func TestRunsResetNameTwiceOverridesToLatestValue(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check what the user saw was reasonable
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Contains(t, cmd.Values().(*RunsResetCmdValues).runName, "name2")
 }

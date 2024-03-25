@@ -18,7 +18,7 @@ func TestCommandCollectionContainsLocalInitCommand(t *testing.T) {
 	commands, _ := NewCommandCollection(factory)
 	localInitCommand, err := commands.GetCommand(COMMAND_NAME_LOCAL_INIT)
 	assert.Nil(t, err)
-	
+
 	assert.NotNil(t, localInitCommand)
 	assert.Equal(t, COMMAND_NAME_LOCAL_INIT, localInitCommand.Name())
 	assert.NotNil(t, localInitCommand.Values())
@@ -157,7 +157,7 @@ func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'local init' command.", "", "", factory, t)
+	checkOutput("Displays the options for the 'local init' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
@@ -174,7 +174,7 @@ func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("", "", "", factory, t)
+	checkOutput("", "", factory, t)
 
 	assert.Nil(t, err)
 }
