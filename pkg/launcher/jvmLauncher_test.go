@@ -48,36 +48,6 @@ var (
         }
       ]
     }`
-
-	//improper key-value pair in 'methods'
-	invalidStructureJsonFileContent = `{
-		"runName": "L0",
-        "bundle": "dev.galasa.examples.banking.account",
-        "testName": "dev.galasa.examples.banking.account.TestAccount",
-        "testShortName": "TestAccount",
-        "requestor": "unknown",
-        "status": "finished",
-        "result": "Passed",
-        "queued": "2024-03-14T10:11:02.185556Z",
-        "startTime": "2024-03-14T10:11:02.221697Z",
-        "endTime": "2024-03-14T10:11:02.439849Z",
-        "methods": [
-          {
-            "className": "dev.galasa.examples.banking.account.TestAccount",
-            "methodName": "simpleSampleTest",
-            "type": "Test",
-            "befores": [],
-            "afters": [],
-            "status": "finished",
-            "result": "Passed",
-            "runLogStart": 0,
-            "runLogEnd": 0,
-			"new":
-            "startTime": "2024-03-14T10:11:02.413588Z",
-            "endTime": "2024-03-14T10:11:02.428472Z"
-        }
-      ]
-    }`
 )
 
 func NewMockLauncherParams() (
@@ -1375,7 +1345,35 @@ func TestSetTestStructureFromRasFileInvalidFileContentReturnsError(t *testing.T)
 	var run = galasaapi.NewRun()
 	run.SetRunId("L0")
 	jsonFileName := "structure.json"
-
+	//improper key-value pair in 'methods'
+	invalidStructureJsonFileContent := `{
+		"runName": "L0",
+		"bundle": "dev.galasa.examples.banking.account",
+		"testName": "dev.galasa.examples.banking.account.TestAccount",
+		"testShortName": "TestAccount",
+		"requestor": "unknown",
+		"status": "finished",
+		"result": "Passed",
+		"queued": "2024-03-14T10:11:02.185556Z",
+		"startTime": "2024-03-14T10:11:02.221697Z",
+		"endTime": "2024-03-14T10:11:02.439849Z",
+		"methods": [
+			{
+			"className": "dev.galasa.examples.banking.account.TestAccount",
+			"methodName": "simpleSampleTest",
+			"type": "Test",
+			"befores": [],
+			"afters": [],
+			"status": "finished",
+			"result": "Passed",
+			"runLogStart": 0,
+			"runLogEnd": 0,
+			"new":
+			"startTime": "2024-03-14T10:11:02.413588Z",
+			"endTime": "2024-03-14T10:11:02.428472Z"
+		}
+		]
+	}`
 	_, _, fs, _,
 		_, _, _, galasaHome := NewMockLauncherParams()
 
