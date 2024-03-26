@@ -23,44 +23,44 @@ func NewMockFactory() Factory {
 	return &MockFactory{}
 }
 
-func (this *MockFactory) GetFileSystem() files.FileSystem {
-	if this.fileSystem == nil {
-		this.fileSystem = files.NewMockFileSystem()
+func (factory *MockFactory) GetFileSystem() files.FileSystem {
+	if factory.fileSystem == nil {
+		factory.fileSystem = files.NewMockFileSystem()
 	}
-	return this.fileSystem
+	return factory.fileSystem
 }
 
-func (this *MockFactory) GetEnvironment() utils.Environment {
-	if this.env == nil {
-		this.env = utils.NewMockEnv()
+func (factory *MockFactory) GetEnvironment() utils.Environment {
+	if factory.env == nil {
+		factory.env = utils.NewMockEnv()
 	}
-	return this.env
+	return factory.env
 }
 
-func (this *MockFactory) GetFinalWordHandler() FinalWordHandler {
-	if this.finalWordHandler == nil {
-		this.finalWordHandler = NewMockFinalWordHandler()
+func (factory *MockFactory) GetFinalWordHandler() FinalWordHandler {
+	if factory.finalWordHandler == nil {
+		factory.finalWordHandler = NewMockFinalWordHandler()
 	}
-	return this.finalWordHandler
+	return factory.finalWordHandler
 }
 
-func (this *MockFactory) GetStdOutConsole() utils.Console {
-	if this.stdOutConsole == nil {
-		this.stdOutConsole = utils.NewMockConsole()
+func (factory *MockFactory) GetStdOutConsole() utils.Console {
+	if factory.stdOutConsole == nil {
+		factory.stdOutConsole = utils.NewMockConsole()
 	}
-	return this.stdOutConsole
+	return factory.stdOutConsole
 }
 
-func (this *MockFactory) GetStdErrConsole() utils.Console {
-	if this.stdErrConsole == nil {
-		this.stdErrConsole = utils.NewMockConsole()
+func (factory *MockFactory) GetStdErrConsole() utils.Console {
+	if factory.stdErrConsole == nil {
+		factory.stdErrConsole = utils.NewMockConsole()
 	}
-	return this.stdErrConsole
+	return factory.stdErrConsole
 }
 
-func (this *MockFactory) GetTimeService() utils.TimeService {
-	if this.timeService == nil {
-		this.timeService = utils.NewMockTimeService()
+func (factory *MockFactory) GetTimeService() utils.TimeService {
+	if factory.timeService == nil {
+		factory.timeService = utils.NewMockTimeService()
 	}
-	return this.timeService
+	return factory.timeService
 }
