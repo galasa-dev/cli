@@ -105,13 +105,13 @@ func (expander *ImageExpanderImpl) calculateTargetImagePaths(gzFilePath string) 
 	filePathParts := strings.Split(gzFilePath, separator)
 
 	if len(filePathParts)-3 < 0 {
-		log.Printf("gz file %s found, but it's not in a 'terminals/termXXX' folder so ignoring.\n", gzFilePath)
+		// log.Printf("gz file %s found, but it's not in a 'terminals/termXXX' folder so ignoring.\n", gzFilePath)
 	} else {
 		// The json descriptions of the panels appear in zos3270/terminals/term1/term1-0001.gz
 		// So we want images to appear in zos3270/images/term1/term1-0001.png
 		if filePathParts[len(filePathParts)-3] != "terminals" {
 			// It's not in the correct structure, so ignoring.
-			log.Printf("gz file %s found, but it's not in a 'terminals' folder so ignoring.\n", gzFilePath)
+			// log.Printf("gz file %s found, but it's not in a 'terminals' folder so ignoring.\n", gzFilePath)
 		} else {
 
 			// Replace the .gz file extension with .png

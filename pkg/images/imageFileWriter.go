@@ -53,7 +53,7 @@ func (writer *ImageFileWriterImpl) isFullyQualifiedImageFileWritable(qualifiedFi
 	isExistsAlready, err = writer.fs.Exists(qualifiedFileName)
 	if err == nil {
 		if isExistsAlready {
-			log.Printf("File %s already exists. So not over-writing it.\n", qualifiedFileName)
+			// log.Printf("File %s already exists. So not over-writing it.\n", qualifiedFileName)
 		} else {
 			// It's writeable.
 			isWritable = true
