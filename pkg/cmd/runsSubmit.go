@@ -183,9 +183,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 
 					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console)
 
-					if err == nil {
-						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
-					}
+					err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 				}
 			}
 		}

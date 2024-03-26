@@ -78,7 +78,7 @@ func TestReadBackThrottleFileFailsIfNoThrottleFileThere(t *testing.T) {
 
 	_, err = submitter.readThrottleFile("throttle")
 	if err == nil {
-		assert.Fail(t, "Should have failed to read from a throttle file. "+err.Error())
+		assert.Fail(t, "Should have failed to read from a throttle file. ")
 	}
 	assert.Contains(t, err.Error(), "GAL1048", "Error returned should contain GAL1048 error indicating read throttle file failed."+err.Error())
 }
@@ -108,7 +108,7 @@ func TestReadBackThrottleFileFailsIfFileContainsInvalidInt(t *testing.T) {
 
 	_, err = submitter.readThrottleFile("throttle")
 	if err == nil {
-		assert.Fail(t, "Should have failed to read from a throttle file. "+err.Error())
+		assert.Fail(t, "Should have failed to read from a throttle file. ")
 	}
 	assert.Contains(t, err.Error(), "GAL1049E", "Error returned should contain GAL1049E error indicating read invalid throttle file content."+err.Error())
 }
@@ -318,7 +318,7 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
 	mockFileSystem := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
 
 	commandParameters := utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
@@ -482,7 +482,7 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 	groupName := "groupname"
 	var readyRuns []TestRun
 	testRun := TestRun{
-		GherkinUrl: "gherkin.feature" ,
+		GherkinUrl: "gherkin.feature",
 	}
 	readyRuns = append(readyRuns, testRun)
 	submittedRuns := make(map[string]*TestRun)
@@ -492,9 +492,9 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 	requestor := "user"
 	requestType := ""
 
-	run, err := submitter.submitRun(groupName, readyRuns, submittedRuns, lostRuns ,runOverrides ,trace ,requestor ,requestType)
-	assert.Nil(t,err)
-	assert.Empty(t,run)
+	run, err := submitter.submitRun(groupName, readyRuns, submittedRuns, lostRuns, runOverrides, trace, requestor, requestType)
+	assert.Nil(t, err)
+	assert.Empty(t, run)
 	assert.Contains(t, submittedRuns["M100"].GherkinUrl, "gherkin.feature")
 
 }
@@ -575,7 +575,7 @@ func TestGetReadyRunsFromPortfolioReturnsGherkinReadyRuns(t *testing.T) {
 
 	overrides := make(map[string]string)
 
-	readyRuns := submitter.buildListOfRunsToSubmit(portfolio,overrides)
+	readyRuns := submitter.buildListOfRunsToSubmit(portfolio, overrides)
 
 	assert.NotEmpty(t, readyRuns)
 	assert.Contains(t, readyRuns[0].GherkinUrl, "file:///demo/gherkin.feature")
@@ -623,7 +623,7 @@ func TestSubmitRunsFromGherkinPortfolioOutputsFeatureNames(t *testing.T) {
 
 	overrides := make(map[string]string)
 
-	readyRuns := submitter.buildListOfRunsToSubmit(portfolio,overrides)
+	readyRuns := submitter.buildListOfRunsToSubmit(portfolio, overrides)
 
 	assert.NotEmpty(t, readyRuns)
 	assert.Contains(t, readyRuns[0].GherkinUrl, "file:///demo/gherkin.feature")

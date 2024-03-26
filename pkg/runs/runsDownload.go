@@ -41,7 +41,7 @@ func DownloadArtifacts(
 	var err error = nil
 	var runs []galasaapi.Run
 
-	if (err == nil) && (runName != "") {
+	if runName != "" {
 		err = ValidateRunName(runName)
 	}
 	if err == nil {
