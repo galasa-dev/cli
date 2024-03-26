@@ -167,7 +167,7 @@ func (submitter *Submitter) executeSubmitRuns(
 
 		throttle, isThrottleFileLost = submitter.updateThrottleFromFileIfDifferent(params.ThrottleFileName, throttle, isThrottleFileLost)
 
-		submitter.runsFetchCurrentStatus(params.GroupName, readyRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
+		submitter.runsFetchCurrentStatus(params.GroupName, submittedRuns, finishedRuns, lostRuns, fetchRas)
 
 		// Only sleep if there are runs in progress but not yet finished.
 		if len(submittedRuns) > 0 || len(rerunRuns) > 0 {
@@ -282,7 +282,7 @@ func (submitter *Submitter) submitRun(
 	readyRuns []TestRun,
 	submittedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun,
-	runOverrides *map[string]string,
+	runOverrides *map[string]string, // This doesn't appear to be used. Why not ?
 	trace bool,
 	requestor string,
 	requestType string,
@@ -294,52 +294,49 @@ func (submitter *Submitter) submitRun(
 		nextRun := readyRuns[0]
 		readyRuns = readyRuns[1:]
 
-		if err == nil {
+		className := nextRun.Bundle + "/" + nextRun.Class
 
-			className := nextRun.Bundle + "/" + nextRun.Class
+		submitOverrides := make(map[string]interface{})
 
-			submitOverrides := make(map[string]interface{})
+		for key, value := range nextRun.Overrides {
+			submitOverrides[key] = value
+		}
 
-			for key, value := range nextRun.Overrides {
-				submitOverrides[key] = value
+		var resultGroup *galasaapi.TestRuns
+		log.Printf("submitRun - %s, %s", className, requestType)
+		resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
+			nextRun.Stream, nextRun.Obr, trace, nextRun.GherkinUrl, nextRun.GherkinFeature, submitOverrides)
+		if err != nil {
+			log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
+			lostRuns[className] = &nextRun
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
+		} else {
+			if len(resultGroup.GetRuns()) < 1 {
+				log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
+				lostRuns[className] = &nextRun
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST, nextRun.Bundle, nextRun.Class)
 			}
 
-			var resultGroup *galasaapi.TestRuns
-			log.Printf("submitRun - %s, %s", className, requestType)
-			resultGroup, err = submitter.launcher.SubmitTestRun(groupName, className, requestType, requestor,
-				nextRun.Stream, nextRun.Obr, trace, nextRun.GherkinUrl, nextRun.GherkinFeature, submitOverrides)
-			if err != nil {
-				log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
-				lostRuns[className] = &nextRun
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
-			} else {
-				if len(resultGroup.GetRuns()) < 1 {
-					log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
-					lostRuns[className] = &nextRun
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TEST_NOT_IN_RUN_GROUP_LOST, nextRun.Bundle, nextRun.Class)
-				}
+			if err == nil {
+				submittedRun := resultGroup.GetRuns()[0]
+				nextRun.Name = *submittedRun.Name
 
-				if err == nil {
-					submittedRun := resultGroup.GetRuns()[0]
-					nextRun.Name = *submittedRun.Name
+				submittedRuns[nextRun.Name] = &nextRun
 
-					submittedRuns[nextRun.Name] = &nextRun
-
-					if nextRun.GherkinUrl != "" {
-						log.Printf("Run %v submitted - %v\n", nextRun.Name, nextRun.GherkinFeature)
-					} else {
-						log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
-					}
+				if nextRun.GherkinUrl != "" {
+					log.Printf("Run %v submitted - %v\n", nextRun.Name, nextRun.GherkinFeature)
+				} else {
+					log.Printf("Run %v submitted - %v/%v/%v\n", nextRun.Name, nextRun.Stream, nextRun.Bundle, nextRun.Class)
 				}
 			}
 		}
+
 	}
 	return readyRuns, err
 }
 
 func (submitter *Submitter) runsFetchCurrentStatus(
 	groupName string,
-	readyRuns []TestRun,
 	submittedRuns map[string]*TestRun,
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun,
@@ -598,9 +595,7 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValues) error {
 	var err error = nil
 
-	if err == nil {
-		params.OverrideFilePath, err = files.TildaExpansion(submitter.fileSystem, params.OverrideFilePath)
-	}
+	params.OverrideFilePath, err = files.TildaExpansion(submitter.fileSystem, params.OverrideFilePath)
 
 	if err == nil {
 		params.PortfolioFileName, err = files.TildaExpansion(submitter.fileSystem, params.PortfolioFileName)

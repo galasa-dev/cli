@@ -57,7 +57,7 @@ func ResetRun(
 				consoleErr := console.WriteString(fmt.Sprintf(galasaErrors.GALASA_INFO_RUNS_RESET_SUCCESS.Template, runName))
 
 				// Console error is not as important to report as the original error if there was one.
-				if consoleErr != nil && err == nil {
+				if consoleErr != nil {
 					err = consoleErr
 				}
 			}

@@ -48,7 +48,7 @@ func ReportYaml(
 	}
 
 	// Write the report out to disk
-	fileSystem.WriteBinaryFile(reportYamlFilename, bytes)
+	err = fileSystem.WriteBinaryFile(reportYamlFilename, bytes)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_CREATE_REPORT_YAML, reportYamlFilename, err)
 		return err

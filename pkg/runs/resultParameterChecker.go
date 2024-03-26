@@ -38,7 +38,7 @@ func ValidateResultParameter(resultInputString string, apiClient *galasaapi.APIC
 		if err == nil {
 			if httpResponse.StatusCode != http.StatusOK {
 				httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
-				errString := err.Error() + httpError
+				errString := httpError
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RESULTNAMES_FAILED, errString)
 			} else {
 				rasResultNames := rasResultNamesData.GetResultnames()

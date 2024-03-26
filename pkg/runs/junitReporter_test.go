@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func submitFinishedRunsAndReturnJunitReport(t *testing.T, finishedRunsMap map[string]*TestRun, lostRunsMap map[string]*TestRun, expectedReport string) string {
+func submitFinishedRunsAndReturnJunitReport(t *testing.T, finishedRunsMap map[string]*TestRun, lostRunsMap map[string]*TestRun, expectedReport string) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	err := ReportJunit(
@@ -39,7 +39,22 @@ func submitFinishedRunsAndReturnJunitReport(t *testing.T, finishedRunsMap map[st
 		assert.Fail(t, "Could not read the junit file. "+err.Error())
 	}
 
-	return actualContents
+	expected := stripWhitespace(expectedReport)
+	actual := stripWhitespace(actualContents)
+
+	//Then...
+	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
+
+	for index := range expected {
+		expectedChar := expected[index]
+		actualChar := actual[index]
+		expectedCharOrd, _ := strconv.Atoi(string(expectedChar))
+		actualCharOrd, _ := strconv.Atoi(string(actualChar))
+		assert.Equal(t, expectedChar, actualChar, "Characters are not the same! expected:'%v' actual:'%v'", expectedCharOrd, actualCharOrd)
+	}
+
+	assert.EqualValues(t, expected, actual)
+
 }
 
 func stripWhitespace(input string) string {
@@ -74,14 +89,7 @@ func TestJunitReportPassedRunWith2PassedTestsWorks(t *testing.T) {
 	</testsuites>`
 
 	// When...
-	actualContents := submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
-
-	expected := stripWhitespace(expectedReport)
-	actual := stripWhitespace(actualContents)
-
-	//Then...
-	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
-	assert.EqualValues(t, expected, actual)
+	submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
 }
 
 func TestJunitReportFailedRunWith2PassedTestsWorks(t *testing.T) {
@@ -109,14 +117,7 @@ func TestJunitReportFailedRunWith2PassedTestsWorks(t *testing.T) {
 	</testsuites>`
 
 	// When...
-	actualContents := submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
-
-	expected := stripWhitespace(expectedReport)
-	actual := stripWhitespace(actualContents)
-
-	//Then...
-	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
-	assert.EqualValues(t, expected, actual)
+	submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
 }
 
 func TestJunitReportWith0TestsWorks(t *testing.T) {
@@ -141,14 +142,7 @@ func TestJunitReportWith0TestsWorks(t *testing.T) {
 	</testsuites>`
 
 	// When...
-	actualContents := submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
-
-	expected := stripWhitespace(expectedReport)
-	actual := stripWhitespace(actualContents)
-
-	//Then...
-	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
-	assert.EqualValues(t, expected, actual)
+	submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
 }
 
 func TestJunitReportWith1FailedTestWorks(t *testing.T) {
@@ -180,14 +174,7 @@ func TestJunitReportWith1FailedTestWorks(t *testing.T) {
 	</testsuites>`
 
 	//When...
-	actualContents := submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
-
-	expected := stripWhitespace(expectedReport)
-	actual := stripWhitespace(actualContents)
-
-	//Then...
-	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
-	assert.EqualValues(t, expected, actual)
+	submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
 }
 
 func TestJunitReportWith2RunsAndMixedResultTestsReturnsOk(t *testing.T) {
@@ -232,23 +219,7 @@ func TestJunitReportWith2RunsAndMixedResultTestsReturnsOk(t *testing.T) {
 	</testsuites>`
 
 	//When..
-	actualContents := submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
-
-	expected := stripWhitespace(expectedReport)
-	actual := stripWhitespace(actualContents)
-
-	//Then...
-	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
-
-	for index := range expected {
-		expectedChar := expected[index]
-		actualChar := actual[index]
-		expectedCharOrd, _ := strconv.Atoi(string(expectedChar))
-		actualCharOrd, _ := strconv.Atoi(string(actualChar))
-		assert.Equal(t, expectedChar, actualChar, "Characters are not the same! expected:'%v' actual:'%v'", expectedCharOrd, actualCharOrd)
-	}
-
-	assert.EqualValues(t, actual, expected)
+	submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
 }
 
 func TestJunitReportWithManyRunsAndMixedResultTestsReturnsAlphabeticallyOk(t *testing.T) {
@@ -307,23 +278,7 @@ func TestJunitReportWithManyRunsAndMixedResultTestsReturnsAlphabeticallyOk(t *te
 	</testsuites>`
 
 	// When...
-	actualContents := submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
-
-	expected := stripWhitespace(expectedReport)
-	actual := stripWhitespace(actualContents)
-
-	//Then...
-	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
-
-	for index := range expected {
-		expectedChar := expected[index]
-		actualChar := actual[index]
-		expectedCharOrd, _ := strconv.Atoi(string(expectedChar))
-		actualCharOrd, _ := strconv.Atoi(string(actualChar))
-		assert.Equal(t, expectedChar, actualChar, "Characters are not the same! expected:'%v' actual:'%v'", expectedCharOrd, actualCharOrd)
-	}
-
-	assert.EqualValues(t, actual, expected)
+	submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, nil, expectedReport)
 }
 
 func TestJunitReportPassedRunWithLostRunsWorks(t *testing.T) {
@@ -366,12 +321,5 @@ func TestJunitReportPassedRunWithLostRunsWorks(t *testing.T) {
 	</testsuites>`
 
 	// When...
-	actualContents := submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, lostRunsMap, expectedReport)
-
-	expected := stripWhitespace(expectedReport)
-	actual := stripWhitespace(actualContents)
-
-	//Then...
-	assert.Equal(t, len(expected), len(actual), "Lengths are not valid. Expected:%d Actual:%d", len(expected), len(actual))
-	assert.EqualValues(t, expected, actual)
+	submitFinishedRunsAndReturnJunitReport(t, finishedRunsMap, lostRunsMap, expectedReport)
 }

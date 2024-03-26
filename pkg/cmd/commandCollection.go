@@ -79,7 +79,7 @@ func (commands *commandCollectionImpl) GetRootCommand() GalasaCommand {
 
 func (commands *commandCollectionImpl) GetCommand(name string) (GalasaCommand, error) {
 	var err error
-	cmd, _ := commands.commandMap[name]
+	cmd := commands.commandMap[name]
 	if cmd == nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COMMAND_NOT_FOUND_IN_CMD_COLLECTION)
 		log.Printf("Caller tried to lookup %s in the command collection and it was not found.\n", name)
@@ -148,13 +148,11 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 	var authLoginCommand GalasaCommand
 	var authLogoutCommand GalasaCommand
 
+	authCommand, err = NewAuthCommand(rootCommand)
 	if err == nil {
-		authCommand, err = NewAuthCommand(rootCommand)
+		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 		if err == nil {
-			authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
-			if err == nil {
-				authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
-			}
+			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
 		}
 	}
 
@@ -172,11 +170,9 @@ func (commands *commandCollectionImpl) addLocalCommands(factory Factory, rootCom
 	var localCommand GalasaCommand
 	var localInitCommand GalasaCommand
 
+	localCommand, err = NewLocalCommand(rootCommand)
 	if err == nil {
-		localCommand, err = NewLocalCommand(rootCommand)
-		if err == nil {
-			localInitCommand, err = NewLocalInitCommand(factory, localCommand, rootCommand)
-		}
+		localInitCommand, err = NewLocalInitCommand(factory, localCommand, rootCommand)
 	}
 
 	if err == nil {
@@ -190,11 +186,10 @@ func (commands *commandCollectionImpl) addProjectCommands(factory Factory, rootC
 	var err error
 
 	var projectCommand GalasaCommand
+
+	projectCommand, err = NewProjectCmd(rootCommand)
 	if err == nil {
-		projectCommand, err = NewProjectCmd(rootCommand)
-		if err == nil {
-			commands.commandMap[projectCommand.Name()] = projectCommand
-		}
+		commands.commandMap[projectCommand.Name()] = projectCommand
 	}
 
 	if err == nil {
@@ -214,17 +209,15 @@ func (commands *commandCollectionImpl) addPropertiesCommands(factory Factory, ro
 	var propertiesDeleteCommand GalasaCommand
 	var propertiesSetCommand GalasaCommand
 
+	propertiesCommand, err = NewPropertiesCommand(rootCommand)
 	if err == nil {
-		propertiesCommand, err = NewPropertiesCommand(rootCommand)
+		propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, rootCommand)
 		if err == nil {
-			propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, rootCommand)
+			propertiesSetCommand, err = NewPropertiesSetCommand(factory, propertiesCommand, rootCommand)
 			if err == nil {
-				propertiesSetCommand, err = NewPropertiesSetCommand(factory, propertiesCommand, rootCommand)
+				propertiesDeleteCommand, err = NewPropertiesDeleteCommand(factory, propertiesCommand, rootCommand)
 				if err == nil {
-					propertiesDeleteCommand, err = NewPropertiesDeleteCommand(factory, propertiesCommand, rootCommand)
-					if err == nil {
-						err = commands.addPropertiesNamespaceCommands(factory, rootCommand, propertiesCommand)
-					}
+					err = commands.addPropertiesNamespaceCommands(factory, rootCommand, propertiesCommand)
 				}
 			}
 		}
@@ -245,11 +238,9 @@ func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory Fa
 	var propertiesNamespaceCommand GalasaCommand
 	var propertiesNamespaceGetCommand GalasaCommand
 
+	propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(propertiesCommand, rootCommand)
 	if err == nil {
-		propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(propertiesCommand, rootCommand)
-		if err == nil {
-			propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
-		}
+		propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
 	}
 
 	if err == nil {
@@ -271,23 +262,21 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 	var runsResetCommand GalasaCommand
 	var runsCancelCommand GalasaCommand
 
+	runsCommand, err = NewRunsCmd(rootCommand)
 	if err == nil {
-		runsCommand, err = NewRunsCmd(rootCommand)
+		runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
 		if err == nil {
-			runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
+			runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, rootCommand)
 			if err == nil {
-				runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, rootCommand)
+				runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
 				if err == nil {
-					runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
+					runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
 					if err == nil {
-						runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
+						runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
 						if err == nil {
-							runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
+							runsResetCommand, err = NewRunsResetCommand(factory, runsCommand, rootCommand)
 							if err == nil {
-								runsResetCommand, err = NewRunsResetCommand(factory, runsCommand, rootCommand)
-								if err == nil {
-									runsCancelCommand, err = NewRunsCancelCommand(factory, runsCommand, rootCommand)
-								}
+								runsCancelCommand, err = NewRunsCancelCommand(factory, runsCommand, rootCommand)
 							}
 						}
 					}
@@ -319,17 +308,15 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory Factory, roo
 	var resourcesUpdateCommand GalasaCommand
 	var resourcesDeleteCommand GalasaCommand
 
+	resourcesCommand, err = NewResourcesCmd(rootCommand)
 	if err == nil {
-		resourcesCommand, err = NewResourcesCmd(rootCommand)
+		resourcesApplyCommand, err = NewResourcesApplyCommand(factory, resourcesCommand, rootCommand)
 		if err == nil {
-			resourcesApplyCommand, err = NewResourcesApplyCommand(factory, resourcesCommand, rootCommand)
+			resourcesCreateCommand, err = NewResourcesCreateCommand(factory, resourcesCommand, rootCommand)
 			if err == nil {
-				resourcesCreateCommand, err = NewResourcesCreateCommand(factory, resourcesCommand, rootCommand)
+				resourcesUpdateCommand, err = NewResourcesUpdateCommand(factory, resourcesCommand, rootCommand)
 				if err == nil {
-					resourcesUpdateCommand, err = NewResourcesUpdateCommand(factory, resourcesCommand, rootCommand)
-					if err == nil {
-						resourcesDeleteCommand, err = NewResourcesDeleteCommand(factory, resourcesCommand, rootCommand)
-					}
+					resourcesDeleteCommand, err = NewResourcesDeleteCommand(factory, resourcesCommand, rootCommand)
 				}
 			}
 		}

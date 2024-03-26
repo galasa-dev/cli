@@ -13,7 +13,7 @@ func NewMockFinalWordHandler() FinalWordHandler {
 	return new(MockFinalWordHandler)
 }
 
-func (this *MockFinalWordHandler) FinalWord(rootCmd GalasaCommand, errorToExctractFrom interface{}) {
+func (handler *MockFinalWordHandler) FinalWord(rootCmd GalasaCommand, errorToExctractFrom interface{}) {
 	// Capture the final word object to see what was sent.
-	this.ReportedObject = errorToExctractFrom
+	handler.ReportedObject = errorToExctractFrom
 }

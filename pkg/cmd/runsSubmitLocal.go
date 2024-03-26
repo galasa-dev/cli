@@ -148,8 +148,8 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 
 	runs.AddGherkinFlag(runsSubmitLocalCobraCmd, cmd.values.submitLocalSelectionFlags, false, "Gherkin feature file URL. Should start with 'file://'. ")
 
-	runsSubmitLocalCobraCmd.MarkFlagsRequiredTogether("class","obr")
-	runsSubmitLocalCobraCmd.MarkFlagsOneRequired("class","gherkin")
+	runsSubmitLocalCobraCmd.MarkFlagsRequiredTogether("class", "obr")
+	runsSubmitLocalCobraCmd.MarkFlagsOneRequired("class", "gherkin")
 
 	runsSubmitCmd.CobraCommand().AddCommand(runsSubmitLocalCobraCmd)
 
@@ -221,19 +221,14 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 							console,
 						)
 
-						job := images.NewPollingJob(
-							"local test run image expander",
-							images.DEFAULT_MILLISECS_BETWEEN_POLLS,
-							func() error { return scanFilesAndExpandImages(fileSystem, embeddedFileSystem, galasaHome, console) },
-						)
-						defer job.Stop()
-						job.Start()
-
 						err = submitter.ExecuteSubmitRuns(
 							runsSubmitCmdValues,
 							cmd.values.submitLocalSelectionFlags,
 						)
 
+						if err == nil {
+							scanFilesAndExpandImages(fileSystem, embeddedFileSystem, galasaHome, console)
+						}
 					}
 				}
 			}

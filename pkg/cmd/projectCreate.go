@@ -267,11 +267,9 @@ func createParentFolderContents(
 ) error {
 	var err error = nil
 
-	if err == nil {
-		if useMaven {
-			err = createParentFolderPom(fileGenerator, packageName, featureNames,
-				isOBRProjectRequired, forceOverwrite)
-		}
+	if useMaven {
+		err = createParentFolderPom(fileGenerator, packageName, featureNames,
+			isOBRProjectRequired, forceOverwrite)
 	}
 
 	if err == nil {
