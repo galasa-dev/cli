@@ -83,7 +83,7 @@ done
 
 # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
 if [[ "${bootstrap}" == "" ]]; then
-    export bootstrap="https://galasa-galasa-prod.cicsk8s.hursley.ibm.com/bootstrap"
+    export bootstrap="https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap"
     info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
 fi
 
@@ -100,14 +100,14 @@ export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
 export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 
 CALLED_BY_MAIN="true"
-source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh
+source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh --bootstrap "${bootstrap}"
 calculate_galasactl_executable
 
-source ${BASEDIR}/test-scripts/runs-tests.sh
+source ${BASEDIR}/test-scripts/runs-tests.sh --bootstrap "${bootstrap}"
 test_runs_commands
 
-source ${BASEDIR}/test-scripts/properties-tests.sh
+source ${BASEDIR}/test-scripts/properties-tests.sh --bootstrap "${bootstrap}"
 properties_tests
 
-source ${BASEDIR}/test-scripts/resources-tests.sh
+source ${BASEDIR}/test-scripts/resources-tests.sh --bootstrap "${bootstrap}"
 resources_tests
