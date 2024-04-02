@@ -114,21 +114,33 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 	var restApiVersion string
 	var err error
-	var cpsProperty *galasaapi.CpsProperty
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-
-		cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.
-			GetCpsNamespaceCascadeProperty(nil, "framework", "test", "streams").ClientApiVersion(restApiVersion).Execute()
+		var properties []galasaapi.GalasaProperty
+		properties, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.
+			QueryCpsNamespaceProperties(nil, "framework").Prefix("test.stream").Suffix("repo").ClientApiVersion(restApiVersion).Execute()
 		if err == nil {
-			if cpsProperty == nil || cpsProperty.Value == nil {
-				streams = make([]string, 0)
-			} else {
-				streams = strings.Split(*cpsProperty.Value, ",")
-			}
+
+			streams, err = getStreamNamesFromProperties(properties)
 		}
+	}
+	return streams, err
+}
+
+// When passed an array of GalasaProperty objects, extract the stream names from them.
+func getStreamNamesFromProperties(properties []galasaapi.GalasaProperty) ([]string, error) {
+	var err error
+	var streams []string = make([]string,0)
+	for _, property := range properties {
+		propertyNamePtr := property.GetMetadata().Name
+
+		propertyName := *propertyNamePtr
+		// This is something like "test.stream.zosk8s.repo"
+
+		streamName := propertyName[12 : len(propertyName)-5]
+		streams = append(streams, streamName)
 	}
 	return streams, err
 }
