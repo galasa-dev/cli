@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	TOKEN_PROPERTY = "GALASA_TOKEN"
+	TOKEN_PROPERTY  = "GALASA_TOKEN"
 	TOKEN_SEPARATOR = ":"
 )
 
@@ -32,7 +32,7 @@ func GetAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome,
 	galasactlPropertiesFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.properties")
 
 	// Get the file-based token property if we can
-	tokenProperty, fileAccessErr := getPropertyFromFile(fileSystem, galasactlPropertiesFilePath, env, TOKEN_PROPERTY)
+	tokenProperty, fileAccessErr := getPropertyFromFile(fileSystem, galasactlPropertiesFilePath, TOKEN_PROPERTY)
 
 	// Over-write the token property value if there is an environment variable set to do that.
 	tokenProperty = getPropertyWithOverride(env, tokenProperty, galasactlPropertiesFilePath, TOKEN_PROPERTY)
@@ -85,7 +85,7 @@ func getPropertyWithOverride(env utils.Environment, valueFromFile string, filePa
 }
 
 // Gets a property from the user's galasactl.properties file
-func getPropertyFromFile(fileSystem files.FileSystem, galasactlPropertiesFilePath string, env utils.Environment, propertyName string) (string, error) {
+func getPropertyFromFile(fileSystem files.FileSystem, galasactlPropertiesFilePath string, propertyName string) (string, error) {
 	var err error = nil
 	var galasactlProperties props.JavaProperties
 	galasactlProperties, err = props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)

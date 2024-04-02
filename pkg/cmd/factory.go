@@ -50,18 +50,18 @@ func (*RealFactory) GetFinalWordHandler() FinalWordHandler {
 
 // We only ever expect there to be a single console object, which collects all the
 // command output.
-func (this *RealFactory) GetStdOutConsole() utils.Console {
-	if this.stdOutConsole == nil {
-		this.stdOutConsole = utils.NewRealConsole()
+func (factory *RealFactory) GetStdOutConsole() utils.Console {
+	if factory.stdOutConsole == nil {
+		factory.stdOutConsole = utils.NewRealConsole()
 	}
-	return this.stdOutConsole
+	return factory.stdOutConsole
 }
 
-func (this *RealFactory) GetStdErrConsole() utils.Console {
-	if this.stdErrConsole == nil {
-		this.stdErrConsole = utils.NewRealConsole()
+func (factory *RealFactory) GetStdErrConsole() utils.Console {
+	if factory.stdErrConsole == nil {
+		factory.stdErrConsole = utils.NewRealConsole()
 	}
-	return this.stdErrConsole
+	return factory.stdErrConsole
 }
 
 func (*RealFactory) GetTimeService() utils.TimeService {

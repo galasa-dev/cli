@@ -153,7 +153,7 @@ var (
 	GALASA_ERROR_INVALID_CLASS_TOO_MANY_SLASHES           = NewMessageType("GAL1065E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Too many slashes found.", 1065, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_CLASS_SUFFIX_FOUND               = NewMessageType("GAL1066E: Badly formed Class parameter '%s'. Expected it to be of the form <OSGiBundleId>/<FullyQualifiedJavaClass> with no .class suffix. Unwanted .class suffix detected.", 1066, STACK_TRACE_WANTED)
 	GALASA_ERROR_INVALID_OUTPUT_FORMAT                    = NewMessageType("GAL1067E: Unsupported value '%s' for parameter --format. Supported values are: %s."+SEE_COMMAND_REFERENCE, 1067, STACK_TRACE_WANTED)
-	GALASA_ERROR_QUERY_RUNS_FAILED                        = NewMessageType("GAL1068E: Could not query run results. Reason: '%s'", 1068, STACK_TRACE_WANTED)
+	GALASA_ERROR_QUERY_RUNS_FAILED                        = NewMessageType("GAL1068E: Could not query run results. Reason: '%s'", 1068, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_LOG_FILE_IS_A_FOLDER                     = NewMessageType("GAL1069E: Could not open log file for writing. '%s' is a directory, the --log parameter should refer to a file path (existing or not), or '-' (the console)", 1069, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_BOOTSTRAP_BAD_DEBUG_MODE_VALUE           = NewMessageType("GAL1070E: Invalid value '%s' detected for optional property '%s' in bootstrap properties. Valid values are 'listen' or 'attach'. Only used when --debug flag is set. Defaults to 'listen'. Can be overridden with the --debugMode flag.", 1070, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_ARG_BAD_DEBUG_MODE_VALUE                 = NewMessageType("GAL1071E: Invalid value '%s' detected for optional --debugMode argument. Valid values are 'listen' or 'attach'. Only used when --debug flag is set. Defaults to 'listen'. Default can be set with an optional property '%s' in bootstrap properties.", 1071, STACK_TRACE_NOT_WANTED)
@@ -230,13 +230,13 @@ var (
 	GALASA_ERROR_FAILED_TO_COMPILE_PROPERTY_FIELD_REGEX = NewMessageType("GAL1141E: Unable to compile the regex pattern for Galasa Property field '%s'. Reason: '%s'", 1141, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_PROPERTY_FIELD_FORMAT          = NewMessageType("GAL1142E: The %s field value, '%s', provided does not match formatting requirements. "+
 		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.", 1142, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS = NewMessageType("GAL1143E: Could not query run results. Server returned a non-200 code (%s)", 1143, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 
 	// Information messages...
 	GALASA_INFO_FOLDER_DOWNLOADED_TO = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
-	GALASA_INFO_RENDERED_IMAGE_COUNT = NewMessageType("GAL2502I: Rendered %d image files.\n", 2502, STACK_TRACE_NOT_WANTED)
 	GALASA_INFO_RUNS_RESET_SUCCESS   = NewMessageType("GAL2503I: The request to reset run '%s' has been accepted by the server.\n", 2503, STACK_TRACE_NOT_WANTED)
 	GALASA_INFO_RUNS_CANCEL_SUCCESS  = NewMessageType("GAL2504I: The request to cancel run '%s' has been accepted by the server.\n", 2504, STACK_TRACE_NOT_WANTED)
 )

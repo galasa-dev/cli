@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/props"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -33,6 +34,7 @@ func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	err := submitter.writeThrottleFile("throttle", 101)
@@ -74,11 +76,12 @@ func TestReadBackThrottleFileFailsIfNoThrottleFileThere(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	_, err = submitter.readThrottleFile("throttle")
 	if err == nil {
-		assert.Fail(t, "Should have failed to read from a throttle file. "+err.Error())
+		assert.Fail(t, "Should have failed to read from a throttle file. ")
 	}
 	assert.Contains(t, err.Error(), "GAL1048", "Error returned should contain GAL1048 error indicating read throttle file failed."+err.Error())
 }
@@ -104,11 +107,12 @@ func TestReadBackThrottleFileFailsIfFileContainsInvalidInt(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	_, err = submitter.readThrottleFile("throttle")
 	if err == nil {
-		assert.Fail(t, "Should have failed to read from a throttle file. "+err.Error())
+		assert.Fail(t, "Should have failed to read from a throttle file. ")
 	}
 	assert.Contains(t, err.Error(), "GAL1049E", "Error returned should contain GAL1049E error indicating read invalid throttle file content."+err.Error())
 }
@@ -130,6 +134,7 @@ func TestUpdateThrottleFromFileIfDifferentChangesValueWhenDifferent(t *testing.T
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	mockFileSystem.WriteTextFile("throttle", "10")
@@ -156,6 +161,7 @@ func TestUpdateThrottleFromFileIfDifferentDoesntChangeIfFileMissing(t *testing.T
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	// mockFileSystem.WriteTextFile("throttle", "10") - file is missing now.
@@ -191,6 +197,7 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	overrides, err := submitter.buildOverrideMap(commandParameters)
@@ -229,6 +236,7 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	overrides, err := submitter.buildOverrideMap(commandParameters)
 
@@ -262,6 +270,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	err = submitter.correctOverrideFilePathParameter(&commandParameters)
 
@@ -305,6 +314,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	err = submitter.correctOverrideFilePathParameter(&commandParameters)
 
@@ -318,7 +328,7 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 
 	mockFileSystem := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
-	galasaHome, err := utils.NewGalasaHome(mockFileSystem, env, "")
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
 
 	commandParameters := utils.RunsSubmitCmdValues{
 		Overrides:        []string{"a=b"},
@@ -335,6 +345,7 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	overrides, err := submitter.buildOverrideMap(commandParameters)
 
@@ -385,6 +396,7 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
 
@@ -437,6 +449,7 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	// Do the launching of the tests.
 	err = submitter.ExecuteSubmitRuns(
@@ -477,12 +490,13 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	groupName := "groupname"
 	var readyRuns []TestRun
 	testRun := TestRun{
-		GherkinUrl: "gherkin.feature" ,
+		GherkinUrl: "gherkin.feature",
 	}
 	readyRuns = append(readyRuns, testRun)
 	submittedRuns := make(map[string]*TestRun)
@@ -492,9 +506,9 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 	requestor := "user"
 	requestType := ""
 
-	run, err := submitter.submitRun(groupName, readyRuns, submittedRuns, lostRuns ,runOverrides ,trace ,requestor ,requestType)
-	assert.Nil(t,err)
-	assert.Empty(t,run)
+	run, err := submitter.submitRun(groupName, readyRuns, submittedRuns, lostRuns, runOverrides, trace, requestor, requestType)
+	assert.Nil(t, err)
+	assert.Empty(t, run)
 	assert.Contains(t, submittedRuns["M100"].GherkinUrl, "gherkin.feature")
 
 }
@@ -520,6 +534,7 @@ func TestGetPortfolioReturnsGherkinPortfolio(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	flags := NewTestSelectionFlagValues()
@@ -559,6 +574,7 @@ func TestGetReadyRunsFromPortfolioReturnsGherkinReadyRuns(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	flags := NewTestSelectionFlagValues()
@@ -575,7 +591,7 @@ func TestGetReadyRunsFromPortfolioReturnsGherkinReadyRuns(t *testing.T) {
 
 	overrides := make(map[string]string)
 
-	readyRuns := submitter.buildListOfRunsToSubmit(portfolio,overrides)
+	readyRuns := submitter.buildListOfRunsToSubmit(portfolio, overrides)
 
 	assert.NotEmpty(t, readyRuns)
 	assert.Contains(t, readyRuns[0].GherkinUrl, "file:///demo/gherkin.feature")
@@ -607,6 +623,7 @@ func TestSubmitRunsFromGherkinPortfolioOutputsFeatureNames(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	flags := NewTestSelectionFlagValues()
@@ -623,7 +640,7 @@ func TestSubmitRunsFromGherkinPortfolioOutputsFeatureNames(t *testing.T) {
 
 	overrides := make(map[string]string)
 
-	readyRuns := submitter.buildListOfRunsToSubmit(portfolio,overrides)
+	readyRuns := submitter.buildListOfRunsToSubmit(portfolio, overrides)
 
 	assert.NotEmpty(t, readyRuns)
 	assert.Contains(t, readyRuns[0].GherkinUrl, "file:///demo/gherkin.feature")

@@ -21,14 +21,14 @@ import (
 )
 
 var (
-    BLACK = color.RGBA{0, 0, 0, 255}
+	BLACK = color.RGBA{0, 0, 0, 255}
 )
 
 func TestCanCalculateTargetPathsOk(t *testing.T) {
 	fs := files.NewMockFileSystem()
 	embeddedFs := embedded.NewMockReadOnlyFileSystem()
 	renderer := NewImageRenderer(embeddedFs)
-	expander := NewImageExpander(fs, renderer).(*ImageExpanderImpl)
+	expander := NewImageExpander(fs, renderer, false).(*ImageExpanderImpl)
 	folderPath, err := expander.calculateTargetImagePaths("a/b/terminals/c/e.gz")
 
 	assert.Nil(t, err, "could not get paths when we should have been able to.")
@@ -41,7 +41,7 @@ func TestCalculatesBlankPathIfPathTooShort(t *testing.T) {
 	fs := files.NewMockFileSystem()
 	embeddedFs := embedded.NewMockReadOnlyFileSystem()
 	renderer := NewImageRenderer(embeddedFs)
-	expander := NewImageExpander(fs, renderer).(*ImageExpanderImpl)
+	expander := NewImageExpander(fs, renderer, false).(*ImageExpanderImpl)
 	folderPath, err := expander.calculateTargetImagePaths("a/e.gz")
 
 	assert.Nil(t, err, "could not get paths when we should have been able to.")
@@ -54,7 +54,7 @@ func TestCalculatesBlankPathIfPathDoesntContainTerminals(t *testing.T) {
 	fs := files.NewMockFileSystem()
 	embeddedFs := embedded.NewMockReadOnlyFileSystem()
 	renderer := NewImageRenderer(embeddedFs)
-	expander := NewImageExpander(fs, renderer).(*ImageExpanderImpl)
+	expander := NewImageExpander(fs, renderer, false).(*ImageExpanderImpl)
 	folderPath, err := expander.calculateTargetImagePaths("a/b/c/d/e.gz")
 
 	assert.Nil(t, err, "could not get paths when we should have been able to.")
@@ -84,11 +84,66 @@ func TestCanExpandAGzFileToAnImageFile(t *testing.T) {
 		if err == nil {
 
 			renderer := NewImageRenderer(embeddedFs)
-			expander := NewImageExpander(fs, renderer)
+			expander := NewImageExpander(fs, renderer, false)
 
 			// When...
 			err = expander.ExpandImages("/U423")
 			assert.Nil(t, err, "could not expand images")
+			if err == nil {
+
+				// Then...
+				var isExists bool
+				isExists, err = fs.DirExists("/U423/zos3270/images/term1")
+				assert.Nil(t, err, "could not find out if file exists or not")
+				if err == nil {
+
+					assert.True(t, isExists, "Image folder %s was not created.", "/U423/zos3270/images/term1")
+					if isExists {
+
+						// Read the rendered file contents.
+						var renderedContents []byte
+						renderedContents, err = fs.ReadBinaryFile("/U423/zos3270/images/term1/term1-00001.png")
+						assert.Nil(t, err, "could not read rendered file")
+						if err == nil {
+							isSame := compareImage(t, renderedContents, "./testdata/gzipExample/images-to-compare", "term1-00001.png")
+							if isSame {
+								// The example gz file contains 10 screens, each of which should be rendered
+								assert.Equal(t, 10, expander.GetExpandedImageFileCount(), "wrong number of expanded files counted.")
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+func TestCanExpandASingleFileBumpsCounter(t *testing.T) {
+
+	realFs := files.NewOSFileSystem()
+	embeddedFs := embedded.GetReadOnlyFileSystem()
+
+	var gzContents []byte
+	var err error
+
+	gzContents, err = realFs.ReadBinaryFile("./testdata/gzipExample/term1-00001.gz")
+
+	assert.Nil(t, err, "could not load the real gz file data")
+	if err == nil {
+
+		// Load the real gz contents into the mock file system...
+		// so any image files we create don't infect the real file system.
+		fs := files.NewMockFileSystem()
+		err = fs.WriteBinaryFile("/U423/zos3270/terminals/term1/term1-1.gz", gzContents)
+		assert.Nil(t, err, "could not write real gz contents into the mock file system")
+		if err == nil {
+
+			renderer := NewImageRenderer(embeddedFs)
+			expander := NewImageExpander(fs, renderer, false)
+
+			// When...
+			err = expander.ExpandImage("/U423/zos3270/terminals/term1/term1-1.gz")
+			assert.Nil(t, err, "could not expand image")
 			if err == nil {
 
 				// Then...
@@ -169,10 +224,10 @@ func compareTwoImages(t *testing.T, renderedContents []byte, expectedContents []
 	if err == nil {
 		expectedImage, err = png.Decode(bytes.NewReader(expectedContents))
 
-        renderedImageBounds := renderedImage.Bounds()
-        expectedImageBounds := expectedImage.Bounds()
+		renderedImageBounds := renderedImage.Bounds()
+		expectedImageBounds := expectedImage.Bounds()
 
-        // Make sure the rendered image is the same size as the expected image
+		// Make sure the rendered image is the same size as the expected image
 		if renderedImageBounds == expectedImageBounds {
 			for column := expectedImage.Bounds().Min.Y; column < expectedImage.Bounds().Max.Y; column++ {
 				for row := expectedImage.Bounds().Min.X; row < expectedImage.Bounds().Max.X; row++ {
@@ -180,8 +235,8 @@ func compareTwoImages(t *testing.T, renderedContents []byte, expectedContents []
 					renderedPixelColor := renderedImage.At(column, row)
 
 					// We're ignoring colors because some pixels may have slight differences in RGB values, which
-                    // causes tests to fail. Whenever the expected pixel is black, the rendered pixel should also
-                    // be black, and when the expected pixel is a color, the rendered pixel should also be a color.
+					// causes tests to fail. Whenever the expected pixel is black, the rendered pixel should also
+					// be black, and when the expected pixel is a color, the rendered pixel should also be a color.
 					if (expectedPixelColor == BLACK && renderedPixelColor != BLACK) ||
 						(expectedPixelColor != BLACK && renderedPixelColor == BLACK) {
 						assert.Fail(t, "error", "rendered RGBA value %v does not match expected RGBA value %v at (x: %d, y: %d)", renderedPixelColor, expectedPixelColor, column, row)

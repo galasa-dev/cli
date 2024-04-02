@@ -15,7 +15,7 @@ galasactl runs prepare [flags]
 ```
       --append             Append tests to existing portfolio
       --bundle strings     bundles of which tests will be selected from, bundles are selected if the name contains this string, or if --regex is specified then matches the regex
-      --class strings      test class names to run from the specified stream or portfolio. The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.
+      --class strings      test class names to run from the specified stream or portfolio. The format of each entry is {osgi-bundle-name}/{java-class-name}.  Multiple values can be supplied using a comma-separated list of values, or by using multiple instances of the --class flag. Java class names are fully qualified. No .class suffix is needed.
       --gherkin strings    Gherkin feature file URL. Should start with 'file://'. 
   -h, --help               Displays the options for the 'runs prepare' command.
       --override strings   overrides to be sent with the tests (overrides in the portfolio will take precedence)

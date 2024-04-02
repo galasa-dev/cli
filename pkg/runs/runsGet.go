@@ -184,7 +184,8 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 			} else {
 				if httpResponse.StatusCode != http.StatusOK {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS, strconv.Itoa(httpResponse.StatusCode))
 				} else {
 					runsDetails = append(runsDetails, *details)
 				}
@@ -259,7 +260,7 @@ func GetRunsFromRestApi(
 			} else {
 				if httpResponse.StatusCode != http.StatusOK {
 					httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
-					errString := err.Error() + httpError
+					errString := httpError
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
 				} else {
 

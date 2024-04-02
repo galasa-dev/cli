@@ -41,7 +41,7 @@ func DownloadArtifacts(
 	var err error = nil
 	var runs []galasaapi.Run
 
-	if (err == nil) && (runName != "") {
+	if runName != "" {
 		err = ValidateRunName(runName)
 	}
 	if err == nil {
@@ -159,25 +159,6 @@ func nameDownloadFolder(run galasaapi.Run, runName string, timeService utils.Tim
 	return directoryName, err
 }
 
-func renderImagesInFolder(fileSystem files.FileSystem, folderName string, console utils.Console) error {
-	var err error
-
-	// No error, so try to expand the files.
-	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
-	renderer := images.NewImageRenderer(embeddedFileSystem)
-	expander := images.NewImageExpander(fileSystem, renderer)
-
-	err = expander.ExpandImages(folderName)
-	if err == nil {
-
-		// Write out a status string to the console about how many files were rendered.
-		count := expander.GetExpandedImageFileCount()
-		message := fmt.Sprintf(galasaErrors.GALASA_INFO_RENDERED_IMAGE_COUNT.Template, count, folderName)
-		console.WriteString(message)
-	}
-	return err
-}
-
 func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
 	directoryName string,
 	run galasaapi.Run,
@@ -196,10 +177,33 @@ func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
 		directoryName = filepath.Join(runDownloadTargetFolder, directoryName)
 	}
 
-	err = downloadArtifactsToDirectory(apiClient, directoryName, run, fileSystem, forceDownload, console)
+	var filePathsCreated []string
+	filePathsCreated, err = downloadArtifactsToDirectory(apiClient, directoryName, run, fileSystem, forceDownload, console)
 
 	if err == nil {
-		err = renderImagesInFolder(fileSystem, directoryName, console)
+		renderImages(fileSystem, filePathsCreated, forceDownload)
+	}
+	return err
+}
+
+func renderImages(fileSystem files.FileSystem, filePathsCreated []string, forceOverwriteExistingFiles bool) error {
+	var err error
+
+	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+	renderer := images.NewImageRenderer(embeddedFileSystem)
+	expander := images.NewImageExpander(fileSystem, renderer, forceOverwriteExistingFiles)
+
+	for _, filePath := range filePathsCreated {
+		err = expander.ExpandImage(filePath)
+		if err != nil {
+			break
+		}
+	}
+
+	if err == nil {
+		// Write out a status string to the console about how many files were rendered.
+		count := expander.GetExpandedImageFileCount()
+		log.Printf("Expanded a total of %d image files.", count)
 	}
 
 	return err
@@ -211,9 +215,10 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 	fileSystem files.FileSystem,
 	forceDownload bool,
 	console utils.Console,
-) error {
+) (filePathsCreated []string, err error) {
 
 	runId := run.GetRunId()
+	filePathsCreated = make([]string, 0)
 
 	filesWrittenOkCount := 0
 
@@ -227,9 +232,13 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 				artifactData, isArtifactDataEmpty, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiClient)
 				if err == nil {
 					if !isArtifactDataEmpty {
-						err = WriteArtifactToFileSystem(fileSystem, directoryName, artifactPath, artifactData, forceDownload, console)
+
+						targetFilePath := filepath.Join(directoryName, artifactPath)
+
+						err = WriteArtifactToFileSystem(fileSystem, targetFilePath, artifactPath, artifactData, forceDownload, console)
 						if err == nil {
 							filesWrittenOkCount += 1
+							filePathsCreated = append(filePathsCreated, targetFilePath)
 						}
 					}
 				}
@@ -257,7 +266,7 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 		}
 	}
 
-	return err
+	return filePathsCreated, err
 }
 
 // Retrieves the paths of all artifacts for a given test run using its runId.
@@ -299,7 +308,7 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 // the "runs download" command.
 func WriteArtifactToFileSystem(
 	fileSystem files.FileSystem,
-	runDirectory string,
+	targetFilePath string,
 	artifactPath string,
 	fileDownloaded io.Reader,
 	shouldOverwrite bool,
@@ -309,7 +318,6 @@ func WriteArtifactToFileSystem(
 
 	pathParts := strings.Split(artifactPath, "/")
 	fileName := pathParts[len(pathParts)-1]
-	targetFilePath := filepath.Join(runDirectory, artifactPath)
 
 	// Check if a new file should be created or if an existing one should be overwritten.
 	var fileExists bool

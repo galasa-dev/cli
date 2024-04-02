@@ -20,22 +20,21 @@ func GetStreams(launcher launcher.Launcher) ([]string, error) {
 }
 
 func ValidateStream(validStreamNames []string, streamNameToCheck string) error {
-	log.Printf("Validating that stream %s exists in the list of valid streams.\n",streamNameToCheck)
+	log.Printf("Validating that stream %s exists in the list of valid streams.\n", streamNameToCheck)
 
 	var err error = nil
 
 	var streamFound = false
-	
+
 	for _, s := range validStreamNames {
 		if s == streamNameToCheck {
 			log.Println("Stream is found in the list of valid streams.")
 			streamFound = true
-			break;
+			break
 		}
 	}
 
-	
-	if ! streamFound {
+	if !streamFound {
 		// Not a valid stream name. Build the error message.
 		log.Println("Stream not found, deciding error.")
 		if len(validStreamNames) < 1 {

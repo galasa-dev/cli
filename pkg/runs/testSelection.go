@@ -96,9 +96,11 @@ func AddCommandFlags(command *cobra.Command, flags *utils.TestSelectionFlagValue
 	flags.RegexSelect = command.Flags().Bool("regex", false, "Test selection is performed by using regex")
 
 	AddClassFlag(command, flags, false, "test class names to run from the specified stream or portfolio."+
-		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
+		" The format of each entry is {osgi-bundle-name}/{java-class-name}. "+
+		" Multiple values can be supplied using a comma-separated list of values, or by using multiple instances of the --class flag."+
+		" Java class names are fully qualified. No .class suffix is needed.")
 
-	AddGherkinFlag(command,flags, false, "Gherkin feature file URL. Should start with 'file://'. ")
+	AddGherkinFlag(command, flags, false, "Gherkin feature file URL. Should start with 'file://'. ")
 }
 
 func AddClassFlag(command *cobra.Command, flags *utils.TestSelectionFlagValues, isRequired bool, helpText string) {
@@ -173,9 +175,8 @@ func SelectTests(launcherInstance launcher.Launcher, flags *utils.TestSelectionF
 	if err == nil {
 		testSelection = TestSelection{Classes: make([]TestClass, 0)}
 
-		if err == nil {
-			err = selectTestsByBundle(testCatalog, &testSelection, flags)
-		}
+		err = selectTestsByBundle(testCatalog, &testSelection, flags)
+
 		if err == nil {
 			err = selectTestsByPackage(testCatalog, &testSelection, flags)
 		}
@@ -189,29 +190,28 @@ func SelectTests(launcherInstance launcher.Launcher, flags *utils.TestSelectionF
 			err = selectTestsByClass(testCatalog, &testSelection, flags)
 		}
 		if err == nil {
-			err = selectTestsByGherkin(testCatalog, &testSelection, flags)
+			err = selectTestsByGherkin(&testSelection, flags)
 		}
 	}
 
 	return testSelection, err
 }
 
-func selectTestsByGherkin(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
+func selectTestsByGherkin(testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 	var err error = nil
 
-	if len(*flags.GherkinUrl) < 1{
+	if len(*flags.GherkinUrl) < 1 {
 		return err
 	}
 	gherkinUrls := *flags.GherkinUrl
-	for _, gherkin := range gherkinUrls{
-		
+	for _, gherkin := range gherkinUrls {
+
 		newSelectedClass := TestClass{
 			GherkinUrl: gherkin,
 		}
-	
+
 		testSelection.Classes = append(testSelection.Classes, newSelectedClass)
 	}
-
 
 	return err
 }
@@ -304,7 +304,11 @@ func selectTestsByTest(testCatalog launcher.TestCatalog, testSelection *TestSele
 	return err
 }
 
-func selectTestsByClass(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
+func selectTestsByClass(
+	testCatalog launcher.TestCatalog, // Shouldn't this be used ?
+	testSelection *TestSelection,
+	flags *utils.TestSelectionFlagValues,
+) error {
 
 	var err error = nil
 	if len(*flags.Classes) < 1 {
