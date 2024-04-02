@@ -69,7 +69,7 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
 
     # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
     if [[ "${bootstrap}" == "" ]]; then
-        export bootstrap="https://galasa-galasa-prod.cicsk8s.hursley.ibm.com/bootstrap"
+        export bootstrap="https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap"
         info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
     fi
 
