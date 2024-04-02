@@ -18,16 +18,18 @@ type ImageFileWriter interface {
 }
 
 type ImageFileWriterImpl struct {
-	fs                     files.FileSystem
-	imageFolderPath        string
-	imageFilesWrittenCount int
+	fs                          files.FileSystem
+	imageFolderPath             string
+	imageFilesWrittenCount      int
+	forceOverwriteExistingFiles bool
 }
 
-func NewImageFileWriter(fs files.FileSystem, imageFolderPath string) ImageFileWriter {
+func NewImageFileWriter(fs files.FileSystem, imageFolderPath string, forceOverwriteExistingFiles bool) ImageFileWriter {
 	writer := new(ImageFileWriterImpl)
 	writer.fs = fs
 	writer.imageFolderPath = imageFolderPath
 	writer.imageFilesWrittenCount = 0
+	writer.forceOverwriteExistingFiles = forceOverwriteExistingFiles
 	return writer
 }
 
@@ -54,6 +56,7 @@ func (writer *ImageFileWriterImpl) isFullyQualifiedImageFileWritable(qualifiedFi
 	if err == nil {
 		if isExistsAlready {
 			// log.Printf("File %s already exists. So not over-writing it.\n", qualifiedFileName)
+			isWritable = writer.forceOverwriteExistingFiles
 		} else {
 			// It's writeable.
 			isWritable = true

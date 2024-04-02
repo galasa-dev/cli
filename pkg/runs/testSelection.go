@@ -96,7 +96,9 @@ func AddCommandFlags(command *cobra.Command, flags *utils.TestSelectionFlagValue
 	flags.RegexSelect = command.Flags().Bool("regex", false, "Test selection is performed by using regex")
 
 	AddClassFlag(command, flags, false, "test class names to run from the specified stream or portfolio."+
-		" The format of each entry is osgi-bundle-name/java-class-name . Java class names are fully qualified. No .class suffix is needed.")
+		" The format of each entry is {osgi-bundle-name}/{java-class-name}. "+
+		" Multiple values can be supplied using a comma-separated list of values, or by using multiple instances of the --class flag."+
+		" Java class names are fully qualified. No .class suffix is needed.")
 
 	AddGherkinFlag(command, flags, false, "Gherkin feature file URL. Should start with 'file://'. ")
 }
@@ -302,8 +304,11 @@ func selectTestsByTest(testCatalog launcher.TestCatalog, testSelection *TestSele
 	return err
 }
 
-func selectTestsByClass(testCatalog launcher.TestCatalog, // Shouldn't this be used ?
-	testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
+func selectTestsByClass(
+	testCatalog launcher.TestCatalog, // Shouldn't this be used ?
+	testSelection *TestSelection,
+	flags *utils.TestSelectionFlagValues,
+) error {
 
 	var err error = nil
 	if len(*flags.Classes) < 1 {

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/props"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -33,6 +34,7 @@ func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	err := submitter.writeThrottleFile("throttle", 101)
@@ -74,6 +76,7 @@ func TestReadBackThrottleFileFailsIfNoThrottleFileThere(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	_, err = submitter.readThrottleFile("throttle")
@@ -104,6 +107,7 @@ func TestReadBackThrottleFileFailsIfFileContainsInvalidInt(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	_, err = submitter.readThrottleFile("throttle")
@@ -130,6 +134,7 @@ func TestUpdateThrottleFromFileIfDifferentChangesValueWhenDifferent(t *testing.T
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	mockFileSystem.WriteTextFile("throttle", "10")
@@ -156,6 +161,7 @@ func TestUpdateThrottleFromFileIfDifferentDoesntChangeIfFileMissing(t *testing.T
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	// mockFileSystem.WriteTextFile("throttle", "10") - file is missing now.
@@ -191,6 +197,7 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	overrides, err := submitter.buildOverrideMap(commandParameters)
@@ -229,6 +236,7 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	overrides, err := submitter.buildOverrideMap(commandParameters)
 
@@ -262,6 +270,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	err = submitter.correctOverrideFilePathParameter(&commandParameters)
 
@@ -305,6 +314,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	err = submitter.correctOverrideFilePathParameter(&commandParameters)
 
@@ -335,6 +345,7 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	overrides, err := submitter.buildOverrideMap(commandParameters)
 
@@ -385,6 +396,7 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
 
@@ -437,6 +449,7 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 	// Do the launching of the tests.
 	err = submitter.ExecuteSubmitRuns(
@@ -477,6 +490,7 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	groupName := "groupname"
@@ -520,6 +534,7 @@ func TestGetPortfolioReturnsGherkinPortfolio(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	flags := NewTestSelectionFlagValues()
@@ -559,6 +574,7 @@ func TestGetReadyRunsFromPortfolioReturnsGherkinReadyRuns(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	flags := NewTestSelectionFlagValues()
@@ -607,6 +623,7 @@ func TestSubmitRunsFromGherkinPortfolioOutputsFeatureNames(t *testing.T) {
 		mockTimeService,
 		env,
 		console,
+		images.NewImageExpanderNullImpl(),
 	)
 
 	flags := NewTestSelectionFlagValues()

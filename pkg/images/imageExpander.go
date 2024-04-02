@@ -16,25 +16,62 @@ import (
 
 type ImageExpander interface {
 	ExpandImages(rootFolderPath string) error
+	ExpandImage(pathToFile string) error
 	GetExpandedImageFileCount() int
 }
 
-type ImageExpanderImpl struct {
-	fs                  files.FileSystem
-	renderer            ImageRenderer
+// ********** A null implementation. Does nothing. ***********
+type ImageExpanderNullImpl struct {
 	expandedFileCounter int
 }
 
-func NewImageExpander(fs files.FileSystem, renderer ImageRenderer) ImageExpander {
+func (expander *ImageExpanderNullImpl) GetExpandedImageFileCount() int {
+	return expander.expandedFileCounter
+}
+
+func (expander *ImageExpanderNullImpl) ExpandImages(rootFolderPath string) error {
+	return nil
+}
+
+func (expander *ImageExpanderNullImpl) ExpandImage(filePath string) error {
+	return nil
+}
+
+func NewImageExpanderNullImpl() ImageExpander {
+	expander := new(ImageExpanderNullImpl)
+	expander.expandedFileCounter = 0
+	return expander
+}
+
+// ******** A real implementation of an expander *******
+type ImageExpanderImpl struct {
+	fs                          files.FileSystem
+	renderer                    ImageRenderer
+	expandedFileCounter         int
+	forceOverwriteExistingFiles bool
+}
+
+func NewImageExpander(fs files.FileSystem, renderer ImageRenderer, forceOverwriteExistingFiles bool) ImageExpander {
 	expander := new(ImageExpanderImpl)
 	expander.fs = fs
 	expander.renderer = renderer
 	expander.expandedFileCounter = 0
+	expander.forceOverwriteExistingFiles = forceOverwriteExistingFiles
 	return expander
 }
 
 func (expander *ImageExpanderImpl) GetExpandedImageFileCount() int {
 	return expander.expandedFileCounter
+}
+
+func (expander *ImageExpanderImpl) ExpandImage(filePath string) error {
+	var err error
+
+	if strings.HasSuffix(filePath, ".gz") {
+		// It's a gz file we might like to expand.
+		err = expander.expandGzFile(filePath)
+	}
+	return err
 }
 
 func (expander *ImageExpanderImpl) ExpandImages(rootFolderPath string) error {
@@ -47,13 +84,9 @@ func (expander *ImageExpanderImpl) ExpandImages(rootFolderPath string) error {
 
 	if err == nil {
 		for _, filePath := range paths {
-			if strings.HasSuffix(filePath, ".gz") {
-				// It's a gz file we might like to expand.
-
-				err = expander.expandGzFile(filePath)
-				if err != nil {
-					break
-				}
+			err = expander.ExpandImage(filePath)
+			if err != nil {
+				break
 			}
 		}
 	}
@@ -81,7 +114,7 @@ func (expander *ImageExpanderImpl) expandGzFile(gzFilePath string) error {
 					log.Printf("Could not read the contents of hte gzip file. cause:%v\n", err)
 				} else {
 
-					writer := NewImageFileWriter(expander.fs, targetImageFolderPath)
+					writer := NewImageFileWriter(expander.fs, targetImageFolderPath, expander.forceOverwriteExistingFiles)
 
 					err = expander.renderer.RenderJsonBytesToImageFiles(binaryContent, writer)
 

@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 
@@ -14,8 +13,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
-	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
@@ -211,6 +208,9 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 					if err == nil {
 						var console = factory.GetStdOutConsole()
 
+						renderer := images.NewImageRenderer(embeddedFileSystem)
+						expander := images.NewImageExpander(fileSystem, renderer, true)
+
 						// Do the launching of the tests.
 						submitter := runs.NewSubmitter(
 							galasaHome,
@@ -219,6 +219,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 							timeService,
 							env,
 							console,
+							expander,
 						)
 
 						err = submitter.ExecuteSubmitRuns(
@@ -227,7 +228,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 						)
 
 						if err == nil {
-							scanFilesAndExpandImages(fileSystem, embeddedFileSystem, galasaHome, console)
+							reportOnExpandedImages(expander, console)
 						}
 					}
 				}
@@ -238,26 +239,13 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	return err
 }
 
-func scanFilesAndExpandImages(fs files.FileSystem, embeddedFs embedded.ReadOnlyFileSystem, galasaHome utils.GalasaHome, console utils.Console) error {
-	var err error
-	log.Printf("Starting to scan files to expand .gz files into terminal images. Root folder: %s", galasaHome.GetNativeFolderPath())
-	renderer := images.NewImageRenderer(embeddedFs)
-	expander := images.NewImageExpander(fs, renderer)
+func reportOnExpandedImages(expander images.ImageExpander, console utils.Console) error {
 
-	folderToScan := galasaHome.GetNativeFolderPath()
+	// Write out a status string to the console about how many files were rendered.
+	count := expander.GetExpandedImageFileCount()
 
-	err = expander.ExpandImages(folderToScan)
-	if err == nil {
+	// Only bother writing out a message if any images have been expanded.
+	log.Printf("Expanded a total of %d images from .gz files.", count)
 
-		// Write out a status string to the console about how many files were rendered.
-		count := expander.GetExpandedImageFileCount()
-
-		// Only bother writing out a message if any images have been expanded.
-		if count > 0 {
-			message := fmt.Sprintf(galasaErrors.GALASA_INFO_RENDERED_IMAGE_COUNT.Template, count)
-			console.WriteString(message)
-		}
-	}
-	log.Printf("Scanning of files to expand .gz files into terminal images completed.\n")
-	return err
+	return nil
 }

@@ -13,6 +13,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -181,7 +182,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 
 					var console = factory.GetStdOutConsole()
 
-					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console)
+					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console, images.NewImageExpanderNullImpl())
 
 					err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 				}

@@ -57,6 +57,11 @@ func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome strin
 func validateUserHomeDir(path string, fs files.FileSystem) error {
 	var err error = nil
 
+	// path is a string, so can never be nil
+	if strings.Trim(path, "\n \t") == "" {
+
+	}
+
 	return err
 }
 

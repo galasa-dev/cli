@@ -322,7 +322,7 @@ func TestJvmLauncherSetsRASStoreOverride(t *testing.T) {
 	env := utils.NewMockEnv()
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
-	overridesGotBack := addStandardOverrideProperties(galasaHome, fs, overrides)
+	overridesGotBack := addStandardOverrideProperties(galasaHome, overrides)
 	assert.Contains(t, overridesGotBack, "framework.resultarchive.store")
 }
 
@@ -332,7 +332,7 @@ func TestJvmLauncherSets3270TerminalOutputFormatProperty(t *testing.T) {
 	env := utils.NewMockEnv()
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
-	overridesGotBack := addStandardOverrideProperties(galasaHome, fs, overrides)
+	overridesGotBack := addStandardOverrideProperties(galasaHome, overrides)
 
 	assert.Contains(t, overridesGotBack, "zos3270.terminal.output")
 	assert.Contains(t, overridesGotBack["zos3270.terminal.output"], "png")

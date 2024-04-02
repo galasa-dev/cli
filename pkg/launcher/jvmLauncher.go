@@ -362,7 +362,7 @@ func createTemporaryOverridesFile(
 	fileSystem files.FileSystem,
 	overrides map[string]interface{},
 ) (string, error) {
-	overrides = addStandardOverrideProperties(galasaHome, fileSystem, overrides)
+	overrides = addStandardOverrideProperties(galasaHome, overrides)
 
 	// Write the properties to a file
 	overridesFilePath := temporaryFolderPath + "overrides.properties"
@@ -372,7 +372,6 @@ func createTemporaryOverridesFile(
 
 func addStandardOverrideProperties(
 	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
 	overrides map[string]interface{},
 ) map[string]interface{} {
 

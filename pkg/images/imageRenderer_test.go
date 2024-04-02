@@ -77,7 +77,7 @@ func TestRenderEmptyTerminalRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -118,7 +118,7 @@ func TestRenderTerminalWithFieldRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -159,7 +159,7 @@ func TestRenderTerminalWithSmallerSizeRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -200,7 +200,7 @@ func TestRenderTerminalWithFieldAtOriginRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -244,7 +244,7 @@ func TestRenderTerminalWithFieldAtTopRightRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -289,7 +289,7 @@ func TestRenderTerminalWithFieldAtBottomLeftRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -333,7 +333,7 @@ func TestRenderTerminalWithFieldAtBottomRightRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -377,7 +377,7 @@ func TestRenderTerminalWithFullRowRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, false)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -425,7 +425,7 @@ func TestRenderTerminalWithFullColumnRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -469,7 +469,7 @@ func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -530,7 +530,7 @@ func TestRenderTerminaColorsRenderOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -585,7 +585,7 @@ func TestRenderTerminaUnicodeTextRendersOk(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...
@@ -626,7 +626,7 @@ func TestRenderTerminalWithMissingFontDefaultsToMonoFont(t *testing.T) {
 	terminal := createTerminal(imageId, terminalImage)
 	terminalJsonBytes, _ := json.Marshal(terminal)
 
-	imageFileWriter := NewImageFileWriter(fs, tempDir)
+	imageFileWriter := NewImageFileWriter(fs, tempDir, true)
 	imageRenderer := NewImageRenderer(embeddedFs)
 
 	// When...

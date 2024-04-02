@@ -18,6 +18,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/props"
 	"github.com/galasa-dev/cli/pkg/runsformatter"
@@ -31,6 +32,7 @@ type Submitter struct {
 	timeService utils.TimeService
 	env         utils.Environment
 	console     utils.Console
+	expander    images.ImageExpander
 }
 
 func NewSubmitter(
@@ -40,6 +42,7 @@ func NewSubmitter(
 	timeService utils.TimeService,
 	env utils.Environment,
 	console utils.Console,
+	expander images.ImageExpander,
 ) *Submitter {
 	instance := new(Submitter)
 	instance.galasaHome = galasaHome
@@ -48,6 +51,7 @@ func NewSubmitter(
 	instance.timeService = timeService
 	instance.env = env
 	instance.console = console
+	instance.expander = expander
 	return instance
 }
 
@@ -100,12 +104,33 @@ func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
 		err = submitter.createReports(params, finishedRuns, lostRuns)
 		if err == nil {
 
-			// Fail the command if tests failed, and the user wanted us to fail if tests fail.
-			failureCount := CountTotalFailedRuns(finishedRuns, lostRuns)
-			if failureCount > 0 && !params.NoExitCodeOnTestFailures {
-				// Not all runs passed
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED, failureCount)
+			err = reportRendedImages(finishedRuns, submitter)
+
+			if err == nil {
+
+				// Fail the command if tests failed, and the user wanted us to fail if tests fail.
+				failureCount := CountTotalFailedRuns(finishedRuns, lostRuns)
+				if failureCount > 0 && !params.NoExitCodeOnTestFailures {
+					// Not all runs passed
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_TESTS_FAILED, failureCount)
+				}
 			}
+		}
+
+	}
+
+	return err
+}
+
+func reportRendedImages(finishedRuns map[string]*TestRun, submitter *Submitter) error {
+	var err error
+
+	for runName, _ := range finishedRuns {
+
+		folderToScan := submitter.galasaHome.GetNativeFolderPath() + "/ras/" + runName
+		err = submitter.expander.ExpandImages(folderToScan)
+		if err != nil {
+			break
 		}
 	}
 
@@ -394,6 +419,7 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 						}
 					}
 				}
+
 				if checkRun.GherkinUrl != "" {
 					log.Printf("Run %v has finished(%v) - %v\n", runName, result, checkRun.GherkinFeature)
 				} else {
