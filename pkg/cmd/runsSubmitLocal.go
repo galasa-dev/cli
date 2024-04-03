@@ -228,7 +228,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 						)
 
 						if err == nil {
-							reportOnExpandedImages(expander, console)
+							reportOnExpandedImages(expander)
 						}
 					}
 				}
@@ -239,7 +239,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	return err
 }
 
-func reportOnExpandedImages(expander images.ImageExpander, console utils.Console) error {
+func reportOnExpandedImages(expander images.ImageExpander) error {
 
 	// Write out a status string to the console about how many files were rendered.
 	count := expander.GetExpandedImageFileCount()
