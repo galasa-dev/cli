@@ -2,7 +2,8 @@
 plugins {
     id 'base'
     id 'maven-publish'
-    id 'dev.galasa.obr' version '0.15.0'
+    id 'dev.galasa.obr' version '0.33.0'
+    id 'dev.galasa.testcatalog' version '0.33.0'
 }
 
 // Set the variables which will control what the built OSGi bundle will be called
@@ -30,4 +31,14 @@ publishing {
             artifact obrFile
         }
     }
+}
+
+// If we are deploying a test catalog using the galasa plugin,
+// directly to the ecosystem, then we can get the properties
+// we need from the system properties, passed on the command line using
+// -DGALASA_STREAM=xxx -DGALASA_BOOTSTRAP=xxx -DGALASA_TOKEN=xxx
+deployTestCatalog {
+    bootstrap = System.getProperty("GALASA_BOOTSTRAP")
+    stream = System.getProperty("GALASA_STREAM")
+    token = System.getProperty("GALASA_TOKEN");
 }

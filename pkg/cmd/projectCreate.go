@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
@@ -269,7 +270,7 @@ func createParentFolderContents(
 
 	if useMaven {
 		err = createParentFolderPom(fileGenerator, packageName, featureNames,
-			isOBRProjectRequired, forceOverwrite)
+			isOBRProjectRequired, forceOverwrite, isDevelopment)
 	}
 
 	if err == nil {
@@ -331,6 +332,8 @@ func separateFeatureNamesFromCommaSeparatedList(featureNamesCommaSeparated strin
 		}
 	}
 
+	sort.Strings(featureNames)
+
 	return featureNames, err
 }
 
@@ -341,6 +344,7 @@ func createParentFolderPom(
 	featureNames []string,
 	isOBRRequired bool,
 	forceOverwrite bool,
+	IsDevelopment bool,
 ) error {
 
 	type ParentPomParameters struct {
@@ -352,6 +356,7 @@ func createParentFolderPom(
 		IsOBRRequired    bool
 		ObrName          string
 		ChildModuleNames []string
+		IsDevelopment    bool
 	}
 
 	galasaVersion, err := embedded.GetGalasaVersion()
@@ -363,6 +368,7 @@ func createParentFolderPom(
 			IsOBRRequired:    isOBRRequired,
 			ObrName:          packageName + ".obr",
 			ChildModuleNames: make([]string, len(featureNames)),
+			IsDevelopment:    IsDevelopment,
 		}
 		// Populate the child module names
 		for index, featureName := range featureNames {
