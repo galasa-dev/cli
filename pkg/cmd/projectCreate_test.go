@@ -826,3 +826,22 @@ func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useMaven, true)
 	assert.Equal(t, cmd.Values().(*ProjectCreateCmdValues).useGradle, true)
 }
+
+func TestSeparateFeatureNamesSortsTheResults(t *testing.T) {
+
+	features1, err := separateFeatureNamesFromCommaSeparatedList("payee,account")
+	assert.Nil(t, err)
+	assert.NotNil(t, features1)
+	assert.Equal(t, 2, len(features1))
+	assert.Equal(t, features1[0], "account")
+	assert.Equal(t, features1[1], "payee")
+
+	// When we do the same thing in a different order...
+	features2, err2 := separateFeatureNamesFromCommaSeparatedList("account,payee")
+	// We should get the same results.
+	assert.Nil(t, err2)
+	assert.NotNil(t, features2)
+	assert.Equal(t, 2, len(features2))
+	assert.Equal(t, features2[0], "account")
+	assert.Equal(t, features2[1], "payee")
+}

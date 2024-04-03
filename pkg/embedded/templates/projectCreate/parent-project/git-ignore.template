@@ -17,3 +17,6 @@
 # Ignore any built java artifacts
 **/*.class
 **/*.jar
+
+# Ignore any temporary folder locally
+temp/
