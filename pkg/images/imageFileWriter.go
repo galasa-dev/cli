@@ -6,8 +6,6 @@
 package images
 
 import (
-	"log"
-
 	"github.com/galasa-dev/cli/pkg/files"
 )
 
@@ -76,7 +74,6 @@ func (writer *ImageFileWriterImpl) WriteImageFile(simpleFileName string, imageBy
 			err = writer.fs.WriteBinaryFile(fullyQualifiedTargetImageFilePath, imageBytes)
 			if err == nil {
 				writer.imageFilesWrittenCount = writer.imageFilesWrittenCount + 1
-				log.Printf("Image file has been created: %s\n", fullyQualifiedTargetImageFilePath)
 			}
 		}
 	}

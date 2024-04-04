@@ -156,9 +156,6 @@ func (expander *ImageExpanderImpl) calculateTargetImagePaths(gzFilePath string) 
 
 			// Roll together all the parts of the files to get the folder and the file
 			desiredImageFolderPath = strings.Join(filePathParts[:len(filePathParts)-1], separator)
-
-			log.Printf("Expanding gzFile %s to folder %s\n", gzFilePath, desiredImageFolderPath)
-
 		}
 	}
 	return desiredImageFolderPath, err
