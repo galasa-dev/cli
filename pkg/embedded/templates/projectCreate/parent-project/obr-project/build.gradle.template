@@ -18,10 +18,8 @@ dependencies {
 {{- end }}
 }
 
+def testcatalog = file('build/testcatalog.json')
 def obrFile = file('build/galasa.obr')
-artifacts {
-    archives obrFile
-}
 
 // Tell gradle to publish the built OBR as a maven artifact on the 
 // local maven repository.
@@ -29,6 +27,10 @@ publishing {
     publications {
         maven(MavenPublication) {
             artifact obrFile
+            artifact (testcatalog) {
+                classifier "testcatalog"
+                extension "json"
+            }
         }
     }
 }
