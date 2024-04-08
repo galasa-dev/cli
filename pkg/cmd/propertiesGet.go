@@ -11,6 +11,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/properties"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -165,19 +166,22 @@ func (cmd *PropertiesGetCommand) executePropertiesGet(
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				var apiClient *galasaapi.APIClient
+				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 
-				// Call to process the command in a unit-testable way.
-				err = properties.GetProperties(
-					propertiesCmdValues.namespace,
-					propertiesCmdValues.propertyName,
-					cmd.values.propertiesPrefix,
-					cmd.values.propertiesSuffix,
-					cmd.values.propertiesInfix,
-					apiClient,
-					cmd.values.propertiesOutputFormat,
-					console,
-				)
+				if err == nil {
+					// Call to process the command in a unit-testable way.
+					err = properties.GetProperties(
+						propertiesCmdValues.namespace,
+						propertiesCmdValues.propertyName,
+						cmd.values.propertiesPrefix,
+						cmd.values.propertiesSuffix,
+						cmd.values.propertiesInfix,
+						apiClient,
+						cmd.values.propertiesOutputFormat,
+						console,
+					)
+				}
 			}
 		}
 	}

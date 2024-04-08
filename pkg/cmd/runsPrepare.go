@@ -12,6 +12,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -150,47 +151,50 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 					timeService := factory.GetTimeService()
 
 					// Create an API client
+					var apiClient *galasaapi.APIClient
 					apiServerUrl := bootstrapData.ApiServerURL
-					apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
-					launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
-
-					validator := runs.NewStreamBasedValidator()
-					err = validator.Validate(cmd.values.prepareSelectionFlags)
+					apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 					if err == nil {
-
-						var testSelection runs.TestSelection
-						testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
+						launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
+	
+						validator := runs.NewStreamBasedValidator()
+						err = validator.Validate(cmd.values.prepareSelectionFlags)
 						if err == nil {
-
-							count := len(testSelection.Classes)
-							if count < 1 {
-								err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
-							} else {
-								if count == 1 {
-									log.Println("1 test was selected")
-								} else {
-									log.Printf("%v tests were selected", count)
-								}
-							}
-
+	
+							var testSelection runs.TestSelection
+							testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
 							if err == nil {
-
-								var portfolio *runs.Portfolio
-								if *cmd.values.prepareAppend {
-									portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
+	
+								count := len(testSelection.Classes)
+								if count < 1 {
+									err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
 								} else {
-									portfolio = runs.NewPortfolio()
+									if count == 1 {
+										log.Println("1 test was selected")
+									} else {
+										log.Printf("%v tests were selected", count)
+									}
 								}
-
+	
 								if err == nil {
-									runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
-
-									err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
+	
+									var portfolio *runs.Portfolio
+									if *cmd.values.prepareAppend {
+										portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
+									} else {
+										portfolio = runs.NewPortfolio()
+									}
+	
 									if err == nil {
-										if *cmd.values.prepareAppend {
-											log.Println("Portfolio appended")
-										} else {
-											log.Println("Portfolio created")
+										runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
+	
+										err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
+										if err == nil {
+											if *cmd.values.prepareAppend {
+												log.Println("Portfolio appended")
+											} else {
+												log.Println("Portfolio created")
+											}
 										}
 									}
 								}

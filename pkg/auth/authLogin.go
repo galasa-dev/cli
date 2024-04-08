@@ -74,7 +74,7 @@ func GetAuthenticatedAPIClient(
 	galasaHome utils.GalasaHome,
 	timeService utils.TimeService,
 	env utils.Environment,
-) *galasaapi.APIClient {
+) (*galasaapi.APIClient, error) {
 	bearerToken, err := GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
 	if err != nil {
 		// Attempt to log in
@@ -89,10 +89,6 @@ func GetAuthenticatedAPIClient(
 	var apiClient *galasaapi.APIClient
 	if err == nil {
 		apiClient = api.InitialiseAuthenticatedAPI(apiServerUrl, bearerToken)
-	} else {
-		// Temporary code to allow the CLI to continue running commands while authentication is being implemented.
-		// Remove this once authentication has been delivered and users can authenticate against an ecosystem
-		apiClient = api.InitialiseAPI(apiServerUrl)
 	}
-	return apiClient
+	return apiClient, err
 }
