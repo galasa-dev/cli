@@ -26,6 +26,7 @@ func ApplyResources(
 	filePath string,
 	fileSystem files.FileSystem,
 	apiServerUrl string,
+	bearerToken string,
 ) error {
 	var err error
 	var fileContent string
@@ -42,13 +43,13 @@ func ApplyResources(
 		}
 
 		if err == nil {
-			err = sendResourcesRequestToServer(jsonBytes, apiServerUrl)
+			err = sendResourcesRequestToServer(jsonBytes, apiServerUrl, bearerToken)
 		}
 	}
 	return err
 }
 
-func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string) error {
+func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string, bearerToken string) error {
 
 	var err error
 	var responseBody []byte
@@ -61,6 +62,7 @@ func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string)
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Accept-Encoding", "gzip,deflate,br")
+		req.Header.Set("Authorization", "Bearer " + bearerToken)
 
 		// WARNING:
 		// Don't leave the following log statement enabled. It might log secret namespace property values, which would be a security violation.

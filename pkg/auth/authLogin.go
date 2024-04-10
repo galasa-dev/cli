@@ -75,6 +75,24 @@ func GetAuthenticatedAPIClient(
 	timeService utils.TimeService,
 	env utils.Environment,
 ) (*galasaapi.APIClient, error) {
+	bearerToken, err := GetBearerToken(apiServerUrl, fileSystem, galasaHome, timeService, env)
+
+	var apiClient *galasaapi.APIClient
+	if err == nil {
+		apiClient = api.InitialiseAuthenticatedAPI(apiServerUrl, bearerToken)
+	}
+	return apiClient, err
+}
+
+// Gets a locally-stored bearer token, or attempts to log in and retrieve a new bearer token if
+// one does not already exist
+func GetBearerToken(
+	apiServerUrl string,
+	fileSystem files.FileSystem,
+	galasaHome utils.GalasaHome,
+	timeService utils.TimeService,
+	env utils.Environment,
+) (string, error) {
 	bearerToken, err := GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
 	if err != nil {
 		// Attempt to log in
@@ -85,10 +103,5 @@ func GetAuthenticatedAPIClient(
 			bearerToken, err = GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
 		}
 	}
-
-	var apiClient *galasaapi.APIClient
-	if err == nil {
-		apiClient = api.InitialiseAuthenticatedAPI(apiServerUrl, bearerToken)
-	}
-	return apiClient, err
+	return bearerToken, err
 }
