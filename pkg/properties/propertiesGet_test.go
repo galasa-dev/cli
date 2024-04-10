@@ -11,10 +11,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/galasa-dev/cli/pkg/auth"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -324,13 +322,7 @@ func TestInvalidNamepsaceReturnsError(t *testing.T) {
 
 	mockConsole := utils.NewMockConsole()
 
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
-
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	//When
 	err := GetProperties(namespace, name, prefix, suffix, infix, apiClient, propertiesOutputFormat, mockConsole)
@@ -354,13 +346,8 @@ func TestValidNamespaceReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name      value
 validnamespace property0 value0
@@ -393,13 +380,8 @@ func TestEmptyNamespaceReturnsEmpty(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `Total:0
 `
@@ -425,13 +407,8 @@ func TestValidNamespaceAndPrefixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name             value
 validnamespace aPrefix.property prefixVal
@@ -461,13 +438,8 @@ func TestValidNamespaceAndSuffixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name             value
 validnamespace property.aSuffix suffixVal
@@ -497,13 +469,8 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name                     value
 validnamespace aPrefix.property.aSuffix prefixSuffixVal
@@ -533,13 +500,8 @@ func TestValidNamespaceWithNoMatchingPrefixAndSuffixReturnsEmpty(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `Total:0
 `
@@ -566,13 +528,8 @@ func TestValidNamespaceAndNoMatchingPrefixReturnsEmpty(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `Total:0
 `
@@ -599,13 +556,8 @@ func TestValidNamespaceAndNoMatchingSuffixReturnsEmpty(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `Total:0
 `
@@ -632,13 +584,8 @@ func TestValidNamespaceWithMatchingInfixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name                value
 validnamespace extra.anInfix.extra infixVal
@@ -667,13 +614,8 @@ func TestValidNamespaceWithMatchingInfixesReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name                value
 validnamespace extra.anInfix.extra infixVal
@@ -702,13 +644,8 @@ func TestValidNamespaceWithNoMatchingInfixReturnsEmpty(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `Total:0
 `
@@ -734,13 +671,8 @@ func TestValidNamespaceWithMatchingPrefixAndInfixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name                     value
 validnamespace aPrefix.anInfix.property prefixInfixVal
@@ -770,13 +702,8 @@ func TestValidNamespaceWithMatchingSuffixAndInfixReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name                     value
 validnamespace property.anInfix.aSuffix suffixInfixVal
@@ -806,13 +733,8 @@ func TestValidNamespaceWithMatchingPrefixAndSuffixAndInfixReturnsOk(t *testing.T
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name                             value
 validnamespace aPrefix.anInfix.property.aSuffix prefixSuffixInfixVal
@@ -842,13 +764,8 @@ func TestValidNamespaceWithValidNameReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name      value
 validnamespace property0 value0
@@ -877,13 +794,8 @@ func TestValidNameWithEmptyValueValidNameReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `namespace      name           value
 validnamespace emptyValueName 
@@ -913,13 +825,8 @@ func TestInvalidPropertyNameReturnsEmpty(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `Total:0
 `
@@ -946,13 +853,8 @@ func TestValidNamespaceRawFormatReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `validnamespace|property0|value0
 validnamespace|property1|value1
@@ -981,13 +883,8 @@ func TestEmptyNamespaceRawFormatReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := ``
 	//When
@@ -1012,13 +909,8 @@ func TestValidNamespaceYamlFormatReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := `apiVersion: null
 kind: null
@@ -1074,13 +966,8 @@ func TestEmptyNamespaceYamlFormatReturnsOk(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := ``
 	//When
@@ -1160,13 +1047,8 @@ func TestInvalidNamespaceFormatWithCapitalLettersReturnsError(t *testing.T) {
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
 
-	apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	expectedOutput := ``
 	//When

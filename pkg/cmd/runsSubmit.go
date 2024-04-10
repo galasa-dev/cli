@@ -13,6 +13,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
@@ -173,18 +174,22 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 
 				// The launcher we are going to use to start/monitor tests.
 				apiServerUrl := bootstrapData.ApiServerURL
-				apiClient := auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
-				launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
-				validator := runs.NewStreamBasedValidator()
-				err = validator.Validate(cmd.values.TestSelectionFlagValues)
+				var apiClient *galasaapi.APIClient
+				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
 				if err == nil {
-
-					var console = factory.GetStdOutConsole()
-
-					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console, images.NewImageExpanderNullImpl())
-
-					err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
+					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
+	
+					validator := runs.NewStreamBasedValidator()
+					err = validator.Validate(cmd.values.TestSelectionFlagValues)
+					if err == nil {
+	
+						var console = factory.GetStdOutConsole()
+	
+						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console, images.NewImageExpanderNullImpl())
+	
+						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
+					}
 				}
 			}
 		}

@@ -216,9 +216,10 @@ func TestGetAuthenticatedAPIClientWithBearerTokenFileReturnsClient(t *testing.T)
 	mockFileSystem.WriteTextFile(bearerTokenFilePath, fmt.Sprintf(`{"jwt":"%s"}`, mockJwt))
 
 	// When...
-	apiClient := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	// Then...
+	assert.Nil(t, err, "No error should have been thrown")
 	assert.NotNil(t, apiClient, "API client should not be nil")
 }
 
@@ -233,13 +234,11 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 
 	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 
-	mockClientId := "dummyId"
-	mockSecret := "shhhh"
-	mockRefreshToken := "abcdefg"
-	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf(
-		"GALASA_CLIENT_ID=%s\n"+
-			"GALASA_SECRET=%s\n"+
-			"GALASA_ACCESS_TOKEN=%s", mockClientId, mockSecret, mockRefreshToken))
+	accessTokenValue := "abc"
+	clientIdValue := "dummyId"
+	tokenPropertyValue := accessTokenValue + TOKEN_SEPARATOR + clientIdValue
+
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
 	mockJwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
@@ -251,35 +250,10 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 	apiServerUrl := server.URL
 
 	// When...
-	apiClient := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
 
 	// Then...
+	assert.Nil(t, err, "No error should have been thrown")
 	assert.NotNil(t, apiClient, "API client should not be nil if the login was successful")
 }
 
-// Temporary test - remove once authentication is enforced
-func TestGetAuthenticatedAPIClientWithUnavailableAPIContinuesWithoutToken(t *testing.T) {
-	// Given...
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockTimeService := utils.NewMockTimeService()
-
-	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
-
-	mockClientId := "dummyId"
-	mockRefreshToken := "abcdefg"
-	tokenPropertyValue := mockRefreshToken + TOKEN_SEPARATOR + mockClientId
-	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
-
-	server := NewAuthServletMock(t, 500, "")
-	defer server.Close()
-
-	apiServerUrl := server.URL
-
-	// When...
-	apiClient := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
-
-	// Then...
-	assert.NotNil(t, apiClient, "API client should not be nil")
-}
