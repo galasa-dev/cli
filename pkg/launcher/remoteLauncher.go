@@ -132,7 +132,7 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 // When passed an array of GalasaProperty objects, extract the stream names from them.
 func getStreamNamesFromProperties(properties []galasaapi.GalasaProperty) ([]string, error) {
 	var err error
-	var streams []string = make([]string,0)
+	var streams []string = make([]string, 0)
 	for _, property := range properties {
 		propertyNamePtr := property.GetMetadata().Name
 
@@ -168,7 +168,7 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 			var resp *http.Response
 			resp, err = http.Get(*cpsProperty.Value)
 			if err != nil {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, *cpsProperty.Value, stream, err)
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_GET_TEST_CATALOG_CONTENTS_FAILED, *cpsProperty.Value, stream, err)
 			} else {
 				defer resp.Body.Close()
 
@@ -188,5 +188,5 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 		}
 	}
 
-	return testCatalog, nil
+	return testCatalog, err
 }
