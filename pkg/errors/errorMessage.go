@@ -7,6 +7,7 @@ package errors
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -62,6 +63,7 @@ func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	galasaError.msgType = msgType
 	galasaError.message = message
 
+	log.Println(message)
 	if galasaError.msgType.IsStackTraceWanted {
 		LogStackTrace()
 	}
@@ -103,7 +105,7 @@ var (
 	GALASA_ERROR_SUBMIT_REPORT_JUNIT_WRITE_FAIL           = NewMessageType("GAL1015E: Failed to  write test report junit results file %s. Reason is %s", 1015, STACK_TRACE_WANTED)
 	GALASA_ERROR_EMPTY_PORTFOLIO                          = NewMessageType("GAL1016E: There are no tests in the test porfolio %s", 1016, STACK_TRACE_WANTED)
 	GALASA_ERROR_TESTS_FAILED                             = NewMessageType("GAL1017E: Not all runs passed. %v failed.", 1017, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_NO_TESTS_SELECTED                        = NewMessageType("GAL1018E: No tests were selected.", 1018, STACK_TRACE_WANTED)
+	GALASA_ERROR_NO_TESTS_SELECTED                        = NewMessageType("GAL1018E: No tests were selected.", 1018, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_PREPARE_INVALID_OVERRIDE                 = NewMessageType("GAL1019E: Invalid override '%v'", 1019, STACK_TRACE_WANTED)
 	GALASA_ERROR_OPEN_LOG_FILE_FAILED                     = NewMessageType("GAL1020E: Failed to open log file '%s' for writing. Reason is %s", 1020, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_OPEN_PORTFOLIO_FILE_FAILED               = NewMessageType("GAL1021E: Failed to open portfolio file '%s' for reading. Reason is %s", 1021, STACK_TRACE_WANTED)
@@ -230,7 +232,8 @@ var (
 	GALASA_ERROR_FAILED_TO_COMPILE_PROPERTY_FIELD_REGEX = NewMessageType("GAL1141E: Unable to compile the regex pattern for Galasa Property field '%s'. Reason: '%s'", 1141, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_PROPERTY_FIELD_FORMAT          = NewMessageType("GAL1142E: The %s field value, '%s', provided does not match formatting requirements. "+
 		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.", 1142, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS = NewMessageType("GAL1143E: Could not query run results. Server returned a non-200 code (%s)", 1143, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS         = NewMessageType("GAL1143E: Could not query run results. Server returned a non-200 code (%s)", 1143, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_TEST_CATALOG_CONTENTS_FAILED = NewMessageType("GAL1144E: Could not use url '%s' to retrieve the contents of the test catalog from stream '%s'. Http error from the Galasa server is '%v'", 1144, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
