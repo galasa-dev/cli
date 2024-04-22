@@ -240,44 +240,57 @@ func (launcher *JvmLauncher) SubmitTestRun(
 				}
 
 				if err == nil {
-					var (
-						cmd  string
-						args []string
-					)
-					cmd, args, err = getCommandSyntax(
-						launcher.bootstrapProps,
-						launcher.galasaHome,
-						launcher.fileSystem, launcher.javaHome, obrs,
-						*testClassToLaunch, launcher.cmdParams.RemoteMaven, launcher.cmdParams.LocalMaven,
-						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
-						gherkinURL,
-						isTraceEnabled,
-						launcher.cmdParams.IsDebugEnabled,
-						launcher.cmdParams.DebugPort,
-						launcher.cmdParams.DebugMode,
-					)
+
+					var jwt = ""
+					if launcher.isCPSRemote() {
+						// Though this is a local test run being launched, the CPS will be remote on an ecosystem via REST.
+						// If the config store value doesn't start wiht that, then it's not a remote CPS, so we don't need the JWT.
+						log.Printf("framework.config.store bootstrap property indicates a remote CPS will be used. So we need a valid JWT.\n")
+						jwt, err = utils.GetBearerTokenFromTokenJsonFile(launcher.fileSystem, launcher.galasaHome, launcher.timeService)
+					}
+
 					if err == nil {
-						log.Printf("Launching command '%s' '%v'\n", cmd, args)
-						localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
-						err = localTest.launch(cmd, args)
 
+						var (
+							cmd  string
+							args []string
+						)
+						cmd, args, err = getCommandSyntax(
+							launcher.bootstrapProps,
+							launcher.galasaHome,
+							launcher.fileSystem, launcher.javaHome, obrs,
+							*testClassToLaunch, launcher.cmdParams.RemoteMaven, launcher.cmdParams.LocalMaven,
+							launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
+							gherkinURL,
+							isTraceEnabled,
+							launcher.cmdParams.IsDebugEnabled,
+							launcher.cmdParams.DebugPort,
+							launcher.cmdParams.DebugMode,
+							jwt,
+						)
 						if err == nil {
-							// The JVM process started. Store away its' details
-							launcher.localTests = append(launcher.localTests, localTest)
+							log.Printf("Launching command '%s' '%v'\n", cmd, args)
+							localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
+							err = localTest.launch(cmd, args)
 
-							localTest.testRun = new(galasaapi.TestRun)
-							if testClassToLaunch.OSGiBundleName != "" {
-								localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+							if err == nil {
+								// The JVM process started. Store away its' details
+								launcher.localTests = append(launcher.localTests, localTest)
+
+								localTest.testRun = new(galasaapi.TestRun)
+								if testClassToLaunch.OSGiBundleName != "" {
+									localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+								}
+								localTest.testRun.SetStream(stream)
+								localTest.testRun.SetGroup(groupName)
+								localTest.testRun.SetRequestor(requestor)
+								localTest.testRun.SetTrace(isTraceEnabled)
+								localTest.testRun.SetType(requestType)
+								localTest.testRun.SetName(localTest.runId)
+
+								// The test run we started can be returned to the submitter.
+								testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
 							}
-							localTest.testRun.SetStream(stream)
-							localTest.testRun.SetGroup(groupName)
-							localTest.testRun.SetRequestor(requestor)
-							localTest.testRun.SetTrace(isTraceEnabled)
-							localTest.testRun.SetType(requestType)
-							localTest.testRun.SetName(localTest.runId)
-
-							// The test run we started can be returned to the submitter.
-							testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
 						}
 					}
 				}
@@ -286,6 +299,15 @@ func (launcher *JvmLauncher) SubmitTestRun(
 	}
 
 	return testRuns, err
+}
+
+// isCPSRemote - decide whether the config store used by tests is remote or not.
+// If it is remote, we are going to have to get a valid JWT to use.
+func (launcher *JvmLauncher) isCPSRemote() bool {
+	isRemote := false
+	configStoreProp := launcher.bootstrapProps["framework.config.store"]
+	isRemote = strings.HasPrefix(configStoreProp, "galasacps")
+	return isRemote
 }
 
 func defaultLocalMavenIfNotSet(localMaven string, fileSystem files.FileSystem) (string, error) {
@@ -598,6 +620,7 @@ func getCommandSyntax(
 	isDebugEnabled bool,
 	debugPort uint32,
 	debugMode string,
+	jwt string,
 ) (string, []string, error) {
 
 	var cmd string = ""
@@ -685,6 +708,10 @@ func getCommandSyntax(
 			args = append(args, "--trace")
 		}
 
+		// If there is a jwt, pass it through.
+		if jwt != "" {
+			args = append(args, "-DGALASA_JWT="+jwt)
+		}
 	}
 
 	return cmd, args, err

@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package auth
+package utils
 
 import (
 	"errors"
@@ -12,15 +12,14 @@ import (
 	"time"
 
 	"github.com/galasa-dev/cli/pkg/files"
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestWriteBearerTokenJsonFileWritesJwtJsonToFile(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	jwtJsonToWrite := `{"jwt":"blah"}`
 
@@ -37,8 +36,8 @@ func TestWriteBearerTokenJsonFileWritesJwtJsonToFile(t *testing.T) {
 func TestWriteBearerTokenJsonWithFailingWriteOperationReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewOverridableMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	mockFileSystem.VirtualFunction_WriteTextFile = func(path string, contents string) error {
 		return errors.New("simulating a failed write operation")
@@ -57,16 +56,16 @@ func TestWriteBearerTokenJsonWithFailingWriteOperationReturnsError(t *testing.T)
 func TestGetBearerTokenFromTokenJsonFileReturnsBearerToken(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
 	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
 	mockCurrentTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockCurrentTime)
+	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
 	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json",
+		mockGalasaHome.GetNativeFolderPath()+"/bearer-token.json",
 		fmt.Sprintf(`{"jwt":"%s"}`, expectedToken))
 
 	// When...
@@ -80,16 +79,16 @@ func TestGetBearerTokenFromTokenJsonFileReturnsBearerToken(t *testing.T) {
 func TestGetBearerTokenFromTokenJsonFileWithExpiredTokenReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	// This is a dummy JWT that expires 1 second after the Unix epoch
 	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjF9.2H0EJnt58ApysedXcvNUAy6FhgBIbDmPfq9d79qF4yQ"
 	mockTime := time.UnixMilli(0)
-	mockTimeService := utils.NewOverridableMockTimeService(mockTime)
+	mockTimeService := NewOverridableMockTimeService(mockTime)
 
 	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json",
+		mockGalasaHome.GetNativeFolderPath()+"/bearer-token.json",
 		fmt.Sprintf(`{"jwt":"%s"}`, expectedToken))
 
 	// When...
@@ -103,9 +102,9 @@ func TestGetBearerTokenFromTokenJsonFileWithExpiredTokenReturnsError(t *testing.
 func TestGetBearerTokenFromTokenJsonFileWithMissingTokenFileReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockTimeService := utils.NewMockTimeService()
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockTimeService := NewMockTimeService()
 
 	// When...
 	_, err := GetBearerTokenFromTokenJsonFile(mockFileSystem, mockGalasaHome, mockTimeService)
@@ -118,12 +117,12 @@ func TestGetBearerTokenFromTokenJsonFileWithMissingTokenFileReturnsError(t *test
 func TestGetBearerTokenFromTokenJsonFileWithBadContentsReturnsError(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
-	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockTimeService := utils.NewMockTimeService()
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockTimeService := NewMockTimeService()
 
 	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json",
+		mockGalasaHome.GetNativeFolderPath()+"/bearer-token.json",
 		"notabearertoken")
 
 	// When...

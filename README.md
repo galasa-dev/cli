@@ -620,3 +620,16 @@ So, invoke the `galasactl` without installing on your local machine, using the d
 ```
 docker run harbor.galasa.dev/galasadev/galasa-cli-amd64:main galasactl --version
 ```
+
+## Running a test locally, but using shared configuration properties on a remote Galasa server
+This configuration is supported. An ecosystem can be set up with CPS (configuration properties store) properties.
+
+The galasactl tool can be configured to communicate with that CPS.
+
+To do this, assuming `https://myhost/api/bootstrap` can be used to 
+communicate with the remote server, add the following to your `bootstrap.properties` file, 
+```
+// https://myhost/api is the location of the Galasa REST API endpoints.
+framework.config.store=galasacps://myhost/api
+framework.extra.bundles=dev.galasa.cps.rest
+```
