@@ -28,7 +28,7 @@ func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.Ga
 		var jwt string
 		jwt, err = GetJwtFromRestApi(apiServerUrl, authProperties)
 		if err == nil {
-			err = WriteBearerTokenJsonFile(fileSystem, galasaHome, jwt)
+			err = utils.WriteBearerTokenJsonFile(fileSystem, galasaHome, jwt)
 		}
 	}
 	return err
@@ -93,14 +93,14 @@ func GetBearerToken(
 	timeService utils.TimeService,
 	env utils.Environment,
 ) (string, error) {
-	bearerToken, err := GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
+	bearerToken, err := utils.GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
 	if err != nil {
 		// Attempt to log in
 		log.Printf("Logging in to the Galasa Ecosystem at '%s'", apiServerUrl)
 		err = Login(apiServerUrl, fileSystem, galasaHome, env)
 		if err == nil {
 			log.Printf("Logged in to the Galasa Ecosystem at '%s' OK", apiServerUrl)
-			bearerToken, err = GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
+			bearerToken, err = utils.GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
 		}
 	}
 	return bearerToken, err

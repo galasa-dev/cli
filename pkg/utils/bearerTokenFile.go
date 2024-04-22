@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package auth
+package utils
 
 import (
 	"encoding/json"
@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/galasa-dev/cli/pkg/files"
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -31,7 +30,7 @@ const (
 //	{
 //	  "jwt": "<bearer-token-here>"
 //	}
-func WriteBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome utils.GalasaHome, jwt string) error {
+func WriteBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome GalasaHome, jwt string) error {
 	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
 
 	log.Printf("Writing bearer token to file '%s'", bearerTokenFilePath)
@@ -47,7 +46,7 @@ func WriteBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome utils.Gala
 }
 
 // Gets the JWT from the bearer-token.json file if it exists, errors if the file does not exist or if the token is invalid
-func GetBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome utils.GalasaHome, timeService utils.TimeService) (string, error) {
+func GetBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome GalasaHome, timeService TimeService) (string, error) {
 	var err error = nil
 	var bearerToken string = ""
 	var bearerTokenJsonContents string = ""
@@ -81,7 +80,7 @@ func GetBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome uti
 }
 
 // Checks whether a given bearer token is valid or not, returning true if it is valid and false otherwise
-func IsBearerTokenValid(bearerTokenString string, timeService utils.TimeService) bool {
+func IsBearerTokenValid(bearerTokenString string, timeService TimeService) bool {
 	var err error = nil
 	var bearerToken *jwt.Token
 

@@ -50,6 +50,10 @@ var (
     }`
 )
 
+const (
+	BLANK_JWT = ""
+)
+
 func NewMockLauncherParams() (
 	props.JavaProperties,
 	*utils.MockEnv,
@@ -510,6 +514,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -545,7 +550,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 		overridesFilePath,
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
-		isDebugEnabled, debugPort, debugMode,
+		isDebugEnabled, debugPort, debugMode, BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -583,6 +588,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -622,6 +628,7 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -696,6 +703,7 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 		isDebugEnabled,
 		debugPort,
 		debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -732,6 +740,7 @@ func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -770,6 +779,7 @@ func TestCommandIncludesTwoFlagsFromBootstrapProperties(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -808,6 +818,7 @@ func TestCommandIncludesDefaultDebugPortAndMode(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -847,6 +858,7 @@ func TestCommandDrawsValidDebugPortFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -886,6 +898,7 @@ func TestCommandDrawsInvalidDebugPortFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, err)
@@ -925,6 +938,7 @@ func TestCommandDrawsValidDebugModeFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -970,6 +984,7 @@ func TestCommandDrawsInvalidDebugModeFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, err)
@@ -1007,6 +1022,7 @@ func TestCommandDrawsValidDebugModeListenFromCommandLine(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -1050,6 +1066,7 @@ func TestCommandDrawsValidDebugModeAttachFromCommandLine(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -1093,6 +1110,7 @@ func TestCommandDrawsInvalidDebugModeFromCommandLine(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, err)
@@ -1132,6 +1150,7 @@ func TestLocalMavenNotSetDefaults(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	// Then...
@@ -1172,6 +1191,7 @@ func TestLocalMavenSet(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	// Then...
