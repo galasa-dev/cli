@@ -48,7 +48,7 @@ func TestLoginWithNoGalasactlPropertiesFileReturnsError(t *testing.T) {
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-	mockResponse := `{"jwt":"blah"}`
+	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
 	defer server.Close()
 
@@ -71,7 +71,7 @@ func TestLoginWithBadGalasactlPropertiesFileReturnsError(t *testing.T) {
 	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, "here are some bad galasactl.properties contents!")
 
-	mockResponse := `{"jwt":"blah"}`
+	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
 	defer server.Close()
 
@@ -98,7 +98,7 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	tokenPropertyValue := mockRefreshToken + TOKEN_SEPARATOR + mockClientId
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
-	mockResponse := `{"jwt":"blah"}`
+	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
 	defer server.Close()
 
@@ -112,9 +112,10 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	bearerTokenFileContents, _ := mockFileSystem.ReadTextFile(bearerTokenFilePath)
 
 	// Then...
+	expectedJson := `{"jwt":"blah"}`
 	assert.Nil(t, err, "Should not return an error if the bearer token file has been successfully created")
 	assert.True(t, bearerTokenFileExists, "Bearer token file should exist")
-	assert.Equal(t, mockResponse, bearerTokenFileContents)
+	assert.Equal(t, expectedJson, bearerTokenFileContents)
 }
 
 func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
@@ -134,7 +135,7 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 		return errors.New("simulating a failed write operation")
 	}
 
-	mockResponse := `{"jwt":"blah"}`
+	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
 	defer server.Close()
 
@@ -185,7 +186,7 @@ func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
 
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, "unknown.value=blah")
 
-	mockResponse := `{"jwt":"blah"}`
+	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
 	server := NewAuthServletMock(t, 200, mockResponse)
 	defer server.Close()
 
