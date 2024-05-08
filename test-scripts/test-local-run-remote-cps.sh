@@ -143,7 +143,7 @@ function build_galasa_home {
     info "GALASA_HOME is $GALASA_HOME"
 
 
-    cmd="${PROJECT_DIR}/bin/${binary} local init "
+    cmd="${PROJECT_DIR}/bin/${binary} local init --development"
     info "Command is $cmd"
     $cmd
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build galasa home. Return code: ${rc}" ; exit 1 ; fi
