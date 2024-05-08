@@ -7,6 +7,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -57,10 +58,15 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
 		} else {
 			defer httpResponse.Body.Close()
-			var tokenResponseJson []byte
-			tokenResponseJson, err = tokenResponse.MarshalJSON()
-			jwtJsonStr = string(tokenResponseJson)
-			log.Println("Bearer token received from API server OK")
+			var jwtJson []byte
+			token := utils.BearerTokenJson{
+				Jwt: tokenResponse.GetJwt(),
+			}
+			jwtJson, err = json.Marshal(token)
+			if err == nil {
+				jwtJsonStr = string(jwtJson)
+				log.Println("Bearer token received from API server OK")
+			}
 		}
 	}
 
