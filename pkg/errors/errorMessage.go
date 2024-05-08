@@ -234,6 +234,7 @@ var (
 		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.", 1142, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS         = NewMessageType("GAL1143E: Could not query run results. Server returned a non-200 code (%s)", 1143, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_TEST_CATALOG_CONTENTS_FAILED = NewMessageType("GAL1144E: Could not use url '%s' to retrieve the contents of the test catalog from stream '%s'. Http error from the Galasa server is '%v'", 1144, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UNABLE_TO_MARSHAL_JWT_JSON = NewMessageType("GAL1145E: Failed to  unmarshal the JWT json. Reason: %s", 1145, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

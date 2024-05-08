@@ -7,6 +7,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -17,6 +18,10 @@ import (
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
+
+type JwtJson struct {
+	Jwt string `json:"jwt"`
+}
 
 // Login - performs all the logic to implement the `galasactl auth login` command
 func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome, env utils.Environment) error {
@@ -57,11 +62,32 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
 		} else {
 			defer httpResponse.Body.Close()
-			var tokenResponseJson []byte
-			tokenResponseJson, err = tokenResponse.MarshalJSON()
-			jwtJsonStr = string(tokenResponseJson)
-			log.Println("Bearer token received from API server OK")
+
+			jwtJsonStr, err = getJWTJsonStringFromTokenResponse(tokenResponse)
 		}
+	}
+
+	return jwtJsonStr, err
+}
+
+// Saves the JWT in a new structure that only saves the JWT and not refresh token, and returns the JSON string
+func getJWTJsonStringFromTokenResponse(tokenResponse *galasaapi.TokenResponse) (string, error){
+	var err error
+	var jwtJsonBytes []byte
+	var jwtJsonStr string
+
+	// new structure defined to only store jwt 
+	// and not refresh token
+	jwtJson := JwtJson{
+		Jwt: tokenResponse.GetJwt(),
+	}
+	
+	jwtJsonBytes, err = json.Marshal(jwtJson)
+	if err == nil{
+		jwtJsonStr = string(jwtJsonBytes)
+		log.Println("Bearer token received from API server OK")
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_MARSHAL_JWT_JSON, err.Error())
 	}
 
 	return jwtJsonStr, err

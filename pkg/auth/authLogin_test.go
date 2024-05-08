@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 
@@ -257,3 +258,64 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 	assert.NotNil(t, apiClient, "API client should not be nil if the login was successful")
 }
 
+func TestLoginWithoutRefreshTokenReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+
+	mockClientId := "dummyId"
+	mockRefreshToken := ""
+	tokenPropertyValue := mockRefreshToken + TOKEN_SEPARATOR + mockClientId
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+
+	mockResponse := `{"jwt":"blah"}`
+	server := NewAuthServletMock(t, 200, mockResponse)
+	defer server.Close()
+
+	apiServerUrl := server.URL
+
+	// When...
+	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome, mockEnvironment)
+
+	bearerTokenFilePath := mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json"
+	bearerTokenFileExists, _ := mockFileSystem.Exists(bearerTokenFilePath)
+
+	// Then...
+	assert.NotNil(t, err, "Should return an error as the refresh token is absent")
+	assert.ErrorContains(t, err, "GAL1125E")
+	assert.False(t, bearerTokenFileExists, "Bearer token file should not exist")
+}
+
+func TestGetJWTJsonStringFromReponseTokenWithRefreshTokenReturnsJWTStringWithoutToken(t *testing.T) {
+	//Given...
+	var tokenResponse = galasaapi.NewTokenResponse()
+	tokenResponse.SetJwt("blah")
+	tokenResponse.SetRefreshToken("refresh")
+
+	mockResponse := `{"jwt":"blah"}`
+
+	//When...
+	jwtJsonStr, err := getJWTJsonStringFromTokenResponse(tokenResponse)
+
+	//Then...
+	assert.Nil(t, err, "No error should have been thrown")
+	assert.Equal(t, mockResponse, jwtJsonStr)
+}
+
+func TestGetJWTJsonStringFromReponseTokenWithoutRefreshTokenReturnsJWTStringWithoutToken(t *testing.T) {
+	//Given...
+	var tokenResponse = galasaapi.NewTokenResponse()
+	tokenResponse.SetJwt("blah")
+
+	mockResponse := `{"jwt":"blah"}`
+
+	//When...
+	jwtJsonStr, err := getJWTJsonStringFromTokenResponse(tokenResponse)
+
+	//Then...
+	assert.Nil(t, err, "No error should have been thrown")
+	assert.Equal(t, mockResponse, jwtJsonStr)
+}
