@@ -115,10 +115,13 @@ function run_tests {
     export GALASA_HOME=$TEMP_DIR/home
     info "GALASA_HOME is $GALASA_HOME"
 
+    export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
+
     baseName="dev.galasa.cps.rest.test"
     cmd="${PROJECT_DIR}/bin/${binary} runs submit local --obr mvn:${baseName}/${baseName}.obr/0.0.1-SNAPSHOT/obr \
         --class ${baseName}.http/${baseName}.http.TestHttp \
         --bootstrap file://$TEMP_DIR/home/bootstrap.properties \
+        --remoteMaven ${REMOTE_MAVEN} \
         --log -
        "
     info "Command is $cmd"
