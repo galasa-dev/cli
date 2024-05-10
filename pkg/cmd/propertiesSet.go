@@ -134,13 +134,18 @@ func (cmd *PropertiesSetCommand) executePropertiesSet(
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
 			if err == nil {
 
-				timeService := factory.GetTimeService()
-
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := auth.NewAuthenticator(
+					apiServerUrl,
+					fileSystem,
+					galasaHome,
+					factory.GetTimeService(),
+					env,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.

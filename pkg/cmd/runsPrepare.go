@@ -148,23 +148,28 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
 				if err == nil {
 
-					timeService := factory.GetTimeService()
-
 					// Create an API client
 					var apiClient *galasaapi.APIClient
 					apiServerUrl := bootstrapData.ApiServerURL
-					apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+					authenticator := auth.NewAuthenticator(
+						apiServerUrl,
+						fileSystem,
+						galasaHome,
+						factory.GetTimeService(),
+						env,
+					)
+					apiClient, err = authenticator.GetAuthenticatedAPIClient()
 					if err == nil {
 						launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
-	
+
 						validator := runs.NewStreamBasedValidator()
 						err = validator.Validate(cmd.values.prepareSelectionFlags)
 						if err == nil {
-	
+
 							var testSelection runs.TestSelection
 							testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
 							if err == nil {
-	
+
 								count := len(testSelection.Classes)
 								if count < 1 {
 									err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
@@ -175,19 +180,19 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 										log.Printf("%v tests were selected", count)
 									}
 								}
-	
+
 								if err == nil {
-	
+
 									var portfolio *runs.Portfolio
 									if *cmd.values.prepareAppend {
 										portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
 									} else {
 										portfolio = runs.NewPortfolio()
 									}
-	
+
 									if err == nil {
 										runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
-	
+
 										err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
 										if err == nil {
 											if *cmd.values.prepareAppend {
