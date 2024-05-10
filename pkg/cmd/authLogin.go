@@ -120,13 +120,14 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 			apiServerUrl := bootstrapData.ApiServerURL
 			log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-			// Call to process the command in a unit-testable way.
-			err = auth.Login(
+			authenticator := auth.NewAuthenticator(
 				apiServerUrl,
 				fileSystem,
 				galasaHome,
+				utils.NewRealTimeService(),
 				env,
 			)
+			err = authenticator.Login()
 		}
 	}
 	return err

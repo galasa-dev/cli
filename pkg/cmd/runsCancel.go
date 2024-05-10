@@ -131,8 +131,16 @@ func (cmd *RunsCancelCommand) executeCancel(
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API Server is at '%s'\n", apiServerUrl)
 
+				authenticator := auth.NewAuthenticator(
+					apiServerUrl,
+					fileSystem,
+					galasaHome,
+					utils.NewRealTimeService(),
+					env,
+				)
+
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
 					// Call to process command in unit-testable way.

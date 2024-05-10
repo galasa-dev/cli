@@ -127,10 +127,15 @@ func loadAndPassDataIntoResourcesApi(action string, factory Factory, resourcesCm
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				timeService := factory.GetTimeService()
-
 				var bearerToken string
-				bearerToken, err = auth.GetBearerToken(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := auth.NewAuthenticator(
+					apiServerUrl,
+					fileSystem,
+					galasaHome,
+					factory.GetTimeService(),
+					env,
+				)
+				bearerToken, err = authenticator.GetBearerToken()
 
 				if err == nil {
 					err = resources.ApplyResources(

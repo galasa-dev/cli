@@ -132,7 +132,14 @@ func (cmd *RunsResetCommand) executeReset(
 				log.Printf("The API Server is at '%s'\n", apiServerUrl)
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := auth.NewAuthenticator(
+					apiServerUrl,
+					fileSystem,
+					galasaHome,
+					factory.GetTimeService(),
+					env,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
 					// Call to process command in unit-testable way.

@@ -55,7 +55,9 @@ func TestLoginWithNoGalasactlPropertiesFileReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 
 	// When...
-	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome, mockEnvironment)
+	mockTimeService := utils.NewMockTimeService()
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	err := authenticator.Login()
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the galasactl.properties file does not exist")
@@ -78,7 +80,9 @@ func TestLoginWithBadGalasactlPropertiesFileReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 
 	// When...
-	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome, mockEnvironment)
+	mockTimeService := utils.NewMockTimeService()
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	err := authenticator.Login()
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the galasactl.properties file does not contain valid YAML")
@@ -105,7 +109,9 @@ func TestLoginCreatesBearerTokenFileContainingJWT(t *testing.T) {
 	apiServerUrl := server.URL
 
 	// When...
-	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome, mockEnvironment)
+	mockTimeService := utils.NewMockTimeService()
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	err := authenticator.Login()
 
 	bearerTokenFilePath := mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json"
 	bearerTokenFileExists, _ := mockFileSystem.Exists(bearerTokenFilePath)
@@ -142,7 +148,9 @@ func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 
 	// When...
-	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome, mockEnvironment)
+	mockTimeService := utils.NewMockTimeService()
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	err := authenticator.Login()
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if writing the bearer token file fails")
@@ -169,7 +177,9 @@ func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 
 	// When...
-	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome, mockEnvironment)
+	mockTimeService := utils.NewMockTimeService()
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	err := authenticator.Login()
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the API request returns an error")
@@ -193,7 +203,9 @@ func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 
 	// When...
-	err := Login(apiServerUrl, mockFileSystem, mockGalasaHome, mockEnvironment)
+	mockTimeService := utils.NewMockTimeService()
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	err := authenticator.Login()
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the GALASA_ACCESS_TOKEN property is missing")
@@ -217,7 +229,8 @@ func TestGetAuthenticatedAPIClientWithBearerTokenFileReturnsClient(t *testing.T)
 	mockFileSystem.WriteTextFile(bearerTokenFilePath, fmt.Sprintf(`{"jwt":"%s"}`, mockJwt))
 
 	// When...
-	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient, err := authenticator.GetAuthenticatedAPIClient()
 
 	// Then...
 	assert.Nil(t, err, "No error should have been thrown")
@@ -251,10 +264,10 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 	apiServerUrl := server.URL
 
 	// When...
-	apiClient, err := GetAuthenticatedAPIClient(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
+	apiClient, err := authenticator.GetAuthenticatedAPIClient()
 
 	// Then...
 	assert.Nil(t, err, "No error should have been thrown")
 	assert.NotNil(t, apiClient, "API client should not be nil if the login was successful")
 }
-

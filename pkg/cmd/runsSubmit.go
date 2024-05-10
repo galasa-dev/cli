@@ -176,18 +176,25 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 				apiServerUrl := bootstrapData.ApiServerURL
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := auth.NewAuthenticator(
+					apiServerUrl,
+					fileSystem,
+					galasaHome,
+					factory.GetTimeService(),
+					env,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 				if err == nil {
 					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
-	
+
 					validator := runs.NewStreamBasedValidator()
 					err = validator.Validate(cmd.values.TestSelectionFlagValues)
 					if err == nil {
-	
+
 						var console = factory.GetStdOutConsole()
-	
+
 						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console, images.NewImageExpanderNullImpl())
-	
+
 						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 					}
 				}

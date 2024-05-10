@@ -7,39 +7,20 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
 )
-
-// Login - performs all the logic to implement the `galasactl auth login` command
-func Login(apiServerUrl string, fileSystem files.FileSystem, galasaHome utils.GalasaHome, env utils.Environment) error {
-
-	var err error = nil
-	var authProperties galasaapi.AuthProperties
-	authProperties, err = GetAuthProperties(fileSystem, galasaHome, env)
-	if err == nil {
-		var jwt string
-		jwt, err = GetJwtFromRestApi(apiServerUrl, authProperties)
-		if err == nil {
-			err = utils.WriteBearerTokenJsonFile(fileSystem, galasaHome, jwt)
-		}
-	}
-	return err
-}
 
 // Gets a JSON Web Token (JWT) from the API server's /auth endpoint
 func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthProperties) (string, error) {
 	var err error = nil
 	var context context.Context = nil
-	var jwtJsonStr string
+	var jwt string
 	var restApiVersion string
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
@@ -58,56 +39,10 @@ func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthPropert
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
 		} else {
 			defer httpResponse.Body.Close()
-			var jwtJson []byte
-			token := utils.BearerTokenJson{
-				Jwt: tokenResponse.GetJwt(),
-			}
-			jwtJson, err = json.Marshal(token)
-			if err == nil {
-				jwtJsonStr = string(jwtJson)
-				log.Println("Bearer token received from API server OK")
-			}
+			log.Println("Bearer token received from API server OK")
+			jwt = tokenResponse.GetJwt()
 		}
 	}
 
-	return jwtJsonStr, err
-}
-
-// Gets a new authenticated API client, attempting to log in if a bearer token file does not exist
-func GetAuthenticatedAPIClient(
-	apiServerUrl string,
-	fileSystem files.FileSystem,
-	galasaHome utils.GalasaHome,
-	timeService utils.TimeService,
-	env utils.Environment,
-) (*galasaapi.APIClient, error) {
-	bearerToken, err := GetBearerToken(apiServerUrl, fileSystem, galasaHome, timeService, env)
-
-	var apiClient *galasaapi.APIClient
-	if err == nil {
-		apiClient = api.InitialiseAuthenticatedAPI(apiServerUrl, bearerToken)
-	}
-	return apiClient, err
-}
-
-// Gets a locally-stored bearer token, or attempts to log in and retrieve a new bearer token if
-// one does not already exist
-func GetBearerToken(
-	apiServerUrl string,
-	fileSystem files.FileSystem,
-	galasaHome utils.GalasaHome,
-	timeService utils.TimeService,
-	env utils.Environment,
-) (string, error) {
-	bearerToken, err := utils.GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
-	if err != nil {
-		// Attempt to log in
-		log.Printf("Logging in to the Galasa Ecosystem at '%s'", apiServerUrl)
-		err = Login(apiServerUrl, fileSystem, galasaHome, env)
-		if err == nil {
-			log.Printf("Logged in to the Galasa Ecosystem at '%s' OK", apiServerUrl)
-			bearerToken, err = utils.GetBearerTokenFromTokenJsonFile(fileSystem, galasaHome, timeService)
-		}
-	}
-	return bearerToken, err
+	return jwt, err
 }
