@@ -31,6 +31,7 @@ const (
 	COMMAND_NAME_AUTH                     = "auth"
 	COMMAND_NAME_AUTH_LOGIN               = "auth login"
 	COMMAND_NAME_AUTH_LOGOUT              = "auth logout"
+	COMMAND_NAME_AUTH_TOKENS_GET          = "auth tokens get"
 	COMMAND_NAME_PROJECT                  = "project"
 	COMMAND_NAME_PROJECT_CREATE           = "project create"
 	COMMAND_NAME_LOCAL                    = "local"
@@ -153,6 +154,9 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 		if err == nil {
 			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
+			if err == nil {
+				authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authCommand, rootCommand)
+			}
 		}
 	}
 
@@ -160,6 +164,7 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 		commands.commandMap[authCommand.Name()] = authCommand
 		commands.commandMap[authLoginCommand.Name()] = authLoginCommand
 		commands.commandMap[authLogoutCommand.Name()] = authLogoutCommand
+		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
 	}
 
 	return err
