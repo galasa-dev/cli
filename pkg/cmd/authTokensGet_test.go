@@ -59,22 +59,21 @@ func TestAuthTokenssGetReturnsWithoutError(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// TO DO: implement different formats
-// func TestAuthTokenssGetFormatReturnsOk(t *testing.T) {
-// 	// Given...
-// 	factory := NewMockFactory()
-// 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_GET, factory, t)
+func TestAuthTokenssGetFormatReturnsOk(t *testing.T) {
+	// Given...
+	factory := NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_GET, factory, t)
 
-// 	var args []string = []string{"auth", "tokens", "get", "--format", "yaml"}
+	var args []string = []string{"auth", "tokens", "get", "--format", "yaml"}
 
-// 	// When...
-// 	err := commandCollection.Execute(args)
+	// When...
+	err := commandCollection.Execute(args)
 
-// 	// Then...
-// 	assert.Nil(t, err)
+	// Then...
+	assert.Nil(t, err)
 
-// 	// Check what the user saw is reasonable.
-// 	checkOutput("", "", factory, t)
+	// Check what the user saw is reasonable.
+	checkOutput("", "", factory, t)
 
-// 	assert.Contains(t, cmd.Values().(*AuthTokensGetCmdValues).tokensOutputFormat, "yaml")
-// }
+	assert.Contains(t, cmd.Values().(*AuthTokensGetCmdValues).tokensOutputFormat, "yaml")
+}
