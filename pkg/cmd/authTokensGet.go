@@ -8,22 +8,38 @@ package cmd
 import (
 	"log"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
+//Objective: Allow user to do this:
+//	auth tokens get
+//  And then display all namespaces in the cps or returns empty
+
+type AuthTokensGetCmdValues struct {
+	bootstrap          string
+	tokensOutputFormat string
+}
 type AuthTokensGetCommand struct {
+	values       *AuthTokensGetCmdValues
 	cobraCommand *cobra.Command
 }
 
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthTokensGetCommand(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewAuthTokensGetCommand(
+	factory Factory,
+	authTokensCommand GalasaCommand,
+	authTokens GalasaCommand,
+	rootCmd GalasaCommand,
+) (GalasaCommand, error) {
+
 	cmd := new(AuthTokensGetCommand)
 
-	err := cmd.init(factory, authCommand, rootCmd)
+	err := cmd.init(factory, authTokensCommand, authTokens, rootCmd)
 	return cmd, err
 }
 
@@ -39,38 +55,49 @@ func (cmd *AuthTokensGetCommand) CobraCommand() *cobra.Command {
 }
 
 func (cmd *AuthTokensGetCommand) Values() interface{} {
-	// There are no values.
-	return nil
+	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthTokensGetCommand) init(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *AuthTokensGetCommand) init(factory Factory, authTokensCommand GalasaCommand, authCommand GalasaCommand, rootCmd GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd.Values().(*RootCmdValues))
+
+	cmd.values = &AuthTokensGetCmdValues{}
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, authCommand, rootCmd)
+
 	return err
 }
 
-func (cmd *AuthTokensGetCommand) createCobraCmd(factory Factory, authCommand GalasaCommand, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *AuthTokensGetCommand) createCobraCmd(
+	factory Factory,
+	authTokensCommand,
+	authCommand GalasaCommand,
+	rootCmd GalasaCommand,
+) (*cobra.Command, error) {
+
 	var err error
 
-	authLogoutCmd := &cobra.Command{
+	authGetTokensCobraCmd := &cobra.Command{
 		Use:     "get",
 		Short:   "Get tokens from a Galasa ecosystem",
 		Long:    "Get tokens from a Galasa ecosystem which you are logged in to",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthLogout(factory, rootCmdValues)
+			return cmd.executeAuthTokensGet(factory, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
-	authCommand.CobraCommand().AddCommand(authTokensCmd)
+	addBootstrapFlag(authGetTokensCobraCmd, &cmd.values.bootstrap)
+	// TO DO: implement format flag
 
-	return authLogoutCmd, err
+	authTokensCommand.CobraCommand().AddCommand(authGetTokensCobraCmd)
+
+	return authGetTokensCobraCmd, err
 }
 
-func (cmd *AuthTokensGetCommand) executeAuthLogout(
+func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 	factory Factory,
 	rootCmdValues *RootCmdValues,
 ) error {

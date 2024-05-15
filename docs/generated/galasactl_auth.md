@@ -24,4 +24,5 @@ Manages authentication with a Galasa ecosystem using access tokens, enabling sec
 * [galasactl](galasactl.md)	 - CLI for Galasa
 * [galasactl auth login](galasactl_auth_login.md)	 - Log in to a Galasa ecosystem using an existing access token
 * [galasactl auth logout](galasactl_auth_logout.md)	 - Log out from a Galasa ecosystem
+* [galasactl auth tokens](galasactl_auth_tokens.md)	 - Queries tokens in an ecosystem
 
