@@ -1,10 +1,10 @@
 ## galasactl auth tokens get
 
-Get tokens from a Galasa ecosystem
+Get a list of authentication tokens
 
 ### Synopsis
 
-Get tokens from a Galasa ecosystem which you are logged in to
+Get a list of tokens used for authenticating with the Galasa API server
 
 ```
 galasactl auth tokens get [flags]
@@ -13,8 +13,8 @@ galasactl auth tokens get [flags]
 ### Options
 
 ```
-  -b, --bootstrap string   Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
-  -h, --help               Displays the options for the 'auth tokens get' command.
+      --format string   output format for the data returned. Supported formats are: 'summary'. (default "summary")
+  -h, --help            Displays the options for the 'auth tokens get' command.
 ```
 
 ### Options inherited from parent commands

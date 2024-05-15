@@ -57,7 +57,7 @@ func GetTokens(
 }
 
 // Ensures the user has provided a valid output format as part of the "runs get" command.
-func validateOutputFormatFlagValue(tokensOutputFormat string, validFormatters map[string]tokensformatter.PropertyFormatter) (tokensformatter.PropertyFormatter, error) {
+func validateOutputFormatFlagValue(tokensOutputFormat string, validFormatters map[string]tokensformatter.TokenFormatter) (tokensformatter.TokenFormatter, error) {
 	var err error
 
 	chosenFormatter, isPresent := validFormatters[tokensOutputFormat]

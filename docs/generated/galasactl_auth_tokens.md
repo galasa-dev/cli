@@ -22,5 +22,5 @@ Allows interaction to query tokens in Galasa Ecosystem
 ### SEE ALSO
 
 * [galasactl auth](galasactl_auth.md)	 - Manages authentication with a Galasa ecosystem
-* [galasactl auth tokens get](galasactl_auth_tokens_get.md)	 - Get tokens from a Galasa ecosystem
+* [galasactl auth tokens get](galasactl_auth_tokens_get.md)	 - Get a list of authentication tokens
 
