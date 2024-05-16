@@ -44,7 +44,7 @@ func (*TokenSummaryFormatter) FormatTokens(authTokens []galasaapi.AuthToken) (st
 		for _, token := range authTokens {
 			var line []string
 			id := *token.TokenId
-			createdTime := *token.CreatedTime
+			createdTime := formatTimeToNearestDate(*token.CreatedTime)
 			owner := *token.Owner.LoginId
 			description := *token.Description
 

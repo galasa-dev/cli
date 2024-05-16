@@ -26,7 +26,7 @@ import (
 // and turn them into a string for display to the user.
 const (
 	HEADER_TOKEN_ID          = "tokenid"
-	HEADER_TOKEN_DATE        = "created(YYYY/MM/DD)"
+	HEADER_TOKEN_DATE        = "created(YYYY-MM-DD)"
 	HEADER_TOKEN_USER        = "user"
 	HEADER_TOKEN_DESCRIPTION = "description"
 )
@@ -65,4 +65,16 @@ func writeFormattedTableToStringBuilder(table [][]string, buff *strings.Builder,
 		}
 		buff.WriteString("\n")
 	}
+}
+
+// -----------------------------------------------------
+// Functions for time formats and duration
+func formatTimeToNearestDate(rawTime string) string {
+	var formattedTimeString string
+	if len(rawTime) < 19 {
+		formattedTimeString = ""
+	} else {
+		formattedTimeString = rawTime[0:10]
+	}
+	return formattedTimeString
 }

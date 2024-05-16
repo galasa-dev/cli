@@ -47,7 +47,7 @@ func TestTokenSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	formatter := NewTokenSummaryFormatter()
 	// No data to format...
 	tokens := make([]galasaapi.AuthToken, 0)
-	token1 := CreateMockAuthToken("098234980123-1283182389", "2023-12-03", "mcobbett", "So I can access ecosystem1 from my laptop.")
+	token1 := CreateMockAuthToken("098234980123-1283182389", "2023-12-03T18:25:43.511Z", "mcobbett", "So I can access ecosystem1 from my laptop.")
 	tokens = append(tokens, *token1)
 
 	// When...
@@ -56,7 +56,7 @@ func TestTokenSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		`tokenid                 created(YYYY/MM/DD) user     description
+		`tokenid                 created(YYYY-MM-DD) user     description
 098234980123-1283182389 2023-12-03          mcobbett So I can access ecosystem1 from my laptop.
 
 Total:1
@@ -69,9 +69,9 @@ func TestTokenSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	formatter := NewTokenSummaryFormatter()
 	// No data to format...
 	tokens := make([]galasaapi.AuthToken, 0)
-	token1 := CreateMockAuthToken("098234980123-1283182389", "2023-12-03", "mcobbett", "So I can access ecosystem1 from my laptop.")
-	token2 := CreateMockAuthToken("8218971d287s1-dhj32er2323", "2024-03-03", "mcobbett", "Automated build of example repo can change CPS properties")
-	token3 := CreateMockAuthToken("87a6sd87ahq2-2y8hqwdjj273", "2023-08-04", "savvas", "CLI access from vscode")
+	token1 := CreateMockAuthToken("098234980123-1283182389", "2023-12-03T18:25:43.511Z", "mcobbett", "So I can access ecosystem1 from my laptop.")
+	token2 := CreateMockAuthToken("8218971d287s1-dhj32er2323", "2024-03-03T09:36:50.511Z", "mcobbett", "Automated build of example repo can change CPS properties")
+	token3 := CreateMockAuthToken("87a6sd87ahq2-2y8hqwdjj273", "2023-08-04T23:00:23.511Z", "savvas", "CLI access from vscode")
 	tokens = append(tokens, *token1, *token2, *token3)
 
 	// When...
@@ -79,8 +79,7 @@ func TestTokenSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput :=
-		`tokenid                   created(YYYY/MM/DD) user     description
+	expectedFormattedOutput := `tokenid                   created(YYYY-MM-DD) user     description
 098234980123-1283182389   2023-12-03          mcobbett So I can access ecosystem1 from my laptop.
 8218971d287s1-dhj32er2323 2024-03-03          mcobbett Automated build of example repo can change CPS properties
 87a6sd87ahq2-2y8hqwdjj273 2023-08-04          savvas   CLI access from vscode
