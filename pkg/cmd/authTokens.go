@@ -13,7 +13,12 @@ import (
 //Objective: Allow user to do this:
 //	auth tokens ...
 
+type AuthTokensCmdValues struct {
+	bootstrap string
+}
+
 type AuthTokensCommand struct {
+	values       *AuthTokensCmdValues
 	cobraCommand *cobra.Command
 }
 
@@ -39,8 +44,7 @@ func (cmd *AuthTokensCommand) CobraCommand() *cobra.Command {
 }
 
 func (cmd *AuthTokensCommand) Values() interface{} {
-	// There are no values.
-	return nil
+	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -48,6 +52,7 @@ func (cmd *AuthTokensCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthTokensCommand) init(authCommand GalasaCommand) error {
 	var err error
+	cmd.values = &AuthTokensCmdValues{}
 	cmd.cobraCommand, err = cmd.createAuthTokensCobraCmd(authCommand)
 	return err
 }
@@ -57,14 +62,15 @@ func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
 ) (*cobra.Command, error) {
 
 	var err error
-	AuthTokensCmd := &cobra.Command{
+	authTokensCmd := &cobra.Command{
 		Use:   "tokens",
 		Short: "Queries tokens in an ecosystem",
 		Long:  "Allows interaction to query tokens in Galasa Ecosystem",
 		Args:  cobra.NoArgs,
 	}
 
-	authCommand.CobraCommand().AddCommand(AuthTokensCmd)
+	addBootstrapFlag(authTokensCmd, &cmd.values.bootstrap)
+	authCommand.CobraCommand().AddCommand(authTokensCmd)
 
-	return AuthTokensCmd, err
+	return authTokensCmd, err
 }

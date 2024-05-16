@@ -20,7 +20,8 @@ func TestAuthTokensCommandInCommandCollection(t *testing.T) {
 
 	assert.NotNil(t, authCommand)
 	assert.Equal(t, COMMAND_NAME_AUTH_TOKENS, authCommand.Name())
-	assert.Nil(t, authCommand.Values())
+	assert.NotNil(t, authCommand.Values())
+	assert.IsType(t, &AuthTokensCmdValues{}, authCommand.Values())
 	assert.NotNil(t, authCommand.CobraCommand())
 }
 

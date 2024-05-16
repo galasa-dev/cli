@@ -177,7 +177,7 @@ func (commands *commandCollectionImpl) addAuthTokensCommands(factory Factory, au
 
 	authTokensCommand, err = NewAuthTokensCommand(authCommand, rootCommand)
 	if err == nil {
-		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, authCommand, rootCommand)
+		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
 	}
 
 	if err == nil {
