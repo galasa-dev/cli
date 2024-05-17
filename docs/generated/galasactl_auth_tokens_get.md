@@ -4,7 +4,7 @@ Get a list of authentication tokens
 
 ### Synopsis
 
-Get a list of tokens used for authenticating with the Galasa API server
+Get a list of tokens used for authentication with the Galasa API server
 
 ```
 galasactl auth tokens get [flags]
@@ -13,8 +13,7 @@ galasactl auth tokens get [flags]
 ### Options
 
 ```
-      --format string   output format for the data returned. Supported formats are: 'summary'. (default "summary")
-  -h, --help            Displays the options for the 'auth tokens get' command.
+  -h, --help   Displays the options for the 'auth tokens get' command.
 ```
 
 ### Options inherited from parent commands

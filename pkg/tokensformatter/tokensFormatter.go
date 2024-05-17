@@ -14,8 +14,7 @@ import (
 )
 
 //Print in the following fashion:
-//AUTH TOKENS
-// tokenid                   created(YYYY/MM/DD)  user     description
+// tokenid                   created(YYYY-MM-DD)  user     description
 // 098234980123-1283182389   2023-12-03           mcobbett So I can access ecosystem1 from my laptop.
 // 8218971d287s1-dhj32er2323 2024-03-03           mcobbett Automated build of example repo can change CPS properties
 // 87a6sd87ahq2-2y8hqwdjj273 2023-08-04           savvas   CLI access from vscode

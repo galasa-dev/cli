@@ -20,8 +20,7 @@ func TestAuthTokensGetCommandInCommandCollection(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, COMMAND_NAME_AUTH_TOKENS_GET, AuthTokensGetCommand.Name())
-	assert.NotNil(t, AuthTokensGetCommand.Values())
-	assert.IsType(t, &AuthTokensGetCmdValues{}, AuthTokensGetCommand.Values())
+	assert.Nil(t, AuthTokensGetCommand.Values())
 	assert.NotNil(t, AuthTokensGetCommand.CobraCommand())
 }
 
@@ -57,23 +56,4 @@ func TestAuthTokenssGetReturnsWithoutError(t *testing.T) {
 	checkOutput("", "", factory, t)
 
 	assert.Nil(t, err)
-}
-
-func TestAuthTokenssGetFormatReturnsOk(t *testing.T) {
-	// Given...
-	factory := NewMockFactory()
-	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_GET, factory, t)
-
-	var args []string = []string{"auth", "tokens", "get", "--format", "yaml"}
-
-	// When...
-	err := commandCollection.Execute(args)
-
-	// Then...
-	assert.Nil(t, err)
-
-	// Check what the user saw is reasonable.
-	checkOutput("", "", factory, t)
-
-	assert.Contains(t, cmd.Values().(*AuthTokensGetCmdValues).tokensOutputFormat, "yaml")
 }

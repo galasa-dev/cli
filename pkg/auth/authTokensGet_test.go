@@ -71,7 +71,6 @@ func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, re
 
 func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 	//Given...
-	tokensOutputFormat := "summary"
 	serverState := "populated"
 	server := NewPropertiesNamespaceServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
@@ -87,7 +86,7 @@ Total:3
 `
 
 	//When
-	err := GetTokens(apiClient, tokensOutputFormat, console)
+	err := GetTokens(apiClient, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -96,7 +95,6 @@ Total:3
 
 func TestNoTokensPathReturnsOk(t *testing.T) {
 	//Given...
-	tokensOutputFormat := "summary"
 	serverState := "empty"
 	server := NewPropertiesNamespaceServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
@@ -106,7 +104,7 @@ func TestNoTokensPathReturnsOk(t *testing.T) {
 	expectedOutput := "Total:0\n"
 
 	//When
-	err := GetTokens(apiClient, tokensOutputFormat, console)
+	err := GetTokens(apiClient, console)
 
 	//Then
 	assert.Nil(t, err)
@@ -115,7 +113,6 @@ func TestNoTokensPathReturnsOk(t *testing.T) {
 
 func TestInvalidPathReturnsError(t *testing.T) {
 	//Given...
-	tokensOutputFormat := "summary"
 	serverState := ""
 	server := NewPropertiesNamespaceServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
@@ -124,7 +121,7 @@ func TestInvalidPathReturnsError(t *testing.T) {
 	console := utils.NewMockConsole()
 
 	//When
-	err := GetTokens(apiClient, tokensOutputFormat, console)
+	err := GetTokens(apiClient, console)
 
 	//Then
 	assert.NotNil(t, err)
