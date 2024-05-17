@@ -37,7 +37,7 @@ func GetTokens(
 		log.Println("GetTokens - Failed to retrieve list of tokens from API server")
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_TOKEN_LIST_FROM_API_SERVER, err.Error())
 	} else {
-		log.Printf("GetTokens -  tokens collected: %v", authTokens)
+		log.Printf("GetTokens -  %v tokens collected", len(authTokens.GetTokens()))
 		var chosenFormatter tokensformatter.TokenFormatter
 
 		chosenFormatter, err = validateOutputFormatFlagValue(tokensOutputFormat, validTokenFormatters)
