@@ -39,7 +39,6 @@ func GetTokens(
 		if err == nil {
 			console.WriteString(outputText)
 		}
-
 	}
 
 	return err

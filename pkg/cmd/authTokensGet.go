@@ -15,9 +15,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//Objective: Allow user to do this:
-//	auth tokens get
-//  And then display all tokens or returns empty
+// Objective: Allow user to do this:
+//
+//		auth tokens get
+//	 And then display all tokens or returns empty
 type AuthTokensGetCommand struct {
 	cobraCommand *cobra.Command
 }
@@ -78,7 +79,6 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 		Long:    "Get a list of tokens used for authentication with the Galasa API server",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			log.Printf("HERE insideee %v", err)
 			return cmd.executeAuthTokensGet(factory, authTokensCommand.Values().(*AuthTokensCmdValues), rootCmd.Values().(*RootCmdValues))
 		},
 	}
@@ -129,10 +129,7 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.
-					err = auth.GetTokens(
-						apiClient,
-						console,
-					)
+					err = auth.GetTokens(apiClient, console)
 				}
 			}
 		}
