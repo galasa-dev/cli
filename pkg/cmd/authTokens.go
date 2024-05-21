@@ -63,10 +63,11 @@ func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
 
 	var err error
 	authTokensCmd := &cobra.Command{
-		Use:   "tokens",
-		Short: "Queries tokens in an ecosystem",
-		Long:  "Allows interaction to query tokens in Galasa Ecosystem",
-		Args:  cobra.NoArgs,
+		Use:     "tokens",
+		Short:   "Queries tokens in an ecosystem",
+		Long:    "Allows interaction to query tokens in Galasa Ecosystem",
+		Aliases: []string{COMMAND_NAME_AUTH_TOKENS},
+		Args:    cobra.NoArgs,
 	}
 
 	addBootstrapFlag(authTokensCmd, &cmd.values.bootstrap)
