@@ -45,6 +45,7 @@ galasactl-source : \
 	./pkg/properties/*.go \
 	./pkg/propertiesformatter/*.go \
 	./pkg/resources/*.go \
+	./pkg/tokensformatter/*.go \
 	embedded_info
 
 # The build process
