@@ -138,6 +138,7 @@ func (commands *commandCollectionImpl) init(factory Factory) error {
 	}
 
 	if err == nil {
+		log.Println("INSIDER SETTING HELP")
 		commands.setHelpFlags()
 	}
 
@@ -149,15 +150,20 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 	var authCommand GalasaCommand
 	var authLoginCommand GalasaCommand
 	var authLogoutCommand GalasaCommand
+	// var authTokensCommand GalasaCommand
 
 	authCommand, err = NewAuthCommand(rootCommand)
 	if err == nil {
 		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 		if err == nil {
 			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
+
 			// if err == nil {
-			// 	err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
+			// 	authTokensCommand, err = NewAuthTokensCommand(authCommand, rootCommand)
 			// }
+			if err == nil {
+				err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
+			}
 		}
 	}
 
@@ -165,28 +171,29 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 		commands.commandMap[authCommand.Name()] = authCommand
 		commands.commandMap[authLoginCommand.Name()] = authLoginCommand
 		commands.commandMap[authLogoutCommand.Name()] = authLogoutCommand
+		// commands.commandMap[authTokensCommand.Name()] = authTokensCommand
 	}
 
 	return err
 }
 
-// func (commands *commandCollectionImpl) addAuthTokensCommands(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
-// 	var err error
-// 	var authTokensCommand GalasaCommand
-// 	var authTokensGetCommand GalasaCommand
+func (commands *commandCollectionImpl) addAuthTokensCommands(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
+	var err error
+	var authTokensCommand GalasaCommand
+	var authTokensGetCommand GalasaCommand
 
-// 	authTokensCommand, err = NewAuthTokensCommand(authCommand)
-// 	if err == nil {
-// 		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
-// 	}
+	authTokensCommand, err = NewAuthTokensCommand(authCommand, rootCommand)
+	if err == nil {
+		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
+	}
 
-// 	if err == nil {
-// 		commands.commandMap[authTokensCommand.Name()] = authTokensCommand
-// 		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
-// 	}
+	if err == nil {
+		commands.commandMap[authTokensCommand.Name()] = authTokensCommand
+		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
+	}
 
-// 	return err
-// }
+	return err
+}
 
 func (commands *commandCollectionImpl) addLocalCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
@@ -358,6 +365,7 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory Factory, roo
 
 func (commands *commandCollectionImpl) setHelpFlags() {
 	for _, command := range commands.commandMap {
+		log.Println("command name", command.Name())
 		command.CobraCommand().Flags().BoolP("help", "h", false, "Displays the options for the '"+command.Name()+"' command.")
 	}
 }
