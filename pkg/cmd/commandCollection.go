@@ -155,9 +155,9 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 		if err == nil {
 			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
-			// if err == nil {
-			// 	err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
-			// }
+			if err == nil {
+				err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
+			}
 		}
 	}
 
