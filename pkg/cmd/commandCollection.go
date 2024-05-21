@@ -155,9 +155,9 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 		if err == nil {
 			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
-			if err == nil {
-				err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
-			}
+			// if err == nil {
+			// 	err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
+			// }
 		}
 	}
 
@@ -170,23 +170,23 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 	return err
 }
 
-func (commands *commandCollectionImpl) addAuthTokensCommands(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
-	var err error
-	var authTokensCommand GalasaCommand
-	var authTokensGetCommand GalasaCommand
+// func (commands *commandCollectionImpl) addAuthTokensCommands(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) error {
+// 	var err error
+// 	var authTokensCommand GalasaCommand
+// 	var authTokensGetCommand GalasaCommand
 
-	authTokensCommand, err = NewAuthTokensCommand(authCommand)
-	if err == nil {
-		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
-	}
+// 	authTokensCommand, err = NewAuthTokensCommand(authCommand)
+// 	if err == nil {
+// 		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
+// 	}
 
-	if err == nil {
-		commands.commandMap[authTokensCommand.Name()] = authTokensCommand
-		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
-	}
+// 	if err == nil {
+// 		commands.commandMap[authTokensCommand.Name()] = authTokensCommand
+// 		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
+// 	}
 
-	return err
-}
+// 	return err
+// }
 
 func (commands *commandCollectionImpl) addLocalCommands(factory Factory, rootCommand GalasaCommand) error {
 	var err error
