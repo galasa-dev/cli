@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
@@ -63,4 +64,8 @@ func (factory *MockFactory) GetTimeService() utils.TimeService {
 		factory.timeService = utils.NewMockTimeService()
 	}
 	return factory.timeService
+}
+
+func (factory *MockFactory) GetAuthenticator(apiServerUrl string, galasaHome utils.GalasaHome) utils.Authenticator {
+	return auth.NewMockAuthenticator()
 }

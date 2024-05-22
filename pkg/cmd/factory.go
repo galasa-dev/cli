@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
@@ -52,4 +53,8 @@ func (factory *RealFactory) GetStdErrConsole() utils.Console {
 
 func (*RealFactory) GetTimeService() utils.TimeService {
 	return utils.NewRealTimeService()
+}
+
+func (factory *RealFactory) GetAuthenticator(apiServerUrl string, galasaHome utils.GalasaHome) utils.Authenticator {
+	return auth.NewAuthenticator(apiServerUrl, factory.GetFileSystem(), galasaHome, factory.GetTimeService(), factory.GetEnvironment())
 }
