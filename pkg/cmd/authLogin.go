@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -120,12 +119,9 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 			apiServerUrl := bootstrapData.ApiServerURL
 			log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-			authenticator := auth.NewAuthenticator(
+			authenticator := factory.GetAuthenticator(
 				apiServerUrl,
-				fileSystem,
 				galasaHome,
-				utils.NewRealTimeService(),
-				env,
 			)
 			err = authenticator.Login()
 		}

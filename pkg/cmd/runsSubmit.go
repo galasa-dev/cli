@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
@@ -176,12 +175,9 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 				apiServerUrl := bootstrapData.ApiServerURL
 
 				var apiClient *galasaapi.APIClient
-				authenticator := auth.NewAuthenticator(
+				authenticator := factory.GetAuthenticator(
 					apiServerUrl,
-					fileSystem,
 					galasaHome,
-					factory.GetTimeService(),
-					env,
 				)
 				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 				if err == nil {

@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/resources"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -128,12 +127,9 @@ func loadAndPassDataIntoResourcesApi(action string, factory utils.Factory, resou
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 				var bearerToken string
-				authenticator := auth.NewAuthenticator(
+				authenticator := factory.GetAuthenticator(
 					apiServerUrl,
-					fileSystem,
 					galasaHome,
-					factory.GetTimeService(),
-					env,
 				)
 				bearerToken, err = authenticator.GetBearerToken()
 

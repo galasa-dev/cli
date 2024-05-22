@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -131,12 +130,9 @@ func (cmd *RunsCancelCommand) executeCancel(
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API Server is at '%s'\n", apiServerUrl)
 
-				authenticator := auth.NewAuthenticator(
+				authenticator := factory.GetAuthenticator(
 					apiServerUrl,
-					fileSystem,
 					galasaHome,
-					utils.NewRealTimeService(),
-					env,
 				)
 
 				var apiClient *galasaapi.APIClient

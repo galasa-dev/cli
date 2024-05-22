@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/launcher"
@@ -151,12 +150,9 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 					// Create an API client
 					var apiClient *galasaapi.APIClient
 					apiServerUrl := bootstrapData.ApiServerURL
-					authenticator := auth.NewAuthenticator(
+					authenticator := factory.GetAuthenticator(
 						apiServerUrl,
-						fileSystem,
 						galasaHome,
-						factory.GetTimeService(),
-						env,
 					)
 					apiClient, err = authenticator.GetAuthenticatedAPIClient()
 					if err == nil {

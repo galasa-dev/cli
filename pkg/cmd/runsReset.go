@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -132,12 +131,9 @@ func (cmd *RunsResetCommand) executeReset(
 				log.Printf("The API Server is at '%s'\n", apiServerUrl)
 
 				var apiClient *galasaapi.APIClient
-				authenticator := auth.NewAuthenticator(
+				authenticator := factory.GetAuthenticator(
 					apiServerUrl,
-					fileSystem,
 					galasaHome,
-					factory.GetTimeService(),
-					env,
 				)
 				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
