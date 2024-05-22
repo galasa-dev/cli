@@ -129,9 +129,9 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.
-					//err = auth.GetTokens(apiClient, console)
-					log.Printf("executing cosolw GET %v", console)
-					log.Printf("executing apiclient GET %v", apiClient)
+					err = auth.GetTokens(apiClient, console)
+					// log.Printf("executing cosolw GET %v", console)
+					// log.Printf("executing apiclient GET %v", apiClient)
 				}
 			}
 		}
