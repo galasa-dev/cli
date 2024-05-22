@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package cmd
+package utils
 
 import (
 	"github.com/spf13/cobra"

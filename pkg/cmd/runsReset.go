@@ -32,7 +32,7 @@ type RunsResetCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsResetCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsResetCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(RunsResetCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -56,7 +56,7 @@ func (cmd *RunsResetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsResetCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsResetCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsResetCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsResetCobraCmd(
@@ -67,8 +67,8 @@ func (cmd *RunsResetCommand) init(factory Factory, runsCommand GalasaCommand, ro
 	return err
 }
 
-func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory Factory,
-	runsCommand GalasaCommand,
+func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory utils.Factory,
+	runsCommand utils.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -96,7 +96,7 @@ func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory Factory,
 }
 
 func (cmd *RunsResetCommand) executeReset(
-	factory Factory,
+	factory utils.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

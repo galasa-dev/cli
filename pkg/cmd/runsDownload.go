@@ -35,7 +35,7 @@ type RunsDownloadCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsDownloadCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsDownloadCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(RunsDownloadCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -60,7 +60,7 @@ func (cmd *RunsDownloadCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsDownloadCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsDownloadCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory,
@@ -71,8 +71,8 @@ func (cmd *RunsDownloadCommand) init(factory Factory, runsCommand GalasaCommand,
 }
 
 func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
-	factory Factory,
-	runsCommand GalasaCommand,
+	factory utils.Factory,
+	runsCommand utils.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -103,7 +103,7 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 }
 
 func (cmd *RunsDownloadCommand) executeRunsDownload(
-	factory Factory,
+	factory utils.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

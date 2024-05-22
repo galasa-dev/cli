@@ -28,7 +28,7 @@ type ResourcesApplyCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesApplyCommand(factory Factory, resourcesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewResourcesApplyCommand(factory utils.Factory, resourcesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 
 	cmd := new(ResourcesApplyCommand)
 	err := cmd.init(factory, resourcesCommand, rootCommand)
@@ -54,7 +54,7 @@ func (cmd *ResourcesApplyCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesApplyCommand) init(factory Factory, resourcesApplyCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *ResourcesApplyCommand) init(factory utils.Factory, resourcesApplyCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 
 	var err error = nil
 
@@ -65,8 +65,8 @@ func (cmd *ResourcesApplyCommand) init(factory Factory, resourcesApplyCommand Ga
 }
 
 func (cmd *ResourcesApplyCommand) createCobraCommand(
-	factory Factory,
-	resourcesCommand GalasaCommand,
+	factory utils.Factory,
+	resourcesCommand utils.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -88,7 +88,7 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 	return resourcesApplyCmd
 }
 
-func executeResourcesApply(factory Factory,
+func executeResourcesApply(factory utils.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -99,7 +99,7 @@ func executeResourcesApply(factory Factory,
 	return err
 }
 
-func loadAndPassDataIntoResourcesApi(action string, factory Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
+func loadAndPassDataIntoResourcesApi(action string, factory utils.Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()

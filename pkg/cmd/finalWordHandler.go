@@ -11,24 +11,19 @@ import (
 	"reflect"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
-
-// A final word handler can set the exit code of the entire process.
-// Or it could be mocked-out to just collect it and checked in tests.
-type FinalWordHandler interface {
-	FinalWord(rootCmd GalasaCommand, errorToExctractFrom interface{})
-}
 
 // The real implementation of the interface.
 type RealFinalWordHandler struct {
 }
 
-func NewRealFinalWordHandler() FinalWordHandler {
+func NewRealFinalWordHandler() utils.FinalWordHandler {
 	handler := new(RealFinalWordHandler)
 	return handler
 }
 
-func (handler *RealFinalWordHandler) FinalWord(rootCmd GalasaCommand, errorToExctractFrom interface{}) {
+func (handler *RealFinalWordHandler) FinalWord(rootCmd utils.GalasaCommand, errorToExctractFrom interface{}) {
 
 	rootCmdValues := rootCmd.Values().(*RootCmdValues)
 

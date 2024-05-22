@@ -5,8 +5,10 @@
  */
 package cmd
 
+import "github.com/galasa-dev/cli/pkg/utils"
+
 // The main entry point into the cmd package.
-func Execute(factory Factory, args []string) error {
+func Execute(factory utils.Factory, args []string) error {
 	var err error
 
 	finalWordHandler := factory.GetFinalWordHandler()

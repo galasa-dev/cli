@@ -32,7 +32,7 @@ type RunsPrepareCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsPrepareCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsPrepareCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(RunsPrepareCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -57,7 +57,7 @@ func (cmd *RunsPrepareCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsPrepareCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsPrepareCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsPrepareCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(
@@ -68,8 +68,8 @@ func (cmd *RunsPrepareCommand) init(factory Factory, runsCommand GalasaCommand, 
 	return err
 }
 func (cmd *RunsPrepareCommand) createCobraCommand(
-	factory Factory,
-	runsCommand GalasaCommand,
+	factory utils.Factory,
+	runsCommand utils.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 	var err error = nil
@@ -100,7 +100,7 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 }
 
 func (cmd *RunsPrepareCommand) executeAssemble(
-	factory Factory,
+	factory utils.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

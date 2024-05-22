@@ -51,7 +51,7 @@ type ProjectCreateCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewProjectCreateCmd(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewProjectCreateCmd(factory utils.Factory, projectCmd utils.GalasaCommand, rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
 	var err error = nil
 
 	cmd := new(ProjectCreateCommand)
@@ -79,7 +79,7 @@ func (cmd *ProjectCreateCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *ProjectCreateCommand) init(factory utils.Factory, projectCmd utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
 	var err error
 
 	cmd.values = &ProjectCreateCmdValues{}
@@ -89,9 +89,9 @@ func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand,
 }
 
 func (cmd *ProjectCreateCommand) createCobraCommand(
-	factory Factory,
-	projectCmd GalasaCommand,
-	rootCmd GalasaCommand,
+	factory utils.Factory,
+	projectCmd utils.GalasaCommand,
+	rootCmd utils.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error = nil
@@ -134,7 +134,7 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 	return projectCreateCmd, err
 }
 
-func (cmd *ProjectCreateCommand) executeCreateProject(factory Factory, rootCmdValues *RootCmdValues) error {
+func (cmd *ProjectCreateCommand) executeCreateProject(factory utils.Factory, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 

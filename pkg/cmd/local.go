@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,7 @@ type LocalCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewLocalCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewLocalCommand(rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(LocalCommand)
 	err := cmd.init(rootCmd)
 	return cmd, err
@@ -40,13 +41,13 @@ func (cmd *LocalCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private functions
 // ------------------------------------------------------------------------------------------------
-func (cmd *LocalCommand) init(rootCmd GalasaCommand) error {
+func (cmd *LocalCommand) init(rootCmd utils.GalasaCommand) error {
 	var err error
 	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
 	return err
 }
 
-func (cmd *LocalCommand) createCobraCommand(rootCmd GalasaCommand) (*cobra.Command, error) {
+func (cmd *LocalCommand) createCobraCommand(rootCmd utils.GalasaCommand) (*cobra.Command, error) {
 	var err error
 	localCobraCmd := &cobra.Command{
 		Use:   "local",

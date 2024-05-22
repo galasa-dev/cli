@@ -9,21 +9,22 @@ import (
 	"log"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 type CommandCollection interface {
 	// name - One of the COMMAND_NAME_* constants.
-	GetCommand(name string) (GalasaCommand, error)
+	GetCommand(name string) (utils.GalasaCommand, error)
 
-	GetRootCommand() GalasaCommand
+	GetRootCommand() utils.GalasaCommand
 
 	Execute(args []string) error
 }
 
 type commandCollectionImpl struct {
-	rootCommand GalasaCommand
+	rootCommand utils.GalasaCommand
 
-	commandMap map[string]GalasaCommand
+	commandMap map[string]utils.GalasaCommand
 }
 
 const (
@@ -59,7 +60,7 @@ const (
 // -----------------------------------------------------------------
 // Constructors
 // -----------------------------------------------------------------
-func NewCommandCollection(factory Factory) (CommandCollection, error) {
+func NewCommandCollection(factory utils.Factory) (CommandCollection, error) {
 
 	commands := new(commandCollectionImpl)
 
@@ -72,12 +73,12 @@ func NewCommandCollection(factory Factory) (CommandCollection, error) {
 // Public functions
 // -----------------------------------------------------------------
 
-func (commands *commandCollectionImpl) GetRootCommand() GalasaCommand {
+func (commands *commandCollectionImpl) GetRootCommand() utils.GalasaCommand {
 	cmd, _ := commands.GetCommand(COMMAND_NAME_ROOT)
 	return cmd
 }
 
-func (commands *commandCollectionImpl) GetCommand(name string) (GalasaCommand, error) {
+func (commands *commandCollectionImpl) GetCommand(name string) (utils.GalasaCommand, error) {
 	var err error
 	cmd := commands.commandMap[name]
 	if cmd == nil {
@@ -101,9 +102,9 @@ func (commands *commandCollectionImpl) Execute(args []string) error {
 // -----------------------------------------------------------------
 // Private functions.
 // -----------------------------------------------------------------
-func (commands *commandCollectionImpl) init(factory Factory) error {
+func (commands *commandCollectionImpl) init(factory utils.Factory) error {
 
-	commands.commandMap = make(map[string]GalasaCommand)
+	commands.commandMap = make(map[string]utils.GalasaCommand)
 
 	rootCommand, err := NewRootCommand(factory)
 	if err == nil {
@@ -142,11 +143,11 @@ func (commands *commandCollectionImpl) init(factory Factory) error {
 	return err
 }
 
-func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addAuthCommands(factory utils.Factory, rootCommand utils.GalasaCommand) error {
 	var err error
-	var authCommand GalasaCommand
-	var authLoginCommand GalasaCommand
-	var authLogoutCommand GalasaCommand
+	var authCommand utils.GalasaCommand
+	var authLoginCommand utils.GalasaCommand
+	var authLogoutCommand utils.GalasaCommand
 
 	authCommand, err = NewAuthCommand(rootCommand)
 	if err == nil {
@@ -165,10 +166,10 @@ func (commands *commandCollectionImpl) addAuthCommands(factory Factory, rootComm
 	return err
 }
 
-func (commands *commandCollectionImpl) addLocalCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addLocalCommands(factory utils.Factory, rootCommand utils.GalasaCommand) error {
 	var err error
-	var localCommand GalasaCommand
-	var localInitCommand GalasaCommand
+	var localCommand utils.GalasaCommand
+	var localInitCommand utils.GalasaCommand
 
 	localCommand, err = NewLocalCommand(rootCommand)
 	if err == nil {
@@ -182,10 +183,10 @@ func (commands *commandCollectionImpl) addLocalCommands(factory Factory, rootCom
 	return err
 }
 
-func (commands *commandCollectionImpl) addProjectCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addProjectCommands(factory utils.Factory, rootCommand utils.GalasaCommand) error {
 	var err error
 
-	var projectCommand GalasaCommand
+	var projectCommand utils.GalasaCommand
 
 	projectCommand, err = NewProjectCmd(rootCommand)
 	if err == nil {
@@ -193,7 +194,7 @@ func (commands *commandCollectionImpl) addProjectCommands(factory Factory, rootC
 	}
 
 	if err == nil {
-		var projectCreateCommand GalasaCommand
+		var projectCreateCommand utils.GalasaCommand
 		projectCreateCommand, err = NewProjectCreateCmd(factory, projectCommand, rootCommand)
 		if err == nil {
 			commands.commandMap[projectCreateCommand.Name()] = projectCreateCommand
@@ -202,12 +203,12 @@ func (commands *commandCollectionImpl) addProjectCommands(factory Factory, rootC
 	return err
 }
 
-func (commands *commandCollectionImpl) addPropertiesCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addPropertiesCommands(factory utils.Factory, rootCommand utils.GalasaCommand) error {
 	var err error
-	var propertiesCommand GalasaCommand
-	var propertiesGetCommand GalasaCommand
-	var propertiesDeleteCommand GalasaCommand
-	var propertiesSetCommand GalasaCommand
+	var propertiesCommand utils.GalasaCommand
+	var propertiesGetCommand utils.GalasaCommand
+	var propertiesDeleteCommand utils.GalasaCommand
+	var propertiesSetCommand utils.GalasaCommand
 
 	propertiesCommand, err = NewPropertiesCommand(rootCommand)
 	if err == nil {
@@ -233,10 +234,10 @@ func (commands *commandCollectionImpl) addPropertiesCommands(factory Factory, ro
 	return err
 }
 
-func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory Factory, rootCommand GalasaCommand, propertiesCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory utils.Factory, rootCommand utils.GalasaCommand, propertiesCommand utils.GalasaCommand) error {
 	var err error
-	var propertiesNamespaceCommand GalasaCommand
-	var propertiesNamespaceGetCommand GalasaCommand
+	var propertiesNamespaceCommand utils.GalasaCommand
+	var propertiesNamespaceGetCommand utils.GalasaCommand
 
 	propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(propertiesCommand, rootCommand)
 	if err == nil {
@@ -250,17 +251,17 @@ func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory Fa
 	return err
 }
 
-func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addRunsCommands(factory utils.Factory, rootCommand utils.GalasaCommand) error {
 
 	var err error
-	var runsCommand GalasaCommand
-	var runsDownloadCommand GalasaCommand
-	var runsGetCommand GalasaCommand
-	var runsPrepareCommand GalasaCommand
-	var runsSubmitCommand GalasaCommand
-	var runsSubmitLocalCommand GalasaCommand
-	var runsResetCommand GalasaCommand
-	var runsCancelCommand GalasaCommand
+	var runsCommand utils.GalasaCommand
+	var runsDownloadCommand utils.GalasaCommand
+	var runsGetCommand utils.GalasaCommand
+	var runsPrepareCommand utils.GalasaCommand
+	var runsSubmitCommand utils.GalasaCommand
+	var runsSubmitLocalCommand utils.GalasaCommand
+	var runsResetCommand utils.GalasaCommand
+	var runsCancelCommand utils.GalasaCommand
 
 	runsCommand, err = NewRunsCmd(rootCommand)
 	if err == nil {
@@ -299,14 +300,14 @@ func (commands *commandCollectionImpl) addRunsCommands(factory Factory, rootComm
 	return err
 }
 
-func (commands *commandCollectionImpl) addResourcesCommands(factory Factory, rootCommand GalasaCommand) error {
+func (commands *commandCollectionImpl) addResourcesCommands(factory utils.Factory, rootCommand utils.GalasaCommand) error {
 
 	var err error
-	var resourcesCommand GalasaCommand
-	var resourcesApplyCommand GalasaCommand
-	var resourcesCreateCommand GalasaCommand
-	var resourcesUpdateCommand GalasaCommand
-	var resourcesDeleteCommand GalasaCommand
+	var resourcesCommand utils.GalasaCommand
+	var resourcesApplyCommand utils.GalasaCommand
+	var resourcesCreateCommand utils.GalasaCommand
+	var resourcesUpdateCommand utils.GalasaCommand
+	var resourcesDeleteCommand utils.GalasaCommand
 
 	resourcesCommand, err = NewResourcesCmd(rootCommand)
 	if err == nil {

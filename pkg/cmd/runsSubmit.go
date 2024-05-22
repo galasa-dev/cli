@@ -28,7 +28,7 @@ type RunsSubmitCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsSubmitCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(RunsSubmitCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -53,7 +53,7 @@ func (cmd *RunsSubmitCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsSubmitCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 	var err error
 	cmd.values = &utils.RunsSubmitCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsSubmitCobraCmd(
@@ -64,8 +64,8 @@ func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, r
 	return err
 }
 
-func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
-	runsCommand GalasaCommand,
+func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory utils.Factory,
+	runsCommand utils.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -139,7 +139,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
 }
 
 func (cmd *RunsSubmitCommand) executeSubmit(
-	factory Factory,
+	factory utils.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

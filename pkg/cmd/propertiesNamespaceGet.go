@@ -34,11 +34,11 @@ type PropertiesNamespaceGetCommand struct {
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
 func NewPropertiesNamespaceGetCommand(
-	factory Factory,
-	propertiesNamespaceCommand GalasaCommand,
-	propertiesCommand GalasaCommand,
-	rootCommand GalasaCommand,
-) (GalasaCommand, error) {
+	factory utils.Factory,
+	propertiesNamespaceCommand utils.GalasaCommand,
+	propertiesCommand utils.GalasaCommand,
+	rootCommand utils.GalasaCommand,
+) (utils.GalasaCommand, error) {
 
 	cmd := new(PropertiesNamespaceGetCommand)
 
@@ -64,7 +64,7 @@ func (cmd *PropertiesNamespaceGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceGetCommand) init(factory Factory, propertiesNamespaceCommand GalasaCommand, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *PropertiesNamespaceGetCommand) init(factory utils.Factory, propertiesNamespaceCommand utils.GalasaCommand, propertiesCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
 	var err error
 	cmd.values = &PropertiesNamespaceGetCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCmd)
@@ -72,10 +72,10 @@ func (cmd *PropertiesNamespaceGetCommand) init(factory Factory, propertiesNamesp
 }
 
 func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
-	factory Factory,
-	propertiesNamespaceCommand GalasaCommand,
-	propertiesCommand GalasaCommand,
-	rootCmd GalasaCommand,
+	factory utils.Factory,
+	propertiesNamespaceCommand utils.GalasaCommand,
+	propertiesCommand utils.GalasaCommand,
+	rootCmd utils.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error = nil
@@ -102,7 +102,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 }
 
 func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
-	factory Factory,
+	factory utils.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

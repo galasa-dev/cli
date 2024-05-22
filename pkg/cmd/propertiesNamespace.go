@@ -7,6 +7,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ type PropertiesNamespaceCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesNamespaceCommand(propertiesCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesNamespaceCommand(propertiesCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(PropertiesNamespaceCommand)
 
 	err := cmd.init(propertiesCommand)
@@ -47,14 +48,14 @@ func (cmd *PropertiesNamespaceCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceCommand) init(propertiesCommand GalasaCommand) error {
+func (cmd *PropertiesNamespaceCommand) init(propertiesCommand utils.GalasaCommand) error {
 	var err error
 	cmd.cobraCommand, err = cmd.createPropertiesNamespaceCobraCmd(propertiesCommand)
 	return err
 }
 
 func (cmd *PropertiesNamespaceCommand) createPropertiesNamespaceCobraCmd(
-	propertiesCommand GalasaCommand,
+	propertiesCommand utils.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
