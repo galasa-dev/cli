@@ -35,7 +35,7 @@ type RunsSubmitLocalCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitLocalCommand(factory Factory, runsSubmitCommand GalasaCommand, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsSubmitLocalCommand(factory utils.Factory, runsSubmitCommand utils.GalasaCommand, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(RunsSubmitLocalCommand)
 	err := cmd.init(factory, runsSubmitCommand, runsCommand, rootCommand)
 	return cmd, err
@@ -60,7 +60,7 @@ func (cmd *RunsSubmitLocalCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitLocalCommand) init(factory Factory, runsSubmitCommand GalasaCommand, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsSubmitLocalCommand) init(factory utils.Factory, runsSubmitCommand utils.GalasaCommand, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 	var err error
 
 	// Allocate storage to capture the parsed values.
@@ -79,8 +79,8 @@ func (cmd *RunsSubmitLocalCommand) init(factory Factory, runsSubmitCommand Galas
 }
 
 func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
-	factory Factory,
-	runsSubmitCmd GalasaCommand,
+	factory utils.Factory,
+	runsSubmitCmd utils.GalasaCommand,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
@@ -154,7 +154,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 }
 
 func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
-	factory Factory,
+	factory utils.Factory,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,

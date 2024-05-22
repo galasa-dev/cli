@@ -40,7 +40,7 @@ type PropertiesGetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesGetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesGetCommand(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 
 	cmd := new(PropertiesGetCommand)
 	err := cmd.init(factory, propertiesCommand, rootCommand)
@@ -66,7 +66,7 @@ func (cmd *PropertiesGetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *PropertiesGetCommand) init(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 
 	var err error = nil
 
@@ -77,8 +77,8 @@ func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaC
 }
 
 func (cmd *PropertiesGetCommand) createCobraCommand(
-	factory Factory,
-	propertiesCommand GalasaCommand,
+	factory utils.Factory,
+	propertiesCommand utils.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -131,7 +131,7 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 }
 
 func (cmd *PropertiesGetCommand) executePropertiesGet(
-	factory Factory,
+	factory utils.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

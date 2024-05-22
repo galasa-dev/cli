@@ -7,6 +7,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +23,7 @@ type ResourcesCreateCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesCreateCommand(factory Factory, resourcesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewResourcesCreateCommand(factory utils.Factory, resourcesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 
 	cmd := new(ResourcesCreateCommand)
 	err := cmd.init(factory, resourcesCommand, rootCommand)
@@ -48,7 +49,7 @@ func (cmd *ResourcesCreateCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesCreateCommand) init(factory Factory, resourcesCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *ResourcesCreateCommand) init(factory utils.Factory, resourcesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 
 	var err error = nil
 
@@ -59,8 +60,8 @@ func (cmd *ResourcesCreateCommand) init(factory Factory, resourcesCommand Galasa
 }
 
 func (cmd *ResourcesCreateCommand) createCobraCommand(
-	factory Factory,
-	resourcesCommand GalasaCommand,
+	factory utils.Factory,
+	resourcesCommand utils.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -82,7 +83,7 @@ func (cmd *ResourcesCreateCommand) createCobraCommand(
 	return resourcesCreateCmd
 }
 
-func executeResourcesCreate(factory Factory,
+func executeResourcesCreate(factory utils.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

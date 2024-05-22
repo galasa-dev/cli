@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -18,17 +19,15 @@ type RunsCommand struct {
 	values       *RunsCmdValues
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewRunsCmd(rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsCmd(rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(RunsCommand)
 	err := cmd.init(rootCommand)
 	return cmd, err
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Public functions
@@ -46,12 +45,11 @@ func (cmd *RunsCommand) Values() interface{} {
 	return cmd.values
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsCommand) init(rootCmd GalasaCommand) error {
+func (cmd *RunsCommand) init(rootCmd utils.GalasaCommand) error {
 
 	var err error = nil
 
@@ -61,7 +59,7 @@ func (cmd *RunsCommand) init(rootCmd GalasaCommand) error {
 	return err
 }
 
-func (cmd *RunsCommand) createCobraCommand(rootCommand GalasaCommand) (*cobra.Command, error) {
+func (cmd *RunsCommand) createCobraCommand(rootCommand utils.GalasaCommand) (*cobra.Command, error) {
 
 	var err error
 

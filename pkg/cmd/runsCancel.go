@@ -32,7 +32,7 @@ type RunsCancelCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsCancelCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsCancelCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(RunsCancelCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -56,7 +56,7 @@ func (cmd *RunsCancelCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsCancelCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsCancelCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsCancelCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsCancelCobraCmd(
@@ -67,8 +67,8 @@ func (cmd *RunsCancelCommand) init(factory Factory, runsCommand GalasaCommand, r
 	return err
 }
 
-func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory Factory,
-	runsCommand GalasaCommand,
+func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory utils.Factory,
+	runsCommand utils.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -96,7 +96,7 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory Factory,
 }
 
 func (cmd *RunsCancelCommand) executeCancel(
-	factory Factory,
+	factory utils.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

@@ -24,7 +24,7 @@ type LocalInitCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewLocalInitCommand(factory Factory, localCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewLocalInitCommand(factory utils.Factory, localCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
 
 	cmd := new(LocalInitCommand)
 	err := cmd.init(factory, localCommand, rootCmd)
@@ -50,7 +50,7 @@ func (cmd *LocalInitCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *LocalInitCommand) init(factory utils.Factory, localCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
 	var err error
 
 	cmd.values = &LocalInitCmdValues{}
@@ -60,10 +60,10 @@ func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, r
 }
 
 func (cmd *LocalInitCommand) createCobraCommand(
-	factory Factory,
-	localCommand GalasaCommand, 
-	rootCmd GalasaCommand,
-	) *cobra.Command {
+	factory utils.Factory,
+	localCommand utils.GalasaCommand,
+	rootCmd utils.GalasaCommand,
+) *cobra.Command {
 
 	localInitCobraCmd := &cobra.Command{
 		Use:   "init",
@@ -82,7 +82,7 @@ func (cmd *LocalInitCommand) createCobraCommand(
 	return localInitCobraCmd
 }
 
-func (cmd *LocalInitCommand) executeEnvInit(factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *LocalInitCommand) executeEnvInit(factory utils.Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
 
 	var err error = nil
 

@@ -24,7 +24,7 @@ type PropertiesDeleteCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesDeleteCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesDeleteCommand(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(PropertiesDeleteCommand)
 
 	err := cmd.init(factory, propertiesCommand, rootCommand)
@@ -50,7 +50,7 @@ func (cmd *PropertiesDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *PropertiesDeleteCommand) init(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
 	var err error
 	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, rootCmd)
 	return err
@@ -61,9 +61,9 @@ func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand Gala
 //  And then display a successful message or error
 
 func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
-	factory Factory,
-	propertiesCommand GalasaCommand,
-	rootCmd GalasaCommand) (*cobra.Command, error) {
+	factory utils.Factory,
+	propertiesCommand utils.GalasaCommand,
+	rootCmd utils.GalasaCommand) (*cobra.Command, error) {
 
 	var err error = nil
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
@@ -89,7 +89,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 	return propertiesDeleteCmd, err
 }
 
-func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory utils.Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.

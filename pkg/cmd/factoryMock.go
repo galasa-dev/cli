@@ -11,7 +11,7 @@ import (
 )
 
 type MockFactory struct {
-	finalWordHandler FinalWordHandler
+	finalWordHandler utils.FinalWordHandler
 	fileSystem       files.FileSystem
 	env              utils.Environment
 	stdOutConsole    utils.Console
@@ -19,7 +19,7 @@ type MockFactory struct {
 	timeService      utils.TimeService
 }
 
-func NewMockFactory() Factory {
+func NewMockFactory() utils.Factory {
 	return &MockFactory{}
 }
 
@@ -37,7 +37,7 @@ func (factory *MockFactory) GetEnvironment() utils.Environment {
 	return factory.env
 }
 
-func (factory *MockFactory) GetFinalWordHandler() FinalWordHandler {
+func (factory *MockFactory) GetFinalWordHandler() utils.FinalWordHandler {
 	if factory.finalWordHandler == nil {
 		factory.finalWordHandler = NewMockFinalWordHandler()
 	}

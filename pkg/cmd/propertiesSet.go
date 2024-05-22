@@ -34,7 +34,7 @@ type PropertiesSetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesSetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesSetCommand(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
 
 	cmd := new(PropertiesSetCommand)
 	err := cmd.init(factory, propertiesCommand, rootCommand)
@@ -60,7 +60,7 @@ func (cmd *PropertiesSetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *PropertiesSetCommand) init(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
 
 	var err error = nil
 	cmd.values = &PropertiesSetCmdValues{}
@@ -71,8 +71,8 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 }
 
 func (cmd *PropertiesSetCommand) createCobraCommand(
-	factory Factory,
-	propertiesCommand GalasaCommand,
+	factory utils.Factory,
+	propertiesCommand utils.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -105,7 +105,7 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 }
 
 func (cmd *PropertiesSetCommand) executePropertiesSet(
-	factory Factory,
+	factory utils.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

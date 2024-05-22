@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,7 @@ type AuthCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewAuthCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewAuthCommand(rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
 	cmd := new(AuthCommand)
 
 	cmd.init(rootCmd)
@@ -42,13 +43,13 @@ func (cmd *AuthCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthCommand) init(rootCmd GalasaCommand) error {
+func (cmd *AuthCommand) init(rootCmd utils.GalasaCommand) error {
 	var err error
 	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
 	return err
 }
 
-func (cmd *AuthCommand) createCobraCommand(rootCmd GalasaCommand) (*cobra.Command, error) {
+func (cmd *AuthCommand) createCobraCommand(rootCmd utils.GalasaCommand) (*cobra.Command, error) {
 
 	var err error = nil
 

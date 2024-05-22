@@ -7,6 +7,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +25,7 @@ type PropertiesCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesCommand(rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesCommand(rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
 
 	cmd := new(PropertiesCommand)
 	err := cmd.init(rootCmd)
@@ -50,7 +51,7 @@ func (cmd *PropertiesCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesCommand) init(rootCmd GalasaCommand) error {
+func (cmd *PropertiesCommand) init(rootCmd utils.GalasaCommand) error {
 
 	var err error = nil
 
@@ -61,7 +62,7 @@ func (cmd *PropertiesCommand) init(rootCmd GalasaCommand) error {
 }
 
 func (cmd *PropertiesCommand) createCobraCommand(
-	rootCommand GalasaCommand,
+	rootCommand utils.GalasaCommand,
 ) *cobra.Command {
 	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",

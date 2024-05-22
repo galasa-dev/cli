@@ -14,17 +14,6 @@ import (
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
-type Authenticator interface {
-	// Gets a bearer token from the persistent cache if there is one, else logs into the server to get one.
-	GetBearerToken() (string, error)
-
-	// Gets a new authenticated API client, attempting to log in if a bearer token file does not exist
-	GetAuthenticatedAPIClient() (*galasaapi.APIClient, error)
-
-	// Logs into the server, saving the JWT token obtained in a persistent cache for later
-	Login() error
-}
-
 type authenticatorImpl struct {
 	apiServerUrl string
 	fileSystem   files.FileSystem
@@ -40,7 +29,7 @@ func NewAuthenticator(
 	galasaHome utils.GalasaHome,
 	timeService utils.TimeService,
 	env utils.Environment,
-) Authenticator {
+) utils.Authenticator {
 
 	authenticator := new(authenticatorImpl)
 

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func checkOutput(expectedStdOutput string, expectedStdErr string, factory Factory, t *testing.T) {
+func checkOutput(expectedStdOutput string, expectedStdErr string, factory utils.Factory, t *testing.T) {
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
 	if expectedStdOutput != "" {
@@ -37,11 +37,11 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, factory Factor
 	assert.Nil(t, o)
 }
 
-func setupTestCommandCollection(command string, factory Factory, t *testing.T) (CommandCollection, GalasaCommand) {
+func setupTestCommandCollection(command string, factory utils.Factory, t *testing.T) (CommandCollection, utils.GalasaCommand) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	var cmd GalasaCommand
+	var cmd utils.GalasaCommand
 	cmd, err = commandCollection.GetCommand(command)
 	assert.Nil(t, err)
 	cmd.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
@@ -64,7 +64,7 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 	commands, err := NewCommandCollection(factory)
 	// Then...
 	assert.Nil(t, err)
-	var rootCommand GalasaCommand
+	var rootCommand utils.GalasaCommand
 	rootCommand, err = commands.GetCommand(COMMAND_NAME_ROOT)
 	assert.Nil(t, err)
 
