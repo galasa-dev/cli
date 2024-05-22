@@ -32,7 +32,7 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, factory utils.
 		assert.Empty(t, errText)
 	}
 
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	finalWordHandler := factory.GetFinalWordHandler().(*utils.MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
 	assert.Nil(t, o)
 }
@@ -49,7 +49,7 @@ func setupTestCommandCollection(command string, factory utils.Factory, t *testin
 }
 
 func TestCommandsCollectionHasARootCommand(t *testing.T) {
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 	rootCommand, err := commands.GetCommand(COMMAND_NAME_ROOT)
@@ -59,7 +59,7 @@ func TestCommandsCollectionHasARootCommand(t *testing.T) {
 
 func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	// When...
 	commands, err := NewCommandCollection(factory)
 	// Then...
@@ -73,7 +73,7 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 
 func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	// When...
 	commands, err := NewCommandCollection(factory)
@@ -87,7 +87,7 @@ func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 
 func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	// When...
 	commands, err := NewCommandCollection(factory)
 	// Then...
@@ -101,7 +101,7 @@ func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
 
 func TestVersionFromCommandLine(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = make([]string, 0)
 	args = append(args, "--version")
@@ -118,7 +118,7 @@ func TestVersionFromCommandLine(t *testing.T) {
 
 func TestNoParamsFromCommandLine(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = make([]string, 0)
 	args = append(args, "")
@@ -158,7 +158,7 @@ func TestCanGetTestsFailedExitCodeAndErrorTextFromATestFailedGalasaErrorPointer(
 
 func TestRootHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"--help"}
 
@@ -174,7 +174,7 @@ func TestRootHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRootNoCommandsReturnsUsageReport(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{}
 

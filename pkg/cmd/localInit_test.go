@@ -14,7 +14,7 @@ import (
 )
 
 func TestCommandCollectionContainsLocalInitCommand(t *testing.T) {
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 	localInitCommand, err := commands.GetCommand(COMMAND_NAME_LOCAL_INIT)
 	assert.Nil(t, err)
@@ -147,7 +147,7 @@ func assertSettingsXMLCreatedAndContentOk(t *testing.T, mockFileSystem files.Fil
 
 func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"local", "init", "--help"}
 
@@ -164,7 +164,7 @@ func TestLocalInitHelpFlagSetCorrectly(t *testing.T) {
 
 func TestLocalInitNoFlagsReturnsNoError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_LOCAL_INIT, factory, t)
 
 	var args []string = []string{"local", "init"}

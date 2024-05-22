@@ -568,7 +568,7 @@ func TestCanCreateGradleProjectDevelopmentModeGeneratesMavenRepoReference(t *tes
 
 func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"project", "create"}
 
@@ -584,7 +584,7 @@ func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 
 func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"project", "create", "--package", "my.pkg", "--maven"}
 
@@ -608,7 +608,7 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 
 func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"project", "create", "--package", "my.package"}
@@ -627,7 +627,7 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 
 func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	// When...
 	commands, _ := NewCommandCollection(factory)
@@ -642,7 +642,7 @@ func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 
 func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"project", "create", "--help"}
 
@@ -658,7 +658,7 @@ func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 
 func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create"}
@@ -676,7 +676,7 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 
 func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name"}
@@ -694,7 +694,7 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 
 func TestProjectCreatePackageFlagNoPackageReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package"}
@@ -711,7 +711,7 @@ func TestProjectCreatePackageFlagNoPackageReturnsError(t *testing.T) {
 
 func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "comma,seperated,test,list"}
@@ -730,7 +730,7 @@ func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
 
 func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--force"}
@@ -749,7 +749,7 @@ func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--obr"}
@@ -768,7 +768,7 @@ func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--maven"}
@@ -787,7 +787,7 @@ func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--gradle"}
@@ -806,7 +806,7 @@ func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "feature,list", "--force", "--obr", "--maven", "--gradle"}

@@ -3,17 +3,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package auth
+package utils
 
 import (
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 type MockAuthenticator struct {
 }
 
-func NewMockAuthenticator() utils.Authenticator {
+func NewMockAuthenticator() Authenticator {
 
 	authenticator := new(MockAuthenticator)
 

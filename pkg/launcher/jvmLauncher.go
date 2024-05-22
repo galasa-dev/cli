@@ -68,6 +68,9 @@ type JvmLauncher struct {
 
 	// A map of bootstrap properties
 	bootstrapProps props.JavaProperties
+
+	// So we can get common objects easily.
+	factory utils.Factory
 }
 
 // These parameters are gathered from the command-line and passed into the laucher.
@@ -114,12 +117,10 @@ const (
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
 func NewJVMLauncher(
+	factory utils.Factory,
 	bootstrapProps props.JavaProperties,
-	env utils.Environment,
-	fileSystem files.FileSystem,
 	embeddedFileSystem embedded.ReadOnlyFileSystem,
 	runsSubmitLocalCmdParams *RunsSubmitLocalCmdParameters,
-	timeService utils.TimeService,
 	processFactory ProcessFactory,
 	galasaHome utils.GalasaHome,
 ) (*JvmLauncher, error) {
@@ -129,12 +130,17 @@ func NewJVMLauncher(
 		launcher *JvmLauncher = nil
 	)
 
+	env := factory.GetEnvironment()
+	fileSystem := factory.GetFileSystem()
+	timeService := factory.GetTimeService()
+
 	javaHome := env.GetEnv("JAVA_HOME")
 
 	err = utils.ValidateJavaHome(fileSystem, javaHome)
 
 	if err == nil {
 		launcher = new(JvmLauncher)
+		launcher.factory = factory
 		launcher.javaHome = javaHome
 		launcher.cmdParams = *runsSubmitLocalCmdParams
 		launcher.env = env
@@ -245,8 +251,10 @@ func (launcher *JvmLauncher) SubmitTestRun(
 					if launcher.isCPSRemote() {
 						// Though this is a local test run being launched, the CPS will be remote on an ecosystem via REST.
 						// If the config store value doesn't start wiht that, then it's not a remote CPS, so we don't need the JWT.
+						apiServerUrl := launcher.getCPSRemoteApiServerUrl()
+						authenticator := launcher.factory.GetAuthenticator(apiServerUrl, launcher.galasaHome)
 						log.Printf("framework.config.store bootstrap property indicates a remote CPS will be used. So we need a valid JWT.\n")
-						jwt, err = utils.GetBearerTokenFromTokenJsonFile(launcher.fileSystem, launcher.galasaHome, launcher.timeService)
+						jwt, err = authenticator.GetBearerToken()
 					}
 
 					if err == nil {
@@ -308,6 +316,13 @@ func (launcher *JvmLauncher) isCPSRemote() bool {
 	configStoreProp := launcher.bootstrapProps["framework.config.store"]
 	isRemote = strings.HasPrefix(configStoreProp, "galasacps")
 	return isRemote
+}
+
+// Gets the https URL of the config store, to be used contacting the remote CPS.
+func (launcher *JvmLauncher) getCPSRemoteApiServerUrl() string {
+	configStoreGalasaUrl := launcher.bootstrapProps["framework.config.store"]
+	httpsUrl := strings.Replace(configStoreGalasaUrl, "galasacps", "https", 1)
+	return httpsUrl
 }
 
 func defaultLocalMavenIfNotSet(localMaven string, fileSystem files.FileSystem) (string, error) {

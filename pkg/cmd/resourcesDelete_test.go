@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestResourcesDeleteCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	resourcesDeleteCommand, _ := commands.GetCommand(COMMAND_NAME_RESOURCES_DELETE)

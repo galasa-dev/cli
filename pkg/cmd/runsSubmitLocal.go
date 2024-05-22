@@ -201,8 +201,9 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 					// A launcher is needed to launch anythihng
 					var launcherInstance launcher.Launcher
 					launcherInstance, err = launcher.NewJVMLauncher(
-						bootstrapData.Properties, env, fileSystem, embeddedFileSystem,
-						cmd.values.runsSubmitLocalCmdParams, timeService,
+						factory,
+						bootstrapData.Properties, embeddedFileSystem,
+						cmd.values.runsSubmitLocalCmdParams,
 						processFactory, galasaHome)
 
 					if err == nil {
