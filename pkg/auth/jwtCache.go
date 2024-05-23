@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
 
@@ -33,14 +34,14 @@ type JwtCache interface {
 
 type fileBasedJwtCache struct {
 	fileSystem  files.FileSystem
-	galasaHome  utils.GalasaHome
-	timeService utils.TimeService
+	galasaHome  spi.GalasaHome
+	timeService spi.TimeService
 }
 
 func NewJwtCache(
 	fileSystem files.FileSystem,
-	galasaHome utils.GalasaHome,
-	timeService utils.TimeService,
+	galasaHome spi.GalasaHome,
+	timeService spi.TimeService,
 ) JwtCache {
 	cache := new(fileBasedJwtCache)
 
@@ -77,7 +78,7 @@ func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jw
 }
 
 // Checks whether a given bearer token is valid or not, returning true if it is valid and false otherwise
-func IsBearerTokenValid(bearerTokenString string, timeService utils.TimeService) (bool, error) {
+func IsBearerTokenValid(bearerTokenString string, timeService spi.TimeService) (bool, error) {
 	var err error
 	var bearerToken *jwt.Token
 	var isValid bool = false

@@ -10,12 +10,13 @@ import (
 	"testing"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
-func checkOutput(expectedStdOutput string, expectedStdErr string, factory utils.Factory, t *testing.T) {
+func checkOutput(expectedStdOutput string, expectedStdErr string, factory spi.Factory, t *testing.T) {
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
 	if expectedStdOutput != "" {
@@ -37,11 +38,11 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, factory utils.
 	assert.Nil(t, o)
 }
 
-func setupTestCommandCollection(command string, factory utils.Factory, t *testing.T) (CommandCollection, utils.GalasaCommand) {
+func setupTestCommandCollection(command string, factory spi.Factory, t *testing.T) (CommandCollection, spi.GalasaCommand) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	var cmd utils.GalasaCommand
+	var cmd spi.GalasaCommand
 	cmd, err = commandCollection.GetCommand(command)
 	assert.Nil(t, err)
 	cmd.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
@@ -64,7 +65,7 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 	commands, err := NewCommandCollection(factory)
 	// Then...
 	assert.Nil(t, err)
-	var rootCommand utils.GalasaCommand
+	var rootCommand spi.GalasaCommand
 	rootCommand, err = commands.GetCommand(COMMAND_NAME_ROOT)
 	assert.Nil(t, err)
 

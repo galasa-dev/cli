@@ -16,6 +16,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
@@ -35,7 +36,7 @@ type RunsSubmitLocalCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitLocalCommand(factory utils.Factory, runsSubmitCommand utils.GalasaCommand, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewRunsSubmitLocalCommand(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsSubmitLocalCommand)
 	err := cmd.init(factory, runsSubmitCommand, runsCommand, rootCommand)
 	return cmd, err
@@ -60,7 +61,7 @@ func (cmd *RunsSubmitLocalCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitLocalCommand) init(factory utils.Factory, runsSubmitCommand utils.GalasaCommand, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 
 	// Allocate storage to capture the parsed values.
@@ -79,8 +80,8 @@ func (cmd *RunsSubmitLocalCommand) init(factory utils.Factory, runsSubmitCommand
 }
 
 func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
-	factory utils.Factory,
-	runsSubmitCmd utils.GalasaCommand,
+	factory spi.Factory,
+	runsSubmitCmd spi.GalasaCommand,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
@@ -154,7 +155,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 }
 
 func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
-	factory utils.Factory,
+	factory spi.Factory,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
@@ -175,7 +176,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 		env := factory.GetEnvironment()
 
 		// Work out where galasa home is, only once.
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 

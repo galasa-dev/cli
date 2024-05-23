@@ -10,20 +10,16 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
-
-type GalasaHome interface {
-	GetNativeFolderPath() string
-	GetUrlFolderPath() string
-}
 
 type galasaHomeImpl struct {
 	path string
 	fs   files.FileSystem
-	env  Environment
+	env  spi.Environment
 }
 
-func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome string) (GalasaHome, error) {
+func NewGalasaHome(fs files.FileSystem, env spi.Environment, cmdFlagGalasaHome string) (spi.GalasaHome, error) {
 	var err error
 	var homeData *galasaHomeImpl = nil
 

@@ -8,19 +8,15 @@ package utils
 import (
 	"log"
 	"time"
-)
 
-type TimeService interface {
-	Sleep(duration time.Duration)
-	Now() time.Time
-	Interrupt(message string)
-}
+	"github.com/galasa-dev/cli/pkg/spi"
+)
 
 type timeService struct {
 	interruptEventChannel chan string
 }
 
-func NewRealTimeService() TimeService {
+func NewRealTimeService() spi.TimeService {
 	service := timeService{
 		// The interrupt channel has enough capacity for 100 events before anything blocks.
 		interruptEventChannel: make(chan string, 100),

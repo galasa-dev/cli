@@ -11,19 +11,19 @@ import (
 	"reflect"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // The real implementation of the interface.
 type RealFinalWordHandler struct {
 }
 
-func NewRealFinalWordHandler() utils.FinalWordHandler {
+func NewRealFinalWordHandler() spi.FinalWordHandler {
 	handler := new(RealFinalWordHandler)
 	return handler
 }
 
-func (handler *RealFinalWordHandler) FinalWord(rootCmd utils.GalasaCommand, errorToExctractFrom interface{}) {
+func (handler *RealFinalWordHandler) FinalWord(rootCmd spi.GalasaCommand, errorToExctractFrom interface{}) {
 
 	rootCmdValues := rootCmd.Values().(*RootCmdValues)
 

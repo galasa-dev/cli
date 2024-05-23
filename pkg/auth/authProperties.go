@@ -13,7 +13,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
@@ -24,7 +24,7 @@ const (
 )
 
 // Gets authentication properties from the user's galasactl.properties file or from the environment or a mixture.
-func GetAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome, env utils.Environment) (galasaapi.AuthProperties, string, error) {
+func GetAuthProperties(fileSystem files.FileSystem, galasaHome spi.GalasaHome, env spi.Environment) (galasaapi.AuthProperties, string, error) {
 	var err error
 	authProperties := galasaapi.NewAuthProperties()
 
@@ -69,7 +69,7 @@ func checkPropertyIsSet(propertyValue string, propertyName string, galasactlProp
 	return err
 }
 
-func getPropertyWithOverride(env utils.Environment, valueFromFile string, filePathGatheredFrom string, propertyName string) string {
+func getPropertyWithOverride(env spi.Environment, valueFromFile string, filePathGatheredFrom string, propertyName string) string {
 	value := env.GetEnv(propertyName)
 	if value != "" {
 		// env var has been set.

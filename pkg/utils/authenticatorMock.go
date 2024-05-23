@@ -7,12 +7,13 @@ package utils
 
 import (
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type MockAuthenticator struct {
 }
 
-func NewMockAuthenticator() Authenticator {
+func NewMockAuthenticator() spi.Authenticator {
 
 	authenticator := new(MockAuthenticator)
 

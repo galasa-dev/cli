@@ -11,26 +11,26 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type authenticatorImpl struct {
 	apiServerUrl string
 	fileSystem   files.FileSystem
-	galasaHome   utils.GalasaHome
-	timeService  utils.TimeService
-	env          utils.Environment
+	galasaHome   spi.GalasaHome
+	timeService  spi.TimeService
+	env          spi.Environment
 	cache        JwtCache
 }
 
 func NewAuthenticator(
 	apiServerUrl string,
 	fileSystem files.FileSystem,
-	galasaHome utils.GalasaHome,
-	timeService utils.TimeService,
-	env utils.Environment,
+	galasaHome spi.GalasaHome,
+	timeService spi.TimeService,
+	env spi.Environment,
 	jwtCache JwtCache,
-) utils.Authenticator {
+) spi.Authenticator {
 
 	authenticator := new(authenticatorImpl)
 

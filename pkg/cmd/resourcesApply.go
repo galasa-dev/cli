@@ -11,6 +11,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/resources"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +28,7 @@ type ResourcesApplyCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesApplyCommand(factory utils.Factory, resourcesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesApplyCommand)
 	err := cmd.init(factory, resourcesCommand, rootCommand)
@@ -53,7 +54,7 @@ func (cmd *ResourcesApplyCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesApplyCommand) init(factory utils.Factory, resourcesApplyCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 
 	var err error
 
@@ -64,8 +65,8 @@ func (cmd *ResourcesApplyCommand) init(factory utils.Factory, resourcesApplyComm
 }
 
 func (cmd *ResourcesApplyCommand) createCobraCommand(
-	factory utils.Factory,
-	resourcesCommand utils.GalasaCommand,
+	factory spi.Factory,
+	resourcesCommand spi.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -87,7 +88,7 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 	return resourcesApplyCmd
 }
 
-func executeResourcesApply(factory utils.Factory,
+func executeResourcesApply(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -98,7 +99,7 @@ func executeResourcesApply(factory utils.Factory,
 	return err
 }
 
-func loadAndPassDataIntoResourcesApi(action string, factory utils.Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
+func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
@@ -113,7 +114,7 @@ func loadAndPassDataIntoResourcesApi(action string, factory utils.Factory, resou
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 
 		if err == nil {

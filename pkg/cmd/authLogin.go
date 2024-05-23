@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +26,7 @@ type AuthLoginComamnd struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthLoginCommand(factory utils.Factory, authCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewAuthLoginCommand(factory spi.Factory, authCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(AuthLoginComamnd)
 	err := cmd.init(factory, authCommand, rootCommand)
 	return cmd, err
@@ -49,7 +50,7 @@ func (cmd *AuthLoginComamnd) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLoginComamnd) init(factory utils.Factory, authCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
+func (cmd *AuthLoginComamnd) init(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 
 	cmd.values = &AuthLoginCmdValues{}
@@ -60,9 +61,9 @@ func (cmd *AuthLoginComamnd) init(factory utils.Factory, authCommand utils.Galas
 }
 
 func (cmd *AuthLoginComamnd) createCobraCommand(
-	factory utils.Factory,
-	authCommand utils.GalasaCommand,
-	rootCmd utils.GalasaCommand,
+	factory spi.Factory,
+	authCommand spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -87,7 +88,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 }
 
 func (cmd *AuthLoginComamnd) executeAuthLogin(
-	factory utils.Factory,
+	factory spi.Factory,
 	rootCmdValues *RootCmdValues,
 ) error {
 
@@ -105,7 +106,7 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err != nil {
 			panic(err)

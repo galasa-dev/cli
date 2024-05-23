@@ -7,7 +7,7 @@
 package cmd
 
 import (
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ type ResourcesDeleteCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesDeleteCommand(factory utils.Factory, resourcesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewResourcesDeleteCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesDeleteCommand)
 	err := cmd.init(factory, resourcesCommand, rootCommand)
@@ -49,7 +49,7 @@ func (cmd *ResourcesDeleteCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesDeleteCommand) init(factory utils.Factory, resourcesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 
 	var err error
 
@@ -60,8 +60,8 @@ func (cmd *ResourcesDeleteCommand) init(factory utils.Factory, resourcesCommand 
 }
 
 func (cmd *ResourcesDeleteCommand) createCobraCommand(
-	factory utils.Factory,
-	resourcesCommand utils.GalasaCommand,
+	factory spi.Factory,
+	resourcesCommand spi.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -83,7 +83,7 @@ func (cmd *ResourcesDeleteCommand) createCobraCommand(
 	return resourcesDeleteCmd
 }
 
-func executeResourcesDelete(factory utils.Factory,
+func executeResourcesDelete(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {

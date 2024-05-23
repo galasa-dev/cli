@@ -15,7 +15,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // A local test which gets run.
@@ -44,7 +44,7 @@ type LocalTest struct {
 	testRun *galasaapi.TestRun
 
 	// A time service. When a significant event occurs, we interrupt it.
-	timeService utils.TimeService
+	timeService spi.TimeService
 
 	// The file system the local test deposits results onto.
 	// We use this to read the results back to find out if it passed/failed. ...etc.
@@ -56,7 +56,7 @@ type LocalTest struct {
 
 // A structure which tells us all we know about a JVM process we launched.
 func NewLocalTest(
-	timeService utils.TimeService,
+	timeService spi.TimeService,
 	fileSystem files.FileSystem,
 	processFactory ProcessFactory,
 ) *LocalTest {

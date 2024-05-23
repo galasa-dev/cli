@@ -23,7 +23,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/images"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // DownloadArtifacts - performs all the logic to implement the `galasactl runs download` command,
@@ -32,8 +32,8 @@ func DownloadArtifacts(
 	runName string,
 	forceDownload bool,
 	fileSystem files.FileSystem,
-	timeService utils.TimeService,
-	console utils.Console,
+	timeService spi.TimeService,
+	console spi.Console,
 	apiClient *galasaapi.APIClient,
 	runDownloadTargetFolder string,
 ) error {
@@ -88,8 +88,8 @@ func downloadReRunArtfifacts(
 	forceDownload bool,
 	fileSystem files.FileSystem,
 	apiClient *galasaapi.APIClient,
-	console utils.Console,
-	timeService utils.TimeService,
+	console spi.Console,
+	timeService spi.TimeService,
 	runDownloadTargetFolder string,
 ) error {
 	var err error
@@ -133,7 +133,7 @@ func createMapOfReRuns(runs []galasaapi.Run) map[string][]galasaapi.Run {
 	return reRunsByQueuedTime
 }
 
-func nameReRunArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int, timeService utils.TimeService) string {
+func nameReRunArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int, timeService spi.TimeService) string {
 	result := reRun.TestStructure.GetResult()
 	runName := reRun.TestStructure.GetRunName()
 	var directoryName string
@@ -148,7 +148,7 @@ func nameReRunArtifactDownloadDirectory(reRun galasaapi.Run, reRunIndex int, tim
 	return directoryName
 }
 
-func nameDownloadFolder(run galasaapi.Run, runName string, timeService utils.TimeService) (string, error) {
+func nameDownloadFolder(run galasaapi.Run, runName string, timeService spi.TimeService) (string, error) {
 	directoryName := runName
 	var err error
 	result := run.TestStructure.GetResult()
@@ -164,7 +164,7 @@ func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
 	run galasaapi.Run,
 	fileSystem files.FileSystem,
 	forceDownload bool,
-	console utils.Console,
+	console spi.Console,
 	runDownloadTargetFolder string,
 ) error {
 	var err error
@@ -214,7 +214,7 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 	run galasaapi.Run,
 	fileSystem files.FileSystem,
 	forceDownload bool,
-	console utils.Console,
+	console spi.Console,
 ) (filePathsCreated []string, err error) {
 
 	runId := run.GetRunId()
@@ -312,7 +312,7 @@ func WriteArtifactToFileSystem(
 	artifactPath string,
 	fileDownloaded io.Reader,
 	shouldOverwrite bool,
-	console utils.Console) error {
+	console spi.Console) error {
 
 	var err error
 

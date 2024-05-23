@@ -13,7 +13,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/props"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 const (
@@ -72,7 +72,7 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 }
 
 // getDefaultBootstrapPath - Work out where the boostrap file can normally be found.
-func getDefaultBootstrapPath(galasaHome utils.GalasaHome) string {
+func getDefaultBootstrapPath(galasaHome spi.GalasaHome) string {
 
 	// Turn the path into a URL
 	// This may involve changing the direction of slash characters.
@@ -87,9 +87,9 @@ func getDefaultBootstrapPath(galasaHome utils.GalasaHome) string {
 // loadBootstrap - Loads the contents of a bootstrap file into memory.
 // bootstrapPath - Where do we find the bootstrap contents from ? This can be a URL must end in /bootstrap
 func LoadBootstrap(
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	fileSystem files.FileSystem,
-	env utils.Environment,
+	env spi.Environment,
 	bootstrapPath string,
 	urlResolutionService UrlResolutionService,
 ) (*BootstrapData, error) {

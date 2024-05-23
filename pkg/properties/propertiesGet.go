@@ -17,7 +17,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/propertiesformatter"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 var (
@@ -35,7 +35,7 @@ func GetProperties(
 	infix string,
 	apiClient *galasaapi.APIClient,
 	propertiesOutputFormat string,
-	console utils.Console,
+	console spi.Console,
 ) error {
 	var err error
 
@@ -77,7 +77,7 @@ func getCpsPropertiesFromRestApi(
 	suffix string,
 	infix string,
 	apiClient *galasaapi.APIClient,
-	console utils.Console,
+	console spi.Console,
 ) ([]galasaapi.GalasaProperty, error) {
 
 	var err error

@@ -12,6 +12,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/properties"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -39,7 +40,7 @@ type PropertiesGetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesGetCommand(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewPropertiesGetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesGetCommand)
 	err := cmd.init(factory, propertiesCommand, rootCommand)
@@ -65,7 +66,7 @@ func (cmd *PropertiesGetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesGetCommand) init(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 
 	var err error
 
@@ -76,8 +77,8 @@ func (cmd *PropertiesGetCommand) init(factory utils.Factory, propertiesCommand u
 }
 
 func (cmd *PropertiesGetCommand) createCobraCommand(
-	factory utils.Factory,
-	propertiesCommand utils.GalasaCommand,
+	factory spi.Factory,
+	propertiesCommand spi.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -130,7 +131,7 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 }
 
 func (cmd *PropertiesGetCommand) executePropertiesGet(
-	factory utils.Factory,
+	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -149,7 +150,7 @@ func (cmd *PropertiesGetCommand) executePropertiesGet(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 

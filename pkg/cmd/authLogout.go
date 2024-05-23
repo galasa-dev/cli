@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +21,7 @@ type AuthLogoutCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthLogoutCommand(factory utils.Factory, authCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewAuthLogoutCommand(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(AuthLogoutCommand)
 
 	err := cmd.init(factory, authCommand, rootCmd)
@@ -46,13 +47,13 @@ func (cmd *AuthLogoutCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLogoutCommand) init(factory utils.Factory, authCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
+func (cmd *AuthLogoutCommand) init(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd.Values().(*RootCmdValues))
 	return err
 }
 
-func (cmd *AuthLogoutCommand) createCobraCmd(factory utils.Factory, authCommand utils.GalasaCommand, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *AuthLogoutCommand) createCobraCmd(factory spi.Factory, authCommand spi.GalasaCommand, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
 	var err error
 
 	authLogoutCmd := &cobra.Command{
@@ -71,7 +72,7 @@ func (cmd *AuthLogoutCommand) createCobraCmd(factory utils.Factory, authCommand 
 }
 
 func (cmd *AuthLogoutCommand) executeAuthLogout(
-	factory utils.Factory,
+	factory spi.Factory,
 	rootCmdValues *RootCmdValues,
 ) error {
 
@@ -89,7 +90,7 @@ func (cmd *AuthLogoutCommand) executeAuthLogout(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 			err = auth.Logout(fileSystem, galasaHome)

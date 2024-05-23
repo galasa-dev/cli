@@ -15,7 +15,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	galasaapi "github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 var (
@@ -25,8 +25,8 @@ var (
 
 func ResetRun(
 	runName string,
-	timeService utils.TimeService,
-	console utils.Console,
+	timeService spi.TimeService,
+	console spi.Console,
 	apiServerUrl string,
 	apiClient *galasaapi.APIClient,
 ) error {

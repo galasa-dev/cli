@@ -14,6 +14,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -60,9 +61,9 @@ func NewMockLauncherParams() (
 	files.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
-	utils.TimeService,
+	spi.TimeService,
 	ProcessFactory,
-	utils.GalasaHome,
+	spi.GalasaHome,
 ) {
 	// Given...
 	env := utils.NewMockEnv()
@@ -495,8 +496,8 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 
 func getDefaultCommandSyntaxTestParameters() (
 	props.JavaProperties,
-	utils.Environment,
-	utils.GalasaHome,
+	spi.Environment,
+	spi.GalasaHome,
 	*files.MockFileSystem,
 	string,
 	[]utils.MavenCoordinates,
@@ -1260,9 +1261,9 @@ func NewMockGherkinParams() (
 	files.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
-	utils.TimeService,
+	spi.TimeService,
 	ProcessFactory,
-	utils.GalasaHome,
+	spi.GalasaHome,
 ) {
 	// Given...
 	env := utils.NewMockEnv()

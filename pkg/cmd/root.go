@@ -7,7 +7,7 @@ package cmd
 
 import (
 	"github.com/galasa-dev/cli/pkg/embedded"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +32,7 @@ type RootCommand struct {
 // -------------------------------------------------------------------------------
 // Constructor
 // -------------------------------------------------------------------------------
-func NewRootCommand(factory utils.Factory) (*RootCommand, error) {
+func NewRootCommand(factory spi.Factory) (*RootCommand, error) {
 	cmd := new(RootCommand)
 
 	err := cmd.init(factory)
@@ -60,7 +60,7 @@ func (cmd *RootCommand) Values() interface{} {
 // Private methods
 //-------------------------------------------------------------------------------
 
-func (cmd *RootCommand) init(factory utils.Factory) error {
+func (cmd *RootCommand) init(factory spi.Factory) error {
 
 	var err error
 
@@ -74,7 +74,7 @@ func (cmd *RootCommand) init(factory utils.Factory) error {
 	return err
 }
 
-func (cmd *RootCommand) createCobraCommand(factory utils.Factory) (*cobra.Command, error) {
+func (cmd *RootCommand) createCobraCommand(factory spi.Factory) (*cobra.Command, error) {
 	version, err := embedded.GetGalasaCtlVersion()
 	var rootCmd *cobra.Command
 	if err == nil {

@@ -12,6 +12,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/properties"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -33,11 +34,11 @@ type PropertiesNamespaceGetCommand struct {
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
 func NewPropertiesNamespaceGetCommand(
-	factory utils.Factory,
-	propertiesNamespaceCommand utils.GalasaCommand,
-	propertiesCommand utils.GalasaCommand,
-	rootCommand utils.GalasaCommand,
-) (utils.GalasaCommand, error) {
+	factory spi.Factory,
+	propertiesNamespaceCommand spi.GalasaCommand,
+	propertiesCommand spi.GalasaCommand,
+	rootCommand spi.GalasaCommand,
+) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesNamespaceGetCommand)
 
@@ -63,7 +64,7 @@ func (cmd *PropertiesNamespaceGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceGetCommand) init(factory utils.Factory, propertiesNamespaceCommand utils.GalasaCommand, propertiesCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
+func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, propertiesCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 	cmd.values = &PropertiesNamespaceGetCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCmd)
@@ -71,10 +72,10 @@ func (cmd *PropertiesNamespaceGetCommand) init(factory utils.Factory, properties
 }
 
 func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
-	factory utils.Factory,
-	propertiesNamespaceCommand utils.GalasaCommand,
-	propertiesCommand utils.GalasaCommand,
-	rootCmd utils.GalasaCommand,
+	factory spi.Factory,
+	propertiesNamespaceCommand spi.GalasaCommand,
+	propertiesCommand spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -101,7 +102,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 }
 
 func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
-	factory utils.Factory,
+	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -120,7 +121,7 @@ func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 

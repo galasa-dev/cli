@@ -11,14 +11,6 @@ import (
 )
 
 // -------------------------------------------------
-// A console where things can be written to so the user
-// can see them.
-type Console interface {
-	WriteString(text string) error
-	Write(p []byte) (n int, err error)
-}
-
-// -------------------------------------------------
 // A real implementation which writes text to stdout.
 type RealConsole struct {
 }

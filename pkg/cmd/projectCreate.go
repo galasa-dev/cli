@@ -13,6 +13,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -51,7 +52,7 @@ type ProjectCreateCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewProjectCreateCmd(factory utils.Factory, projectCmd utils.GalasaCommand, rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewProjectCreateCmd(factory spi.Factory, projectCmd spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
 	var err error
 
 	cmd := new(ProjectCreateCommand)
@@ -79,7 +80,7 @@ func (cmd *ProjectCreateCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ProjectCreateCommand) init(factory utils.Factory, projectCmd utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
+func (cmd *ProjectCreateCommand) init(factory spi.Factory, projectCmd spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 
 	cmd.values = &ProjectCreateCmdValues{}
@@ -89,9 +90,9 @@ func (cmd *ProjectCreateCommand) init(factory utils.Factory, projectCmd utils.Ga
 }
 
 func (cmd *ProjectCreateCommand) createCobraCommand(
-	factory utils.Factory,
-	projectCmd utils.GalasaCommand,
-	rootCmd utils.GalasaCommand,
+	factory spi.Factory,
+	projectCmd spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -134,7 +135,7 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 	return projectCreateCmd, err
 }
 
-func (cmd *ProjectCreateCommand) executeCreateProject(factory utils.Factory, rootCmdValues *RootCmdValues) error {
+func (cmd *ProjectCreateCommand) executeCreateProject(factory spi.Factory, rootCmdValues *RootCmdValues) error {
 
 	var err error
 

@@ -11,6 +11,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +32,7 @@ type RunsResetCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsResetCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewRunsResetCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsResetCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -55,7 +56,7 @@ func (cmd *RunsResetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsResetCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *RunsResetCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsResetCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsResetCobraCmd(
@@ -66,8 +67,8 @@ func (cmd *RunsResetCommand) init(factory utils.Factory, runsCommand utils.Galas
 	return err
 }
 
-func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory utils.Factory,
-	runsCommand utils.GalasaCommand,
+func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -95,7 +96,7 @@ func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory utils.Factory,
 }
 
 func (cmd *RunsResetCommand) executeReset(
-	factory utils.Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -114,7 +115,7 @@ func (cmd *RunsResetCommand) executeReset(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 

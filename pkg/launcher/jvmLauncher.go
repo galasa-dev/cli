@@ -18,6 +18,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
@@ -45,13 +46,13 @@ type JvmLauncher struct {
 	cmdParams RunsSubmitLocalCmdParameters
 
 	// An abstraction of the environment, so we can look up things like JAVA_HOME
-	env utils.Environment
+	env spi.Environment
 
 	// An abstraction of the file system so we can mock it out easily for unit tests.
 	fileSystem files.FileSystem
 
 	// A location galasa can call home
-	galasaHome utils.GalasaHome
+	galasaHome spi.GalasaHome
 
 	// A file system so we can get at embedded content if required.
 	// (Like so we can unpack the boot.jar)
@@ -61,7 +62,7 @@ type JvmLauncher struct {
 	localTests []*LocalTest
 
 	// This timer service can be interrupted when we don't want it to sleep.
-	timeService utils.TimeService
+	timeService spi.TimeService
 
 	// A service which can create OS processes.
 	processFactory ProcessFactory
@@ -70,7 +71,7 @@ type JvmLauncher struct {
 	bootstrapProps props.JavaProperties
 
 	// So we can get common objects easily.
-	factory utils.Factory
+	factory spi.Factory
 }
 
 // These parameters are gathered from the command-line and passed into the laucher.
@@ -117,12 +118,12 @@ const (
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
 func NewJVMLauncher(
-	factory utils.Factory,
+	factory spi.Factory,
 	bootstrapProps props.JavaProperties,
 	embeddedFileSystem embedded.ReadOnlyFileSystem,
 	runsSubmitLocalCmdParams *RunsSubmitLocalCmdParameters,
 	processFactory ProcessFactory,
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 ) (*JvmLauncher, error) {
 
 	var (
@@ -363,7 +364,7 @@ func deleteTempFiles(fileSystem files.FileSystem, temporaryFolderPath string) {
 }
 
 func prepareTempFiles(
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	fileSystem files.FileSystem,
 	overrides map[string]interface{},
 ) (string, string, error) {
@@ -397,7 +398,7 @@ func prepareTempFiles(
 // - error if there was one.
 func createTemporaryOverridesFile(
 	temporaryFolderPath string,
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	fileSystem files.FileSystem,
 	overrides map[string]interface{},
 ) (string, error) {
@@ -410,7 +411,7 @@ func createTemporaryOverridesFile(
 }
 
 func addStandardOverrideProperties(
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	overrides map[string]interface{},
 ) map[string]interface{} {
 
@@ -443,7 +444,7 @@ func overrideLocalRunIdPrefixProperty(overrides map[string]interface{}) {
 	}
 }
 
-func overrideRasStoreProperty(galasaHome utils.GalasaHome, overrides map[string]interface{}) {
+func overrideRasStoreProperty(galasaHome spi.GalasaHome, overrides map[string]interface{}) {
 	// Set the ras location to be local disk always.
 	const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
 
@@ -623,7 +624,7 @@ func (launcher *JvmLauncher) GetTestCatalog(stream string) (TestCatalog, error) 
 //	    --test dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee
 func getCommandSyntax(
 	bootstrapProperties props.JavaProperties,
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	fileSystem files.FileSystem,
 	javaHome string,
 	testObrs []utils.MavenCoordinates,

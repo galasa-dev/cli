@@ -22,26 +22,27 @@ import (
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/props"
 	"github.com/galasa-dev/cli/pkg/runsformatter"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 type Submitter struct {
-	galasaHome  utils.GalasaHome
+	galasaHome  spi.GalasaHome
 	fileSystem  files.FileSystem
 	launcher    launcher.Launcher
-	timeService utils.TimeService
-	env         utils.Environment
-	console     utils.Console
+	timeService spi.TimeService
+	env         spi.Environment
+	console     spi.Console
 	expander    images.ImageExpander
 }
 
 func NewSubmitter(
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	fileSystem files.FileSystem,
 	launcher launcher.Launcher,
-	timeService utils.TimeService,
-	env utils.Environment,
-	console utils.Console,
+	timeService spi.TimeService,
+	env spi.Environment,
+	console spi.Console,
 	expander images.ImageExpander,
 ) *Submitter {
 	instance := new(Submitter)

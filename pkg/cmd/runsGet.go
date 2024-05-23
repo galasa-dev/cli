@@ -11,6 +11,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +35,7 @@ type RunsGetCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsGetCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewRunsGetCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsGetCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -59,7 +60,7 @@ func (cmd *RunsGetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsGetCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *RunsGetCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsGetCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(factory, runsCommand, rootCommand.Values().(*RootCmdValues))
@@ -67,8 +68,8 @@ func (cmd *RunsGetCommand) init(factory utils.Factory, runsCommand utils.GalasaC
 }
 
 func (cmd *RunsGetCommand) createCobraCommand(
-	factory utils.Factory,
-	runsCommand utils.GalasaCommand,
+	factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -113,7 +114,7 @@ func (cmd *RunsGetCommand) createCobraCommand(
 }
 
 func (cmd *RunsGetCommand) executeRunsGet(
-	factory utils.Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -132,7 +133,7 @@ func (cmd *RunsGetCommand) executeRunsGet(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 

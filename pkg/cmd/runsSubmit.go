@@ -16,6 +16,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
@@ -27,7 +28,7 @@ type RunsSubmitCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewRunsSubmitCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsSubmitCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -52,7 +53,7 @@ func (cmd *RunsSubmitCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *RunsSubmitCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &utils.RunsSubmitCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsSubmitCobraCmd(
@@ -63,8 +64,8 @@ func (cmd *RunsSubmitCommand) init(factory utils.Factory, runsCommand utils.Gala
 	return err
 }
 
-func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory utils.Factory,
-	runsCommand utils.GalasaCommand,
+func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -138,7 +139,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory utils.Factory,
 }
 
 func (cmd *RunsSubmitCommand) executeSubmit(
-	factory utils.Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -158,7 +159,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 

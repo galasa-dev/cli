@@ -11,10 +11,10 @@ import (
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
-func Logout(fileSystem files.FileSystem, galasaHome utils.GalasaHome) error {
+func Logout(fileSystem files.FileSystem, galasaHome spi.GalasaHome) error {
 
 	var err error
 	bearerTokenFilePath := fmt.Sprintf("%s/%s", galasaHome.GetNativeFolderPath(), "bearer-token.json")

@@ -12,11 +12,11 @@ import (
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 func getRunIdFromRunName(runName string,
-	timeService utils.TimeService,
+	timeService spi.TimeService,
 	apiClient *galasaapi.APIClient,
 ) (string, error) {
 	var err error

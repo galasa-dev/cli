@@ -12,6 +12,7 @@ import (
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type BearerTokenJson struct {
@@ -25,12 +26,17 @@ type BearerTokenFile interface {
 
 type BearerTokenFileImpl struct {
 	fileSystem   files.FileSystem
-	galasaHome   GalasaHome
+	galasaHome   spi.GalasaHome
 	baseFileName string
-	timeService  TimeService
+	timeService  spi.TimeService
 }
 
-func NewBearerTokenFile(fileSystem files.FileSystem, galasaHome GalasaHome, baseFileName string, timeService TimeService) BearerTokenFile {
+func NewBearerTokenFile(
+	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	baseFileName string,
+	timeService spi.TimeService,
+) BearerTokenFile {
 	file := new(BearerTokenFileImpl)
 	file.fileSystem = fileSystem
 	file.galasaHome = galasaHome

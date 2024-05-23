@@ -11,6 +11,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +35,7 @@ type RunsDownloadCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsDownloadCommand(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewRunsDownloadCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsDownloadCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -59,7 +60,7 @@ func (cmd *RunsDownloadCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsDownloadCommand) init(factory utils.Factory, runsCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
+func (cmd *RunsDownloadCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsDownloadCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory,
@@ -70,8 +71,8 @@ func (cmd *RunsDownloadCommand) init(factory utils.Factory, runsCommand utils.Ga
 }
 
 func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
-	factory utils.Factory,
-	runsCommand utils.GalasaCommand,
+	factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
@@ -102,7 +103,7 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 }
 
 func (cmd *RunsDownloadCommand) executeRunsDownload(
-	factory utils.Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -122,7 +123,7 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 

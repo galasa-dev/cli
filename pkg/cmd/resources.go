@@ -7,7 +7,7 @@
 package cmd
 
 import (
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ type ResourcesCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewResourcesCmd(rootCommand utils.GalasaCommand) (utils.GalasaCommand, error) {
+func NewResourcesCmd(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(ResourcesCommand)
 	err := cmd.init(rootCommand)
 	return cmd, err
@@ -51,7 +51,7 @@ func (cmd *ResourcesCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesCommand) init(rootCmd utils.GalasaCommand) error {
+func (cmd *ResourcesCommand) init(rootCmd spi.GalasaCommand) error {
 
 	var err error
 
@@ -61,7 +61,7 @@ func (cmd *ResourcesCommand) init(rootCmd utils.GalasaCommand) error {
 	return err
 }
 
-func (cmd *ResourcesCommand) createCobraCommand(rootCommand utils.GalasaCommand) (*cobra.Command, error) {
+func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
 
 	var err error
 
