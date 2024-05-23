@@ -38,18 +38,18 @@ func (*TokenSummaryFormatter) FormatTokens(authTokens []galasaapi.AuthToken) (st
 	if totalTokens > 0 {
 		var table [][]string
 
-		var headers = []string{HEADER_TOKEN_ID, HEADER_TOKEN_DATE, HEADER_TOKEN_USER, HEADER_TOKEN_DESCRIPTION}
+		var headers = []string{HEADER_TOKEN_ID, HEADER_TOKEN_CREATION_TIME, HEADER_TOKEN_USER, HEADER_TOKEN_DESCRIPTION}
 
 		table = append(table, headers)
 		for _, token := range authTokens {
 			var line []string
 			id := token.GetTokenId()
-			createdTime := formatTimeToNearestDate(token.GetCreatedTime())
+			creationTime := formatTimeToNearestDate(token.GetCreationTime())
 			owner := token.GetOwner()
 			ownerLoginId := owner.GetLoginId()
 			description := token.GetDescription()
 
-			line = append(line, id, createdTime, ownerLoginId, description)
+			line = append(line, id, creationTime, ownerLoginId, description)
 			table = append(table, line)
 		}
 

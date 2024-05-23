@@ -33,7 +33,7 @@ func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, re
     "tokens":[
         {
             "token_id":"098234980123-1283182389",
-            "created_time":"2023-12-03T18:25:43.511Z",
+            "creation_time":"2023-12-03T18:25:43.511Z",
             "owner": {
                 "login_id":"mcobbett"
             },
@@ -41,7 +41,7 @@ func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, re
         },
         {
             "token_id":"8218971d287s1-dhj32er2323",
-            "created_time":"2024-03-03T09:36:50.511Z",
+            "creation_time":"2024-03-03T09:36:50.511Z",
             "owner": {
                 "login_id":"mcobbett"
             },
@@ -49,7 +49,7 @@ func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, re
         },
         {
             "token_id":"87a6sd87ahq2-2y8hqwdjj273",
-            "created_time":"2023-08-04T23:00:23.511Z",
+            "creation_time":"2023-08-04T23:00:23.511Z",
             "owner": {
                 "login_id":"savvas"
             },

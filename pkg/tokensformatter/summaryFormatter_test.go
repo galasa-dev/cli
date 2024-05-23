@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateMockAuthToken(id string, createdTime string, LoginId string, description string) *galasaapi.AuthToken {
+func CreateMockAuthToken(id string, creationTime string, LoginId string, description string) *galasaapi.AuthToken {
 	var token = galasaapi.NewAuthToken()
 
 	token.SetTokenId(id)
-	token.SetCreatedTime(createdTime)
+	token.SetCreationTime(creationTime)
 
 	owner := galasaapi.NewUser()
 	owner.SetLoginId(LoginId)

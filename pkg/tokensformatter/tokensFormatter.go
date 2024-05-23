@@ -24,10 +24,10 @@ import (
 // TokensFormatter - implementations can take a collection of auth tokens results
 // and turn them into a string for display to the user.
 const (
-	HEADER_TOKEN_ID          = "tokenid"
-	HEADER_TOKEN_DATE        = "created(YYYY-MM-DD)"
-	HEADER_TOKEN_USER        = "user"
-	HEADER_TOKEN_DESCRIPTION = "description"
+	HEADER_TOKEN_ID            = "tokenid"
+	HEADER_TOKEN_CREATION_TIME = "created(YYYY-MM-DD)"
+	HEADER_TOKEN_USER          = "user"
+	HEADER_TOKEN_DESCRIPTION   = "description"
 )
 
 type TokenFormatter interface {
