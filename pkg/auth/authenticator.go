@@ -29,6 +29,7 @@ func NewAuthenticator(
 	galasaHome utils.GalasaHome,
 	timeService utils.TimeService,
 	env utils.Environment,
+	jwtCache JwtCache,
 ) utils.Authenticator {
 
 	authenticator := new(authenticatorImpl)
@@ -39,21 +40,28 @@ func NewAuthenticator(
 	authenticator.fileSystem = fileSystem
 	authenticator.env = env
 
-	authenticator.cache = NewJwtCache(fileSystem, galasaHome, timeService)
+	authenticator.cache = jwtCache
 
 	return authenticator
 }
 
 func (authenticator *authenticatorImpl) GetBearerToken() (string, error) {
 
-	bearerToken, err := utils.GetBearerTokenFromTokenJsonFile(authenticator.fileSystem, authenticator.galasaHome, authenticator.timeService)
-	if err != nil {
-		// Attempt to log in
-		log.Printf("Logging in to the Galasa Ecosystem at '%s'", authenticator.apiServerUrl)
-		err = authenticator.Login()
-		if err == nil {
-			log.Printf("Logged in to the Galasa Ecosystem at '%s' OK", authenticator.apiServerUrl)
-			bearerToken, err = utils.GetBearerTokenFromTokenJsonFile(authenticator.fileSystem, authenticator.galasaHome, authenticator.timeService)
+	var bearerToken string
+	var err error
+	var galasaTokenValue string
+
+	_, galasaTokenValue, err = GetAuthProperties(authenticator.fileSystem, authenticator.galasaHome, authenticator.env)
+	if err == nil {
+		bearerToken, err = authenticator.cache.Get(authenticator.apiServerUrl, galasaTokenValue)
+		if err != nil {
+			// Attempt to log in
+			log.Printf("Logging in to the Galasa Ecosystem at '%s'", authenticator.apiServerUrl)
+			err = authenticator.Login()
+			if err == nil {
+				log.Printf("Logged in to the Galasa Ecosystem at '%s' OK", authenticator.apiServerUrl)
+				bearerToken, err = authenticator.cache.Get(authenticator.apiServerUrl, galasaTokenValue)
+			}
 		}
 	}
 	return bearerToken, err

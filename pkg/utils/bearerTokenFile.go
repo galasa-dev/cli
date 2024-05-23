@@ -18,20 +18,41 @@ type BearerTokenJson struct {
 	Jwt string `json:"jwt"`
 }
 
+type BearerTokenFile interface {
+	WriteJwt(jwt string) error
+	ReadJwt() (string, error)
+}
+
+type BearerTokenFileImpl struct {
+	fileSystem   files.FileSystem
+	galasaHome   GalasaHome
+	baseFileName string
+	timeService  TimeService
+}
+
+func NewBearerTokenFile(fileSystem files.FileSystem, galasaHome GalasaHome, baseFileName string, timeService TimeService) BearerTokenFile {
+	file := new(BearerTokenFileImpl)
+	file.fileSystem = fileSystem
+	file.galasaHome = galasaHome
+	file.baseFileName = baseFileName
+	file.timeService = timeService
+	return file
+}
+
 // Writes a new bearer-token.json file containing a JWT in the following format:
 //
 //	{
 //	  "jwt": "<bearer-token-here>"
 //	}
-func WriteBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome GalasaHome, jwt string) error {
-	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
+func (file *BearerTokenFileImpl) WriteJwt(jwt string) error {
+	bearerTokenFilePath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-token.json")
 
 	log.Printf("Writing bearer token to file '%s'", bearerTokenFilePath)
 
 	json, err := buildBearerTokenFileContent(jwt)
 	if err == nil {
 
-		err = fileSystem.WriteTextFile(bearerTokenFilePath, json)
+		err = file.fileSystem.WriteTextFile(bearerTokenFilePath, json)
 
 		if err == nil {
 			log.Printf("Written bearer token to file '%s' OK", bearerTokenFilePath)
@@ -57,15 +78,15 @@ func buildBearerTokenFileContent(jwt string) (contentJson string, err error) {
 }
 
 // Gets the JWT from the bearer-token.json file if it exists, errors if the file does not exist or if the token is invalid
-func GetBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome GalasaHome, timeService TimeService) (string, error) {
+func (file *BearerTokenFileImpl) ReadJwt() (string, error) {
 	var err error = nil
 	var bearerToken string = ""
 	var bearerTokenJsonContents string = ""
 
-	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
+	bearerTokenFilePath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-token.json")
 
 	log.Printf("Retrieving bearer token from file '%s'", bearerTokenFilePath)
-	bearerTokenJsonContents, err = fileSystem.ReadTextFile(bearerTokenFilePath)
+	bearerTokenJsonContents, err = file.fileSystem.ReadTextFile(bearerTokenFilePath)
 	if err == nil {
 		var bearerTokenJson BearerTokenJson
 		err = json.Unmarshal([]byte(bearerTokenJsonContents), &bearerTokenJson)

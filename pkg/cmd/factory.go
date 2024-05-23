@@ -56,5 +56,6 @@ func (*RealFactory) GetTimeService() utils.TimeService {
 }
 
 func (factory *RealFactory) GetAuthenticator(apiServerUrl string, galasaHome utils.GalasaHome) utils.Authenticator {
-	return auth.NewAuthenticator(apiServerUrl, factory.GetFileSystem(), galasaHome, factory.GetTimeService(), factory.GetEnvironment())
+	jwtCache := auth.NewJwtCache(factory.GetFileSystem(), galasaHome, factory.GetTimeService())
+	return auth.NewAuthenticator(apiServerUrl, factory.GetFileSystem(), galasaHome, factory.GetTimeService(), factory.GetEnvironment(), jwtCache)
 }

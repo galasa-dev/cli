@@ -7,7 +7,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -23,8 +22,10 @@ func TestWriteBearerTokenJsonFileWritesJwtJsonToFile(t *testing.T) {
 
 	token := "blah"
 
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", NewMockTimeService())
+
 	// When...
-	err := WriteBearerTokenJsonFile(mockFileSystem, mockGalasaHome, token)
+	err := file.WriteJwt(token)
 
 	// Then...
 	assert.Nil(t, err, "Should not return an error when writing a JWT to the bearer-token.json file in an existing galasa home directory")
@@ -46,8 +47,10 @@ func TestWriteBearerTokenJsonWithFailingWriteOperationReturnsError(t *testing.T)
 
 	token := "blah"
 
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", NewMockTimeService())
+
 	// When...
-	err := WriteBearerTokenJsonFile(mockFileSystem, mockGalasaHome, token)
+	err := file.WriteJwt(token)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error when writing the bearer-token.json file fails")
@@ -65,12 +68,11 @@ func TestGetBearerTokenFromTokenJsonFileReturnsBearerToken(t *testing.T) {
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
-	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath()+"/bearer-token.json",
-		fmt.Sprintf(`{"jwt":"%s"}`, expectedToken))
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", mockTimeService)
+	file.WriteJwt(expectedToken)
 
 	// When...
-	bearerToken, err := GetBearerTokenFromTokenJsonFile(mockFileSystem, mockGalasaHome, mockTimeService)
+	bearerToken, err := file.ReadJwt()
 
 	// Then...
 	assert.Nil(t, err, "Should not return an error when a valid bearer token exists and is valid in bearer-token.json")
@@ -84,8 +86,10 @@ func TestGetBearerTokenFromTokenJsonFileWithMissingTokenFileReturnsError(t *test
 	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 	mockTimeService := NewMockTimeService()
 
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", mockTimeService)
+
 	// When...
-	_, err := GetBearerTokenFromTokenJsonFile(mockFileSystem, mockGalasaHome, mockTimeService)
+	_, err := file.ReadJwt()
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error when bearer token file does not exist")
@@ -99,12 +103,14 @@ func TestGetBearerTokenFromTokenJsonFileWithBadContentsReturnsError(t *testing.T
 	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 	mockTimeService := NewMockTimeService()
 
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", mockTimeService)
+
 	mockFileSystem.WriteTextFile(
-		mockGalasaHome.GetNativeFolderPath()+"/bearer-token.json",
+		mockGalasaHome.GetNativeFolderPath()+"/baseFile.json",
 		"notabearertoken")
 
 	// When...
-	_, err := GetBearerTokenFromTokenJsonFile(mockFileSystem, mockGalasaHome, mockTimeService)
+	_, err := file.ReadJwt()
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error when the bearer token file exists but doesn't contain valid JSON")

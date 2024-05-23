@@ -52,16 +52,17 @@ func NewJwtCache(
 }
 
 func (cache *fileBasedJwtCache) Put(serverApiUrl string, galasaToken string, jwt string) (err error) {
-	err = utils.WriteBearerTokenJsonFile(cache.fileSystem, cache.galasaHome, jwt)
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, "bearer-token.json", cache.timeService)
+	err = file.WriteJwt(jwt)
 	return err
 }
 
 func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jwt string, err error) {
 	var possiblyInvalidJwt = ""
-	possiblyInvalidJwt, err = utils.GetBearerTokenFromTokenJsonFile(
-		cache.fileSystem,
-		cache.galasaHome,
-		cache.timeService)
+
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, "bearer-token.json", cache.timeService)
+
+	possiblyInvalidJwt, err = file.ReadJwt()
 
 	if err == nil {
 		var isValid bool
