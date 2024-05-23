@@ -270,7 +270,7 @@ func mockFSWriteTextFile(fs MockFileSystem, targetFilePath string, desiredConten
 
 func mockFSReadBinaryFile(fs MockFileSystem, filePath string) ([]byte, error) {
 	bytes := make([]byte, 0)
-	var err error = nil
+	var err error
 	node := fs.data[filePath]
 	if node == nil {
 		err = os.ErrNotExist
@@ -282,7 +282,7 @@ func mockFSReadBinaryFile(fs MockFileSystem, filePath string) ([]byte, error) {
 
 func mockFSReadTextFile(fs MockFileSystem, filePath string) (string, error) {
 	text := ""
-	var err error = nil
+	var err error
 	node := fs.data[filePath]
 	if node == nil {
 		err = os.ErrNotExist
@@ -294,7 +294,7 @@ func mockFSReadTextFile(fs MockFileSystem, filePath string) (string, error) {
 
 func mockFSExists(fs MockFileSystem, path string) (bool, error) {
 	isExists := true
-	var err error = nil
+	var err error
 	node := fs.data[path]
 	if node == nil {
 		isExists = false
@@ -304,7 +304,7 @@ func mockFSExists(fs MockFileSystem, path string) (bool, error) {
 
 func mockFSDirExists(fs MockFileSystem, path string) (bool, error) {
 	isDirExists := true
-	var err error = nil
+	var err error
 	node := fs.data[path]
 	if node == nil {
 		isDirExists = false

@@ -25,7 +25,7 @@ const (
 
 // Gets authentication properties from the user's galasactl.properties file or from the environment or a mixture.
 func GetAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome, env utils.Environment) (galasaapi.AuthProperties, string, error) {
-	var err error = nil
+	var err error
 	authProperties := galasaapi.NewAuthProperties()
 
 	// Work out which file we we want to draw properties from.
@@ -86,7 +86,7 @@ func getPropertyWithOverride(env utils.Environment, valueFromFile string, filePa
 
 // Gets a property from the user's galasactl.properties file
 func getPropertyFromFile(fileSystem files.FileSystem, galasactlPropertiesFilePath string, propertyName string) (string, error) {
-	var err error = nil
+	var err error
 	var galasactlProperties props.JavaProperties
 	galasactlProperties, err = props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
 	if err != nil {

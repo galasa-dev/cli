@@ -51,7 +51,7 @@ func (cmd *ResourcesUpdateCommand) Values() interface{} {
 
 func (cmd *ResourcesUpdateCommand) init(factory utils.Factory, resourcesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 
 	cmd.values = &ResourcesUpdateCmdValues{}
 	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, rootCommand.Values().(*RootCmdValues))

@@ -19,7 +19,7 @@ import (
 )
 
 func ValidateResultParameter(resultInputString string, apiClient *galasaapi.APIClient) (string, error) {
-	var err error = nil
+	var err error
 	var validResultInputs []string
 	var invalidResultInputs []string
 	var resultQuery string = ""

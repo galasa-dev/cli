@@ -24,7 +24,7 @@ type galasaHomeImpl struct {
 }
 
 func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome string) (GalasaHome, error) {
-	var err error = nil
+	var err error
 	var homeData *galasaHomeImpl = nil
 
 	galasaHomePath := cmdFlagGalasaHome
@@ -36,8 +36,6 @@ func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome strin
 			if err == nil {
 				galasaHomePath = userHome + fs.GetFilePathSeparator() + ".galasa"
 			}
-		} else {
-			err = validateUserHomeDir(galasaHomePath, fs)
 		}
 	}
 
@@ -52,17 +50,6 @@ func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome strin
 	}
 
 	return homeData, err
-}
-
-func validateUserHomeDir(path string, fs files.FileSystem) error {
-	var err error = nil
-
-	// path is a string, so can never be nil
-	if strings.Trim(path, "\n \t") == "" {
-
-	}
-
-	return err
 }
 
 func (homeData *galasaHomeImpl) GetNativeFolderPath() string {

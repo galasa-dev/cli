@@ -25,7 +25,7 @@ type JavaClassDef struct {
 // - JAVA_HOME/bin/java must exist as a file.
 func ValidateJavaHome(fileSystem files.FileSystem, javaHome string) error {
 
-	var err error = nil
+	var err error
 
 	// Check that the javaHome string is well-formed.
 	if javaHome == "" {
@@ -50,7 +50,7 @@ func ValidateJavaHome(fileSystem files.FileSystem, javaHome string) error {
 // checkJavaHomeBinJavaProgramExists check to make sure JAVA_HOME/bin/java is a program which
 // - exists
 func checkJavaHomeBinJavaProgram(fileSystem files.FileSystem, javaHome string) error {
-	var err error = nil
+	var err error
 
 	// Check that the program $JAVA_HOME/bin/java exists
 	separator := fileSystem.GetFilePathSeparator()
@@ -85,7 +85,7 @@ func sanitiseJavaHome(fs files.FileSystem, initialJavaHome string) string {
 
 // checkJavaHomeBinFolderExists Checks that the $JAVA_HOME/bin folder exists.
 func checkJavaHomeBinFolderExists(fileSystem files.FileSystem, javaHome string) error {
-	var err error = nil
+	var err error
 	javaBinFolder := javaHome + fileSystem.GetFilePathSeparator() + "bin"
 	var isBinFolderThere bool
 	isBinFolderThere, err = fileSystem.DirExists(javaBinFolder)

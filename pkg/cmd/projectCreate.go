@@ -52,7 +52,7 @@ type ProjectCreateCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 func NewProjectCreateCmd(factory utils.Factory, projectCmd utils.GalasaCommand, rootCmd utils.GalasaCommand) (utils.GalasaCommand, error) {
-	var err error = nil
+	var err error
 
 	cmd := new(ProjectCreateCommand)
 	err = cmd.init(factory, projectCmd, rootCmd)
@@ -94,7 +94,7 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 	rootCmd utils.GalasaCommand,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 
 	projectCreateCmd := &cobra.Command{
 		Use:     "create",
@@ -136,7 +136,7 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 
 func (cmd *ProjectCreateCommand) executeCreateProject(factory utils.Factory, rootCmdValues *RootCmdValues) error {
 
-	var err error = nil
+	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
@@ -266,7 +266,7 @@ func createParentFolderContents(
 	useGradle bool,
 	isDevelopment bool,
 ) error {
-	var err error = nil
+	var err error
 
 	if useMaven {
 		err = createParentFolderPom(fileGenerator, packageName, featureNames,
@@ -439,7 +439,7 @@ func createTestProjects(
 	isDevelopment bool,
 ) error {
 
-	var err error = nil
+	var err error
 	for _, featureName := range featureNames {
 		err = createTestProject(fileGenerator, packageName, featureName, forceOverwrite, useMaven, useGradle, isDevelopment)
 		if err != nil {

@@ -18,7 +18,7 @@ import (
 
 // Gets a JSON Web Token (JWT) from the API server's /auth endpoint
 func GetJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthProperties) (string, error) {
-	var err error = nil
+	var err error
 	var context context.Context = nil
 	var jwt string
 	var restApiVersion string

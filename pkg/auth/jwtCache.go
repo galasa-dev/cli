@@ -58,7 +58,7 @@ func (cache *fileBasedJwtCache) Put(serverApiUrl string, galasaToken string, jwt
 }
 
 func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jwt string, err error) {
-	var possiblyInvalidJwt = ""
+	var possiblyInvalidJwt string
 
 	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, "bearer-token.json", cache.timeService)
 
@@ -78,7 +78,7 @@ func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jw
 
 // Checks whether a given bearer token is valid or not, returning true if it is valid and false otherwise
 func IsBearerTokenValid(bearerTokenString string, timeService utils.TimeService) (bool, error) {
-	var err error = nil
+	var err error
 	var bearerToken *jwt.Token
 	var isValid bool = false
 

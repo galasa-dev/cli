@@ -60,7 +60,7 @@ func updateCpsProperty(namespace string,
 	property *galasaapi.GalasaProperty,
 	apiClient *galasaapi.APIClient,
 ) error {
-	var err error = nil
+	var err error
 	var context context.Context = nil
 
 	var restApiVersion string
@@ -85,7 +85,7 @@ func createCpsProperty(namespace string,
 	property *galasaapi.GalasaProperty,
 	apiClient *galasaapi.APIClient,
 ) error {
-	var err error = nil
+	var err error
 	var context context.Context = nil
 
 	var restApiVersion string

@@ -84,7 +84,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
-	var err error = nil
+	var err error
 
 	runsSubmitLocalCobraCmd := &cobra.Command{
 		Use:     "local",
@@ -160,7 +160,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	rootCmdValues *RootCmdValues,
 ) error {
 
-	var err error = nil
+	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()

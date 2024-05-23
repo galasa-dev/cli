@@ -67,7 +67,7 @@ func (cmd *PropertiesGetCommand) Values() interface{} {
 
 func (cmd *PropertiesGetCommand) init(factory utils.Factory, propertiesCommand utils.GalasaCommand, rootCommand utils.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 
 	cmd.values = &PropertiesGetCmdValues{}
 	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, rootCommand.Values().(*RootCmdValues))

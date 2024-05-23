@@ -50,7 +50,7 @@ type FileSystem interface {
 // TildaExpansion If a file starts with a tilda '~' character, expand it
 // to the home folder of the user on this file system.
 func TildaExpansion(fileSystem FileSystem, path string) (string, error) {
-	var err error = nil
+	var err error
 	if path != "" {
 		if path[0] == '~' {
 			var userHome string

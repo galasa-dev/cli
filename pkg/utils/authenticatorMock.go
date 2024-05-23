@@ -21,7 +21,7 @@ func NewMockAuthenticator() Authenticator {
 
 func (authenticator *MockAuthenticator) GetBearerToken() (string, error) {
 	bearerToken := ""
-	var err error = nil
+	var err error
 
 	return bearerToken, err
 }
@@ -29,12 +29,12 @@ func (authenticator *MockAuthenticator) GetBearerToken() (string, error) {
 // Gets a new authenticated API client, attempting to log in if a bearer token file does not exist
 func (authenticator *MockAuthenticator) GetAuthenticatedAPIClient() (*galasaapi.APIClient, error) {
 	var apiClient *galasaapi.APIClient = nil
-	var err error = nil
+	var err error
 	return apiClient, err
 }
 
 // Login - performs all the logic to implement the `galasactl auth login` command
 func (authenticator *MockAuthenticator) Login() error {
-	var err error = nil
+	var err error
 	return err
 }

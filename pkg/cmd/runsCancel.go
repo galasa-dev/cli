@@ -71,7 +71,7 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory utils.Factory,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsCancelCmd := &cobra.Command{

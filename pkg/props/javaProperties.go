@@ -54,13 +54,13 @@ func ReadProperties(propertyString string) JavaProperties {
 }
 
 func WritePropertiesFile(fs files.FileSystem, path string, properties map[string]interface{}) error {
-	var err error = nil
+	var err error
 
 	buff := new(bytes.Buffer)
 
 	// Extract all the property keys
 	keys := make([]string, 0)
-	for k, _ := range properties {
+	for k := range properties {
 		keys = append(keys, k)
 	}
 

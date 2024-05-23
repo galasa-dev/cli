@@ -50,7 +50,7 @@ func (cmd *AuthLoginComamnd) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthLoginComamnd) init(factory utils.Factory, authCommand utils.GalasaCommand, rootCmd utils.GalasaCommand) error {
-	var err error = nil
+	var err error
 
 	cmd.values = &AuthLoginCmdValues{}
 

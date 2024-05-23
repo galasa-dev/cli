@@ -104,7 +104,7 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 // Block this thread until we can gather where the RAS folder is for this test.
 // It is resolved within the JVM, and traced, where we pick it up from.
 func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
-	var err error = nil
+	var err error
 	rasFolderPathUrl := ""
 
 	// Wait for the ras location to be detected in the JVM output.
@@ -136,7 +136,7 @@ func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputPr
 // Block this thread until we can gather what the RunId for this test is
 // It is allocated within the JVM, and traced, where we pick it up from.
 func (localTest *LocalTest) waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
-	var err error = nil
+	var err error
 	var runId string = ""
 
 	// Wait for the runId to be detected in the JVM output.
@@ -198,7 +198,7 @@ func (localTest *LocalTest) waitForCompletion() error {
 // ras folder.
 func (localTest *LocalTest) updateTestStatusFromRasFile() error {
 
-	var err error = nil
+	var err error
 
 	if localTest.runId == "" || localTest.rasFolderPathUrl == "" {
 		log.Printf("Don't have enough information to find the structure.json in the RAS folder.\n")

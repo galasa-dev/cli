@@ -77,7 +77,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 	rootCmd utils.GalasaCommand,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertieNamespaceGetCobraCommand := &cobra.Command{

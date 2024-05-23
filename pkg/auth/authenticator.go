@@ -79,7 +79,7 @@ func (authenticator *authenticatorImpl) GetAuthenticatedAPIClient() (*galasaapi.
 
 // Login - performs all the logic to implement the `galasactl auth login` command
 func (authenticator *authenticatorImpl) Login() error {
-	var err error = nil
+	var err error
 	var authProperties galasaapi.AuthProperties
 	var galasaTokenValue string
 	authProperties, galasaTokenValue, err = GetAuthProperties(authenticator.fileSystem, authenticator.galasaHome, authenticator.env)

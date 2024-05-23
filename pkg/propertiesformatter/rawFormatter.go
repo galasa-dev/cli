@@ -31,7 +31,7 @@ func (*PropertyRawFormatter) GetName() string {
 func (*PropertyRawFormatter) FormatProperties(cpsProperties []galasaapi.GalasaProperty) (string, error) {
 	var result string = ""
 	buff := strings.Builder{}
-	var err error = nil
+	var err error
 
 	for _, property := range cpsProperties {
 		namespace := *property.Metadata.Namespace
@@ -50,7 +50,7 @@ func (*PropertyRawFormatter) FormatProperties(cpsProperties []galasaapi.GalasaPr
 func (*PropertyRawFormatter) FormatNamespaces(namespaces []galasaapi.Namespace) (string, error) {
 	var result string = ""
 	buff := strings.Builder{}
-	var err error = nil
+	var err error
 
 	for _, namespace := range namespaces {
 		buff.WriteString(*namespace.Name + "|" +

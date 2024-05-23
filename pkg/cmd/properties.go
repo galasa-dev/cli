@@ -53,7 +53,7 @@ func (cmd *PropertiesCommand) Values() interface{} {
 
 func (cmd *PropertiesCommand) init(rootCmd utils.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 
 	cmd.values = &PropertiesCmdValues{}
 	cmd.cobraCommand = cmd.createCobraCommand(rootCmd)

@@ -80,7 +80,7 @@ func getCpsPropertiesFromRestApi(
 	console utils.Console,
 ) ([]galasaapi.GalasaProperty, error) {
 
-	var err error = nil
+	var err error
 	var context context.Context = nil
 
 	var restApiVersion string
@@ -228,7 +228,7 @@ func ValidateInfixes(infix string) error {
 	for _, infixElem := range infixElements {
 		err = validatePropertyFieldFormat(infixElem, "infix")
 		if err != nil {
-			//as soon as an invalid value is found, 
+			//as soon as an invalid value is found,
 			//exit the for loop and return
 			break
 		}

@@ -22,7 +22,7 @@ func GetStreams(launcher launcher.Launcher) ([]string, error) {
 func ValidateStream(validStreamNames []string, streamNameToCheck string) error {
 	log.Printf("Validating that stream %s exists in the list of valid streams.\n", streamNameToCheck)
 
-	var err error = nil
+	var err error
 
 	var streamFound = false
 

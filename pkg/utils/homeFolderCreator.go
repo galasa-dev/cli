@@ -10,7 +10,6 @@ import (
 	"github.com/galasa-dev/cli/pkg/files"
 )
 
-
 func InitialiseGalasaHomeFolder(home GalasaHome, fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) error {
 
 	var err error
@@ -191,8 +190,8 @@ func createLibDirAndContent(fileGenerator *FileGenerator, galasaLibDir string) e
 
 func GetGalasaBootJarPath(fs files.FileSystem, home GalasaHome) (string, error) {
 	var galasaBootJarPath string = ""
-	var err error = nil
-	var galasaVersion = ""
+	var err error
+	var galasaVersion string
 	var galasaHomePath = home.GetNativeFolderPath()
 
 	galasaVersion, err = embedded.GetGalasaVersion()

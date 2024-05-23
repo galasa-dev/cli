@@ -79,9 +79,9 @@ func buildBearerTokenFileContent(jwt string) (contentJson string, err error) {
 
 // Gets the JWT from the bearer-token.json file if it exists, errors if the file does not exist or if the token is invalid
 func (file *BearerTokenFileImpl) ReadJwt() (string, error) {
-	var err error = nil
+	var err error
 	var bearerToken string = ""
-	var bearerTokenJsonContents string = ""
+	var bearerTokenJsonContents string
 
 	bearerTokenFilePath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-token.json")
 

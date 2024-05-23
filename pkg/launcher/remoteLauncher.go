@@ -148,7 +148,7 @@ func getStreamNamesFromProperties(properties []galasaapi.GalasaProperty) ([]stri
 
 func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, error) {
 
-	var err error = nil
+	var err error
 	var testCatalog TestCatalog
 	var cpsProperty *galasaapi.CpsProperty
 	var restApiVersion string

@@ -64,7 +64,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 	propertiesCommand utils.GalasaCommand,
 	rootCmd utils.GalasaCommand) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertiesDeleteCmd := &cobra.Command{

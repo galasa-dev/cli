@@ -62,7 +62,7 @@ func (cmd *RootCommand) Values() interface{} {
 
 func (cmd *RootCommand) init(factory utils.Factory) error {
 
-	var err error = nil
+	var err error
 
 	// Flags parsed by this command put values into this instance of the structure.
 	cmd.values = &RootCmdValues{

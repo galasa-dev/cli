@@ -61,7 +61,7 @@ func (submitter *Submitter) ExecuteSubmitRuns(
 
 ) error {
 
-	var err error = nil
+	var err error
 
 	err = submitter.validateAndCorrectParams(params, TestSelectionFlagValues)
 	if err == nil {
@@ -87,7 +87,7 @@ func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
 	params utils.RunsSubmitCmdValues,
 ) error {
 
-	var err error = nil
+	var err error
 
 	// Build list of runs to submit
 	readyRuns := submitter.buildListOfRunsToSubmit(portfolio, runOverrides)
@@ -125,7 +125,7 @@ func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
 func reportRendedImages(finishedRuns map[string]*TestRun, submitter *Submitter) error {
 	var err error
 
-	for runName, _ := range finishedRuns {
+	for runName := range finishedRuns {
 
 		folderToScan := submitter.galasaHome.GetNativeFolderPath() + "/ras/" + runName
 		err = submitter.expander.ExpandImages(folderToScan)
@@ -143,7 +143,7 @@ func (submitter *Submitter) executeSubmitRuns(
 	runOverrides map[string]string,
 ) (map[string]*TestRun, map[string]*TestRun, error) {
 
-	var err error = nil
+	var err error
 
 	submittedRuns := make(map[string]*TestRun)
 	rerunRuns := make(map[string]*TestRun)
@@ -231,7 +231,7 @@ func displayInterrimProgressReport(readyRuns []TestRun,
 }
 
 func (submitter *Submitter) writeThrottleFile(throttleFileName string, throttle int) error {
-	var err error = nil
+	var err error
 	if throttleFileName != "" {
 		// Throttle filename was specified. Lets use a throttle file.
 		err = submitter.fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
@@ -313,7 +313,7 @@ func (submitter *Submitter) submitRun(
 	requestType string,
 ) ([]TestRun, error) {
 
-	var err error = nil
+	var err error
 	if len(readyRuns) >= 1 {
 
 		nextRun := readyRuns[0]
@@ -454,7 +454,7 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
 	//convert TestRun tests into formattable data
 	displayTestRunResults(finishedRuns, lostRuns)
 
-	var err error = nil
+	var err error
 	if params.ReportYamlFilename != "" {
 		err = ReportYaml(submitter.fileSystem, params.ReportYamlFilename, finishedRuns, lostRuns)
 	}
@@ -476,7 +476,7 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
 
 func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
 	var formatter = runsformatter.NewSummaryFormatter()
-	var err error = nil
+	var err error
 	var outputText string
 
 	formattableTest := FormattableTestFromTestRun(finishedRuns, lostRuns)
@@ -547,7 +547,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 	submitSelectionFlags *utils.TestSelectionFlagValues,
 ) error {
 
-	var err error = nil
+	var err error
 
 	// Guard against the poll time being less than 1 second
 	if params.PollIntervalSeconds < 1 {
@@ -619,7 +619,7 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 }
 
 func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValues) error {
-	var err error = nil
+	var err error
 
 	params.OverrideFilePath, err = files.TildaExpansion(submitter.fileSystem, params.OverrideFilePath)
 
@@ -676,7 +676,7 @@ func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[strin
 }
 
 func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string) (map[string]string, error) {
-	var err error = nil
+	var err error
 
 	// Convert overrides to a map
 	for _, override := range commandLineOverrides {
@@ -704,7 +704,7 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 func (submitter *Submitter) getPortfolio(portfolioFileName string, submitSelectionFlags *utils.TestSelectionFlagValues) (*Portfolio, error) {
 	// Load the portfolio of tests
 	var portfolio *Portfolio = nil
-	var err error = nil
+	var err error
 
 	if portfolioFileName != "" {
 		portfolio, err = ReadPortfolio(submitter.fileSystem, portfolioFileName)
@@ -733,7 +733,7 @@ func (submitter *Submitter) GetCurrentUserName() string {
 }
 
 func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string) error {
-	var err error = nil
+	var err error
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
 		// Empty portfolio
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
@@ -743,7 +743,7 @@ func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFil
 
 func (submitter *Submitter) checkIfGroupAlreadyInUse(groupName string) (bool, error) {
 	isInUse := false
-	var err error = nil
+	var err error
 
 	// Just check if it is already in use,  which is perfectly valid for custom group names
 	var uuidCheck *galasaapi.TestRuns

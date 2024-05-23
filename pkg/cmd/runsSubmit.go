@@ -68,7 +68,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory utils.Factory,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 
 	submitSelectionFlags := runs.NewTestSelectionFlagValues()
 	cmd.values.TestSelectionFlagValues = submitSelectionFlags

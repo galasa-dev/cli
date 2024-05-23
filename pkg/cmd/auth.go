@@ -51,7 +51,7 @@ func (cmd *AuthCommand) init(rootCmd utils.GalasaCommand) error {
 
 func (cmd *AuthCommand) createCobraCommand(rootCmd utils.GalasaCommand) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 
 	authCmd := &cobra.Command{
 		Use:   "auth",

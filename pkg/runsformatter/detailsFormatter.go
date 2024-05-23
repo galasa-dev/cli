@@ -39,7 +39,7 @@ func (*DetailsFormatter) IsNeedingMethodDetails() bool {
 
 func (*DetailsFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 	var result string = ""
-	var err error = nil
+	var err error
 
 	totalResults := len(runs)
 	resultCountsMap := initialiseResultMap()

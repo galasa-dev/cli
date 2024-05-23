@@ -71,7 +71,7 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 	runsCommand utils.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
-	var err error = nil
+	var err error
 
 	cmd.values.prepareSelectionFlags = runs.NewTestSelectionFlagValues()
 
@@ -103,7 +103,7 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
-	var err error = nil
+	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()

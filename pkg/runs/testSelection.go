@@ -63,7 +63,7 @@ func NewStreamBasedValidator() TestSelectionFlagValidator {
 }
 
 func (*StreamBasedValidator) Validate(flags *utils.TestSelectionFlagValues) error {
-	var err error = nil
+	var err error
 	if flags.Stream == "" {
 		if len(*flags.Packages) > 0 || len(*flags.Bundles) > 0 || len(*flags.Tests) > 0 || len(*flags.Classes) > 0 {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_STREAM_FLAG_REQUIRED)
@@ -80,7 +80,7 @@ func NewObrBasedValidator() TestSelectionFlagValidator {
 }
 
 func (*ObrBasedValidator) Validate(flags *utils.TestSelectionFlagValues) error {
-	var err error = nil
+	var err error
 	return err
 }
 
@@ -198,7 +198,7 @@ func SelectTests(launcherInstance launcher.Launcher, flags *utils.TestSelectionF
 }
 
 func selectTestsByGherkin(testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
-	var err error = nil
+	var err error
 
 	if len(*flags.GherkinUrl) < 1 {
 		return err
@@ -218,7 +218,7 @@ func selectTestsByGherkin(testSelection *TestSelection, flags *utils.TestSelecti
 
 func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 
-	var err error = nil
+	var err error
 
 	if len(*flags.Bundles) < 1 {
 		return err
@@ -247,7 +247,7 @@ func selectTestsByBundle(testCatalog launcher.TestCatalog, testSelection *TestSe
 }
 
 func selectTestsByPackage(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
-	var err error = nil
+	var err error
 
 	if len(*flags.Packages) < 1 {
 		return err
@@ -277,7 +277,7 @@ func selectTestsByPackage(testCatalog launcher.TestCatalog, testSelection *TestS
 
 func selectTestsByTest(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 
-	var err error = nil
+	var err error
 
 	if len(*flags.Tests) < 1 {
 		return err
@@ -310,7 +310,7 @@ func selectTestsByClass(
 	flags *utils.TestSelectionFlagValues,
 ) error {
 
-	var err error = nil
+	var err error
 	if len(*flags.Classes) < 1 {
 		return err
 	}
@@ -337,7 +337,7 @@ func selectTestsByClass(
 
 func selectTestsByTag(testCatalog launcher.TestCatalog, testSelection *TestSelection, flags *utils.TestSelectionFlagValues) error {
 
-	var err error = nil
+	var err error
 	if len(*flags.Tags) < 1 {
 		return err
 	}
@@ -403,9 +403,9 @@ func selectClass(testSelection *TestSelection, bundle string, name string, flags
 
 func convertRegex(patterns *[]string, regexSelect bool) (*[]*regexp.Regexp, error) {
 
-	var err error = nil
+	var err error
 	regexPatterns := make([]*regexp.Regexp, 0)
-	var r *regexp.Regexp = nil
+	var r *regexp.Regexp
 	if regexSelect {
 		// Create patterns of actual regex
 		for _, selection := range *patterns {

@@ -51,7 +51,7 @@ func (cmd *RunsCommand) Values() interface{} {
 
 func (cmd *RunsCommand) init(rootCmd utils.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 
 	cmd.values = &RunsCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)

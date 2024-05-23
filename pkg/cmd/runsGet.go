@@ -72,7 +72,7 @@ func (cmd *RunsGetCommand) createCobraCommand(
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsGetCobraCmd := &cobra.Command{

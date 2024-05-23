@@ -75,7 +75,7 @@ func resetRun(runName string,
 	runStatusUpdateRequest *galasaapi.UpdateRunStatusRequest,
 	apiClient *galasaapi.APIClient,
 ) error {
-	var err error = nil
+	var err error
 	var resp *http.Response
 	var context context.Context = nil
 	var restApiVersion string

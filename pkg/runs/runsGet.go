@@ -166,7 +166,7 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 }
 
 func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.APIClient) ([]galasaapi.Run, error) {
-	var err error = nil
+	var err error
 	var runsDetails []galasaapi.Run = make([]galasaapi.Run, 0)
 	var context context.Context = nil
 	var details *galasaapi.Run
@@ -209,7 +209,7 @@ func GetRunsFromRestApi(
 	apiClient *galasaapi.APIClient,
 ) ([]galasaapi.Run, error) {
 
-	var err error = nil
+	var err error
 	var results []galasaapi.Run = make([]galasaapi.Run, 0)
 
 	var context context.Context = nil

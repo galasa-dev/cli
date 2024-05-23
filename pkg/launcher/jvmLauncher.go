@@ -126,7 +126,7 @@ func NewJVMLauncher(
 ) (*JvmLauncher, error) {
 
 	var (
-		err      error        = nil
+		err      error
 		launcher *JvmLauncher = nil
 	)
 
@@ -321,6 +321,8 @@ func (launcher *JvmLauncher) isCPSRemote() bool {
 // Gets the https URL of the config store, to be used contacting the remote CPS.
 func (launcher *JvmLauncher) getCPSRemoteApiServerUrl() string {
 	configStoreGalasaUrl := launcher.bootstrapProps["framework.config.store"]
+	// The configuration has a URL like galasacps://myhost/api
+	// We need to turn it into something like https://myhost/api
 	httpsUrl := strings.Replace(configStoreGalasaUrl, "galasacps", "https", 1)
 	return httpsUrl
 }
@@ -367,9 +369,9 @@ func prepareTempFiles(
 ) (string, string, error) {
 
 	var (
-		temporaryFolderPath string = ""
-		overridesFilePath   string = ""
-		err                 error  = nil
+		temporaryFolderPath string
+		overridesFilePath   string
+		err                 error
 	)
 
 	// Create a temporary folder
@@ -829,7 +831,7 @@ func calculateDebugMode(debugMode string, bootstrapProperties props.JavaProperti
 }
 
 func checkDebugModeValueIsValid(debugMode string, errorMessageIfInvalid *galasaErrors.MessageType) error {
-	var err error = nil
+	var err error
 
 	lowerCaseDebugMode := strings.ToLower(debugMode)
 

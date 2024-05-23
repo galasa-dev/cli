@@ -84,7 +84,7 @@ func (cmd *LocalInitCommand) createCobraCommand(
 
 func (cmd *LocalInitCommand) executeEnvInit(factory utils.Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
 
-	var err error = nil
+	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()

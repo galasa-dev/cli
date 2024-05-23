@@ -23,7 +23,7 @@ func ReportJSON(
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun) error {
 
-	var err error = nil
+	var err error
 	var testReport TestReport
 	testReport.Tests = make([]TestRun, 0)
 
