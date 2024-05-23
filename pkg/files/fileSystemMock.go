@@ -14,6 +14,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // ------------------------------------------------------------------------------------
@@ -58,7 +60,7 @@ type MockFileSystem struct {
 // NewMockFileSystem creates an implementation of the thin file system layer which delegates
 // to a memory map. This uses the default behaviour for all the virtual functions in our
 // MockFileSystem
-func NewMockFileSystem() FileSystem {
+func NewMockFileSystem() spi.FileSystem {
 	mockFileSystem := NewOverridableMockFileSystem()
 	return mockFileSystem
 }
@@ -303,7 +305,7 @@ func mockFSExists(fs MockFileSystem, path string) (bool, error) {
 }
 
 func mockFSDirExists(fs MockFileSystem, path string) (bool, error) {
-	isDirExists := true
+	var isDirExists bool // set to true by default.
 	var err error
 	node := fs.data[path]
 	if node == nil {

@@ -9,7 +9,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
@@ -33,13 +32,13 @@ type JwtCache interface {
 }
 
 type fileBasedJwtCache struct {
-	fileSystem  files.FileSystem
+	fileSystem  spi.FileSystem
 	galasaHome  spi.GalasaHome
 	timeService spi.TimeService
 }
 
 func NewJwtCache(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	galasaHome spi.GalasaHome,
 	timeService spi.TimeService,
 ) JwtCache {

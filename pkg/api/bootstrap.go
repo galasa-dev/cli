@@ -88,7 +88,7 @@ func getDefaultBootstrapPath(galasaHome spi.GalasaHome) string {
 // bootstrapPath - Where do we find the bootstrap contents from ? This can be a URL must end in /bootstrap
 func LoadBootstrap(
 	galasaHome spi.GalasaHome,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	env spi.Environment,
 	bootstrapPath string,
 	urlResolutionService UrlResolutionService,
@@ -144,7 +144,7 @@ func LoadBootstrap(
 	return bootstrap, err
 }
 
-func cleanPath(fileSystem files.FileSystem, path string) (string, error) {
+func cleanPath(fileSystem spi.FileSystem, path string) (string, error) {
 	var err error
 	if path != "" {
 		path = removeLeadingFileColon(path)
@@ -169,7 +169,7 @@ func validateURL(path string) error {
 	return err
 }
 
-func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem files.FileSystem) (*BootstrapData, error) {
+func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem spi.FileSystem) (*BootstrapData, error) {
 	bootstrap := new(BootstrapData)
 	var content string
 	var err error

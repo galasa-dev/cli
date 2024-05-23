@@ -9,12 +9,12 @@ import (
 	"log"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"gopkg.in/yaml.v3"
 )
 
 func ReportYaml(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	reportYamlFilename string,
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun) error {

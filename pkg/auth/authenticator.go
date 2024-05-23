@@ -9,14 +9,13 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type authenticatorImpl struct {
 	apiServerUrl string
-	fileSystem   files.FileSystem
+	fileSystem   spi.FileSystem
 	galasaHome   spi.GalasaHome
 	timeService  spi.TimeService
 	env          spi.Environment
@@ -25,7 +24,7 @@ type authenticatorImpl struct {
 
 func NewAuthenticator(
 	apiServerUrl string,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	galasaHome spi.GalasaHome,
 	timeService spi.TimeService,
 	env spi.Environment,

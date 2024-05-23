@@ -20,7 +20,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -31,7 +30,7 @@ import (
 func DownloadArtifacts(
 	runName string,
 	forceDownload bool,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	timeService spi.TimeService,
 	console spi.Console,
 	apiClient *galasaapi.APIClient,
@@ -86,7 +85,7 @@ func DownloadArtifacts(
 func downloadReRunArtfifacts(
 	reRunsByQueuedTime map[string][]galasaapi.Run,
 	forceDownload bool,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	apiClient *galasaapi.APIClient,
 	console spi.Console,
 	timeService spi.TimeService,
@@ -162,7 +161,7 @@ func nameDownloadFolder(run galasaapi.Run, runName string, timeService spi.TimeS
 func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
 	directoryName string,
 	run galasaapi.Run,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	forceDownload bool,
 	console spi.Console,
 	runDownloadTargetFolder string,
@@ -186,7 +185,7 @@ func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
 	return err
 }
 
-func renderImages(fileSystem files.FileSystem, filePathsCreated []string, forceOverwriteExistingFiles bool) error {
+func renderImages(fileSystem spi.FileSystem, filePathsCreated []string, forceOverwriteExistingFiles bool) error {
 	var err error
 
 	embeddedFileSystem := embedded.GetReadOnlyFileSystem()
@@ -212,7 +211,7 @@ func renderImages(fileSystem files.FileSystem, filePathsCreated []string, forceO
 func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 	directoryName string,
 	run galasaapi.Run,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	forceDownload bool,
 	console spi.Console,
 ) (filePathsCreated []string, err error) {
@@ -307,7 +306,7 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 // to be written to. Existing files are only overwritten if the --force option is used as part of
 // the "runs download" command.
 func WriteArtifactToFileSystem(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	targetFilePath string,
 	artifactPath string,
 	fileDownloaded io.Reader,
@@ -395,7 +394,7 @@ func TransferContent(sourceFile io.Reader, targetFile io.WriteCloser, targetFile
 
 // Creates an empty file representing an artifact that is being written. Any parent directories that do not exist
 // will be created. Returns the empty file that was created or an error if any file creation operations failed.
-func CreateEmptyArtifactFile(fileSystem files.FileSystem, targetFilePath string) (io.WriteCloser, error) {
+func CreateEmptyArtifactFile(fileSystem spi.FileSystem, targetFilePath string) (io.WriteCloser, error) {
 
 	var err error
 	var newFile io.WriteCloser = nil

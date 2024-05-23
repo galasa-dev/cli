@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
@@ -25,14 +24,14 @@ type BearerTokenFile interface {
 }
 
 type BearerTokenFileImpl struct {
-	fileSystem   files.FileSystem
+	fileSystem   spi.FileSystem
 	galasaHome   spi.GalasaHome
 	baseFileName string
 	timeService  spi.TimeService
 }
 
 func NewBearerTokenFile(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	galasaHome spi.GalasaHome,
 	baseFileName string,
 	timeService spi.TimeService,

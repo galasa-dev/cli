@@ -24,7 +24,7 @@ func NewRealFactory() spi.Factory {
 	return &RealFactory{}
 }
 
-func (*RealFactory) GetFileSystem() files.FileSystem {
+func (*RealFactory) GetFileSystem() spi.FileSystem {
 	return files.NewOSFileSystem()
 }
 

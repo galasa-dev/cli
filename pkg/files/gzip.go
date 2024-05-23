@@ -11,12 +11,13 @@ import (
 	"io"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // For gzip files, we need a utility which reads and writes gzip files to a file system.
 type GzipImpl struct {
 	path string
-	fs   FileSystem
+	fs   spi.FileSystem
 }
 
 type GzipFile interface {
@@ -24,7 +25,7 @@ type GzipFile interface {
 	WriteBytes(binaryContent []byte) error
 }
 
-func NewGzipFile(fs FileSystem, pathToGzip string) GzipFile {
+func NewGzipFile(fs spi.FileSystem, pathToGzip string) GzipFile {
 	gzip := new(GzipImpl)
 	gzip.path = pathToGzip
 	gzip.fs = fs

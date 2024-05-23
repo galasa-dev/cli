@@ -7,7 +7,7 @@ package runs
 
 import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"gopkg.in/yaml.v3"
 )
 
@@ -67,7 +67,7 @@ func AddClassesToPortfolio(testSelection *TestSelection, testOverrides *map[stri
 	}
 }
 
-func WritePortfolio(fileSystem files.FileSystem, filename string, portfolio *Portfolio) error {
+func WritePortfolio(fileSystem spi.FileSystem, filename string, portfolio *Portfolio) error {
 	bytes, err := yaml.Marshal(&portfolio)
 	if err == nil {
 		err = fileSystem.WriteBinaryFile(filename, bytes)
@@ -75,7 +75,7 @@ func WritePortfolio(fileSystem files.FileSystem, filename string, portfolio *Por
 	return err
 }
 
-func ReadPortfolio(fileSystem files.FileSystem, filename string) (*Portfolio, error) {
+func ReadPortfolio(fileSystem spi.FileSystem, filename string) (*Portfolio, error) {
 
 	var portfolio Portfolio
 

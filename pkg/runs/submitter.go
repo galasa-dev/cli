@@ -28,7 +28,7 @@ import (
 
 type Submitter struct {
 	galasaHome  spi.GalasaHome
-	fileSystem  files.FileSystem
+	fileSystem  spi.FileSystem
 	launcher    launcher.Launcher
 	timeService spi.TimeService
 	env         spi.Environment
@@ -38,7 +38,7 @@ type Submitter struct {
 
 func NewSubmitter(
 	galasaHome spi.GalasaHome,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	launcher launcher.Launcher,
 	timeService spi.TimeService,
 	env spi.Environment,

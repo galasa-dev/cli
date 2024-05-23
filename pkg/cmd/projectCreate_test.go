@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -62,7 +63,7 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
-func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool, packageName string) {
+func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem spi.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool, packageName string) {
 	parentFolderExists, err := mockFileSystem.DirExists(packageName)
 	assert.Nil(t, err)
 	assert.True(t, parentFolderExists, "Parent folder was not created.")
@@ -113,7 +114,7 @@ func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.Fil
 	}
 }
 
-func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem files.FileSystem, featureName string, isMaven bool, isGradle bool) {
+func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem spi.FileSystem, featureName string, isMaven bool, isGradle bool) {
 
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg." + featureName)
 	assert.Nil(t, err)
@@ -170,7 +171,7 @@ func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem files.Fil
 	assert.True(t, isTestResourcesTextFileExists, "Test text resource file was not created.")
 }
 
-func assertJavaFileWasGenerated(t *testing.T, mockFileSystem files.FileSystem, expectedJavaFilePath string, packageName string) {
+func assertJavaFileWasGenerated(t *testing.T, mockFileSystem spi.FileSystem, expectedJavaFilePath string, packageName string) {
 	testJavaFileExists, err := mockFileSystem.Exists(expectedJavaFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testJavaFileExists, "Test java file was not created.")
@@ -325,7 +326,7 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
 
-func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem files.FileSystem, isMaven bool, isGradle bool) {
+func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem spi.FileSystem, isMaven bool, isGradle bool) {
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.obr")
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test folder was not created.")

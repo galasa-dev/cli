@@ -15,7 +15,6 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -49,7 +48,7 @@ type JvmLauncher struct {
 	env spi.Environment
 
 	// An abstraction of the file system so we can mock it out easily for unit tests.
-	fileSystem files.FileSystem
+	fileSystem spi.FileSystem
 
 	// A location galasa can call home
 	galasaHome spi.GalasaHome
@@ -328,7 +327,7 @@ func (launcher *JvmLauncher) getCPSRemoteApiServerUrl() string {
 	return httpsUrl
 }
 
-func defaultLocalMavenIfNotSet(localMaven string, fileSystem files.FileSystem) (string, error) {
+func defaultLocalMavenIfNotSet(localMaven string, fileSystem spi.FileSystem) (string, error) {
 	var err error
 	returnMavenPath := ""
 	if localMaven == "" {
@@ -359,13 +358,13 @@ func buildListOfAllObrs(obrsFromCommandLine []string, obrFromPortfolio string) (
 	return obrs, err
 }
 
-func deleteTempFiles(fileSystem files.FileSystem, temporaryFolderPath string) {
+func deleteTempFiles(fileSystem spi.FileSystem, temporaryFolderPath string) {
 	fileSystem.DeleteDir(temporaryFolderPath)
 }
 
 func prepareTempFiles(
 	galasaHome spi.GalasaHome,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	overrides map[string]interface{},
 ) (string, string, error) {
 
@@ -399,7 +398,7 @@ func prepareTempFiles(
 func createTemporaryOverridesFile(
 	temporaryFolderPath string,
 	galasaHome spi.GalasaHome,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	overrides map[string]interface{},
 ) (string, error) {
 	overrides = addStandardOverrideProperties(galasaHome, overrides)
@@ -542,7 +541,7 @@ func createRunFromLocalTest(localTest *LocalTest) (*galasaapi.Run, error) {
 	return run, err
 }
 
-func setTestStructureFromRasFile(run *galasaapi.Run, jsonFilePath string, fileSystem files.FileSystem) error {
+func setTestStructureFromRasFile(run *galasaapi.Run, jsonFilePath string, fileSystem spi.FileSystem) error {
 
 	var testStructure = galasaapi.NewTestStructure()
 	var err error
@@ -625,7 +624,7 @@ func (launcher *JvmLauncher) GetTestCatalog(stream string) (TestCatalog, error) 
 func getCommandSyntax(
 	bootstrapProperties props.JavaProperties,
 	galasaHome spi.GalasaHome,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	javaHome string,
 	testObrs []utils.MavenCoordinates,
 	testLocation TestLocation,

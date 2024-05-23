@@ -9,17 +9,16 @@ import (
 	"log"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type galasaHomeImpl struct {
 	path string
-	fs   files.FileSystem
+	fs   spi.FileSystem
 	env  spi.Environment
 }
 
-func NewGalasaHome(fs files.FileSystem, env spi.Environment, cmdFlagGalasaHome string) (spi.GalasaHome, error) {
+func NewGalasaHome(fs spi.FileSystem, env spi.Environment, cmdFlagGalasaHome string) (spi.GalasaHome, error) {
 	var err error
 	var homeData *galasaHomeImpl = nil
 

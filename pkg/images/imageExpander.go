@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // Given a root folder, we scan for .gz files which need expansion into images.
@@ -45,13 +46,13 @@ func NewImageExpanderNullImpl() ImageExpander {
 
 // ******** A real implementation of an expander *******
 type ImageExpanderImpl struct {
-	fs                          files.FileSystem
+	fs                          spi.FileSystem
 	renderer                    ImageRenderer
 	expandedFileCounter         int
 	forceOverwriteExistingFiles bool
 }
 
-func NewImageExpander(fs files.FileSystem, renderer ImageRenderer, forceOverwriteExistingFiles bool) ImageExpander {
+func NewImageExpander(fs spi.FileSystem, renderer ImageRenderer, forceOverwriteExistingFiles bool) ImageExpander {
 	expander := new(ImageExpanderImpl)
 	expander.fs = fs
 	expander.renderer = renderer

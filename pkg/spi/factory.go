@@ -5,8 +5,6 @@
  */
 package spi
 
-import "github.com/galasa-dev/cli/pkg/files"
-
 // A final word handler can set the exit code of the entire process.
 // Or it could be mocked-out to just collect it and checked in tests.
 type FinalWordHandler interface {
@@ -19,7 +17,7 @@ type FinalWordHandler interface {
 // We do this so we can have a real and a mock implementation
 // to make unit testing easier.
 type Factory interface {
-	GetFileSystem() files.FileSystem
+	GetFileSystem() FileSystem
 	GetEnvironment() Environment
 	GetFinalWordHandler() FinalWordHandler
 	GetStdOutConsole() Console

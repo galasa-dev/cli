@@ -7,11 +7,10 @@ package utils
 
 import (
 	"github.com/galasa-dev/cli/pkg/embedded"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
-func InitialiseGalasaHomeFolder(home spi.GalasaHome, fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) error {
+func InitialiseGalasaHomeFolder(home spi.GalasaHome, fileSystem spi.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) error {
 
 	var err error
 
@@ -189,7 +188,7 @@ func createLibDirAndContent(fileGenerator *FileGenerator, galasaLibDir string) e
 	return err
 }
 
-func GetGalasaBootJarPath(fs files.FileSystem, home spi.GalasaHome) (string, error) {
+func GetGalasaBootJarPath(fs spi.FileSystem, home spi.GalasaHome) (string, error) {
 	var galasaBootJarPath string = ""
 	var err error
 	var galasaVersion string

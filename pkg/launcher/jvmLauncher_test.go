@@ -58,7 +58,7 @@ const (
 func NewMockLauncherParams() (
 	props.JavaProperties,
 	*utils.MockEnv,
-	files.FileSystem,
+	spi.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
 	spi.TimeService,
@@ -1258,7 +1258,7 @@ func TestLocalMavenSet(t *testing.T) {
 func NewMockGherkinParams() (
 	props.JavaProperties,
 	*utils.MockEnv,
-	files.FileSystem,
+	spi.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
 	spi.TimeService,

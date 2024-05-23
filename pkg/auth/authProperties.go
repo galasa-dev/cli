@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -24,7 +23,7 @@ const (
 )
 
 // Gets authentication properties from the user's galasactl.properties file or from the environment or a mixture.
-func GetAuthProperties(fileSystem files.FileSystem, galasaHome spi.GalasaHome, env spi.Environment) (galasaapi.AuthProperties, string, error) {
+func GetAuthProperties(fileSystem spi.FileSystem, galasaHome spi.GalasaHome, env spi.Environment) (galasaapi.AuthProperties, string, error) {
 	var err error
 	authProperties := galasaapi.NewAuthProperties()
 
@@ -85,7 +84,7 @@ func getPropertyWithOverride(env spi.Environment, valueFromFile string, filePath
 }
 
 // Gets a property from the user's galasactl.properties file
-func getPropertyFromFile(fileSystem files.FileSystem, galasactlPropertiesFilePath string, propertyName string) (string, error) {
+func getPropertyFromFile(fileSystem spi.FileSystem, galasactlPropertiesFilePath string, propertyName string) (string, error) {
 	var err error
 	var galasactlProperties props.JavaProperties
 	galasactlProperties, err = props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)

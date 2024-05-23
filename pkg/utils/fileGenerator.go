@@ -12,7 +12,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 //---------------------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ type GeneratedFileDef struct {
 }
 
 type FileGenerator struct {
-	fileSystem         files.FileSystem
+	fileSystem         spi.FileSystem
 	embeddedFileSystem embedded.ReadOnlyFileSystem
 }
 
@@ -35,7 +35,7 @@ type FileGenerator struct {
 // Public functions.
 //-------------------------------------------------------------------------------------------------
 
-func NewFileGenerator(fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) *FileGenerator {
+func NewFileGenerator(fileSystem spi.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem) *FileGenerator {
 	fileGenerator := &FileGenerator{fileSystem: fileSystem, embeddedFileSystem: embeddedFileSystem}
 	return fileGenerator
 }

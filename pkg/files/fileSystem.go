@@ -14,42 +14,12 @@ import (
 	"runtime"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
-
-// FileSystem is a thin interface layer above the os package which can be mocked out
-type FileSystem interface {
-	// MkdirAll creates all folders in the file system if they don't already exist.
-	MkdirAll(targetFolderPath string) error
-	ReadTextFile(filePath string) (string, error)
-	ReadBinaryFile(filePath string) ([]byte, error)
-	WriteTextFile(targetFilePath string, desiredContents string) error
-	WriteBinaryFile(targetFilePath string, desiredContents []byte) error
-	Exists(path string) (bool, error)
-	DirExists(path string) (bool, error)
-	GetUserHomeDirPath() (string, error)
-	OutputWarningMessage(string) error
-	MkTempDir() (string, error)
-	DeleteDir(path string)
-	DeleteFile(path string)
-
-	// Creates a file in the file system if it can.
-	Create(path string) (io.WriteCloser, error)
-
-	// Returns the normal extension used for executable files.
-	// ie: The .exe suffix in windows, or "" in unix-like systems.
-	GetExecutableExtension() string
-
-	// GetPathSeparator returns the file path separator specific
-	// to this operating system.
-	GetFilePathSeparator() string
-
-	// Gets all the file paths recursively from a starting folder.
-	GetAllFilePaths(rootPath string) ([]string, error)
-}
 
 // TildaExpansion If a file starts with a tilda '~' character, expand it
 // to the home folder of the user on this file system.
-func TildaExpansion(fileSystem FileSystem, path string) (string, error) {
+func TildaExpansion(fileSystem spi.FileSystem, path string) (string, error) {
 	var err error
 	if path != "" {
 		if path[0] == '~' {
@@ -70,7 +40,7 @@ type OSFileSystem struct {
 
 // NewOSFileSystem creates an implementation of the thin file system layer which delegates
 // to the real os package calls.
-func NewOSFileSystem() FileSystem {
+func NewOSFileSystem() spi.FileSystem {
 	return new(OSFileSystem)
 }
 

@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"github.com/galasa-dev/cli/pkg/embedded"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -103,7 +102,7 @@ func (cmd *LocalInitCommand) executeEnvInit(factory spi.Factory, localInitCmdVal
 }
 
 func localEnvInit(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	env spi.Environment,
 	cmdFlagGalasaHome string,
 	isDevelopment bool,

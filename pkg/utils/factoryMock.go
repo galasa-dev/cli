@@ -12,7 +12,7 @@ import (
 
 type MockFactory struct {
 	FinalWordHandler spi.FinalWordHandler
-	FileSystem       files.FileSystem
+	FileSystem       spi.FileSystem
 	Env              spi.Environment
 	StdOutConsole    spi.Console
 	StdErrConsole    spi.Console
@@ -24,7 +24,7 @@ func NewMockFactory() *MockFactory {
 	return new(MockFactory)
 }
 
-func (factory *MockFactory) GetFileSystem() files.FileSystem {
+func (factory *MockFactory) GetFileSystem() spi.FileSystem {
 	if factory.FileSystem == nil {
 		factory.FileSystem = files.NewMockFileSystem()
 	}

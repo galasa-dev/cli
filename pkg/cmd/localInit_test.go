@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -94,43 +95,43 @@ func TestCanCreateGalasaHomeFolderWhenAlreadyInitialised(t *testing.T) {
 
 }
 
-func assertBootstrapPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
+func assertBootstrapPropertiesCreated(t *testing.T, mockFileSystem spi.FileSystem, galasaDir string) {
 	testBootstrapPropertiesExists, err := mockFileSystem.Exists(galasaDir + "bootstrap.properties")
 	assert.Nil(t, err)
 	assert.True(t, testBootstrapPropertiesExists, "Bootstrap properties was not created")
 }
 
-func assertCPSPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
+func assertCPSPropertiesCreated(t *testing.T, mockFileSystem spi.FileSystem, galasaDir string) {
 	testCPSPropertiesExists, err := mockFileSystem.Exists(galasaDir + "cps.properties")
 	assert.Nil(t, err)
 	assert.True(t, testCPSPropertiesExists, "CPS properties was not created")
 }
 
-func assertCredentialsPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
+func assertCredentialsPropertiesCreated(t *testing.T, mockFileSystem spi.FileSystem, galasaDir string) {
 	testCredentialsPropertiesExists, err := mockFileSystem.Exists(galasaDir + "credentials.properties")
 	assert.Nil(t, err)
 	assert.True(t, testCredentialsPropertiesExists, "Credentials properties was not created")
 }
 
-func assertDSSPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
+func assertDSSPropertiesCreated(t *testing.T, mockFileSystem spi.FileSystem, galasaDir string) {
 	testDSSPropertiesExists, err := mockFileSystem.Exists(galasaDir + "dss.properties")
 	assert.Nil(t, err)
 	assert.True(t, testDSSPropertiesExists, "DSS properties was not created")
 }
 
-func assertOverridesPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
+func assertOverridesPropertiesCreated(t *testing.T, mockFileSystem spi.FileSystem, galasaDir string) {
 	testOverridesPropertiesExists, err := mockFileSystem.Exists(galasaDir + "overrides.properties")
 	assert.Nil(t, err)
 	assert.True(t, testOverridesPropertiesExists, "Overrides properties was not created")
 }
 
-func assertGalasactlPropertiesCreated(t *testing.T, mockFileSystem files.FileSystem, galasaDir string) {
+func assertGalasactlPropertiesCreated(t *testing.T, mockFileSystem spi.FileSystem, galasaDir string) {
 	testGalasactlPropertiesExists, err := mockFileSystem.Exists(galasaDir + "galasactl.properties")
 	assert.Nil(t, err)
 	assert.True(t, testGalasactlPropertiesExists, "Galasactl properties was not created")
 }
 
-func assertSettingsXMLCreatedAndContentOk(t *testing.T, mockFileSystem files.FileSystem, m2Dir string, isDevelopment bool) {
+func assertSettingsXMLCreatedAndContentOk(t *testing.T, mockFileSystem spi.FileSystem, m2Dir string, isDevelopment bool) {
 	testSettingsXMLExists, err := mockFileSystem.Exists(m2Dir + "settings.xml")
 	assert.Nil(t, err)
 	assert.True(t, testSettingsXMLExists, "Settings.xml was not created")

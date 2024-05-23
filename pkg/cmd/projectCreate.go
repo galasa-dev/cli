@@ -12,7 +12,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/spi"
 
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -199,7 +198,7 @@ func (cmd *ProjectCreateCommand) executeCreateProject(factory spi.Factory, rootC
 // featureNamesCommaSeparated - eg: kettle,toaster. Causes a kettle and toaster project to be created with a sample test in.
 // isDevelopment - if true, the user wants to use bleeding-edge versions of galasa code and maven repositories.
 func createProject(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	packageName string,
 	featureNamesCommaSeparated string,
 	isOBRProjectRequired bool,
