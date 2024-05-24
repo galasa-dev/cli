@@ -23,7 +23,7 @@ const (
 )
 
 // Gets authentication properties from the user's galasactl.properties file or from the environment or a mixture.
-func GetAuthProperties(fileSystem spi.FileSystem, galasaHome spi.GalasaHome, env spi.Environment) (galasaapi.AuthProperties, string, error) {
+func getAuthProperties(fileSystem spi.FileSystem, galasaHome spi.GalasaHome, env spi.Environment) (galasaapi.AuthProperties, string, error) {
 	var err error
 	authProperties := galasaapi.NewAuthProperties()
 

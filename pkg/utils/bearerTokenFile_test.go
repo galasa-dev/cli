@@ -7,6 +7,8 @@ package utils
 
 import (
 	"errors"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -30,7 +32,7 @@ func TestWriteBearerTokenJsonFileWritesJwtJsonToFile(t *testing.T) {
 	// Then...
 	assert.Nil(t, err, "Should not return an error when writing a JWT to the bearer-token.json file in an existing galasa home directory")
 
-	bearerTokenJson, _ := mockFileSystem.ReadTextFile(mockGalasaHome.GetNativeFolderPath() + "/bearer-token.json")
+	bearerTokenJson, _ := mockFileSystem.ReadTextFile(mockGalasaHome.GetNativeFolderPath() + "/bearer-tokens/baseFile.json")
 
 	assert.Contains(t, bearerTokenJson, token)
 }
@@ -115,4 +117,126 @@ func TestGetBearerTokenFromTokenJsonFileWithBadContentsReturnsError(t *testing.T
 	// Then...
 	assert.NotNil(t, err, "Should return an error when the bearer token file exists but doesn't contain valid JSON")
 	assert.ErrorContains(t, err, "GAL1107E")
+}
+
+func TestGetAllFilePathsReturnsTwoFiles(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	// This is a dummy JWT that expires 1 hour after the Unix epoch
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
+
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
+	file.WriteJwt(expectedToken)
+	file = NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile2.json", mockTimeService)
+	file.WriteJwt(expectedToken)
+
+	allFiles, err := ListAllBearerTokenFiles(mockFileSystem, mockGalasaHome)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 2, len(allFiles))
+	sortedResults := sort.StringSlice(allFiles)
+
+	assert.True(t, strings.HasSuffix(sortedResults[0], "baseFile1.json"))
+	assert.True(t, strings.HasSuffix(sortedResults[1], "baseFile2.json"))
+}
+
+func TestDeleteAllBearerTokensWorks(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	// This is a dummy JWT that expires 1 hour after the Unix epoch
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
+
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
+	file.WriteJwt(expectedToken)
+	file = NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile2.json", mockTimeService)
+	file.WriteJwt(expectedToken)
+
+	allFiles, err := ListAllBearerTokenFiles(mockFileSystem, mockGalasaHome)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(allFiles))
+
+	// When we delete all the files...
+	err = DeleteAllBearerTokenFiles(mockFileSystem, mockGalasaHome)
+
+	// Then
+	assert.Nil(t, err)
+
+	allFiles, err = ListAllBearerTokenFiles(mockFileSystem, mockGalasaHome)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(allFiles))
+
+}
+
+func TestTokenFileWhichExistsSaysItExists(t *testing.T) {
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	// This is a dummy JWT that expires 1 hour after the Unix epoch
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
+
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
+	file.WriteJwt(expectedToken)
+
+	isExists, err := file.Exists()
+	assert.Nil(t, err)
+	assert.True(t, isExists)
+}
+
+func TestTokenFileWhichDoesntExistSaysItDoesntExist(t *testing.T) {
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	// This is a dummy JWT that expires 1 hour after the Unix epoch
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
+
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
+
+	isExists, err := file.Exists()
+	assert.Nil(t, err)
+	assert.False(t, isExists)
+}
+
+func TestTokenFileWhichIsDeletedNoLongerExists(t *testing.T) {
+
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := NewMockEnv()
+	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	// This is a dummy JWT that expires 1 hour after the Unix epoch
+	mockCurrentTime := time.UnixMilli(0)
+	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
+
+	// Create the jwt on disk.
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
+	file.WriteJwt(expectedToken)
+
+	// Check it exists
+	isExists, err := file.Exists()
+	assert.Nil(t, err)
+	assert.True(t, isExists)
+
+	// Now delete it.
+	err = file.DeleteJwt()
+	assert.Nil(t, err)
+
+	// Check it no longer exists.
+	isExists, err = file.Exists()
+	assert.Nil(t, err)
+	assert.False(t, isExists)
 }

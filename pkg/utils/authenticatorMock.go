@@ -39,3 +39,9 @@ func (authenticator *MockAuthenticator) Login() error {
 	var err error
 	return err
 }
+
+// Login - performs all the logic to implement the `galasactl auth login` command
+func (authenticator *MockAuthenticator) LogoutOfEverywhere() error {
+	var err error
+	return err
+}

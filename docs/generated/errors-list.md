@@ -141,6 +141,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1145E: Jwt token is invalid or can't be parsed: {}
 - GAL1146E: Failed to get the expiration time from the jwt claim: {}
 
+- GAL1147E: Failed to create folder for bearer tokens at '{}'
+
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

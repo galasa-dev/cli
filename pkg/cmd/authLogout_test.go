@@ -22,7 +22,7 @@ func TestAuthogoutCommandInCommandCollectionHasName(t *testing.T) {
 
 	assert.NotNil(t, authLogoutommand)
 	assert.Equal(t, COMMAND_NAME_AUTH_LOGOUT, authLogoutommand.Name())
-	assert.Nil(t, authLogoutommand.Values())
+	assert.NotNil(t, authLogoutommand.Values())
 	assert.NotNil(t, authLogoutommand.CobraCommand())
 }
 
@@ -45,11 +45,12 @@ func TestAuthLogoutHelpFlagSetCorrectly(t *testing.T) {
 func TestAuthLogoutNoFlagsExecutesOk(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_LOGOUT, factory, t)
 
 	var args []string = []string{"auth", "logout"}
 
 	// When...
-	err := Execute(factory, args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check what the user saw is reasonable.

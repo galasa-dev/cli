@@ -16,4 +16,6 @@ type Authenticator interface {
 
 	// Logs into the server, saving the JWT token obtained in a persistent cache for later
 	Login() error
+
+	LogoutOfEverywhere() error
 }

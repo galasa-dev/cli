@@ -237,6 +237,8 @@ var (
 	GALASA_JWT_CANNOT_BE_PARSED                   = NewMessageType("GAL1145E: Jwt token is invalid or can't be parsed: %s", 1145, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_HAS_NO_EXPIRATION_DATETIME         = NewMessageType("GAL1146E: Failed to get the expiration time from the jwt claim: %s\n", 1146, STACK_TRACE_NOT_WANTED)
 
+	GALASA_ERROR_FAILED_TO_CREATE_BEARER_TOKEN_FOLDER = NewMessageType("GAL1147E: Failed to create folder for bearer tokens at '%s'\n", 1147, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 

@@ -8,13 +8,16 @@ package cmd
 import (
 	"log"
 
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
+type AuthLogoutCmdValues struct {
+}
+
 type AuthLogoutCommand struct {
+	values       *AuthLogoutCmdValues
 	cobraCommand *cobra.Command
 }
 
@@ -40,8 +43,7 @@ func (cmd *AuthLogoutCommand) CobraCommand() *cobra.Command {
 }
 
 func (cmd *AuthLogoutCommand) Values() interface{} {
-	// There are no values.
-	return nil
+	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -49,11 +51,12 @@ func (cmd *AuthLogoutCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthLogoutCommand) init(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd.Values().(*RootCmdValues))
+	cmd.values = &AuthLogoutCmdValues{}
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd)
 	return err
 }
 
-func (cmd *AuthLogoutCommand) createCobraCmd(factory spi.Factory, authCommand spi.GalasaCommand, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *AuthLogoutCommand) createCobraCmd(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (*cobra.Command, error) {
 	var err error
 
 	authLogoutCmd := &cobra.Command{
@@ -62,7 +65,7 @@ func (cmd *AuthLogoutCommand) createCobraCmd(factory spi.Factory, authCommand sp
 		Long:    "Log out from a Galasa ecosystem that you have previously logged in to",
 		Aliases: []string{"auth logout"},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthLogout(factory, rootCmdValues)
+			return cmd.executeAuthLogout(factory, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
@@ -93,7 +96,11 @@ func (cmd *AuthLogoutCommand) executeAuthLogout(
 		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
-			err = auth.Logout(fileSystem, galasaHome)
+			authenticator := factory.GetAuthenticator(
+				"",
+				galasaHome,
+			)
+			err = authenticator.LogoutOfEverywhere()
 		}
 	}
 	return err

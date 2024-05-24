@@ -7,6 +7,7 @@ package auth
 
 import (
 	"log"
+	"net/url"
 	"time"
 
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -29,6 +30,12 @@ type JwtCache interface {
 
 	// Returns the jwt if we have one, or "" if not.
 	Get(serverApiUrl string, galasaToken string) (jwt string, err error)
+
+	// Clears the jwt if we have one in the cache. ie: Logs out.
+	Clear(serverApiUrl string, galasaToken string) error
+
+	// Clears all the cache content.
+	ClearAll() error
 }
 
 type fileBasedJwtCache struct {
@@ -52,32 +59,59 @@ func NewJwtCache(
 }
 
 func (cache *fileBasedJwtCache) Put(serverApiUrl string, galasaToken string, jwt string) (err error) {
-	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, "bearer-token.json", cache.timeService)
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, cache.urlToFileName(serverApiUrl)+".json", cache.timeService)
 	err = file.WriteJwt(jwt)
 	return err
 }
 
+func (cache *fileBasedJwtCache) Clear(serverApiUrl string, galasaToken string) error {
+	var err error
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, cache.urlToFileName(serverApiUrl)+".json", cache.timeService)
+	file.DeleteJwt()
+	return err
+}
+
+func (cache *fileBasedJwtCache) ClearAll() error {
+	err := utils.DeleteAllBearerTokenFiles(cache.fileSystem, cache.galasaHome)
+	return err
+}
+
+// Gets the jwt from the cache, or returns a string if it's not present.
+// Only jwts which are valid (not expired) are returned.
 func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jwt string, err error) {
 	var possiblyInvalidJwt string
 
-	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, "bearer-token.json", cache.timeService)
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, cache.urlToFileName(serverApiUrl)+".json", cache.timeService)
 
-	possiblyInvalidJwt, err = file.ReadJwt()
-
+	var isExists bool
+	isExists, err = file.Exists()
 	if err == nil {
-		var isValid bool
-		isValid, err = IsBearerTokenValid(possiblyInvalidJwt, cache.timeService)
-		if err == nil {
-			if isValid {
-				jwt = possiblyInvalidJwt
+
+		if isExists {
+			possiblyInvalidJwt, err = file.ReadJwt()
+
+			if err == nil {
+				var isValid bool
+				isValid, err = cache.isBearerTokenValid(possiblyInvalidJwt, cache.timeService)
+				if err == nil {
+					if isValid {
+						jwt = possiblyInvalidJwt
+					}
+				}
 			}
 		}
 	}
 	return jwt, err
 }
 
+// Converts an arbitrary URL to a name we can use as a filename.
+func (cache *fileBasedJwtCache) urlToFileName(urlToConvert string) string {
+	filename := url.QueryEscape(urlToConvert)
+	return filename
+}
+
 // Checks whether a given bearer token is valid or not, returning true if it is valid and false otherwise
-func IsBearerTokenValid(bearerTokenString string, timeService spi.TimeService) (bool, error) {
+func (cache *fileBasedJwtCache) isBearerTokenValid(bearerTokenString string, timeService spi.TimeService) (bool, error) {
 	var err error
 	var bearerToken *jwt.Token
 	var isValid bool = false

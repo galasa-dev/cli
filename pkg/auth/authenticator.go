@@ -50,7 +50,7 @@ func (authenticator *authenticatorImpl) GetBearerToken() (string, error) {
 	var err error
 	var galasaTokenValue string
 
-	_, galasaTokenValue, err = GetAuthProperties(authenticator.fileSystem, authenticator.galasaHome, authenticator.env)
+	_, galasaTokenValue, err = getAuthProperties(authenticator.fileSystem, authenticator.galasaHome, authenticator.env)
 	if err == nil {
 		bearerToken, err = authenticator.cache.Get(authenticator.apiServerUrl, galasaTokenValue)
 		if err != nil {
@@ -81,7 +81,7 @@ func (authenticator *authenticatorImpl) Login() error {
 	var err error
 	var authProperties galasaapi.AuthProperties
 	var galasaTokenValue string
-	authProperties, galasaTokenValue, err = GetAuthProperties(authenticator.fileSystem, authenticator.galasaHome, authenticator.env)
+	authProperties, galasaTokenValue, err = getAuthProperties(authenticator.fileSystem, authenticator.galasaHome, authenticator.env)
 	if err == nil {
 		var jwt string
 		jwt, err = GetJwtFromRestApi(authenticator.apiServerUrl, authProperties)
@@ -89,5 +89,12 @@ func (authenticator *authenticatorImpl) Login() error {
 			err = authenticator.cache.Put(authenticator.apiServerUrl, galasaTokenValue, jwt)
 		}
 	}
+	return err
+}
+
+// Logout - performs all the logout to implement the `galasactl auth login` command
+func (authenticator *authenticatorImpl) LogoutOfEverywhere() error {
+	var err error
+	authenticator.cache.ClearAll()
 	return err
 }

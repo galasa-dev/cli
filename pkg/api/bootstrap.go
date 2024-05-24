@@ -96,20 +96,9 @@ func LoadBootstrap(
 
 	var err error
 
-	path := bootstrapPath
-
 	var bootstrap *BootstrapData = nil
 
-	// If the --bootstrap flag wasn't specified by the user... default to the value in the
-	// GALASA_BOOTSTRAP environment variable.
-	if path == "" {
-		path = env.GetEnv("GALASA_BOOTSTRAP")
-	}
-
-	// If it's still not clear, use the default bootstrap.properties in the ${HOME}/.galasa folder.
-	if path == "" {
-		path = getDefaultBootstrapPath(galasaHome)
-	}
+	path := GetBootstrapLocation(env, galasaHome, bootstrapPath)
 
 	// Default the API server to assume it's running locally, natively.
 	defaultApiServerURL := "http://127.0.0.1"
@@ -142,6 +131,23 @@ func LoadBootstrap(
 	}
 
 	return bootstrap, err
+}
+
+func GetBootstrapLocation(env spi.Environment, galasaHome spi.GalasaHome, explicitUserBootstrap string) string {
+
+	path := explicitUserBootstrap
+
+	// If the --bootstrap flag wasn't specified by the user... default to the value in the
+	// GALASA_BOOTSTRAP environment variable.
+	if path == "" {
+		path = env.GetEnv("GALASA_BOOTSTRAP")
+	}
+
+	// If it's still not clear, use the default bootstrap.properties in the ${HOME}/.galasa folder.
+	if path == "" {
+		path = getDefaultBootstrapPath(galasaHome)
+	}
+	return path
 }
 
 func cleanPath(fileSystem spi.FileSystem, path string) (string, error) {

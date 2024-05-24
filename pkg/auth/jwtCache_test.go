@@ -99,9 +99,7 @@ func TestCanAddAndGetBackJwtFromCache(t *testing.T) {
 	}
 }
 
-func TestCantGetBackANearlyExpiredToken(t *testing.T) {
-	// Given...
-
+func createNewJwtCache() JwtCache {
 	fileSystem := files.NewMockFileSystem()
 	env := utils.NewMockEnv()
 	galasaHome, _ := utils.NewGalasaHome(fileSystem, env, "")
@@ -109,6 +107,12 @@ func TestCantGetBackANearlyExpiredToken(t *testing.T) {
 	timeService := utils.NewOverridableMockTimeService(mockTime)
 
 	cache := NewJwtCache(fileSystem, galasaHome, timeService)
+	return cache
+}
+
+func TestCantGetBackANearlyExpiredToken(t *testing.T) {
+	// Given...
+	cache := createNewJwtCache()
 
 	// This is a dummy JWT that expires 1 second after the Unix epoch
 	expiredJwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjF9.2H0EJnt58ApysedXcvNUAy6FhgBIbDmPfq9d79qF4yQ"
@@ -121,5 +125,38 @@ func TestCantGetBackANearlyExpiredToken(t *testing.T) {
 	// Then...
 	assert.Nil(t, err, "Should not error when a bearer token has expired")
 	assert.Empty(t, tokenGotBack)
+}
+
+func TestUrlToFileNameReturnsSomething(t *testing.T) {
+	cache := fileBasedJwtCache{}
+	fileName := cache.urlToFileName("http://a.b.c")
+	assert.NotEmpty(t, fileName)
+	assert.Equal(t, "http%3A%2F%2Fa.b.c", fileName)
+}
+
+func TestClearingAllCacheDeletesBearerToken(t *testing.T) {
+	// Given...
+	cache := createNewJwtCache()
+
+	mockJwt, _ := createDummyJwt()
+
+	cache.Put("myApiServer", "myToken:myClientId", mockJwt)
+	var jwtGotBack string
+	var err error
+	jwtGotBack, err = cache.Get("myApiServer", "myToken:myClientId")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, jwtGotBack)
+	assert.Equal(t, jwtGotBack, mockJwt)
+
+	// So there is a jwt in the cache.
+
+	// When... we delete them all.
+	err = cache.ClearAll()
+	assert.Nil(t, err)
+
+	// Then .. we shouldn't be able to get the jwt back.
+	jwtGotBack, err = cache.Get("myApiServer", "myToken:myClientId")
+	assert.Nil(t, err)
+	assert.Empty(t, jwtGotBack)
 
 }
