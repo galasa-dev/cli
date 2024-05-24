@@ -16,14 +16,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewPropertiesNamespaceServletMock(t *testing.T, state string) *httptest.Server {
+func NewAuthTokensServletMock(t *testing.T, state string) *httptest.Server {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		mockPropertiesNamespaceServlet(t, w, r, state)
+		mockAuthTokensServlet(t, w, r, state)
 	}))
 	return server
 }
 
-func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, request *http.Request, state string) {
+func mockAuthTokensServlet(t *testing.T, writer http.ResponseWriter, request *http.Request, state string) {
 	writer.Header().Set("Content-Type", "application/json")
 	var statusCode int
 	var body string
@@ -72,7 +72,7 @@ func mockPropertiesNamespaceServlet(t *testing.T, writer http.ResponseWriter, re
 func TestMultipleNamespacesPathReturnsOk(t *testing.T) {
 	//Given...
 	serverState := "populated"
-	server := NewPropertiesNamespaceServletMock(t, serverState)
+	server := NewAuthTokensServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
@@ -96,7 +96,7 @@ Total:3
 func TestNoTokensPathReturnsOk(t *testing.T) {
 	//Given...
 	serverState := "empty"
-	server := NewPropertiesNamespaceServletMock(t, serverState)
+	server := NewAuthTokensServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
@@ -114,7 +114,7 @@ func TestNoTokensPathReturnsOk(t *testing.T) {
 func TestInvalidPathReturnsError(t *testing.T) {
 	//Given...
 	serverState := ""
-	server := NewPropertiesNamespaceServletMock(t, serverState)
+	server := NewAuthTokensServletMock(t, serverState)
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
@@ -126,4 +126,5 @@ func TestInvalidPathReturnsError(t *testing.T) {
 	//Then
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1145E")
+	assert.Contains(t, err.Error(), "Could not get list of tokens from API server")
 }

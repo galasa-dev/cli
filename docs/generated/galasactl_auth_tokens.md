@@ -4,7 +4,7 @@ Queries tokens in an ecosystem
 
 ### Synopsis
 
-Allows interaction to query tokens in Galasa Ecosystem
+Allows interaction with a Galasa Ecosystem's auth store to query tokens and retrieve their details
 
 ### Options
 

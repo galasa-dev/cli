@@ -105,7 +105,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1103E: Could not query CPS results. Reason: '{}'
 - GAL1104E: Unable to delete the bearer token file '{}'.
-- GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
+- GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
 - GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
 - GAL1108E: Invalid bearer token. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
 - GAL1109E: Unable to access the file. Reason: '{}'
@@ -138,7 +138,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1142E: The {} field value, '{}', provided does not match formatting requirements. The {} field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.
 - GAL1143E: Could not query run results. Server returned a non-200 code ({})
 - GAL1144E: Could not use url '{}' to retrieve the contents of the test catalog from stream '{}'. Http error from the Galasa server is '{}'
-- GAL1145E: Could not get list of tokens from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
+- GAL1145E: Could not get list of tokens from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

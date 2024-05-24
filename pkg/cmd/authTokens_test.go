@@ -44,16 +44,14 @@ func TestAuthTokensHelpFlagSetCorrectly(t *testing.T) {
 func TestAuthTokensNoFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := NewMockFactory()
-	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS, factory, t)
-
 	var args []string = []string{"auth", "tokens"}
 
 	// When...
-	err := commandCollection.Execute(args)
+	err := Execute(factory, args)
 
 	// Then...
 	assert.Nil(t, err)
 
 	// Check what the user saw is reasonable.
-	checkOutput("", "", factory, t)
+	checkOutput("Usage:\n  galasactl auth tokens [command]", "", factory, t)
 }

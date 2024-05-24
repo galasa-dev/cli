@@ -65,7 +65,7 @@ func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
 	authTokensCmd := &cobra.Command{
 		Use:     "tokens",
 		Short:   "Queries tokens in an ecosystem",
-		Long:    "Allows interaction to query tokens in Galasa Ecosystem",
+		Long:    "Allows interaction with a Galasa Ecosystem's auth store to query tokens and retrieve their details",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS},
 		Args:    cobra.NoArgs,
 	}

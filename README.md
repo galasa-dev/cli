@@ -141,7 +141,9 @@ For a complete list of supported parameters see [here](./docs/generated/galasact
 
 
 ## auth tokens get
-This command is used to retrieve authentication tokens from an ecosystem
+Tokens, auth tokens or personal access tokens, enable a user to be authenticated with a Galasa Ecosystem before interacting with it. This command allows a user to see details of all tokens authenticated with a Galasa Ecosystem.
+
+Before running this command, it is advised to run the `auth tokens logout` and then `auth tokens login` commands (as seen above).
 
 ### Examples
 

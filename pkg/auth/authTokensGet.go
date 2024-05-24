@@ -20,17 +20,14 @@ func GetTokens(
 	apiClient *galasaapi.APIClient,
 	console utils.Console,
 ) error {
-	var err error = nil
-	var context context.Context = nil
-	var authTokens *galasaapi.AuthTokens
 
-	authTokens, _, err = apiClient.AuthenticationAPIApi.GetTokens(context).Execute()
+	authTokens, err := getAuthTokensFromRestApi(apiClient)
+
 	if err != nil {
 		log.Println("GetTokens - Failed to retrieve list of tokens from API server")
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_TOKEN_LIST_FROM_API_SERVER, err.Error())
 	} else {
 		log.Printf("GetTokens -  %v tokens collected", len(authTokens.GetTokens()))
-
 		summaryFormatter := tokensformatter.NewTokenSummaryFormatter()
 
 		var outputText string
@@ -42,4 +39,13 @@ func GetTokens(
 	}
 
 	return err
+}
+
+func getAuthTokensFromRestApi(apiClient *galasaapi.APIClient) (*galasaapi.AuthTokens, error) {
+	var context context.Context = nil
+
+	tokens, resp, err := apiClient.AuthenticationAPIApi.GetTokens(context).Execute()
+	defer resp.Body.Close()
+
+	return tokens, err
 }
