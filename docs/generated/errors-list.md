@@ -138,8 +138,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1142E: The {} field value, '{}', provided does not match formatting requirements. The {} field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.
 - GAL1143E: Could not query run results. Server returned a non-200 code ({})
 - GAL1144E: Could not use url '{}' to retrieve the contents of the test catalog from stream '{}'. Http error from the Galasa server is '{}'
-- GAL1145E: Jwt token is invalid or can't be parsed: {}
-- GAL1146E: Failed to get the expiration time from the jwt claim: {}
+- GAL1145E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '{}'. This could indicate a corruption in the file. To resolve, manually delete the file and authenticate against the server again with the 'glasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '{}'
+- GAL1146E: The cache of access tokens contains a java web token (jwt) in file '{}', from which an expiration time could not be extracted. This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '{}'
 
 - GAL1147E: Failed to create folder for bearer tokens at '{}'
 

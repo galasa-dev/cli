@@ -234,8 +234,10 @@ var (
 		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.", 1142, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS         = NewMessageType("GAL1143E: Could not query run results. Server returned a non-200 code (%s)", 1143, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_TEST_CATALOG_CONTENTS_FAILED = NewMessageType("GAL1144E: Could not use url '%s' to retrieve the contents of the test catalog from stream '%s'. Http error from the Galasa server is '%v'", 1144, STACK_TRACE_NOT_WANTED)
-	GALASA_JWT_CANNOT_BE_PARSED                   = NewMessageType("GAL1145E: Jwt token is invalid or can't be parsed: %s", 1145, STACK_TRACE_NOT_WANTED)
-	GALASA_JWT_HAS_NO_EXPIRATION_DATETIME         = NewMessageType("GAL1146E: Failed to get the expiration time from the jwt claim: %s\n", 1146, STACK_TRACE_NOT_WANTED)
+	GALASA_JWT_CANNOT_BE_PARSED                   = NewMessageType("GAL1145E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '%s'. This could indicate a corruption in the file. To resolve,"+
+		" manually delete the file and authenticate against the server again with the 'glasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '%s'", 1145, STACK_TRACE_NOT_WANTED)
+	GALASA_JWT_HAS_NO_EXPIRATION_DATETIME = NewMessageType("GAL1146E: The cache of access tokens contains a java web token (jwt) in file '%s', from which an expiration time could not be extracted."+
+		" This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '%s'\n", 1146, STACK_TRACE_NOT_WANTED)
 
 	GALASA_ERROR_FAILED_TO_CREATE_BEARER_TOKEN_FOLDER = NewMessageType("GAL1147E: Failed to create folder for bearer tokens at '%s'\n", 1147, STACK_TRACE_NOT_WANTED)
 

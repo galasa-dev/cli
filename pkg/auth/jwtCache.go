@@ -59,14 +59,16 @@ func NewJwtCache(
 }
 
 func (cache *fileBasedJwtCache) Put(serverApiUrl string, galasaToken string, jwt string) (err error) {
-	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, cache.urlToFileName(serverApiUrl)+".json", cache.timeService)
+	filename := cache.urlToFileName(serverApiUrl) + ".json"
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, filename, cache.timeService)
 	err = file.WriteJwt(jwt)
 	return err
 }
 
 func (cache *fileBasedJwtCache) Clear(serverApiUrl string, galasaToken string) error {
 	var err error
-	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, cache.urlToFileName(serverApiUrl)+".json", cache.timeService)
+	filename := cache.urlToFileName(serverApiUrl) + ".json"
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, filename, cache.timeService)
 	file.DeleteJwt()
 	return err
 }
@@ -81,7 +83,8 @@ func (cache *fileBasedJwtCache) ClearAll() error {
 func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jwt string, err error) {
 	var possiblyInvalidJwt string
 
-	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, cache.urlToFileName(serverApiUrl)+".json", cache.timeService)
+	filename := cache.urlToFileName(serverApiUrl) + ".json"
+	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, filename, cache.timeService)
 
 	var isExists bool
 	isExists, err = file.Exists()
@@ -92,7 +95,7 @@ func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jw
 
 			if err == nil {
 				var isValid bool
-				isValid, err = cache.isBearerTokenValid(possiblyInvalidJwt, cache.timeService)
+				isValid, err = cache.isBearerTokenValid(possiblyInvalidJwt, cache.timeService, filename)
 				if err == nil {
 					if isValid {
 						jwt = possiblyInvalidJwt
@@ -111,7 +114,7 @@ func (cache *fileBasedJwtCache) urlToFileName(urlToConvert string) string {
 }
 
 // Checks whether a given bearer token is valid or not, returning true if it is valid and false otherwise
-func (cache *fileBasedJwtCache) isBearerTokenValid(bearerTokenString string, timeService spi.TimeService) (bool, error) {
+func (cache *fileBasedJwtCache) isBearerTokenValid(bearerTokenString string, timeService spi.TimeService, filename string) (bool, error) {
 	var err error
 	var bearerToken *jwt.Token
 	var isValid bool = false
@@ -119,12 +122,12 @@ func (cache *fileBasedJwtCache) isBearerTokenValid(bearerTokenString string, tim
 	// Decode the bearer token without verifying its signature
 	bearerToken, _, err = jwt.NewParser().ParseUnverified(bearerTokenString, jwt.MapClaims{})
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_JWT_CANNOT_BE_PARSED, err.Error())
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_JWT_CANNOT_BE_PARSED, filename, err.Error())
 	} else {
 		var tokenExpiry *jwt.NumericDate
 		tokenExpiry, err = bearerToken.Claims.GetExpirationTime()
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_JWT_HAS_NO_EXPIRATION_DATETIME, err.Error())
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_JWT_HAS_NO_EXPIRATION_DATETIME, filename, err.Error())
 		} else {
 			// Add a buffer to the current time to make sure the bearer token does not expire within
 			// this buffer (e.g. if the buffer is 10 mins, make sure the token doesn't expire within 10 mins)
