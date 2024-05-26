@@ -6,6 +6,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"testing"
@@ -134,93 +135,100 @@ func TestLoginCreatesBearerTokenJWTInCache(t *testing.T) {
 	assert.Equal(t, mockJwt, jwtGotBack)
 }
 
-// func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
-// 	// Given...
-// 	mockFileSystem := files.NewOverridableMockFileSystem()
-// 	mockEnvironment := utils.NewMockEnv()
-// 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+func TestLoginWithFailedFileWriteReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewOverridableMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-// 	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 
-// 	mockClientId := "dummyId"
-// 	mockRefreshToken := "abcdefg"
-// 	tokenPropertyValue := mockRefreshToken + TOKEN_SEPARATOR + mockClientId
-// 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+	mockClientId := "dummyId"
+	mockRefreshToken := "abcdefg"
+	tokenPropertyValue := mockRefreshToken + TOKEN_SEPARATOR + mockClientId
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
-// 	mockFileSystem.VirtualFunction_WriteTextFile = func(path string, contents string) error {
-// 		return errors.New("simulating a failed write operation")
-// 	}
+	mockFileSystem.VirtualFunction_WriteTextFile = func(path string, contents string) error {
+		return errors.New("simulating a failed write operation")
+	}
 
-// 	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
-// 	server := NewAuthServletMock(t, 200, mockResponse)
-// 	defer server.Close()
+	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
+	server := NewAuthServletMock(t, 200, mockResponse)
+	defer server.Close()
 
-// 	apiServerUrl := server.URL
+	apiServerUrl := server.URL
 
-// 	// When...
-// 	mockTimeService := utils.NewMockTimeService()
-// 	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
-// 	err := authenticator.Login()
+	mockTimeService := utils.NewMockTimeService()
+	cache := NewJwtCache(mockFileSystem, mockGalasaHome, mockTimeService)
 
-// 	// Then...
-// 	assert.NotNil(t, err, "Should return an error if writing the bearer token file fails")
-// 	assert.ErrorContains(t, err, "GAL1042E")
-// }
+	// When...
 
-// func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
-// 	// Given...
-// 	mockFileSystem := files.NewMockFileSystem()
-// 	mockEnvironment := utils.NewMockEnv()
-// 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, cache)
+	err := authenticator.Login()
 
-// 	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+	// Then...
+	assert.NotNil(t, err, "Should return an error if writing the bearer token file fails")
+	assert.ErrorContains(t, err, "GAL1042E")
+}
 
-// 	mockClientId := "dummyId"
-// 	mockRefreshToken := "abcdefg"
-// 	tokenPropertyValue := mockRefreshToken + TOKEN_SEPARATOR + mockClientId
-// 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
+func TestLoginWithFailedTokenRequestReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-// 	mockResponse := `{"error":"something went wrong!"}`
-// 	server := NewAuthServletMock(t, 500, mockResponse)
-// 	defer server.Close()
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 
-// 	apiServerUrl := server.URL
+	mockClientId := "dummyId"
+	mockRefreshToken := "abcdefg"
+	tokenPropertyValue := mockRefreshToken + TOKEN_SEPARATOR + mockClientId
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
-// 	// When...
-// 	mockTimeService := utils.NewMockTimeService()
-// 	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
-// 	err := authenticator.Login()
+	mockResponse := `{"error":"something went wrong!"}`
+	server := NewAuthServletMock(t, 500, mockResponse)
+	defer server.Close()
 
-// 	// Then...
-// 	assert.NotNil(t, err, "Should return an error if the API request returns an error")
-// 	assert.ErrorContains(t, err, "GAL1106E")
-// }
+	apiServerUrl := server.URL
 
-// func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
-// 	// Given...
-// 	mockFileSystem := files.NewMockFileSystem()
-// 	mockEnvironment := utils.NewMockEnv()
-// 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockTimeService := utils.NewMockTimeService()
+	cache := NewJwtCache(mockFileSystem, mockGalasaHome, mockTimeService)
 
-// 	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
+	// When...
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, cache)
+	err := authenticator.Login()
 
-// 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, "unknown.value=blah")
+	// Then...
+	assert.NotNil(t, err, "Should return an error if the API request returns an error")
+	assert.ErrorContains(t, err, "GAL1106E")
+}
 
-// 	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
-// 	server := NewAuthServletMock(t, 200, mockResponse)
-// 	defer server.Close()
+func TestLoginWithMissingAuthPropertyReturnsError(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-// 	apiServerUrl := server.URL
+	galasactlPropertiesFilePath := mockGalasaHome.GetNativeFolderPath() + "/galasactl.properties"
 
-// 	// When...
-// 	mockTimeService := utils.NewMockTimeService()
-// 	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment)
-// 	err := authenticator.Login()
+	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, "unknown.value=blah")
 
-// 	// Then...
-// 	assert.NotNil(t, err, "Should return an error if the GALASA_ACCESS_TOKEN property is missing")
-// 	assert.ErrorContains(t, err, "GAL1122E")
-// }
+	mockResponse := `{"jwt":"blah", "refresh_token":"abc"}`
+	server := NewAuthServletMock(t, 200, mockResponse)
+	defer server.Close()
+
+	apiServerUrl := server.URL
+
+	mockTimeService := utils.NewMockTimeService()
+	cache := NewJwtCache(mockFileSystem, mockGalasaHome, mockTimeService)
+
+	// When...
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, cache)
+	err := authenticator.Login()
+
+	// Then...
+	assert.NotNil(t, err, "Should return an error if the GALASA_ACCESS_TOKEN property is missing")
+	assert.ErrorContains(t, err, "GAL1122E")
+}
 
 func TestGetAuthenticatedAPIClientWithBearerTokenFileReturnsClient(t *testing.T) {
 	// Given...
