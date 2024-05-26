@@ -105,16 +105,16 @@ The `galasactl` tool can generate the following errors:
 - GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1103E: Could not query CPS results. Reason: '{}'
 - GAL1104E: Unable to delete the bearer token file '{}'.
-- GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
-- GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
-- GAL1108E: Invalid bearer token. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
+- GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
+- GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
+- GAL1108E: Invalid bearer token. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
 - GAL1109E: Unable to access the file. Reason: '{}'
 - GAL1110E: Could not retrieve the content of the file provided. Reason: '{}'
 - GAL1111E: Error parsing the file '{}'. The file is not in the expected yaml format. Reason: '{}'. Invalid yaml:'{}'
 - GAL1112E: Error converting the parsed yaml content into a json payload for the http request. Reason: '{}'
 - GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program or the user input. Errors returned: '{}'
-- GAL1114E: The resources operation failed due to a problem on the server. Please collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
-- GAL1115E: An unexpected response was received from the Galasa Ecosystem. Please collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
+- GAL1114E: The resources operation failed due to a problem on the server. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
+- GAL1115E: An unexpected response was received from the Galasa Ecosystem. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
 - GAL1116E: Error reading the HTTP Response body. Reason: '{}'
 - GAL1117E: The delete operation failed. Unable to process the error information returned from the server.
 - GAL1118E: The resource operation failed. Unable to process the error information returned from the server. Reason: '{}'
@@ -124,7 +124,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1122E: Authentication property {} is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '{}' or set as an environment variable.
 - GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: {}
 - GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: {}
-- GAL1125E: Authentication property {} is invalid. Please ensure that it the value is made up of two parts that are separated by a '{}'.
+- GAL1125E: Authentication property {} is invalid. Ensure that it the value is made up of two parts that are separated by a '{}'.
 - GAL1132E: No active run found matching run name '{}'.
 - GAL1133E: Error resetting run '{}'. Reason: '{}'
 - GAL1134E: The runs reset operation failed. Unable to process the error information returned from the server.
@@ -138,10 +138,11 @@ The `galasactl` tool can generate the following errors:
 - GAL1142E: The {} field value, '{}', provided does not match formatting requirements. The {} field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.
 - GAL1143E: Could not query run results. Server returned a non-200 code ({})
 - GAL1144E: Could not use url '{}' to retrieve the contents of the test catalog from stream '{}'. Http error from the Galasa server is '{}'
-- GAL1145E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '{}'. This could indicate a corruption in the file. To resolve, manually delete the file and authenticate against the server again with the 'glasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '{}'
-- GAL1146E: The cache of access tokens contains a java web token (jwt) in file '{}', from which an expiration time could not be extracted. This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '{}'
+- GAL1145E: Failed to create folder for bearer tokens at '{}'
 
-- GAL1147E: Failed to create folder for bearer tokens at '{}'
+- GAL1146E: Could not get list of tokens from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
+- GAL1147E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '{}'. This could indicate a corruption in the file. To resolve, manually delete the file and authenticate against the server again with the 'glasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '{}'
+- GAL1148E: The cache of access tokens contains a java web token (jwt) in file '{}', from which an expiration time could not be extracted. This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '{}'
 
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}

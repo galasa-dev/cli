@@ -131,7 +131,7 @@ func TestUrlToFileNameReturnsSomething(t *testing.T) {
 	cache := fileBasedJwtCache{}
 	fileName := cache.urlToFileName("http://a.b.c")
 	assert.NotEmpty(t, fileName)
-	assert.Equal(t, "http%3A%2F%2Fa.b.c", fileName)
+	assert.Equal(t, "a.b.c", fileName)
 }
 
 func TestClearingAllCacheDeletesBearerToken(t *testing.T) {

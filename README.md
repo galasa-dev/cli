@@ -122,6 +122,9 @@ Logging in to an ecosystem:
 galasactl auth login
 ```
 
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_login.md).
+
+
 ## auth logout
 
 To log out of a Galasa ecosystem using `galasactl`, you can use the `auth logout` command. If you run a `galasactl` command that interacts with an ecosystem while logged out, `galasactl` will attempt to automatically log in using the properties in your `galasactl.properties` file within your `GALASA_HOME` directory.
@@ -133,6 +136,29 @@ Logging out of an ecosystem:
 ```
 galasactl auth logout
 ```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_logout.md).
+
+
+## auth tokens get
+Tokens, auth tokens or personal access tokens, enable a user to be authenticated with a Galasa Ecosystem before interacting with it. This command allows a user to see details of all tokens authenticated with a Galasa Ecosystem.
+
+Before running this command, it is advised to run the `auth tokens logout` and then `auth tokens login` commands (as seen above).
+
+### Examples
+
+```
+> galasactl auth tokens get
+tokenid                   created(YYYY-MM-DD) user     description
+098234980123-1283182389   2023-12-03          mcobbett So I can access ecosystem1 from my laptop.
+8218971d287s1-dhj32er2323 2024-03-03          mcobbett Automated build of example repo can change CPS properties
+87a6sd87ahq2-2y8hqwdjj273 2023-08-04          savvas   CLI access from vscode
+
+Total:3
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_get.md).
+
 
 ## runs prepare
 

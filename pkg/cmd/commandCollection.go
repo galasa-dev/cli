@@ -32,6 +32,8 @@ const (
 	COMMAND_NAME_AUTH                     = "auth"
 	COMMAND_NAME_AUTH_LOGIN               = "auth login"
 	COMMAND_NAME_AUTH_LOGOUT              = "auth logout"
+	COMMAND_NAME_AUTH_TOKENS              = "auth tokens"
+	COMMAND_NAME_AUTH_TOKENS_GET          = "auth tokens get"
 	COMMAND_NAME_PROJECT                  = "project"
 	COMMAND_NAME_PROJECT_CREATE           = "project create"
 	COMMAND_NAME_LOCAL                    = "local"
@@ -154,6 +156,9 @@ func (commands *commandCollectionImpl) addAuthCommands(factory spi.Factory, root
 		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 		if err == nil {
 			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
+			if err == nil {
+				err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
+			}
 		}
 	}
 
@@ -161,6 +166,24 @@ func (commands *commandCollectionImpl) addAuthCommands(factory spi.Factory, root
 		commands.commandMap[authCommand.Name()] = authCommand
 		commands.commandMap[authLoginCommand.Name()] = authLoginCommand
 		commands.commandMap[authLogoutCommand.Name()] = authLogoutCommand
+	}
+
+	return err
+}
+
+func (commands *commandCollectionImpl) addAuthTokensCommands(factory spi.Factory, authCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+	var err error
+	var authTokensCommand spi.GalasaCommand
+	var authTokensGetCommand spi.GalasaCommand
+
+	authTokensCommand, err = NewAuthTokensCommand(authCommand, rootCommand)
+	if err == nil {
+		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
+	}
+
+	if err == nil {
+		commands.commandMap[authTokensCommand.Name()] = authTokensCommand
+		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
 	}
 
 	return err

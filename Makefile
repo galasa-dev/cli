@@ -46,6 +46,7 @@ galasactl-source : \
 	./pkg/propertiesformatter/*.go \
 	./pkg/resources/*.go \
 	./pkg/spi/*.go \
+	./pkg/tokensformatter/*.go \
 	embedded_info
 
 # The build process
@@ -88,8 +89,6 @@ bin/galasactl-linux-arm64 : galasactl-source
 
 bin/galasactl-linux-s390x : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=s390x go build -o bin/galasactl-linux-s390x ./cmd/galasactl
-
-
 
 bin/gendocs-galasactl-darwin-arm64 : galasactl-source
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/gendocs-galasactl-darwin-arm64 ./cmd/gendocs-galasactl

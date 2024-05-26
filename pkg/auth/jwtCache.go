@@ -8,6 +8,7 @@ package auth
 import (
 	"log"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -104,12 +105,19 @@ func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jw
 			}
 		}
 	}
+
+	log.Printf("JwtCache: Get. Returning jwt of length %v. err: %v\n", len(jwt), err)
+
 	return jwt, err
 }
 
 // Converts an arbitrary URL to a name we can use as a filename.
 func (cache *fileBasedJwtCache) urlToFileName(urlToConvert string) string {
-	filename := url.QueryEscape(urlToConvert)
+
+	// Strip off the https:// or http:// part
+	s := strings.Replace(urlToConvert, "https://", "", 1)
+	s1 := strings.Replace(s, "http://", "", 1)
+	filename := url.QueryEscape(s1)
 	return filename
 }
 

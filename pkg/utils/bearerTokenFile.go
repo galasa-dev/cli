@@ -56,6 +56,7 @@ func DeleteAllBearerTokenFiles(fileSystem spi.FileSystem, galasaHome spi.GalasaH
 
 	if err == nil {
 		for _, bearerTokenFilePath := range bearerTokenFilePaths {
+			log.Printf("DeleteAllBearerTokenFiles : deleting file '%s'", bearerTokenFilePath)
 			fileSystem.DeleteFile(bearerTokenFilePath)
 		}
 	}
@@ -142,6 +143,8 @@ func (file *BearerTokenFileImpl) DeleteJwt() error {
 	var err error
 	bearerTokenFolderPath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-tokens")
 	bearerTokenFilePath := filepath.Join(bearerTokenFolderPath, file.baseFileName)
+	log.Printf("DeleteJwt file '%s'", bearerTokenFilePath)
+
 	file.fileSystem.DeleteFile(bearerTokenFilePath)
 	return err
 }
