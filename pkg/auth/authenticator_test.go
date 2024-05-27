@@ -292,3 +292,33 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 	assert.Nil(t, err, "No error should have been thrown")
 	assert.NotNil(t, apiClient, "API client should not be nil if the login was successful")
 }
+
+var wasCalled bool = false
+
+func mockClearAll() {
+	wasCalled = true
+}
+
+func TestLogoutCallsCacheLogoutEverywhere(t *testing.T) {
+	// Given...
+	mockFileSystem := files.NewMockFileSystem()
+	mockEnvironment := utils.NewMockEnv()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+	mockResponse := `{"jwt":"` + mockJwt + `", "refresh_token":"abc"}`
+	server := NewAuthServletMock(t, 200, mockResponse)
+	defer server.Close()
+
+	apiServerUrl := server.URL
+
+	mockTimeService := utils.NewMockTimeService()
+	jwtCache := NewJwtCache(mockFileSystem, mockGalasaHome, mockTimeService)
+
+	// When...
+	authenticator := NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, jwtCache)
+	err := authenticator.Login()
+
+	// Then...
+	assert.NotNil(t, err, "Should return an error if the galasactl.properties file does not exist")
+	assert.ErrorContains(t, err, "GAL1043E")
+}

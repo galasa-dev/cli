@@ -6,9 +6,13 @@
 package auth
 
 import (
+	"context"
 	"log"
+	"net/http"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/embedded"
+	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/spi"
 )
@@ -100,7 +104,7 @@ func (authenticator *authenticatorImpl) Login() error {
 	authProperties, galasaTokenValue, err = getAuthProperties(authenticator.fileSystem, authenticator.galasaHome, authenticator.env)
 	if err == nil {
 		var jwt string
-		jwt, err = GetJwtFromRestApi(authenticator.apiServerUrl, authProperties)
+		jwt, err = authenticator.getJwtFromRestApi(authenticator.apiServerUrl, authProperties)
 		if err == nil {
 			err = authenticator.cache.Put(authenticator.apiServerUrl, galasaTokenValue, jwt)
 		}
@@ -119,4 +123,35 @@ func (authenticator *authenticatorImpl) LogoutOfEverywhere() error {
 
 	authenticator.cache.ClearAll()
 	return err
+}
+
+// Gets a JSON Web Token (JWT) from the API server's /auth endpoint
+func (authenticator *authenticatorImpl) getJwtFromRestApi(apiServerUrl string, authProperties galasaapi.AuthProperties) (string, error) {
+	var err error
+	var context context.Context = nil
+	var jwt string
+	var restApiVersion string
+
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+
+	if err == nil {
+		apiClient := api.InitialiseAPI(apiServerUrl)
+
+		var tokenResponse *galasaapi.TokenResponse
+		var httpResponse *http.Response
+		tokenResponse, httpResponse, err = apiClient.AuthenticationAPIApi.PostAuthenticate(context).
+			AuthProperties(authProperties).
+			ClientApiVersion(restApiVersion).
+			Execute()
+		if err != nil {
+			log.Println("Failed to retrieve bearer token from API server")
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
+		} else {
+			defer httpResponse.Body.Close()
+			log.Println("Bearer token received from API server OK")
+			jwt = tokenResponse.GetJwt()
+		}
+	}
+
+	return jwt, err
 }
