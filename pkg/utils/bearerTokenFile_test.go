@@ -144,10 +144,10 @@ func TestGetAllFilePathsReturnsTwoFiles(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, 2, len(allFiles))
-	sortedResults := sort.StringSlice(allFiles)
+	sort.Sort(sort.StringSlice(allFiles))
 
-	assert.True(t, strings.HasSuffix(sortedResults[0], "baseFile1.json"), "Full path returned: "+sortedResults[0]+" suffix expected: baseFile1.json")
-	assert.True(t, strings.HasSuffix(sortedResults[1], "baseFile2.json"), "Full path returned: "+sortedResults[1]+" suffix expected: baseFile2.json")
+	assert.True(t, strings.HasSuffix(allFiles[0], "baseFile1.json"), "Full path returned: "+allFiles[0]+" suffix expected: baseFile1.json")
+	assert.True(t, strings.HasSuffix(allFiles[1], "baseFile2.json"), "Full path returned: "+allFiles[1]+" suffix expected: baseFile2.json")
 }
 
 func TestDeleteAllBearerTokensWorks(t *testing.T) {
