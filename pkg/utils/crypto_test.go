@@ -31,3 +31,19 @@ func TestCryptoWithNoSecretFails(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "GAL1149")
 }
+
+func TestCryptoFailsToEncryptHugeAmountsOfDataGracefully(t *testing.T) {
+	secret := "a pretty small encryption key which should be big enough."
+	dataSize := MAX_TEXT_TO_ENCRYPT + 10
+	textBytes := make([]byte, dataSize)
+	for i := 0; i < dataSize; i++ {
+		textBytes[i] = 'a'
+	}
+	text := string(textBytes)
+
+	_, err := Encrypt(secret, text)
+	assert.NotNil(t, err)
+	if err != nil {
+		assert.Contains(t, err.Error(), "GAL1152")
+	}
+}

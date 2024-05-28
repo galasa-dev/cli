@@ -16,36 +16,47 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
+const (
+	// The maximum value we can cope with for the encryption.
+	// We hold all the data in memory so need to be defensive we don't try to encrypt too much.
+	MAX_TEXT_TO_ENCRYPT = 2048
+)
+
 func Encrypt(secret string, textToEncrypt string) (string, error) {
 	var encryptedText string
 	var err error
 	var block cipher.Block
 
-	secret, err = makeSecretCorrectLength(secret)
-	if err == nil {
+	if len(textToEncrypt) > MAX_TEXT_TO_ENCRYPT {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ENCRYPTION_DATA_TOO_LONG)
+	} else {
 
-		block, err = aes.NewCipher([]byte(secret))
+		secret, err = makeSecretCorrectLength(secret)
 		if err == nil {
 
-			textToEncryptBytes := []byte(textToEncrypt)
-
-			// To make things harder to crack, we add a random piece of data at
-			// the start, before the data we actually want to encrypt.
-			// It gets ignored once it gets decrypted anyway.
-			data := make([]byte, aes.BlockSize+len(textToEncryptBytes))
-			randomPart := data[:aes.BlockSize]
-			// So fill-up the random part now.
-			_, err = io.ReadFull(rand.Reader, randomPart)
+			block, err = aes.NewCipher([]byte(secret))
 			if err == nil {
-				stream := cipher.NewCFBEncrypter(block, randomPart)
 
-				// Copy in the plain text into the cipher block.
-				stream.XORKeyStream(data[aes.BlockSize:], textToEncryptBytes)
+				textToEncryptBytes := []byte(textToEncrypt)
 
-				// Data now contains the random part + the plain text.
+				// To make things harder to crack, we add a random piece of data at
+				// the start, before the data we actually want to encrypt.
+				// It gets ignored once it gets decrypted anyway.
+				data := make([]byte, aes.BlockSize+len(textToEncryptBytes))
+				randomPart := data[:aes.BlockSize]
+				// So fill-up the random part now.
+				_, err = io.ReadFull(rand.Reader, randomPart)
+				if err == nil {
+					stream := cipher.NewCFBEncrypter(block, randomPart)
 
-				// Now apply the encryption.
-				encryptedText = base64.RawStdEncoding.EncodeToString(data)
+					// Copy in the plain text into the cipher block.
+					stream.XORKeyStream(data[aes.BlockSize:], textToEncryptBytes)
+
+					// Data now contains the random part + the plain text.
+
+					// Now apply the encryption.
+					encryptedText = base64.RawStdEncoding.EncodeToString(data)
+				}
 			}
 		}
 	}

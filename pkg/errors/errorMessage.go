@@ -244,6 +244,7 @@ var (
 	GALASA_JWT_ENCRYPTION_INVALID_GALASA_TOKEN   = NewMessageType("GAL1149E: Programming logic error: Cannot encrypt because the length of the key is too small.", 1149, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_DECRYPTION_FAILED_BASE64          = NewMessageType("GAL1150E: Programming logic error: Decryption of cached bearer token failed. Reason: %s", 1150, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_DECRYPTION_FAILED_BLOCK_TOO_SMALL = NewMessageType("GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: %d, AES block size: %d", 1151, STACK_TRACE_NOT_WANTED)
+	GALASA_ENCRYPTION_DATA_TOO_LONG              = NewMessageType("GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.", 1152, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
