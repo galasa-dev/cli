@@ -7,7 +7,7 @@ package cmd
 
 import (
 	"github.com/galasa-dev/cli/pkg/embedded"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +24,7 @@ type LocalInitCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewLocalInitCommand(factory Factory, localCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewLocalInitCommand(factory spi.Factory, localCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(LocalInitCommand)
 	err := cmd.init(factory, localCommand, rootCmd)
@@ -50,7 +50,7 @@ func (cmd *LocalInitCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *LocalInitCommand) init(factory spi.Factory, localCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 
 	cmd.values = &LocalInitCmdValues{}
@@ -60,10 +60,10 @@ func (cmd *LocalInitCommand) init(factory Factory, localCommand GalasaCommand, r
 }
 
 func (cmd *LocalInitCommand) createCobraCommand(
-	factory Factory,
-	localCommand GalasaCommand, 
-	rootCmd GalasaCommand,
-	) *cobra.Command {
+	factory spi.Factory,
+	localCommand spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
+) *cobra.Command {
 
 	localInitCobraCmd := &cobra.Command{
 		Use:   "init",
@@ -82,9 +82,9 @@ func (cmd *LocalInitCommand) createCobraCommand(
 	return localInitCobraCmd
 }
 
-func (cmd *LocalInitCommand) executeEnvInit(factory Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *LocalInitCommand) executeEnvInit(factory spi.Factory, localInitCmdValues *LocalInitCmdValues, rootCmdValues *RootCmdValues) error {
 
-	var err error = nil
+	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
@@ -102,8 +102,8 @@ func (cmd *LocalInitCommand) executeEnvInit(factory Factory, localInitCmdValues 
 }
 
 func localEnvInit(
-	fileSystem files.FileSystem,
-	env utils.Environment,
+	fileSystem spi.FileSystem,
+	env spi.Environment,
 	cmdFlagGalasaHome string,
 	isDevelopment bool,
 ) error {

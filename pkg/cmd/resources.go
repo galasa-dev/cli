@@ -7,6 +7,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +25,7 @@ type ResourcesCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewResourcesCmd(rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewResourcesCmd(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(ResourcesCommand)
 	err := cmd.init(rootCommand)
 	return cmd, err
@@ -50,9 +51,9 @@ func (cmd *ResourcesCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesCommand) init(rootCmd GalasaCommand) error {
+func (cmd *ResourcesCommand) init(rootCmd spi.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 
 	cmd.values = &ResourcesCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
@@ -60,7 +61,7 @@ func (cmd *ResourcesCommand) init(rootCmd GalasaCommand) error {
 	return err
 }
 
-func (cmd *ResourcesCommand) createCobraCommand(rootCommand GalasaCommand) (*cobra.Command, error) {
+func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
 
 	var err error
 
@@ -72,8 +73,8 @@ func (cmd *ResourcesCommand) createCobraCommand(rootCommand GalasaCommand) (*cob
 
 	addBootstrapFlag(resourcesCobraCmd, &cmd.values.bootstrap)
 	resourcesCobraCmd.PersistentFlags().StringVarP(&cmd.values.filePath, "file", "f", "",
-		"The file containing yaml definitions of resources to be applied manipulated by this command. " +
-		"This can be a fully-qualified path or path relative to the current directory."+
+		"The file containing yaml definitions of resources to be applied manipulated by this command. "+
+			"This can be a fully-qualified path or path relative to the current directory."+
 			"Example: my_resources.yaml")
 	resourcesCobraCmd.MarkPersistentFlagRequired("file")
 

@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPropertiesNamespaceGetCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesNamespaceGetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE_GET)
@@ -27,7 +28,7 @@ func TestPropertiesNamespaceGetCommandInCommandCollection(t *testing.T) {
 
 func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "namespaces", "get", "--help"}
 
@@ -44,7 +45,7 @@ func TestPropertiesNamespaceGetHelpFlagSetCorrectly(t *testing.T) {
 
 func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
 	var args []string = []string{"properties", "namespaces", "get"}
@@ -61,7 +62,7 @@ func TestPropertiesNamespacesGetReturnsWithoutError(t *testing.T) {
 
 func TestPropertiesNamespacesGetFormatReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_NAMESPACE_GET, factory, t)
 
 	var args []string = []string{"properties", "namespaces", "get", "--format", "yaml"}

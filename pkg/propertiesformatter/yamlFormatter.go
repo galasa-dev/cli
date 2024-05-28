@@ -32,7 +32,7 @@ func (*PropertyYamlFormatter) GetName() string {
 
 func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.GalasaProperty) (string, error) {
 	var result string = ""
-	var err error = nil
+	var err error
 	buff := strings.Builder{}
 	//totalProperties := len(cpsProperties)
 

@@ -5,9 +5,7 @@
  */
 package images
 
-import (
-	"github.com/galasa-dev/cli/pkg/files"
-)
+import "github.com/galasa-dev/cli/pkg/spi"
 
 type ImageFileWriter interface {
 	WriteImageFile(simpleFileName string, imageBytes []byte) error
@@ -16,13 +14,13 @@ type ImageFileWriter interface {
 }
 
 type ImageFileWriterImpl struct {
-	fs                          files.FileSystem
+	fs                          spi.FileSystem
 	imageFolderPath             string
 	imageFilesWrittenCount      int
 	forceOverwriteExistingFiles bool
 }
 
-func NewImageFileWriter(fs files.FileSystem, imageFolderPath string, forceOverwriteExistingFiles bool) ImageFileWriter {
+func NewImageFileWriter(fs spi.FileSystem, imageFolderPath string, forceOverwriteExistingFiles bool) ImageFileWriter {
 	writer := new(ImageFileWriterImpl)
 	writer.fs = fs
 	writer.imageFolderPath = imageFolderPath

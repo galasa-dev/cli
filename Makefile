@@ -21,7 +21,7 @@ tests: galasactl-source build/coverage.txt build/coverage.html
 
 build/coverage.out : galasactl-source
 	mkdir -p build
-	go test -v -cover -coverprofile=build/coverage.out -coverpkg pkg/api,./pkg/auth,./pkg/cmd,./pkg/runsformatter,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/properties,./pkg/propertiesformatter,./pkg/tokensformatter,./pkg/resources ./pkg/...
+	go test -v -cover -coverprofile=build/coverage.out -coverpkg pkg/api,./pkg/auth,./pkg/cmd,./pkg/runsformatter,./pkg/errors,./pkg/launcher,./pkg/utils,./pkg/runs,./pkg/properties,./pkg/propertiesformatter,./pkg/resources ./pkg/...
 
 build/coverage.html : build/coverage.out
 	go tool cover -html=build/coverage.out -o build/coverage.html
@@ -45,6 +45,7 @@ galasactl-source : \
 	./pkg/properties/*.go \
 	./pkg/propertiesformatter/*.go \
 	./pkg/resources/*.go \
+	./pkg/spi/*.go \
 	./pkg/tokensformatter/*.go \
 	embedded_info
 
@@ -88,8 +89,6 @@ bin/galasactl-linux-arm64 : galasactl-source
 
 bin/galasactl-linux-s390x : galasactl-source
 	CGO_ENABLED=0 GOOS=linux GOARCH=s390x go build -o bin/galasactl-linux-s390x ./cmd/galasactl
-
-
 
 bin/gendocs-galasactl-darwin-arm64 : galasactl-source
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o bin/gendocs-galasactl-darwin-arm64 ./cmd/gendocs-galasactl

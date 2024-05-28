@@ -13,12 +13,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type JavaProperties map[string]string
 
-func ReadPropertiesFile(fs files.FileSystem, filePath string) (JavaProperties, error) {
+func ReadPropertiesFile(fs spi.FileSystem, filePath string) (JavaProperties, error) {
 	var properties JavaProperties
 	contents, err := fs.ReadTextFile(filePath)
 	if err == nil {
@@ -53,14 +53,14 @@ func ReadProperties(propertyString string) JavaProperties {
 	return properties
 }
 
-func WritePropertiesFile(fs files.FileSystem, path string, properties map[string]interface{}) error {
-	var err error = nil
+func WritePropertiesFile(fs spi.FileSystem, path string, properties map[string]interface{}) error {
+	var err error
 
 	buff := new(bytes.Buffer)
 
 	// Extract all the property keys
 	keys := make([]string, 0)
-	for k, _ := range properties {
+	for k := range properties {
 		keys = append(keys, k)
 	}
 

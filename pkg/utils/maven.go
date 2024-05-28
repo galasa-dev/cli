@@ -24,7 +24,7 @@ type MavenCoordinates struct {
 // input into pieces.
 func ValidateObrs(obrInputs []string) ([]MavenCoordinates, error) {
 
-	var err error = nil
+	var err error
 	obrs := make([]MavenCoordinates, 0)
 
 	for _, obr := range obrInputs {
@@ -44,7 +44,7 @@ func ValidateObrs(obrInputs []string) ([]MavenCoordinates, error) {
 // Validate that the --obr parameter or portfolio field passed by the user conform to this convention by splitting the
 // input into pieces.
 func ValidateObr(obr string) (MavenCoordinates, error) {
-	var err error = nil
+	var err error
 	var coordinates MavenCoordinates
 
 	parts := strings.Split(obr, "/")

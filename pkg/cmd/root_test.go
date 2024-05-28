@@ -10,12 +10,13 @@ import (
 	"testing"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
-func checkOutput(expectedStdOutput string, expectedStdErr string, factory Factory, t *testing.T) {
+func checkOutput(expectedStdOutput string, expectedStdErr string, factory spi.Factory, t *testing.T) {
 	stdOutConsole := factory.GetStdOutConsole().(*utils.MockConsole)
 	outText := stdOutConsole.ReadText()
 	if expectedStdOutput != "" {
@@ -32,16 +33,16 @@ func checkOutput(expectedStdOutput string, expectedStdErr string, factory Factor
 		assert.Empty(t, errText)
 	}
 
-	finalWordHandler := factory.GetFinalWordHandler().(*MockFinalWordHandler)
+	finalWordHandler := factory.GetFinalWordHandler().(*utils.MockFinalWordHandler)
 	o := finalWordHandler.ReportedObject
 	assert.Nil(t, o)
 }
 
-func setupTestCommandCollection(command string, factory Factory, t *testing.T) (CommandCollection, GalasaCommand) {
+func setupTestCommandCollection(command string, factory spi.Factory, t *testing.T) (CommandCollection, spi.GalasaCommand) {
 	commandCollection, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 
-	var cmd GalasaCommand
+	var cmd spi.GalasaCommand
 	cmd, err = commandCollection.GetCommand(command)
 	assert.Nil(t, err)
 	cmd.CobraCommand().RunE = func(cobraCmd *cobra.Command, args []string) error { return nil }
@@ -49,7 +50,7 @@ func setupTestCommandCollection(command string, factory Factory, t *testing.T) (
 }
 
 func TestCommandsCollectionHasARootCommand(t *testing.T) {
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, err := NewCommandCollection(factory)
 	assert.Nil(t, err)
 	rootCommand, err := commands.GetCommand(COMMAND_NAME_ROOT)
@@ -59,12 +60,12 @@ func TestCommandsCollectionHasARootCommand(t *testing.T) {
 
 func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	// When...
 	commands, err := NewCommandCollection(factory)
 	// Then...
 	assert.Nil(t, err)
-	var rootCommand GalasaCommand
+	var rootCommand spi.GalasaCommand
 	rootCommand, err = commands.GetCommand(COMMAND_NAME_ROOT)
 	assert.Nil(t, err)
 
@@ -73,7 +74,7 @@ func TestRootCommandInCommandCollectionHasAName(t *testing.T) {
 
 func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	// When...
 	commands, err := NewCommandCollection(factory)
@@ -87,7 +88,7 @@ func TestRootCommandInCommandCollectionHasACobraCommand(t *testing.T) {
 
 func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	// When...
 	commands, err := NewCommandCollection(factory)
 	// Then...
@@ -101,7 +102,7 @@ func TestRootCommandInCommandCollectionHasAValuesStructure(t *testing.T) {
 
 func TestVersionFromCommandLine(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = make([]string, 0)
 	args = append(args, "--version")
@@ -118,7 +119,7 @@ func TestVersionFromCommandLine(t *testing.T) {
 
 func TestNoParamsFromCommandLine(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = make([]string, 0)
 	args = append(args, "")
@@ -158,7 +159,7 @@ func TestCanGetTestsFailedExitCodeAndErrorTextFromATestFailedGalasaErrorPointer(
 
 func TestRootHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"--help"}
 
@@ -174,7 +175,7 @@ func TestRootHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRootNoCommandsReturnsUsageReport(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{}
 

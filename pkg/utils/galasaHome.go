@@ -9,22 +9,17 @@ import (
 	"log"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
-
-type GalasaHome interface {
-	GetNativeFolderPath() string
-	GetUrlFolderPath() string
-}
 
 type galasaHomeImpl struct {
 	path string
-	fs   files.FileSystem
-	env  Environment
+	fs   spi.FileSystem
+	env  spi.Environment
 }
 
-func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome string) (GalasaHome, error) {
-	var err error = nil
+func NewGalasaHome(fs spi.FileSystem, env spi.Environment, cmdFlagGalasaHome string) (spi.GalasaHome, error) {
+	var err error
 	var homeData *galasaHomeImpl = nil
 
 	galasaHomePath := cmdFlagGalasaHome
@@ -36,8 +31,6 @@ func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome strin
 			if err == nil {
 				galasaHomePath = userHome + fs.GetFilePathSeparator() + ".galasa"
 			}
-		} else {
-			err = validateUserHomeDir(galasaHomePath, fs)
 		}
 	}
 
@@ -52,17 +45,6 @@ func NewGalasaHome(fs files.FileSystem, env Environment, cmdFlagGalasaHome strin
 	}
 
 	return homeData, err
-}
-
-func validateUserHomeDir(path string, fs files.FileSystem) error {
-	var err error = nil
-
-	// path is a string, so can never be nil
-	if strings.Trim(path, "\n \t") == "" {
-
-	}
-
-	return err
 }
 
 func (homeData *galasaHomeImpl) GetNativeFolderPath() string {

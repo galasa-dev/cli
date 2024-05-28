@@ -11,14 +11,14 @@ import (
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/tokensformatter"
-	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // GetTokens - performs all the logic to implement the `galasactl auth tokens get` command
 func GetTokens(
 	apiClient *galasaapi.APIClient,
-	console utils.Console,
+	console spi.Console,
 ) error {
 
 	authTokens, err := getAuthTokensFromRestApi(apiClient)

@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunsResetCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	runsResetCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_RESET)
@@ -27,7 +28,7 @@ func TestRunsResetCommandInCommandCollection(t *testing.T) {
 
 func TestRunsResetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "reset", "--help"}
 
@@ -43,7 +44,7 @@ func TestRunsResetHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsResetNoFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "reset"}
 
@@ -59,7 +60,7 @@ func TestRunsResetNoFlagsReturnsError(t *testing.T) {
 
 func TestRunsResetNameFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_RESET, factory, t)
 
 	var args []string = []string{"runs", "reset", "--name", "name"}
@@ -77,7 +78,7 @@ func TestRunsResetNameFlagReturnsOk(t *testing.T) {
 
 func TestRunsResetNameNoParameterReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_RESET, factory, t)
 
 	var args []string = []string{"runs", "reset", "--name"}
@@ -95,7 +96,7 @@ func TestRunsResetNameNoParameterReturnsError(t *testing.T) {
 
 func TestRunsResetUnknownParameterReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_RESET, factory, t)
 
 	var args []string = []string{"runs", "reset", "--name", "name1", "--random", "random"}
@@ -113,7 +114,7 @@ func TestRunsResetUnknownParameterReturnsError(t *testing.T) {
 
 func TestRunsResetNameTwiceOverridesToLatestValue(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_RESET, factory, t)
 
 	var args []string = []string{"runs", "reset", "--name", "name1", "--name", "name2"}

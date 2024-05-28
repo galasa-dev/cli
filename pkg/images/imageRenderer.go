@@ -168,7 +168,7 @@ func (renderer *ImageRendererImpl) drawString(img *image.RGBA, column int, row i
 // Converts a JSON byte array representing one or more 3270 terminals into a Terminal object
 func convertJsonBytesToTerminal(terminalJsonBytes []byte) (Terminal, error) {
 	var terminal Terminal
-	var err error = nil
+	var err error
 
 	err = json.Unmarshal(terminalJsonBytes, &terminal)
 	if err != nil {
@@ -193,7 +193,7 @@ func getCharacters(fieldContents *FieldContents) []rune {
 
 // Encodes a rendered 3270 terminal image in PNG format and returns the resulting byte array
 func encodeImageToPng(image *image.RGBA) ([]byte, error) {
-	var err error = nil
+	var err error
 
 	buf := new(bytes.Buffer)
 	err = png.Encode(buf, image)

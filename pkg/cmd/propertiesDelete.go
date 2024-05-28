@@ -10,9 +10,9 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/properties"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +24,7 @@ type PropertiesDeleteCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesDeleteCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesDeleteCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(PropertiesDeleteCommand)
 
 	err := cmd.init(factory, propertiesCommand, rootCommand)
@@ -50,7 +50,7 @@ func (cmd *PropertiesDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *PropertiesDeleteCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, rootCmd)
 	return err
@@ -61,11 +61,11 @@ func (cmd *PropertiesDeleteCommand) init(factory Factory, propertiesCommand Gala
 //  And then display a successful message or error
 
 func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
-	factory Factory,
-	propertiesCommand GalasaCommand,
-	rootCmd GalasaCommand) (*cobra.Command, error) {
+	factory spi.Factory,
+	propertiesCommand spi.GalasaCommand,
+	rootCmd spi.GalasaCommand) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertiesDeleteCmd := &cobra.Command{
@@ -89,7 +89,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 	return propertiesDeleteCmd, err
 }
 
-func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
@@ -105,7 +105,7 @@ func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory Factory, pro
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
@@ -115,13 +115,15 @@ func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory Factory, pro
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
 			if err == nil {
 
-				timeService := factory.GetTimeService()
-
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 				if err == nil {
 					// Call to process the command in a unit-testable way.
 					err = properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiClient)

@@ -12,11 +12,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
@@ -28,7 +28,7 @@ type RunsSubmitCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsSubmitCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsSubmitCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -53,7 +53,7 @@ func (cmd *RunsSubmitCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsSubmitCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &utils.RunsSubmitCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsSubmitCobraCmd(
@@ -64,12 +64,12 @@ func (cmd *RunsSubmitCommand) init(factory Factory, runsCommand GalasaCommand, r
 	return err
 }
 
-func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
-	runsCommand GalasaCommand,
+func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 
 	submitSelectionFlags := runs.NewTestSelectionFlagValues()
 	cmd.values.TestSelectionFlagValues = submitSelectionFlags
@@ -139,7 +139,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory Factory,
 }
 
 func (cmd *RunsSubmitCommand) executeSubmit(
-	factory Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -159,7 +159,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
@@ -176,18 +176,22 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 				apiServerUrl := bootstrapData.ApiServerURL
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 				if err == nil {
 					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
-	
+
 					validator := runs.NewStreamBasedValidator()
 					err = validator.Validate(cmd.values.TestSelectionFlagValues)
 					if err == nil {
-	
+
 						var console = factory.GetStdOutConsole()
-	
+
 						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console, images.NewImageExpanderNullImpl())
-	
+
 						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 					}
 				}

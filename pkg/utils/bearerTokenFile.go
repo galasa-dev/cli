@@ -9,94 +9,165 @@ import (
 	"encoding/json"
 	"log"
 	"path/filepath"
-	"time"
-
-	"github.com/galasa-dev/cli/pkg/files"
-	"github.com/golang-jwt/jwt/v5"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type BearerTokenJson struct {
 	Jwt string `json:"jwt"`
 }
 
-const (
-	TOKEN_EXPIRY_BUFFER_MINUTES = 10
-)
+type BearerTokenFile interface {
+	WriteJwt(jwt string, encryptionSecret string) error
+	ReadJwt(encryptionSecret string) (string, error)
+	DeleteJwt() error
+	Exists() (bool, error)
+}
+
+type BearerTokenFileImpl struct {
+	fileSystem   spi.FileSystem
+	galasaHome   spi.GalasaHome
+	baseFileName string
+	timeService  spi.TimeService
+}
+
+func NewBearerTokenFile(
+	fileSystem spi.FileSystem,
+	galasaHome spi.GalasaHome,
+	baseFileName string,
+	timeService spi.TimeService,
+) BearerTokenFile {
+	file := new(BearerTokenFileImpl)
+	file.fileSystem = fileSystem
+	file.galasaHome = galasaHome
+	file.baseFileName = baseFileName
+	file.timeService = timeService
+	return file
+}
+
+func ListAllBearerTokenFiles(fileSystem spi.FileSystem, galasaHome spi.GalasaHome) ([]string, error) {
+	bearerTokenFolderPath := getBearerTokensFolderPath(galasaHome)
+	return fileSystem.GetAllFilePaths(bearerTokenFolderPath)
+}
+
+func DeleteAllBearerTokenFiles(fileSystem spi.FileSystem, galasaHome spi.GalasaHome) error {
+	bearerTokenFilePaths, err := ListAllBearerTokenFiles(fileSystem, galasaHome)
+
+	if err == nil {
+		for _, bearerTokenFilePath := range bearerTokenFilePaths {
+			log.Printf("DeleteAllBearerTokenFiles : deleting file '%s'", bearerTokenFilePath)
+			fileSystem.DeleteFile(bearerTokenFilePath)
+		}
+	}
+	return err
+}
+
+func getBearerTokensFolderPath(galasaHome spi.GalasaHome) string {
+	return filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-tokens")
+}
 
 // Writes a new bearer-token.json file containing a JWT in the following format:
 //
 //	{
 //	  "jwt": "<bearer-token-here>"
 //	}
-func WriteBearerTokenJsonFile(fileSystem files.FileSystem, galasaHome GalasaHome, jwt string) error {
-	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
-
-	log.Printf("Writing bearer token to file '%s'", bearerTokenFilePath)
-	err := fileSystem.WriteTextFile(bearerTokenFilePath, jwt)
-
-	if err == nil {
-		log.Printf("Written bearer token to file '%s' OK", bearerTokenFilePath)
+func (file *BearerTokenFileImpl) WriteJwt(jwt string, encryptionSecret string) error {
+	bearerTokenFolderPath := getBearerTokensFolderPath(file.galasaHome)
+	var err error
+	err = file.fileSystem.MkdirAll(bearerTokenFolderPath)
+	if err != nil {
+		log.Printf("Failed to make sure beader-tokens folder exists. '%s'", bearerTokenFolderPath)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_CREATE_BEARER_TOKEN_FOLDER, bearerTokenFolderPath, err.Error())
 	} else {
-		log.Printf("Failed to write bearer token file '%s'", bearerTokenFilePath)
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, bearerTokenFilePath, err.Error())
+
+		bearerTokenFilePath := filepath.Join(bearerTokenFolderPath, file.baseFileName)
+
+		log.Printf("Writing bearer token to file '%s'", bearerTokenFilePath)
+
+		var json string
+		json, err = buildBearerTokenFileContent(jwt)
+		if err == nil {
+
+			var encryptedJwt string
+			encryptedJwt, err = Encrypt(encryptionSecret, json)
+			if err == nil {
+				err = file.fileSystem.WriteTextFile(bearerTokenFilePath, encryptedJwt)
+
+				if err == nil {
+					log.Printf("Written bearer token to file '%s' OK", bearerTokenFilePath)
+				} else {
+					log.Printf("Failed to write bearer token file '%s'", bearerTokenFilePath)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, bearerTokenFilePath, err.Error())
+				}
+			}
+		}
 	}
 	return err
 }
 
-// Gets the JWT from the bearer-token.json file if it exists, errors if the file does not exist or if the token is invalid
-func GetBearerTokenFromTokenJsonFile(fileSystem files.FileSystem, galasaHome GalasaHome, timeService TimeService) (string, error) {
-	var err error = nil
-	var bearerToken string = ""
-	var bearerTokenJsonContents string = ""
+// Pack the json string into a structure.
+func buildBearerTokenFileContent(jwt string) (contentJson string, err error) {
+	content := BearerTokenJson{
+		Jwt: jwt,
+	}
+	var contentJsonBytes []byte
+	contentJsonBytes, err = json.Marshal(content)
+	if err == nil {
+		contentJson = string(contentJsonBytes)
+	}
+	return contentJson, err
+}
 
-	bearerTokenFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-token.json")
+// Gets the JWT from the bearer-token.json file if it exists, errors if the file does not exist or if the token is invalid
+func (file *BearerTokenFileImpl) ReadJwt(encryptionSecret string) (string, error) {
+	var err error
+	var bearerToken string = ""
+
+	bearerTokenFolderPath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-tokens")
+	bearerTokenFilePath := filepath.Join(bearerTokenFolderPath, file.baseFileName)
 
 	log.Printf("Retrieving bearer token from file '%s'", bearerTokenFilePath)
-	bearerTokenJsonContents, err = fileSystem.ReadTextFile(bearerTokenFilePath)
+	var encryptedBearerTokenJsonContents string
+	encryptedBearerTokenJsonContents, err = file.fileSystem.ReadTextFile(bearerTokenFilePath)
 	if err == nil {
-		var bearerTokenJson BearerTokenJson
-		err = json.Unmarshal([]byte(bearerTokenJsonContents), &bearerTokenJson)
-		if err == nil {
-			bearerToken = bearerTokenJson.Jwt
-			log.Printf("Retrieved bearer token from file '%s' OK", bearerTokenFilePath)
+		var bearerTokenJsonContents string
+		bearerTokenJsonContents, err = Decrypt(encryptionSecret, encryptedBearerTokenJsonContents)
+
+		if err != nil {
+			log.Printf("Could not retrieve bearer token from file '%s' because it was encrypted with a different GALASA_TOKEN. Ignoring.", bearerTokenFilePath)
+			// This will look to the caller like there was nothing to read.
+		} else {
+			var bearerTokenJson BearerTokenJson
+			err = json.Unmarshal([]byte(bearerTokenJsonContents), &bearerTokenJson)
+			if err == nil {
+				bearerToken = bearerTokenJson.Jwt
+				log.Printf("Retrieved bearer token from file '%s' OK", bearerTokenFilePath)
+			}
 		}
 	}
 
 	if err != nil {
 		log.Printf("Could not retrieve bearer token from file '%s'", bearerTokenFilePath)
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE, bearerTokenFilePath, err.Error())
-	} else {
-		log.Printf("Validating bearer token retrieved from file '%s'", bearerTokenFilePath)
-		if !IsBearerTokenValid(bearerToken, timeService) {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_BEARER_TOKEN)
-		} else {
-			log.Printf("Validated bearer token retrieved from file '%s' OK", bearerTokenFilePath)
-		}
 	}
 
 	return bearerToken, err
 }
 
-// Checks whether a given bearer token is valid or not, returning true if it is valid and false otherwise
-func IsBearerTokenValid(bearerTokenString string, timeService TimeService) bool {
-	var err error = nil
-	var bearerToken *jwt.Token
+func (file *BearerTokenFileImpl) DeleteJwt() error {
+	var err error
+	bearerTokenFolderPath := getBearerTokensFolderPath(file.galasaHome)
+	bearerTokenFilePath := filepath.Join(bearerTokenFolderPath, file.baseFileName)
+	log.Printf("DeleteJwt file '%s'", bearerTokenFilePath)
 
-	// Decode the bearer token without verifying its signature
-	bearerToken, _, err = jwt.NewParser().ParseUnverified(bearerTokenString, jwt.MapClaims{})
-	if err == nil {
-		var tokenExpiry *jwt.NumericDate
-		tokenExpiry, err = bearerToken.Claims.GetExpirationTime()
-		if err == nil {
-			// Add a buffer to the current time to make sure the bearer token does not expire within
-			// this buffer (e.g. if the buffer is 10 mins, make sure the token doesn't expire within 10 mins)
-			acceptableExpiryTime := timeService.Now().Add(time.Duration(TOKEN_EXPIRY_BUFFER_MINUTES) * time.Minute)
-			if (tokenExpiry.Time).After(acceptableExpiryTime) {
-				return true
-			}
-		}
-	}
-	return false
+	file.fileSystem.DeleteFile(bearerTokenFilePath)
+	return err
+}
+
+func (file *BearerTokenFileImpl) Exists() (bool, error) {
+	bearerTokenFolderPath := getBearerTokensFolderPath(file.galasaHome)
+	bearerTokenFilePath := filepath.Join(bearerTokenFolderPath, file.baseFileName)
+	isExists, err := file.fileSystem.Exists(bearerTokenFilePath)
+	return isExists, err
 }

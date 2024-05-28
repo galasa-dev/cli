@@ -12,7 +12,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -51,8 +51,8 @@ type ProjectCreateCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewProjectCreateCmd(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
-	var err error = nil
+func NewProjectCreateCmd(factory spi.Factory, projectCmd spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
+	var err error
 
 	cmd := new(ProjectCreateCommand)
 	err = cmd.init(factory, projectCmd, rootCmd)
@@ -79,7 +79,7 @@ func (cmd *ProjectCreateCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *ProjectCreateCommand) init(factory spi.Factory, projectCmd spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 
 	cmd.values = &ProjectCreateCmdValues{}
@@ -89,12 +89,12 @@ func (cmd *ProjectCreateCommand) init(factory Factory, projectCmd GalasaCommand,
 }
 
 func (cmd *ProjectCreateCommand) createCobraCommand(
-	factory Factory,
-	projectCmd GalasaCommand,
-	rootCmd GalasaCommand,
+	factory spi.Factory,
+	projectCmd spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 
 	projectCreateCmd := &cobra.Command{
 		Use:     "create",
@@ -134,9 +134,9 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 	return projectCreateCmd, err
 }
 
-func (cmd *ProjectCreateCommand) executeCreateProject(factory Factory, rootCmdValues *RootCmdValues) error {
+func (cmd *ProjectCreateCommand) executeCreateProject(factory spi.Factory, rootCmdValues *RootCmdValues) error {
 
-	var err error = nil
+	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
@@ -198,7 +198,7 @@ func (cmd *ProjectCreateCommand) executeCreateProject(factory Factory, rootCmdVa
 // featureNamesCommaSeparated - eg: kettle,toaster. Causes a kettle and toaster project to be created with a sample test in.
 // isDevelopment - if true, the user wants to use bleeding-edge versions of galasa code and maven repositories.
 func createProject(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	packageName string,
 	featureNamesCommaSeparated string,
 	isOBRProjectRequired bool,
@@ -266,7 +266,7 @@ func createParentFolderContents(
 	useGradle bool,
 	isDevelopment bool,
 ) error {
-	var err error = nil
+	var err error
 
 	if useMaven {
 		err = createParentFolderPom(fileGenerator, packageName, featureNames,
@@ -439,7 +439,7 @@ func createTestProjects(
 	isDevelopment bool,
 ) error {
 
-	var err error = nil
+	var err error
 	for _, featureName := range featureNames {
 		err = createTestProject(fileGenerator, packageName, featureName, forceOverwrite, useMaven, useGradle, isDevelopment)
 		if err != nil {

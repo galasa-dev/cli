@@ -19,7 +19,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runsformatter"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 var (
@@ -47,8 +47,8 @@ func GetRuns(
 	resultParameter string,
 	shouldGetActive bool,
 	outputFormatString string,
-	timeService utils.TimeService,
-	console utils.Console,
+	timeService spi.TimeService,
+	console spi.Console,
 	apiServerUrl string,
 	apiClient *galasaapi.APIClient,
 ) error {
@@ -124,7 +124,7 @@ func CreateFormatters() map[string]runsformatter.RunsFormatter {
 	return validFormatters
 }
 
-func writeOutput(outputText string, console utils.Console) error {
+func writeOutput(outputText string, console spi.Console) error {
 	err := console.WriteString(outputText)
 	return err
 }
@@ -166,7 +166,7 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 }
 
 func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.APIClient) ([]galasaapi.Run, error) {
-	var err error = nil
+	var err error
 	var runsDetails []galasaapi.Run = make([]galasaapi.Run, 0)
 	var context context.Context = nil
 	var details *galasaapi.Run
@@ -205,11 +205,11 @@ func GetRunsFromRestApi(
 	fromAgeMins int,
 	toAgeMins int,
 	shouldGetActive bool,
-	timeService utils.TimeService,
+	timeService spi.TimeService,
 	apiClient *galasaapi.APIClient,
 ) ([]galasaapi.Run, error) {
 
-	var err error = nil
+	var err error
 	var results []galasaapi.Run = make([]galasaapi.Run, 0)
 
 	var context context.Context = nil

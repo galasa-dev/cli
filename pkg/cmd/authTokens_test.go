@@ -8,11 +8,12 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthTokensCommandInCommandCollection(t *testing.T) {
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	authCommand, err := commands.GetCommand(COMMAND_NAME_AUTH_TOKENS)
@@ -27,7 +28,7 @@ func TestAuthTokensCommandInCommandCollection(t *testing.T) {
 
 func TestAuthTokensHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"auth", "tokens", "--help"}
 
@@ -43,7 +44,7 @@ func TestAuthTokensHelpFlagSetCorrectly(t *testing.T) {
 
 func TestAuthTokensNoFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"auth", "tokens"}
 
 	// When...

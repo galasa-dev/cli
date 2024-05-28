@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPropertiesSetCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesSetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_SET)
@@ -27,7 +28,7 @@ func TestPropertiesSetCommandInCommandCollection(t *testing.T) {
 
 func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "set", "--help"}
 
@@ -44,7 +45,7 @@ func TestPropertiesSetHelpFlagSetCorrectly(t *testing.T) {
 
 func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "set"}
 
@@ -61,7 +62,7 @@ func TestPropertiesSetNoFlagsReturnsError(t *testing.T) {
 
 func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_SET, factory, t)
 
 	var args []string = []string{"properties", "set", "--namespace", "mince", "--name", "pies.are.so.tasty", "--value", "some kinda value"}
@@ -83,7 +84,7 @@ func TestPropertiesSetNameNamespaceValueReturnsOk(t *testing.T) {
 
 func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "set", "--namespace", "sunshine"}
 
@@ -100,7 +101,7 @@ func TestPropertiesSetNamespaceOnlyReturnsError(t *testing.T) {
 
 func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "set", "--name", "call.me.little.sunshine"}
 
@@ -117,7 +118,7 @@ func TestPropertiesSetOnlyNameReturnsError(t *testing.T) {
 
 func TestPropertiesOnlyValueReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "set", "--value", "ghost"}
 

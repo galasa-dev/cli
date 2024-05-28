@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunsSubmitLocalCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT_LOCAL)
@@ -27,7 +28,7 @@ func TestRunsSubmitLocalCommandInCommandCollection(t *testing.T) {
 
 func TestRunsSubmitLocalHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "submit", "local", "--help"}
 
@@ -44,7 +45,7 @@ func TestRunsSubmitLocalHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsSubmitLocalWithoutObrWithClassErrors(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"runs", "submit", "local", "--class", "osgi.bundle/class.path"}
 
 	// When...
@@ -61,7 +62,7 @@ func TestRunsSubmitLocalWithoutObrWithClassErrors(t *testing.T) {
 
 func TestRunsSubmitLocalWithoutClassWithObrErrors(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"runs", "submit", "local", "--obr", "mvn:second.breakfast/elevenses/0.1.0/brunch"}
 
 	// When...
@@ -78,7 +79,7 @@ func TestRunsSubmitLocalWithoutClassWithObrErrors(t *testing.T) {
 
 func TestMultipleRequiredFlagsNotSetReturnsListInError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"runs", "submit", "local"}
 
 	// When...
@@ -95,7 +96,7 @@ func TestMultipleRequiredFlagsNotSetReturnsListInError(t *testing.T) {
 
 func TestRunsSubmitLocalClassObrFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr"}
@@ -115,7 +116,7 @@ func TestRunsSubmitLocalClassObrFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitLocalDebugFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--debug"}
@@ -136,7 +137,7 @@ func TestRunsSubmitLocalDebugFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitLocalDebugModeFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--debugMode", "slow"}
@@ -157,7 +158,7 @@ func TestRunsSubmitLocalDebugModeFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitLocalDebugPortFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--debugPort", "5000"}
@@ -178,7 +179,7 @@ func TestRunsSubmitLocalDebugPortFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitLocalGalasaVersionFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--galasaVersion", "0.1.0"}
@@ -199,7 +200,7 @@ func TestRunsSubmitLocalGalasaVersionFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitLocalLocalMavenFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--localMaven", "maven/repo/location"}
@@ -220,7 +221,7 @@ func TestRunsSubmitLocalLocalMavenFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitLocalRemoteMavenFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local", "--class", "my.class", "--obr", "mvn:a.big.ol.obr", "--remoteMaven", "remote.maven.location"}
@@ -241,7 +242,7 @@ func TestRunsSubmitLocalRemoteMavenFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitLocalAllFlagsWorkTogether(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local",
@@ -275,7 +276,7 @@ func TestRunsSubmitLocalAllFlagsWorkTogether(t *testing.T) {
 
 func TestRunsSubmitLocaGherkinFlagsWork(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT_LOCAL, factory, t)
 
 	var args []string = []string{"runs", "submit", "local",

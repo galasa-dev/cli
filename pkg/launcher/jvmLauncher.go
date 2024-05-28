@@ -15,9 +15,9 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
@@ -45,13 +45,13 @@ type JvmLauncher struct {
 	cmdParams RunsSubmitLocalCmdParameters
 
 	// An abstraction of the environment, so we can look up things like JAVA_HOME
-	env utils.Environment
+	env spi.Environment
 
 	// An abstraction of the file system so we can mock it out easily for unit tests.
-	fileSystem files.FileSystem
+	fileSystem spi.FileSystem
 
 	// A location galasa can call home
-	galasaHome utils.GalasaHome
+	galasaHome spi.GalasaHome
 
 	// A file system so we can get at embedded content if required.
 	// (Like so we can unpack the boot.jar)
@@ -61,13 +61,16 @@ type JvmLauncher struct {
 	localTests []*LocalTest
 
 	// This timer service can be interrupted when we don't want it to sleep.
-	timeService utils.TimeService
+	timeService spi.TimeService
 
 	// A service which can create OS processes.
 	processFactory ProcessFactory
 
 	// A map of bootstrap properties
 	bootstrapProps props.JavaProperties
+
+	// So we can get common objects easily.
+	factory spi.Factory
 }
 
 // These parameters are gathered from the command-line and passed into the laucher.
@@ -114,20 +117,22 @@ const (
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
 func NewJVMLauncher(
+	factory spi.Factory,
 	bootstrapProps props.JavaProperties,
-	env utils.Environment,
-	fileSystem files.FileSystem,
 	embeddedFileSystem embedded.ReadOnlyFileSystem,
 	runsSubmitLocalCmdParams *RunsSubmitLocalCmdParameters,
-	timeService utils.TimeService,
 	processFactory ProcessFactory,
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 ) (*JvmLauncher, error) {
 
 	var (
-		err      error        = nil
+		err      error
 		launcher *JvmLauncher = nil
 	)
+
+	env := factory.GetEnvironment()
+	fileSystem := factory.GetFileSystem()
+	timeService := factory.GetTimeService()
 
 	javaHome := env.GetEnv("JAVA_HOME")
 
@@ -135,6 +140,7 @@ func NewJVMLauncher(
 
 	if err == nil {
 		launcher = new(JvmLauncher)
+		launcher.factory = factory
 		launcher.javaHome = javaHome
 		launcher.cmdParams = *runsSubmitLocalCmdParams
 		launcher.env = env
@@ -245,8 +251,10 @@ func (launcher *JvmLauncher) SubmitTestRun(
 					if launcher.isCPSRemote() {
 						// Though this is a local test run being launched, the CPS will be remote on an ecosystem via REST.
 						// If the config store value doesn't start wiht that, then it's not a remote CPS, so we don't need the JWT.
+						apiServerUrl := launcher.getCPSRemoteApiServerUrl()
+						authenticator := launcher.factory.GetAuthenticator(apiServerUrl, launcher.galasaHome)
 						log.Printf("framework.config.store bootstrap property indicates a remote CPS will be used. So we need a valid JWT.\n")
-						jwt, err = utils.GetBearerTokenFromTokenJsonFile(launcher.fileSystem, launcher.galasaHome, launcher.timeService)
+						jwt, err = authenticator.GetBearerToken()
 					}
 
 					if err == nil {
@@ -310,7 +318,16 @@ func (launcher *JvmLauncher) isCPSRemote() bool {
 	return isRemote
 }
 
-func defaultLocalMavenIfNotSet(localMaven string, fileSystem files.FileSystem) (string, error) {
+// Gets the https URL of the config store, to be used contacting the remote CPS.
+func (launcher *JvmLauncher) getCPSRemoteApiServerUrl() string {
+	configStoreGalasaUrl := launcher.bootstrapProps["framework.config.store"]
+	// The configuration has a URL like galasacps://myhost/api
+	// We need to turn it into something like https://myhost/api
+	httpsUrl := strings.Replace(configStoreGalasaUrl, "galasacps", "https", 1)
+	return httpsUrl
+}
+
+func defaultLocalMavenIfNotSet(localMaven string, fileSystem spi.FileSystem) (string, error) {
 	var err error
 	returnMavenPath := ""
 	if localMaven == "" {
@@ -341,20 +358,20 @@ func buildListOfAllObrs(obrsFromCommandLine []string, obrFromPortfolio string) (
 	return obrs, err
 }
 
-func deleteTempFiles(fileSystem files.FileSystem, temporaryFolderPath string) {
+func deleteTempFiles(fileSystem spi.FileSystem, temporaryFolderPath string) {
 	fileSystem.DeleteDir(temporaryFolderPath)
 }
 
 func prepareTempFiles(
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
 	overrides map[string]interface{},
 ) (string, string, error) {
 
 	var (
-		temporaryFolderPath string = ""
-		overridesFilePath   string = ""
-		err                 error  = nil
+		temporaryFolderPath string
+		overridesFilePath   string
+		err                 error
 	)
 
 	// Create a temporary folder
@@ -380,8 +397,8 @@ func prepareTempFiles(
 // - error if there was one.
 func createTemporaryOverridesFile(
 	temporaryFolderPath string,
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
 	overrides map[string]interface{},
 ) (string, error) {
 	overrides = addStandardOverrideProperties(galasaHome, overrides)
@@ -393,7 +410,7 @@ func createTemporaryOverridesFile(
 }
 
 func addStandardOverrideProperties(
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	overrides map[string]interface{},
 ) map[string]interface{} {
 
@@ -426,7 +443,7 @@ func overrideLocalRunIdPrefixProperty(overrides map[string]interface{}) {
 	}
 }
 
-func overrideRasStoreProperty(galasaHome utils.GalasaHome, overrides map[string]interface{}) {
+func overrideRasStoreProperty(galasaHome spi.GalasaHome, overrides map[string]interface{}) {
 	// Set the ras location to be local disk always.
 	const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
 
@@ -524,7 +541,7 @@ func createRunFromLocalTest(localTest *LocalTest) (*galasaapi.Run, error) {
 	return run, err
 }
 
-func setTestStructureFromRasFile(run *galasaapi.Run, jsonFilePath string, fileSystem files.FileSystem) error {
+func setTestStructureFromRasFile(run *galasaapi.Run, jsonFilePath string, fileSystem spi.FileSystem) error {
 
 	var testStructure = galasaapi.NewTestStructure()
 	var err error
@@ -606,8 +623,8 @@ func (launcher *JvmLauncher) GetTestCatalog(stream string) (TestCatalog, error) 
 //	    --test dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee
 func getCommandSyntax(
 	bootstrapProperties props.JavaProperties,
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
 	javaHome string,
 	testObrs []utils.MavenCoordinates,
 	testLocation TestLocation,
@@ -814,7 +831,7 @@ func calculateDebugMode(debugMode string, bootstrapProperties props.JavaProperti
 }
 
 func checkDebugModeValueIsValid(debugMode string, errorMessageIfInvalid *galasaErrors.MessageType) error {
-	var err error = nil
+	var err error
 
 	lowerCaseDebugMode := strings.ToLower(debugMode)
 

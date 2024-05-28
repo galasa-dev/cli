@@ -7,6 +7,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,7 @@ type AuthTokensCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthTokensCommand(authCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewAuthTokensCommand(authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(AuthTokensCommand)
 
 	err := cmd.init(authCommand)
@@ -50,7 +51,7 @@ func (cmd *AuthTokensCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthTokensCommand) init(authCommand GalasaCommand) error {
+func (cmd *AuthTokensCommand) init(authCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &AuthTokensCmdValues{}
 	cmd.cobraCommand, err = cmd.createAuthTokensCobraCmd(authCommand)
@@ -58,7 +59,7 @@ func (cmd *AuthTokensCommand) init(authCommand GalasaCommand) error {
 }
 
 func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
-	authCommand GalasaCommand,
+	authCommand spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error

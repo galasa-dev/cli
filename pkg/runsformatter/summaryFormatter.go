@@ -30,7 +30,7 @@ func (*SummaryFormatter) IsNeedingMethodDetails() bool {
 
 func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, error) {
 	var result string = ""
-	var err error = nil
+	var err error
 	buff := strings.Builder{}
 	totalResults := len(testResultsData)
 	resultCountsMap := initialiseResultMap()

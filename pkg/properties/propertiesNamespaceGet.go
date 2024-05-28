@@ -14,7 +14,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/propertiesformatter"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 func GetPropertiesNamespaces(
 	apiClient *galasaapi.APIClient,
 	namespaceOutputFormat string,
-	console utils.Console,
+	console spi.Console,
 ) error {
 	var err error
 	var chosenFormatter propertiesformatter.PropertyFormatter
@@ -36,7 +36,7 @@ func GetPropertiesNamespaces(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-			chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validNamespaceFormatters)
+		chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validNamespaceFormatters)
 		if err == nil {
 			var namespaces []galasaapi.Namespace
 			namespaces, _, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).ClientApiVersion(restApiVersion).Execute()

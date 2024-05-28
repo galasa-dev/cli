@@ -8,19 +8,23 @@ package cmd
 import (
 	"log"
 
-	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
+type AuthLogoutCmdValues struct {
+}
+
 type AuthLogoutCommand struct {
+	values       *AuthLogoutCmdValues
 	cobraCommand *cobra.Command
 }
 
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthLogoutCommand(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewAuthLogoutCommand(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(AuthLogoutCommand)
 
 	err := cmd.init(factory, authCommand, rootCmd)
@@ -39,20 +43,20 @@ func (cmd *AuthLogoutCommand) CobraCommand() *cobra.Command {
 }
 
 func (cmd *AuthLogoutCommand) Values() interface{} {
-	// There are no values.
-	return nil
+	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLogoutCommand) init(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *AuthLogoutCommand) init(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd.Values().(*RootCmdValues))
+	cmd.values = &AuthLogoutCmdValues{}
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authCommand, rootCmd)
 	return err
 }
 
-func (cmd *AuthLogoutCommand) createCobraCmd(factory Factory, authCommand GalasaCommand, rootCmdValues *RootCmdValues) (*cobra.Command, error) {
+func (cmd *AuthLogoutCommand) createCobraCmd(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (*cobra.Command, error) {
 	var err error
 
 	authLogoutCmd := &cobra.Command{
@@ -61,7 +65,7 @@ func (cmd *AuthLogoutCommand) createCobraCmd(factory Factory, authCommand Galasa
 		Long:    "Log out from a Galasa ecosystem that you have previously logged in to",
 		Aliases: []string{"auth logout"},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthLogout(factory, rootCmdValues)
+			return cmd.executeAuthLogout(factory, rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
@@ -71,7 +75,7 @@ func (cmd *AuthLogoutCommand) createCobraCmd(factory Factory, authCommand Galasa
 }
 
 func (cmd *AuthLogoutCommand) executeAuthLogout(
-	factory Factory,
+	factory spi.Factory,
 	rootCmdValues *RootCmdValues,
 ) error {
 
@@ -89,10 +93,14 @@ func (cmd *AuthLogoutCommand) executeAuthLogout(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
-			err = auth.Logout(fileSystem, galasaHome)
+			authenticator := factory.GetAuthenticator(
+				"",
+				galasaHome,
+			)
+			err = authenticator.LogoutOfEverywhere()
 		}
 	}
 	return err

@@ -10,8 +10,8 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/resources"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +28,7 @@ type ResourcesApplyCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesApplyCommand(factory Factory, resourcesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesApplyCommand)
 	err := cmd.init(factory, resourcesCommand, rootCommand)
@@ -54,9 +54,9 @@ func (cmd *ResourcesApplyCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesApplyCommand) init(factory Factory, resourcesApplyCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 
 	cmd.values = &ResourcesApplyCmdValues{}
 	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesApplyCommand, rootCommand.Values().(*RootCmdValues))
@@ -65,8 +65,8 @@ func (cmd *ResourcesApplyCommand) init(factory Factory, resourcesApplyCommand Ga
 }
 
 func (cmd *ResourcesApplyCommand) createCobraCommand(
-	factory Factory,
-	resourcesCommand GalasaCommand,
+	factory spi.Factory,
+	resourcesCommand spi.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -88,7 +88,7 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 	return resourcesApplyCmd
 }
 
-func executeResourcesApply(factory Factory,
+func executeResourcesApply(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -99,7 +99,7 @@ func executeResourcesApply(factory Factory,
 	return err
 }
 
-func loadAndPassDataIntoResourcesApi(action string, factory Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
+func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
@@ -114,7 +114,7 @@ func loadAndPassDataIntoResourcesApi(action string, factory Factory, resourcesCm
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 
 		if err == nil {
@@ -127,10 +127,12 @@ func loadAndPassDataIntoResourcesApi(action string, factory Factory, resourcesCm
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-				timeService := factory.GetTimeService()
-
 				var bearerToken string
-				bearerToken, err = auth.GetBearerToken(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				bearerToken, err = authenticator.GetBearerToken()
 
 				if err == nil {
 					err = resources.ApplyResources(

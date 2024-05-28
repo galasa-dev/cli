@@ -7,6 +7,8 @@ package utils
 
 import (
 	"time"
+
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type MockTimeService struct {
@@ -17,11 +19,11 @@ func NewMockTimeServiceAsMock(now time.Time) *MockTimeService {
 	return &MockTimeService{MockNow: now}
 }
 
-func NewMockTimeService() TimeService {
+func NewMockTimeService() spi.TimeService {
 	return NewMockTimeServiceAsMock(time.Now())
 }
 
-func NewOverridableMockTimeService(now time.Time) TimeService {
+func NewOverridableMockTimeService(now time.Time) spi.TimeService {
 	return NewMockTimeServiceAsMock(now)
 }
 

@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPropertiesDeleteCommandInCommandCollectionHasName(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesDeleteCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_DELETE)
@@ -26,7 +27,7 @@ func TestPropertiesDeleteCommandInCommandCollectionHasName(t *testing.T) {
 
 func TestPropertiesDeleteHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "delete", "--help"}
 
@@ -42,7 +43,7 @@ func TestPropertiesDeleteHelpFlagSetCorrectly(t *testing.T) {
 
 func TestPropertiesDeleteNoArgsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"properties", "delete"}
 
 	// When...
@@ -58,7 +59,7 @@ func TestPropertiesDeleteNoArgsReturnsError(t *testing.T) {
 
 func TestPropertiesDeleteWithoutName(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"properties", "delete", "--namespace", "jitters"}
 
 	// When...
@@ -74,7 +75,7 @@ func TestPropertiesDeleteWithoutName(t *testing.T) {
 
 func TestPropertiesDeleteWithoutNamespace(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"properties", "delete", "--name", "jeepers"}
 
 	// When...
@@ -90,7 +91,7 @@ func TestPropertiesDeleteWithoutNamespace(t *testing.T) {
 
 func TestPropertiesDeleteWithNameAndNamespace(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_DELETE, factory, t)
 
 	var args []string = []string{"properties", "delete", "--namespace", "gyro", "--name", "space.ball"}

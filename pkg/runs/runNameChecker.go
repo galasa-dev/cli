@@ -28,7 +28,7 @@ var (
 // format of the runName.
 func ValidateRunName(runName string) error {
 
-	var err error = nil
+	var err error
 
 	isMatching := RUN_NAME_PATTERN.MatchString(runName)
 

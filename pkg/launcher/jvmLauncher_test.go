@@ -14,6 +14,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -57,12 +58,12 @@ const (
 func NewMockLauncherParams() (
 	props.JavaProperties,
 	*utils.MockEnv,
-	files.FileSystem,
+	spi.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
-	utils.TimeService,
+	spi.TimeService,
 	ProcessFactory,
-	utils.GalasaHome,
+	spi.GalasaHome,
 ) {
 	// Given...
 	env := utils.NewMockEnv()
@@ -99,9 +100,17 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 
 	bootstrapProps := getBasicBootstrapProperties()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 	if err != nil {
 		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
 	}
@@ -140,9 +149,17 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 	if err == nil {
 		assert.Fail(t, "Constructor should have failed but it did not.")
 	}
@@ -165,9 +182,17 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 
 	bootstrapProps := getBasicBootstrapProperties()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -180,9 +205,17 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -233,9 +266,17 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 
 	bootstrapProps := getBasicBootstrapProperties()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 	if err != nil {
 		assert.Fail(t, "Launcher should have launched command OK")
 	}
@@ -373,9 +414,16 @@ func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, _ := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
@@ -408,9 +456,15 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 	launcher, _ := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
@@ -442,8 +496,8 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 
 func getDefaultCommandSyntaxTestParameters() (
 	props.JavaProperties,
-	utils.Environment,
-	utils.GalasaHome,
+	spi.Environment,
+	spi.GalasaHome,
 	*files.MockFileSystem,
 	string,
 	[]utils.MavenCoordinates,
@@ -1204,12 +1258,12 @@ func TestLocalMavenSet(t *testing.T) {
 func NewMockGherkinParams() (
 	props.JavaProperties,
 	*utils.MockEnv,
-	files.FileSystem,
+	spi.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
-	utils.TimeService,
+	spi.TimeService,
 	ProcessFactory,
-	utils.GalasaHome,
+	spi.GalasaHome,
 ) {
 	// Given...
 	env := utils.NewMockEnv()
@@ -1233,9 +1287,17 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -1273,10 +1335,17 @@ func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
 
-	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 
+	launcher, err := NewJVMLauncher(
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
 	}
@@ -1308,9 +1377,17 @@ func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
 		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -1495,9 +1572,17 @@ func TestGetRunsByIdReturnsOk(t *testing.T) {
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, _ := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome,
+	)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})

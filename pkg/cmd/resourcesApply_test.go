@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestResourcesApplyCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	resourcesApplyCommand, err := commands.GetCommand(COMMAND_NAME_RESOURCES_APPLY)
@@ -28,7 +29,7 @@ func TestResourcesApplyCommandInCommandCollection(t *testing.T) {
 
 func TestResourcesApplyHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"resources", "apply", "--help"}
 
@@ -44,7 +45,7 @@ func TestResourcesApplyHelpFlagSetCorrectly(t *testing.T) {
 
 func TestResourcesApplyNoFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"resources", "apply"}
 
@@ -61,7 +62,7 @@ func TestResourcesApplyNoFlagsReturnsError(t *testing.T) {
 
 func TestResourcesApplyFileFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RESOURCES_APPLY, factory, t)
 
 	var args []string = []string{"resources", "apply", "--file", "mince.yaml"}

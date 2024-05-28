@@ -125,6 +125,6 @@ func TestInvalidPathReturnsError(t *testing.T) {
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1145E")
+	assert.Contains(t, err.Error(), "GAL1146E")
 	assert.Contains(t, err.Error(), "Could not get list of tokens from API server")
 }

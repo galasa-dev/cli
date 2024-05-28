@@ -13,11 +13,11 @@ import (
 	"strings"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"gopkg.in/yaml.v3"
 )
 
-func validateFilePathExists(fileSystem files.FileSystem, filePath string) error {
+func validateFilePathExists(fileSystem spi.FileSystem, filePath string) error {
 	exists, err := fileSystem.Exists(filePath)
 
 	if err != nil {
@@ -37,7 +37,7 @@ func validateFilePathExists(fileSystem files.FileSystem, filePath string) error 
 	return err
 }
 
-func getYamlFileContent(fileSystem files.FileSystem, filePath string) (string, error) {
+func getYamlFileContent(fileSystem spi.FileSystem, filePath string) (string, error) {
 	fileContent, err := fileSystem.ReadTextFile(filePath)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_COULD_NOT_GET_YAML_CONTENT, err)

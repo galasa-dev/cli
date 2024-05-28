@@ -13,9 +13,8 @@ import (
 	"time"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // A local test which gets run.
@@ -44,11 +43,11 @@ type LocalTest struct {
 	testRun *galasaapi.TestRun
 
 	// A time service. When a significant event occurs, we interrupt it.
-	timeService utils.TimeService
+	timeService spi.TimeService
 
 	// The file system the local test deposits results onto.
 	// We use this to read the results back to find out if it passed/failed. ...etc.
-	fileSystem files.FileSystem
+	fileSystem spi.FileSystem
 
 	// Something which can create new processes in the operating system
 	processFactory ProcessFactory
@@ -56,8 +55,8 @@ type LocalTest struct {
 
 // A structure which tells us all we know about a JVM process we launched.
 func NewLocalTest(
-	timeService utils.TimeService,
-	fileSystem files.FileSystem,
+	timeService spi.TimeService,
+	fileSystem spi.FileSystem,
 	processFactory ProcessFactory,
 ) *LocalTest {
 
@@ -104,7 +103,7 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 // Block this thread until we can gather where the RAS folder is for this test.
 // It is resolved within the JVM, and traced, where we pick it up from.
 func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
-	var err error = nil
+	var err error
 	rasFolderPathUrl := ""
 
 	// Wait for the ras location to be detected in the JVM output.
@@ -136,7 +135,7 @@ func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputPr
 // Block this thread until we can gather what the RunId for this test is
 // It is allocated within the JVM, and traced, where we pick it up from.
 func (localTest *LocalTest) waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
-	var err error = nil
+	var err error
 	var runId string = ""
 
 	// Wait for the runId to be detected in the JVM output.
@@ -198,7 +197,7 @@ func (localTest *LocalTest) waitForCompletion() error {
 // ras folder.
 func (localTest *LocalTest) updateTestStatusFromRasFile() error {
 
-	var err error = nil
+	var err error
 
 	if localTest.runId == "" || localTest.rasFolderPathUrl == "" {
 		log.Printf("Don't have enough information to find the structure.json in the RAS folder.\n")

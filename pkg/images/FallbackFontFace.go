@@ -24,28 +24,28 @@ type FallbackFontFace struct {
 
 // Loads a .ttf or .otf font from the embedded filesystem
 func loadFont(fs embedded.ReadOnlyFileSystem, fontFilePath string) (font.Face, error) {
-    var err error
-    var fontBytes []byte
-    var opentypeFont *opentype.Font
-    var fontFace font.Face
+	var err error
+	var fontBytes []byte
+	var opentypeFont *opentype.Font
+	var fontFace font.Face
 
-    fontBytes, err = fs.ReadFile(fontFilePath)
-    if err == nil {
-        opentypeFont, err = opentype.Parse(fontBytes)
-        if err == nil {
-            fontFace, err = opentype.NewFace(opentypeFont, nil)
-        }
-    }
-    return fontFace, err
+	fontBytes, err = fs.ReadFile(fontFilePath)
+	if err == nil {
+		opentypeFont, err = opentype.Parse(fontBytes)
+		if err == nil {
+			fontFace, err = opentype.NewFace(opentypeFont, nil)
+		}
+	}
+	return fontFace, err
 }
 
 // Loads a .ttf or .otf font from the embedded filesystem
 func loadFontsFromDirectory(fileSystem embedded.ReadOnlyFileSystem, fontDirectoryPath string) ([]font.Face, error) {
-    var err error
+	var err error
 	var fontFiles []fs.DirEntry
 	fonts := make([]font.Face, 0)
 
-    fontFiles, err = fileSystem.ReadDir(fontDirectoryPath)
+	fontFiles, err = fileSystem.ReadDir(fontDirectoryPath)
 	if err == nil {
 		for _, fontFile := range fontFiles {
 			var fontFace font.Face
@@ -56,8 +56,8 @@ func loadFontsFromDirectory(fileSystem embedded.ReadOnlyFileSystem, fontDirector
 				fonts = append(fonts, fontFace)
 			}
 		}
-    }
-    return fonts, err
+	}
+	return fonts, err
 }
 
 func NewFallbackFontFace(primaryFont font.Face) *FallbackFontFace {
@@ -68,9 +68,9 @@ func (f *FallbackFontFace) AddFallbackFont(fontFace font.Face) {
 	f.fallbacks = append(f.fallbacks, fontFace)
 }
 
-//----------------------------------------------
+// ----------------------------------------------
 // Functions implementing the font.Face interface
-//----------------------------------------------
+// ----------------------------------------------
 func (f *FallbackFontFace) Close() error {
 	err := f.primary.Close()
 	for _, fallback := range f.fallbacks {

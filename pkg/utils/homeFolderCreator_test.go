@@ -13,6 +13,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -73,7 +74,7 @@ func TestCanCreateHomeFolderGoldenPath(t *testing.T) {
 	assert.True(t, isExists, "Failed to create file "+galasaHomeDir+"/credentials.properties")
 }
 
-func assertFolderExists(t *testing.T, mockFileSystem files.FileSystem, path string, message string) {
+func assertFolderExists(t *testing.T, mockFileSystem spi.FileSystem, path string, message string) {
 	isExist, _ := mockFileSystem.DirExists(path)
 	assert.True(t, isExist, message)
 }

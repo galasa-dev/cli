@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunsDownloadCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	runsDownloadCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_DOWNLOAD)
@@ -27,7 +28,7 @@ func TestRunsDownloadCommandInCommandCollection(t *testing.T) {
 
 func TestRunsDownloadHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "download", "--help"}
 
@@ -43,7 +44,7 @@ func TestRunsDownloadHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "download"}
 
@@ -59,7 +60,7 @@ func TestRunsDownloadNoFlagsReturnsError(t *testing.T) {
 
 func TestRunsDownloadNameFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "human1"}
@@ -77,7 +78,7 @@ func TestRunsDownloadNameFlagReturnsOk(t *testing.T) {
 
 func TestRunsDownloadNameNoParameterReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name"}
@@ -95,7 +96,7 @@ func TestRunsDownloadNameNoParameterReturnsError(t *testing.T) {
 
 func TestRunsDownloadDestinationReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--destination", "random/destination"}
@@ -113,7 +114,7 @@ func TestRunsDownloadDestinationReturnsError(t *testing.T) {
 
 func TestRunsDownloadNameDestinationReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--destination", "of/decay"}
@@ -133,7 +134,7 @@ func TestRunsDownloadNameDestinationReturnsOk(t *testing.T) {
 
 func TestRunsDownloadNameForceReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--force"}
@@ -153,7 +154,7 @@ func TestRunsDownloadNameForceReturnsOk(t *testing.T) {
 
 func TestRunsDownloadNameDestinationForceReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--destination", "of/decay", "--force"}
@@ -174,7 +175,7 @@ func TestRunsDownloadNameDestinationForceReturnsOk(t *testing.T) {
 
 func TestRunsDownloadNameTwiceOverridesToLatestValue(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_DOWNLOAD, factory, t)
 
 	var args []string = []string{"runs", "download", "--name", "foundations", "--name", "chemicals"}

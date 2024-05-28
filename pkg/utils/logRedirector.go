@@ -11,7 +11,7 @@ import (
 	"log"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 /*
@@ -19,7 +19,7 @@ import (
  * specified file, or if the file name is "-" or empty, the log information won't be
  * re-directed, but will appear on stderr.
  */
-func CaptureLog(fileSystem files.FileSystem, logFileName string) error {
+func CaptureLog(fileSystem spi.FileSystem, logFileName string) error {
 
 	var err error
 

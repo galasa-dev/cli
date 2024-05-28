@@ -9,9 +9,9 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ type RunsResetCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsResetCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsResetCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsResetCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -56,7 +56,7 @@ func (cmd *RunsResetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsResetCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsResetCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsResetCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsResetCobraCmd(
@@ -67,12 +67,12 @@ func (cmd *RunsResetCommand) init(factory Factory, runsCommand GalasaCommand, ro
 	return err
 }
 
-func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory Factory,
-	runsCommand GalasaCommand,
+func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsResetCmd := &cobra.Command{
@@ -96,7 +96,7 @@ func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory Factory,
 }
 
 func (cmd *RunsResetCommand) executeReset(
-	factory Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -115,7 +115,7 @@ func (cmd *RunsResetCommand) executeReset(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
@@ -132,7 +132,11 @@ func (cmd *RunsResetCommand) executeReset(
 				log.Printf("The API Server is at '%s'\n", apiServerUrl)
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
 					// Call to process command in unit-testable way.

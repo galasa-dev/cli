@@ -9,10 +9,11 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/stretchr/testify/assert"
 )
 
-func createTestPortfolioFile(t *testing.T, fs files.FileSystem, portfolioFilePath string, bundleName string, className string, stream string, obr string) *Portfolio {
+func createTestPortfolioFile(t *testing.T, fs spi.FileSystem, portfolioFilePath string, bundleName string, className string, stream string, obr string) *Portfolio {
 	portfolio := NewPortfolio()
 
 	testSelection := new(TestSelection)

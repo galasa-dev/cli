@@ -5,9 +5,9 @@
  */
 package utils
 
-import "github.com/galasa-dev/cli/pkg/files"
+import "github.com/galasa-dev/cli/pkg/spi"
 
-func AddJavaRuntimeToMock(fileSystem files.FileSystem, baseJavaFolderName string) {
+func AddJavaRuntimeToMock(fileSystem spi.FileSystem, baseJavaFolderName string) {
 	separator := fileSystem.GetFilePathSeparator()
 	fileSystem.MkdirAll(baseJavaFolderName + separator + "bin")
 	fileSystem.WriteBinaryFile(baseJavaFolderName+separator+
