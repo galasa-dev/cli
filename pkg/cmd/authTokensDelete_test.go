@@ -12,20 +12,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAuthTokensGetCommandInCommandCollection(t *testing.T) {
+func TestAuthTokensDeleteCommandInCommandCollection(t *testing.T) {
 
 	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
-	AuthTokensGetCommand, err := commands.GetCommand(COMMAND_NAME_AUTH_TOKENS_GET)
+	AuthTokensDeleteCommand, err := commands.GetCommand(COMMAND_NAME_AUTH_TOKENS_DELETE)
 	assert.Nil(t, err)
 
-	assert.Equal(t, COMMAND_NAME_AUTH_TOKENS_GET, AuthTokensGetCommand.Name())
-	assert.Nil(t, AuthTokensGetCommand.Values())
-	assert.NotNil(t, AuthTokensGetCommand.CobraCommand())
+	assert.Equal(t, COMMAND_NAME_AUTH_TOKENS_DELETE, AuthTokensDeleteCommand.Name())
+	assert.Nil(t, AuthTokensDeleteCommand.Values())
+	assert.NotNil(t, AuthTokensDeleteCommand.CobraCommand())
 }
 
-func TestAuthTokensGetHelpFlagSetCorrectly(t *testing.T) {
+func TestAuthTokensDeleteHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 
@@ -42,12 +42,12 @@ func TestAuthTokensGetHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestAuthTokensGetReturnsWithoutError(t *testing.T) {
+func TestAuthTokensDeleteReturnsWithoutError(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
-	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_GET, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_DELETE, factory, t)
 
-	var args []string = []string{"auth", "tokens", "get"}
+	var args []string = []string{"auth", "tokens", "delete"}
 
 	// When...
 	err := commandCollection.Execute(args)
