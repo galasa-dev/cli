@@ -47,7 +47,7 @@ func NewBearerTokenFile(
 }
 
 func ListAllBearerTokenFiles(fileSystem spi.FileSystem, galasaHome spi.GalasaHome) ([]string, error) {
-	bearerTokenFolderPath := filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-tokens")
+	bearerTokenFolderPath := getBearerTokensFolderPath(galasaHome)
 	return fileSystem.GetAllFilePaths(bearerTokenFolderPath)
 }
 
@@ -63,13 +63,17 @@ func DeleteAllBearerTokenFiles(fileSystem spi.FileSystem, galasaHome spi.GalasaH
 	return err
 }
 
+func getBearerTokensFolderPath(galasaHome spi.GalasaHome) string {
+	return filepath.Join(galasaHome.GetNativeFolderPath(), "bearer-tokens")
+}
+
 // Writes a new bearer-token.json file containing a JWT in the following format:
 //
 //	{
 //	  "jwt": "<bearer-token-here>"
 //	}
 func (file *BearerTokenFileImpl) WriteJwt(jwt string, encryptionSecret string) error {
-	bearerTokenFolderPath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-tokens")
+	bearerTokenFolderPath := getBearerTokensFolderPath(file.galasaHome)
 	var err error
 	err = file.fileSystem.MkdirAll(bearerTokenFolderPath)
 	if err != nil {
@@ -153,7 +157,7 @@ func (file *BearerTokenFileImpl) ReadJwt(encryptionSecret string) (string, error
 
 func (file *BearerTokenFileImpl) DeleteJwt() error {
 	var err error
-	bearerTokenFolderPath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-tokens")
+	bearerTokenFolderPath := getBearerTokensFolderPath(file.galasaHome)
 	bearerTokenFilePath := filepath.Join(bearerTokenFolderPath, file.baseFileName)
 	log.Printf("DeleteJwt file '%s'", bearerTokenFilePath)
 
@@ -162,7 +166,7 @@ func (file *BearerTokenFileImpl) DeleteJwt() error {
 }
 
 func (file *BearerTokenFileImpl) Exists() (bool, error) {
-	bearerTokenFolderPath := filepath.Join(file.galasaHome.GetNativeFolderPath(), "bearer-tokens")
+	bearerTokenFolderPath := getBearerTokensFolderPath(file.galasaHome)
 	bearerTokenFilePath := filepath.Join(bearerTokenFolderPath, file.baseFileName)
 	isExists, err := file.fileSystem.Exists(bearerTokenFilePath)
 	return isExists, err
