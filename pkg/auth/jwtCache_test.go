@@ -160,3 +160,28 @@ func TestClearingAllCacheDeletesBearerToken(t *testing.T) {
 	assert.Empty(t, jwtGotBack)
 
 }
+
+func TestCacheLooksEmptyIfEncryptionKeyChanges(t *testing.T) {
+	// Given...
+	cache := createNewJwtCache()
+
+	mockJwt, _ := createDummyJwt()
+
+	cache.Put("myApiServer", "myToken:myClientId", mockJwt)
+	var jwtGotBack string
+	var err error
+	jwtGotBack, err = cache.Get("myApiServer", "myToken:myClientId")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, jwtGotBack)
+	assert.Equal(t, jwtGotBack, mockJwt)
+
+	// So there is a jwt in the cache.
+
+	// When... we change our galasa token
+
+	// Then .. we shouldn't be able to get the jwt back.
+	jwtGotBack, err = cache.Get("myApiServer", "myToken:myClientId2")
+	assert.Nil(t, err)
+	assert.Empty(t, jwtGotBack)
+
+}

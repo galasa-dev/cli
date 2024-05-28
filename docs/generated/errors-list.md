@@ -144,6 +144,9 @@ The `galasactl` tool can generate the following errors:
 - GAL1147E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '{}'. This could indicate a corruption in the file. To resolve, manually delete the file and authenticate against the server again with the 'glasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '{}'
 - GAL1148E: The cache of access tokens contains a java web token (jwt) in file '{}', from which an expiration time could not be extracted. This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '{}'
 
+- GAL1149E: Programming logic error: Cannot encrypt because the length of the key is too small.
+- GAL1150E: Programming logic error: Decryption of cached bearer token failed. Reason: {}
+- GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: {}, AES block size: {}
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

@@ -62,7 +62,7 @@ func NewJwtCache(
 func (cache *fileBasedJwtCache) Put(serverApiUrl string, galasaToken string, jwt string) (err error) {
 	filename := cache.urlToFileName(serverApiUrl) + ".json"
 	file := utils.NewBearerTokenFile(cache.fileSystem, cache.galasaHome, filename, cache.timeService)
-	err = file.WriteJwt(jwt)
+	err = file.WriteJwt(jwt, galasaToken)
 	return err
 }
 
@@ -92,12 +92,18 @@ func (cache *fileBasedJwtCache) Get(serverApiUrl string, galasaToken string) (jw
 	if err == nil {
 
 		if isExists {
-			possiblyInvalidJwt, err = file.ReadJwt()
+			possiblyInvalidJwt, err = file.ReadJwt(galasaToken)
 
-			if err == nil {
+			if err != nil {
+				log.Printf("Could not read JWT from file. Perhaps the Galasa token has changed since it was stored ?. Ignoring. %s", err.Error())
+				err = nil
+			} else {
 				var isValid bool
 				isValid, err = cache.isBearerTokenValid(possiblyInvalidJwt, cache.timeService, filename)
-				if err == nil {
+				if err != nil {
+					log.Printf("Bearer token we read from encrypted file is invalid. Possibly due to Galasa token changing since it was stored. Ignoring. Reason: %s", err.Error())
+					err = nil
+				} else {
 					if isValid {
 						jwt = possiblyInvalidJwt
 					}

@@ -16,6 +16,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var encryptionSecret string = "My long test encryption secret"
+
 func TestWriteBearerTokenJsonFileWritesJwtJsonToFile(t *testing.T) {
 	// Given...
 	mockFileSystem := files.NewMockFileSystem()
@@ -27,14 +29,17 @@ func TestWriteBearerTokenJsonFileWritesJwtJsonToFile(t *testing.T) {
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", NewMockTimeService())
 
 	// When...
-	err := file.WriteJwt(token)
+	err := file.WriteJwt(token, encryptionSecret)
 
 	// Then...
 	assert.Nil(t, err, "Should not return an error when writing a JWT to the bearer-token.json file in an existing galasa home directory")
 
 	bearerTokenJson, _ := mockFileSystem.ReadTextFile(mockGalasaHome.GetNativeFolderPath() + "/bearer-tokens/baseFile.json")
 
-	assert.Contains(t, bearerTokenJson, token)
+	decryptedJson, err := Decrypt(encryptionSecret, bearerTokenJson)
+
+	assert.Nil(t, err)
+	assert.Contains(t, decryptedJson, token)
 }
 
 func TestWriteBearerTokenJsonWithFailingWriteOperationReturnsError(t *testing.T) {
@@ -52,7 +57,7 @@ func TestWriteBearerTokenJsonWithFailingWriteOperationReturnsError(t *testing.T)
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", NewMockTimeService())
 
 	// When...
-	err := file.WriteJwt(token)
+	err := file.WriteJwt(token, encryptionSecret)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error when writing the bearer-token.json file fails")
@@ -71,10 +76,10 @@ func TestGetBearerTokenFromTokenJsonFileReturnsBearerToken(t *testing.T) {
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", mockTimeService)
-	file.WriteJwt(expectedToken)
+	file.WriteJwt(expectedToken, encryptionSecret)
 
 	// When...
-	bearerToken, err := file.ReadJwt()
+	bearerToken, err := file.ReadJwt(encryptionSecret)
 
 	// Then...
 	assert.Nil(t, err, "Should not return an error when a valid bearer token exists and is valid in bearer-token.json")
@@ -91,7 +96,7 @@ func TestGetBearerTokenFromTokenJsonFileWithMissingTokenFileReturnsError(t *test
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile.json", mockTimeService)
 
 	// When...
-	_, err := file.ReadJwt()
+	_, err := file.ReadJwt(encryptionSecret)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error when bearer token file does not exist")
@@ -112,7 +117,7 @@ func TestGetBearerTokenFromTokenJsonFileWithBadContentsReturnsError(t *testing.T
 		"notabearertoken")
 
 	// When...
-	_, err := file.ReadJwt()
+	_, err := file.ReadJwt(encryptionSecret)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error when the bearer token file exists but doesn't contain valid JSON")
@@ -131,9 +136,9 @@ func TestGetAllFilePathsReturnsTwoFiles(t *testing.T) {
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
-	file.WriteJwt(expectedToken)
+	file.WriteJwt(expectedToken, encryptionSecret)
 	file = NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile2.json", mockTimeService)
-	file.WriteJwt(expectedToken)
+	file.WriteJwt(expectedToken, encryptionSecret)
 
 	allFiles, err := ListAllBearerTokenFiles(mockFileSystem, mockGalasaHome)
 	assert.Nil(t, err)
@@ -157,9 +162,9 @@ func TestDeleteAllBearerTokensWorks(t *testing.T) {
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
-	file.WriteJwt(expectedToken)
+	file.WriteJwt(expectedToken, encryptionSecret)
 	file = NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile2.json", mockTimeService)
-	file.WriteJwt(expectedToken)
+	file.WriteJwt(expectedToken, encryptionSecret)
 
 	allFiles, err := ListAllBearerTokenFiles(mockFileSystem, mockGalasaHome)
 	assert.Nil(t, err)
@@ -188,7 +193,7 @@ func TestTokenFileWhichExistsSaysItExists(t *testing.T) {
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
-	file.WriteJwt(expectedToken)
+	file.WriteJwt(expectedToken, encryptionSecret)
 
 	isExists, err := file.Exists()
 	assert.Nil(t, err)
@@ -224,7 +229,7 @@ func TestTokenFileWhichIsDeletedNoLongerExists(t *testing.T) {
 	// Create the jwt on disk.
 	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
-	file.WriteJwt(expectedToken)
+	file.WriteJwt(expectedToken, encryptionSecret)
 
 	// Check it exists
 	isExists, err := file.Exists()
