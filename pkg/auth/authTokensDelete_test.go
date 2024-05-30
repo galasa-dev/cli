@@ -7,7 +7,6 @@
 package auth
 
 import (
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -39,9 +38,7 @@ func mockDeleteTokensServlet(t *testing.T, w http.ResponseWriter, r *http.Reques
 	var statusCode int
 	var jsonRespBody string
 	splitUrl := strings.Split(r.URL.Path, "/")
-	log.Printf("mock %v", splitUrl)
 	tokenId := splitUrl[3]
-	log.Printf("id %v", tokenId)
 
 	//auth/tokens/{tokenId}
 	if tokenId == "unauthorizedToken" {
@@ -56,6 +53,9 @@ func mockDeleteTokensServlet(t *testing.T, w http.ResponseWriter, r *http.Reques
 				"error_code": 5000,
 				"error_message": "GAL5000E: Error occured when trying to access the endpoint. Report the problem to your Galasa Ecosystem owner."
 			}`
+	} else if tokenId == "notFoundToken" {
+		statusCode = 404
+		jsonRespBody = ""
 	} else if tokenId == "validToken" {
 		statusCode = 200
 		jsonRespBody = ""
@@ -91,6 +91,23 @@ func TestInvalidTokenIdWithSpecialCharactersReturnsError(t *testing.T) {
 func TestDeleteValidTokenReturnsOk(t *testing.T) {
 	//Given...
 	tokenId := "validToken"
+
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	//When
+	err := DeleteToken(tokenId, apiClient, console)
+
+	//Then
+	assert.Nil(t, err)
+}
+
+func TestDeleteValidNotFoundTokenReturnsOk(t *testing.T) {
+	//Given...
+	tokenId := "notFoundToken"
 
 	server := newDeleteTokensServletMock(t)
 	apiClient := api.InitialiseAPI(server.URL)

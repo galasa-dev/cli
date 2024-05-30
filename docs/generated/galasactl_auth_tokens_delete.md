@@ -14,7 +14,7 @@ galasactl auth tokens delete [flags]
 
 ```
   -h, --help             Displays the options for the 'auth tokens delete' command.
-      --tokenId string   The ID of the token to be deleted. This is an alphanumeric value
+      --tokenId string   The ID of the token to be deleted. This is an alphanumeric string
 ```
 
 ### Options inherited from parent commands

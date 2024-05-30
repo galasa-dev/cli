@@ -87,7 +87,7 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 	}
 
 	authDeleteTokensCobraCmd.Flags().StringVar(&cmd.values.tokenId, "tokenId", "",
-		"The ID of the token to be deleted. This is an alphanumeric value")
+		"The ID of the token to be deleted. This is an alphanumeric string")
 	authDeleteTokensCobraCmd.MarkFlagRequired("tokenId")
 
 	authTokensCommand.CobraCommand().AddCommand(authDeleteTokensCobraCmd)
@@ -110,7 +110,7 @@ func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 	if err == nil {
 		rootCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Delete a token from the ecosystem")
+		log.Println("Galasa CLI - Delete/Revoke a token from the ecosystem")
 
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()

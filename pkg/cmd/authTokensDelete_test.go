@@ -61,7 +61,7 @@ func TestAuthTokensDeleteWithTokenIdReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestAuthTokensDeleteWithoutTokenIdReturnsOk(t *testing.T) {
+func TestAuthTokensDeleteWithoutTokenIdFlagValueReturnsAppropriateOutput(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_DELETE, factory, t)
