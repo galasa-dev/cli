@@ -31,7 +31,7 @@ func NewAuthServletMock(t *testing.T, status int, mockResponse string) *httptest
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 
-		if strings.Contains(request.URL.Path, "/auth") {
+		if strings.Contains(request.URL.Path, "/auth/tokens") {
 			requestBody, err := io.ReadAll(request.Body)
 			assert.Nil(t, err, "Error reading request body")
 
