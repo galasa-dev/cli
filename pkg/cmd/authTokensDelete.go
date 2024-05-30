@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -19,7 +20,11 @@ import (
 // auth tokens delete --tokenid xxx
 //
 //	And delete the token of that id
+type AuthTokensDeleteCmdValues struct {
+	tokenId string
+}
 type AuthTokensDeleteCommand struct {
+	values       *AuthTokensDeleteCmdValues
 	cobraCommand *cobra.Command
 }
 
@@ -33,7 +38,6 @@ func NewAuthTokensDeleteCommand(
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(AuthTokensDeleteCommand)
-
 	err := cmd.init(factory, authTokensCommand, rootCmd)
 	return cmd, err
 }
@@ -50,8 +54,7 @@ func (cmd *AuthTokensDeleteCommand) CobraCommand() *cobra.Command {
 }
 
 func (cmd *AuthTokensDeleteCommand) Values() interface{} {
-	// There are no values.
-	return nil
+	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -59,7 +62,7 @@ func (cmd *AuthTokensDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthTokensDeleteCommand) init(factory spi.Factory, authTokensCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
-
+	cmd.values = &AuthTokensDeleteCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, rootCmd)
 
 	return err
@@ -67,7 +70,7 @@ func (cmd *AuthTokensDeleteCommand) init(factory spi.Factory, authTokensCommand 
 
 func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 	factory spi.Factory,
-	authTokensCommand,
+	authTokensCommand spi.GalasaCommand,
 	rootCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
@@ -82,6 +85,10 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 			return cmd.executeAuthTokensDelete(factory, authTokensCommand.Values().(*AuthTokensCmdValues), rootCmd.Values().(*RootCmdValues))
 		},
 	}
+
+	authDeleteTokensCobraCmd.Flags().StringVar(&cmd.values.tokenId, "tokenId", "",
+		"The ID of the token to be deleted. This is an alphanumeric value")
+	authDeleteTokensCobraCmd.MarkFlagRequired("tokenId")
 
 	authTokensCommand.CobraCommand().AddCommand(authDeleteTokensCobraCmd)
 
@@ -133,8 +140,7 @@ func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.
-					//err = auth.DeleteTokens(apiClient, console)
-					log.Print(console, apiClient)
+					err = auth.DeleteToken(cmd.values.tokenId, apiClient, console)
 				}
 			}
 		}

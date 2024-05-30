@@ -21,7 +21,8 @@ func TestAuthTokensDeleteCommandInCommandCollection(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, COMMAND_NAME_AUTH_TOKENS_DELETE, AuthTokensDeleteCommand.Name())
-	assert.Nil(t, AuthTokensDeleteCommand.Values())
+	assert.NotNil(t, AuthTokensDeleteCommand.Values())
+	assert.IsType(t, &AuthTokensDeleteCmdValues{}, AuthTokensDeleteCommand.Values())
 	assert.NotNil(t, AuthTokensDeleteCommand.CobraCommand())
 }
 
@@ -29,7 +30,7 @@ func TestAuthTokensDeleteHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 
-	var args []string = []string{"auth", "tokens", "get", "--help"}
+	var args []string = []string{"auth", "tokens", "delete", "--help"}
 
 	// When...
 	err := Execute(factory, args)
@@ -37,17 +38,18 @@ func TestAuthTokensDeleteHelpFlagSetCorrectly(t *testing.T) {
 	// Then...
 
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'auth tokens get' command.", "", factory, t)
+	checkOutput("Displays the options for the 'auth tokens delete' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }
 
-func TestAuthTokensDeleteReturnsWithoutError(t *testing.T) {
+
+func TestAuthTokensDeleteWithTokenIdReturnsOk(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_DELETE, factory, t)
 
-	var args []string = []string{"auth", "tokens", "delete"}
+	var args []string = []string{"auth", "tokens", "delete", "--tokenId", "abc"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -57,4 +59,21 @@ func TestAuthTokensDeleteReturnsWithoutError(t *testing.T) {
 	checkOutput("", "", factory, t)
 
 	assert.Nil(t, err)
+}
+
+func TestAuthTokensDeleteWithoutTokenIdReturnsOk(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_DELETE, factory, t)
+
+	var args []string = []string{"auth", "tokens", "delete", "--tokenId"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	// Check what the user saw is reasonable.
+	assert.NotNil(t, err)
+	checkOutput("", "flag needs an argument: --tokenId", factory, t)
+
 }

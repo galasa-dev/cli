@@ -10,10 +10,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/spi"
+)
+
+const (
+	TOKEN_ID_PATTERN = "^[a-zA-Z0-9]+$"
 )
 
 // GetTokens - performs all the logic to implement the `galasactl auth tokens delete --tokenid xxx` command
@@ -22,10 +27,28 @@ func DeleteToken(
 	apiClient *galasaapi.APIClient,
 	console spi.Console,
 ) error {
-
 	var err error
+	err = validateTokenId(tokenId)
+	if err == nil {
+		log.Print("DeleteToken - valid token id provided")
+		err = deleteTokenFromRestApi(tokenId, apiClient)
+	}
 
-	err = deleteTokenFromRestApi(tokenId, apiClient)
+	return err
+}
+
+// token id are currently strictly alphanumerical
+func validateTokenId(tokenId string) error {
+
+	validTokenIdFormat, err := regexp.Compile(TOKEN_ID_PATTERN)
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_COMPILE_TOKEN_ID_REGEX, err.Error())
+	} else {
+		//check if the token id format matches
+		if !validTokenIdFormat.MatchString(tokenId) {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_TOKEN_ID_FORMAT, tokenId)
+		}
+	}
 
 	return err
 }
@@ -36,8 +59,7 @@ func deleteTokenFromRestApi(tokenId string, apiClient *galasaapi.APIClient) erro
 	var resp *http.Response
 	var responseBody []byte
 
-	apiCall := apiClient.AuthenticationAPIApi.DeleteToken(context, tokenId)
-	_, resp, err = apiCall.Execute()
+	_, resp, err = apiClient.AuthenticationAPIApi.DeleteToken(context, tokenId).Execute()
 
 	if (resp != nil) && (resp.StatusCode != http.StatusOK) {
 		defer resp.Body.Close()
