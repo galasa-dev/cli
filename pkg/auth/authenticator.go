@@ -139,7 +139,7 @@ func (authenticator *authenticatorImpl) getJwtFromRestApi(apiServerUrl string, a
 
 		var tokenResponse *galasaapi.TokenResponse
 		var httpResponse *http.Response
-		tokenResponse, httpResponse, err = apiClient.AuthenticationAPIApi.PostAuthenticate(context).
+		tokenResponse, httpResponse, err = apiClient.AuthenticationAPIApi.CreateToken(context).
 			AuthProperties(authProperties).
 			ClientApiVersion(restApiVersion).
 			Execute()
