@@ -160,6 +160,22 @@ Total:3
 For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_get.md).
 
 
+## auth tokens delete
+
+This command deletes or revokes access to a token identified by the token id.
+
+### Examples
+
+Deleting a token with id 'myId'
+
+```
+galasactl auth tokens delete --tokenId myId
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_delete.md).
+
+
+
 ## runs prepare
 
 The purpose of `runs prepare` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.
