@@ -18,8 +18,7 @@ import (
 
 // Objective: Allow user to do this:
 // auth tokens delete --tokenid xxx
-//
-//	And delete the token of that id
+// And delete the token of that id
 type AuthTokensDeleteCmdValues struct {
 	tokenId string
 }
@@ -62,6 +61,7 @@ func (cmd *AuthTokensDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 func (cmd *AuthTokensDeleteCommand) init(factory spi.Factory, authTokensCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
+
 	cmd.values = &AuthTokensDeleteCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, rootCmd)
 

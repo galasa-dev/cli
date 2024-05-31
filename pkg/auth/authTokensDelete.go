@@ -28,7 +28,7 @@ func DeleteToken(
 	console spi.Console,
 ) error {
 	var err error
-	
+
 	err = validateTokenId(tokenId)
 	if err == nil {
 		log.Print("DeleteToken - valid token id provided")
@@ -66,7 +66,7 @@ func deleteTokenFromRestApi(tokenId string, apiClient *galasaapi.APIClient) erro
 		defer resp.Body.Close()
 
 		responseBody, err = io.ReadAll(resp.Body)
-		log.Printf("deleteTokenFromRestApi Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
+		log.Printf("deleteTokenFromRestApi - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
 
 		if err == nil {
 			//no error returned if a 404 (Not Found) payload is returned, as the ultimate goal of the token not being present is accomplished
