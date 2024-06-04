@@ -63,6 +63,18 @@ function read_boot_jar_version {
 }
 
 
+#----------------------------------------------------------------------------
+function check_exit_code () {
+    # This function takes 3 parameters in the form:
+    # $1 an integer value of the expected exit code
+    # $2 an error message to display if $1 is not equal to 0
+    if [[ "$1" != "0" ]]; then 
+        error "$2" 
+        exit 1  
+    fi
+}
+
+
 #--------------------------------------------------------------------------
 # 
 # Main script logic
@@ -570,13 +582,41 @@ function cleanup_temp {
     cd ${BASEDIR}/temp
 }
 
+
+#-------------------------------------------
+#Detect secrets
+function check_secrets {
+    h2 "updating secrets baseline"
+    cd ${BASEDIR}
+    detect-secrets scan --exclude-files go.sum --update .secrets.baseline
+    rc=$? 
+    check_exit_code $rc "Failed to run detect-secrets. Please check it is installed properly" 
+    success "updated secrets file"
+
+    h2 "running audit for secrets"
+    detect-secrets audit .secrets.baseline
+    rc=$? 
+    check_exit_code $rc "Failed to audit detect-secrets."
+    
+    #Check all secrets have been audited
+    secrets=$(grep -c hashed_secret .secrets.baseline)
+    audits=$(grep -c is_secret .secrets.baseline)
+    if [[ "$secrets" != "$audits" ]]; then 
+        error "Not all secrets found have been audited"
+        exit 1  
+    fi
+    success "secrets audit complete"
+}
+
+
+
+
 # The steps to build the CLI
 clean
 download_dependencies
 generate_rest_client
 go_mod_tidy
 build_executables
-
 
 
 

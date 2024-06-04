@@ -71,7 +71,7 @@ func TestGetBearerTokenFromTokenJsonFileReturnsBearerToken(t *testing.T) {
 	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
-	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s" //This is a mock JWT and contains no info //pragma: allowlist secret
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
@@ -131,7 +131,7 @@ func TestGetAllFilePathsReturnsTwoFiles(t *testing.T) {
 	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
-	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s" //This is a mock JWT and contains no info //pragma: allowlist secret
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
@@ -157,7 +157,7 @@ func TestDeleteAllBearerTokensWorks(t *testing.T) {
 	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
-	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s" //This is a mock JWT and contains no info //pragma: allowlist secret
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
@@ -188,7 +188,7 @@ func TestTokenFileWhichExistsSaysItExists(t *testing.T) {
 	mockGalasaHome, _ := NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
-	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s" //This is a mock JWT and contains no info //pragma: allowlist secret
 	mockCurrentTime := time.UnixMilli(0)
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
@@ -227,7 +227,7 @@ func TestTokenFileWhichIsDeletedNoLongerExists(t *testing.T) {
 	mockTimeService := NewOverridableMockTimeService(mockCurrentTime)
 
 	// Create the jwt on disk.
-	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	expectedToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s" //This is a mock JWT and contains no info //pragma: allowlist secret
 	file := NewBearerTokenFile(mockFileSystem, mockGalasaHome, "baseFile1.json", mockTimeService)
 	file.WriteJwt(expectedToken, encryptionSecret)
 

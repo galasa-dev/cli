@@ -115,7 +115,7 @@ func TestCantGetBackANearlyExpiredToken(t *testing.T) {
 	cache := createNewJwtCache()
 
 	// This is a dummy JWT that expires 1 second after the Unix epoch
-	expiredJwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjF9.2H0EJnt58ApysedXcvNUAy6FhgBIbDmPfq9d79qF4yQ"
+	expiredJwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjF9.2H0EJnt58ApysedXcvNUAy6FhgBIbDmPfq9d79qF4yQ" //pragma: allowlist secret
 
 	cache.Put("myApiServer", "myToken:myClientId", expiredJwt)
 
