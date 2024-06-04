@@ -663,7 +663,7 @@ build_generated_source_gradle
 run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
 
 
-
+check_secrets
 
 # launch_test_on_ecosystem
 # test_on_windows
