@@ -72,7 +72,7 @@ func DownloadArtifacts(
 					err = downloadArtifactsAndRenderImagesToDirectory(apiClient, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
 				}
 			} else {
-				log.Printf("No artifacts to download for run: '%s'", runName)
+				log.Printf("No artifacts to download for run: '%s'\n", runName)
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_ARTIFACTS_TO_DOWNLOAD, runName)
 			}
 		}
@@ -201,7 +201,7 @@ func renderImages(fileSystem spi.FileSystem, filePathsCreated []string, forceOve
 	if err == nil {
 		// Write out a status string to the console about how many files were rendered.
 		count := expander.GetExpandedImageFileCount()
-		log.Printf("Expanded a total of %d image files.", count)
+		log.Printf("Expanded a total of %d image files.\n", count)
 	}
 
 	return err
@@ -295,7 +295,7 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 				artifactPaths = append(artifactPaths, artifact.GetPath())
 			}
 		}
-		log.Printf("%v artifact path(s) found", len(artifactPaths))
+		log.Printf("%v artifact path(s) found\n", len(artifactPaths))
 	}
 
 	return artifactPaths, err
@@ -332,13 +332,13 @@ func WriteArtifactToFileSystem(
 			if err == nil {
 				defer newFile.Close()
 
-				log.Printf("Writing artifact '%s' to '%s' on local file system", fileName, targetFilePath)
+				log.Printf("Writing artifact '%s' to '%s' on local file system\n", fileName, targetFilePath)
 
 				err = TransferContent(fileDownloaded, newFile, targetFilePath)
 				if err == nil {
-					log.Printf("Artifact '%s' written to '%s' OK", fileName, targetFilePath)
+					log.Printf("Artifact '%s' written to '%s' OK\n", fileName, targetFilePath)
 				} else {
-					log.Printf("Artifact '%s' write to '%s' failed. '%s'", fileName, targetFilePath, err.Error())
+					log.Printf("Artifact '%s' write to '%s' failed. '%s'\n", fileName, targetFilePath, err.Error())
 				}
 			}
 		}
@@ -364,7 +364,7 @@ func TransferContent(sourceFile io.Reader, targetFile io.WriteCloser, targetFile
 		var bytesRead int
 		bytesRead, err = reader.Read(buffer)
 		if err != nil {
-			log.Printf("TransferContent: Read(...) returned %s", err.Error())
+			log.Printf("TransferContent: Read(...) returned %s\n", err.Error())
 
 			// Suppress end of file error, as we want to read until the end of the file.
 			if err == io.EOF {
@@ -374,18 +374,18 @@ func TransferContent(sourceFile io.Reader, targetFile io.WriteCloser, targetFile
 			break
 		}
 
-		log.Printf("TransferContent: Read(...) returned %d bytes of data", bytesRead)
+		log.Printf("TransferContent: Read(...) returned %d bytes of data\n", bytesRead)
 
 		_, err = targetFile.Write(buffer[:bytesRead])
 		if err != nil {
-			log.Printf("TransferContent: Write() failed. err=%s", err.Error())
+			log.Printf("TransferContent: Write() failed. err=%s\n", err.Error())
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_WRITE_FILE, targetFilePath, err.Error())
 			break
 		}
 	}
 
 	if err != nil {
-		log.Printf("TransferContent problem. File: %s. err: %s", targetFilePath, err.Error())
+		log.Printf("TransferContent problem. File: %s. err: %s\n", targetFilePath, err.Error())
 	}
 
 	return err
@@ -419,7 +419,7 @@ func GetFileFromRestApi(runId string, artifactPath string, apiClient *galasaapi.
 	isFileEmpty := false
 	var httpResponse *http.Response
 	var fileDownloaded *os.File
-	log.Printf("Downloading artifact '%s' from API server", artifactPath)
+	log.Printf("Downloading artifact '%s' from API server\n", artifactPath)
 
 	var restApiVersion string
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
@@ -433,12 +433,12 @@ func GetFileFromRestApi(runId string, artifactPath string, apiClient *galasaapi.
 
 		if err != nil {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
-			log.Printf("Failed to download artifact. %s", err.Error())
+			log.Printf("Failed to download artifact. %s\n", err.Error())
 		} else {
-			log.Printf("Artifact '%s' http response from API server OK", artifactPath)
+			log.Printf("Artifact '%s' http response from API server OK\n", artifactPath)
 
 			if fileDownloaded == nil {
-				log.Printf("Artifact '%s' http response returned nil file content.", artifactPath)
+				log.Printf("Artifact '%s' http response returned nil file content.\n", artifactPath)
 				isFileEmpty = true
 			}
 		}
