@@ -147,6 +147,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1149E: Programming logic error: Cannot encrypt because the length of the key is too small.
 - GAL1150E: Programming logic error: Decryption of cached bearer token failed. Reason: {}
 - GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: {}, AES block size: {}
+- GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

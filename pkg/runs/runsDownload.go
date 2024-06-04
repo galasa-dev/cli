@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -351,7 +350,7 @@ func WriteArtifactToFileSystem(
 // to read and write the contents in chunks.
 func TransferContent(sourceFile io.Reader, targetFile io.WriteCloser, targetFilePath string) error {
 
-	log.Printf("TransferContent: Entered. targetFilePath: %s sourceFile type:%s", targetFilePath, reflect.TypeOf(sourceFile))
+	log.Printf("TransferContent: Entered. targetFilePath: %s\n", targetFilePath)
 
 	var err error
 
