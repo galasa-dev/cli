@@ -29,7 +29,7 @@ type commandCollectionImpl struct {
 
 const (
 	COMMAND_NAME_ROOT                     = "galasactl"
-	COMMAND_NAME_AUTH                     = "auth"
+	COMMAND_NAME_AUTH                     = "auth" //This is a command, not a secret //pragma: allowlist secret
 	COMMAND_NAME_AUTH_LOGIN               = "auth login"
 	COMMAND_NAME_AUTH_LOGOUT              = "auth logout"
 	COMMAND_NAME_AUTH_TOKENS              = "auth tokens"
