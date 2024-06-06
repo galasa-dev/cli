@@ -8,8 +8,8 @@ package runs
 import (
 	"testing"
 
-	"github.com/galasa-dev/cli/pkg/runsformatter"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/runsformatter"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,14 +31,13 @@ func CreateMethod(methodName string,
 	return method
 }
 
-
 func createRunForConverter(
 	runName string,
 	testName string,
 	requestor string,
 	status string,
 	result string,
-	queued string, 
+	queued string,
 	methods []galasaapi.TestMethod) galasaapi.Run {
 	run1Id := "ar"
 	bundle := ""
@@ -194,11 +193,11 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		//StartTimeUTC  string
 		//EndTimeUTC    string
 		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
-		Requestor:    "Requestor1",
-		Bundle:       "bundle1",
-		ApiServerUrl: "127.0.0.1",
-		Methods:      nil,
-		Lost:         false,
+		Requestor:     "Requestor1",
+		Bundle:        "bundle1",
+		ApiServerUrl:  "https://my.host1/api",
+		Methods:       nil,
+		Lost:          false,
 	}
 	formattableTest2 := runsformatter.FormattableTest{
 		RunId:    "id2",
@@ -209,11 +208,11 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		//StartTimeUTC  string
 		//EndTimeUTC    string
 		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
-		Requestor:    "Requestor2",
-		Bundle:       "bundle2",
-		ApiServerUrl: "127.0.0.1",
-		Methods:      nil,
-		Lost:         false,
+		Requestor:     "Requestor2",
+		Bundle:        "bundle2",
+		ApiServerUrl:  "https://my.host2/api",
+		Methods:       nil,
+		Lost:          false,
 	}
 	formattableTest3 := runsformatter.FormattableTest{
 		RunId:    "id3",
@@ -224,11 +223,11 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		//StartTimeUTC  string
 		//EndTimeUTC    string
 		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
-		Requestor:    "Requestor3",
-		Bundle:       "bundle3",
-		ApiServerUrl: "137.0.0.1",
-		Methods:      nil,
-		Lost:         false,
+		Requestor:     "Requestor3",
+		Bundle:        "bundle3",
+		ApiServerUrl:  "https://my.host3/api",
+		Methods:       nil,
+		Lost:          false,
 	}
 	formattableTest4 := runsformatter.FormattableTest{
 		RunId:    "id4",
@@ -239,11 +238,11 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		//StartTimeUTC  string
 		//EndTimeUTC    string
 		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
-		Requestor:    "Requestor4",
-		Bundle:       "bundle4",
-		ApiServerUrl: "147.0.0.1",
-		Methods:      nil,
-		Lost:         false,
+		Requestor:     "Requestor4",
+		Bundle:        "bundle4",
+		ApiServerUrl:  "https://my.host4/api",
+		Methods:       nil,
+		Lost:          false,
 	}
 	formattableTest5 := runsformatter.FormattableTest{
 		RunId:    "id5",
@@ -254,11 +253,11 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		//StartTimeUTC  string
 		//EndTimeUTC    string
 		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
-		Requestor:    "Requestor5",
-		Bundle:       "bundle5",
-		ApiServerUrl: "157.0.0.1",
-		Methods:      nil,
-		Lost:         false,
+		Requestor:     "Requestor5",
+		Bundle:        "bundle5",
+		ApiServerUrl:  "https://my.host5/api",
+		Methods:       nil,
+		Lost:          false,
 	}
 	formattableTest6 := runsformatter.FormattableTest{
 		RunId:    "id6",
@@ -269,11 +268,11 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		//StartTimeUTC  string
 		//EndTimeUTC    string
 		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
-		Requestor:    "Requestor6",
-		Bundle:       "bundle6",
-		ApiServerUrl: "167.0.0.1",
-		Methods:      nil,
-		Lost:         false,
+		Requestor:     "Requestor6",
+		Bundle:        "bundle6",
+		ApiServerUrl:  "https://my.host6/api",
+		Methods:       nil,
+		Lost:          false,
 	}
 	formattableTest7 := runsformatter.FormattableTest{
 		RunId:    "id7",
@@ -284,11 +283,11 @@ func TestFormattableTestsArePrintedInOrder(t *testing.T) {
 		//StartTimeUTC  string
 		//EndTimeUTC    string
 		QueuedTimeUTC: "2023-05-04T10:45:29.545323Z",
-		Requestor:    "Requestor7",
-		Bundle:       "bundle7",
-		ApiServerUrl: "177.0.0.1",
-		Methods:      nil,
-		Lost:         false,
+		Requestor:     "Requestor7",
+		Bundle:        "bundle7",
+		ApiServerUrl:  "https://my.host7/api",
+		Methods:       nil,
+		Lost:          false,
 	}
 	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3, formattableTest4, formattableTest5, formattableTest6, formattableTest7)
 	//When
@@ -420,15 +419,15 @@ func TestRunsOfTestRunStructArePrintedInSortedOrder(t *testing.T) {
 
 func TestGherkinRunReturnsCorrectFormattableTestly(t *testing.T) {
 	testRun := TestRun{
-		Name:      "",
-		Bundle:    "",
-		Class:     "",
-		Stream:    "",
-		Status:    "myStatus",
-		Result:    "Passed",
-		Overrides: make(map[string]string, 1),
-		Tests:     []TestMethod{{Method: "Scenario1", Result: "passed"}, {Method: "Scenario2", Result: "passed"}},
-		GherkinUrl: "file:///my/directory/path/GherkinFeature.feature",
+		Name:           "",
+		Bundle:         "",
+		Class:          "",
+		Stream:         "",
+		Status:         "myStatus",
+		Result:         "Passed",
+		Overrides:      make(map[string]string, 1),
+		Tests:          []TestMethod{{Method: "Scenario1", Result: "passed"}, {Method: "Scenario2", Result: "passed"}},
+		GherkinUrl:     "file:///my/directory/path/GherkinFeature.feature",
 		GherkinFeature: "GherkinFeature",
 	}
 
