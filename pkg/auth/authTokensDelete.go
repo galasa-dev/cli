@@ -77,12 +77,12 @@ func deleteTokenFromRestApi(tokenId string, apiClient *galasaapi.APIClient) erro
 			
 						if err == nil {
 							// Return a Galasa API error, because the status code is not 200 (OK)
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_TOKEN_FAILED, tokenId, errorFromServer.Message)
+							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_REVOKE_TOKEN_FAILED, tokenId, errorFromServer.Message)
 						}
 					}
 			} else {
 				// No response was received from the API server, so something else may have gone wrong
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_TOKEN_FAILED, tokenId, err.Error())
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_REVOKE_TOKEN_FAILED, tokenId, err.Error())
 			}
 		}
 	}

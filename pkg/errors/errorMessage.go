@@ -245,7 +245,7 @@ var (
 	GALASA_JWT_DECRYPTION_FAILED_BASE64           = NewMessageType("GAL1150E: Programming logic error: Decryption of cached bearer token failed. Reason: %s", 1150, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_DECRYPTION_FAILED_BLOCK_TOO_SMALL  = NewMessageType("GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: %d, AES block size: %d", 1151, STACK_TRACE_NOT_WANTED)
 	GALASA_ENCRYPTION_DATA_TOO_LONG               = NewMessageType("GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.", 1152, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_TOKEN_FAILED              = NewMessageType("GAL1153E: Failed to delete the token with ID '%v'. Reason: '%s'.", 1153, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_REVOKE_TOKEN_FAILED              = NewMessageType("GAL1153E: Failed to revoke the token with ID '%v'. Reason: '%s'.", 1153, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_TOKEN_ID_FORMAT          = NewMessageType("GAL1154E: The provided token ID, '%s', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.", 1154, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...

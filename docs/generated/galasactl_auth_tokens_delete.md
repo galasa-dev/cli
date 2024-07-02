@@ -1,10 +1,10 @@
 ## galasactl auth tokens delete
 
-Deletes a personal access token
+Revokes a personal access token
 
 ### Synopsis
 
-Deletes a token used for authentication with the Galasa API server through the provided token id
+Revokes a token used for authentication with the Galasa API server through the provided token id
 
 ```
 galasactl auth tokens delete [flags]

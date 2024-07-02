@@ -23,6 +23,6 @@ Allows interaction with a Galasa Ecosystem's auth store to query tokens and retr
 ### SEE ALSO
 
 * [galasactl auth](galasactl_auth.md)	 - Manages authentication with a Galasa ecosystem
-* [galasactl auth tokens delete](galasactl_auth_tokens_delete.md)	 - Deletes a personal access token
+* [galasactl auth tokens delete](galasactl_auth_tokens_delete.md)	 - Revokes a personal access token
 * [galasactl auth tokens get](galasactl_auth_tokens_get.md)	 - Get a list of authentication tokens
 

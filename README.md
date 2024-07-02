@@ -168,7 +168,7 @@ To retrieve a list of available personal access tokens that have been created an
 
 ### Examples
 
-Deleting a token with ID 'myId'
+Revoking a token with ID 'myId'
 
 ```
 galasactl auth tokens delete --tokenid myId

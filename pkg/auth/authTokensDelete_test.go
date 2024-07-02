@@ -190,7 +190,7 @@ func TestDeleteWithValidNotFoundTokenReturnsOk(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to delete the token with ID")
+	assert.Contains(t, err.Error(), "Failed to revoke the token with ID")
 	assert.Contains(t, err.Error(), "GAL1153E")
 }
 

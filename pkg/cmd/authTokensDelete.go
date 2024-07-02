@@ -78,8 +78,8 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 
 	authDeleteTokensCobraCmd := &cobra.Command{
 		Use:     "delete",
-		Short:   "Deletes a personal access token",
-		Long:    "Deletes a token used for authentication with the Galasa API server through the provided token id",
+		Short:   "Revokes a personal access token",
+		Long:    "Revokes a token used for authentication with the Galasa API server through the provided token id",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
 			return cmd.executeAuthTokensDelete(factory, authTokensCommand.Values().(*AuthTokensCmdValues), rootCmd.Values().(*RootCmdValues))
