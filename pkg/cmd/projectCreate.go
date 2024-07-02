@@ -38,6 +38,7 @@ type ProjectCreateCmdValues struct {
 	force                      bool
 	isOBRProjectRequired       bool
 	featureNamesCommaSeparated string
+  manager                    string
 	useMaven                   bool
 	useGradle                  bool
 	isDevelopmentProjectCreate bool
@@ -118,7 +119,8 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 
 	projectCreateCmd.Flags().BoolVar(&cmd.values.force, "force", false, "Force-overwrite files which already exist.")
 	projectCreateCmd.Flags().BoolVar(&cmd.values.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	projectCreateCmd.Flags().StringVar(&cmd.values.featureNamesCommaSeparated, "features", "feature1",
+	projectCreateCmd.Flags().StringVar(&cmd.values.manager, "manager", "", "manager to create manager")
+  projectCreateCmd.Flags().StringVar(&cmd.values.featureNamesCommaSeparated, "features", "feature1",
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
@@ -151,6 +153,7 @@ func (cmd *ProjectCreateCommand) executeCreateProject(factory spi.Factory, rootC
 		err = createProject(fileSystem,
 			cmd.values.packageName,
 			cmd.values.featureNamesCommaSeparated,
+      cmd.values.manager,
 			cmd.values.isOBRProjectRequired,
 			cmd.values.force,
 			cmd.values.useMaven,
@@ -201,6 +204,7 @@ func createProject(
 	fileSystem spi.FileSystem,
 	packageName string,
 	featureNamesCommaSeparated string,
+  manager string,
 	isOBRProjectRequired bool,
 	forceOverwrite bool,
 	useMaven bool,
@@ -208,7 +212,7 @@ func createProject(
 	isDevelopment bool,
 ) error {
 
-	log.Printf("Creating project using packageName:%s\n", packageName)
+	log.Printf("Hello my name Creating project using packageName:%s\n", packageName)
 
 	var err error
 
@@ -240,7 +244,7 @@ func createProject(
 				}
 
 				if err == nil {
-					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite,
+					err = createTestProjects(fileGenerator, packageName, featureNames, manager, forceOverwrite,
 						useMaven, useGradle, isDevelopment)
 					if err == nil {
 						if isOBRProjectRequired {
@@ -433,6 +437,7 @@ func createTestProjects(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
 	featureNames []string,
+  manager string,
 	forceOverwrite bool,
 	useMaven bool,
 	useGradle bool,
@@ -446,6 +451,7 @@ func createTestProjects(
 			break
 		}
 	}
+  err = createTestManager(fileGenerator, packageName, manager, forceOverwrite, useMaven, useGradle, isDevelopment)
 	return err
 }
 
@@ -482,6 +488,40 @@ func createTestProject(
 	if err == nil {
 		err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
 	}
+
+	if err == nil {
+		log.Printf("Tests project %s created OK.", targetFolderPath)
+	}
+	return err
+}
+
+// createTestProject - creates a single project to contain tests which test a feature.
+func createTestManager(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+  manager string,
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool,
+	isDevelopment bool,
+) error {
+
+	targetFolderPath := packageName + "/" + packageName + "." + manager
+	log.Printf("Creating tests project %s\n", targetFolderPath)
+
+	// Create the base test folder
+	err := fileGenerator.CreateFolder(targetFolderPath)
+	if err == nil {
+    if useMaven {
+			err = createTestFolderPom(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
+		}
+
+		err = createTestFolderGradle(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite, isDevelopment)
+	}
+
+	err = createJavaSourceFolder(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
+
+	err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
 
 	if err == nil {
 		log.Printf("Tests project %s created OK.", targetFolderPath)
@@ -620,6 +660,48 @@ func createTestFolderPom(fileGenerator *utils.FileGenerator, targetTestFolderPat
 
 // Creates a build.gradle and a bnd.bnd file in a Gradle test project directory.
 func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
+	packageName string, featureName string, forceOverwrite bool, isDevelopment bool) error {
+
+	type TestGradleParameters struct {
+		Parent      GradleCoordinates
+		Coordinates GradleCoordinates
+		// Version of Galasa we are targetting
+		GalasaVersion string
+		IsDevelopment bool
+	}
+
+	galasaVersion, err := embedded.GetGalasaVersion()
+
+	if err == nil {
+		gradleProjectTemplateParameters := TestGradleParameters{
+			Parent:        GradleCoordinates{GroupId: packageName, Name: packageName},
+			Coordinates:   GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
+			GalasaVersion: galasaVersion,
+			IsDevelopment: isDevelopment}
+
+		buildGradleFile := utils.GeneratedFileDef{
+			FileType:                 "gradle",
+			TargetFilePath:           targetTestFolderPath + "/build.gradle",
+			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/build.gradle.template",
+			TemplateParameters:       gradleProjectTemplateParameters}
+
+		err = fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
+
+		if err == nil {
+			bndFile := utils.GeneratedFileDef{
+				FileType:                 "bnd",
+				TargetFilePath:           targetTestFolderPath + "/bnd.bnd",
+				EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/bnd.bnd",
+				TemplateParameters:       gradleProjectTemplateParameters}
+			err = fileGenerator.CreateFile(bndFile, forceOverwrite, true)
+		}
+	}
+
+	return err
+}
+
+// Creates a build.gradle and a bnd.bnd file in a Gradle test project directory.
+func createTestFolderManager(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
 	packageName string, featureName string, forceOverwrite bool, isDevelopment bool) error {
 
 	type TestGradleParameters struct {
