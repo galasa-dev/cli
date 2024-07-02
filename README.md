@@ -162,14 +162,14 @@ For a complete list of supported parameters see [here](./docs/generated/galasact
 
 ## auth tokens delete
 
-This command deletes or revokes access to a token identified by the token id.
+This command deletes a token identified by the token id.
 
 ### Examples
 
 Deleting a token with id 'myId'
 
 ```
-galasactl auth tokens delete --tokenId myId
+galasactl auth tokens delete --tokenid myId
 ```
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_delete.md).

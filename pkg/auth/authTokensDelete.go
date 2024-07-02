@@ -12,16 +12,17 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 const (
-	TOKEN_ID_PATTERN = "^[a-zA-Z0-9]+$"
+	TOKEN_ID_PATTERN = "^[a-zA-Z0-9\\_\\-]+$"
 )
 
-// GetTokens - performs all the logic to implement the `galasactl auth tokens delete --tokenid xxx` command
+// DeleteToken - performs all the logic to implement the `galasactl auth tokens delete --tokenid xxx` command
 func DeleteToken(
 	tokenId string,
 	apiClient *galasaapi.APIClient,
@@ -38,14 +39,13 @@ func DeleteToken(
 	return err
 }
 
-// token id are currently strictly alphanumerical
 func validateTokenId(tokenId string) error {
 
 	validTokenIdFormat, err := regexp.Compile(TOKEN_ID_PATTERN)
 	if err != nil {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_COMPILE_TOKEN_ID_REGEX, err.Error())
 	} else {
-		//check if the token id format matches
+		// Check if the token ID format is valid
 		if !validTokenIdFormat.MatchString(tokenId) {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_TOKEN_ID_FORMAT, tokenId)
 		}
@@ -59,36 +59,34 @@ func deleteTokenFromRestApi(tokenId string, apiClient *galasaapi.APIClient) erro
 	var context context.Context
 	var resp *http.Response
 	var responseBody []byte
+	
+	var restApiVersion string
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	_, resp, err = apiClient.AuthenticationAPIApi.DeleteToken(context, tokenId).Execute()
-
-	if (resp != nil) && (resp.StatusCode != http.StatusOK) {
-		defer resp.Body.Close()
-
-		responseBody, err = io.ReadAll(resp.Body)
-		log.Printf("deleteTokenFromRestApi - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
-
-		if err == nil {
-			//no error returned if a 404 (Not Found) payload is returned, as the ultimate goal of the token not being present is accomplished
-			if resp.StatusCode == http.StatusNotFound {
-				log.Printf("deleteTokenFromRestApi - token id '%s' was not found, and therefore cannot be deleted.", tokenId)
+	if err == nil {
+		_, resp, err = apiClient.AuthenticationAPIApi.DeleteToken(context, tokenId).ClientApiVersion(restApiVersion).Execute()
+	
+		if err != nil {
+			// Try to get the error returned from the API server and return that message
+			if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+				defer resp.Body.Close()
+					responseBody, err = io.ReadAll(resp.Body)
+					log.Printf("deleteTokenFromRestApi - HTTP response - Status Code: '%v' Payload: '%v' ", resp.StatusCode, string(responseBody))
+			
+					if err == nil {
+						var errorFromServer *galasaErrors.GalasaAPIError
+						errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+			
+						if err == nil {
+							// Return a Galasa API error, because the status code is not 200 (OK)
+							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_TOKEN_FAILED, tokenId, errorFromServer.Message)
+						}
+					}
 			} else {
-				var errorFromServer *galasaErrors.GalasaAPIError
-				errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
-
-				if err == nil {
-					//return galasa api error, because status code is not 200 (OK)
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_TOKEN_FAILED, tokenId, errorFromServer.Message)
-				} else {
-					//unable to parse response into api error
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_TOKEN_RESPONSE_PARSING, err.Error())
-				}
+				// No response was received from the API server, so something else may have gone wrong
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_TOKEN_FAILED, tokenId, err.Error())
 			}
-		} else {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err.Error())
 		}
-
 	}
-
 	return err
 }

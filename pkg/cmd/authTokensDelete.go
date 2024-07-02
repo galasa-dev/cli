@@ -86,9 +86,8 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 		},
 	}
 
-	authDeleteTokensCobraCmd.Flags().StringVar(&cmd.values.tokenId, "tokenId", "",
-		"The ID of the token to be deleted. This is an alphanumeric string")
-	authDeleteTokensCobraCmd.MarkFlagRequired("tokenId")
+	authDeleteTokensCobraCmd.Flags().StringVar(&cmd.values.tokenId, "tokenid", "", "The ID of the token to be deleted.")
+	authDeleteTokensCobraCmd.MarkFlagRequired("tokenid")
 
 	authTokensCommand.CobraCommand().AddCommand(authDeleteTokensCobraCmd)
 

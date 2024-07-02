@@ -45,18 +45,24 @@ func mockDeleteTokensServlet(t *testing.T, w http.ResponseWriter, r *http.Reques
 		statusCode = 401
 		jsonRespBody = `{
 			"error_code": 5401,
-			"error_message": "GAL5401E: Unauthorized. Please ensure you have provided a valid 'Authorization' header with a valid bearer token and try again."
-			}`
+			"error_message": "GAL5401E: Unauthorized."
+		}`
 	} else if tokenId == "serverErrToken" {
 		statusCode = 500
 		jsonRespBody = `{
-				"error_code": 5000,
-				"error_message": "GAL5000E: Error occured when trying to access the endpoint. Report the problem to your Galasa Ecosystem owner."
-			}`
+			"error_code": 5000,
+			"error_message": "GAL5000E: Internal server error occurred."
+		}`
 	} else if tokenId == "notFoundToken" {
 		statusCode = 404
-		jsonRespBody = ""
-	} else if tokenId == "validToken" {
+		jsonRespBody = `{
+			"error_code": 5404,
+			"error_message": "GAL5404E: Token record with the provided ID was not found."
+		}`
+	} else if tokenId == "invalidResponse" {
+		statusCode = 500
+		jsonRespBody = `this is not a valid JSON response from the API server!`
+	} else {
 		statusCode = 200
 		jsonRespBody = ""
 	}
@@ -65,31 +71,27 @@ func mockDeleteTokensServlet(t *testing.T, w http.ResponseWriter, r *http.Reques
 	w.Write([]byte(jsonRespBody))
 }
 
-func TestValidTokenIdFormatReturnsOk(t *testing.T) {
-	//Given
-	validTokenIdFormat := "siuIOHUDH98Y73GioudusIUH"
-
-	//When
-	err := validateTokenId(validTokenIdFormat)
-
-	//then
-	assert.Nil(t, err)
-}
 func TestInvalidTokenIdWithSpecialCharactersReturnsError(t *testing.T) {
-	//Given
+	// Given...
 	invalidTokenIdFormat := "siuIOHUDH98Y:73GioudusIUH"
 
-	//When
-	err := validateTokenId(invalidTokenIdFormat)
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
 
-	//then
+	console := utils.NewMockConsole()
+
+	// When
+	err := DeleteToken(invalidTokenIdFormat, apiClient, console)
+
+	// Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "The provided token id, '"+invalidTokenIdFormat+"', provided does not match formatting requirements. The token id must be an alphanumeric string only.")
+	assert.Contains(t, err.Error(), "The provided token ID, '" + invalidTokenIdFormat + "', does not match formatting requirements")
 	assert.Contains(t, err.Error(), "GAL1156E")
 }
 
-func TestDeleteValidTokenReturnsOk(t *testing.T) {
-	//Given...
+func TestDeleteTokenWithAlphabeticTokenReturnsOk(t *testing.T) {
+	// Given...
 	tokenId := "validToken"
 
 	server := newDeleteTokensServletMock(t)
@@ -98,15 +100,100 @@ func TestDeleteValidTokenReturnsOk(t *testing.T) {
 
 	console := utils.NewMockConsole()
 
-	//When
+	// When...
 	err := DeleteToken(tokenId, apiClient, console)
 
-	//Then
+	// Then...
 	assert.Nil(t, err)
 }
 
-func TestDeleteValidNotFoundTokenReturnsOk(t *testing.T) {
-	//Given...
+func TestDeleteTokenWithNumericTokenReturnsOk(t *testing.T) {
+	// Given...
+	tokenId := "123456789"
+
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	// When...
+	err := DeleteToken(tokenId, apiClient, console)
+
+	// Then...
+	assert.Nil(t, err)
+}
+
+func TestDeleteTokenWithAlphanumericTokenReturnsOk(t *testing.T) {
+	// Given...
+	tokenId := "validtoken123WithAlphanum456Characters789"
+
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	// When...
+	err := DeleteToken(tokenId, apiClient, console)
+
+	// Then...
+	assert.Nil(t, err)
+}
+
+func TestDeleteTokenWithAlphanumDashesTokenReturnsOk(t *testing.T) {
+	// Given...
+	tokenId := "token-with-123-dashes-and-numbers"
+
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	// When...
+	err := DeleteToken(tokenId, apiClient, console)
+
+	// Then...
+	assert.Nil(t, err)
+}
+
+func TestDeleteTokenWithAlphanumUnderscoresTokenReturnsOk(t *testing.T) {
+	// Given...
+	tokenId := "token_with_123_underscores_and_numbers"
+
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	// When...
+	err := DeleteToken(tokenId, apiClient, console)
+
+	// Then...
+	assert.Nil(t, err)
+}
+
+func TestDeleteTokenWithAlphanumUnderscoresAndDashesTokenReturnsOk(t *testing.T) {
+	// Given...
+	tokenId := "token-with_dashes-123_underscores_and_numbers"
+
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	// When...
+	err := DeleteToken(tokenId, apiClient, console)
+
+	// Then...
+	assert.Nil(t, err)
+}
+
+func TestDeleteWithValidNotFoundTokenReturnsOk(t *testing.T) {
+	// Given...
 	tokenId := "notFoundToken"
 
 	server := newDeleteTokensServletMock(t)
@@ -115,15 +202,17 @@ func TestDeleteValidNotFoundTokenReturnsOk(t *testing.T) {
 
 	console := utils.NewMockConsole()
 
-	//When
+	// When...
 	err := DeleteToken(tokenId, apiClient, console)
 
-	//Then
-	assert.Nil(t, err)
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Failed to delete the token with ID")
+	assert.Contains(t, err.Error(), "GAL1153E")
 }
 
 func TestDeleteUnauthorizedTokenReturnsError(t *testing.T) {
-	//Given...
+	// Given...
 	tokenId := "unauthorizedToken"
 
 	server := newDeleteTokensServletMock(t)
@@ -132,17 +221,17 @@ func TestDeleteUnauthorizedTokenReturnsError(t *testing.T) {
 
 	console := utils.NewMockConsole()
 
-	//When
+	// When...
 	err := DeleteToken(tokenId, apiClient, console)
 
-	//Then
+	// Then...
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Unauthorized. Please ensure you have provided a valid 'Authorization' header with a valid bearer token and try again.")
+	assert.Contains(t, err.Error(), "Unauthorized")
 	assert.Contains(t, err.Error(), "GAL5401E")
 }
 
-func TestDeleteTokenServerErrorTokenReturnedReturnsError(t *testing.T) {
-	//Given...
+func TestDeleteTokenWithInternalServerErrorReturnsError(t *testing.T) {
+	// Given...
 	tokenId := "serverErrToken"
 
 	server := newDeleteTokensServletMock(t)
@@ -151,11 +240,30 @@ func TestDeleteTokenServerErrorTokenReturnedReturnsError(t *testing.T) {
 
 	console := utils.NewMockConsole()
 
-	//When
+	// When...
 	err := DeleteToken(tokenId, apiClient, console)
 
-	//Then
+	// Then...
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Error occured when trying to access the endpoint. Report the problem to your Galasa Ecosystem owner.")
+	assert.Contains(t, err.Error(), "Internal server error occurred")
 	assert.Contains(t, err.Error(), "GAL5000E")
+}
+
+func TestDeleteTokenWithInvalidServerResponseReturnsError(t *testing.T) {
+	// Given...
+	tokenId := "invalidResponse"
+
+	server := newDeleteTokensServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	console := utils.NewMockConsole()
+
+	// When...
+	err := DeleteToken(tokenId, apiClient, console)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Error reading the HTTP Response body")
+	assert.Contains(t, err.Error(), "GAL1116E")
 }

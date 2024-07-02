@@ -238,17 +238,16 @@ var (
 	GALASA_ERROR_RETRIEVING_TOKEN_LIST_FROM_API_SERVER = NewMessageType("GAL1146E: Could not get list of tokens from API server. Reason: '%s'."+
 		" Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file", 1146, STACK_TRACE_WANTED)
 	GALASA_JWT_CANNOT_BE_PARSED = NewMessageType("GAL1147E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '%s'. This could indicate a corruption in the file. To resolve,"+
-		" manually delete the file and authenticate against the server again with the 'glasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '%s'", 1147, STACK_TRACE_NOT_WANTED)
+		" manually delete the file and authenticate against the server again with the 'galasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '%s'", 1147, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_HAS_NO_EXPIRATION_DATETIME = NewMessageType("GAL1148E: The cache of access tokens contains a java web token (jwt) in file '%s', from which an expiration time could not be extracted."+
 		" This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '%s'\n", 1148, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_ENCRYPTION_INVALID_GALASA_TOKEN    = NewMessageType("GAL1149E: Programming logic error: Cannot encrypt because the length of the key is too small.", 1149, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_DECRYPTION_FAILED_BASE64           = NewMessageType("GAL1150E: Programming logic error: Decryption of cached bearer token failed. Reason: %s", 1150, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_DECRYPTION_FAILED_BLOCK_TOO_SMALL  = NewMessageType("GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: %d, AES block size: %d", 1151, STACK_TRACE_NOT_WANTED)
 	GALASA_ENCRYPTION_DATA_TOO_LONG               = NewMessageType("GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.", 1152, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_TOKEN_FAILED              = NewMessageType("GAL1153E: Failed to delete the token with id '%v'. Reason: '%s'.", 1153, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_TOKEN_RESPONSE_PARSING    = NewMessageType("GAL1154E: The auth tokens delete operation failed. Unable to process the error information returned from the server. Reason: '%s'", 1154, STACK_TRACE_WANTED)
-	GALASA_ERROR_FAILED_TO_COMPILE_TOKEN_ID_REGEX = NewMessageType("GAL1155E: Unable to compile the regex pattern for the provided token id. Reason: '%s'", 1155, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_TOKEN_ID_FORMAT          = NewMessageType("GAL1156E: The provided token id, '%s', provided does not match formatting requirements. The token id must be an alphanumeric string only.", 1156, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_TOKEN_FAILED              = NewMessageType("GAL1153E: Failed to delete the token with ID '%v'. Reason: '%s'.", 1153, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_COMPILE_TOKEN_ID_REGEX = NewMessageType("GAL1155E: Programming logic error: Unable to compile the regex pattern for the provided token ID. Reason: '%s'", 1155, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_TOKEN_ID_FORMAT          = NewMessageType("GAL1156E: The provided token ID, '%s', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.", 1156, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

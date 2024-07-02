@@ -49,7 +49,7 @@ func TestAuthTokensDeleteWithTokenIdReturnsOk(t *testing.T) {
 	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_DELETE, factory, t)
 
-	var args []string = []string{"auth", "tokens", "delete", "--tokenId", "abc"}
+	var args []string = []string{"auth", "tokens", "delete", "--tokenid", "abc"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -66,7 +66,7 @@ func TestAuthTokensDeleteWithoutTokenIdFlagValueReturnsAppropriateOutput(t *test
 	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_DELETE, factory, t)
 
-	var args []string = []string{"auth", "tokens", "delete", "--tokenId"}
+	var args []string = []string{"auth", "tokens", "delete", "--tokenid"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -74,6 +74,6 @@ func TestAuthTokensDeleteWithoutTokenIdFlagValueReturnsAppropriateOutput(t *test
 	// Then...
 	// Check what the user saw is reasonable.
 	assert.NotNil(t, err)
-	checkOutput("", "flag needs an argument: --tokenId", factory, t)
+	checkOutput("", "flag needs an argument: --tokenid", factory, t)
 
 }
