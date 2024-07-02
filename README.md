@@ -162,11 +162,13 @@ For a complete list of supported parameters see [here](./docs/generated/galasact
 
 ## auth tokens delete
 
-This command deletes a token identified by the token id.
+This command revokes a personal access token identified by the given token ID. This command is useful if you have lost access to your personal access token or if your token has been compromised, and you wish to prevent it from being used maliciously.
+
+To retrieve a list of available personal access tokens that have been created and their token IDs, see [auth tokens get](#auth-tokens-get).
 
 ### Examples
 
-Deleting a token with id 'myId'
+Deleting a token with ID 'myId'
 
 ```
 galasactl auth tokens delete --tokenid myId
