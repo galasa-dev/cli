@@ -13,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -73,21 +72,19 @@ func mockDeleteTokensServlet(t *testing.T, w http.ResponseWriter, r *http.Reques
 
 func TestInvalidTokenIdWithSpecialCharactersReturnsError(t *testing.T) {
 	// Given...
-	invalidTokenIdFormat := "siuIOHUDH98Y:73GioudusIUH"
+	invalidTokenIdFormat := "siuIOHUDH98Y:73Gioud@£!%H..."
 
 	server := newDeleteTokensServletMock(t)
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When
-	err := DeleteToken(invalidTokenIdFormat, apiClient, console)
+	err := DeleteToken(invalidTokenIdFormat, apiClient)
 
 	// Then
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "The provided token ID, '" + invalidTokenIdFormat + "', does not match formatting requirements")
-	assert.Contains(t, err.Error(), "GAL1156E")
+	assert.Contains(t, err.Error(), "GAL1154E")
 }
 
 func TestDeleteTokenWithAlphabeticTokenReturnsOk(t *testing.T) {
@@ -98,10 +95,8 @@ func TestDeleteTokenWithAlphabeticTokenReturnsOk(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -115,10 +110,8 @@ func TestDeleteTokenWithNumericTokenReturnsOk(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -132,10 +125,8 @@ func TestDeleteTokenWithAlphanumericTokenReturnsOk(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -149,10 +140,8 @@ func TestDeleteTokenWithAlphanumDashesTokenReturnsOk(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -166,10 +155,8 @@ func TestDeleteTokenWithAlphanumUnderscoresTokenReturnsOk(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -183,10 +170,8 @@ func TestDeleteTokenWithAlphanumUnderscoresAndDashesTokenReturnsOk(t *testing.T)
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -200,10 +185,8 @@ func TestDeleteWithValidNotFoundTokenReturnsOk(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.NotNil(t, err)
@@ -219,10 +202,8 @@ func TestDeleteUnauthorizedTokenReturnsError(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.NotNil(t, err)
@@ -238,10 +219,8 @@ func TestDeleteTokenWithInternalServerErrorReturnsError(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.NotNil(t, err)
@@ -257,10 +236,8 @@ func TestDeleteTokenWithInvalidServerResponseReturnsError(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.URL)
 	defer server.Close()
 
-	console := utils.NewMockConsole()
-
 	// When...
-	err := DeleteToken(tokenId, apiClient, console)
+	err := DeleteToken(tokenId, apiClient)
 
 	// Then...
 	assert.NotNil(t, err)

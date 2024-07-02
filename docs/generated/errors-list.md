@@ -149,8 +149,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: {}, AES block size: {}
 - GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.
 - GAL1153E: Failed to delete the token with ID '{}'. Reason: '{}'.
-- GAL1155E: Programming logic error: Unable to compile the regex pattern for the provided token ID. Reason: '{}'
-- GAL1156E: The provided token ID, '{}', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.
+- GAL1154E: The provided token ID, '{}', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

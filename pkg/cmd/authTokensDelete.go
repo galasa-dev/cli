@@ -124,8 +124,6 @@ func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, authTokenCmdValues.bootstrap, urlService)
 			if err == nil {
 
-				var console = factory.GetStdOutConsole()
-
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
@@ -138,8 +136,7 @@ func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = auth.DeleteToken(cmd.values.tokenId, apiClient, console)
+					err = auth.DeleteToken(cmd.values.tokenId, apiClient)
 				}
 			}
 		}
