@@ -44,7 +44,7 @@ func getAuthTokensFromRestApi(apiClient *galasaapi.APIClient) ([]galasaapi.AuthT
 	tokens, resp, err := apiClient.AuthenticationAPIApi.GetTokens(context).Execute()
 
 	if err != nil {
-		log.Println("GetTokens - Failed to retrieve list of tokens from API server")
+		log.Println("getAuthTokensFromRestApi - Failed to retrieve list of tokens from API server")
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_TOKEN_LIST_FROM_API_SERVER, err.Error())
 	} else {
 		defer resp.Body.Close()

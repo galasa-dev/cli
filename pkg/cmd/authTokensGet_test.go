@@ -42,7 +42,7 @@ func TestAuthTokensGetHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestAuthTokenssGetReturnsWithoutError(t *testing.T) {
+func TestAuthTokensGetReturnsWithoutError(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_TOKENS_GET, factory, t)

@@ -160,6 +160,24 @@ Total:3
 For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_get.md).
 
 
+## auth tokens delete
+
+This command revokes a personal access token identified by the given token ID. This command is useful if you have lost access to your personal access token or if your token has been compromised, and you wish to prevent it from being used maliciously.
+
+To retrieve a list of available personal access tokens that have been created and their token IDs, see [auth tokens get](#auth-tokens-get).
+
+### Examples
+
+Revoking a token with ID 'myId'
+
+```
+galasactl auth tokens delete --tokenid myId
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_delete.md).
+
+
+
 ## runs prepare
 
 The purpose of `runs prepare` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.

@@ -34,6 +34,7 @@ const (
 	COMMAND_NAME_AUTH_LOGOUT              = "auth logout"
 	COMMAND_NAME_AUTH_TOKENS              = "auth tokens"
 	COMMAND_NAME_AUTH_TOKENS_GET          = "auth tokens get"
+	COMMAND_NAME_AUTH_TOKENS_DELETE       = "auth tokens delete"
 	COMMAND_NAME_PROJECT                  = "project"
 	COMMAND_NAME_PROJECT_CREATE           = "project create"
 	COMMAND_NAME_LOCAL                    = "local"
@@ -175,15 +176,20 @@ func (commands *commandCollectionImpl) addAuthTokensCommands(factory spi.Factory
 	var err error
 	var authTokensCommand spi.GalasaCommand
 	var authTokensGetCommand spi.GalasaCommand
+	var authTokensDeleteCommand spi.GalasaCommand
 
 	authTokensCommand, err = NewAuthTokensCommand(authCommand, rootCommand)
 	if err == nil {
 		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
+		if err == nil {
+			authTokensDeleteCommand, err = NewAuthTokensDeleteCommand(factory, authTokensCommand, rootCommand)
+		}
 	}
 
 	if err == nil {
 		commands.commandMap[authTokensCommand.Name()] = authTokensCommand
 		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
+		commands.commandMap[authTokensDeleteCommand.Name()] = authTokensDeleteCommand
 	}
 
 	return err

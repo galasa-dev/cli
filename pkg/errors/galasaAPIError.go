@@ -27,8 +27,9 @@ func GetApiErrorFromResponse(body []byte) (*GalasaAPIError, error){
 
 	err = json.Unmarshal(body, &apiError)
 
-	if err != nil{
+	if err != nil {
 		log.Printf("GetApiErrorFromResponse FAIL - %v", err)
+		err = NewGalasaError(GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err.Error())
 	}
 	return apiError, err
 }
