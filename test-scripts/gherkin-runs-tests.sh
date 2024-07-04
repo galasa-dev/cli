@@ -87,12 +87,14 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
 
 fi
 
-function generateGherkinFile {
-    h1 "Creating sample gherkin feature files"
+function SubmitLocalSimpleGherkinTest {
+    h1 "Submitting the sample gherkin feature"
 
-    input_file="$ORIGINAL_DIR/temp/GherkinSubmitTest.feature"
+    gherkin_feature_filename="simple.feature"
 
-    cat << EOF > $input_file 
+    feature_file_path="$ORIGINAL_DIR/temp/${gherkin_feature_filename}"
+
+    cat << EOF > $feature_file_path 
 Feature: GherkinSubmitTest
   Scenario: Log Example Statement
     
@@ -103,15 +105,13 @@ Feature: GherkinSubmitTest
     THEN Write to log "This is a second scenario"
 EOF
     success "OK"
-}
 
-function SubmittingLocalGherkinTest {
-    h1 "Submitting the sample gherkin feature"
+    log_output_file=$ORIGINAL_DIR/temp/$gherkin_feature_filename.log
 
     cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
     --remoteMaven https://development.galasa.dev/main/maven-repo/obr \
-    --gherkin file://$input_file \
-    --log -"
+    --gherkin file://$feature_file_path \
+    --log $log_output_file"
 
     info "Command is: $cmd"
 
@@ -122,6 +122,78 @@ function SubmittingLocalGherkinTest {
         error "Failed to run gherkin test"
         exit 1
     fi
+
+    log_occurrances=$(cat $log_output_file | grep "CoreStatementOwner - This is a log statement" | wc -l | xargs)
+    if [[ "$log_occurrances" != "1" ]]; then 
+        error "The log statement 1 we tried to log is not visible in the log. It appeared $log_occurrances times."
+        exit 1
+    fi
+    success "Log statement 1 appeared in the log OK"
+
+    log_occurrances=$(cat $log_output_file | grep "CoreStatementOwner - This is a second scenario" | wc -l | xargs)
+    if [[ "$log_occurrances" != "1" ]]; then 
+        error "The log statement 2 we tried to log is not visible in the log. It appeared $log_occurrances times."
+        exit 1
+    fi
+    success "Log statement 2 appeared in the log OK"
+
+    success "OK"
+}
+
+function SubmitLocalGherkinScenarioOutlineTest {
+    h1 "Submitting the gherkin feature with a scenario outline."
+
+    gherkin_feature_filename="scenario-outline.feature"
+
+    feature_file_path="$ORIGINAL_DIR/temp/${gherkin_feature_filename}"
+
+    cat << EOF > $feature_file_path 
+Feature: GherkinSubmitTest
+  Scenario Outline: Log A fruit
+    
+    # This is a comment. Should be ignored.
+    # We want to write out one piece of fruit to the log, for each 
+    # scenario described by this outline.
+
+    THEN Write to log "<fruit>"
+    
+    Examples:
+    | fruit  |
+    | apple  |
+    | banana |
+EOF
+    success "OK"
+
+    log_output_file=$ORIGINAL_DIR/temp/$gherkin_feature_filename.log
+
+    cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
+    --remoteMaven https://development.galasa.dev/main/maven-repo/obr \
+    --gherkin file://$feature_file_path \
+    --log $log_output_file"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to run gherkin test"
+        exit 1
+    fi
+
+    log_occurrances=$(cat $log_output_file | grep "CoreStatementOwner - apple" | wc -l | xargs)
+    if [[ "$log_occurrances" != "1" ]]; then 
+        error "The log statement 1 we tried to log is not visible in the log. It appeared $log_occurrances times."
+        exit 1
+    fi
+    success "Log statement 1 appeared in the log OK"
+
+    log_occurrances=$(cat $log_output_file | grep "CoreStatementOwner - banana" | wc -l | xargs)
+    if [[ "$log_occurrances" != "1" ]]; then 
+        error "The log statement 2 we tried to log is not visible in the log. It appeared $log_occurrances times."
+        exit 1
+    fi
+    success "Log statement 2 appeared in the log OK"
 
     success "OK"
 }
@@ -169,10 +241,11 @@ function SubmittingBadSuffixLocalGherkinTest {
 }
 
 function test_gherkin_commands {
-    generateGherkinFile
-    SubmittingLocalGherkinTest
     SubmittingBadPrefixLocalGherkinTest
     SubmittingBadSuffixLocalGherkinTest
+
+    SubmitLocalSimpleGherkinTest
+    SubmitLocalGherkinScenarioOutlineTest
 }
 
 # checks if it's been called by main, set this variable if it is

@@ -104,11 +104,6 @@ CALLED_BY_MAIN="true"
 source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh
 calculate_galasactl_executable
 
-# Test the hybrid configuration where the local test runs locally, but
-# draws it's CPS properties from a remote ecosystem via a REST extension.
-source ${BASEDIR}/test-scripts/test-local-run-remote-cps.sh 
-test_local_run_remote_cps
-
 source ${BASEDIR}/test-scripts/runs-tests.sh --bootstrap "${bootstrap}"
 test_runs_commands
 
@@ -117,4 +112,9 @@ properties_tests
 
 source ${BASEDIR}/test-scripts/resources-tests.sh --bootstrap "${bootstrap}"
 resources_tests
+
+# Test the hybrid configuration where the local test runs locally, but
+# draws it's CPS properties from a remote ecosystem via a REST extension.
+source ${BASEDIR}/test-scripts/test-local-run-remote-cps.sh 
+test_local_run_remote_cps
 
