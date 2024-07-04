@@ -62,16 +62,22 @@ func TestGetTestCatalogHttpErrorGetsReported(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("URL arrived at the mock test server: %s\n", r.RequestURI)
 		switch r.RequestURI {
-		case "/cps/namespace/framework/prefix/test.stream.myStream/suffix/location":
+		case "/cps/framework/properties?prefix=test.stream.myStream&suffix=location":
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 
 			name := "mycpsPropName"
 			value := "a duff value" // This is intentionally duff, which will cause an HTTP error when the production code tries to GET using this as a URL.
-			payload := galasaapi.CpsProperty{
-				Name:  &name,
-				Value: &value,
+			payload := []galasaapi.GalasaProperty{
+				{
+					Metadata: &galasaapi.GalasaPropertyMetadata{
+						Name: &name,
+					},
+					Data: &galasaapi.GalasaPropertyData{
+						Value: &value,
+					},
+				},
 			}
 			payloadBytes, _ := json.Marshal(payload)
 			w.Write(payloadBytes)
