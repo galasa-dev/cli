@@ -540,6 +540,10 @@ function run_test_locally_using_galasactl {
 
     unset GALASA_BOOTSTRAP
 
+    rm -f results.junit
+    rm -f results.yaml
+    rm -f results.json
+
     cmd="${BASEDIR}/bin/${galasactl_command} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
     --class ${BUNDLE}/${JAVA_CLASS} \
@@ -549,6 +553,7 @@ function run_test_locally_using_galasactl {
     --requesttype MikeCLI \
     --poll 10 \
     --progress 1 \
+    --reportjunit results.junit --reportyaml results.yaml --reportjson results.json  \
     --log ${LOG_FILE}"
 
     # --reportjson myreport.json \
