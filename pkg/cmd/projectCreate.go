@@ -212,7 +212,7 @@ func createProject(
 	isDevelopment bool,
 ) error {
 
-	log.Printf("Hello my name Creating project using packageName:%s\n", packageName)
+	log.Printf("Creating project using packageName:%s\n", packageName)
 
 	var err error
 
@@ -495,7 +495,6 @@ func createTestProject(
 	return err
 }
 
-// createTestProject - creates a single project to contain tests which test a feature.
 func createTestManager(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
@@ -515,16 +514,20 @@ func createTestManager(
     if useMaven {
 			err = createTestFolderPom(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
 		}
-
-		err = createTestFolderGradle(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite, isDevelopment)
+    
+    if useGradle {
+			err = createTestFolderGradle(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite, isDevelopment)
+		}
 	}
-
-	err = createJavaSourceFolder(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
+  
+  if err == nil {
+	  err = createJavaSourceFolder(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
+  }
 
 	err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
 
 	if err == nil {
-		log.Printf("Tests project %s created OK.", targetFolderPath)
+		log.Printf("Manager project %s created OK.", targetFolderPath)
 	}
 	return err
 }
@@ -701,7 +704,7 @@ func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolder
 }
 
 // Creates a build.gradle and a bnd.bnd file in a Gradle test project directory.
-func createTestFolderManager(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
+func createManagerFolder(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
 	packageName string, featureName string, forceOverwrite bool, isDevelopment bool) error {
 
 	type TestGradleParameters struct {
