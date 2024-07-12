@@ -680,3 +680,6 @@ framework.extra.bundles=dev.galasa.cps.rest
 ```
 
 The user must perform a `galasactl auth login` to the same ecosystem before trying to launch a local test.
+
+# Gherkin Support
+Gherkin support is described [here](./gherkin-docs.md)
