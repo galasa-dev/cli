@@ -147,6 +147,8 @@ function galasa_home_init {
     mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
+    export GALASA_HOME=${BASEDIR}/temp/home
+
     cmd="${BASEDIR}/bin/${binary} local init --development \
     --log -"
 
