@@ -140,6 +140,53 @@ EOF
     success "OK"
 }
 
+function SubmitTestWhichUsesACPSVariable {
+  h1 "Submitting the gherkin which uses a CPS variable."
+
+    gherkin_feature_filename="scenario-cps-prop-use.feature"
+
+    feature_file_path="$ORIGINAL_DIR/temp/${gherkin_feature_filename}"
+
+    echo "test.fruit.name=peach" > $ORIGINAL_DIR/temp/home/cps.properties
+
+    cat << EOF > $feature_file_path 
+Feature: GherkinSubmitTest
+  Scenario: Log A fruit
+    GIVEN <fruit> is test property fruit.name
+    THEN Write to log "my favourite fruit is <fruit>"
+EOF
+    success "OK"
+
+    log_output_file=$ORIGINAL_DIR/temp/$gherkin_feature_filename.log
+
+    cmd="$ORIGINAL_DIR/bin/${binary} runs submit local \
+    --remoteMaven https://development.galasa.dev/main/maven-repo/obr \
+    --gherkin file://$feature_file_path \
+    --log $log_output_file"
+
+    info "Command is: $cmd"
+
+    $cmd
+    rc=$?
+
+    if [[ "${rc}" != "0" ]]; then 
+        error "Failed to run gherkin test"
+        exit 1
+    fi
+
+    info "output is:"
+    cat $log_output_file | grep "d.g.c.m.i.g.CoreStatementOwner - my favourite fruit is"
+
+    log_occurrances=$(cat $log_output_file | grep "my favourite fruit is peach" | wc -l | xargs)
+    if [[ "$log_occurrances" != "1" ]]; then 
+        error "The log statement 1 we tried to log is not visible in the log. It appeared $log_occurrances times."
+        exit 1
+    fi
+    success "Log statement 1 appeared in the log OK"
+
+    success "OK"
+}
+
 function SubmitLocalGherkinScenarioOutlineTest {
     h1 "Submitting the gherkin feature with a scenario outline."
 
@@ -241,6 +288,8 @@ function SubmittingBadSuffixLocalGherkinTest {
 }
 
 function test_gherkin_commands {
+    SubmitTestWhichUsesACPSVariable
+
     SubmittingBadPrefixLocalGherkinTest
     SubmittingBadSuffixLocalGherkinTest
 

@@ -128,7 +128,7 @@ or
 
 #### Gathering a variable from the configuration property store
 - `GIVEN <V> is test property namespace.prefix.infix.suffix`
-- `GIVEN <FruitName> is test property test.fruit.name`
+- `GIVEN <FruitName> is test property fruit.name` Note: No 'test' namespace is required in the Gherkin file. That namespace prefix is assumed.
 
 ### Writing to a test log
 - `THEN Write to log "xxx"`
