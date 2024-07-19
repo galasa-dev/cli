@@ -73,15 +73,19 @@ func yamlToByteArray(inputYaml string, action string) ([]byte, error) {
 
 	for _, partYaml := range parts {
 
-		var parsedData interface{}
-
-		err = yaml.Unmarshal([]byte(partYaml), &parsedData)
-		if err != nil {
-			log.Printf("Unable to unmarshal yaml data to retrieve yaml content")
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_YAML, err, partYaml)
-			break
+		if len(strings.TrimSpace(partYaml)) == 0 { 
+			// yaml section is empty
+			log.Printf("Yaml section '%s' does not contain any data. This will be added to the request",partYaml)
 		} else {
-			parsedParts = append(parsedParts, parsedData)
+			var parsedData interface{}
+			err = yaml.Unmarshal([]byte(partYaml), &parsedData)
+			if err != nil {
+				log.Printf("Unable to unmarshal yaml data to retrieve yaml content")
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_UNMARSHAL_YAML, err, partYaml)
+				break
+			} else {
+				parsedParts = append(parsedParts, parsedData)
+			}
 		}
 	}
 
