@@ -75,7 +75,6 @@ func yamlToByteArray(inputYaml string, action string) ([]byte, error) {
 
 		if len(strings.TrimSpace(partYaml)) == 0 { 
 			// yaml section is empty
-			log.Printf("Yaml section '%s' does not contain any data. This will be added to the request",partYaml)
 		} else {
 			var parsedData interface{}
 			err = yaml.Unmarshal([]byte(partYaml), &parsedData)
