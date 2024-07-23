@@ -239,7 +239,7 @@ func createProject(
 
 				if err == nil {
 					err = createParentFolderContents(
-						fileGenerator, packageName, featureNames, isOBRProjectRequired,
+						fileGenerator, packageName, manager, featureNames, isOBRProjectRequired,
 						forceOverwrite, useMaven, useGradle, isDevelopment)
 				}
 
@@ -248,7 +248,7 @@ func createProject(
 						useMaven, useGradle, isDevelopment)
 					if err == nil {
 						if isOBRProjectRequired {
-							err = createOBRProject(fileGenerator, packageName, featureNames,
+							err = createOBRProject(fileGenerator, packageName, manager, featureNames,
 								forceOverwrite, useMaven, useGradle)
 						}
 					}
@@ -263,6 +263,7 @@ func createProject(
 func createParentFolderContents(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
+  manager string,
 	featureNames []string,
 	isOBRProjectRequired bool,
 	forceOverwrite bool,
@@ -272,15 +273,17 @@ func createParentFolderContents(
 ) error {
 	var err error
 
+  features := append(featureNames, manager)
+
 	if useMaven {
-		err = createParentFolderPom(fileGenerator, packageName, featureNames,
+		err = createParentFolderPom(fileGenerator, packageName, features,
 			isOBRProjectRequired, forceOverwrite, isDevelopment)
 	}
 
 	if err == nil {
 		if useGradle {
 			err = createParentFolderSettingsGradle(fileGenerator, packageName,
-				featureNames, isOBRProjectRequired, forceOverwrite, isDevelopment)
+				features, isOBRProjectRequired, forceOverwrite, isDevelopment)
 		}
 	}
 
@@ -535,6 +538,7 @@ func createTestManager(
 func createOBRProject(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
+  manager string,
 	featureNames []string,
 	forceOverwrite bool,
 	useMaven bool,
@@ -543,15 +547,17 @@ func createOBRProject(
 	targetFolderPath := packageName + "/" + packageName + ".obr"
 	log.Printf("Creating obr project %s\n", targetFolderPath)
 
+  features := append(featureNames, manager)
+
 	// Create the base test folder
 	err := fileGenerator.CreateFolder(targetFolderPath)
 	if err == nil {
 		if useMaven {
-			err = createOBRFolderPom(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
+			err = createOBRFolderPom(fileGenerator, targetFolderPath, packageName, features, forceOverwrite)
 		}
 
 		if useGradle {
-			err = createOBRFolderBuildGradle(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
+			err = createOBRFolderBuildGradle(fileGenerator, targetFolderPath, packageName, features, forceOverwrite)
 		}
 	}
 
