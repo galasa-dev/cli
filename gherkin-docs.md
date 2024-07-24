@@ -81,6 +81,10 @@ and following lines detailing what the values of each variable should be.
 
 An id of xxx allows the terminal to be named, so they can be distinguished in cases where two or more terminals are used in the same test scenario.
 
+By default, the terminal id is `A` and it is using tag `PRIMARY` though the above allow you to specify other settings.
+
+This `PRIMARY` image tag 
+
 #### To simulate the pressing of special Program Function (PF) keys 
 - `AND press terminal key PF1`
 - `AND press terminal key PF2`
@@ -169,10 +173,49 @@ Feature: Test 3270 interactions
     | GRK3        | THRICE THIS      |
 ```
 
-## How to run a feature locally
+# How to run a feature locally
+
+### Set up your galasa environment: 
+```
+galasactl local init
+```
+
+### Edit your CPS properties
+Set the following into your `~/.galasa/cps.properties file:
+```
+# CPS properties to enable gherkin tests.
+
+# Gherkin uses the 'PRIMARY' tag by default.
+# The .imageid property value indicates what zos.image.{value}.ipv4.hostname will be used for example.
+zos.dse.tag.PRIMARY.imageid=MYHOST
+# The PLEXNAME below needs to change to match the name of your zos cluster.
+zos.dse.tag.PRIMARY.clusterid=PLEXNAME
+# The following PLEXNAME should be changed to the same value as above.
+# The following MYHOSTIMAGE should be changed to be the name of the machine you want to access on the cluster. eg: MV2XX
+zos.cluster.PLEXNAME.images=MYHOSTIMAGE
+
+# The following MYHOST part of the property key needs to change to match the value of the zos.dse.tag.PRIMARY.imageid property.
+# The following machine.hostname needs to change to be the dotted ip name which is resolvable via DNS
+zos.image.MYHOST.default.hostname=machine.hostname
+zos.image.MYHOST.ipv4.hostname=machine.hostname
+# The PLEXNAME below must be changed to match the value of zos.dse.tag.PRIMARY.clusterid
+zos.image.MYHOST.sysplex=PLEXNAME
+zos.image.MYHOST.telnet.port=23
+zos.image.MYHOST.telnet.tls=false
+```
+
+### Set a test gherkin feature into a file. Say ~/test1.feature
+```
+Feature: GherkinLog
+  Scenario Outline: Log Example Statement
+    THEN Write to log "Hello World"
+```
+
+### Run the gherkin test locally
 Some examples:
-- `galasactl runs submit local --gherkin file:///fruit.feature  --log -`
-- `galasactl runs submit local --gherkin file:///fruit.feature --overridefile my.override.properties --reportyaml results.yaml --log -`
+- `galasactl runs submit local --gherkin file:///test1.feature` - A basic run of a feature test.
+- `galasactl runs submit local --gherkin file:///test1.feature  --log -` - Viewing run logs also.
+- `galasactl runs submit local --gherkin file:///test1.feature --overridefile my.override.properties --reportyaml results.yaml --log -` - Overriding some CPS properties and getting a test results summary.
 
 ## How to run the feature remotely
 
