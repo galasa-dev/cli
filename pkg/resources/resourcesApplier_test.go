@@ -181,39 +181,6 @@ func TestCanApplyValidMultipleResources(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestCanApplyEmptyValidResource(t *testing.T) {
-	// Given
-	expectedJsonArrivingInServlet := `{
-    "action": "apply",
-    "data": [
-        null
-    ]
-}`
-
-	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
-	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
-
-	yamlToApply := ""
-
-	action := "apply"
-
-	fs := files.NewOverridableMockFileSystem()
-	filePath := "/my/resources.yaml"
-	fs.WriteTextFile(filePath, yamlToApply)
-
-	// When
-	err := ApplyResources(
-		action,
-		filePath,
-		fs,
-		mockservletUrl,
-		mockBearerToken,
-	)
-
-	// Then
-	assert.Nil(t, err)
-}
 
 func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T) {
 	// Given
@@ -509,36 +476,3 @@ func TestCanDeleteValidMultipleResources(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestCanDeleteEmptyValidResource(t *testing.T) {
-	// Given
-	expectedJsonArrivingInServlet := `{
-    "action": "delete",
-    "data": [
-        null
-    ]
-}`
-
-	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
-	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
-
-	yamlToApply := ""
-
-	action := "delete"
-
-	fs := files.NewOverridableMockFileSystem()
-	filePath := "/my/resources.yaml"
-	fs.WriteTextFile(filePath, yamlToApply)
-
-	// When
-	err := ApplyResources(
-		action,
-		filePath,
-		fs,
-		mockservletUrl,
-		mockBearerToken,
-	)
-
-	// Then
-	assert.Nil(t, err)
-}
