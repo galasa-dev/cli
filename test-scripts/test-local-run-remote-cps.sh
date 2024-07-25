@@ -56,12 +56,12 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     #-----------------------------------------------------------------------------------------                   
     # Process parameters
     #-----------------------------------------------------------------------------------------                   
-    GALASA_BOOTSTRAP=""
 
+    bootstrap_from_cmd_line=""
     while [ "$1" != "" ]; do
         case $1 in
             -b | --bootstrap )   shift
-                                    GALASA_BOOTSTRAP=$1
+                                    bootstrap_from_cmd_line=$1
                                     ;;
             -h | --help )           usage
                                     exit
@@ -73,8 +73,17 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
         shift
     done
 
+    if [[ "$bootstrap_from_cmd_line" != "" ]]; then
+        info "Using the bootstrap from the --bootstrap command-line option."
+        GALASA_BOOTSTRAP=$bootstrap_from_cmd_line
+    else 
+        if [[ "${GALASA_BOOTSTRAP}" != "" ]]; then
+            info "Using the bootstrap from the GALASA_BOOTSTRAP environment variable."
+        fi
+    fi
+
     if [[ "${GALASA_BOOTSTRAP}" == "" ]]; then
-        error "Need to use the --bootstrap parameter."
+        error "Need to use the --bootstrap parameter or set the GALASA_BOOTSTRAP environment variable."
         usage
         exit 1  
     fi
@@ -104,7 +113,7 @@ EOF
 
 
 #-----------------------------------------------------------------------------------------
-function run_tests {
+function remote_cps_run_tests {
     h2 "Running the test code locally"
     # Add the "--log -" flag if you want to see more detailed output.
     
@@ -137,6 +146,8 @@ function run_tests {
 function build_galasa_home {
     h2 "Building galasa home"
 
+    is_cache_enabled=$1
+
     rm -fr $TEMP_DIR
     info "Creating temporary folder at $TEMP_DIR"
     mkdir $TEMP_DIR
@@ -161,6 +172,11 @@ function build_galasa_home {
 # Target the CPS on the ecosystem
 framework.config.store=${galasaConfigStoreRestUrl}
 framework.extra.bundles=dev.galasa.cps.rest
+EOF
+
+    cat << EOF >> $TEMP_DIR/home/overrides.properties
+
+framework.cps.rest.cache.is.enabled=$is_cache_enabled
 EOF
 
     success "OK"
@@ -217,16 +233,31 @@ function log_variables {
 }
 
 function test_local_run_remote_cps() {
+    test_local_run_repote_cps_cache_enabled true
+    test_local_run_repote_cps_cache_enabled false
+}
+
+
+function test_local_run_repote_cps_cache_enabled() {
+    is_cache_enabled=$1
+
     h1 "Testing a local run, where the CPS draws properties from a remote ecosystem"
+    if [[ "$is_cache_enabled" == "true" ]]; then
+        info "Caching of CPS properties is enabled"
+    else 
+        info "Caching of CPS properties is disabled"
+    fi
     cd $PROJECT_DIR
+
     log_variables
-    build_galasa_home
+    # Build the galasa home. Set the CPSRest cache to be enabled.
+    build_galasa_home $is_cache_enabled
     logout_of_ecosystem
     login_to_ecosystem
     generating_galasa_test_project
     build_test_project
-    run_tests
-    success "Local runs with remote CPS works."
+    remote_cps_run_tests
+    success "Local runs with remote CPS works"
 }
 
 if [[ "$CALLED_BY_MAIN" == "" ]]; then
