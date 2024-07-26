@@ -527,7 +527,9 @@ func createTestManager(
 	  err = createJavaSourceFolder(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
   }
 
-	err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
+	if err == nil{
+    err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
+  }
 
 	if err == nil {
 		log.Printf("Manager project %s created OK.", targetFolderPath)
@@ -669,48 +671,6 @@ func createTestFolderPom(fileGenerator *utils.FileGenerator, targetTestFolderPat
 
 // Creates a build.gradle and a bnd.bnd file in a Gradle test project directory.
 func createTestFolderGradle(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
-	packageName string, featureName string, forceOverwrite bool, isDevelopment bool) error {
-
-	type TestGradleParameters struct {
-		Parent      GradleCoordinates
-		Coordinates GradleCoordinates
-		// Version of Galasa we are targetting
-		GalasaVersion string
-		IsDevelopment bool
-	}
-
-	galasaVersion, err := embedded.GetGalasaVersion()
-
-	if err == nil {
-		gradleProjectTemplateParameters := TestGradleParameters{
-			Parent:        GradleCoordinates{GroupId: packageName, Name: packageName},
-			Coordinates:   GradleCoordinates{GroupId: packageName, Name: packageName + "." + featureName},
-			GalasaVersion: galasaVersion,
-			IsDevelopment: isDevelopment}
-
-		buildGradleFile := utils.GeneratedFileDef{
-			FileType:                 "gradle",
-			TargetFilePath:           targetTestFolderPath + "/build.gradle",
-			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/build.gradle.template",
-			TemplateParameters:       gradleProjectTemplateParameters}
-
-		err = fileGenerator.CreateFile(buildGradleFile, forceOverwrite, true)
-
-		if err == nil {
-			bndFile := utils.GeneratedFileDef{
-				FileType:                 "bnd",
-				TargetFilePath:           targetTestFolderPath + "/bnd.bnd",
-				EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/test-project/bnd.bnd",
-				TemplateParameters:       gradleProjectTemplateParameters}
-			err = fileGenerator.CreateFile(bndFile, forceOverwrite, true)
-		}
-	}
-
-	return err
-}
-
-// Creates a build.gradle and a bnd.bnd file in a Gradle test project directory.
-func createManagerFolder(fileGenerator *utils.FileGenerator, targetTestFolderPath string,
 	packageName string, featureName string, forceOverwrite bool, isDevelopment bool) error {
 
 	type TestGradleParameters struct {
