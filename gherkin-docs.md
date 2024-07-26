@@ -94,7 +94,7 @@ Or burn the terminal size into your scenario, which will take precedence on any 
 - `Given a terminal B with 24 rows and 160 columns`
 - `Given a terminal C tagged ABCD with 24 rows and 80 columns`
 
-Default terminal size is 24x80 if not specified anywhere else.
+Default terminal size is 24 rows x 80 columns if not specified anywhere else.
 
 This `PRIMARY` image tag 
 
