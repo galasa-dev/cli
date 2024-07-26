@@ -296,8 +296,8 @@ func CheckNamespace(namespace string) (int, string) {
 	case "invalidnamespace":
 		statusCode = 404
 		namespaceProperties = `{
-			error_code: 5016,
-			error_message: "GAL5016E: Error occured when trying to access namespace 'invalidnamespace'. The Namespace provided is invalid."
+			"error_code": 5016,
+			"error_message": "GAL5016E: Error occured when trying to access namespace 'invalidnamespace'. The Namespace provided is invalid."
 		}`
 	}
 
