@@ -83,6 +83,19 @@ An id of xxx allows the terminal to be named, so they can be distinguished in ca
 
 By default, the terminal id is `A` and it is using tag `PRIMARY` though the above allow you to specify other settings.
 
+You can also set the desired terminal size using the following CPS properties:
+- `zos3270.gherkin.terminal.rows` defaults to 24 if missing.
+- `zos3270.gherkin.terminal.columns` defaults to 80 if missing.
+
+These values can then be overridden on an individual test basis as required.
+
+Or burn the terminal size into your scenario, which will take precedence on any CPS or override property value.
+- `GIVEN a terminal with 48 rows and 160 columns`
+- `Given a terminal B with 24 rows and 160 columns`
+- `Given a terminal C tagged ABCD with 24 rows and 80 columns`
+
+Default terminal size is 24x80 if not specified anywhere else.
+
 This `PRIMARY` image tag 
 
 #### To simulate the pressing of special Program Function (PF) keys 
