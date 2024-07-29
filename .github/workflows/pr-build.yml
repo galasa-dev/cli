@@ -31,6 +31,10 @@ jobs:
         with:
           gradle-version: 6.9.2
 
+      - name: Cat go.mod to see if its there
+        run: |
+          cat cli/pkg/galasaapi/go.mod
+
       - name: Gather dependencies using Gradle
         run : |
           gradle -b cli/build.gradle installJarsIntoTemplates --info \
@@ -41,10 +45,6 @@ jobs:
       - name: Generate Go client code using openapi.yaml
         run : |
           docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main java -jar /opt/openapi/openapi-generator-cli.jar generate -i /var/workspace/cli/build/dependencies/openapi.yaml -g go -o /var/workspace/cli/pkg/galasaapi --additional-properties=packageName=galasaapi --global-property=apiTests=false
-
-      - name: Cat go.mod to check it is there
-        run: |
-          cat cli/pkg/galasaapi/go.mod
 
       - name: Clear go.mod
         run: |
