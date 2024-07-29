@@ -17,8 +17,8 @@ jobs:
     steps:
       - name: Checkout CLI
         uses: actions/checkout@v4
-        with:
-          path: cli
+        # with:
+        #   path: cli
 
       - name: Checkout Framework
         uses: actions/checkout@v4
