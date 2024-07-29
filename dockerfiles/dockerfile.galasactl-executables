@@ -1,6 +1,6 @@
 FROM harbor.galasa.dev/docker_proxy_cache/library/httpd:2.4.59
 
 RUN rm -v /usr/local/apache2/htdocs/*
-COPY automation/dockerfiles/httpdconf/base-httpd.conf /usr/local/apache2/conf/httpd.conf
+COPY dockerfiles/httpdconf/base-httpd.conf /usr/local/apache2/conf/httpd.conf
 
-COPY cli/bin/galasactl* /usr/local/apache2/htdocs/
+COPY bin/galasactl* /usr/local/apache2/htdocs/

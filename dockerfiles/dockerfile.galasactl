@@ -5,7 +5,7 @@ ARG platform
 RUN addgroup galasa && \ 
     adduser -D -G galasa -h /galasa -s /bin/sh galasa 
 
-COPY cli/bin/galasactl-${platform} /bin/galasactl
+COPY bin/galasactl-${platform} /bin/galasactl
 RUN chmod +x /bin/galasactl
 
 WORKDIR /galasa
