@@ -75,11 +75,11 @@ jobs:
 
       - name: Chmod local test script
         run: | 
-          chmod +x cli/test-galasactl-local.sh
+          chmod +x test-galasactl-local.sh
 
       - name: Run local test script with maven
         run : |
-          ./cli/test-galasactl-local.sh --buildTool maven
+          ./test-galasactl-local.sh --buildTool maven
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -88,11 +88,11 @@ jobs:
 
       - name: Chmod local test script
         run: | 
-          chmod +x cli/test-galasactl-local.sh
+          chmod +x test-galasactl-local.sh
 
       - name: Run local test script with maven
         run : |
-          ./cli/test-galasactl-local.sh --buildTool gradle
+          ./test-galasactl-local.sh --buildTool gradle
 
   # test-galasactl-ecosystem:
   #   name: Run the galasactl ecosystem test script
