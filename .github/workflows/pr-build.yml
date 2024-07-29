@@ -77,7 +77,7 @@ jobs:
         run: | 
           chmod +x test-galasactl-local.sh
 
-      - name: Run local test script with maven
+      - name: Run local test script with Maven
         run : |
           ./test-galasactl-local.sh --buildTool maven
 
@@ -86,19 +86,17 @@ jobs:
         with:
           gradle-version: 6.9.2
 
-      - name: Chmod local test script
-        run: | 
-          chmod +x test-galasactl-local.sh
-
-      - name: Run local test script with maven
+      - name: Run local test script with Gradle
         run : |
           ./test-galasactl-local.sh --buildTool gradle
 
-  # test-galasactl-ecosystem:
-  #   name: Run the galasactl ecosystem test script
-  #   runs-on: ubuntu-latest
+      - name: Chmod ecosystem test script
+        run : |
+          chmod +x test-galasactl-ecosystem.sh
 
-  #   steps:
+      - name: Run ecosystem test script
+        run : |
+          ./test-galasactl-ecosystem.sh --bootstrap https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap
 
   # build-cli-docker-images:
   #   name: Build Docker images with the executable and for the development Maven registry
