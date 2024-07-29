@@ -66,29 +66,7 @@ jobs:
       # Invoke the make command to build the go code, run unit tests and gather code coverage stats.
       - name: Build Go code with the Makefile
         run : |
-          make all -C cli/
-
-  #     - name: Upload galasactl binary for testing
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: galasactl-linux-x86_64
-  #         path: cli/bin/galasactl-linux-x86_64
-
-  # test-galasactl-locally-with-maven:
-  #   name: Run the galasactl local test script with Maven
-  #   runs-on: ubuntu-latest
-  #   needs: build-cli
-
-  #   steps:
-  #   - name: Checkout CLI
-  #     uses: actions/checkout@v4
-  #     with:
-  #       path: cli
-        
-  #   - name: Download galasactl binary for testing
-  #     uses: actions/download-artifact@v4
-  #     with:
-  #       name: galasactl-linux-x86_64
+          make -f cli/Makefile all
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -104,28 +82,6 @@ jobs:
       - name: Run local test script with maven
         run : |
           ./cli/test-galasactl-local.sh --buildTool maven
-
-  # test-galasactl-locally-with-gradle:
-  #   name: Run the galasactl local test script with Gradle
-  #   runs-on: ubuntu-latest
-  #   needs: build-cli
-
-  #   steps:
-  #   - name: Checkout CLI
-  #     uses: actions/checkout@v4
-  #     with:
-  #       path: cli
-
-  #   - name: Download galasactl binary for testing
-  #     uses: actions/download-artifact@v4
-  #     with:
-  #       name: galasactl-linux-x86_64
-
-  #   - name: Setup JDK 
-  #     uses: actions/setup-java@v4
-  #     with:
-  #       java-version: '11'
-  #       distribution: 'semeru'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
