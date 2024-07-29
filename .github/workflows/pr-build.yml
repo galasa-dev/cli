@@ -80,6 +80,11 @@ jobs:
     needs: build-cli
 
     steps:
+    - name: Checkout CLI
+      uses: actions/checkout@v4
+      with:
+        path: cli
+        
     - name: Download galasactl binary for testing
       uses: actions/download-artifact@v4
       with:
@@ -106,6 +111,11 @@ jobs:
     needs: build-cli
 
     steps:
+    - name: Checkout CLI
+      uses: actions/checkout@v4
+      with:
+        path: cli
+
     - name: Download galasactl binary for testing
       uses: actions/download-artifact@v4
       with:
