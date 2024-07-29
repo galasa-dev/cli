@@ -66,7 +66,12 @@ jobs:
       # Invoke the make command to build the go code, run unit tests and gather code coverage stats.
       - name: Build Go code with the Makefile
         run : |
-          make -f cli/Makefile all
+          make all -C cli/
+
+      # The above command would have changed directories, now change back.
+      - name: Change directory
+        run : |
+          cd ..
 
       - name: Set up JDK
         uses: actions/setup-java@v4
