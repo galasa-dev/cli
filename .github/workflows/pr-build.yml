@@ -31,6 +31,7 @@ jobs:
         with:
           gradle-version: 6.9.2
 
+      # Pull down dependencies with Gradle and put them in the right places.
       - name: Gather dependencies using Gradle
         run : |
           gradle -b cli/build.gradle installJarsIntoTemplates --info \
@@ -38,9 +39,13 @@ jobs:
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
           -PtargetMaven=${{ github.workspace }}/repo \
 
+      # Generate client code so galasactl can communicate with the API server.
       - name: Generate Go client code using openapi.yaml
         run : |
           docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main java -jar /opt/openapi/openapi-generator-cli.jar generate -i /var/workspace/cli/build/dependencies/openapi.yaml -g go -o /var/workspace/cli/pkg/galasaapi --additional-properties=packageName=galasaapi --global-property=apiTests=false
+
+      # The go.mod and go.sum are out of date, as they do not include the generated code so they are deleted here. They get re-generated when we compile.
+      # Due to permissions, deleting the go.mod and go.sum must be done by the openapi image as the image generated those files.
 
       - name: Clear go.mod
         run : |
@@ -50,14 +55,7 @@ jobs:
         run : |
           docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main rm /var/workspace/cli/pkg/galasaapi/go.sum
 
-      # - name: Clear go.mod
-      #   run: |
-      #     rm -v cli/pkg/galasaapi/go.mod
-      
-      # - name: Clear go.sum
-      #   run : |
-      #     rm -v cli/pkg/galasaapi/go.sum
-
+      # The go code needs to know which version of Galasa it is part of, so substitute an eye-catcher with the correct value.
       - name: Update version 
         run : |
           version=$(cat cli/VERSION) &&
@@ -65,22 +63,72 @@ jobs:
           mv -f cli/temp.txt cli/pkg/cmd/root.go &&
           cat cli/pkg/cmd/root.go
 
+      # Invoke the make command to build the go code, run unit tests and gather code coverage stats.
       - name: Build Go code with the Makefile
         run : |
           make all -C cli/
 
-  # test-galasactl-locally:
-  #   name: Run the galasactl local test script
-  #   runs-on: ubuntu-latest
+      - name: Upload galasactl binary for testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: galasactl-linux-x86_64
+          path: cli/bin/galasactl-linux-x86_64
 
-  #   steps:
-  #   - name: Chmod local test script
-  #     run: | 
-  #       chmod +x cli/test-galasactl-local.sh
+  test-galasactl-locally-with-maven:
+    name: Run the galasactl local test script with Maven
+    runs-on: ubuntu-latest
+    needs: build-cli
 
-  #   - name: Run local test script with maven
-  #     run : |
-  #       ./cli/test-galasactl-local.sh --buildTool maven
+    steps:
+    - name: Download galasactl binary for testing
+      uses: actions/download-artifact@v4
+      with:
+        name: galasactl-linux-x86_64
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'semeru'
+        cache: maven
+
+    - name: Chmod local test script
+      run: | 
+        chmod +x cli/test-galasactl-local.sh
+
+    - name: Run local test script with maven
+      run : |
+        ./cli/test-galasactl-local.sh --buildTool maven
+
+  test-galasactl-locally-with-gradle:
+    name: Run the galasactl local test script with Gradle
+    runs-on: ubuntu-latest
+    needs: build-cli
+
+    steps:
+    - name: Download galasactl binary for testing
+      uses: actions/download-artifact@v4
+      with:
+        name: galasactl-linux-x86_64
+
+    - name: Setup JDK 
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'semeru'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: 6.9.2
+
+    - name: Chmod local test script
+      run: | 
+        chmod +x cli/test-galasactl-local.sh
+
+    - name: Run local test script with maven
+      run : |
+        ./cli/test-galasactl-local.sh --buildTool gradle
 
   # test-galasactl-ecosystem:
   #   name: Run the galasactl ecosystem test script
