@@ -40,26 +40,26 @@ jobs:
       # Generate client code so galasactl can communicate with the API server.
       - name: Generate Go client code using openapi.yaml
         run : |
-          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main java -jar /opt/openapi/openapi-generator-cli.jar generate -i /var/workspace/cli/build/dependencies/openapi.yaml -g go -o /var/workspace/cli/pkg/galasaapi --additional-properties=packageName=galasaapi --global-property=apiTests=false
+          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main java -jar /opt/openapi/openapi-generator-cli.jar generate -i /var/workspace/build/dependencies/openapi.yaml -g go -o /var/workspace/pkg/galasaapi --additional-properties=packageName=galasaapi --global-property=apiTests=false
 
       # The go.mod and go.sum are out of date, as they do not include the generated code so they are deleted here. They get re-generated when we compile.
       # Due to permissions, deleting the go.mod and go.sum must be done by the openapi image as the image generated those files.
 
       - name: Clear go.mod
         run : |
-          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main rm /var/workspace/cli/pkg/galasaapi/go.mod
+          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main rm /var/workspace/pkg/galasaapi/go.mod
 
       - name: Clear go.sum
         run : |
-          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main rm /var/workspace/cli/pkg/galasaapi/go.sum
+          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main rm /var/workspace/pkg/galasaapi/go.sum
 
       # The go code needs to know which version of Galasa it is part of, so substitute an eye-catcher with the correct value.
       - name: Update version 
         run : |
-          version=$(cat cli/VERSION) &&
-          cat cli/pkg/cmd/root.go | sed "s/unknowncliversion-unknowngithash/${version}/1" > cli/temp.txt &&
-          mv -f cli/temp.txt cli/pkg/cmd/root.go &&
-          cat cli/pkg/cmd/root.go
+          version=$(cat VERSION) &&
+          cat pkg/cmd/root.go | sed "s/unknowncliversion-unknowngithash/${version}/1" > temp.txt &&
+          mv -f temp.txt pkg/cmd/root.go &&
+          cat pkg/cmd/root.go
 
       # Invoke the make command to build the go code, run unit tests and gather code coverage stats.
       - name: Build Go code with the Makefile
