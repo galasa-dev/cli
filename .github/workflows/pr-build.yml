@@ -1,0 +1,76 @@
+name: PR build
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  NAMESPACE: galasa-dev
+  IMAGE_TAG: main
+
+jobs:
+  build-cli:
+    name: Build the Galasa CLI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout CLI
+        uses: actions/checkout@v4
+        with:
+          path: cli
+
+      - name: Checkout Framework
+        uses: actions/checkout@v4
+        with:
+          repository: ${{env.NAMESPACE}}/framework
+          path: framework
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 6.9.2
+
+      - name: Gather dependencies using Gradle
+        run : |
+          gradle -b cli/build.gradle installJarsIntoTemplates --info \
+          -PsourceMaven=https://development.galasa.dev/gh/maven-repo/maven \
+          -PcentralMaven=https://repo.maven.apache.org/maven2/ \
+          -PtargetMaven=${{ github.workspace }}/repo \
+
+      - name: Generate Go client code using openapi.yaml
+        run : |
+          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main java -jar /opt/openapi/openapi-generator-cli.jar generate -i cli/build/dependencies/openapi.yaml -g go -o pkg/galasaapi --additional-properties=packageName=galasaapi --global-property=apiTests=false
+
+      - name: Clear go.mod
+        run: |
+          rm -v cli/pkg/galasaapi/go.mod
+      
+      - name: Clear go.sum
+        run : |
+          rm -v cli/pkg/galasaapi/go.sum
+
+      - name: Update version 
+        run : |
+          version=$(cat cli/VERSION) &&
+          cat cli/pkg/cmd/root.go | sed "s/unknowncliversion-unknowngithash/${version}/1" > cli/temp.txt &&
+          mv -f cli/temp.txt cli/pkg/cmd/root.go &&
+          cat cli/pkg/cmd/root.go
+
+      - name: Build Go code with the Makefile
+        run : |
+          make all -C cli/
+
+  # test-galasactl-locally:
+  #   name: Run the galasactl local test script
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - name: Chmod local test script
+  #     run: | 
+  #       chmod +x cli/test-galasactl-local.sh
+
+  #   - name: Run local test script with maven
+  #     run : |
+  #       ./cli/test-galasactl-local.sh --buildTool maven
+        
