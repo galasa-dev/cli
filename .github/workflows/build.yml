@@ -1,7 +1,7 @@
-name: PR build
+name: Main build
 
 on:
-  pull_request:
+  push:
     branches: [main]
 
 env:
@@ -93,33 +93,62 @@ jobs:
       #   run : |
       #     ./test-galasactl-ecosystem.sh --bootstrap https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap
 
-      - name: Build Docker image with galasactl executable
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Extract metadata for galasactl image
+        id: metadata-galasactl
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/galasactl-x86_64
+  
+      - name: Build galasactl image
+        id: build-galasactl
         uses: docker/build-push-action@v5
         with:
           context: .
           file: dockerfiles/dockerfile.galasactl
-          load: true
-          tags: galasactl-x86_64:test
+          push: true
+          tags: ${{ steps.metadata-galasactl.outputs.tags }}
+          labels: ${{ steps.metadata-galasactl.outputs.labels }}
           build-args: |
             platform=linux-x86_64
 
-      # Commenting for now as the image is not yet available on GHCR.
-      # - name: Build Docker image with galasactl executable and IBM certificates
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: dockerfiles/certs
-      #     file: dockerfiles/dockerfile.galasactl-ibm
-      #     load: true
-      #     tags: galasactl-ibm-x86_64:test
-      #     build-args: |
-      #       dockerRepository=ghcr.io
-      #       tag=main
+      - name: Extract metadata for galasactl-ibm image
+        id: metadata-galasactl-ibm
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/galasactl-ibm-x86_64
+  
+      - name: Build galasactl-ibm image
+        id: build-galasactl-ibm
+        uses: docker/build-push-action@v5
+        with:
+          context: dockerfiles/certs
+          file: dockerfiles/dockerfile.galasactl-ibm
+          push: true
+          tags: ${{ steps.metadata-galasactl-ibm.outputs.tags }}
+          labels: ${{ steps.metadata-galasactl-ibm.outputs.labels }}
+          build-args: |
+            dockerRepository=ghcr.io
+            tag=main
 
-      - name: Build Docker image for development download site
+      - name: Extract metadata for galasactl-executables image
+        id: metadata-galasactl-executables
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/galasactl-executables
+  
+      - name: Build galasactl-executables image
+        id: build-galasactl-executables
         uses: docker/build-push-action@v5
         with:
           context: .
           file: dockerfiles/dockerfile.galasactl-executables
-          load: true
-          tags: galasactl-executables:test
-        
+          push: true
+          tags: ${{ steps.metadata-galasactl-executables.outputs.tags }}
+          labels: ${{ steps.metadata-galasactl-executables.outputs.labels }}
