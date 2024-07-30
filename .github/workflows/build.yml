@@ -152,3 +152,16 @@ jobs:
           push: true
           tags: ${{ steps.metadata-galasactl-executables.outputs.tags }}
           labels: ${{ steps.metadata-galasactl-executables.outputs.labels }}
+
+      - name: Recycle application in ArgoCD
+        env: 
+            ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+        run: |
+            docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app actions run gh-cli restart --kind Deployment --resource-name cli-gh --server argocd.galasa.dev
+       
+      - name: Wait for application health in ArgoCD
+        env: 
+            ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+        run: |
+            docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app wait gh-cli --resource apps:Deployment:cli-gh --health
+       
