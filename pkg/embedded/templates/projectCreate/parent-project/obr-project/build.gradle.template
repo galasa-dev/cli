@@ -2,8 +2,8 @@
 plugins {
     id 'base'
     id 'maven-publish'
-    id 'dev.galasa.obr' version '0.33.0'
-    id 'dev.galasa.testcatalog' version '0.33.0'
+    id 'dev.galasa.obr' version '0.36.0'
+    id 'dev.galasa.testcatalog' version '0.36.0'
 }
 
 // Set the variables which will control what the built OSGi bundle will be called
@@ -20,6 +20,12 @@ dependencies {
 
 def testcatalog = file('build/testcatalog.json')
 def obrFile = file('build/galasa.obr')
+
+
+tasks.withType(PublishToMavenLocal) { task ->
+    task.dependsOn genobr
+    task.dependsOn mergetestcat
+}
 
 // Tell gradle to publish the built OBR as a maven artifact on the 
 // local maven repository.
