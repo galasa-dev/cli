@@ -13,8 +13,8 @@ galasactl users get [flags]
 ### Options
 
 ```
-  -h, --help          Displays the options for the 'users get' command.
-  -n, --name string   A mandatory flag that is required to return the currently logged in user.The input must be a string
+  -h, --help        Displays the options for the 'users get' command.
+  -i, --id string   A mandatory flag that is required to return the currently logged in user.The input must be a string
 ```
 
 ### Options inherited from parent commands

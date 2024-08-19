@@ -79,16 +79,16 @@ func (cmd *UsersCommand) createCobraCommand(
 
 func addLoginIdFlag(cmd *cobra.Command, isMandatory bool, userCmdValues *UsersCmdValues) {
 
-	flagName := "name"
+	flagName := "id"
 	var description string
 	if isMandatory {
-		description = "A mandatory flag that is required to return the currently logged in user." //CHANGE THIS BEFORE PR
+		description = "A mandatory flag that is required to return the currently logged in user."
 	} else {
-		description = "An optional flag that is required to return the currently logged in user." //CHANGE THIS BEFORE PR
+		description = "An optional flag that is required to return the currently logged in user."
 	}
-	description += "The input must be a string" //CHANGE THIS BEFORE PR
+	description += "The input must be a string"
 
-	cmd.PersistentFlags().StringVarP(&userCmdValues.name, flagName, "n", "", description)
+	cmd.PersistentFlags().StringVarP(&userCmdValues.name, flagName, "i", "", description)
 
 	if isMandatory {
 		cmd.MarkPersistentFlagRequired(flagName)

@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,6 +27,7 @@ func NewUsersServletMock(t *testing.T) *httptest.Server {
 }
 
 func MockUsersServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
+
 	assert.NotEmpty(t, r.Header.Get("ClientApiVersion"))
 
 	if !strings.Contains(r.URL.Path, "/users") {
@@ -40,6 +42,7 @@ func MockUsersServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
 func TestNullOrEmptyLoginIdReturnsError(t *testing.T) {
 
 	//given
+	mockConsole := utils.NewMockConsole()
 	loginId := ""
 
 	server := NewUsersServletMock(t)
@@ -49,7 +52,7 @@ func TestNullOrEmptyLoginIdReturnsError(t *testing.T) {
 	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	//when
-	err := GetUsers(loginId, apiClient)
+	err := GetUsers(loginId, apiClient, mockConsole)
 
 	assert.ErrorContains(t, err, "GAL1155E")
 
@@ -58,6 +61,7 @@ func TestNullOrEmptyLoginIdReturnsError(t *testing.T) {
 func TestNotMeInputLoginIdReturnsError(t *testing.T) {
 
 	//given
+	mockConsole := utils.NewMockConsole()
 	loginId := "notMe"
 
 	server := NewUsersServletMock(t)
@@ -67,25 +71,7 @@ func TestNotMeInputLoginIdReturnsError(t *testing.T) {
 	apiClient := api.InitialiseAPI(apiServerUrl)
 
 	//when
-	err := GetUsers(loginId, apiClient)
+	err := GetUsers(loginId, apiClient, mockConsole)
 
 	assert.ErrorContains(t, err, "GAL1156E")
 }
-
-// func TestMeInputLoginIdReturnsError(t *testing.T) {
-
-// 	//given
-// 	loginId := "me"
-
-// 	server := NewUsersServletMock(t)
-// 	apiServerUrl := server.URL
-// 	defer server.Close()
-
-// 	apiClient := api.InitialiseAPI(apiServerUrl)
-
-// 	//when
-// 	err := GetUsers(loginId, apiClient)
-
-// 	fmt.Printf(err.Error())
-
-// }

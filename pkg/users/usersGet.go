@@ -8,21 +8,35 @@ package users
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
-func GetUsers(loginId string, apiClient *galasaapi.APIClient) error {
+type UserData struct {
+	LoginId string `json:"login_id"`
+}
+
+func GetUsers(loginId string, apiClient *galasaapi.APIClient, console spi.Console) error {
 	var err error
-	var outputText []galasaapi.UserData
+	var outputText []byte
 
 	err = validateLoginIdFlag(loginId)
 	if err == nil {
-
 		outputText, err = getUserDataFromRestApi(loginId, apiClient)
-		fmt.Print(outputText)
+
+		if err == nil {
+			var userData []UserData
+			err = json.Unmarshal(outputText, &userData)
+
+			if err == nil {
+				console.WriteString("id: " + userData[0].LoginId)
+			}
+
+		}
+
 	}
 
 	return err
@@ -31,7 +45,7 @@ func GetUsers(loginId string, apiClient *galasaapi.APIClient) error {
 func getUserDataFromRestApi(
 	loginId string,
 	apiClient *galasaapi.APIClient,
-) ([]galasaapi.UserData, error) {
+) ([]byte, error) {
 
 	var err error
 	var context context.Context = nil
@@ -47,7 +61,14 @@ func getUserDataFromRestApi(
 		apiCall := apiClient.UsersAPIApi.GetUserByLoginId(context).LoginId(loginId).ClientApiVersion(restApiVersion)
 		userProperties, _, err = apiCall.Execute()
 
+		if err == nil {
+			userPropertiesJSON, err := json.Marshal(userProperties)
+			if err == nil {
+				return userPropertiesJSON, err
+			}
+		}
+
 	}
 
-	return userProperties, err
+	return nil, err
 }

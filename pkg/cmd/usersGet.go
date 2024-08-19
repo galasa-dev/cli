@@ -115,11 +115,13 @@ func (cmd *UsersGetCommand) executeUsersGet(
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			// Read the bootstrap properties.
+			// Read the bootstrap users.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, userCmdValues.ecosystemBootstrap, urlService)
 			if err == nil {
+
+				var console = factory.GetStdOutConsole()
 
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
@@ -134,7 +136,7 @@ func (cmd *UsersGetCommand) executeUsersGet(
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.
-					err = users.GetUsers(userCmdValues.name, apiClient)
+					err = users.GetUsers(userCmdValues.name, apiClient, console)
 				}
 			}
 		}
