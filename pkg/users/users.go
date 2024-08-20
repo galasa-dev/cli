@@ -12,7 +12,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
-func validateLoginIdFlag(loginId string) error {
+func validateLoginIdFlag(loginId string) (string, error) {
 
 	var err error
 
@@ -27,6 +27,8 @@ func validateLoginIdFlag(loginId string) error {
 		}
 	}
 
-	return err
+	loginId = strings.TrimSpace(loginId)
+
+	return loginId, err
 
 }
