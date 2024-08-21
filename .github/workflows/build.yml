@@ -1,15 +1,26 @@
 name: Main build
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
 env:
   REGISTRY: ghcr.io
   NAMESPACE: galasa-dev
-  IMAGE_TAG: main
+  BRANCH: ${{ github.ref_name }}
+  ARGO_APP_BRANCH: gh # TODO: remove this parameter and just use env.BRANCH once we update development.galasa.dev/main with these workflows.
+
 
 jobs:
+  log-github-ref:
+    name: Log the GitHub ref this workflow is running on (Branch or tag that received dispatch)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log GitHub ref of workflow
+        run: |
+          echo "This workflow is running on GitHub ref ${{ env.BRANCH }}"
+
   build-cli:
     name: Build the Galasa CLI
     runs-on: ubuntu-latest
@@ -21,15 +32,23 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 6.9.2
+          gradle-version: 8.9
 
       # Pull down dependencies with Gradle and put them in the right places.
       - name: Gather dependencies using Gradle
         run : |
+          set -o pipefail
           gradle -b build.gradle installJarsIntoTemplates --info \
-          -PsourceMaven=https://development.galasa.dev/gh/maven-repo/maven \
+          -PsourceMaven=https://development.galasa.dev/${{ env.ARGO_APP_BRANCH }}/maven-repo/maven \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
-          -PtargetMaven=${{ github.workspace }}/repo \
+          -PtargetMaven=${{ github.workspace }}/repo 2>&1 | tee build.log
+
+      - name: Upload Gradle installJarsIntoTemplates log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-installJarsIntoTemplates-log
+          path: build.log
 
       # Generate client code so galasactl can communicate with the API server.
       - name: Generate Go client code using openapi.yaml
@@ -63,7 +82,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'semeru'
           cache: maven
 
@@ -78,7 +97,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 6.9.2
+          gradle-version: 8.9
 
       - name: Run local test script with Gradle
         run : |
@@ -135,7 +154,7 @@ jobs:
           labels: ${{ steps.metadata-galasactl-ibm.outputs.labels }}
           build-args: |
             dockerRepository=ghcr.io
-            tag=main
+            tag=${{ env.BRANCH }}
 
       - name: Extract metadata for galasactl-executables image
         id: metadata-galasactl-executables
@@ -157,11 +176,22 @@ jobs:
         env: 
             ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
         run: |
-            docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app actions run gh-cli restart --kind Deployment --resource-name cli-gh --server argocd.galasa.dev
+            docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app actions run ${{ env.ARGO_APP_BRANCH }}-cli restart --kind Deployment --resource-name cli-${{ env.ARGO_APP_BRANCH }} --server argocd.galasa.dev
        
       - name: Wait for application health in ArgoCD
         env: 
             ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
         run: |
-            docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app wait gh-cli --resource apps:Deployment:cli-gh --health --server argocd.galasa.dev
-       
+            docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app wait ${{ env.ARGO_APP_BRANCH }}-cli --resource apps:Deployment:cli-${{ env.ARGO_APP_BRANCH }} --health --server argocd.galasa.dev
+
+  trigger-isolated-workflow:
+    name: Trigger Isolated workflow
+    runs-on: ubuntu-latest
+    needs: build-cli
+
+    steps:
+      - name: Trigger Isolated workflow dispatch event with GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GALASA_TEAM_GITHUB_TOKEN }}
+        run: |
+          gh workflow run build.yaml --repo https://github.com/galasa-dev/isolated --ref ${{ env.BRANCH }}
