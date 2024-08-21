@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -237,10 +236,7 @@ func WriteMockRasRunsResponse(
 	writer.Header().Set("Content-Type", "application/json")
 
 	values := req.URL.Query()
-	pageRequestedStr := values.Get("page")
 	runNameQueryParameter := values.Get("runname")
-	pageRequested, _ := strconv.Atoi(pageRequestedStr)
-	assert.Equal(t, pageRequested, 1)
 
 	assert.Equal(t, runNameQueryParameter, runName)
 
@@ -254,9 +250,8 @@ func WriteMockRasRunsResponse(
 
 	writer.Write([]byte(fmt.Sprintf(`
 	{
-		"pageNumber": 1,
+		"nextCursor": "",
 		"pageSize": 1,
-		"numPages": 1,
 		"amountOfRuns": %d,
 		"runs":[ %s ]
 	}`, len(runResultStrings), combinedRunResultStrings)))

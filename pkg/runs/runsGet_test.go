@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -84,9 +83,17 @@ const (
 			 "contentType":	"application/json"
 			 }]
 			 }`
+
+	EMPTY_RUNS_RESPONSE = `
+		{
+			"nextCursor": "",
+			"pageSize": 1,
+			"amountOfRuns": 0,
+			"runs":[]
+		}`	
 )
 
-func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultStrings ...string) *httptest.Server {
+func NewRunsGetServletMock(t *testing.T, status int, nextPageCursors []string, runName string, runResultStrings ...string) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		clientVersion := r.Header.Get("ClientApiVersion")
@@ -96,7 +103,8 @@ func NewRunsGetServletMock(t *testing.T, status int, runName string, runResultSt
 		} else if strings.Contains(r.URL.Path, "/ras/resultnames") {
 			ConfigureServerForResultNamesEndpoint(t, w, r, status)
 		} else {
-			ConfigureServerForRasRunsEndpoint(t, w, r, runName, status, runResultStrings...)
+			ConfigureServerForRasRunsEndpoint(t, w, r, nextPageCursors[len(nextPageCursors) - 1], runName, status, runResultStrings...)
+			nextPageCursors = nextPageCursors[:len(nextPageCursors) - 1]
 		}
 	}))
 	return server
@@ -127,7 +135,15 @@ func ConfigureServerForDetailsEndpoint(t *testing.T, w http.ResponseWriter, r *h
 		`, combinedRunResultStrings)))
 }
 
-func ConfigureServerForRasRunsEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, runName string, status int, runResultStrings ...string) {
+func ConfigureServerForRasRunsEndpoint(
+	t *testing.T,
+	w http.ResponseWriter,
+	r *http.Request,
+	nextPageCursor string,
+	runName string,
+	status int,
+	runResultStrings ...string,
+) {
 	if r.URL.Path != "/ras/runs" {
 		t.Errorf("Expected to request '/ras/runs', got: %s", r.URL.Path)
 	}
@@ -138,10 +154,12 @@ func ConfigureServerForRasRunsEndpoint(t *testing.T, w http.ResponseWriter, r *h
 	w.WriteHeader(status)
 
 	values := r.URL.Query()
-	pageRequestedStr := values.Get("page")
 	runNameQueryParameter := values.Get("runname")
-	pageRequested, _ := strconv.Atoi(pageRequestedStr)
-	assert.Equal(t, pageRequested, 1)
+
+	cursorQueryParameter := values.Get("cursor")
+	if cursorQueryParameter != "" {
+		assert.Equal(t, nextPageCursor, cursorQueryParameter)
+	}
 
 	assert.Equal(t, runNameQueryParameter, runName)
 	combinedRunResultStrings := ""
@@ -154,12 +172,11 @@ func ConfigureServerForRasRunsEndpoint(t *testing.T, w http.ResponseWriter, r *h
 
 	w.Write([]byte(fmt.Sprintf(`
 		 {
-			 "pageNumber": 1,
+			 "nextCursor": "%s",
 			 "pageSize": 1,
-			 "numPages": 1,
 			 "amountOfRuns": %d,
 			 "runs":[ %s ]
-		 }`, len(runResultStrings), combinedRunResultStrings)))
+		 }`, nextPageCursor, len(runResultStrings), combinedRunResultStrings)))
 }
 
 func ConfigureServerForResultNamesEndpoint(t *testing.T, w http.ResponseWriter, r *http.Request, status int) {
@@ -208,12 +225,13 @@ func TestOutputFormatGarbageStringValidationGivesError(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 
 	// Given ...
+	nextPageCursor := []string{ "" }
 	runName := "U456"
 	age := "2d:24h"
 	requestor := ""
 	result := ""
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	shouldGetActive := false
 	defer server.Close()
 
@@ -247,11 +265,12 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 	// Given ...
 	age := "2d:24h"
 	runName := "garbage"
+	nextPageCursor := []string{ "" }
 	requestor := ""
 	result := ""
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -276,13 +295,14 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 
 func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := ""
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456, RUN_U456_v2)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456, RUN_U456_v2)
 	defer server.Close()
 
 	mockConsole := utils.NewMockConsole()
@@ -350,13 +370,14 @@ func TestOutputFormatDetailsValidatesOk(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := ""
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "details"
@@ -410,13 +431,14 @@ func TestGetFormatterNamesStringMultipleFormattersFormatsOk(t *testing.T) {
 
 func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := ""
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusInternalServerError, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusInternalServerError, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "details"
@@ -439,13 +461,14 @@ func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := ""
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "raw"
@@ -579,14 +602,7 @@ func TestRunsGetURLQueryWithFromAndToDate(t *testing.T) {
 		assert.NotEqualValues(t, query.Get("to"), "")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -619,14 +635,7 @@ func TestRunsGetURLQueryJustFromAge(t *testing.T) {
 		assert.EqualValues(t, query.Get("to"), "")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -659,14 +668,7 @@ func TestRunsGetURLQueryWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 		assert.EqualValues(t, query.Get("runname"), "")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -700,14 +702,7 @@ func TestRunsGetURLQueryWithOlderToAgeThanFromAgeReturnsError(t *testing.T) {
 		assert.EqualValues(t, query.Get("runname"), "U456")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -741,14 +736,7 @@ func TestRunsGetURLQueryWithBadlyFormedFromAndToParameterReturnsError(t *testing
 		assert.EqualValues(t, query.Get("runname"), "U456")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -937,14 +925,7 @@ func TestRunsGetURLQueryWithRequestorNotSuppliedReturnsOK(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -979,14 +960,7 @@ func TestRunsGetURLQueryWithRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.EqualValues(t, query.Get("requestor"), requestor)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -1021,14 +995,7 @@ func TestRunsGetURLQueryWithNumericRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.Contains(t, r.URL.RawQuery, "requestor="+url.QueryEscape(requestor))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -1063,14 +1030,7 @@ func TestRunsGetURLQueryWithDashInRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.Contains(t, r.URL.RawQuery, "requestor="+url.QueryEscape(requestor))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -1105,14 +1065,7 @@ func TestRunsGetURLQueryWithAmpersandRequestorSuppliedReturnsOK(t *testing.T) {
 		assert.Contains(t, r.URL.RawQuery, "requestor="+url.QueryEscape(requestor))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -1148,14 +1101,7 @@ func TestRunsGetURLQueryWithSpecialCharactersRequestorSuppliedReturnsOK(t *testi
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -1175,13 +1121,14 @@ func TestRunsGetURLQueryWithSpecialCharactersRequestorSuppliedReturnsOK(t *testi
 
 func TestRunsGetURLQueryWithResultSuppliedReturnsOK(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := "Passed"
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "summary"
@@ -1202,13 +1149,14 @@ func TestRunsGetURLQueryWithResultSuppliedReturnsOK(t *testing.T) {
 
 func TestRunsGetURLQueryWithMultipleResultSuppliedReturnsOK(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := "Passed,envfail"
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "summary"
@@ -1230,13 +1178,14 @@ func TestRunsGetURLQueryWithMultipleResultSuppliedReturnsOK(t *testing.T) {
 
 func TestRunsGetURLQueryWithResultNotSuppliedReturnsOK(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := ""
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "summary"
@@ -1255,13 +1204,14 @@ func TestRunsGetURLQueryWithResultNotSuppliedReturnsOK(t *testing.T) {
 
 func TestRunsGetURLQueryWithInvalidResultSuppliedReturnsError(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := "garbage"
 	shouldGetActive := false
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "summary"
@@ -1282,13 +1232,14 @@ func TestRunsGetURLQueryWithInvalidResultSuppliedReturnsError(t *testing.T) {
 
 func TestActiveAndResultAreMutuallyExclusiveShouldReturnError(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := "Passed"
 	shouldGetActive := true
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "summary"
@@ -1308,13 +1259,14 @@ func TestActiveAndResultAreMutuallyExclusiveShouldReturnError(t *testing.T) {
 
 func TestActiveParameterReturnsOk(t *testing.T) {
 	// Given ...
+	nextPageCursor := []string{ "" }
 	age := ""
 	runName := "U456"
 	requestor := ""
 	result := ""
 	shouldGetActive := true
 
-	server := NewRunsGetServletMock(t, http.StatusOK, runName, RUN_U456)
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursor, runName, RUN_U456)
 	defer server.Close()
 
 	outputFormat := "summary"
@@ -1351,14 +1303,7 @@ func TestRunsGetActiveRunsBuildsQueryCorrectly(t *testing.T) {
 		assert.NotContains(t, r.URL.RawQuery, "status="+url.QueryEscape("finished"))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-		w.Write([]byte(`
-		 {
-			 "pageNumber": 1,
-			 "pageSize": 1,
-			 "numPages": 1,
-			 "amountOfRuns": 0,
-			 "runs":[]
-		 }`))
+		w.Write([]byte(EMPTY_RUNS_RESPONSE))
 	}))
 	defer server.Close()
 
@@ -1374,4 +1319,40 @@ func TestRunsGetActiveRunsBuildsQueryCorrectly(t *testing.T) {
 
 	// Then ...
 	assert.Nil(t, err)
+}
+
+
+func TestRunsGetWithNextCursorGetsNextPageOfRuns(t *testing.T) {
+
+	// Given ...
+	// When the last page is reached, the cursor doesn't change since all runs have been returned
+	nextPageCursors := []string{ "last-page", "last-page" }
+	age := ""
+	runName := "U456"
+	requestor := ""
+	result := ""
+	shouldGetActive := false
+
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursors, runName, RUN_U456)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient)
+
+	// Then...
+	assert.Nil(t, err)
+	runsReturned := mockConsole.ReadText()
+	assert.Contains(t, runsReturned, runName)
+
+	// The servlet should have been sent two requests, so expect two of the same run for this test
+	run := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
+	expectedResults := run + run
+	assert.Equal(t, runsReturned, expectedResults)
 }
