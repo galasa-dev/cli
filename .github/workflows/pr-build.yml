@@ -21,15 +21,16 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 6.9.2
+          gradle-version: 8.9
 
       # Pull down dependencies with Gradle and put them in the right places.
       - name: Gather dependencies using Gradle
         run : |
+          set -o pipefail
           gradle -b build.gradle installJarsIntoTemplates --info \
           -PsourceMaven=https://development.galasa.dev/gh/maven-repo/maven \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
-          -PtargetMaven=${{ github.workspace }}/repo \
+          -PtargetMaven=${{ github.workspace }}/repo 2>&1 | tee build.log
 
       # Generate client code so galasactl can communicate with the API server.
       - name: Generate Go client code using openapi.yaml
@@ -63,7 +64,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'semeru'
           cache: maven
 
@@ -78,7 +79,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 6.9.2
+          gradle-version: 8.9
 
       - name: Run local test script with Gradle
         run : |
