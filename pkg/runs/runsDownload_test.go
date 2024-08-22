@@ -250,7 +250,6 @@ func WriteMockRasRunsResponse(
 
 	writer.Write([]byte(fmt.Sprintf(`
 	{
-		"nextCursor": "",
 		"pageSize": 1,
 		"amountOfRuns": %d,
 		"runs":[ %s ]

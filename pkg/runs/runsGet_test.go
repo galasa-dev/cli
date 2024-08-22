@@ -86,7 +86,6 @@ const (
 
 	EMPTY_RUNS_RESPONSE = `
 		{
-			"nextCursor": "",
 			"pageSize": 1,
 			"amountOfRuns": 0,
 			"runs":[]
