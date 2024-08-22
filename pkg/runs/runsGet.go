@@ -233,7 +233,7 @@ func GetRunsFromRestApi(
 			var runData *galasaapi.RunResults
 			var httpResponse *http.Response
 			log.Printf("Requesting page '%d' ", pageNumberWanted)
-			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion)
+			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).IncludeCursor("true")
 			if fromAgeMins != 0 {
 				apicall = apicall.From(fromTime)
 			}
@@ -272,6 +272,7 @@ func GetRunsFromRestApi(
 					// Add all the runs into our set of results.
 					// Note: The ... syntax means 'all of the array', so they all get appended at once.
 					results = append(results, runsOnThisPage...)
+					log.Print("APPENDING ")
 
 					// Have we processed the last page ?
 					if !runData.HasNextCursor() || pageCursor == runData.GetNextCursor() {
