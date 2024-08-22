@@ -44,11 +44,12 @@ jobs:
           -PtargetMaven=${{ github.workspace }}/repo 2>&1 | tee build.log
 
       - name: Upload Gradle installJarsIntoTemplates log
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: gradle-installJarsIntoTemplates-log
           path: build.log
+          retention-days: 7 
 
       # Generate client code so galasactl can communicate with the API server.
       - name: Generate Go client code using openapi.yaml
