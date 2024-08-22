@@ -274,7 +274,7 @@ func GetRunsFromRestApi(
 					results = append(results, runsOnThisPage...)
 
 					// Have we processed the last page ?
-					if pageCursor == runData.GetNextCursor() || !runData.HasNextCursor() {
+					if !runData.HasNextCursor() || pageCursor == runData.GetNextCursor() {
 						gotAllResults = true
 					} else {
 						pageCursor = runData.GetNextCursor()
