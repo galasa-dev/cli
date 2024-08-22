@@ -58,6 +58,8 @@ const (
 	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
 	COMMAND_NAME_RESOURCES_UPDATE         = "resources update"
 	COMMAND_NAME_RESOURCES_DELETE         = "resources delete"
+	COMMAND_NAME_USERS                    = "users"
+	COMMAND_NAME_USERS_GET                = "users get"
 )
 
 // -----------------------------------------------------------------
@@ -137,6 +139,10 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 
 	if err == nil {
 		err = commands.addResourcesCommands(factory, rootCommand)
+	}
+
+	if err == nil {
+		err = commands.addUsersCommands(factory, rootCommand)
 	}
 
 	if err == nil {
@@ -358,6 +364,26 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory,
 		commands.commandMap[resourcesCreateCommand.Name()] = resourcesCreateCommand
 		commands.commandMap[resourcesUpdateCommand.Name()] = resourcesUpdateCommand
 		commands.commandMap[resourcesDeleteCommand.Name()] = resourcesDeleteCommand
+	}
+
+	return err
+}
+
+func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+
+	var err error
+	var usersCommand spi.GalasaCommand
+	var usersGetCommand spi.GalasaCommand
+
+	usersCommand, err = NewUsersCommand(rootCommand)
+
+	if err == nil {
+		usersGetCommand, err = NewUsersGetCommand(factory, usersCommand, rootCommand)
+	}
+
+	if err == nil {
+		commands.commandMap[usersCommand.Name()] = usersCommand
+		commands.commandMap[usersGetCommand.Name()] = usersGetCommand
 	}
 
 	return err
