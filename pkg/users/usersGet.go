@@ -16,15 +16,15 @@ import (
 
 func GetUsers(loginId string, apiClient *galasaapi.APIClient, console spi.Console) error {
 	var err error
-	var outputText []galasaapi.UserData
+	var userData galasaapi.UserData
 
 	loginId, err = validateLoginIdFlag(loginId)
 	if err == nil {
-		outputText, err = getUserDataFromRestApi(loginId, apiClient)
+		userData, err = getUserDataFromRestApi(loginId, apiClient)
 
 		if err == nil {
-			extractedUserObject := &outputText[0]
-			console.WriteString("id: " + extractedUserObject.GetLoginId())
+			extractedUserId := userData.GetLoginId()
+			console.WriteString("id: " + extractedUserId)
 		}
 
 	}
@@ -35,7 +35,7 @@ func GetUsers(loginId string, apiClient *galasaapi.APIClient, console spi.Consol
 func getUserDataFromRestApi(
 	loginId string,
 	apiClient *galasaapi.APIClient,
-) ([]galasaapi.UserData, error) {
+) (galasaapi.UserData, error) {
 
 	var err error
 	var context context.Context = nil
@@ -53,5 +53,7 @@ func getUserDataFromRestApi(
 
 	}
 
-	return userProperties, err
+	//Since we have the loginId filter, we can return the first index.
+	//It will always be the currently logged in user
+	return userProperties[0], err
 }

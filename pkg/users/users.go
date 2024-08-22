@@ -16,7 +16,9 @@ func validateLoginIdFlag(loginId string) (string, error) {
 
 	var err error
 
-	if loginId == "" || strings.TrimSpace(loginId) == "" {
+	loginId = strings.TrimSpace(loginId)
+
+	if loginId == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG)
 	}
 
@@ -26,8 +28,6 @@ func validateLoginIdFlag(loginId string) (string, error) {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED, loginId)
 		}
 	}
-
-	loginId = strings.TrimSpace(loginId)
 
 	return loginId, err
 
