@@ -255,7 +255,7 @@ func GetRunsFromRestApi(
 			if pageCursor != "" {
 				apicall = apicall.Cursor(pageCursor)
 			}
-			apicall = apicall.Sort("to:desc")
+			apicall = apicall.Sort("from:desc")
 			runData, httpResponse, err = apicall.Execute()
 
 			if err != nil {
@@ -274,7 +274,7 @@ func GetRunsFromRestApi(
 					results = append(results, runsOnThisPage...)
 
 					// Have we processed the last page ?
-					if !runData.HasNextCursor() || pageCursor == runData.GetNextCursor() {
+					if !runData.HasNextCursor() || len(runsOnThisPage) < int(runData.GetPageSize()) {
 						gotAllResults = true
 					} else {
 						pageCursor = runData.GetNextCursor()
