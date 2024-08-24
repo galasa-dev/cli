@@ -47,6 +47,8 @@ func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.GalasaP
 		yamlRepresentationBytes, err = yaml.Marshal(property)
 		if err == nil {
 			yamlStr := string(yamlRepresentationBytes)
+
+			// TODO: Can anyone please explain why we do this substitution ? Wworried that if the value the user supplies has 'apiversion' inside it will get corrupted...
 			yamlStr = strings.ReplaceAll(yamlStr, "apiversion", "apiVersion")
 			propertyString += yamlStr
 		}
