@@ -37,6 +37,8 @@ const (
 	//namespaces display
 	HEADER_NAMESPACE      = "namespace"
 	HEADER_NAMESPACE_TYPE = "type"
+
+	PROPERTY_VALUE_MAX_VISIBLE_LENGTH = 60
 )
 
 type PropertyFormatter interface {
@@ -57,6 +59,19 @@ func calculateMaxLengthOfEachColumn(table [][]string) []int {
 		}
 	}
 	return columnLengths
+}
+
+func substituteNewLines(originalPropValue string) string {
+	newLinesReplacedValue := strings.Replace(originalPropValue, "\n", "\\n", -1)
+	return newLinesReplacedValue
+}
+
+func cropExtraLongValue(originalPropValue string) string {
+	croppedValue := originalPropValue
+	if len(originalPropValue) > PROPERTY_VALUE_MAX_VISIBLE_LENGTH {
+		croppedValue = originalPropValue[:PROPERTY_VALUE_MAX_VISIBLE_LENGTH] + `...(cropped)`
+	}
+	return croppedValue
 }
 
 func writeFormattedTableToStringBuilder(table [][]string, buff *strings.Builder, columnLengths []int) {
