@@ -8,6 +8,7 @@ package launcher
 import (
 	"log"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/api"
@@ -765,6 +766,88 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Contains(t, args, `-DGALASA_HOME="/User/Home/testuser/.galasa"`)
+}
+
+func TestCommandAllDashDSystemPropertiesPassedAppearBeforeTheDashJar(t *testing.T) {
+
+	bootstrapProps, _, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		localMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := true
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
+
+	cmd, args, err := getCommandSyntax(
+		bootstrapProps,
+		galasaHome,
+		fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		localMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		"", // No Gherkin URL supplied
+		isTraceEnabled,
+		isDebugEnabled,
+		debugPort,
+		debugMode,
+		BLANK_JWT,
+	)
+
+	assert.NotNil(t, cmd)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	// Combine all arguments into a single string.
+	allArgs := strings.Join(args, " ")
+
+	allDashDIndexes := getAllIndexesOfSubstring(allArgs, "-D")
+	allDashJarIndexes := getAllIndexesOfSubstring(allArgs, "-jar")
+
+	assert.Equal(t, 1, len(allDashJarIndexes), "-jar option is found in command launch parameters an unexpected number of times")
+	dashJarIndex := allDashJarIndexes[0]
+	for _, dashDIndex := range allDashDIndexes {
+		assert.Less(t, dashDIndex, dashJarIndex, "A -Dxxx parameter is found after the -jar parameter, so will do nothing. -D parameters should appear before the -jar parameter")
+	}
+}
+
+func TestFindingIndexesOfSubstring(t *testing.T) {
+	originalString := "012345678901234567890"
+	indexes := getAllIndexesOfSubstring(originalString, "01")
+	if assert.Equal(t, 2, len(indexes)) {
+		assert.Equal(t, 0, indexes[0])
+		assert.Equal(t, 10, indexes[1])
+	}
+}
+
+func getAllIndexesOfSubstring(originalString string, subString string) []int {
+	var result []int = make([]int, 0)
+
+	searchString := originalString
+	charactersProcessed := 0
+	isDone := false
+	for !isDone {
+
+		index := strings.Index(searchString, subString)
+		if index == -1 {
+			isDone = true
+		} else {
+			result = append(result, index+charactersProcessed)
+			searchString = searchString[index+1:]
+			charactersProcessed += index + 1
+		}
+	}
+
+	return result
 }
 
 func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {

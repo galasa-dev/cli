@@ -667,13 +667,20 @@ func getCommandSyntax(
 
 		args = appendArgsBootstrapJvmLaunchOptions(args, bootstrapProperties)
 
-		args = append(args, "-jar")
-		args = append(args, bootJarPath)
-
+		// Note: Any -D properties are options for the JVM, so must appear before the -jar parameter.
+		// Parameters after the -jar parameter get passed into the 'main' of the launched java program.
 		args = append(args, "-Dfile.encoding=UTF-8")
 
 		nativeGalasaHomeFolderPath := galasaHome.GetNativeFolderPath()
 		args = append(args, `-DGALASA_HOME="`+nativeGalasaHomeFolderPath+`"`)
+
+		// If there is a jwt, pass it through.
+		if jwt != "" {
+			args = append(args, "-DGALASA_JWT="+jwt)
+		}
+
+		args = append(args, "-jar")
+		args = append(args, bootJarPath)
 
 		// --localmaven file://${M2_PATH}/repository/
 		// Note: URLs always have forward-slashes
@@ -725,10 +732,6 @@ func getCommandSyntax(
 			args = append(args, "--trace")
 		}
 
-		// If there is a jwt, pass it through.
-		if jwt != "" {
-			args = append(args, "-DGALASA_JWT="+jwt)
-		}
 	}
 
 	return cmd, args, err
