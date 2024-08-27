@@ -31,7 +31,6 @@ func (*PropertyYamlFormatter) GetName() string {
 }
 
 func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.GalasaProperty) (string, error) {
-	var result string = ""
 	var err error
 	buff := strings.Builder{}
 	//totalProperties := len(cpsProperties)
@@ -48,7 +47,10 @@ func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.GalasaP
 		if err == nil {
 			yamlStr := string(yamlRepresentationBytes)
 
-			// TODO: Can anyone please explain why we do this substitution ? Wworried that if the value the user supplies has 'apiversion' inside it will get corrupted...
+			// The generated bean serialises in json as 'apiVersion' which is correct. In yaml it serialises as 'apiversion' (incorrect)
+			// So this is a hack to correct that failure.
+			// Note: This will corrupt any value string which also has 'apiversion' inside it !
+			// TODO: The fix is to change the bean and add a 'yaml' annotation so it gets rendered correctly. Golang has yaml annotations, but does the generator support them ?
 			yamlStr = strings.ReplaceAll(yamlStr, "apiversion", "apiVersion")
 			propertyString += yamlStr
 		}
@@ -56,6 +58,6 @@ func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.GalasaP
 		buff.WriteString(propertyString)
 	}
 
-	result = buff.String()
+	result := buff.String()
 	return result, err
 }
