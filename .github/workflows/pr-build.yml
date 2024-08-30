@@ -1,3 +1,8 @@
+#
+# Copyright contributors to the Galasa project
+#
+# SPDX-License-Identifier: EPL-2.0
+#
 name: PR build
 
 on:
@@ -28,7 +33,8 @@ jobs:
         run : |
           set -o pipefail
           gradle -b build.gradle installJarsIntoTemplates --info \
-          -PsourceMaven=https://development.galasa.dev/gh/maven-repo/maven \
+          --no-daemon --console plain \
+          -PsourceMaven=https://development.galasa.dev/main/maven-repo/maven \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
           -PtargetMaven=${{ github.workspace }}/repo 2>&1 | tee build.log
 
@@ -83,11 +89,6 @@ jobs:
       - name: Run local test script with Maven
         run : |
           ./test-galasactl-local.sh --buildTool maven
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.9
 
       - name: Run local test script with Gradle
         run : |
