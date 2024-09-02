@@ -62,7 +62,7 @@ build/coverage.out : $(SOURCE_FILES)
 build/coverage-sanitised.out : build/coverage.out
 	cat build/coverage.out \
 		| grep -v "Mock" \
-		| grep -v "ixtures" \
+		| grep -v "ixture" \
 		> build/coverage-sanitised.out
 
 # Unit test output --> an html report.
