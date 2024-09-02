@@ -53,6 +53,7 @@ const (
 	COMMAND_NAME_RUNS_SUBMIT_LOCAL        = "runs submit local"
 	COMMAND_NAME_RUNS_RESET               = "runs reset"
 	COMMAND_NAME_RUNS_CANCEL              = "runs cancel"
+	COMMAND_NAME_RUNS_DELETE              = "runs delete"
 	COMMAND_NAME_RESOURCES                = "resources"
 	COMMAND_NAME_RESOURCES_APPLY          = "resources apply"
 	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
@@ -297,6 +298,7 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 	var runsSubmitLocalCommand spi.GalasaCommand
 	var runsResetCommand spi.GalasaCommand
 	var runsCancelCommand spi.GalasaCommand
+	var runsDeleteCommand spi.GalasaCommand
 
 	runsCommand, err = NewRunsCmd(rootCommand)
 	if err == nil {
@@ -313,6 +315,9 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 							runsResetCommand, err = NewRunsResetCommand(factory, runsCommand, rootCommand)
 							if err == nil {
 								runsCancelCommand, err = NewRunsCancelCommand(factory, runsCommand, rootCommand)
+								if err == nil {
+									runsDeleteCommand, err = NewRunsDeleteCommand(factory, runsCommand, rootCommand)
+								}
 							}
 						}
 					}
@@ -330,6 +335,7 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 		commands.commandMap[runsSubmitLocalCommand.Name()] = runsSubmitLocalCommand
 		commands.commandMap[runsResetCommand.Name()] = runsResetCommand
 		commands.commandMap[runsCancelCommand.Name()] = runsCancelCommand
+		commands.commandMap[runsDeleteCommand.Name()] = runsDeleteCommand
 	}
 
 	return err

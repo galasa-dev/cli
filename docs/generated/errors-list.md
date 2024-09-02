@@ -152,6 +152,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1154E: The provided token ID, '{}', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.
 - GAL1155E: The id provided by the --id field cannot be an empty string.
 - GAL1156E: '{}' is not supported as a valid value. Valid values are 'me'.
+- GAL1157E: An attempt to delete a run failed. Cause is {}
+- GAL1158E: An attempt to delete a run failed. The server responded with an error. Cause is {}
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
