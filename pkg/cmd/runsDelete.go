@@ -73,8 +73,8 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 
 	runsDeleteCobraCmd := &cobra.Command{
 		Use:     "delete",
-		Short:   "Get the details of a test runname which ran or is running.",
-		Long:    "Get the details of a test runname which ran or is running, displaying the results to the caller.",
+		Short:   "Delete a named test run.",
+		Long:    "Delete a named test run.",
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs delete"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
@@ -82,8 +82,7 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 		},
 	}
 
-	runsDeleteCobraCmd.PersistentFlags().StringVar(&cmd.values.runName, "name", "", "the name of the test run we want to delete."+
-		" Cannot be used in conjunction with --requestor, --result or --active flags")
+	runsDeleteCobraCmd.PersistentFlags().StringVar(&cmd.values.runName, "name", "", "the name of the test run we want to delete.")
 
 	runsDeleteCobraCmd.MarkFlagRequired("name")
 
