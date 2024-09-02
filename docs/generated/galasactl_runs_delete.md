@@ -1,10 +1,10 @@
 ## galasactl runs delete
 
-Get the details of a test runname which ran or is running.
+Delete a named test run.
 
 ### Synopsis
 
-Get the details of a test runname which ran or is running, displaying the results to the caller.
+Delete a named test run.
 
 ```
 galasactl runs delete [flags]
@@ -14,7 +14,7 @@ galasactl runs delete [flags]
 
 ```
   -h, --help          Displays the options for the 'runs delete' command.
-      --name string   the name of the test run we want to delete. Cannot be used in conjunction with --requestor, --result or --active flags
+      --name string   the name of the test run we want to delete.
 ```
 
 ### Options inherited from parent commands

@@ -17,7 +17,7 @@ import (
 )
 
 // Objective: Allow the user to do this:
-//    run get --runname 12345
+//    runs delete --name 12345
 // And then show the results in a human-readable form.
 
 // Variables set by cobra's command-line parsing.

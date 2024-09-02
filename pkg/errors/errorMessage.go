@@ -249,8 +249,10 @@ var (
 	GALASA_ERROR_INVALID_TOKEN_ID_FORMAT         = NewMessageType("GAL1154E: The provided token ID, '%s', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.", 1154, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG      = NewMessageType("GAL1155E: The id provided by the --id field cannot be an empty string.", 1155, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED          = NewMessageType("GAL1156E: '%s' is not supported as a valid value. Valid values are 'me'.", 1156, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_RUN_FAILED               = NewMessageType("GAL1157E: An attempt to delete a run failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED       = NewMessageType("GAL1158E: An attempt to delete a run failed. The server responded with an error. Cause is %s", 1158, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUN_FAILED               = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED       = NewMessageType("GAL1158E: An attempt to delete a run named '%s' failed. The server responded with an error. Cause is %s", 1158, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT = NewMessageType("GAL1159E: Failed to delete a run named '%s'. The server responded with an unexpected status code '%v' and did not contain any content. Cause is %s", 1159, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUNS_BADLY_FORMATTED = NewMessageType("GAL1159E: Failed to delete a run named '%s'. The server responded with an unexpected status code '%v' and did not contain any content. Cause is %s", 1159, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
