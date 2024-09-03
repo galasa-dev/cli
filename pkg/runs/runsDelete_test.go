@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/api"
@@ -17,44 +18,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewRunsDeleteServletMock(
-	t *testing.T,
-	runName string,
-	runId string,
-	runResultJsonStrings []string,
-	deleteRunStatusCode int,
-) *httptest.Server {
-
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
-
-		assert.NotEmpty(t, req.Header.Get("ClientApiVersion"))
-		acceptHeader := req.Header.Get("Accept")
-		if req.URL.Path == "/ras/runs" {
-			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsResponse(t, writer, req, runName, runResultJsonStrings)
-		} else if req.URL.Path == "/ras/runs/"+runId {
-			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
-			WriteMockRasRunsDeleteResponse(t, writer, req, runName, deleteRunStatusCode)
-		}
-	}))
-
-	return server
-}
-
-func WriteMockRasRunsDeleteResponse(
-	t *testing.T,
-	writer http.ResponseWriter,
-	req *http.Request,
-	runName string,
-	statusCode int) {
-
-	writer.WriteHeader(statusCode)
-	
-}
-
-func createMockRun(runName string) galasaapi.Run {
+func createMockRun(runName string, runId string) galasaapi.Run {
 	run := *galasaapi.NewRun()
-	run.SetRunId(runName)
+	run.SetRunId(runId)
 	testStructure := *galasaapi.NewTestStructure()
 	testStructure.SetRunName(runName)
 
@@ -65,13 +31,24 @@ func createMockRun(runName string) galasaapi.Run {
 func TestCanDeleteARun(t *testing.T) {
 	// Given...
 	runName := "J20"
+	runId := "J234567890"
 
 	// Create the mock run to be deleted
-	runToDelete := createMockRun(runName)
+	runToDelete := createMockRun(runName, runId)
 	runToDeleteBytes, _ := json.Marshal(runToDelete)
 	runToDeleteJson := string(runToDeleteBytes)
 
-	server := NewRunsDeleteServletMock(t, runName, runName, []string{ runToDeleteJson }, 204)
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+
+		assert.NotEmpty(t, req.Header.Get("ClientApiVersion"))
+		acceptHeader := req.Header.Get("Accept")
+		if req.URL.Path == "/ras/runs" {
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
+		} else if req.URL.Path == "/ras/runs/"+runId {
+			writer.WriteHeader(http.StatusNoContent)
+		}
+	}))
 
 	console := utils.NewMockConsole()
 	apiServerUrl := server.URL
@@ -93,14 +70,18 @@ func TestCanDeleteARun(t *testing.T) {
 
 func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
 	// Given...
-	nonExistantRunName := "run-does-not-exist"
-	
-	existingRunName := "J20"
-	existingRun := createMockRun(existingRunName)
-	existingRunBytes, _ := json.Marshal(existingRun)
-	existingRunJson := string(existingRunBytes)
+	nonExistantRunName := "runDoesNotExist123"
 
-	server := NewRunsDeleteServletMock(t, nonExistantRunName, nonExistantRunName, []string{ existingRunJson }, 404)
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+		assert.NotEmpty(t, req.Header.Get("ClientApiVersion"))
+		acceptHeader := req.Header.Get("Accept")
+		if req.URL.Path == "/ras/runs" {
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, nonExistantRunName, []string{})
+		} else {
+			assert.Fail(t, "An unexpected http request was issued to the test case.")
+		}
+	}))
 
 	console := utils.NewMockConsole()
 	apiServerUrl := server.URL
@@ -117,4 +98,143 @@ func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
 
 	// Then...
 	assert.NotNil(t, err, "RunsDelete did not return an error but it should have")
+	consoleOutputText := console.ReadText() 
+	assert.Contains(t, consoleOutputText, nonExistantRunName)
+	assert.Contains(t, consoleOutputText, "GAL1163E")
+	assert.Contains(t, consoleOutputText, "The run named 'runDoesNotExist123' could not be deleted")
 }
+
+func TestRunsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
+	// Given...
+	runName := "J20"
+	runId := "J234567890"
+
+	// Create the mock run to be deleted
+	runToDelete := createMockRun(runName, runId)
+	runToDeleteBytes, _ := json.Marshal(runToDelete)
+	runToDeleteJson := string(runToDeleteBytes)
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+
+		assert.NotEmpty(t, req.Header.Get("ClientApiVersion"))
+		acceptHeader := req.Header.Get("Accept")
+		if req.URL.Path == "/ras/runs" {
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
+		} else if req.URL.Path == "/ras/runs/"+runId {
+			writer.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+
+	console := utils.NewMockConsole()
+	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := RunsDelete(
+		runName,
+		console,
+		apiServerUrl,
+		apiClient,
+		mockTimeService)
+
+	// Then...
+	assert.NotNil(t, err, "RunsDelete returned an unexpected error")
+	consoleText := console.ReadText()
+	assert.Contains(t, consoleText , runName)
+	assert.Contains(t, consoleText , "GAL1159E")
+}
+
+func TestRunsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
+	// Given...
+	runName := "J20"
+	runId := "J234567890"
+
+	// Create the mock run to be deleted
+	runToDelete := createMockRun(runName, runId)
+	runToDeleteBytes, _ := json.Marshal(runToDelete)
+	runToDeleteJson := string(runToDeleteBytes)
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+
+		assert.NotEmpty(t, req.Header.Get("ClientApiVersion"))
+		acceptHeader := req.Header.Get("Accept")
+		if req.URL.Path == "/ras/runs" {
+			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+			WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
+		} else if req.URL.Path == "/ras/runs/"+runId {
+			writer.WriteHeader(http.StatusInternalServerError)
+			writer.Header().Set("Content-Type", "application/notJsonOnPurpose")
+			writer.Write([]byte("something not json but non-zero-length."))
+		}
+	}))
+
+	console := utils.NewMockConsole()
+	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := RunsDelete(
+		runName,
+		console,
+		apiServerUrl,
+		apiClient,
+		mockTimeService)
+
+	// Then...
+	assert.NotNil(t, err, "RunsDelete returned an unexpected error")
+	consoleText := console.ReadText()
+	assert.Contains(t, consoleText, runName)
+	assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
+	assert.Contains(t, consoleText, "GAL1164E")
+	assert.Contains(t, consoleText, "Error details from the server are not in the json format")
+}
+
+
+// func TestRunsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
+// 	// Given...
+// 	runName := "J20"
+// 	runId := "J234567890"
+
+// 	// Create the mock run to be deleted
+// 	runToDelete := createMockRun(runName, runId)
+// 	runToDeleteBytes, _ := json.Marshal(runToDelete)
+// 	runToDeleteJson := string(runToDeleteBytes)
+
+// 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+
+// 		assert.NotEmpty(t, req.Header.Get("ClientApiVersion"))
+// 		acceptHeader := req.Header.Get("Accept")
+// 		if req.URL.Path == "/ras/runs" {
+// 			assert.Equal(t, "application/json", acceptHeader, "Expected Accept: application/json header, got: %s", acceptHeader)
+// 			WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
+// 		} else if req.URL.Path == "/ras/runs/"+runId {
+// 			writer.WriteHeader(http.StatusInternalServerError)
+// 			writer.Header().Add("Content-Type", "application/json")
+// 			writer.Write([]byte(`{ "this", "isBadJson because it doesnt end in a close braces" `))
+// 		}
+// 	}))
+
+// 	console := utils.NewMockConsole()
+// 	apiServerUrl := server.URL
+// 	apiClient := api.InitialiseAPI(apiServerUrl)
+// 	mockTimeService := utils.NewMockTimeService()
+
+// 	// When...
+// 	err := RunsDelete(
+// 		runName,
+// 		console,
+// 		apiServerUrl,
+// 		apiClient,
+// 		mockTimeService)
+
+// 	// Then...
+// 	assert.NotNil(t, err, "RunsDelete returned an unexpected error")
+// 	consoleText := console.ReadText()
+// 	assert.Contains(t, consoleText, runName)
+// 	assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
+// 	assert.Contains(t, consoleText, "Gxxxx")
+// 	assert.Contains(t, consoleText, "Error details from the server are not in the json format")
+// }
