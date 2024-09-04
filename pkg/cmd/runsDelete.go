@@ -82,7 +82,7 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 		},
 	}
 
-	runsDeleteCobraCmd.PersistentFlags().StringVar(&cmd.values.runName, "name", "", "the name of the test run we want to delete.")
+	runsDeleteCobraCmd.Flags().StringVar(&cmd.values.runName, "name", "", "the name of the test run we want to delete.")
 
 	runsDeleteCobraCmd.MarkFlagRequired("name")
 
