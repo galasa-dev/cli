@@ -30,6 +30,7 @@ func NewHttpInteraction(expectedPath string, expectedHttpMethod string) HttpInte
         ExpectedHttpMethod: expectedHttpMethod,
     }
 
+    // Set a basic implementation of the lambda to write a default response, which can be overridden by tests
     httpInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusOK)
     }
@@ -70,8 +71,4 @@ func NewMockHttpServer(t *testing.T, interactions []HttpInteraction) MockHttpSer
         }
     }))
     return mockHttpServer
-}
-
-func (mockServer *MockHttpServer) GetServerURL() string {
-    return mockServer.Server.URL
 }

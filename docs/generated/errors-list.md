@@ -152,11 +152,12 @@ The `galasactl` tool can generate the following errors:
 - GAL1154E: The provided token ID, '{}', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.
 - GAL1155E: The id provided by the --id field cannot be an empty string.
 - GAL1156E: '{}' is not supported as a valid value. Valid values are 'me'.
-- GAL1157E: An attempt to delete a run named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1157E: An attempt to delete a run named '{}' failed. Cause is {}
+- GAL1158E: An attempt to delete a run named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
 - GAL1159E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server.
 - GAL1160E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
 - GAL1161E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
-- GAL1162E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: {}
+- GAL1162E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1163E: The run named '{}' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete
 - GAL1164E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.

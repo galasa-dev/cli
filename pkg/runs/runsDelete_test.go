@@ -55,9 +55,10 @@ func TestCanDeleteARun(t *testing.T) {
     }
 
     server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
 
     console := utils.NewMockConsole()
-    apiServerUrl := server.GetServerURL()
+    apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 
@@ -87,9 +88,10 @@ func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
     interactions := []utils.HttpInteraction{ getRunsInteraction }
 
     server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
 
     console := utils.NewMockConsole()
-    apiServerUrl := server.GetServerURL()
+    apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 
@@ -136,6 +138,7 @@ func TestRunsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *test
     }
 
     server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
@@ -186,9 +189,10 @@ func TestRunsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrec
     }
 
     server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
 
     console := utils.NewMockConsole()
-    apiServerUrl := server.GetServerURL()
+    apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 
@@ -238,9 +242,10 @@ func TestRunsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCo
     }
 
     server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
 
     console := utils.NewMockConsole()
-    apiServerUrl := server.GetServerURL()
+    apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 
@@ -299,9 +304,10 @@ func TestRunsDeleteFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *test
     }
 
     server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
 
     console := utils.NewMockConsole()
-    apiServerUrl := server.GetServerURL()
+    apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 
