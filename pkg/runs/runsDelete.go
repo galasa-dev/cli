@@ -153,7 +153,7 @@ func httpResponseToGalasaError(
 				if err == nil {
 					// server returned galasa api error structure we understand.
 					log.Printf("Failed - HTTP response - status code: '%v' server responded with error message: '%v' \n", statusCode, errorMsgReceivedFromApiServer)
-					err = galasaErrors.NewGalasaError(errorMsgReceivedFromApiServer, identifier, errorFromServer.Message)
+					err = galasaErrors.NewGalasaError(errorMsgReceivedFromApiServer, identifier, statusCode, errorFromServer.Message)
 				}
 			}
 		}

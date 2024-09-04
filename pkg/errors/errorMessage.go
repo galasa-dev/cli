@@ -250,15 +250,15 @@ var (
 	GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG      = NewMessageType("GAL1155E: The id provided by the --id field cannot be an empty string.", 1155, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED          = NewMessageType("GAL1156E: '%s' is not supported as a valid value. Valid values are 'me'.", 1156, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_RUN_FAILED               = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED	     = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1157, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED	     = NewMessageType("GAL1158E: An attempt to delete a run named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1158, STACK_TRACE_NOT_WANTED)
 
 	// 4 related but slightly different errors, when an HTTP response arrives from the Galasa server, and we can/can't parse the payload to get the message details out. 
 	GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT 		 = NewMessageType("GAL1159E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server.", 1159, STACK_TRACE_NOT_WANTED) 
 	GALASA_ERROR_DELETE_RUNS_RESPONSE_PAYLOAD_UNREADABLE = NewMessageType("GAL1160E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1160, STACK_TRACE_NOT_WANTED) 
 	GALASA_ERROR_DELETE_RUNS_UNPARSEABLE_CONTENT		 = NewMessageType("GAL1161E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1161, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_RUNS_SERVER_REPORTED_ERROR 		 = NewMessageType("GAL1162E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: %s", 1162, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUNS_SERVER_REPORTED_ERROR 		 = NewMessageType("GAL1162E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1162, STACK_TRACE_NOT_WANTED)
 
-	GALASA_ERROR_SERVER_DELETE_RUN_NOT_FOUND = NewMessageType("GAL1163E: The run named '%s' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete", 1163, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_DELETE_RUN_NOT_FOUND 			 = NewMessageType("GAL1163E: The run named '%s' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete", 1163, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_RUNS_EXPLANATION_NOT_JSON		 = NewMessageType("GAL1164E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1164, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
