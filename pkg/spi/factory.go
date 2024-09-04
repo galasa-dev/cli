@@ -24,4 +24,5 @@ type Factory interface {
 	GetStdErrConsole() Console
 	GetTimeService() TimeService
 	GetAuthenticator(apiServerUrl string, galasaHome GalasaHome) Authenticator
+	GetByteReader() ByteReader
 }

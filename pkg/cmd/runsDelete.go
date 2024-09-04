@@ -135,6 +135,8 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 				var apiClient *galasaapi.APIClient
 				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
+				byteReader := factory.GetByteReader()
+
 				if err == nil {
 					// Call to process the command in a unit-testable way.
 					err = runs.RunsDelete(
@@ -143,6 +145,7 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 						apiServerUrl,
 						apiClient,
 						timeService,
+						byteReader,
 					)
 				}
 			}

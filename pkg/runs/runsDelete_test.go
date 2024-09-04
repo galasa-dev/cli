@@ -61,6 +61,7 @@ func TestCanDeleteARun(t *testing.T) {
     apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReader()
 
     // When...
     err := RunsDelete(
@@ -68,7 +69,8 @@ func TestCanDeleteARun(t *testing.T) {
         console,
         apiServerUrl,
         apiClient,
-        mockTimeService)
+        mockTimeService,
+		mockByteReader)
 
     // Then...
     assert.Nil(t, err, "RunsDelete returned an unexpected error")
@@ -94,6 +96,7 @@ func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
     apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReader()
 
     // When...
     err := RunsDelete(
@@ -101,7 +104,8 @@ func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
         console,
         apiServerUrl,
         apiClient,
-        mockTimeService)
+        mockTimeService,
+		mockByteReader)
 
     // Then...
     assert.NotNil(t, err, "RunsDelete did not return an error but it should have")
@@ -144,6 +148,7 @@ func TestRunsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *test
     apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReader()
 
     // When...
     err := RunsDelete(
@@ -151,10 +156,11 @@ func TestRunsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *test
         console,
         apiServerUrl,
         apiClient,
-        mockTimeService)
+        mockTimeService,
+		mockByteReader)
 
     // Then...
-    assert.NotNil(t, err, "RunsDelete returned an unexpected error")
+    assert.NotNil(t, err, "RunsDelete did not return an error but it should have")
     consoleText := console.ReadText()
     assert.Contains(t, consoleText , runName)
     assert.Contains(t, consoleText , "GAL1159E")
@@ -195,6 +201,7 @@ func TestRunsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrec
     apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReader()
 
     // When...
     err := RunsDelete(
@@ -202,10 +209,11 @@ func TestRunsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrec
         console,
         apiServerUrl,
         apiClient,
-        mockTimeService)
+        mockTimeService,
+		mockByteReader)
 
     // Then...
-    assert.NotNil(t, err, "RunsDelete returned an unexpected error")
+    assert.NotNil(t, err, "RunsDelete did not return an error but it should have")
     consoleText := console.ReadText()
     assert.Contains(t, consoleText, runName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
@@ -248,6 +256,7 @@ func TestRunsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCo
     apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReader()
 
     // When...
     err := RunsDelete(
@@ -255,10 +264,11 @@ func TestRunsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCo
         console,
         apiServerUrl,
         apiClient,
-        mockTimeService)
+        mockTimeService,
+		mockByteReader)
 
     // Then...
-    assert.NotNil(t, err, "RunsDelete returned an unexpected error")
+    assert.NotNil(t, err, "RunsDelete did not return an error but it should have")
     consoleText := console.ReadText()
     assert.Contains(t, consoleText, runName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
@@ -310,6 +320,7 @@ func TestRunsDeleteFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *test
     apiServerUrl := server.Server.URL
     apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReader()
 
     // When...
     err := RunsDelete(
@@ -317,13 +328,71 @@ func TestRunsDeleteFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *test
         console,
         apiServerUrl,
         apiClient,
-        mockTimeService)
+        mockTimeService,
+		mockByteReader)
+
+    // Then...
+    assert.NotNil(t, err, "RunsDelete did not return an error but it should have")
+    consoleText := console.ReadText()
+    assert.Contains(t, consoleText, runName)
+    assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
+    assert.Contains(t, consoleText, "GAL1162E")
+    assert.Contains(t, consoleText, apiErrorMessage)
+}
+
+
+func TestRunsDeleteFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *testing.T) {
+    // Given...
+    runName := "J20"
+    runId := "J234567890"
+
+    // Create the mock run to be deleted
+    runToDelete := createMockRun(runName, runId)
+    runToDeleteBytes, _ := json.Marshal(runToDelete)
+    runToDeleteJson := string(runToDeleteBytes)
+
+    // Create the expected HTTP interactions with the API server
+    getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
+    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+        WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
+    }
+
+    deleteRunsInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
+    deleteRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+        writer.Header().Set("Content-Type", "application/json")
+        writer.WriteHeader(http.StatusInternalServerError)
+        writer.Write([]byte(`{}`))
+    }
+
+    interactions := []utils.HttpInteraction{
+        getRunsInteraction,
+        deleteRunsInteraction,
+    }
+
+    server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReaderAsMock(true)
+
+    // When...
+    err := RunsDelete(
+        runName,
+        console,
+        apiServerUrl,
+        apiClient,
+        mockTimeService,
+		mockByteReader)
 
     // Then...
     assert.NotNil(t, err, "RunsDelete returned an unexpected error")
     consoleText := console.ReadText()
     assert.Contains(t, consoleText, runName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
-    assert.Contains(t, consoleText, "GAL1162E")
-    assert.Contains(t, consoleText, apiErrorMessage)
+    assert.Contains(t, consoleText, "GAL1160E")
+    assert.Contains(t, consoleText, "GAL1160E")
+    assert.Contains(t, consoleText, "Error details from the server could not be read")
 }

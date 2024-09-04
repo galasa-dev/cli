@@ -7,7 +7,6 @@ package runs
 
 import (
 	"context"
-	"io"
 	"log"
 	"net/http"
 
@@ -27,6 +26,7 @@ func RunsDelete(
 	apiServerUrl string,
 	apiClient *galasaapi.APIClient,
 	timeService spi.TimeService,
+	byteReader spi.ByteReader,
 ) error {
 	var err error
 
@@ -52,7 +52,7 @@ func RunsDelete(
 			if len(runs) == 0 {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_RUN_NOT_FOUND, runName)
 			} else {
-				err = deleteRuns(runs, apiClient)
+				err = deleteRuns(runs, apiClient, byteReader)
 			}
 		}
 
@@ -67,6 +67,7 @@ func RunsDelete(
 func deleteRuns(
 	runs []galasaapi.Run,
 	apiClient *galasaapi.APIClient,
+	byteReader spi.ByteReader,
 ) error {
 	var err error
 
@@ -93,6 +94,7 @@ func deleteRuns(
 					err = httpResponseToGalasaError(
 						httpResponse,
 						runName,
+						byteReader,
 						galasaErrors.GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT,
 						galasaErrors.GALASA_ERROR_DELETE_RUNS_RESPONSE_PAYLOAD_UNREADABLE,
 						galasaErrors.GALASA_ERROR_DELETE_RUNS_UNPARSEABLE_CONTENT,
@@ -116,6 +118,7 @@ func deleteRuns(
 func httpResponseToGalasaError(
 	response *http.Response,
 	identifier string,
+	byteReader spi.ByteReader,
 	errorMsgUnexpectedStatusCodeNoResponseBody *galasaErrors.MessageType,
 	errorMsgUnableToReadResponseBody *galasaErrors.MessageType,
 	errorMsgResponsePayloadInWrongFormat *galasaErrors.MessageType,
@@ -136,7 +139,7 @@ func httpResponseToGalasaError(
 		if contentType != "application/json" {
 			err = galasaErrors.NewGalasaError(errorMsgResponseContentTypeNotJson, identifier, statusCode)
 		} else {
-			responseBodyBytes, err = io.ReadAll(response.Body)
+			responseBodyBytes, err = byteReader.ReadAll(response.Body)
 			if err != nil {
 				err = galasaErrors.NewGalasaError(errorMsgUnableToReadResponseBody, identifier, statusCode, err.Error())
 			} else {

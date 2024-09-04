@@ -18,6 +18,7 @@ type MockFactory struct {
 	StdErrConsole    spi.Console
 	TimeService      spi.TimeService
 	Authenticator    spi.Authenticator
+	ByteReader       spi.ByteReader
 }
 
 func NewMockFactory() *MockFactory {
@@ -71,4 +72,11 @@ func (factory *MockFactory) GetAuthenticator(apiServerUrl string, galasaHome spi
 		factory.Authenticator = NewMockAuthenticator()
 	}
 	return factory.Authenticator
+}
+
+func (factory *MockFactory) GetByteReader() spi.ByteReader {
+	if factory.ByteReader == nil {
+		factory.ByteReader = NewMockByteReader()
+	}
+	return factory.ByteReader
 }
