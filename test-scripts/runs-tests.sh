@@ -158,8 +158,6 @@ function runs_download_check_folder_names_during_test_run {
     # checks the folder names are correct with timestamps where appropriate
     h2 "Performing runs download while test is running..."
 
-    run_name=$1
-
     mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
@@ -186,7 +184,7 @@ function runs_download_check_folder_names_during_test_run {
 
     cd ${BASEDIR}/temp
 
-    log_file="runs-submit-output.txt"
+    log_file="runs-submit-output-for-download.txt"
 
     cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
     --bootstrap ${bootstrap} \
@@ -523,21 +521,22 @@ function get_result_with_runname {
     cd ${BASEDIR}/temp
 
     # Get the RunName from the output of galasactl runs submit
+    # The output of runs submit should look like:
+    # submitted-time(UTC) name  requestor status   result test-name
+    # 2024-09-05 12:45:33 C9955 galasa    building Passed inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
+    #
+    # Total:1 Passed:1
 
-    # Gets the line from the last part of the output stream the RunName is found in
-    cat runs-submit-output.txt | grep -o "Run.*-" | tail -1  > line.txt
-
-    # Get just the RunName from the line.
-    # There is a line in the output like this:
-    #   Run C6967 - inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
-    # Environment failure of the test results in "C6976(EnvFail)" ... so the '('...')' part needs removing also.
-    sed 's/Run //; s/ -//; s/[(].*[)]//;' line.txt > runname.txt
-    runname=$(cat runname.txt)
+    # Gets the run name from the second line of the runs submit output (after the headers).
+    # The run name should be the third field, after the date and time fields.
+    runname=$(cat runs-submit-output.txt | sed -n "2{p;q;}" | cut -f3 -d' ')
 
     if [[ "$runname" == "" ]]; then
         error "Run name not captured from previous run launch."
         exit 1
     fi
+
+    info "Run name is: ${runname}"
 
     cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
     --name ${runname} \
@@ -998,7 +997,7 @@ function runs_delete_check_run_can_be_deleted {
         exit 1
     fi
 
-    h3 "Checking that the run '${run_name}' no longer exists"
+    h2 "Checking that the run '${run_name}' no longer exists"
 
     cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
     --name ${run_name} \
