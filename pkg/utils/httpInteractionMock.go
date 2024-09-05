@@ -6,11 +6,11 @@
 package utils
 
 import (
-    "net/http"
-    "net/http/httptest"
-    "testing"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-    "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 // The implementation of a HTTP interaction that allows unit tests to define
@@ -21,7 +21,7 @@ type HttpInteraction struct {
     ExpectedHttpMethod string
 
     // An override-able function to write a HTTP response for this interaction
-    WriteHttpResponseLambda func(writer http.ResponseWriter, req *http.Request)
+    WriteHttpResponseFunc func(writer http.ResponseWriter, req *http.Request)
 }
 
 func NewHttpInteraction(expectedPath string, expectedHttpMethod string) HttpInteraction {
@@ -31,7 +31,7 @@ func NewHttpInteraction(expectedPath string, expectedHttpMethod string) HttpInte
     }
 
     // Set a basic implementation of the lambda to write a default response, which can be overridden by tests
-    httpInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    httpInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusOK)
     }
 
@@ -64,7 +64,7 @@ func NewMockHttpServer(t *testing.T, interactions []HttpInteraction) MockHttpSer
         } else {
             currentInteraction := interactions[*currentInteractionIndex]
             currentInteraction.ValidateRequest(t, req)
-            currentInteraction.WriteHttpResponseLambda(writer, req)
+            currentInteraction.WriteHttpResponseFunc(writer, req)
 
             // The next request to the server should get the next interaction, so advance the index by one
             *currentInteractionIndex++

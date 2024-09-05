@@ -40,12 +40,12 @@ func TestCanDeleteARun(t *testing.T) {
 
     // Create the expected HTTP interactions with the API server
     getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
-    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
     }
 
     deleteRunsInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
-    deleteRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    deleteRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusNoContent)
     }
 
@@ -77,13 +77,88 @@ func TestCanDeleteARun(t *testing.T) {
     assert.Empty(t, console.ReadText(), "The console was written to on a successful deletion, it should be empty")
 }
 
+func TestCanDeleteRunAndReruns(t *testing.T) {
+    // Given...
+    runName := "J20"
+    runId := "J234567890"
+	reRun1Id := "ABC123"
+	reRun2Id := "DEF456"
+
+    // Create the mock runs to be deleted - re-runs should have the same run name but different run IDs
+    runToDelete := createMockRun(runName, runId)
+    runToDeleteBytes, _ := json.Marshal(runToDelete)
+    runToDeleteJson := string(runToDeleteBytes)
+
+	reRun1 := createMockRun(runName, reRun1Id)
+    reRun1Bytes, _ := json.Marshal(reRun1)
+    reRun1Json := string(reRun1Bytes)
+
+	reRun2 := createMockRun(runName, reRun2Id)
+    reRun2Bytes, _ := json.Marshal(reRun2)
+    reRun2Json := string(reRun2Bytes)
+
+	runsAsJsonStrings := []string{
+		runToDeleteJson,
+		reRun1Json,
+		reRun2Json,
+	}
+	
+    // Create the expected HTTP interactions with the API server
+    getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+        WriteMockRasRunsResponse(t, writer, req, runName, runsAsJsonStrings)
+    }
+
+	successfulDeleteFunc := func(writer http.ResponseWriter, req *http.Request) {
+        writer.WriteHeader(http.StatusNoContent)
+    }
+
+    deleteRunInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
+    deleteRunInteraction.WriteHttpResponseFunc = successfulDeleteFunc
+
+    deleteRerun1Interaction := utils.NewHttpInteraction("/ras/runs/" + reRun1Id, http.MethodDelete)
+    deleteRerun1Interaction.WriteHttpResponseFunc = successfulDeleteFunc
+
+    deleteRerun2Interaction := utils.NewHttpInteraction("/ras/runs/" + reRun2Id, http.MethodDelete)
+    deleteRerun2Interaction.WriteHttpResponseFunc = successfulDeleteFunc
+
+    interactions := []utils.HttpInteraction{
+        getRunsInteraction,
+        deleteRunInteraction,
+		deleteRerun1Interaction,
+		deleteRerun2Interaction,
+    }
+
+    server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockTimeService := utils.NewMockTimeService()
+	mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := RunsDelete(
+        runName,
+        console,
+        apiServerUrl,
+        apiClient,
+        mockTimeService,
+		mockByteReader)
+
+    // Then...
+    assert.Nil(t, err, "RunsDelete returned an unexpected error")
+    assert.Empty(t, console.ReadText(), "The console was written to on a successful deletion, it should be empty")
+}
+
 func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
     // Given...
     nonExistantRunName := "runDoesNotExist123"
 
     // Create the expected HTTP interactions with the API server
     getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
-    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         WriteMockRasRunsResponse(t, writer, req, nonExistantRunName, []string{})
     }
 
@@ -127,12 +202,12 @@ func TestRunsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *test
 
     // Create the expected HTTP interactions with the API server
     getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
-    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
     }
 
     deleteRunsInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
-    deleteRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    deleteRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusInternalServerError)
     }
 
@@ -178,12 +253,12 @@ func TestRunsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrec
 
     // Create the expected HTTP interactions with the API server
     getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
-    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
     }
 
     deleteRunsInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
-    deleteRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    deleteRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusInternalServerError)
         writer.Header().Set("Content-Type", "application/notJsonOnPurpose")
         writer.Write([]byte("something not json but non-zero-length."))
@@ -233,12 +308,12 @@ func TestRunsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCo
 
     // Create the expected HTTP interactions with the API server
     getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
-    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
     }
 
     deleteRunsInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
-    deleteRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    deleteRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.Header().Set("Content-Type", "application/json")
         writer.WriteHeader(http.StatusInternalServerError)
         writer.Write([]byte(`{ "this": "isBadJson because it doesnt end in a close braces" `))
@@ -291,12 +366,12 @@ func TestRunsDeleteFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *test
 
     // Create the expected HTTP interactions with the API server
     getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
-    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
     }
 
     deleteRunsInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
-    deleteRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    deleteRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.Header().Set("Content-Type", "application/json")
         writer.WriteHeader(http.StatusInternalServerError)
 
@@ -353,12 +428,12 @@ func TestRunsDeleteFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *test
 
     // Create the expected HTTP interactions with the API server
     getRunsInteraction := utils.NewHttpInteraction("/ras/runs", http.MethodGet)
-    getRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         WriteMockRasRunsResponse(t, writer, req, runName, []string{ runToDeleteJson })
     }
 
     deleteRunsInteraction := utils.NewHttpInteraction("/ras/runs/" + runId, http.MethodDelete)
-    deleteRunsInteraction.WriteHttpResponseLambda = func(writer http.ResponseWriter, req *http.Request) {
+    deleteRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.Header().Set("Content-Type", "application/json")
         writer.WriteHeader(http.StatusInternalServerError)
         writer.Write([]byte(`{}`))
