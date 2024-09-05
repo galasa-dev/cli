@@ -981,6 +981,7 @@ function runs_delete_check_run_can_be_deleted {
 
     h2 "Attempting to delete the run named '${run_name}' using runs delete..."
 
+    mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
     cmd="${ORIGINAL_DIR}/bin/${binary} runs delete \
@@ -997,6 +998,23 @@ function runs_delete_check_run_can_be_deleted {
         exit 1
     fi
 
+    h3 "Checking that the run '${run_name}' no longer exists"
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
+
+    output_file="runs-delete-output.txt"
+    set -o pipefail
+    $cmd | tee $output_file | grep -q "Total:0"
+
+    # We expect a return code of '0' because there should be no runs with the given run name anymore.
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then
+        error "Failed when checking if run '${run_name}' has been deleted. The run still exists when it should not."
+        exit 1
+    fi
+
     success "galasactl runs delete was able to delete an existing run OK."
 }
 
@@ -1006,6 +1024,7 @@ function runs_delete_non_existant_run_returns_error {
 
     h2 "Attempting to delete the non-existant run named '${run_name}' using runs delete..."
 
+    mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
     cmd="${ORIGINAL_DIR}/bin/${binary} runs delete \
