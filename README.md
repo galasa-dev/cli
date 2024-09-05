@@ -419,7 +419,7 @@ A complete list of supported parameters for the `runs download` command is avail
 This command will reset a running test in the Ecosystem that is either stuck in a timeout condition or looping, by requeing the test. Note: The reset command does not wait for the server to complete the act of resetting the test, but if the command succeeds, then the server has accepted the request to reset the test.
 
 
-## Example
+### Example
 
 The run "C1234" can be reset using the following command:
 
@@ -434,7 +434,7 @@ If after running `runs reset` the test is still not able to run through successf
 
 This command will cancel a running test in the Ecosystem. It will not delete any information that is already stored in the RAS about the test, it will only cancel the execution of the test. Note: The cancel command does not wait for the server to complete the act of cancelling the test, but if the command succeeds, then the server has accepted the request to cancel the test.
 
-## Example
+### Example
 
 The run "C1234" can be cancelled using the following command:
 
@@ -442,6 +442,17 @@ The run "C1234" can be cancelled using the following command:
 galasactl runs cancel --name C1234
 ```
 
+## Runs delete
+This command can delete test runs. Currently it can delete only one test run at a time.
+But this command can be used in conjunction with the `galasactl runs get` command to first query the names of the runs you wish to delete, then delete them all.
+
+### Example
+```
+galasactl runs delete --name C1234
+```
+
+Furthermore an example script demonstrates how old runs might be cleaned-out from your Result Archive Store (RAS), to reduce the size of the store and free up some space that can be used for more recent runs.
+See [here](./test-scripts/runs-delete-too-old.sh)
 
 ## properties get
 This command retrieves details of properties in a namespace.
