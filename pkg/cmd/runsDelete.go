@@ -106,7 +106,7 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 	if err == nil {
 		rootCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Delete runs info about a execute")
+		log.Println("Galasa CLI - Delete runs about to execute")
 
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()

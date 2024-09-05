@@ -107,7 +107,7 @@ func deleteRuns(
 			if err != nil {
 				break
 			} else {
-				log.Printf("Run runId:%s runName: %s was deleted OK.\n", runId, run.TestStructure.GetRunName())
+				log.Printf("Run with runId '%s' and runName '%s', was deleted OK.\n", runId, run.TestStructure.GetRunName())
 			}
 		}
 	}

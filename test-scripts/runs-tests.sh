@@ -975,6 +975,60 @@ function launch_test_from_unknown_portfolio {
     success "Unknown portfolio could not be read. galasactl reported this error correctly."
 }
 
+#--------------------------------------------------------------------------
+function runs_delete_check_run_can_be_deleted {
+    run_name=$1
+
+    h2 "Attempting to delete the run named '${run_name}' using runs delete..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs delete \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    # We expect a return code of '0' because the run should have been deleted successfully.
+    $cmd
+    rc=$?
+    if [[ "${rc}" != "0" ]]; then
+        error "Failed to delete run '${run_name}'"
+        exit 1
+    fi
+
+    success "galasactl runs delete was able to delete an existing run OK."
+}
+
+#--------------------------------------------------------------------------
+function runs_delete_non_existant_run_returns_error {
+    run_name="NonExistantRun123"
+
+    h2 "Attempting to delete the non-existant run named '${run_name}' using runs delete..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${ORIGINAL_DIR}/bin/${binary} runs delete \
+    --name ${run_name} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    output_file="runs-delete-output.txt"
+    set -o pipefail
+    $cmd | tee $output_file
+
+    # We expect a return code of '1' because the run does not exist and an error should be reported.
+    rc=$?
+    if [[ "${rc}" != "1" ]]; then
+        error "Failed to return an error when attempting to delete non-existant run '${run_name}'"
+        exit 1
+    fi
+
+    success "galasactl runs delete correctly reported an error when attempting to delete a non-existant run."
+}
+
+#--------------------------------------------------------------------------
 function test_runs_commands {
     # Launch test on ecosystem without a portfolio ...
     launch_test_on_ecosystem_without_portfolio
@@ -1016,6 +1070,10 @@ function test_runs_commands {
     # Attempt to cancel an active run...
     # Temporarily commented out as failing and will block CLI builds.
     # runs_cancel_check_test_is_finished_and_cancelled
+
+    # Attempt to delete a run...
+    runs_delete_check_run_can_be_deleted $RUN_NAME
+    runs_delete_non_existant_run_returns_error
 }
 
 
