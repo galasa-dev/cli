@@ -96,6 +96,7 @@ jobs:
           ./test-galasactl-local.sh --buildTool gradle
 
       # Commenting out for now as we cannot reach the prod1 ecosystem from GitHub Actions.
+      # Testing ecosystem commands is handled in the Tekton pipeline.
       # - name: Chmod ecosystem test script
       #   run : |
       #     chmod +x test-galasactl-ecosystem.sh
