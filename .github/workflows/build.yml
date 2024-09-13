@@ -90,7 +90,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'semeru'
-          cache: maven
 
       - name: Chmod local test script
         run: | 
