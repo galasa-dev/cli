@@ -74,6 +74,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 
 	var err error
 
+	authTokensGetCommandValues := authTokensCommand.Values().(*AuthTokensCmdValues)
 	authGetTokensCobraCmd := &cobra.Command{
 		Use:     "get",
 		Short:   "Get a list of authentication tokens",
@@ -84,6 +85,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 		},
 	}
 
+	addLoginIdFlagToAuthTokensGet(authGetTokensCobraCmd, false, authTokensGetCommandValues)
 	authTokensCommand.CobraCommand().AddCommand(authGetTokensCobraCmd)
 
 	return authGetTokensCobraCmd, err
@@ -134,7 +136,12 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.
-					err = auth.GetTokens(apiClient, console)
+					// Checking if the loginId param was passed
+					if cmd.cobraCommand.Flags().Changed("id") {
+						err = auth.GetTokensByLoginId(apiClient, console, authTokenCmdValues.name)
+					} else {
+						err = auth.GetTokens(apiClient, console)
+					}
 				}
 			}
 		}

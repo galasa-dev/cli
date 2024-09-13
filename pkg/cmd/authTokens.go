@@ -16,6 +16,7 @@ import (
 
 type AuthTokensCmdValues struct {
 	bootstrap string
+	name      string
 }
 
 type AuthTokensCommand struct {
@@ -75,4 +76,22 @@ func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
 	authCommand.CobraCommand().AddCommand(authTokensCmd)
 
 	return authTokensCmd, err
+}
+
+func addLoginIdFlagToAuthTokensGet(cmd *cobra.Command, isMandatory bool, authTokensGetCmdValues *AuthTokensCmdValues) {
+
+	flagName := "id"
+	var description string
+	if isMandatory {
+		description = "A mandatory flag that is required to return the access tokens of the currently logged in user."
+	} else {
+		description = "An optional flag that is required to return the access tokens of the currently logged in user."
+	}
+	description += "The input must be a string"
+
+	cmd.PersistentFlags().StringVarP(&authTokensGetCmdValues.name, flagName, "i", "", description)
+
+	if isMandatory {
+		cmd.MarkPersistentFlagRequired(flagName)
+	}
 }
