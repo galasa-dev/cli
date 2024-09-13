@@ -13,7 +13,8 @@ galasactl auth tokens get [flags]
 ### Options
 
 ```
-  -h, --help   Displays the options for the 'auth tokens get' command.
+  -h, --help        Displays the options for the 'auth tokens get' command.
+  -i, --id string   An optional flag that is required to return the access tokens of the currently logged in user.The input must be a string
 ```
 
 ### Options inherited from parent commands
