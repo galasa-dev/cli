@@ -170,7 +170,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 			if err == nil {
 
 				timeService := factory.GetTimeService()
-				var launcherInstance launcher.Launcher = nil
+				var launcherInstance launcher.Launcher
 
 				// The launcher we are going to use to start/monitor tests.
 				apiServerUrl := bootstrapData.ApiServerURL

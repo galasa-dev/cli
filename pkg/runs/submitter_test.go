@@ -466,7 +466,7 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 		assert.Equal(t, obrName, launchesRecorded[0].ObrFromPortfolio)
 		assert.Equal(t, bundleName+"/"+className, launchesRecorded[0].ClassName)
 	}
-
+	assert.Contains(t, console.ReadText(), bundleName + "/" + className)
 }
 
 func TestSubmitRunwithGherkinFile(t *testing.T) {

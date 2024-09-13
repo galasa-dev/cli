@@ -384,6 +384,20 @@ galasactl runs get --name C1234 --format badFormatterName
 ```
 For a complete list of supported parameters see [here](./docs/generated/galasactl_runs_get.md).
 
+## runs delete
+
+This command deletes a test run from an ecosystem's RAS. The name of the test run to delete can be provided to delete it along with any associated artifacts that have been stored.
+
+### Examples
+
+A run named "C1234" can be deleted using the following command:
+
+```
+galasactl runs delete --name C1234
+```
+
+A complete list of supported parameters for the `runs delete` command is available [here](./docs/generated/galasactl_runs_delete.md)
+
 ## runs download
 
 This command downloads all artifacts for a test run that are stored in an ecosystem's RAS.
