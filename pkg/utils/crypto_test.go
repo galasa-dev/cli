@@ -12,7 +12,7 @@ import (
 )
 
 func TestCanRoundTripText(t *testing.T) {
-	secret := "mysecretisreallylongandhardtoguess34567890$@"
+	secret := "mysecretisreallylongandhardtoguess34567890$@" //This is a mock secret value //pragma: allowlist secret
 	text := "this is my text"
 	encrypted, err := Encrypt(secret, text)
 	assert.Nil(t, err)
@@ -33,7 +33,7 @@ func TestCryptoWithNoSecretFails(t *testing.T) {
 }
 
 func TestCryptoFailsToEncryptHugeAmountsOfDataGracefully(t *testing.T) {
-	secret := "a pretty small encryption key which should be big enough."
+	secret := "a pretty small encryption key which should be big enough." //This is a mock secret value //pragma: allowlist secret
 	dataSize := MAX_TEXT_TO_ENCRYPT + 10
 	textBytes := make([]byte, dataSize)
 	for i := 0; i < dataSize; i++ {

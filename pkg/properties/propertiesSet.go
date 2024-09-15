@@ -8,9 +8,9 @@ package properties
 
 import (
 	"context"
+	"io"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -31,6 +31,7 @@ func SetProperty(
 	apiClient *galasaapi.APIClient,
 ) error {
 	var err error
+	var statusCode int
 
 	err = validateInputsAreNotEmpty(namespace, name)
 	if err == nil {
@@ -41,12 +42,12 @@ func SetProperty(
 			log.Printf("SetProperty - Galasa Property to update/create: ApiVersion:'%s', Kind:'%s', Namespace:'%s', Name:'%s', Value:'%s'",
 				galasaProperty.GetApiVersion(), galasaProperty.GetKind(), galasaProperty.Metadata.GetNamespace(), galasaProperty.Metadata.GetName(), galasaProperty.Data.GetValue())
 
-			err = updateCpsProperty(namespace, name, galasaProperty, apiClient)
+			statusCode, err = updateCpsProperty(namespace, name, galasaProperty, apiClient)
 
 			// if updateProperty() returns an error containing "404 Not Found" due to receiving a
 			// GAL5017E from the api, we know the property does not exist and
 			// so we assume the user wants to create a new property
-			if err != nil && strings.Contains(err.Error(), "404") {
+			if (err != nil) && (statusCode == 404) {
 				err = createCpsProperty(namespace, name, galasaProperty, apiClient)
 			}
 		}
@@ -59,10 +60,10 @@ func updateCpsProperty(namespace string,
 	name string,
 	property *galasaapi.GalasaProperty,
 	apiClient *galasaapi.APIClient,
-) error {
+) (int, error) {
 	var err error
 	var context context.Context = nil
-
+	var responseBody []byte
 	var restApiVersion string
 	var resp *http.Response = nil
 
@@ -71,13 +72,28 @@ func updateCpsProperty(namespace string,
 	if err == nil {
 		apicall := apiClient.ConfigurationPropertyStoreAPIApi.UpdateCpsProperty(context, namespace, name).GalasaProperty(*property).ClientApiVersion(restApiVersion)
 		_, resp, err = apicall.Execute()
-		log.Printf("updateCpsPtoperty - HTTP response status code: '%v'", resp.StatusCode)
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+			log.Printf("updateCpsPtoperty Failed - Error: '%v'", err.Error())
+			if (resp != nil) && (resp.StatusCode != http.StatusNotFound) {
+				defer resp.Body.Close()
+
+				responseBody, err = io.ReadAll(resp.Body)
+				log.Printf("updateCpsPtoperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
+
+				if err == nil {
+					var errorFromServer *galasaErrors.GalasaAPIError
+					errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+					if err == nil {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, errorFromServer.Message)
+					} else {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+					}
+				}
+			}
 		}
 	}
 
-	return err
+	return resp.StatusCode, err
 }
 
 func createCpsProperty(namespace string,
@@ -87,7 +103,7 @@ func createCpsProperty(namespace string,
 ) error {
 	var err error
 	var context context.Context = nil
-
+	var responseBody []byte
 	var restApiVersion string
 	var resp *http.Response = nil
 
@@ -99,7 +115,23 @@ func createCpsProperty(namespace string,
 		log.Printf("createCpsProperty - HTTP response status code: '%v'", resp.StatusCode)
 
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
+			if (resp != nil) {
+				defer resp.Body.Close()
+
+				var errorFromServer *galasaErrors.GalasaAPIError
+				responseBody, err = io.ReadAll(resp.Body)
+				if err == nil {
+					log.Printf("createCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
+					errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+					if err == nil {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, errorFromServer.Message)
+					}else {
+						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
+					}
+				} else {
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
+				}
+			}
 		}
 	}
 

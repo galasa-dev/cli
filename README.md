@@ -160,6 +160,24 @@ Total:3
 For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_get.md).
 
 
+## auth tokens delete
+
+This command revokes a personal access token identified by the given token ID. This command is useful if you have lost access to your personal access token or if your token has been compromised, and you wish to prevent it from being used maliciously.
+
+To retrieve a list of available personal access tokens that have been created and their token IDs, see [auth tokens get](#auth-tokens-get).
+
+### Examples
+
+Revoking a token with ID 'myId'
+
+```
+galasactl auth tokens delete --tokenid myId
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_delete.md).
+
+
+
 ## runs prepare
 
 The purpose of `runs prepare` is to build a portfolio of tests, possibly from multiple test streams.  This portfolio can then be used in the `runs submit` command.
@@ -365,6 +383,20 @@ For a complete list of supported formatters try running the command with a known
 galasactl runs get --name C1234 --format badFormatterName
 ```
 For a complete list of supported parameters see [here](./docs/generated/galasactl_runs_get.md).
+
+## runs delete
+
+This command deletes a test run from an ecosystem's RAS. The name of the test run to delete can be provided to delete it along with any associated artifacts that have been stored.
+
+### Examples
+
+A run named "C1234" can be deleted using the following command:
+
+```
+galasactl runs delete --name C1234
+```
+
+A complete list of supported parameters for the `runs delete` command is available [here](./docs/generated/galasactl_runs_delete.md)
 
 ## runs download
 
@@ -662,3 +694,6 @@ framework.extra.bundles=dev.galasa.cps.rest
 ```
 
 The user must perform a `galasactl auth login` to the same ecosystem before trying to launch a local test.
+
+# Gherkin Support
+Gherkin support is described [here](./gherkin-docs.md)

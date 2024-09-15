@@ -238,13 +238,28 @@ var (
 	GALASA_ERROR_RETRIEVING_TOKEN_LIST_FROM_API_SERVER = NewMessageType("GAL1146E: Could not get list of tokens from API server. Reason: '%s'."+
 		" Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file", 1146, STACK_TRACE_WANTED)
 	GALASA_JWT_CANNOT_BE_PARSED = NewMessageType("GAL1147E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '%s'. This could indicate a corruption in the file. To resolve,"+
-		" manually delete the file and authenticate against the server again with the 'glasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '%s'", 1147, STACK_TRACE_NOT_WANTED)
+		" manually delete the file and authenticate against the server again with the 'galasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '%s'", 1147, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_HAS_NO_EXPIRATION_DATETIME = NewMessageType("GAL1148E: The cache of access tokens contains a java web token (jwt) in file '%s', from which an expiration time could not be extracted."+
 		" This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '%s'\n", 1148, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_ENCRYPTION_INVALID_GALASA_TOKEN   = NewMessageType("GAL1149E: Programming logic error: Cannot encrypt because the length of the key is too small.", 1149, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_DECRYPTION_FAILED_BASE64          = NewMessageType("GAL1150E: Programming logic error: Decryption of cached bearer token failed. Reason: %s", 1150, STACK_TRACE_NOT_WANTED)
 	GALASA_JWT_DECRYPTION_FAILED_BLOCK_TOO_SMALL = NewMessageType("GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: %d, AES block size: %d", 1151, STACK_TRACE_NOT_WANTED)
 	GALASA_ENCRYPTION_DATA_TOO_LONG              = NewMessageType("GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.", 1152, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_REVOKE_TOKEN_FAILED             = NewMessageType("GAL1153E: Failed to revoke the token with ID '%v'. Reason: '%s'.", 1153, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_TOKEN_ID_FORMAT         = NewMessageType("GAL1154E: The provided token ID, '%s', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.", 1154, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG      = NewMessageType("GAL1155E: The id provided by the --id field cannot be an empty string.", 1155, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED          = NewMessageType("GAL1156E: '%s' is not supported as a valid value. Valid values are 'me'.", 1156, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUN_FAILED               = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED	     = NewMessageType("GAL1158E: An attempt to delete a run named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1158, STACK_TRACE_NOT_WANTED)
+
+	// 4 related but slightly different errors, when an HTTP response arrives from the Galasa server, and we can/can't parse the payload to get the message details out. 
+	GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT 		 = NewMessageType("GAL1159E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server.", 1159, STACK_TRACE_NOT_WANTED) 
+	GALASA_ERROR_DELETE_RUNS_RESPONSE_PAYLOAD_UNREADABLE = NewMessageType("GAL1160E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1160, STACK_TRACE_NOT_WANTED) 
+	GALASA_ERROR_DELETE_RUNS_UNPARSEABLE_CONTENT		 = NewMessageType("GAL1161E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1161, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUNS_SERVER_REPORTED_ERROR 		 = NewMessageType("GAL1162E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1162, STACK_TRACE_NOT_WANTED)
+
+	GALASA_ERROR_SERVER_DELETE_RUN_NOT_FOUND 			 = NewMessageType("GAL1163E: The run named '%s' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete", 1163, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUNS_EXPLANATION_NOT_JSON		 = NewMessageType("GAL1164E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1164, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

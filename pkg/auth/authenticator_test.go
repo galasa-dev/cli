@@ -24,14 +24,14 @@ import (
 const (
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
 	// So basically, this JWT has already expired if you compare it to the real time now.
-	mockJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	mockJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s" //pragma: allowlist secret
 )
 
 func NewAuthServletMock(t *testing.T, status int, mockResponse string) *httptest.Server {
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 
-		if strings.Contains(request.URL.Path, "/auth") {
+		if strings.Contains(request.URL.Path, "/auth/tokens") {
 			requestBody, err := io.ReadAll(request.Body)
 			assert.Nil(t, err, "Error reading request body")
 
@@ -275,7 +275,7 @@ func TestGetAuthenticatedAPIClientWithMissingBearerTokenFileAttemptsLogin(t *tes
 	mockFileSystem.WriteTextFile(galasactlPropertiesFilePath, fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
 	// This is a dummy JWT that expires 1 hour after the Unix epoch
-	mockJwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s"
+	mockJwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjM2MDB9._j3Fchdx5IIqgGrdEGWXHxdgVyoBEyoD2-IBvhlxF1s" //pragma: allowlist secret
 	jwtCache.Put("https://myServer", tokenPropertyValue, mockJwt)
 	mockResponse := fmt.Sprintf(`{"jwt":"%s"}`, mockJwt)
 

@@ -222,6 +222,7 @@ func GetRunsFromRestApi(
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 	var restApiVersion string
+	var pageCursor string
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
@@ -232,7 +233,7 @@ func GetRunsFromRestApi(
 			var runData *galasaapi.RunResults
 			var httpResponse *http.Response
 			log.Printf("Requesting page '%d' ", pageNumberWanted)
-			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion)
+			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).IncludeCursor("true")
 			if fromAgeMins != 0 {
 				apicall = apicall.From(fromTime)
 			}
@@ -251,8 +252,10 @@ func GetRunsFromRestApi(
 			if shouldGetActive {
 				apicall = apicall.Status(activeStatusNames)
 			}
-			apicall = apicall.Page(pageNumberWanted)
-			apicall = apicall.Sort("to:desc")
+			if pageCursor != "" {
+				apicall = apicall.Cursor(pageCursor)
+			}
+			apicall = apicall.Sort("from:desc")
 			runData, httpResponse, err = apicall.Execute()
 
 			if err != nil {
@@ -271,9 +274,10 @@ func GetRunsFromRestApi(
 					results = append(results, runsOnThisPage...)
 
 					// Have we processed the last page ?
-					if pageNumberWanted == runData.GetNumPages() {
+					if !runData.HasNextCursor() || len(runsOnThisPage) < int(runData.GetPageSize()) {
 						gotAllResults = true
 					} else {
+						pageCursor = runData.GetNextCursor()
 						pageNumberWanted++
 					}
 				}

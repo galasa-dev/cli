@@ -48,7 +48,7 @@ func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.Gala
 			value := *property.Data.Value
 
 			line = append(line, namespace)
-			line = append(line, name, value)
+			line = append(line, name, cropExtraLongValue(substituteNewLines(value)))
 			table = append(table, line)
 		}
 

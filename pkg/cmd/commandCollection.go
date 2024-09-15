@@ -29,11 +29,12 @@ type commandCollectionImpl struct {
 
 const (
 	COMMAND_NAME_ROOT                     = "galasactl"
-	COMMAND_NAME_AUTH                     = "auth"
+	COMMAND_NAME_AUTH                     = "auth" //This is a command, not a secret //pragma: allowlist secret
 	COMMAND_NAME_AUTH_LOGIN               = "auth login"
 	COMMAND_NAME_AUTH_LOGOUT              = "auth logout"
 	COMMAND_NAME_AUTH_TOKENS              = "auth tokens"
 	COMMAND_NAME_AUTH_TOKENS_GET          = "auth tokens get"
+	COMMAND_NAME_AUTH_TOKENS_DELETE       = "auth tokens delete"
 	COMMAND_NAME_PROJECT                  = "project"
 	COMMAND_NAME_PROJECT_CREATE           = "project create"
 	COMMAND_NAME_LOCAL                    = "local"
@@ -52,11 +53,14 @@ const (
 	COMMAND_NAME_RUNS_SUBMIT_LOCAL        = "runs submit local"
 	COMMAND_NAME_RUNS_RESET               = "runs reset"
 	COMMAND_NAME_RUNS_CANCEL              = "runs cancel"
+	COMMAND_NAME_RUNS_DELETE              = "runs delete"
 	COMMAND_NAME_RESOURCES                = "resources"
 	COMMAND_NAME_RESOURCES_APPLY          = "resources apply"
 	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
 	COMMAND_NAME_RESOURCES_UPDATE         = "resources update"
 	COMMAND_NAME_RESOURCES_DELETE         = "resources delete"
+	COMMAND_NAME_USERS                    = "users"
+	COMMAND_NAME_USERS_GET                = "users get"
 )
 
 // -----------------------------------------------------------------
@@ -139,6 +143,10 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 	}
 
 	if err == nil {
+		err = commands.addUsersCommands(factory, rootCommand)
+	}
+
+	if err == nil {
 		commands.setHelpFlags()
 	}
 
@@ -175,15 +183,20 @@ func (commands *commandCollectionImpl) addAuthTokensCommands(factory spi.Factory
 	var err error
 	var authTokensCommand spi.GalasaCommand
 	var authTokensGetCommand spi.GalasaCommand
+	var authTokensDeleteCommand spi.GalasaCommand
 
 	authTokensCommand, err = NewAuthTokensCommand(authCommand, rootCommand)
 	if err == nil {
 		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
+		if err == nil {
+			authTokensDeleteCommand, err = NewAuthTokensDeleteCommand(factory, authTokensCommand, rootCommand)
+		}
 	}
 
 	if err == nil {
 		commands.commandMap[authTokensCommand.Name()] = authTokensCommand
 		commands.commandMap[authTokensGetCommand.Name()] = authTokensGetCommand
+		commands.commandMap[authTokensDeleteCommand.Name()] = authTokensDeleteCommand
 	}
 
 	return err
@@ -285,6 +298,7 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 	var runsSubmitLocalCommand spi.GalasaCommand
 	var runsResetCommand spi.GalasaCommand
 	var runsCancelCommand spi.GalasaCommand
+	var runsDeleteCommand spi.GalasaCommand
 
 	runsCommand, err = NewRunsCmd(rootCommand)
 	if err == nil {
@@ -301,6 +315,9 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 							runsResetCommand, err = NewRunsResetCommand(factory, runsCommand, rootCommand)
 							if err == nil {
 								runsCancelCommand, err = NewRunsCancelCommand(factory, runsCommand, rootCommand)
+								if err == nil {
+									runsDeleteCommand, err = NewRunsDeleteCommand(factory, runsCommand, rootCommand)
+								}
 							}
 						}
 					}
@@ -318,6 +335,7 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 		commands.commandMap[runsSubmitLocalCommand.Name()] = runsSubmitLocalCommand
 		commands.commandMap[runsResetCommand.Name()] = runsResetCommand
 		commands.commandMap[runsCancelCommand.Name()] = runsCancelCommand
+		commands.commandMap[runsDeleteCommand.Name()] = runsDeleteCommand
 	}
 
 	return err
@@ -352,6 +370,26 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory,
 		commands.commandMap[resourcesCreateCommand.Name()] = resourcesCreateCommand
 		commands.commandMap[resourcesUpdateCommand.Name()] = resourcesUpdateCommand
 		commands.commandMap[resourcesDeleteCommand.Name()] = resourcesDeleteCommand
+	}
+
+	return err
+}
+
+func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+
+	var err error
+	var usersCommand spi.GalasaCommand
+	var usersGetCommand spi.GalasaCommand
+
+	usersCommand, err = NewUsersCommand(rootCommand)
+
+	if err == nil {
+		usersGetCommand, err = NewUsersGetCommand(factory, usersCommand, rootCommand)
+	}
+
+	if err == nil {
+		commands.commandMap[usersCommand.Name()] = usersCommand
+		commands.commandMap[usersGetCommand.Name()] = usersGetCommand
 	}
 
 	return err
