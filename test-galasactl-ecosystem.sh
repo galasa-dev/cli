@@ -116,6 +116,6 @@ resources_tests
 
 # Test the hybrid configuration where the local test runs locally, but
 # draws it's CPS properties from a remote ecosystem via a REST extension.
-# source ${BASEDIR}/test-scripts/test-local-run-remote-cps.sh 
-# test_local_run_remote_cps
+source ${BASEDIR}/test-scripts/test-local-run-remote-cps.sh 
+test_local_run_remote_cps
 
