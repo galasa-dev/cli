@@ -184,14 +184,6 @@ jobs:
         run: |
             docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app wait ${{ env.BRANCH }}-cli --resource apps:Deployment:cli-${{ env.BRANCH }} --health --server argocd.galasa.dev
 
-  trigger-isolated-workflow:
-    name: Trigger Isolated workflow
-    runs-on: ubuntu-latest
-    needs: build-cli
-
-    steps:
-      - name: Trigger Isolated workflow dispatch event with GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.GALASA_TEAM_GITHUB_TOKEN }}
-        run: |
-          gh workflow run build.yaml --repo https://github.com/galasa-dev/isolated --ref ${{ env.BRANCH }}
+      - name: Attempt to trigger test-cli-ecosystem-commands Tekton pipeline
+        run: | 
+          echo "The Tekton pipeline test-cli-ecosystem-commands should be triggered in the next 2-minutes - check the Tekton dashboard"
