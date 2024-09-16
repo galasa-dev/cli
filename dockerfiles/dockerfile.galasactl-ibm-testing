@@ -1,0 +1,28 @@
+ARG dockerRepository
+ARG tag
+FROM ${dockerRepository}/galasa-dev/galasactl-ibm-x86_64:${tag}
+
+# This image is used for testing the ecosystem CLI commands in the galasactl image built by GHCR
+# As well as `galasactl`, the image needs Gradle and JDK for the local run remote CPS tests
+
+# Environment variables
+ENV GRADLE_VERSION=8.9
+ENV GRADLE_HOME=/opt/gradle
+
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y \
+    openjdk-17-jdk \
+    wget \
+    unzip && \
+    # Download and install Gradle
+    wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -O /tmp/gradle.zip && \
+    mkdir -p ${GRADLE_HOME} && \
+    unzip /tmp/gradle.zip -d ${GRADLE_HOME} && \
+    rm /tmp/gradle.zip && \
+    ln -s ${GRADLE_HOME}/gradle-${GRADLE_VERSION} ${GRADLE_HOME}/latest && \
+    ln -s ${GRADLE_HOME}/latest/bin/gradle /usr/local/bin/gradle && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN java -version && gradle --version

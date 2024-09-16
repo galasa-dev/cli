@@ -156,6 +156,27 @@ jobs:
             dockerRepository=ghcr.io
             tag=${{ env.BRANCH }}
 
+      - name: Extract metadata for galasactl-ibm-testing image
+        id: metadata-galasactl-ibm-testing
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/galasactl-ibm-x86_64-testing
+
+      # This image is used in a Tekton pipeline triggered after this workflow
+      # to test the CLI's ecosystem commands
+      - name: Build galasactl-ibm-testing image
+        id: build-galasactl-ibm-testing
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: dockerfiles/dockerfile.galasactl-ibm-testing
+          push: true
+          tags: ${{ steps.metadata-galasactl-ibm-testing.outputs.tags }}
+          labels: ${{ steps.metadata-galasactl-ibm-testing.outputs.labels }}
+          build-args: |
+            dockerRepository=ghcr.io
+            tag=${{ env.BRANCH }}
+
       - name: Extract metadata for galasactl-executables image
         id: metadata-galasactl-executables
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
