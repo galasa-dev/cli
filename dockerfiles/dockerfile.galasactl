@@ -1,5 +1,7 @@
 FROM harbor.galasa.dev/docker_proxy_cache/library/ubuntu:20.04
 
+RUN apt-get install -y ca-certificates
+
 ARG platform
 
 RUN addgroup galasa && \ 
