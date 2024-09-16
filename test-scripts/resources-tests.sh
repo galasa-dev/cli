@@ -118,7 +118,7 @@ data:
   value: $prop_value
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources create \
+    cmd="${BINARY_LOCATION} resources create \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"
@@ -133,7 +133,7 @@ EOF
     fi
 
     # check that property resource has been created
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -187,7 +187,7 @@ data:
   value: $prop_value
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources update \
+    cmd="${BINARY_LOCATION} resources update \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"
@@ -202,7 +202,7 @@ EOF
     fi
 
     # check that property resource has been updated
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -267,7 +267,7 @@ data:
   value: $prop_value_to_create
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources apply \
+    cmd="${BINARY_LOCATION} resources apply \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"
@@ -282,7 +282,7 @@ EOF
     fi
 
     # check that property resource has been applied
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --infix properties.test \
     --bootstrap $bootstrap \
     --log -"
@@ -347,7 +347,7 @@ data:
   value: $prop_value_to_create
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources delete \
+    cmd="${BINARY_LOCATION} resources delete \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"
@@ -363,7 +363,7 @@ EOF
     fi
 
     # check that property has been deleted
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -414,7 +414,7 @@ data:
   value: inexistent
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources delete \
+    cmd="${BINARY_LOCATION} resources delete \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"
@@ -453,7 +453,7 @@ data:
   value:
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources create \
+    cmd="${BINARY_LOCATION} resources create \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"
@@ -491,7 +491,7 @@ data:
   value: value
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources create \
+    cmd="${BINARY_LOCATION} resources create \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"
@@ -527,7 +527,7 @@ data:
   value: value
 EOF
 
-    cmd="$ORIGINAL_DIR/bin/${binary} resources create \
+    cmd="${BINARY_LOCATION} resources create \
     --bootstrap $bootstrap \
     -f $input_file \
     --log -"

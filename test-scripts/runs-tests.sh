@@ -105,7 +105,7 @@ function launch_test_on_ecosystem_with_portfolio {
     mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs prepare \
+    cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
     --stream inttests \
     --portfolio portfolio.yaml \
@@ -127,7 +127,7 @@ function launch_test_on_ecosystem_with_portfolio {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    cmd="${BINARY_LOCATION} runs submit \
     --bootstrap ${bootstrap} \
     --portfolio portfolio.yaml \
     --throttle 1 \
@@ -162,7 +162,7 @@ function runs_download_check_folder_names_during_test_run {
     cd ${BASEDIR}/temp
 
     # Create the portfolio.
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs prepare \
+    cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
     --stream inttests \
     --portfolio portfolio.yaml \
@@ -186,7 +186,7 @@ function runs_download_check_folder_names_during_test_run {
 
     log_file="runs-submit-output-for-download.txt"
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    cmd="${BINARY_LOCATION} runs submit \
     --bootstrap ${bootstrap} \
     --portfolio portfolio.yaml \
     --throttle 1 \
@@ -229,7 +229,7 @@ function runs_download_check_folder_names_during_test_run {
     info "Run name is $run_name"
 
     # Now download the test results which are available from the test which is being submitted in the background process.
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs download \
+    cmd="${BINARY_LOCATION} runs download \
     --name ${run_name} \
     --bootstrap ${bootstrap} \
     --force"
@@ -314,7 +314,7 @@ function runs_reset_check_retry_present {
 
     runs_submit_log_file="runs-submit-output-for-reset.txt"
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
     --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
     --stream inttests
@@ -361,7 +361,7 @@ function runs_reset_check_retry_present {
 
     h2 "Now attempting to reset the run while it's running in the background process."
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs reset \
+    cmd="${BINARY_LOCATION} runs reset \
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
@@ -373,7 +373,7 @@ function runs_reset_check_retry_present {
     runs_get_log_file="runs-get-output-for-reset.txt"
 
     # Now poll runs get to check when the test is finished
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
@@ -424,7 +424,7 @@ function runs_cancel_check_test_is_finished_and_cancelled {
 
     runs_submit_log_file="runs-submit-output-for-cancel.txt"
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
     --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
     --stream inttests
@@ -471,7 +471,7 @@ function runs_cancel_check_test_is_finished_and_cancelled {
 
     h2 "Now attempting to cancel the run while it's running in the background process."
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs cancel \
+    cmd="${BINARY_LOCATION} runs cancel \
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
@@ -538,7 +538,7 @@ function get_result_with_runname {
 
     info "Run name is: ${runname}"
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --name ${runname} \
     --bootstrap ${bootstrap} \
     --log -"
@@ -567,7 +567,7 @@ function runs_get_check_summary_format_output {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --name ${run_name} \
     --format summary \
     --bootstrap ${bootstrap} "
@@ -619,7 +619,7 @@ function runs_get_check_details_format_output {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --name ${run_name} \
     --format details \
     --bootstrap ${bootstrap} "
@@ -673,7 +673,7 @@ function runs_get_check_raw_format_output {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --name ${run_name} \
     --format raw \
     --bootstrap ${bootstrap} "
@@ -711,7 +711,7 @@ function runs_get_check_raw_format_output_with_from_and_to {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --age 1h:0h \
     --format raw \
     --bootstrap ${bootstrap}"
@@ -742,7 +742,7 @@ function runs_get_check_raw_format_output_with_just_from {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --age 1d \
     --format raw \
     --bootstrap ${bootstrap}"
@@ -769,7 +769,7 @@ function runs_get_check_raw_format_output_with_just_from {
 function runs_get_check_raw_format_output_with_no_runname_and_no_age_param {
     h2 "Performing runs get with raw format providing no run name and no age..."
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --format raw \
     --bootstrap ${bootstrap}"
 
@@ -791,7 +791,7 @@ function runs_get_check_raw_format_output_with_invalid_age_param {
     h2 "Performing runs get with raw format providing an age parameter with an invalid value..."
 
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --age 1y:1m \
     --format raw \
     --bootstrap ${bootstrap}"
@@ -814,7 +814,7 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
     h2 "Performing runs get with raw format providing an age parameter with an older to than from age..."
 
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --age 1h:1d \
     --format raw \
     --bootstrap ${bootstrap}"
@@ -839,7 +839,7 @@ function runs_get_check_requestor_parameter {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --age 1d \
     --requestor $requestor \
     --format details \
@@ -869,7 +869,7 @@ function runs_get_check_result_parameter {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --age 1d \
     --result ${result} \
     --format details \
@@ -898,7 +898,7 @@ function launch_test_on_ecosystem_without_portfolio {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
     --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
     --stream inttests
@@ -928,7 +928,7 @@ function create_portfolio_with_unknown_test {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs prepare \
+    cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
     --stream inttests \
     --portfolio unknown-portfolio.yaml \
@@ -953,7 +953,7 @@ function launch_test_from_unknown_portfolio {
 
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs submit \
+    cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
     --portfolio unknown-portfolio.yaml \
     --throttle 1 \
@@ -983,7 +983,7 @@ function runs_delete_check_run_can_be_deleted {
     mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs delete \
+    cmd="${BINARY_LOCATION} runs delete \
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
@@ -999,7 +999,7 @@ function runs_delete_check_run_can_be_deleted {
 
     h2 "Checking that the run '${run_name}' no longer exists"
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs get \
+    cmd="${BINARY_LOCATION} runs get \
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
@@ -1026,7 +1026,7 @@ function runs_delete_non_existant_run_returns_error {
     mkdir -p ${BASEDIR}/temp
     cd ${BASEDIR}/temp
 
-    cmd="${ORIGINAL_DIR}/bin/${binary} runs delete \
+    cmd="${BINARY_LOCATION} runs delete \
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
