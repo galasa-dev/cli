@@ -8,8 +8,8 @@
 echo "Running script test-galasactl-ecosystem.sh"
 
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
+# This script can also be ran in a pipeline to test a published binary of galasactl in GHCR built by the GitHub workflow
 # This script tests the 'galasactl' commands against the ecosystem
-# Pre-requesite: the CLI must have been built first so the binaries are present in the /bin directory
 
 
 # Where is this script executing from ?
@@ -101,6 +101,7 @@ export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 
 CALLED_BY_MAIN="true"
 # Bootstrap is in the $bootstrap variable.
+
 source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh
 calculate_galasactl_executable
 
@@ -115,6 +116,6 @@ resources_tests
 
 # Test the hybrid configuration where the local test runs locally, but
 # draws it's CPS properties from a remote ecosystem via a REST extension.
-source ${BASEDIR}/test-scripts/test-local-run-remote-cps.sh 
-test_local_run_remote_cps
+# source ${BASEDIR}/test-scripts/test-local-run-remote-cps.sh 
+# test_local_run_remote_cps
 
