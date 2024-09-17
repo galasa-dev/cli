@@ -184,6 +184,40 @@ jobs:
         run: |
             docker run --env ARGOCD_AUTH_TOKEN=${{ env.ARGOCD_AUTH_TOKEN }} --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/argocdcli:main app wait ${{ env.BRANCH }}-cli --resource apps:Deployment:cli-${{ env.BRANCH }} --health --server argocd.galasa.dev
 
+  build-galasactl-ibm-testing-image-and-trigger-tekton-pipeline:
+    name: Build image containing galasactl, OpenJDK and Gradle for testing
+    runs-on: ubuntu-latest
+    needs: build-cli
+
+    steps:
+      - name: Checkout CLI
+        uses: actions/checkout@v4
+
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for galasactl-ibm-testing image
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/galasactl-ibm-x86_64-testing
+
+      - name: Build galasactl-ibm-testing image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: dockerfiles/dockerfile.galasactl-ibm-testing
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            branch=${{ env.BRANCH }}
+
       - name: Attempt to trigger test-cli-ecosystem-commands Tekton pipeline
         run: | 
           echo "The Tekton pipeline test-cli-ecosystem-commands should be triggered in the next 2-minutes - check the Tekton dashboard"

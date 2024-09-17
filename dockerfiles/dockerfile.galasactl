@@ -1,32 +1,7 @@
 FROM harbor.galasa.dev/docker_proxy_cache/library/ubuntu:20.04
 
-# Install Java and Gradle as they are pre-reqs for galasactl
-ENV GRADLE_VERSION=8.9
-ENV GRADLE_HOME=/opt/gradle
-
-RUN apt-get update && \
-    apt-get install -y \
-    ca-certificates \
-    openjdk-17-jdk \
-    wget \
-    unzip \
-    tar && \
-    # Install Gradle
-    wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -O /tmp/gradle.zip && \
-    mkdir -p ${GRADLE_HOME} && \
-    unzip /tmp/gradle.zip -d ${GRADLE_HOME} && \
-    rm /tmp/gradle.zip && \
-    ln -s ${GRADLE_HOME}/gradle-${GRADLE_VERSION} ${GRADLE_HOME}/latest && \
-    ln -s ${GRADLE_HOME}/latest/bin/gradle /usr/local/bin/gradle && \
-    # Clean up
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH="$JAVA_HOME/bin:$PATH"
-
-RUN java -version && \
-    gradle --version
+RUN apt-get update \
+    && apt-get install -y ca-certificates
 
 ARG platform
 
