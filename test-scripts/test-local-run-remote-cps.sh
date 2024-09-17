@@ -127,7 +127,7 @@ function remote_cps_run_tests {
     export REMOTE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
 
     baseName="dev.galasa.cps.rest.test"
-    cmd="${PROJECT_DIR}/bin/${binary} runs submit local --obr mvn:${baseName}/${baseName}.obr/0.0.1-SNAPSHOT/obr \
+    cmd="${BINARY_LOCATION} runs submit local --obr mvn:${baseName}/${baseName}.obr/0.0.1-SNAPSHOT/obr \
         --class ${baseName}.http/${baseName}.http.TestHttp \
         --bootstrap file://$TEMP_DIR/home/bootstrap.properties \
         --remoteMaven ${REMOTE_MAVEN} \
@@ -157,7 +157,7 @@ function build_galasa_home {
     info "GALASA_HOME is $GALASA_HOME"
 
 
-    cmd="${PROJECT_DIR}/bin/${binary} local init --development"
+    cmd="${BINARY_LOCATION} local init --development"
     info "Command is $cmd"
     $cmd
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build galasa home. Return code: ${rc}" ; exit 1 ; fi
@@ -185,7 +185,7 @@ EOF
 function login_to_ecosystem {
     h2 "Logging into the ecosystem"
     info "GALASA_BOOTSTRAP is $GALASA_BOOTSTRAP"
-    cmd="${PROJECT_DIR}/bin/${binary} auth login --log -"
+    cmd="${BINARY_LOCATION} auth login --log -"
     info "Command is $cmd"
     $cmd
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to login to the galasa server. Return code: ${rc}" ; exit 1 ; fi
@@ -195,7 +195,7 @@ function login_to_ecosystem {
 function logout_of_ecosystem {
     h2 "Logging out of the ecosystem"
     info "GALASA_BOOTSTRAP is $GALASA_BOOTSTRAP"
-    cmd="${PROJECT_DIR}/bin/${binary} auth logout"
+    cmd="${BINARY_LOCATION} auth logout"
     info "Command is $cmd"
     $cmd
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to logout to the galasa server. Return code: ${rc}" ; exit 1 ; fi
@@ -205,7 +205,7 @@ function logout_of_ecosystem {
 function generating_galasa_test_project {
     h2 "Generating galasa test project code..."
     cd $TEMP_DIR
-    cmd="${PROJECT_DIR}/bin/${binary} project create --package dev.galasa.cps.rest.test --features http --obr --gradle --force --development "
+    cmd="${BINARY_LOCATION} project create --package dev.galasa.cps.rest.test --features http --obr --gradle --force --development "
     info "Command is $cmd"
     $cmd
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to generate galasa test project. Return code: ${rc}" ; exit 1 ; fi
