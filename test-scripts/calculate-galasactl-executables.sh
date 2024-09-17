@@ -85,17 +85,7 @@ export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 function calculate_galasactl_executable {
     h2 "Calculate the name of the galasactl executable for this machine/os"
 
-    # Determine if the /bin directory exists i.e. if the script is testing
-    # a built binary or if it is testing a published Docker image in GHCR
-    # If testing a built binary, it will use it from the /bin, otherwise 
-    # `galasactl` will be used as it is installed on the path within the image.
-    path_to_bin="${BASEDIR}/bin"
-
-    # Check if the /bin directory exists
-    if [ -d "$directory_path" ]; then
-        echo "The /bin directory exists so assume the script is testing a locally built binary."
-        
-        raw_os=$(uname -s) # eg: "Darwin"
+    raw_os=$(uname -s) # eg: "Darwin"
         os=""
         case $raw_os in
             Darwin*) 
@@ -116,6 +106,17 @@ function calculate_galasactl_executable {
 
         export binary="galasactl-${os}-${architecture}"
         info "galasactl binary is ${binary}"
+
+    # Determine if the /bin directory exists i.e. if the script is testing
+    # a built binary or if it is testing a published Docker image in GHCR
+    # If testing a built binary, it will use it from the /bin, otherwise 
+    # `galasactl` will be used as it is installed on the path within the image.
+    path_to_bin="${BASEDIR}/bin"
+    echo $path_to_bin
+
+    # Check if the /bin directory exists
+    if [ -d "$path_to_bin" ]; then
+        echo "The /bin directory exists so assume the script is testing a locally built binary."
 
         export BINARY_LOCATION="${ORIGINAL_DIR}/bin/${binary}"
         info "binary location is ${BINARY_LOCATION}"
