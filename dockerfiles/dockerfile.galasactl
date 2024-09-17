@@ -1,9 +1,6 @@
 FROM harbor.galasa.dev/docker_proxy_cache/library/ubuntu:20.04
 
-# Install Java, Maven and Gradle as they are pre-reqs for galasactl
-
-ENV MAVEN_VERSION=3.8.5
-ENV MAVEN_HOME=/opt/maven
+# Install Java and Gradle as they are pre-reqs for galasactl
 ENV GRADLE_VERSION=8.9
 ENV GRADLE_HOME=/opt/gradle
 
@@ -21,19 +18,12 @@ RUN apt-get update && \
     rm /tmp/gradle.zip && \
     ln -s ${GRADLE_HOME}/gradle-${GRADLE_VERSION} ${GRADLE_HOME}/latest && \
     ln -s ${GRADLE_HOME}/latest/bin/gradle /usr/local/bin/gradle && \
-    # Install Maven
-    wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz -O /tmp/maven.tar.gz && \
-    mkdir -p ${MAVEN_HOME} && \
-    tar -xzf /tmp/maven.tar.gz -C ${MAVEN_HOME} --strip-components=1 && \
-    rm /tmp/maven.tar.gz && \
-    ln -s ${MAVEN_HOME}/bin/mvn /usr/local/bin/mvn && \
     # Clean up
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 RUN java -version && \
-    gradle --version && \
-    mvn --version
+    gradle --version
 
 ARG platform
 
