@@ -60,3 +60,7 @@ func (factory *RealFactory) GetAuthenticator(apiServerUrl string, galasaHome spi
 	jwtCache := auth.NewJwtCache(factory.GetFileSystem(), galasaHome, factory.GetTimeService())
 	return auth.NewAuthenticator(apiServerUrl, factory.GetFileSystem(), galasaHome, factory.GetTimeService(), factory.GetEnvironment(), jwtCache)
 }
+
+func (*RealFactory) GetByteReader() spi.ByteReader {
+	return utils.NewByteReader()
+}

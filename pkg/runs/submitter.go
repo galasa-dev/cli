@@ -186,7 +186,7 @@ func (submitter *Submitter) executeSubmitRuns(
 			now := submitter.timeService.Now()
 			if now.After(nextProgressReport) {
 				//convert TestRun
-				displayInterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
+				submitter.displayInterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
 				nextProgressReport = now.Add(progressReportInterval)
 			}
 		}
@@ -206,7 +206,7 @@ func (submitter *Submitter) executeSubmitRuns(
 	return finishedRuns, lostRuns, err
 }
 
-func displayInterrimProgressReport(readyRuns []TestRun,
+func (submitter *Submitter) displayInterrimProgressReport(readyRuns []TestRun,
 	submittedRuns map[string]*TestRun,
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun,
@@ -217,17 +217,16 @@ func displayInterrimProgressReport(readyRuns []TestRun,
 	finished := len(finishedRuns)
 	lost := len(lostRuns)
 
-	fmt.Println("Progress report")
+	log.Println("Progress report")
 	for runName, run := range submittedRuns {
 		log.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
-		fmt.Printf("Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
 	}
-	fmt.Println("----------------------------------------------------------------------------")
-	fmt.Printf("Run status: Ready=%v, Submitted=%v, Finished=%v, Lost=%v\n", ready, submitted, finished, lost)
-	fmt.Printf("Throttle=%v\n", throttle)
+	log.Println("----------------------------------------------------------------------------")
+	log.Printf("Run status: Ready=%v, Submitted=%v, Finished=%v, Lost=%v\n", ready, submitted, finished, lost)
+	log.Printf("Throttle=%v\n", throttle)
 
 	if finished > 0 {
-		displayTestRunResults(finishedRuns, lostRuns)
+		submitter.displayTestRunResults(finishedRuns, lostRuns)
 	}
 }
 
@@ -453,7 +452,7 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
 
 	//convert TestRun tests into formattable data
-	displayTestRunResults(finishedRuns, lostRuns)
+	submitter.displayTestRunResults(finishedRuns, lostRuns)
 
 	var err error
 	if params.ReportYamlFilename != "" {
@@ -475,7 +474,7 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
 	return err
 }
 
-func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+func (submitter *Submitter) displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
 	var formatter = runsformatter.NewSummaryFormatter()
 	var err error
 	var outputText string
@@ -483,7 +482,7 @@ func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string
 	formattableTest := FormattableTestFromTestRun(finishedRuns, lostRuns)
 	outputText, err = formatter.FormatRuns(formattableTest)
 	if err == nil {
-		print(outputText)
+		submitter.console.WriteString(outputText)
 	}
 }
 
