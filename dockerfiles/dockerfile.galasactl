@@ -1,4 +1,7 @@
-FROM harbor.galasa.dev/docker_proxy_cache/library/alpine:3.18.5
+FROM harbor.galasa.dev/docker_proxy_cache/library/ubuntu:20.04
+
+RUN apt-get update \
+    && apt-get install -y ca-certificates
 
 ARG platform
 

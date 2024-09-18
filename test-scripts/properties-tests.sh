@@ -105,7 +105,7 @@ function properties_create {
     
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties set --namespace ecosystemtest \
     --name $prop_name \
     --value test-value \
     --bootstrap $bootstrap \
@@ -122,7 +122,7 @@ function properties_create {
     fi
 
     # check that property has been created
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -167,7 +167,7 @@ function properties_update {
     
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties set --namespace ecosystemtest \
     --name $prop_name \
     --value updated-value \
     --bootstrap $bootstrap \
@@ -184,7 +184,7 @@ function properties_update {
     fi
 
     # check that property has been updated
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -219,7 +219,7 @@ function properties_delete {
     
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties delete --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -235,7 +235,7 @@ function properties_delete {
     fi
 
     # check that property has been deleted
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -268,7 +268,7 @@ function properties_delete_invalid_property {
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties delete --namespace ecosystemtest \
     --name this.property.shouldnt.exist \
     --bootstrap $bootstrap \
     --log -"
@@ -292,7 +292,7 @@ function properties_delete_without_name {
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties delete --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --log -"
 
@@ -314,7 +314,7 @@ function properties_set_with_name_without_value {
 
     prop_name="properties.test.name.$PROP_NUM"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties set --namespace ecosystemtest \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -335,7 +335,7 @@ function properties_set_with_name_without_value {
 function properties_set_without_name_with_value {
     h2 "Performing properties set without name parameter and with value parameter..."
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties set --namespace ecosystemtest \
     --value random-arbitrary-value \
     --bootstrap $bootstrap \
     --log -"
@@ -359,7 +359,7 @@ function properties_set_without_name_and_value {
     
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties set --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --log -"
 
@@ -378,7 +378,7 @@ function properties_set_without_name_and_value {
 #--------------------------------------------------------------------------
 function properties_get_setup {
     h2 "Performing setup for subsequent properties get commands."
-    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties set --namespace ecosystemtest \
     --name get.test.property \
     --value this-shouldnt-be-deleted \
     --bootstrap $bootstrap \
@@ -390,7 +390,7 @@ function properties_get_setup {
 function properties_get_with_namespace {
     h2 "Performing properties get with only namespace used, expecting list of properties..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --log -"
 
@@ -420,7 +420,7 @@ function properties_get_with_namespace {
 function properties_get_with_name {
     h2 "Performing properties get with only name used, expecting list of properties..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --name get.test.property \
     --bootstrap $bootstrap \
     --log -"
@@ -451,7 +451,7 @@ function properties_get_with_name {
 function properties_get_with_prefix {
     h2 "Performing properties get with prefix used, expecting list of properties..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --prefix get \
     --bootstrap $bootstrap \
     --log -"
@@ -482,7 +482,7 @@ function properties_get_with_prefix {
 function properties_get_with_suffix {
     h2 "Performing properties get with suffix used, expecting list of properties..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --suffix property \
     --bootstrap $bootstrap \
     --log -"
@@ -513,7 +513,7 @@ function properties_get_with_suffix {
 function properties_get_with_infix {
     h2 "Performing properties get with infix used, expecting list of properties..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --infix test \
     --bootstrap $bootstrap \
     --log -"
@@ -544,7 +544,7 @@ function properties_get_with_infix {
 function properties_get_with_prefix_infix_and_suffix {
     h2 "Performing properties get with prefix, infix, and suffix used, expecting list of properties..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --prefix get \
     --suffix property \
     --infix test \
@@ -577,7 +577,7 @@ function properties_get_with_prefix_infix_and_suffix {
 function properties_get_with_namespace_raw_format {
     h2 "Performing properties get with only namespace used, expecting list of properties..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace ecosystemtest \
+    cmd="${BINARY_LOCATION} properties get --namespace ecosystemtest \
     --bootstrap $bootstrap \
     --format raw \
     --log -"
@@ -610,7 +610,7 @@ function properties_secure_namespace_set {
 
     prop_name="properties.secure.namespace"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties set --namespace secure \
+    cmd="${BINARY_LOCATION} properties set --namespace secure \
     --name $prop_name \
     --value dummy.value
     --bootstrap $bootstrap \
@@ -626,7 +626,7 @@ function properties_secure_namespace_set {
     fi
 
     # check that property resource has been created
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace secure \
+    cmd="${BINARY_LOCATION} properties get --namespace secure \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -665,7 +665,7 @@ function properties_secure_namespace_delete {
     
     prop_name="properties.secure.namespace.test"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace secure \
+    cmd="${BINARY_LOCATION} properties delete --namespace secure \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -681,7 +681,7 @@ function properties_secure_namespace_delete {
     fi
 
     # check that property has been deleted
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace secure \
+    cmd="${BINARY_LOCATION} properties get --namespace secure \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -719,7 +719,7 @@ function properties_secure_namespace_non_existent_prop_delete {
     
     prop_name="properties.test.name.value.$PROP_NUM"
 
-    cmd="$ORIGINAL_DIR/bin/${binary} properties delete --namespace secure \
+    cmd="${BINARY_LOCATION} properties delete --namespace secure \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -735,7 +735,7 @@ function properties_secure_namespace_non_existent_prop_delete {
     fi
 
     # check that property has been deleted
-    cmd="$ORIGINAL_DIR/bin/${binary} properties get --namespace secure \
+    cmd="${BINARY_LOCATION} properties get --namespace secure \
     --name $prop_name \
     --bootstrap $bootstrap \
     --log -"
@@ -769,7 +769,7 @@ function properties_secure_namespace_non_existent_prop_delete {
 function properties_namespaces_get {
     h2 "Performing namespaces get, expecting a list of all namespaces in the cps..."
     
-    cmd="$ORIGINAL_DIR/bin/${binary} properties namespaces get \
+    cmd="${BINARY_LOCATION} properties namespaces get \
     --bootstrap $bootstrap \
     --log -"
 

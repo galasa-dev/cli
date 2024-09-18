@@ -6,6 +6,10 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+# Where is this script executing from ?
+BASEDIR=$(dirname "$0");pushd $BASEDIR 2>&1 >> /dev/null ;BASEDIR=$(pwd);popd 2>&1 >> /dev/null
+export ORIGINAL_DIR=$(pwd)
+cd "${BASEDIR}"
 
 #--------------------------------------------------------------------------
 #
@@ -82,25 +86,45 @@ function calculate_galasactl_executable {
     h2 "Calculate the name of the galasactl executable for this machine/os"
 
     raw_os=$(uname -s) # eg: "Darwin"
-    os=""
-    case $raw_os in
-        Darwin*) 
-            os="darwin" 
-            ;;
-        Windows*)
-            os="windows"
-            ;;
-        Linux*)
-            os="linux"
-            ;;
-        *) 
-            error "Failed to recognise which operating system is in use. $raw_os"
-            exit 1
-    esac
+        os=""
+        case $raw_os in
+            Darwin*) 
+                os="darwin" 
+                ;;
+            Windows*)
+                os="windows"
+                ;;
+            Linux*)
+                os="linux"
+                ;;
+            *) 
+                error "Failed to recognise which operating system is in use. $raw_os"
+                exit 1
+        esac
 
-    architecture=$(uname -m)
+        architecture=$(uname -m)
 
-    export binary="galasactl-${os}-${architecture}"
-    info "galasactl binary is ${binary}"
+        export binary="galasactl-${os}-${architecture}"
+        info "galasactl binary is ${binary}"
+
+    # Determine if the /bin directory exists i.e. if the script is testing
+    # a built binary or if it is testing a published Docker image in GHCR
+    # If testing a built binary, it will use it from the /bin, otherwise 
+    # `galasactl` will be used as it is installed on the path within the image.
+    path_to_bin="${BASEDIR}/bin"
+    echo $path_to_bin
+
+    # Check if the /bin directory exists
+    if [ -d "$path_to_bin" ]; then
+        echo "The /bin directory exists so assume the script is testing a locally built binary."
+
+        export BINARY_LOCATION="${ORIGINAL_DIR}/bin/${binary}"
+        info "binary location is ${BINARY_LOCATION}"
+    else
+        echo "The /bin directory does not exist so assume the script is testing a published image in GHCR."
+
+        export BINARY_LOCATION="galasactl"
+    fi
+
     success "OK"
 }
