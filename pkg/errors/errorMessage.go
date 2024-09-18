@@ -249,6 +249,7 @@ var (
 	GALASA_ERROR_INVALID_TOKEN_ID_FORMAT         = NewMessageType("GAL1154E: The provided token ID, '%s', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.", 1154, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG      = NewMessageType("GAL1155E: The id provided by the --id field cannot be an empty string.", 1155, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED          = NewMessageType("GAL1156E: '%s' is not supported as a valid value. Valid values are 'me'.", 1156, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_LOGIN_ID                = NewMessageType("GAL1157E: '%s' is not supported as a valid value. Valid value should not contain spaces. A value of 'admin' is valid but 'galasa admin' is not.", 1157, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
