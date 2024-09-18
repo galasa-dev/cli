@@ -77,3 +77,4 @@ func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
 
 	return authTokensCmd, err
 }
+
