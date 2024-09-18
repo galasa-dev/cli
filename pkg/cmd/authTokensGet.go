@@ -85,7 +85,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 		},
 	}
 
-	addLoginIdFlagToAuthTokensGet(authGetTokensCobraCmd, false, authTokensGetCommandValues)
+	addLoginIdFlagToAuthTokensGet(authGetTokensCobraCmd, authTokensGetCommandValues)
 	authTokensCommand.CobraCommand().AddCommand(authGetTokensCobraCmd)
 
 	return authGetTokensCobraCmd, err
@@ -135,17 +135,19 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
-					// Call to process the command in a unit-testable way.
-					// Checking if the loginId param was passed
-					if cmd.cobraCommand.Flags().Changed("id") {
-						err = auth.GetTokensByLoginId(apiClient, console, authTokenCmdValues.name)
-					} else {
-						err = auth.GetTokens(apiClient, console)
-					}
+					err = auth.GetTokens(apiClient, console, authTokenCmdValues.loginId)
 				}
 			}
 		}
 	}
 
 	return err
+}
+
+func addLoginIdFlagToAuthTokensGet(cmd *cobra.Command, authTokensGetCmdValues *AuthTokensCmdValues) {
+
+	flagName := "user"
+	var description string = "An optional flag that is used to retrieve the access tokens of the currently logged in user. The input must be a string."
+
+	cmd.Flags().StringVar(&authTokensGetCmdValues.loginId, flagName, "", description)
 }
