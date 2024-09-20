@@ -114,6 +114,9 @@ properties_tests
 source ${BASEDIR}/test-scripts/resources-tests.sh --bootstrap "${bootstrap}"
 resources_tests
 
+source ${BASEDIR}/test-scripts/auth-tests.sh --bootstrap "${bootstrap}"
+auth_tests
+
 # Test the hybrid configuration where the local test runs locally, but
 # draws it's CPS properties from a remote ecosystem via a REST extension.
 source ${BASEDIR}/test-scripts/test-local-run-remote-cps.sh 

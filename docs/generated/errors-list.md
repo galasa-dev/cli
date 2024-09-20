@@ -160,6 +160,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1162E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1163E: The run named '{}' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete
 - GAL1164E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1165E: '{}' is not supported as a valid value. LoginId should not contain spaces.
+- GAL1166E: The loginId provided by the --user field cannot be an empty string.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

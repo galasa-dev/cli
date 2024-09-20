@@ -16,6 +16,7 @@ import (
 
 type AuthTokensCmdValues struct {
 	bootstrap string
+	loginId   string
 }
 
 type AuthTokensCommand struct {
@@ -76,3 +77,4 @@ func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
 
 	return authTokensCmd, err
 }
+
