@@ -5,9 +5,9 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-echo "Running script runs-tests.sh"
+echo "Running script auth-tests.sh"
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
-# This script tests the 'galasactl runs submit' command against a test that is in our ecosystem's testcatalog already
+# This script tests the 'galasactl auth tokens get' command against a test that is in our ecosystem's testcatalog already
 # Pre-requesite: the CLI must have been built first so the binaries are present in the /bin directory
 
 if [[ "$CALLED_BY_MAIN" == "" ]]; then
@@ -74,32 +74,13 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     fi
 
     info "Running tests against ecosystem bootstrap ${bootstrap}"
-
-    #-----------------------------------------------------------------------------------------
-    # Constants
-    #-----------------------------------------------------------------------------------------
-    export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"
-    export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}"
-    export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
-    export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
-    export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
-    export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
-
 fi
-
-# generate a random number to append to test names to avoid multiple running at once overriding each other
-function get_random_property_name_number {
-    minimum=100
-    maximum=999
-    PROP_NUM=$(($minimum + $RANDOM % $maximum))
-    echo $PROP_NUM
-}
 
 #-----------------------------------------------------------------------------------------
 # Tests
 #-----------------------------------------------------------------------------------------
 
-function auth_tokens_get {
+function auth_tokens_get_all_tokens_without_loginId {
 
     h2 "Performing auth tokens get without loginId: get..."
 
@@ -112,7 +93,8 @@ function auth_tokens_get {
 
     info "Command is: $cmd"
 
-    $cmd
+    output_file="$ORIGINAL_DIR/temp/auth-get-output.txt"
+    $cmd | tee $output_file
     rc=$?
 
     # We expect a return code of 0 because this is a properly formed auth tokens get command.
@@ -121,16 +103,8 @@ function auth_tokens_get {
         exit 1
     fi
 
-    output_file="$ORIGINAL_DIR/temp/auth-get-output.txt"
-    $cmd | tee $output_file
-
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to get access tokens."
-        exit 1
-    fi
-
-    # Check that the previous properties set created a property
-    cat $output_file | grep "Total:" -q
+    # Checks that the tokens were fetched successfully
+    cat $output_file | grep "Total: 1" -q
 
     success "All access tokens fetched from database successfully."
 
@@ -155,7 +129,7 @@ function auth_tokens_get_with_missing_loginId_throws_error {
 
     rc=$?
     if [[ "${rc}" != "1" ]]; then 
-        error "Failed to get access tokens."
+        error "Failed to get access tokens due to missing login ID. Bad Request"
         exit 1
     fi
 
@@ -163,10 +137,10 @@ function auth_tokens_get_with_missing_loginId_throws_error {
 
 }
 
-function auth_tokens_get_by_loginId {
+function auth_tokens_get_all_tokens_by_loginId {
 
     h2 "Performing auth tokens get with loginId: get..."
-    loginId="Aashir.Siddiqui@ibm.com"
+    loginId="Galasadelivery@ibm.com"
 
     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
@@ -177,24 +151,17 @@ function auth_tokens_get_by_loginId {
     "
 
     info "Command is: $cmd"
-
-    $cmd
-    rc=$?
-
-    # We expect a return code of 0 because this is a properly formed auth tokens get command.
-    if [[ "${rc}" != "0" ]]; then 
-        error "Failed to create property with name and value used."
-        exit 1
-    fi
-
     output_file="$ORIGINAL_DIR/temp/auth-get-output.txt"
+
     $cmd | tee $output_file
+    rc=$?
+    
     if [[ "${rc}" != "0" ]]; then 
-        error "Failed to get property with name used: command failed."
+        error "Failed to fetch access tokens by login ID"
         exit 1
     fi
 
-    # Check that the previous properties set created a property
+    # Checks that the tokens were fetched successfully
     cat $output_file | grep "Total: 1" -q
 
     success "All access tokens by loginId fetched from database successfully."
@@ -204,9 +171,9 @@ function auth_tokens_get_by_loginId {
 #--------------------------------------------------------------------------
 
 function auth_tests {
-    auth_tokens_get
-    auth_tokens_get_by_loginId
+    auth_tokens_get_all_tokens_without_loginId
     auth_tokens_get_with_missing_loginId_throws_error
+    auth_tokens_get_all_tokens_by_loginId
 }
 
 # checks if it's been called by main, set this variable if it is

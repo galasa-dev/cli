@@ -251,7 +251,7 @@ var (
 	GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED          = NewMessageType("GAL1156E: '%s' is not supported as a valid value. Valid values are 'me'.", 1156, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_RUN_FAILED               = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED       = NewMessageType("GAL1158E: An attempt to delete a run named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1158, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_LOGIN_ID                = NewMessageType("GAL1165E: '%s' is not supported as a valid value. LoginId should not contain spaces.", 1165, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_LOGIN_ID                = NewMessageType("GAL1165E: '%s' is not supported as a valid login ID. Login ID should not contain spaces.", 1165, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_USER_FLAG_VALUE         = NewMessageType("GAL1166E: The loginId provided by the --user field cannot be an empty string.", 1166, STACK_TRACE_NOT_WANTED)
 
 	// 4 related but slightly different errors, when an HTTP response arrives from the Galasa server, and we can/can't parse the payload to get the message details out.

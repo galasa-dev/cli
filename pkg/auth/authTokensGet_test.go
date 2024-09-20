@@ -182,7 +182,7 @@ func TestLoginIdWithSpacesReturnsBadRequest(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `GAL1165E: 'galasa admin' is not supported as a valid value. LoginId should not contain spaces.`
+	expectedOutput := `GAL1165E: 'galasa admin' is not supported as a valid login ID. Login ID should not contain spaces.`
 
 	//When
 	err := GetTokens(apiClient, console, "galasa admin")
