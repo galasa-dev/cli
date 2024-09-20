@@ -147,7 +147,7 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 func addLoginIdFlagToAuthTokensGet(cmd *cobra.Command, authTokensGetCmdValues *AuthTokensCmdValues) {
 
 	flagName := "user"
-	var description string = "An optional flag that is used to retrieve the access tokens of the currently logged in user. The input must be a string."
+	var description string = "Optional. Retrieves a list of access tokens for the user with the given username."
 
 	cmd.Flags().StringVar(&authTokensGetCmdValues.loginId, flagName, "", description)
 }

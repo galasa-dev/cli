@@ -8,6 +8,7 @@ package auth
 import (
 	"context"
 	"log"
+	"net/http"
 	"strings"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -48,19 +49,21 @@ func getAuthTokensFromRestApi(apiClient *galasaapi.APIClient, loginId string) ([
 		}
 	}
 
-	if err != nil {
-		return authTokens, err
-	}
+	if err == nil {
 
-	tokens, resp, err := apiCall.Execute()
+		var tokens *galasaapi.AuthTokens
+		var resp *http.Response
 
-	if err != nil {
-		log.Println("getAuthTokensFromRestApi - Failed to retrieve list of tokens from API server")
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_TOKEN_LIST_FROM_API_SERVER, err.Error())
-	} else {
-		defer resp.Body.Close()
-		authTokens = tokens.GetTokens()
-		log.Printf("getAuthTokensFromRestApi -  %v tokens collected", len(authTokens))
+		tokens, resp, err = apiCall.Execute()
+
+		if err != nil {
+			log.Println("getAuthTokensFromRestApi - Failed to retrieve list of tokens from API server")
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_TOKEN_LIST_FROM_API_SERVER, err.Error())
+		} else {
+			defer resp.Body.Close()
+			authTokens = tokens.GetTokens()
+			log.Printf("getAuthTokensFromRestApi -  %v tokens collected", len(authTokens))
+		}
 	}
 
 	return authTokens, err
@@ -85,13 +88,13 @@ func validateLoginIdFlag(loginId string) (string, error) {
 	var err error
 
 	loginId = strings.TrimSpace(loginId)
-	splits := strings.Split(loginId, " ")
+	hasSpace := strings.Contains(loginId, " ")
 
 	if loginId == "" {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_USER_FLAG_VALUE)
 	}
 
-	if len(splits) > 1 {
+	if hasSpace {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_LOGIN_ID, loginId)
 	}
 

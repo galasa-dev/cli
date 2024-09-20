@@ -249,9 +249,10 @@ var (
 	GALASA_ERROR_INVALID_TOKEN_ID_FORMAT         = NewMessageType("GAL1154E: The provided token ID, '%s', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.", 1154, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG      = NewMessageType("GAL1155E: The id provided by the --id field cannot be an empty string.", 1155, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED          = NewMessageType("GAL1156E: '%s' is not supported as a valid value. Valid values are 'me'.", 1156, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_LOGIN_ID                = NewMessageType("GAL1157E: '%s' is not supported as a valid value. Valid value should not contain spaces. A value of 'admin' is valid but 'galasa admin' is not.", 1157, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_RUN_FAILED               = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED       = NewMessageType("GAL1158E: An attempt to delete a run named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1158, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_LOGIN_ID                = NewMessageType("GAL1165E: '%s' is not supported as a valid value. LoginId should not contain spaces.", 1165, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_USER_FLAG_VALUE         = NewMessageType("GAL1166E: The loginId provided by the --user field cannot be an empty string.", 1166, STACK_TRACE_NOT_WANTED)
 
 	// 4 related but slightly different errors, when an HTTP response arrives from the Galasa server, and we can/can't parse the payload to get the message details out.
 	GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT         = NewMessageType("GAL1159E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server.", 1159, STACK_TRACE_NOT_WANTED)

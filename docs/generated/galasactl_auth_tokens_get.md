@@ -14,7 +14,7 @@ galasactl auth tokens get [flags]
 
 ```
   -h, --help          Displays the options for the 'auth tokens get' command.
-      --user string   An optional flag that is used to retrieve the access tokens of the currently logged in user. The input must be a string.
+      --user string   Optional. Retrieves a list of access tokens for the user with the given username.
 ```
 
 ### Options inherited from parent commands

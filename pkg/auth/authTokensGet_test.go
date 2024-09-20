@@ -148,7 +148,7 @@ func TestInvalidPathReturnsError(t *testing.T) {
 	console := utils.NewMockConsole()
 
 	//When
-	err := GetTokens(apiClient, console, "")
+	err := GetTokens(apiClient, console, "admin")
 
 	//Then
 	assert.NotNil(t, err)
@@ -164,7 +164,7 @@ func TestMissingLoginIdFlagReturnsBadRequest(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `GAL1155E: The id provided by the --id field cannot be an empty string.`
+	expectedOutput := `GAL1166E: The loginId provided by the --user field cannot be an empty string.`
 
 	//When
 	err := GetTokens(apiClient, console, "   ")
@@ -182,7 +182,7 @@ func TestLoginIdWithSpacesReturnsBadRequest(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `GAL1157E: 'galasa admin' is not supported as a valid value. Valid value should not contain spaces. A value of 'admin' is valid but 'galasa admin' is not.`
+	expectedOutput := `GAL1165E: 'galasa admin' is not supported as a valid value. LoginId should not contain spaces.`
 
 	//When
 	err := GetTokens(apiClient, console, "galasa admin")
