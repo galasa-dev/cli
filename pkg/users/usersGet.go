@@ -8,6 +8,7 @@ package users
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -24,7 +25,7 @@ func GetUsers(loginId string, apiClient *galasaapi.APIClient, console spi.Consol
 
 		if err == nil {
 			extractedUserId := userData.GetLoginId()
-			console.WriteString("id: " + extractedUserId)
+			console.WriteString(fmt.Sprintf("id: %s\n", extractedUserId))
 		}
 
 	}

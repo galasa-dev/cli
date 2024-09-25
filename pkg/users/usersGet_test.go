@@ -16,16 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// MockServlet
-func NewUsersServletMock(t *testing.T) *httptest.Server {
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		MockUsersServlet(t, w, r)
-	}))
-
-	return server
-}
-
 func MockUsersServlet(t *testing.T, w http.ResponseWriter, r *http.Request) {
 
 	assert.NotEmpty(t, r.Header.Get("ClientApiVersion"))
@@ -45,7 +35,9 @@ func TestNullOrEmptyLoginIdReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	loginId := ""
 
-	server := NewUsersServletMock(t)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		MockUsersServlet(t, w, r)
+	}))
 	apiServerUrl := server.URL
 	defer server.Close()
 
@@ -64,7 +56,9 @@ func TestNotMeInputLoginIdReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	loginId := "notMe"
 
-	server := NewUsersServletMock(t)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		MockUsersServlet(t, w, r)
+	}))
 	apiServerUrl := server.URL
 	defer server.Close()
 
@@ -74,4 +68,30 @@ func TestNotMeInputLoginIdReturnsError(t *testing.T) {
 	err := GetUsers(loginId, apiClient, mockConsole)
 
 	assert.ErrorContains(t, err, "GAL1156E")
+}
+
+func TestMeInputLoginIdPrintsDetailsOnConsole(t *testing.T) {
+
+	//given
+	mockConsole := utils.NewMockConsole()
+	loginId := "me"
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+
+		jsonToReturn := `[{ "login_id": "myUserId" }]`
+		writer.Write([]byte(jsonToReturn))
+
+	}))
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	apiClient := api.InitialiseAPI(apiServerUrl)
+
+	//when
+	err := GetUsers(loginId, apiClient, mockConsole)
+
+	assert.Nil(t, err)
+	text := mockConsole.ReadText()
+	assert.Equal(t, "id: myUserId\n", text)
 }
