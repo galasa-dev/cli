@@ -74,6 +74,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 
 	var err error
 
+	authTokensGetCommandValues := authTokensCommand.Values().(*AuthTokensCmdValues)
 	authGetTokensCobraCmd := &cobra.Command{
 		Use:     "get",
 		Short:   "Get a list of authentication tokens",
@@ -84,6 +85,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 		},
 	}
 
+	addLoginIdFlagToAuthTokensGet(authGetTokensCobraCmd, authTokensGetCommandValues)
 	authTokensCommand.CobraCommand().AddCommand(authGetTokensCobraCmd)
 
 	return authGetTokensCobraCmd, err
@@ -133,12 +135,19 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = auth.GetTokens(apiClient, console)
+					err = auth.GetTokens(apiClient, console, authTokenCmdValues.loginId)
 				}
 			}
 		}
 	}
 
 	return err
+}
+
+func addLoginIdFlagToAuthTokensGet(cmd *cobra.Command, authTokensGetCmdValues *AuthTokensCmdValues) {
+
+	flagName := "user"
+	var description string = "Optional. Retrieves a list of access tokens for the user with the given username."
+
+	cmd.Flags().StringVar(&authTokensGetCmdValues.loginId, flagName, "", description)
 }
