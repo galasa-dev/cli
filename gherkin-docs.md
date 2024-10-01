@@ -141,12 +141,6 @@ secure.credentials.MYCREDS1.password=mypassw0rd
 #### Position the terminal
 - `AND move terminal cursor to field "xxx"`
 
-#### Using credentials from the credentials store
-- `AND type credentials xxx username on terminal`
-- `AND type credentials xxx username on terminal A`
-
-- `AND type credentials xxx password on terminal`
-- `AND type credentials xxx password on terminal A`
 
 #### Waiting for responses
 - `AND wait for terminal keyboard`
