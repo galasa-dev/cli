@@ -123,6 +123,21 @@ or
 - `AND type "xxx" on terminal A in field labelled "yyy"` if you want to name the terminal to send the text to.
 - `AND type "xxx" on terminal`
 
+#### Logging into a terminal application
+- 'AND type credentials MYCREDS1 username on terminal`
+- 'AND type credentials MYCREDS1 password on terminal`
+or
+- 'AND type credentials MYCREDS1 username on terminal A`
+- 'AND type credentials MYCREDS1 password on terminal A`
+
+... where `MYCREDS1` is a variable, matching the name of a credential in the system. 
+
+For example, within a local `credentials.properties` file it may look like this:
+```
+secure.credentials.MYCREDS1.username=myuserid
+secure.credentials.MYCREDS1.password=mypassw0rd
+```
+
 #### Position the terminal
 - `AND move terminal cursor to field "xxx"`
 
