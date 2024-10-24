@@ -9,6 +9,9 @@ package errors
 import (
 	"encoding/json"
 	"log"
+	"net/http"
+
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 type GalasaAPIError struct {
@@ -40,4 +43,53 @@ func GetApiErrorFromResponseBytes(body []byte, marshallingErrorLambda func(marsh
 		err = marshallingErrorLambda(err)
 	}
 	return apiError, err
+}
+
+func HttpResponseToGalasaError(
+	response *http.Response,
+	identifier string,
+	byteReader spi.ByteReader,
+	errorMsgUnexpectedStatusCodeNoResponseBody *MessageType,
+	errorMsgUnableToReadResponseBody *MessageType,
+	errorMsgResponsePayloadInWrongFormat *MessageType,
+	errorMsgReceivedFromApiServer *MessageType,
+	errorMsgResponseContentTypeNotJson *MessageType,
+) error {
+	defer response.Body.Close()
+	var err error
+	var responseBodyBytes []byte
+	statusCode := response.StatusCode
+
+	if response.ContentLength == 0 {
+		log.Printf("Failed - HTTP response - status code: '%v'\n", statusCode)
+		err = NewGalasaError(errorMsgUnexpectedStatusCodeNoResponseBody, identifier, statusCode)
+	} else {
+		
+		contentType := response.Header.Get("Content-Type")
+		if contentType != "application/json" {
+			err = NewGalasaError(errorMsgResponseContentTypeNotJson, identifier, statusCode)
+		} else {
+			responseBodyBytes, err = byteReader.ReadAll(response.Body)
+			if err != nil {
+				err = NewGalasaError(errorMsgUnableToReadResponseBody, identifier, statusCode, err.Error())
+			} else {
+
+				var errorFromServer *GalasaAPIError
+				errorFromServer, err = GetApiErrorFromResponseBytes(
+					responseBodyBytes,
+					func (marshallingError error) error {
+						log.Printf("Failed - HTTP response - status code: '%v' payload in response is not json: '%v' \n", statusCode, string(responseBodyBytes))
+						return NewGalasaError(errorMsgResponsePayloadInWrongFormat, identifier, statusCode, marshallingError)
+					},
+				)
+
+				if err == nil {
+					// server returned galasa api error structure we understand.
+					log.Printf("Failed - HTTP response - status code: '%v' server responded with error message: '%v' \n", statusCode, errorMsgReceivedFromApiServer)
+					err = NewGalasaError(errorMsgReceivedFromApiServer, identifier, statusCode, errorFromServer.Message)
+				}
+			}
+		}
+	}
+	return err
 }
