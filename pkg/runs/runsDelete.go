@@ -84,6 +84,10 @@ func deleteRuns(
 	
 			apicall := apiClient.ResultArchiveStoreAPIApi.DeleteRasRunById(context, runId).ClientApiVersion(restApiVersion)
 			httpResponse, err = apicall.Execute()
+
+			if httpResponse != nil {
+				defer httpResponse.Body.Close()
+			}
 	
 			// 200-299 http status codes manifest in an error.
 			if err != nil {
@@ -91,7 +95,7 @@ func deleteRuns(
 					// We never got a response, error sending it or something ?
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_RUNS_FAILED, err.Error())
 				} else {
-					err = httpResponseToGalasaError(
+					err = galasaErrors.HttpResponseToGalasaError(
 						httpResponse,
 						runName,
 						byteReader,
@@ -115,51 +119,3 @@ func deleteRuns(
 	return err
 }
 
-func httpResponseToGalasaError(
-	response *http.Response,
-	identifier string,
-	byteReader spi.ByteReader,
-	errorMsgUnexpectedStatusCodeNoResponseBody *galasaErrors.MessageType,
-	errorMsgUnableToReadResponseBody *galasaErrors.MessageType,
-	errorMsgResponsePayloadInWrongFormat *galasaErrors.MessageType,
-	errorMsgReceivedFromApiServer *galasaErrors.MessageType,
-	errorMsgResponseContentTypeNotJson *galasaErrors.MessageType,
-) error {
-	defer response.Body.Close()
-	var err error
-	var responseBodyBytes []byte
-	statusCode := response.StatusCode
-
-	if response.ContentLength == 0 {
-		log.Printf("Failed - HTTP response - status code: '%v'\n", statusCode)
-		err = galasaErrors.NewGalasaError(errorMsgUnexpectedStatusCodeNoResponseBody, identifier, statusCode)
-	} else {
-		
-		contentType := response.Header.Get("Content-Type")
-		if contentType != "application/json" {
-			err = galasaErrors.NewGalasaError(errorMsgResponseContentTypeNotJson, identifier, statusCode)
-		} else {
-			responseBodyBytes, err = byteReader.ReadAll(response.Body)
-			if err != nil {
-				err = galasaErrors.NewGalasaError(errorMsgUnableToReadResponseBody, identifier, statusCode, err.Error())
-			} else {
-
-				var errorFromServer *galasaErrors.GalasaAPIError
-				errorFromServer, err = galasaErrors.GetApiErrorFromResponseBytes(
-					responseBodyBytes,
-					func (marshallingError error) error {
-						log.Printf("Failed - HTTP response - status code: '%v' payload in response is not json: '%v' \n", statusCode, string(responseBodyBytes))
-						return galasaErrors.NewGalasaError(errorMsgResponsePayloadInWrongFormat, identifier, statusCode, marshallingError)
-					},
-				)
-
-				if err == nil {
-					// server returned galasa api error structure we understand.
-					log.Printf("Failed - HTTP response - status code: '%v' server responded with error message: '%v' \n", statusCode, errorMsgReceivedFromApiServer)
-					err = galasaErrors.NewGalasaError(errorMsgReceivedFromApiServer, identifier, statusCode, errorFromServer.Message)
-				}
-			}
-		}
-	}
-	return err
-}
