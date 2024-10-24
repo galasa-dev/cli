@@ -116,6 +116,7 @@ const (
 
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
+// We get the caller's timer service so we can interrupt the caller when we are done.
 func NewJVMLauncher(
 	factory spi.Factory,
 	bootstrapProps props.JavaProperties,
@@ -123,6 +124,8 @@ func NewJVMLauncher(
 	runsSubmitLocalCmdParams *RunsSubmitLocalCmdParameters,
 	processFactory ProcessFactory,
 	galasaHome spi.GalasaHome,
+	timeService spi.TimeService,
+
 ) (*JvmLauncher, error) {
 
 	var (
@@ -132,7 +135,6 @@ func NewJVMLauncher(
 
 	env := factory.GetEnvironment()
 	fileSystem := factory.GetFileSystem()
-	timeService := factory.GetTimeService()
 
 	javaHome := env.GetEnv("JAVA_HOME")
 

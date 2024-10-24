@@ -205,7 +205,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 						factory,
 						bootstrapData.Properties, embeddedFileSystem,
 						cmd.values.runsSubmitLocalCmdParams,
-						processFactory, galasaHome)
+						processFactory, galasaHome, timeService)
 
 					if err == nil {
 						var console = factory.GetStdOutConsole()

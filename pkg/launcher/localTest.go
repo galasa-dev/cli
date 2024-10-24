@@ -95,6 +95,10 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 		localTest.runId, err = localTest.waitForRunIdAllocation(localTest.stdout)
 		if err == nil {
 			localTest.rasFolderPathUrl, err = localTest.waitForRasFolderPathUrl(localTest.stdout, localTest.runId)
+
+			if err == nil {
+				log.Printf("JVM test started and in progress. We know how to monitor it now.\n")
+			}
 		}
 	}
 	return err
@@ -110,17 +114,18 @@ func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputPr
 	isDoneWaiting := false
 
 	for !isDoneWaiting {
-		select {
-		case <-outputProcessor.publishResultChannel:
-			rasFolderPathUrl = outputProcessor.detectedRasFolderPathUrl
+
+		// No ras path available yet.
+		if localTest.isCompleted() {
+			// Completed before the ras location was available.
 			isDoneWaiting = true
-		default:
-			// No ras path available yet.
-			if localTest.isCompleted() {
-				// Completed before the ras location was available.
+		} else {
+			timer := time.After(time.Duration(time.Second))
+			select {
+			case <-outputProcessor.publishResultChannel:
+				rasFolderPathUrl = outputProcessor.detectedRasFolderPathUrl
 				isDoneWaiting = true
-			} else {
-				localTest.timeService.Sleep(time.Duration(time.Second))
+			case <-timer:
 			}
 		}
 	}
@@ -142,18 +147,22 @@ func (localTest *LocalTest) waitForRunIdAllocation(outputProcessor *JVMOutputPro
 	isDoneWaiting := false
 
 	for !isDoneWaiting {
-		select {
-		case <-outputProcessor.publishResultChannel:
-			// We have a RunId
-			runId = outputProcessor.detectedRunId
+
+		// No runid available yet.
+		if localTest.isCompleted() {
+			// Completed before the runId was available.
 			isDoneWaiting = true
-		default:
-			// No runid available yet.
-			if localTest.isCompleted() {
-				// Completed before the runId was available.
+		} else {
+
+			timer := time.After(time.Duration(time.Second))
+
+			select {
+			case <-outputProcessor.publishResultChannel:
+				// We have a RunId
+				runId = outputProcessor.detectedRunId
 				isDoneWaiting = true
-			} else {
-				localTest.timeService.Sleep(time.Duration(time.Second))
+
+			case <-timer:
 			}
 		}
 	}
@@ -200,7 +209,7 @@ func (localTest *LocalTest) updateTestStatusFromRasFile() error {
 	var err error
 
 	if localTest.runId == "" || localTest.rasFolderPathUrl == "" {
-		log.Printf("Don't have enough information to find the structure.json in the RAS folder.\n")
+		log.Printf("Don't have enough information to find the structure.json in the RAS folder yet. Test JVM is starting up.\n")
 	} else {
 
 		jsonFilePath := strings.TrimPrefix(localTest.rasFolderPathUrl, "file:///") + "/" + localTest.runId + "/structure.json"
@@ -225,6 +234,7 @@ func (localTest *LocalTest) isCompleted() bool {
 
 	if localTest.testRun != nil && localTest.testRun.GetStatus() == "finished" {
 		// The test is already complete.
+		// log.Printf("Test is already complete\n")
 		isComplete = true
 	} else {
 
@@ -245,6 +255,7 @@ func (localTest *LocalTest) isCompleted() bool {
 		localTest.updateTestStatusFromRasFile()
 		if localTest.testRun != nil && localTest.testRun.GetStatus() == "finished" {
 			// The test is already complete.
+			log.Printf("Test is already complete when it wasn't before.\n")
 			isComplete = true
 		}
 	}

@@ -21,8 +21,19 @@ func NewRealTimeService() spi.TimeService {
 		// The interrupt channel has enough capacity for 100 events before anything blocks.
 		interruptEventChannel: make(chan string, 100),
 	}
+	log.Printf("timeService: %v created\n", service)
+
+	// service.logStackTrace()
+
 	return &service
 }
+
+// func (ts *timeService) logStackTrace() {
+// 	// Print the stack trace.
+// 	buf := make([]byte, 1<<16)
+// 	bytesInStackTrace := runtime.Stack(buf, true)
+// 	log.Printf("timeService: %v stack trace : %s", *ts, buf[:bytesInStackTrace])
+// }
 
 const (
 	SECONDS_BETWEEN_INTERRUPTED_CHECKS  = 3
@@ -31,56 +42,25 @@ const (
 
 // Interrupts any timer sleeping.
 func (ts *timeService) Interrupt(message string) {
-	log.Printf("Interrupting the timing service sleeping. %s\n", message)
+	log.Printf("timeService: %v Interrupting the timing service sleeping. %s\n", *ts, message)
+	// ts.logStackTrace()
 	ts.interruptEventChannel <- "INTERRUPT: " + message
 }
 
 // Sleep for a bit. Waking up if anything calls the interrupt method.
 func (ts *timeService) Sleep(duration time.Duration) {
 
-	// Clear any interruptions which occurred before we went to sleep.
-	for ts.hasBeenInterrupted() {
-		// Do nothing here. Checking is enough to clear an interruption.
-	}
+	log.Printf("timeService: %v : sleep entered\n", *ts)
+	timer := time.After(duration)
 
-	isInterrupted := false
-	isDone := false
-	for !isDone {
-
-		if duration < DURATION_BETWEEN_INTERRUPTED_CHECKS {
-			// Only a bit of time left to sleep for. Do it.
-			time.Sleep(duration)
-			duration = 0
-		} else {
-
-			// Have we been interrupted ?
-			isInterrupted = ts.hasBeenInterrupted()
-
-			if !isInterrupted {
-				time.Sleep(DURATION_BETWEEN_INTERRUPTED_CHECKS)
-				duration -= DURATION_BETWEEN_INTERRUPTED_CHECKS
-			}
-		}
-
-		if duration <= 0 || isInterrupted {
-			isDone = true
-		}
-	}
-}
-
-// Check to see if anything has interrupted the timer service.
-// Called by a sleeping go routine, to check between polls.
-func (ts *timeService) hasBeenInterrupted() bool {
-	isInterrupted := false
 	select {
 	case msg := <-ts.interruptEventChannel:
-		log.Printf("TimeService: received interrupt message %s\n", msg)
-		// There was an interrupt message received. So don't sleep for any longer.
-		isInterrupted = true
-	default:
-		// log.Printf("no interrupt message received\n")
+		log.Printf("timeService: %v : received interrupt message %s\n", *ts, msg)
+	case <-timer:
+		log.Printf("timeService: %v : sleep timed out\n", *ts)
+		// ts.logStackTrace()
 	}
-	return isInterrupted
+	// log.Printf("timeService: %v : sleep exiting\n", *ts)
 }
 
 // Retrieves the current time, with the location set to UTC.
