@@ -63,6 +63,7 @@ func NewMockLauncherParams() (
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
 	spi.TimeService,
+	spi.TimedSleeper,
 	ProcessFactory,
 	spi.GalasaHome,
 ) {
@@ -74,13 +75,14 @@ func NewMockLauncherParams() (
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	bootstrapProps := getBasicBootstrapProperties()
 
 	return bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome
 }
 
 func TestCanCreateAJVMLauncher(t *testing.T) {
@@ -95,6 +97,7 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
@@ -110,7 +113,7 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 	if err != nil {
 		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
@@ -146,6 +149,7 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
@@ -159,7 +163,7 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 	if err == nil {
 		assert.Fail(t, "Constructor should have failed but it did not.")
@@ -177,6 +181,7 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
@@ -192,7 +197,7 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 
 	if err != nil {
@@ -204,7 +209,7 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 func TestCanLaunchLocalJvmTest(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
 	mockFactory := &utils.MockFactory{
 		Env:         env,
@@ -215,7 +220,7 @@ func TestCanLaunchLocalJvmTest(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embeddedReadOnlyFS,
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 
 	if err != nil {
@@ -276,7 +281,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, utils.NewRealTimedSleeper(),
 	)
 	if err != nil {
 		assert.Fail(t, "Launcher should have launched command OK")
@@ -413,7 +418,7 @@ func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
 
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
 	mockFactory := &utils.MockFactory{
 		Env:         env,
@@ -424,7 +429,7 @@ func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
 	launcher, _ := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embeddedReadOnlyFS,
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService)
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
@@ -455,7 +460,7 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
 	mockFactory := &utils.MockFactory{
 		Env:         env,
@@ -465,7 +470,7 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 	launcher, _ := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embeddedReadOnlyFS,
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService)
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
@@ -1345,6 +1350,7 @@ func NewMockGherkinParams() (
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
 	spi.TimeService,
+	spi.TimedSleeper,
 	ProcessFactory,
 	spi.GalasaHome,
 ) {
@@ -1362,13 +1368,13 @@ func NewMockGherkinParams() (
 	bootstrapProps := getBasicBootstrapProperties()
 
 	return bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome
+		jvmLaunchParams, timeService, utils.NewRealTimedSleeper(), mockProcessFactory, galasaHome
 }
 
 func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockGherkinParams()
 
 	mockFactory := &utils.MockFactory{
 		Env:         env,
@@ -1379,7 +1385,7 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embeddedReadOnlyFS,
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 
 	if err != nil {
@@ -1416,7 +1422,7 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockGherkinParams()
 
 	mockFactory := &utils.MockFactory{
 		Env:         env,
@@ -1427,7 +1433,7 @@ func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embeddedReadOnlyFS,
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -1458,7 +1464,7 @@ func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
 func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockGherkinParams()
 
 	mockFactory := &utils.MockFactory{
 		Env:         env,
@@ -1469,7 +1475,7 @@ func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
 	launcher, err := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embeddedReadOnlyFS,
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 
 	if err != nil {
@@ -1505,7 +1511,7 @@ func TestSetTestStructureFromRasFileValidFileContentReturnsOk(t *testing.T) {
 	jsonFileName := "structure.json"
 
 	_, _, fs, _,
-		_, _, _, galasaHome := NewMockLauncherParams()
+		_, _, _, _, galasaHome := NewMockLauncherParams()
 
 	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
 	fs.WriteTextFile(jsonFilePath, validStructureJsonFileContent)
@@ -1555,7 +1561,7 @@ func TestSetTestStructureFromRasFileInvalidFileContentReturnsError(t *testing.T)
 		]
 	}`
 	_, _, fs, _,
-		_, _, _, galasaHome := NewMockLauncherParams()
+		_, _, _, _, galasaHome := NewMockLauncherParams()
 
 	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
 	fs.WriteTextFile(jsonFilePath, invalidStructureJsonFileContent)
@@ -1575,7 +1581,7 @@ func TestSetTestStructureFromRasFileEmptyFileContentReturnsError(t *testing.T) {
 	jsonFileName := "structure.json"
 
 	_, _, fs, _,
-		_, _, _, galasaHome := NewMockLauncherParams()
+		_, _, _, _, galasaHome := NewMockLauncherParams()
 
 	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
 	fs.WriteTextFile(jsonFilePath, "")
@@ -1594,7 +1600,7 @@ func TestSetTestStructureFromRasFileInvalidFilePathReturnsError(t *testing.T) {
 	jsonFileName := "structure.json"
 
 	_, _, fs, _,
-		_, _, _, _ := NewMockLauncherParams()
+		_, _, _, _, _ := NewMockLauncherParams()
 
 	invalidJsonFilePath := "invalidJsonFilePath/" + jsonFileName
 
@@ -1609,9 +1615,9 @@ func TestSetTestStructureFromRasFileInvalidFilePathReturnsError(t *testing.T) {
 func TestCreateRunFromLocalTestValidRasFolderPathReturnsOk(t *testing.T) {
 	//Given...
 	_, _, fs, _,
-		_, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		_, _, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
-	localTest := NewLocalTest(timeService, fs, mockProcessFactory)
+	localTest := NewLocalTest(timedSleeper, fs, mockProcessFactory)
 	localTest.runId = "L0"
 	localTest.rasFolderPathUrl = galasaHome.GetNativeFolderPath()
 
@@ -1634,9 +1640,9 @@ func TestCreateRunFromLocalTestValidRasFolderPathReturnsOk(t *testing.T) {
 func TestCreateRunFromLocalTestInvalidRasFolderPathReturnsError(t *testing.T) {
 	//Given...
 	_, _, fs, _,
-		_, timeService, mockProcessFactory, _ := NewMockLauncherParams()
+		_, _, timedSleeper, mockProcessFactory, _ := NewMockLauncherParams()
 
-	localTest := NewLocalTest(timeService, fs, mockProcessFactory)
+	localTest := NewLocalTest(timedSleeper, fs, mockProcessFactory)
 	localTest.runId = "L0"
 	localTest.rasFolderPathUrl = ""
 
@@ -1651,7 +1657,7 @@ func TestCreateRunFromLocalTestInvalidRasFolderPathReturnsError(t *testing.T) {
 func TestGetRunsByIdReturnsOk(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, _, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, _, galasaHome := NewMockLauncherParams()
 
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
@@ -1665,7 +1671,7 @@ func TestGetRunsByIdReturnsOk(t *testing.T) {
 	launcher, _ := NewJVMLauncher(
 		mockFactory,
 		bootstrapProps, embeddedReadOnlyFS,
-		jvmLaunchParams, mockProcessFactory, galasaHome, timeService,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
 	)
 
 	isTraceEnabled := true

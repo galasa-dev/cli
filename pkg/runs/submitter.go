@@ -27,13 +27,14 @@ import (
 )
 
 type Submitter struct {
-	galasaHome  spi.GalasaHome
-	fileSystem  spi.FileSystem
-	launcher    launcher.Launcher
-	timeService spi.TimeService
-	env         spi.Environment
-	console     spi.Console
-	expander    images.ImageExpander
+	galasaHome   spi.GalasaHome
+	fileSystem   spi.FileSystem
+	launcher     launcher.Launcher
+	timeService  spi.TimeService
+	timedSleeper spi.TimedSleeper
+	env          spi.Environment
+	console      spi.Console
+	expander     images.ImageExpander
 }
 
 func NewSubmitter(
@@ -41,6 +42,7 @@ func NewSubmitter(
 	fileSystem spi.FileSystem,
 	launcher launcher.Launcher,
 	timeService spi.TimeService,
+	timedSleeper spi.TimedSleeper,
 	env spi.Environment,
 	console spi.Console,
 	expander images.ImageExpander,
@@ -50,6 +52,7 @@ func NewSubmitter(
 	instance.fileSystem = fileSystem
 	instance.launcher = launcher
 	instance.timeService = timeService
+	instance.timedSleeper = timedSleeper
 	instance.env = env
 	instance.console = console
 	instance.expander = expander
@@ -198,7 +201,7 @@ func (submitter *Submitter) executeSubmitRuns(
 		// Only sleep if there are runs in progress but not yet finished.
 		if len(submittedRuns) > 0 || len(rerunRuns) > 0 {
 			log.Printf("Sleeping for the poll interval of %v seconds\n", params.PollIntervalSeconds)
-			submitter.timeService.Sleep(pollInterval)
+			submitter.timedSleeper.Sleep(pollInterval)
 			log.Printf("Awake from poll interval sleep of %v seconds\n", params.PollIntervalSeconds)
 		}
 	}

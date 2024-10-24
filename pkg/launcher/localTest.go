@@ -43,7 +43,7 @@ type LocalTest struct {
 	testRun *galasaapi.TestRun
 
 	// A time service. When a significant event occurs, we interrupt it.
-	timeService spi.TimeService
+	mainPollLoopSleeper spi.TimedSleeper
 
 	// The file system the local test deposits results onto.
 	// We use this to read the results back to find out if it passed/failed. ...etc.
@@ -55,7 +55,7 @@ type LocalTest struct {
 
 // A structure which tells us all we know about a JVM process we launched.
 func NewLocalTest(
-	timeService spi.TimeService,
+	mainPollLoopSleeper spi.TimedSleeper,
 	fileSystem spi.FileSystem,
 	processFactory ProcessFactory,
 ) *LocalTest {
@@ -66,7 +66,7 @@ func NewLocalTest(
 	localTest.stderr = bytes.NewBuffer([]byte{})
 	localTest.runId = ""
 	localTest.testRun = nil
-	localTest.timeService = timeService
+	localTest.mainPollLoopSleeper = mainPollLoopSleeper
 	localTest.fileSystem = fileSystem
 	localTest.processFactory = processFactory
 
@@ -197,7 +197,7 @@ func (localTest *LocalTest) waitForCompletion() error {
 	close(localTest.reportingChannel)
 
 	msg := fmt.Sprintf("Test run %s completed.", localTest.runId)
-	localTest.timeService.Interrupt(msg)
+	localTest.mainPollLoopSleeper.Interrupt(msg)
 
 	return err
 }

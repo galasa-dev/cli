@@ -187,6 +187,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 			if err == nil {
 
 				timeService := utils.NewRealTimeService()
+				timedSleeper := utils.NewRealTimedSleeper()
 
 				// the submit is targetting a local JVM
 				embeddedFileSystem := embedded.GetReadOnlyFileSystem()
@@ -205,7 +206,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 						factory,
 						bootstrapData.Properties, embeddedFileSystem,
 						cmd.values.runsSubmitLocalCmdParams,
-						processFactory, galasaHome, timeService)
+						processFactory, galasaHome, timedSleeper)
 
 					if err == nil {
 						var console = factory.GetStdOutConsole()
@@ -219,6 +220,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 							fileSystem,
 							launcherInstance,
 							timeService,
+							timedSleeper,
 							env,
 							console,
 							expander,
