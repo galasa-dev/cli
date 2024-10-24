@@ -386,7 +386,11 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 
 			// now check to see if it is finished
 			if currentRun.GetStatus() == "finished" {
+
 				finishedRuns[runName] = checkRun
+
+				checkRun.Status = *currentRun.Status
+
 				delete(submittedRuns, runName)
 
 				result := "unknown"
@@ -421,9 +425,9 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 				}
 
 				if checkRun.GherkinUrl != "" {
-					log.Printf("Run %v has finished(%v) - %v\n", runName, result, checkRun.GherkinFeature)
+					log.Printf("Run %v has finished(%v) - %v (Gherkin)\n", runName, result, checkRun.GherkinFeature)
 				} else {
-					log.Printf("Run %v has finished(%v) - %v/%v/%v\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+					log.Printf("Run %v has finished(%v) - %v/%v/%v - %s\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class, currentRun.GetStatus())
 				}
 			} else {
 				// Check to see if there was a status change

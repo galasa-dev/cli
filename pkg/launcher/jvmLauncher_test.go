@@ -1628,6 +1628,7 @@ func TestCreateRunFromLocalTestValidRasFolderPathReturnsOk(t *testing.T) {
 	assert.Equal(t, "dev.galasa.examples.banking.account", run.TestStructure.GetBundle())
 	assert.Equal(t, "Passed", run.TestStructure.GetResult())
 	assert.Equal(t, "simpleSampleTest", run.GetTestStructure().Methods[0].GetMethodName())
+	assert.Equal(t, "finished", run.TestStructure.GetStatus())
 }
 
 func TestCreateRunFromLocalTestInvalidRasFolderPathReturnsError(t *testing.T) {
