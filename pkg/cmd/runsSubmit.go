@@ -170,6 +170,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 			if err == nil {
 
 				timeService := factory.GetTimeService()
+				timedSleeper := utils.NewRealTimedSleeper()
 				var launcherInstance launcher.Launcher
 
 				// The launcher we are going to use to start/monitor tests.
@@ -190,7 +191,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 
 						var console = factory.GetStdOutConsole()
 
-						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, env, console, images.NewImageExpanderNullImpl())
+						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
 
 						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 					}

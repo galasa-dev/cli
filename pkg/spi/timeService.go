@@ -8,7 +8,5 @@ package spi
 import "time"
 
 type TimeService interface {
-	Sleep(duration time.Duration)
 	Now() time.Time
-	Interrupt(message string)
 }
