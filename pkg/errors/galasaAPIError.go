@@ -62,16 +62,16 @@ func HttpResponseToGalasaError(
 
 	if response.ContentLength == 0 {
 		log.Printf("Failed - HTTP response - status code: '%v'\n", statusCode)
-		err = NewGalasaError(errorMsgUnexpectedStatusCodeNoResponseBody, identifier, statusCode)
+		err = createResponseError(errorMsgUnexpectedStatusCodeNoResponseBody, identifier, statusCode)
 	} else {
 		
 		contentType := response.Header.Get("Content-Type")
 		if contentType != "application/json" {
-			err = NewGalasaError(errorMsgResponseContentTypeNotJson, identifier, statusCode)
+			err = createResponseError(errorMsgResponseContentTypeNotJson, identifier, statusCode)
 		} else {
 			responseBodyBytes, err = byteReader.ReadAll(response.Body)
 			if err != nil {
-				err = NewGalasaError(errorMsgUnableToReadResponseBody, identifier, statusCode, err.Error())
+				err = createResponseErrorWithCause(errorMsgUnableToReadResponseBody, identifier, statusCode, err.Error())
 			} else {
 
 				var errorFromServer *GalasaAPIError
@@ -79,17 +79,37 @@ func HttpResponseToGalasaError(
 					responseBodyBytes,
 					func (marshallingError error) error {
 						log.Printf("Failed - HTTP response - status code: '%v' payload in response is not json: '%v' \n", statusCode, string(responseBodyBytes))
-						return NewGalasaError(errorMsgResponsePayloadInWrongFormat, identifier, statusCode, marshallingError)
+						return createResponseErrorWithCause(errorMsgResponsePayloadInWrongFormat, identifier, statusCode, marshallingError)
 					},
 				)
 
 				if err == nil {
 					// server returned galasa api error structure we understand.
 					log.Printf("Failed - HTTP response - status code: '%v' server responded with error message: '%v' \n", statusCode, errorMsgReceivedFromApiServer)
-					err = NewGalasaError(errorMsgReceivedFromApiServer, identifier, statusCode, errorFromServer.Message)
+					err = createResponseErrorWithCause(errorMsgReceivedFromApiServer, identifier, statusCode, errorFromServer.Message)
 				}
 			}
 		}
 	}
 	return err
+}
+
+func createResponseError(errorMsg *MessageType, identifier string, statusCode int) error {
+    var err error
+    if identifier == "" {
+        err = NewGalasaError(errorMsg, statusCode)
+    } else {
+        err = NewGalasaError(errorMsg, identifier, statusCode)
+    }
+    return err
+}
+
+func createResponseErrorWithCause(errorMsg *MessageType, identifier string, statusCode int, cause interface{}) error {
+    var err error
+    if identifier == "" {
+        err = NewGalasaError(errorMsg, statusCode, cause)
+    } else {
+        err = NewGalasaError(errorMsg, identifier, statusCode, cause)
+    }
+    return err
 }

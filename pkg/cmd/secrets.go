@@ -87,9 +87,9 @@ func addSecretNameFlag(cmd *cobra.Command, isMandatory bool, secretsCmdValues *S
 		description = "An optional flag that identifies the secret to be retrieved."
 	}
 
-	cmd.PersistentFlags().StringVar(&secretsCmdValues.name, flagName, "", description)
+	cmd.Flags().StringVar(&secretsCmdValues.name, flagName, "", description)
 
 	if isMandatory {
-		cmd.MarkPersistentFlagRequired(flagName)
+		cmd.MarkFlagRequired(flagName)
 	}
 }
