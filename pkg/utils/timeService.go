@@ -23,8 +23,6 @@ func NewRealTimeService() spi.TimeService {
 	}
 	log.Printf("timeService: %v created\n", service)
 
-	// service.logStackTrace()
-
 	return &service
 }
 
