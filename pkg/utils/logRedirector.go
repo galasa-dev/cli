@@ -7,7 +7,6 @@ package utils
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -29,7 +28,7 @@ func CaptureLog(fileSystem spi.FileSystem, logFileName string) error {
 	} else {
 		if logFileName == "" {
 			// Log not specified, so needs to be suppressed.
-			log.SetOutput(ioutil.Discard)
+			log.SetOutput(io.Discard)
 		} else {
 
 			var isLogFileExisting bool
