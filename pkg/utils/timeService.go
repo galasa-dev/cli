@@ -28,13 +28,6 @@ func NewRealTimeService() spi.TimeService {
 	return &service
 }
 
-// func (ts *timeService) logStackTrace() {
-// 	// Print the stack trace.
-// 	buf := make([]byte, 1<<16)
-// 	bytesInStackTrace := runtime.Stack(buf, true)
-// 	log.Printf("timeService: %v stack trace : %s", *ts, buf[:bytesInStackTrace])
-// }
-
 // Retrieves the current time, with the location set to UTC.
 func (ts *timeService) Now() time.Time {
 	return time.Now().UTC()

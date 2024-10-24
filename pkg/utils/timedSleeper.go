@@ -28,15 +28,12 @@ func NewRealTimedSleeper() spi.TimedSleeper {
 	}
 	log.Printf("timeService: %v created\n", service)
 
-	// service.logStackTrace()
-
 	return &service
 }
 
 // Interrupts any timer sleeping.
 func (ts *realTimedSleeper) Interrupt(message string) {
 	log.Printf("timeService: %v Interrupting the timing service sleeping. %s\n", *ts, message)
-	// ts.logStackTrace()
 	ts.interruptEventChannel <- "INTERRUPT: " + message
 }
 
@@ -51,7 +48,5 @@ func (ts *realTimedSleeper) Sleep(duration time.Duration) {
 		log.Printf("timeService: %v : received interrupt message %s\n", *ts, msg)
 	case <-timer:
 		log.Printf("timeService: %v : sleep timed out\n", *ts)
-		// ts.logStackTrace()
 	}
-	// log.Printf("timeService: %v : sleep exiting\n", *ts)
 }
