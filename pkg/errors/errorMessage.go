@@ -284,7 +284,17 @@ var (
 	GALASA_ERROR_GET_SECRETS_SERVER_REPORTED_ERROR       = NewMessageType("GAL1183E: Failed to get secrets. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1183, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_SECRETS_EXPLANATION_NOT_JSON        = NewMessageType("GAL1184E: Failed to get secrets. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1184, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_SECRETS_REQUEST_FAILED              = NewMessageType("GAL1185E: Failed to get secrets. Sending the get request to the Galasa service failed. Cause is %v", 1185, STACK_TRACE_NOT_WANTED)
+	
+	GALASA_ERROR_INVALID_SECRET_TYPE_PROVIDED            = NewMessageType("GAL1186E: Invalid secret type provided. Supported secret types are: %v. Check your provided command parameters and try again.", 1186, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SET_SECRET_NO_RESPONSE_CONTENT          = NewMessageType("GAL1187E: Failed to set a secret named '%s'. Unexpected http status code %v received from the server.", 1187, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SET_SECRET_RESPONSE_BODY_UNREADABLE     = NewMessageType("GAL1188E: Failed to set a secret named '%s'. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1188, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SET_SECRET_UNPARSEABLE_CONTENT          = NewMessageType("GAL1189E: Failed to set a secret named '%s'. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1189, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SET_SECRET_SERVER_REPORTED_ERROR        = NewMessageType("GAL1190E: Failed to set a secret named '%s'. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1190, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SET_SECRET_EXPLANATION_NOT_JSON         = NewMessageType("GAL1191E: Failed to set a secret named '%s'. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1191, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SET_SECRET_REQUEST_FAILED               = NewMessageType("GAL1192E: Failed to set a secret named '%s'. Sending the put request to the Galasa service failed. Cause is %v", 1192, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SET_SECRET_INVALID_FLAG_COMBINATION     = NewMessageType("GAL1193E: Invalid flag combination provided. --username cannot be provided with --base64-username, --password cannot be provided with --base64-password, and --token cannot be provided with --base64-token."+SEE_COMMAND_REFERENCE, 1193, STACK_TRACE_NOT_WANTED)
 
+	// NewMessageType("GAL1097E: Property --name cannot be set alongside --prefix, --suffix, or --infix."+SEE_COMMAND_REFERENCE, 1097, STACK_TRACE_WANTED)
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 

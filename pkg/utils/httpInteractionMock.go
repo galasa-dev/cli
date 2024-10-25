@@ -22,6 +22,8 @@ type HttpInteraction struct {
 
     // An override-able function to write a HTTP response for this interaction
     WriteHttpResponseFunc func(writer http.ResponseWriter, req *http.Request)
+
+	ValidateRequestFunc func(t *testing.T, req *http.Request)
 }
 
 func NewHttpInteraction(expectedPath string, expectedHttpMethod string) HttpInteraction {
@@ -35,6 +37,10 @@ func NewHttpInteraction(expectedPath string, expectedHttpMethod string) HttpInte
         writer.WriteHeader(http.StatusOK)
     }
 
+	httpInteraction.ValidateRequestFunc = func(t *testing.T, req *http.Request) {
+		// Do nothing...
+	}
+
     return httpInteraction
 }
 
@@ -42,6 +48,9 @@ func (interaction *HttpInteraction) ValidateRequest(t *testing.T, req *http.Requ
     assert.NotEmpty(t, req.Header.Get("ClientApiVersion"))
     assert.Equal(t, interaction.ExpectedHttpMethod, req.Method, "Actual HTTP request method did not match the expected method")
     assert.Equal(t, interaction.ExpectedPath, req.URL.Path, "Actual request path did not match the expected path")
+
+	// Perform additional checks based on the possibly overridden function
+	interaction.ValidateRequestFunc(t, req)
 }
 
 //-----------------------------------------------------------------------------
