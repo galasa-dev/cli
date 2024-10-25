@@ -610,9 +610,9 @@ func TestUpdateSecretWithNoNameThrowsError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error as expected")
-    consoleOutputText := console.ReadText()
-    assert.Contains(t, consoleOutputText, "GAL1172E")
-    assert.Contains(t, consoleOutputText, "Invalid secret name provided")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, "GAL1172E")
+    assert.Contains(t, errorMsg, "Invalid secret name provided")
 }
 
 func TestUpdateSecretWithUnknownTypeThrowsError(t *testing.T) {
@@ -653,9 +653,9 @@ func TestUpdateSecretWithUnknownTypeThrowsError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error as expected")
-    consoleOutputText := console.ReadText()
-    assert.Contains(t, consoleOutputText, "GAL1186E")
-    assert.Contains(t, consoleOutputText, "Invalid secret type provided")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, "GAL1186E")
+    assert.Contains(t, errorMsg, "Invalid secret type provided")
 }
 
 func TestUpdateSecretWithInvalidFlagCombinationThrowsError(t *testing.T) {
@@ -697,9 +697,9 @@ func TestUpdateSecretWithInvalidFlagCombinationThrowsError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error as expected")
-    consoleOutputText := console.ReadText()
-    assert.Contains(t, consoleOutputText, "GAL1193E")
-    assert.Contains(t, consoleOutputText, "Invalid flag combination provided")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, "GAL1193E")
+    assert.Contains(t, errorMsg, "Invalid flag combination provided")
 }
 
 func TestSetSecretFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -747,7 +747,7 @@ func TestSetSecretFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testi
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText , secretName)
     assert.Contains(t, consoleText , "GAL1187E")
     assert.Contains(t, consoleText , "Unexpected http status code 500 received from the server")
@@ -800,7 +800,7 @@ func TestSetSecretFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrect
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText, secretName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
     assert.Contains(t, consoleText, "GAL1191E")
@@ -854,7 +854,7 @@ func TestSetSecretFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCor
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText, secretName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
     assert.Contains(t, consoleText, "GAL1189E")
@@ -917,7 +917,7 @@ func TestSetSecretFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *testi
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText, secretName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
     assert.Contains(t, consoleText, "GAL1190E")
@@ -971,7 +971,7 @@ func TestSecretsSetFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *test
 
     // Then...
     assert.NotNil(t, err, "SetSecret did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText, secretName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
     assert.Contains(t, consoleText, "GAL1188E")

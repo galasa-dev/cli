@@ -58,10 +58,6 @@ func GetSecrets(
             }
         }
     }
-
-    if err != nil {
-        console.WriteString(err.Error())
-    }
     log.Printf("GetSecrets exiting. err is %v\n", err)
     return err
 }

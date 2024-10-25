@@ -30,10 +30,6 @@ func DeleteSecret(
         log.Printf("Secret name validated OK")
         err = sendDeleteSecretRequest(secretName, apiClient, byteReader)
     }
-
-    if err != nil {
-        console.WriteString(err.Error())
-    }
     log.Printf("SecretsDelete exiting. err is %v\n", err)
     return err
 }

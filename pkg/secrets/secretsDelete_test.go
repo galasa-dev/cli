@@ -73,9 +73,9 @@ func TestDeleteASecretWithBlankNameDisplaysError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "DeleteSecret did not return an error as expected")
-    consoleOutputText := console.ReadText()
-    assert.Contains(t, consoleOutputText, "GAL1172E")
-    assert.Contains(t, consoleOutputText, " Invalid secret name provided")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, "GAL1172E")
+    assert.Contains(t, errorMsg, " Invalid secret name provided")
 }
 
 func TestDeleteNonExistantSecretDisplaysError(t *testing.T) {
@@ -110,10 +110,10 @@ func TestDeleteNonExistantSecretDisplaysError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "SecretsDelete did not return an error but it should have")
-    consoleOutputText := console.ReadText()
-    assert.Contains(t, consoleOutputText, nonExistantSecret)
-    assert.Contains(t, consoleOutputText, "GAL1170E")
-    assert.Contains(t, consoleOutputText, "Error details from the server are: 'No such secret exists'")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, nonExistantSecret)
+    assert.Contains(t, errorMsg, "GAL1170E")
+    assert.Contains(t, errorMsg, "Error details from the server are: 'No such secret exists'")
 }
 
 func TestSecretsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -147,7 +147,7 @@ func TestSecretsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *t
 
     // Then...
     assert.NotNil(t, err, "SecretsDelete did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText , secretName)
     assert.Contains(t, consoleText , "GAL1167E")
 }
@@ -185,7 +185,7 @@ func TestSecretsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCor
 
     // Then...
     assert.NotNil(t, err, "SecretsDelete did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText, secretName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
     assert.Contains(t, consoleText, "GAL1171E")
@@ -225,7 +225,7 @@ func TestSecretsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGive
 
     // Then...
     assert.NotNil(t, err, "SecretsDelete did not return an error but it should have")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText, secretName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
     assert.Contains(t, consoleText, "GAL1169E")
@@ -266,7 +266,7 @@ func TestSecretsDeleteFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *t
 
     // Then...
     assert.NotNil(t, err, "SecretsDelete returned an unexpected error")
-    consoleText := console.ReadText()
+    consoleText := err.Error()
     assert.Contains(t, consoleText, secretName)
     assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
     assert.Contains(t, consoleText, "GAL1168E")

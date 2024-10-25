@@ -232,7 +232,7 @@ func TestGetASecretWithUnknownFormatDisplaysError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "GetSecrets did not return an error as expected")
-    consoleOutputText := console.ReadText()
+    consoleOutputText := err.Error()
     assert.Contains(t, consoleOutputText, "GAL1067E")
     assert.Contains(t, consoleOutputText, "Unsupported value 'UNKNOWN FORMAT!'")
     assert.Contains(t, consoleOutputText, "'summary', 'yaml'")
@@ -264,7 +264,7 @@ func TestGetASecretWithBlankNameDisplaysError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "GetSecrets did not return an error as expected")
-    consoleOutputText := console.ReadText()
+    consoleOutputText := err.Error()
     assert.Contains(t, consoleOutputText, "GAL1172E")
     assert.Contains(t, consoleOutputText, " Invalid secret name provided")
 }
@@ -303,7 +303,7 @@ func TestGetNonExistantSecretDisplaysError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "SecretsGet did not return an error but it should have")
-    consoleOutputText := console.ReadText()
+    consoleOutputText := err.Error()
     assert.Contains(t, consoleOutputText, nonExistantSecret)
     assert.Contains(t, consoleOutputText, "GAL1177E")
     assert.Contains(t, consoleOutputText, "Error details from the server are: 'No such secret exists'")
@@ -342,9 +342,9 @@ func TestSecretsGetFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *test
 
     // Then...
     assert.NotNil(t, err, "SecretsGet did not return an error but it should have")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText , secretName)
-    assert.Contains(t, consoleText , "GAL1174E")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg , secretName)
+    assert.Contains(t, errorMsg , "GAL1174E")
 }
 
 func TestSecretsGetFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -382,11 +382,11 @@ func TestSecretsGetFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrec
 
     // Then...
     assert.NotNil(t, err, "SecretsGet did not return an error but it should have")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText, secretName)
-    assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
-    assert.Contains(t, consoleText, "GAL1178E")
-    assert.Contains(t, consoleText, "Error details from the server are not in the json format")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, secretName)
+    assert.Contains(t, errorMsg, strconv.Itoa(http.StatusInternalServerError))
+    assert.Contains(t, errorMsg, "GAL1178E")
+    assert.Contains(t, errorMsg, "Error details from the server are not in the json format")
 }
 
 func TestSecretsGetFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -424,12 +424,12 @@ func TestSecretsGetFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCo
 
     // Then...
     assert.NotNil(t, err, "SecretsGet did not return an error but it should have")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText, secretName)
-    assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
-    assert.Contains(t, consoleText, "GAL1176E")
-    assert.Contains(t, consoleText, "Error details from the server are not in a valid json format")
-    assert.Contains(t, consoleText, "Cause: 'unexpected end of JSON input'")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, secretName)
+    assert.Contains(t, errorMsg, strconv.Itoa(http.StatusInternalServerError))
+    assert.Contains(t, errorMsg, "GAL1176E")
+    assert.Contains(t, errorMsg, "Error details from the server are not in a valid json format")
+    assert.Contains(t, errorMsg, "Cause: 'unexpected end of JSON input'")
 }
 
 func TestSecretsGetFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *testing.T) {
@@ -467,11 +467,11 @@ func TestSecretsGetFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *test
 
     // Then...
     assert.NotNil(t, err, "SecretsGet returned an unexpected error")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText, secretName)
-    assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
-    assert.Contains(t, consoleText, "GAL1175E")
-    assert.Contains(t, consoleText, "Error details from the server could not be read")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, secretName)
+    assert.Contains(t, errorMsg, strconv.Itoa(http.StatusInternalServerError))
+    assert.Contains(t, errorMsg, "GAL1175E")
+    assert.Contains(t, errorMsg, "Error details from the server could not be read")
 }
 
 func TestGetAllSecretsFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -507,8 +507,8 @@ func TestGetAllSecretsFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *t
 
     // Then...
     assert.NotNil(t, err, "SecretsGet did not return an error but it should have")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText , "GAL1180E")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg , "GAL1180E")
 }
 
 func TestGetAllSecretsFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -546,10 +546,10 @@ func TestGetAllSecretsFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCor
 
     // Then...
     assert.NotNil(t, err, "SecretsGet did not return an error but it should have")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
-    assert.Contains(t, consoleText, "GAL1184E")
-    assert.Contains(t, consoleText, "Error details from the server are not in the json format")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, strconv.Itoa(http.StatusInternalServerError))
+    assert.Contains(t, errorMsg, "GAL1184E")
+    assert.Contains(t, errorMsg, "Error details from the server are not in the json format")
 }
 
 func TestGetAllSecretsFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -587,11 +587,11 @@ func TestGetAllSecretsFailsWithBadlyFormedJsonContentExplanationErrorPayloadGive
 
     // Then...
     assert.NotNil(t, err, "SecretsGet did not return an error but it should have")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
-    assert.Contains(t, consoleText, "GAL1182E")
-    assert.Contains(t, consoleText, "Error details from the server are not in a valid json format")
-    assert.Contains(t, consoleText, "Cause: 'unexpected end of JSON input'")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, strconv.Itoa(http.StatusInternalServerError))
+    assert.Contains(t, errorMsg, "GAL1182E")
+    assert.Contains(t, errorMsg, "Error details from the server are not in a valid json format")
+    assert.Contains(t, errorMsg, "Cause: 'unexpected end of JSON input'")
 }
 
 func TestGetAllSecretsFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *testing.T) {
@@ -629,8 +629,8 @@ func TestGetAllSecretsFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *t
 
     // Then...
     assert.NotNil(t, err, "SecretsGet returned an unexpected error")
-    consoleText := console.ReadText()
-    assert.Contains(t, consoleText, strconv.Itoa(http.StatusInternalServerError))
-    assert.Contains(t, consoleText, "GAL1181E")
-    assert.Contains(t, consoleText, "Error details from the server could not be read")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, strconv.Itoa(http.StatusInternalServerError))
+    assert.Contains(t, errorMsg, "GAL1181E")
+    assert.Contains(t, errorMsg, "Error details from the server could not be read")
 }

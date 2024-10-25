@@ -60,10 +60,6 @@ func SetSecret(
             }
         }
     }
-
-    if err != nil {
-        console.WriteString(err.Error())
-    }
     log.Printf("SecretsSet exiting. err is %v\n", err)
     return err
 }
