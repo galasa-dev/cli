@@ -19,7 +19,7 @@ import (
 
 func DeleteSecret(
     secretName string,
-	console spi.Console,
+    console spi.Console,
     apiClient *galasaapi.APIClient,
     byteReader spi.ByteReader,
 ) error {
@@ -62,7 +62,7 @@ func sendDeleteSecretRequest(
         if err != nil {
             if httpResponse == nil {
                 // We never got a response, error sending it or something?
-                err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_RUNS_FAILED, err.Error())
+                err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_SECRET_REQUEST_FAILED, err.Error())
             } else {
                 err = galasaErrors.HttpResponseToGalasaError(
                     httpResponse,

@@ -167,7 +167,20 @@ The `galasactl` tool can generate the following errors:
 - GAL1169E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1170E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1171E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
-- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty or only contain spaces.
+- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty or contain spaces.
+- GAL1173E: An attempt to delete a secret named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1174E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server.
+- GAL1175E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1176E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1177E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1178E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1179E: An attempt to get a secret named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1180E: Failed to get secrets. Unexpected http status code {} received from the server.
+- GAL1181E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1182E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1183E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1184E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1185E: Failed to get secrets. Sending the delete request to the Galasa service failed. Cause is {}
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

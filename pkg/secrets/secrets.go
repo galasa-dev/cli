@@ -16,8 +16,8 @@ func validateSecretName(secretName string) error {
     var err error
     secretName = strings.TrimSpace(secretName)
 
-    if secretName == "" {
-        err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_SECRET_NAME)
+    if secretName == "" || strings.ContainsAny(secretName, " \n\t") {
+        err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_SECRET_NAME)
     }
     return err
 }

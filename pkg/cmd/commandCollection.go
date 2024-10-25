@@ -386,9 +386,14 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 
 	var err error
 	var secretsCommand spi.GalasaCommand
+	var secretsGetCommand spi.GalasaCommand
 	var secretsDeleteCommand spi.GalasaCommand
 
 	secretsCommand, err = NewSecretsCmd(rootCommand)
+
+	if err == nil {
+		secretsGetCommand, err = NewSecretsGetCommand(factory, secretsCommand, rootCommand)
+	}
 
 	if err == nil {
 		secretsDeleteCommand, err = NewSecretsDeleteCommand(factory, secretsCommand, rootCommand)
@@ -396,6 +401,7 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 
 	if err == nil {
 		commands.commandMap[secretsCommand.Name()] = secretsCommand
+		commands.commandMap[secretsGetCommand.Name()] = secretsGetCommand
 		commands.commandMap[secretsDeleteCommand.Name()] = secretsDeleteCommand
 	}
 
