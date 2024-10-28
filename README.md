@@ -631,6 +631,31 @@ galasactl resources delete -f my_resources.yaml
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_delete.md).
 
+## secrets get
+
+This command retrieves a list of secrets stored in the Galasa Ecosystem's credentials store. The retrieved secrets can be displayed in different formats, including `summary` and `yaml` formats, based on the value provided by the `--format` flag. If `--format` is not provided, secrets will be displayed in the `summary` format by default.
+
+### Examples
+
+All secrets stored in a Galasa Ecosystem can be retrieved using the following command:
+
+```
+galasactl secrets get
+```
+
+To get a specific secret named `SYSTEM1`, the `--name` flag can be provided as follows:
+
+```
+galasactl secrets get --name SYSTEM1
+```
+
+To display a secret in a different format, like YAML, the `--format` flag can be provided:
+
+```
+galasactl secrets get --name SYSTEM1 --format yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_get.md).
 
 ## secrets delete
 
