@@ -632,7 +632,19 @@ galasactl resources delete -f my_resources.yaml
 For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_delete.md).
 
 
+## secrets delete
 
+This command deletes a secret with the given name from the Galasa Ecosystem's credentials store. The name of the secret to be deleted must be provided using the `--name` flag.
+
+### Examples
+
+To delete a secret named `SYSTEM1`, run the following command:
+
+```
+galasactl secrets delete --name SYSTEM1
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_delete.md).
 
 ## Reference Material
 

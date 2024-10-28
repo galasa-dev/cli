@@ -59,6 +59,8 @@ const (
 	COMMAND_NAME_RESOURCES_CREATE         = "resources create"
 	COMMAND_NAME_RESOURCES_UPDATE         = "resources update"
 	COMMAND_NAME_RESOURCES_DELETE         = "resources delete"
+	COMMAND_NAME_SECRETS                  = "secrets"
+	COMMAND_NAME_SECRETS_DELETE           = "secrets delete"
 	COMMAND_NAME_USERS                    = "users"
 	COMMAND_NAME_USERS_GET                = "users get"
 )
@@ -140,6 +142,10 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 
 	if err == nil {
 		err = commands.addResourcesCommands(factory, rootCommand)
+	}
+
+	if err == nil {
+		err = commands.addSecretsCommands(factory, rootCommand)
 	}
 
 	if err == nil {
@@ -370,6 +376,26 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory,
 		commands.commandMap[resourcesCreateCommand.Name()] = resourcesCreateCommand
 		commands.commandMap[resourcesUpdateCommand.Name()] = resourcesUpdateCommand
 		commands.commandMap[resourcesDeleteCommand.Name()] = resourcesDeleteCommand
+	}
+
+	return err
+}
+
+func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+
+	var err error
+	var secretsCommand spi.GalasaCommand
+	var secretsDeleteCommand spi.GalasaCommand
+
+	secretsCommand, err = NewSecretsCmd(rootCommand)
+
+	if err == nil {
+		secretsDeleteCommand, err = NewSecretsDeleteCommand(factory, secretsCommand, rootCommand)
+	}
+
+	if err == nil {
+		commands.commandMap[secretsCommand.Name()] = secretsCommand
+		commands.commandMap[secretsDeleteCommand.Name()] = secretsDeleteCommand
 	}
 
 	return err
