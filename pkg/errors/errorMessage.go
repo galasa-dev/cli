@@ -294,7 +294,6 @@ var (
 	GALASA_ERROR_SET_SECRET_REQUEST_FAILED               = NewMessageType("GAL1192E: Failed to set a secret named '%s'. Sending the put request to the Galasa service failed. Cause is %v", 1192, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_SET_SECRET_INVALID_FLAG_COMBINATION     = NewMessageType("GAL1193E: Invalid flag combination provided. --username cannot be provided with --base64-username, --password cannot be provided with --base64-password, and --token cannot be provided with --base64-token."+SEE_COMMAND_REFERENCE, 1193, STACK_TRACE_NOT_WANTED)
 
-	// NewMessageType("GAL1097E: Property --name cannot be set alongside --prefix, --suffix, or --infix."+SEE_COMMAND_REFERENCE, 1097, STACK_TRACE_WANTED)
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 

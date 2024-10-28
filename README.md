@@ -631,8 +631,101 @@ galasactl resources delete -f my_resources.yaml
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_delete.md).
 
+## secrets get
 
+This command retrieves a list of secrets stored in the Galasa Ecosystem's credentials store. The retrieved secrets can be displayed in different formats, including `summary` and `yaml` formats, based on the value provided by the `--format` flag. If `--format` is not provided, secrets will be displayed in the `summary` format by default.
 
+### Examples
+
+All secrets stored in a Galasa Ecosystem can be retrieved using the following command:
+
+```
+galasactl secrets get
+```
+
+To get a specific secret named `SYSTEM1`, the `--name` flag can be provided as follows:
+
+```
+galasactl secrets get --name SYSTEM1
+```
+
+To display a secret in a different format, like YAML, the `--format` flag can be provided:
+
+```
+galasactl secrets get --name SYSTEM1 --format yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_get.md).
+
+## secrets set
+
+This command can be used to create and update secrets in the Galasa Ecosystem. These secrets can then be used in Galasa tests to authenticate with test systems and perform other secure operations. The name of a secret to create or update must be provided using the `--name` flag.
+
+### Examples
+
+The `--username`, `--password`, and `--token` flags can be used in different combinations to create different types of secret.
+
+For example, a UsernamePassword secret can be created by supplying `--username` and `--password`:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username" --password "my-password"
+```
+
+A UsernameToken secret can be created by supplying `--username` and `--token`:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username" --token "my-token"
+```
+
+A Token secret can be created by supplying `--token` on its own:
+```
+galasactl secrets set --name SYSTEM1 --token "my-token"
+```
+
+A Username secret can be created by supplying `--username` on its own:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username"
+```
+
+Base64-encoded credentials can be supplied using the `--base64-username`, `--base64-password`, and `--base64-token` flags.
+
+For example, to create a UsernamePassword secret where both the username and password are base64-encoded:
+
+```
+galasactl secrets set --name SYSTEM1 --base64-username "my-base64-username" --base64-password "my-base64-password"
+```
+
+It is also possible to mix these flags with their non-encoded variants discussed previously. For example, to create a UsernameToken secret where only the token is base64-encoded:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-base64-username" --base64-token "my-base64-token"
+```
+
+Once a secret has been created, you can change the type of the secret by supplying your desired secret type using the `--type` flag. When supplying the `--type` flag, all credentials for the new secret type must be provided. To find out what secret types are supported, run `galasactl secrets set --help`.
+
+For example, to create a UsernamePassword secret and then change it to a Token secret:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username" --password "my-password"
+galasactl secrets set --name SYSTEM1 --token "my-token" --type Token
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_set.md).
+
+## secrets delete
+
+This command deletes a secret with the given name from the Galasa Ecosystem's credentials store. The name of the secret to be deleted must be provided using the `--name` flag.
+
+### Examples
+
+To delete a secret named `SYSTEM1`, run the following command:
+
+```
+galasactl secrets delete --name SYSTEM1
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_delete.md).
 
 ## Reference Material
 
