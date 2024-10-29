@@ -38,15 +38,16 @@ func (*SecretSummaryFormatter) FormatSecrets(secrets []galasaapi.GalasaSecret) (
     if totalSecrets > 0 {
         var table [][]string
 
-        var headers = []string{ HEADER_SECRET_NAME, HEADER_SECRET_TYPE }
+        var headers = []string{ HEADER_SECRET_NAME, HEADER_SECRET_TYPE, HEADER_SECRET_DESCRIPTION }
 
         table = append(table, headers)
         for _, secret := range secrets {
             var line []string
             name := secret.Metadata.GetName()
             secretType := secret.Metadata.GetType()
+            secretDescription := secret.Metadata.GetDescription()
 
-            line = append(line, name, string(secretType))
+            line = append(line, name, string(secretType), secretDescription)
             table = append(table, line)
         }
 

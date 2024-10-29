@@ -25,6 +25,7 @@ type SecretsSetCmdValues struct {
     username string
     password string
     token string
+	description string
 }
 
 type SecretsSetCommand struct {
@@ -104,6 +105,7 @@ func (cmd *SecretsSetCommand) createCobraCmd(
     base64TokenFlag := "base64-token"
 
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.secretType, "type", "", fmt.Sprintf("the desired secret type to convert an existing secret into. Supported types are: %v.", galasaapi.AllowedGalasaSecretTypeEnumValues))
+    secretsSetCobraCmd.Flags().StringVar(&cmd.values.description, "description", "", "the description to associate with the secret being created or updated")
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.username, usernameFlag, "", "a username to set into a secret")
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.password, passwordFlag, "", "a password to set into a secret")
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.token, tokenFlag, "", "a token to set into a secret")
@@ -186,6 +188,7 @@ func (cmd *SecretsSetCommand) executeSecretsSet(
                         cmd.values.base64Password,
                         cmd.values.base64Token,
                         cmd.values.secretType,
+						cmd.values.description,
                         console,
                         apiClient,
                         byteReader,

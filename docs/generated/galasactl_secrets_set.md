@@ -16,6 +16,7 @@ galasactl secrets set [flags]
       --base64-password string   a base64-encoded password to set into a secret
       --base64-token string      a base64-encoded token to set into a secret
       --base64-username string   a base64-encoded username to set into a secret
+      --description string       the description to associate with the secret being created or updated
   -h, --help                     Displays the options for the 'secrets set' command.
       --name string              A mandatory flag that identifies the secret to be created or manipulated.
       --password string          a password to set into a secret

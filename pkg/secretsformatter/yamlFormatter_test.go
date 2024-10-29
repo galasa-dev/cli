@@ -6,12 +6,16 @@
 package secretsformatter
 
 import (
-    "fmt"
-    "testing"
+	"fmt"
+	"testing"
 
-    "github.com/galasa-dev/cli/pkg/galasaapi"
-    "github.com/stretchr/testify/assert"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/stretchr/testify/assert"
 )
+
+func createMockGalasaSecret(secretName string) galasaapi.GalasaSecret {
+	return createMockGalasaSecretWithDescription(secretName, "")
+}
 
 func generateExpectedSecretYaml(secretName string) string {
     return fmt.Sprintf(`apiVersion: %s
@@ -22,8 +26,7 @@ metadata:
     type: UsernamePassword
 data:
     username: %s
-    password: %s
-    token: null`, API_VERSION, secretName, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
+    password: %s`, API_VERSION, secretName, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
 }
 
 func TestSecretsYamlFormatterNoDataReturnsBlankString(t *testing.T) {

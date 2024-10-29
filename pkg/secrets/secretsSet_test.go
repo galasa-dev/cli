@@ -38,6 +38,7 @@ func TestCanCreateAUsernameSecret(t *testing.T) {
     base64Password := ""
     base64Token := ""
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     createSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -87,6 +88,7 @@ func TestCanCreateAUsernameSecret(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -106,6 +108,7 @@ func TestCanCreateAUsernamePasswordSecret(t *testing.T) {
     base64Password := ""
     base64Token := ""
     secretType := ""
+    description := "my secret description"
 
     // Create the expected HTTP interactions with the API server
     createSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -115,6 +118,7 @@ func TestCanCreateAUsernamePasswordSecret(t *testing.T) {
         secretRequest := readSecretRequestBody(req)
         assert.Equal(t, secretRequest.GetName(), secretName)
         assert.Empty(t, secretRequest.GetType())
+		assert.Equal(t, secretRequest.GetDescription(), description)
 
         requestUsername := secretRequest.GetUsername()
         assert.Equal(t, requestUsername.GetValue(), username)
@@ -155,6 +159,7 @@ func TestCanCreateAUsernamePasswordSecret(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -174,6 +179,7 @@ func TestCanCreateAUsernameTokenSecret(t *testing.T) {
     base64Password := ""
     base64Token := ""
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     createSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -223,6 +229,7 @@ func TestCanCreateAUsernameTokenSecret(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -242,6 +249,7 @@ func TestCanCreateATokenSecret(t *testing.T) {
     base64Password := ""
     base64Token := ""
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     createSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -291,6 +299,7 @@ func TestCanCreateATokenSecret(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -310,6 +319,7 @@ func TestCanUpdateASecret(t *testing.T) {
     base64Password := ""
     base64Token := ""
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -359,6 +369,7 @@ func TestCanUpdateASecret(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -378,6 +389,7 @@ func TestCanUpdateAUsernamePasswordSecretInBase64Format(t *testing.T) {
     base64Password := "my-base64-password"
     base64Token := ""
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -427,6 +439,7 @@ func TestCanUpdateAUsernamePasswordSecretInBase64Format(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -446,6 +459,7 @@ func TestCanUpdateATokenSecretInBase64Format(t *testing.T) {
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -495,6 +509,7 @@ func TestCanUpdateATokenSecretInBase64Format(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -514,6 +529,7 @@ func TestCanUpdateASecretsTypeOk(t *testing.T) {
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := "token"
+    description := "my new token"
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -563,6 +579,7 @@ func TestCanUpdateASecretsTypeOk(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -582,6 +599,7 @@ func TestUpdateSecretWithNoNameThrowsError(t *testing.T) {
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
 
     // Validation should fail, so no HTTP interactions should take place
     interactions := []utils.HttpInteraction{}
@@ -604,6 +622,7 @@ func TestUpdateSecretWithNoNameThrowsError(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -613,6 +632,141 @@ func TestUpdateSecretWithNoNameThrowsError(t *testing.T) {
     errorMsg := err.Error()
     assert.Contains(t, errorMsg, "GAL1172E")
     assert.Contains(t, errorMsg, "Invalid secret name provided")
+}
+
+func TestUpdateSecretWithNonLatin1NameThrowsError(t *testing.T) {
+    // Given...
+    secretName := string(rune(300)) + "NONLATIN1"
+    username := ""
+    password := ""
+    token := ""
+    base64Username := ""
+    base64Password := ""
+    base64Token := "my-base64-token"
+    secretType := ""
+    description := ""
+
+    // Validation should fail, so no HTTP interactions should take place
+    interactions := []utils.HttpInteraction{}
+
+    server := utils.NewMockHttpServer(t, interactions)
+    defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := SetSecret(
+        secretName,
+        username,
+        password,
+        token,
+        base64Username,
+        base64Password,
+        base64Token,
+        secretType,
+        description,
+        console,
+        apiClient,
+        mockByteReader)
+
+    // Then...
+    assert.NotNil(t, err, "SetSecret did not return an error as expected")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, "GAL1172E")
+    assert.Contains(t, errorMsg, "Invalid secret name provided")
+}
+
+func TestUpdateSecretWithNonLatin1DescriptionThrowsError(t *testing.T) {
+    // Given...
+    secretName := "MYSECRET"
+    username := ""
+    password := ""
+    token := ""
+    base64Username := ""
+    base64Password := ""
+    base64Token := "my-base64-token"
+    secretType := ""
+    description := string(rune(256)) + " is not latin-1"
+
+    // Validation should fail, so no HTTP interactions should take place
+    interactions := []utils.HttpInteraction{}
+
+    server := utils.NewMockHttpServer(t, interactions)
+    defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := SetSecret(
+        secretName,
+        username,
+        password,
+        token,
+        base64Username,
+        base64Password,
+        base64Token,
+        secretType,
+        description,
+        console,
+        apiClient,
+        mockByteReader)
+
+    // Then...
+    assert.NotNil(t, err, "SetSecret did not return an error as expected")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, "GAL1194E")
+    assert.Contains(t, errorMsg, "Invalid secret description provided")
+}
+
+func TestUpdateSecretWithBlankDescriptionThrowsError(t *testing.T) {
+    // Given...
+    secretName := "MYSECRET"
+    username := ""
+    password := ""
+    token := ""
+    base64Username := ""
+    base64Password := ""
+    base64Token := "my-base64-token"
+    secretType := ""
+    description := "       "
+
+    // Validation should fail, so no HTTP interactions should take place
+    interactions := []utils.HttpInteraction{}
+
+    server := utils.NewMockHttpServer(t, interactions)
+    defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := SetSecret(
+        secretName,
+        username,
+        password,
+        token,
+        base64Username,
+        base64Password,
+        base64Token,
+        secretType,
+        description,
+        console,
+        apiClient,
+        mockByteReader)
+
+    // Then...
+    assert.NotNil(t, err, "SetSecret did not return an error as expected")
+    errorMsg := err.Error()
+    assert.Contains(t, errorMsg, "GAL1194E")
+    assert.Contains(t, errorMsg, "Invalid secret description provided")
 }
 
 func TestUpdateSecretWithUnknownTypeThrowsError(t *testing.T) {
@@ -625,6 +779,7 @@ func TestUpdateSecretWithUnknownTypeThrowsError(t *testing.T) {
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := "UNKNOWN"
+    description := "this should fail!"
 
     // Validation should fail, so no HTTP interactions should take place
     interactions := []utils.HttpInteraction{}
@@ -647,6 +802,7 @@ func TestUpdateSecretWithUnknownTypeThrowsError(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -669,6 +825,7 @@ func TestUpdateSecretWithInvalidFlagCombinationThrowsError(t *testing.T) {
     base64Password := "my-base64-password"
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
 
     // Validation should fail, so no HTTP interactions should take place
     interactions := []utils.HttpInteraction{}
@@ -691,6 +848,7 @@ func TestUpdateSecretWithInvalidFlagCombinationThrowsError(t *testing.T) {
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -712,6 +870,7 @@ func TestSetSecretFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testi
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -741,6 +900,7 @@ func TestSetSecretFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testi
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -763,6 +923,7 @@ func TestSetSecretFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrect
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -794,6 +955,7 @@ func TestSetSecretFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrect
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -817,6 +979,7 @@ func TestSetSecretFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCor
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -848,6 +1011,7 @@ func TestSetSecretFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCor
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -872,6 +1036,7 @@ func TestSetSecretFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *testi
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
     apiErrorCode := 5000
     apiErrorMessage := "this is an error from the API server"
 
@@ -911,6 +1076,7 @@ func TestSetSecretFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *testi
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)
@@ -934,6 +1100,7 @@ func TestSecretsSetFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *test
     base64Password := ""
     base64Token := "my-base64-token"
     secretType := ""
+    description := ""
 
     // Create the expected HTTP interactions with the API server
     updateSecretInteraction := utils.NewHttpInteraction("/secrets/" + secretName, http.MethodPut)
@@ -965,6 +1132,7 @@ func TestSecretsSetFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *test
         base64Password,
         base64Token,
         secretType,
+        description,
         console,
         apiClient,
         mockByteReader)

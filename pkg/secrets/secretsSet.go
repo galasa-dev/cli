@@ -32,31 +32,37 @@ func SetSecret(
     base64Password string,
     base64Token string,
     secretType string,
+    description string,
     console spi.Console,
     apiClient *galasaapi.APIClient,
     byteReader spi.ByteReader,
 ) error {
     var err error
 
-    err = validateSecretName(secretName)
+    secretName, err = validateSecretName(secretName)
     if err == nil {
         log.Printf("Secret name validated OK")
-
-        err = validateFlagCombination(username, password, token, base64Username, base64Password, base64Token)
+        if description != "" {
+            description, err = validateDescription(description)
+        }
 
         if err == nil {
-            requestUsername := createSecretRequestUsername(username, base64Username)
-            requestPassword := createSecretRequestPassword(password, base64Password)
-            requestToken := createSecretRequestToken(token, base64Token)
-    
-            var secretTypeValue galasaapi.NullableGalasaSecretType
-            if secretType != "" {
-                secretTypeValue, err = validateSecretType(secretType)
-            }
-    
+            err = validateFlagCombination(username, password, token, base64Username, base64Password, base64Token)
+
             if err == nil {
-                secretRequest := createSecretRequest(secretName, requestUsername, requestPassword, requestToken, secretTypeValue)
-                err = sendSetSecretRequest(secretRequest, apiClient, byteReader)
+                requestUsername := createSecretRequestUsername(username, base64Username)
+                requestPassword := createSecretRequestPassword(password, base64Password)
+                requestToken := createSecretRequestToken(token, base64Token)
+
+                var secretTypeValue galasaapi.NullableGalasaSecretType
+                if secretType != "" {
+                    secretTypeValue, err = validateSecretType(secretType)
+                }
+
+                if err == nil {
+                    secretRequest := createSecretRequest(secretName, requestUsername, requestPassword, requestToken, secretTypeValue, description)
+                    err = sendSetSecretRequest(secretRequest, apiClient, byteReader)
+                }
             }
         }
     }
@@ -109,9 +115,14 @@ func createSecretRequest(
     password galasaapi.SecretRequestPassword,
     token galasaapi.SecretRequestToken,
     secretType galasaapi.NullableGalasaSecretType,
+    description string,
 ) *galasaapi.SecretRequest {
     secretRequest := galasaapi.NewSecretRequest()
     secretRequest.SetName(secretName)
+
+    if description != "" {
+        secretRequest.SetDescription(description)
+    }
 
     if secretType.IsSet() {
         secretRequest.SetType(*secretType.Get())
@@ -201,7 +212,7 @@ func validateFlagCombination(
     base64Token string,
 ) error {
     var err error
-    
+
     // Make sure that a field and its base64 equivalent haven't both been provided
     if (username != "" && base64Username != "") ||
         (password != "" && base64Password != "") ||
