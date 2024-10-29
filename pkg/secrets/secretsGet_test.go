@@ -6,16 +6,16 @@
 package secrets
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"strconv"
-	"testing"
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "strconv"
+    "testing"
 
-	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
-	"github.com/stretchr/testify/assert"
+    "github.com/galasa-dev/cli/pkg/api"
+    "github.com/galasa-dev/cli/pkg/galasaapi"
+    "github.com/galasa-dev/cli/pkg/utils"
+    "github.com/stretchr/testify/assert"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
     DUMMY_PASSWORD = "dummy-password"
 )
 
-func createMockGalasaSecret(secretName string) galasaapi.GalasaSecret {
+func createMockGalasaSecret(secretName string, description string) galasaapi.GalasaSecret {
     secret := *galasaapi.NewGalasaSecret()
 
     secret.SetApiVersion(API_VERSION)
@@ -36,6 +36,10 @@ func createMockGalasaSecret(secretName string) galasaapi.GalasaSecret {
     secretMetadata.SetEncoding(DUMMY_ENCODING)
     secretMetadata.SetType("UsernamePassword")
 
+    if description != "" {
+        secretMetadata.SetDescription(description)
+    }
+
     secretData := *galasaapi.NewGalasaSecretData()
     secretData.SetUsername(DUMMY_USERNAME)
     secretData.SetPassword(DUMMY_PASSWORD)
@@ -45,26 +49,27 @@ func createMockGalasaSecret(secretName string) galasaapi.GalasaSecret {
     return secret
 }
 
-func generateExpectedSecretYaml(secretName string) string {
+func generateExpectedSecretYaml(secretName string, description string) string {
     return fmt.Sprintf(`apiVersion: %s
 kind: GalasaSecret
 metadata:
     name: %s
+    description: %s
     encoding: %s
     type: UsernamePassword
 data:
     username: %s
-    password: %s
-    token: null`, API_VERSION, secretName, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
+    password: %s`, API_VERSION, secretName, description, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
 }
 
 func TestCanGetASecretByName(t *testing.T) {
     // Given...
     secretName := "SYSTEM1"
+    description := "my SYSTEM1 secret"
     outputFormat := "summary"
 
     // Create the mock secret to return
-    secret := createMockGalasaSecret(secretName)
+    secret := createMockGalasaSecret(secretName, description)
     secretBytes, _ := json.Marshal(secret)
     secretJson := string(secretBytes)
 
@@ -97,11 +102,12 @@ func TestCanGetASecretByName(t *testing.T) {
         mockByteReader)
 
     // Then...
-    expectedOutput := fmt.Sprintf(`name    type
-%s UsernamePassword
+    expectedOutput := fmt.Sprintf(
+`name    type             description
+%s UsernamePassword %s
 
 Total:1
-`, secretName)
+`, secretName, description)
     assert.Nil(t, err, "GetSecrets returned an unexpected error")
     assert.Equal(t, expectedOutput, console.ReadText())
 }
@@ -109,10 +115,11 @@ Total:1
 func TestCanGetASecretByNameInYamlFormat(t *testing.T) {
     // Given...
     secretName := "SYSTEM1"
+    description := "my SYSTEM1 secret"
     outputFormat := "yaml"
 
     // Create the mock secret to return
-    secret := createMockGalasaSecret(secretName)
+    secret := createMockGalasaSecret(secretName, description)
     secretBytes, _ := json.Marshal(secret)
     secretJson := string(secretBytes)
 
@@ -145,7 +152,7 @@ func TestCanGetASecretByNameInYamlFormat(t *testing.T) {
         mockByteReader)
 
     // Then...
-    expectedOutput := generateExpectedSecretYaml(secretName) + "\n"
+    expectedOutput := generateExpectedSecretYaml(secretName, description) + "\n"
     assert.Nil(t, err, "GetSecrets returned an unexpected error")
     assert.Equal(t, expectedOutput, console.ReadText())
 }
@@ -160,8 +167,10 @@ func TestCanGetAllSecretsOk(t *testing.T) {
     secrets := make([]galasaapi.GalasaSecret, 0)
     secret1Name := "BOB"
     secret2Name := "BLAH"
-    secret1 := createMockGalasaSecret(secret1Name)
-    secret2 := createMockGalasaSecret(secret2Name)
+    description1 := "my BOB secret"
+    description2 := "my BLAH secret"
+    secret1 := createMockGalasaSecret(secret1Name, description1)
+    secret2 := createMockGalasaSecret(secret2Name, description2)
 
     secrets = append(secrets, secret1, secret2)
     secretsBytes, _ := json.Marshal(secrets)
@@ -196,12 +205,13 @@ func TestCanGetAllSecretsOk(t *testing.T) {
         mockByteReader)
 
     // Then...
-    expectedOutput := fmt.Sprintf(`name type
-%s  UsernamePassword
-%s UsernamePassword
+    expectedOutput := fmt.Sprintf(
+`name type             description
+%s  UsernamePassword %s
+%s UsernamePassword %s
 
 Total:2
-`, secret1Name, secret2Name)
+`, secret1Name, description1, secret2Name, description2)
     assert.Nil(t, err, "GetSecrets returned an unexpected error")
     assert.Equal(t, expectedOutput, console.ReadText())
 }

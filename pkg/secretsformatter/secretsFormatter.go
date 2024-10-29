@@ -26,6 +26,7 @@ import (
 const (
     HEADER_SECRET_NAME = "name"
     HEADER_SECRET_TYPE = "type"
+    HEADER_SECRET_DESCRIPTION = "description"
 )
 
 type SecretsFormatter interface {
