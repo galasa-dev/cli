@@ -19,7 +19,7 @@ func NewMockTimeServiceAsMock(now time.Time) *MockTimeService {
 	return &MockTimeService{MockNow: now}
 }
 
-func NewMockTimeService() spi.TimeService {
+func NewMockTimeService() *MockTimeService {
 	return NewMockTimeServiceAsMock(time.Now())
 }
 
@@ -27,12 +27,7 @@ func NewOverridableMockTimeService(now time.Time) spi.TimeService {
 	return NewMockTimeServiceAsMock(now)
 }
 
-func (ts *MockTimeService) Interrupt(message string) {
-	// The mock timing service doesn't know how to be interrupted.
-}
-
-func (ts *MockTimeService) Sleep(duration time.Duration) {
-	// Do not sleep. Just advance the mock now time.
+func (ts *MockTimeService) AdvanceClock(duration time.Duration) {
 	ts.MockNow.Add(duration)
 }
 

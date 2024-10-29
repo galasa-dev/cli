@@ -60,8 +60,11 @@ type JvmLauncher struct {
 	// The collection of tests which are running, or have completed.
 	localTests []*LocalTest
 
-	// This timer service can be interrupted when we don't want it to sleep.
+	// This timer service allows unit tests to control the time explicitly.
 	timeService spi.TimeService
+
+	// Used by the main polling loop to sleep and be interrupted.
+	timedSleeper spi.TimedSleeper
 
 	// A service which can create OS processes.
 	processFactory ProcessFactory
@@ -116,6 +119,7 @@ const (
 
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
+// We get the caller's timer service so we can interrupt the caller when we are done.
 func NewJVMLauncher(
 	factory spi.Factory,
 	bootstrapProps props.JavaProperties,
@@ -123,6 +127,8 @@ func NewJVMLauncher(
 	runsSubmitLocalCmdParams *RunsSubmitLocalCmdParameters,
 	processFactory ProcessFactory,
 	galasaHome spi.GalasaHome,
+	timedSleeper spi.TimedSleeper,
+
 ) (*JvmLauncher, error) {
 
 	var (
@@ -132,7 +138,6 @@ func NewJVMLauncher(
 
 	env := factory.GetEnvironment()
 	fileSystem := factory.GetFileSystem()
-	timeService := factory.GetTimeService()
 
 	javaHome := env.GetEnv("JAVA_HOME")
 
@@ -148,7 +153,8 @@ func NewJVMLauncher(
 		launcher.embeddedFileSystem = embeddedFileSystem
 		launcher.processFactory = processFactory
 		launcher.galasaHome = galasaHome
-		launcher.timeService = timeService
+		launcher.timeService = factory.GetTimeService()
+		launcher.timedSleeper = timedSleeper
 		launcher.bootstrapProps = bootstrapProps
 
 		// Make sure the home folder has the boot jar unpacked and ready to invoke.
@@ -278,7 +284,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 						)
 						if err == nil {
 							log.Printf("Launching command '%s' '%v'\n", cmd, args)
-							localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
+							localTest := NewLocalTest(launcher.timedSleeper, launcher.fileSystem, launcher.processFactory)
 							err = localTest.launch(cmd, args)
 
 							if err == nil {

@@ -22,6 +22,7 @@ func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 	env := utils.NewMockEnv()
 	mockLauncher := launcher.NewMockLauncher()
 	mockTimeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 
 	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
 
@@ -32,6 +33,7 @@ func TestCanWriteAndReadBackThrottleFile(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		timedSleeper,
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -74,6 +76,7 @@ func TestReadBackThrottleFileFailsIfNoThrottleFileThere(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -105,6 +108,7 @@ func TestReadBackThrottleFileFailsIfFileContainsInvalidInt(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -132,6 +136,7 @@ func TestUpdateThrottleFromFileIfDifferentChangesValueWhenDifferent(t *testing.T
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -159,6 +164,7 @@ func TestUpdateThrottleFromFileIfDifferentDoesntChangeIfFileMissing(t *testing.T
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -195,6 +201,7 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -234,6 +241,7 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -268,6 +276,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -312,6 +321,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -343,6 +353,7 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -394,6 +405,7 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -447,6 +459,7 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -466,7 +479,7 @@ func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
 		assert.Equal(t, obrName, launchesRecorded[0].ObrFromPortfolio)
 		assert.Equal(t, bundleName+"/"+className, launchesRecorded[0].ClassName)
 	}
-	assert.Contains(t, console.ReadText(), bundleName + "/" + className)
+	assert.Contains(t, console.ReadText(), bundleName+"/"+className)
 }
 
 func TestSubmitRunwithGherkinFile(t *testing.T) {
@@ -488,6 +501,7 @@ func TestSubmitRunwithGherkinFile(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -532,6 +546,7 @@ func TestGetPortfolioReturnsGherkinPortfolio(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -572,6 +587,7 @@ func TestGetReadyRunsFromPortfolioReturnsGherkinReadyRuns(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),
@@ -621,6 +637,7 @@ func TestSubmitRunsFromGherkinPortfolioOutputsFeatureNames(t *testing.T) {
 		mockFileSystem,
 		mockLauncher,
 		mockTimeService,
+		utils.NewRealTimedSleeper(),
 		env,
 		console,
 		images.NewImageExpanderNullImpl(),

@@ -49,7 +49,7 @@ func GetProperties(
 			chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
 			if err == nil {
 				var cpsProperty []galasaapi.GalasaProperty
-				cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
+				cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient)
 
 				log.Printf("GetProperties - Galasa Properties collected: %s", getCpsPropertyArrayAsString(cpsProperty))
 				if err == nil {
@@ -77,7 +77,6 @@ func getCpsPropertiesFromRestApi(
 	suffix string,
 	infix string,
 	apiClient *galasaapi.APIClient,
-	console spi.Console,
 ) ([]galasaapi.GalasaProperty, error) {
 
 	var err error

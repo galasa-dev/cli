@@ -467,7 +467,6 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockFileSystem.WriteTextFile(runName+separator+"artifacts"+separator+"dummy.txt", "dummy text file")
 	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
-
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
@@ -513,7 +512,6 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	separator := string(os.PathSeparator)
 	mockFileSystem.WriteTextFile(runName+separator+"dummy.txt", "dummy text file")
 	mockFileSystem.WriteTextFile(runName+separator+"run.log", "dummy log")
-
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
@@ -771,7 +769,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockTimeService.Sleep(time.Second)
+	mockTimeService.AdvanceClock(time.Second)
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
