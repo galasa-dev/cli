@@ -167,7 +167,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1169E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1170E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1171E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
-- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty or contain spaces.
+- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty or contain spaces, and must only contain characters in the Latin-1 character set.
 - GAL1173E: An attempt to delete a secret named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}

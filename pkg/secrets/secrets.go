@@ -12,12 +12,25 @@ import (
     galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
-func validateSecretName(secretName string) error {
+func validateSecretName(secretName string) (string, error) {
     var err error
     secretName = strings.TrimSpace(secretName)
 
-    if secretName == "" || strings.ContainsAny(secretName, " \n\t") {
+    if secretName == "" || strings.ContainsAny(secretName, " \n\t") || !isLatin1(secretName) {
         err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_SECRET_NAME)
     }
-    return err
+    return secretName, err
+}
+
+// Checks if a given string contains only characters in the Latin-1 character set (codepoints 0-255),
+// returning true if so, and false otherwise
+func isLatin1(str string) bool {
+	isValidLatin1 := true
+	for _, character := range str {
+		if character > 255 {
+			isValidLatin1 = false
+			break
+		}
+	}
+	return isValidLatin1
 }
