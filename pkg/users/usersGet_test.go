@@ -79,7 +79,7 @@ func TestMeInputLoginIdPrintsDetailsOnConsole(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 
-		jsonToReturn := `[{ "login_id": "myUserId" }]`
+		jsonToReturn := `[{ "login-id": "myUserId" }]`
 		writer.Write([]byte(jsonToReturn))
 
 	}))
