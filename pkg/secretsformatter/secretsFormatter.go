@@ -27,6 +27,8 @@ const (
     HEADER_SECRET_NAME = "name"
     HEADER_SECRET_TYPE = "type"
     HEADER_SECRET_DESCRIPTION = "description"
+    HEADER_LAST_UPDATED_TIME = "last-updated(UTC)"
+	HEADER_LAST_UPDATED_BY = "last-updated-by"
 )
 
 type SecretsFormatter interface {

@@ -11,6 +11,7 @@ import (
     "net/http"
     "strconv"
     "testing"
+    "time"
 
     "github.com/galasa-dev/cli/pkg/api"
     "github.com/galasa-dev/cli/pkg/galasaapi"
@@ -35,6 +36,8 @@ func createMockGalasaSecret(secretName string, description string) galasaapi.Gal
     secretMetadata.SetName(secretName)
     secretMetadata.SetEncoding(DUMMY_ENCODING)
     secretMetadata.SetType("UsernamePassword")
+    secretMetadata.SetLastUpdatedBy(DUMMY_USERNAME)
+    secretMetadata.SetLastUpdatedTime(time.Date(2024, 01, 01, 10, 0, 0, 0, time.UTC))
 
     if description != "" {
         secretMetadata.SetDescription(description)
@@ -55,11 +58,13 @@ kind: GalasaSecret
 metadata:
     name: %s
     description: %s
+    lastUpdatedTime: 2024-01-01T10:00:00Z
+    lastUpdatedBy: %s
     encoding: %s
     type: UsernamePassword
 data:
     username: %s
-    password: %s`, API_VERSION, secretName, description, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
+    password: %s`, API_VERSION, secretName, description, DUMMY_USERNAME, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
 }
 
 func TestCanGetASecretByName(t *testing.T) {
@@ -102,12 +107,12 @@ func TestCanGetASecretByName(t *testing.T) {
         mockByteReader)
 
     // Then...
-    expectedOutput := fmt.Sprintf(
-`name    type             description
-%s UsernamePassword %s
+    expectedOutput :=
+`name    type             description       last-updated(UTC)   last-updated-by
+SYSTEM1 UsernamePassword my SYSTEM1 secret 2024-01-01 10:00:00 dummy-username
 
 Total:1
-`, secretName, description)
+`
     assert.Nil(t, err, "GetSecrets returned an unexpected error")
     assert.Equal(t, expectedOutput, console.ReadText())
 }
@@ -205,13 +210,13 @@ func TestCanGetAllSecretsOk(t *testing.T) {
         mockByteReader)
 
     // Then...
-    expectedOutput := fmt.Sprintf(
-`name type             description
-%s  UsernamePassword %s
-%s UsernamePassword %s
+    expectedOutput :=
+`name type             description    last-updated(UTC)   last-updated-by
+BOB  UsernamePassword my BOB secret  2024-01-01 10:00:00 dummy-username
+BLAH UsernamePassword my BLAH secret 2024-01-01 10:00:00 dummy-username
 
 Total:2
-`, secret1Name, description1, secret2Name, description2)
+`
     assert.Nil(t, err, "GetSecrets returned an unexpected error")
     assert.Equal(t, expectedOutput, console.ReadText())
 }

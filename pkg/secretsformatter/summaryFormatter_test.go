@@ -6,8 +6,8 @@
 package secretsformatter
 
 import (
-	"fmt"
 	"testing"
+	"time"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +20,10 @@ const (
     DUMMY_PASSWORD = "dummy-password"
 )
 
-func createMockGalasaSecretWithDescription(secretName string, description string) galasaapi.GalasaSecret {
+func createMockGalasaSecretWithDescription(
+	secretName string,
+	description string,
+) galasaapi.GalasaSecret {
     secret := *galasaapi.NewGalasaSecret()
 
     secret.SetApiVersion(API_VERSION)
@@ -30,6 +33,8 @@ func createMockGalasaSecretWithDescription(secretName string, description string
     secretMetadata.SetName(secretName)
     secretMetadata.SetEncoding(DUMMY_ENCODING)
     secretMetadata.SetType("UsernamePassword")
+	secretMetadata.SetLastUpdatedBy(DUMMY_USERNAME)
+	secretMetadata.SetLastUpdatedTime(time.Date(2024, 01, 01, 10, 0, 0, 0, time.UTC))
 
 	if description != "" {
 		secretMetadata.SetDescription(description)
@@ -71,12 +76,12 @@ func TestSecretSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 
     // Then...
     assert.Nil(t, err)
-    expectedFormattedOutput := fmt.Sprintf(
-`name     type             description
-%s UsernamePassword %s
+    expectedFormattedOutput :=
+`name     type             description        last-updated(UTC)   last-updated-by
+MYSECRET UsernamePassword secret for system1 2024-01-01 10:00:00 dummy-username
 
 Total:1
-`, secretName, description)
+`
     assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -102,13 +107,13 @@ func TestSecretSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 
     // Then...
     assert.Nil(t, err)
-    expectedFormattedOutput := fmt.Sprintf(
-`name    type             description
-%s UsernamePassword %s
-%s UsernamePassword %s
-%s UsernamePassword %s
+    expectedFormattedOutput :=
+`name    type             description      last-updated(UTC)   last-updated-by
+SECRET1 UsernamePassword my first secret  2024-01-01 10:00:00 dummy-username
+SECRET2 UsernamePassword my second secret 2024-01-01 10:00:00 dummy-username
+SECRET3 UsernamePassword my third secret  2024-01-01 10:00:00 dummy-username
 
 Total:3
-`, secret1Name, secret1Description, secret2Name, secret2Description, secret3Name, secret3Description)
+`
     assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }

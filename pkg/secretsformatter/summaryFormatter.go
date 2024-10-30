@@ -38,7 +38,13 @@ func (*SecretSummaryFormatter) FormatSecrets(secrets []galasaapi.GalasaSecret) (
     if totalSecrets > 0 {
         var table [][]string
 
-        var headers = []string{ HEADER_SECRET_NAME, HEADER_SECRET_TYPE, HEADER_SECRET_DESCRIPTION }
+        var headers = []string{
+			HEADER_SECRET_NAME,
+			HEADER_SECRET_TYPE,
+			HEADER_SECRET_DESCRIPTION,
+			HEADER_LAST_UPDATED_TIME,
+			HEADER_LAST_UPDATED_BY,
+		}
 
         table = append(table, headers)
         for _, secret := range secrets {
@@ -46,8 +52,15 @@ func (*SecretSummaryFormatter) FormatSecrets(secrets []galasaapi.GalasaSecret) (
             name := secret.Metadata.GetName()
             secretType := secret.Metadata.GetType()
             secretDescription := secret.Metadata.GetDescription()
+			lastUpdatedTime := secret.Metadata.GetLastUpdatedTime()
 
-            line = append(line, name, string(secretType), secretDescription)
+			lastUpdatedTimeReadable := ""
+			if !lastUpdatedTime.IsZero() {				
+				lastUpdatedTimeReadable = lastUpdatedTime.Format("2006-01-02 15:04:05")
+			}
+			lastUpdatedBy := secret.Metadata.GetLastUpdatedBy()
+
+            line = append(line, name, string(secretType), secretDescription, lastUpdatedTimeReadable, lastUpdatedBy)
             table = append(table, line)
         }
 

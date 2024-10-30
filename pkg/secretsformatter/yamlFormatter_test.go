@@ -18,15 +18,18 @@ func createMockGalasaSecret(secretName string) galasaapi.GalasaSecret {
 }
 
 func generateExpectedSecretYaml(secretName string) string {
-    return fmt.Sprintf(`apiVersion: %s
+    return fmt.Sprintf(
+`apiVersion: %s
 kind: GalasaSecret
 metadata:
     name: %s
+    lastUpdatedTime: 2024-01-01T10:00:00Z
+    lastUpdatedBy: %s
     encoding: %s
     type: UsernamePassword
 data:
     username: %s
-    password: %s`, API_VERSION, secretName, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
+    password: %s`, API_VERSION, secretName, DUMMY_USERNAME, DUMMY_ENCODING, DUMMY_USERNAME, DUMMY_PASSWORD)
 }
 
 func TestSecretsYamlFormatterNoDataReturnsBlankString(t *testing.T) {
