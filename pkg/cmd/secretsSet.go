@@ -104,8 +104,10 @@ func (cmd *SecretsSetCommand) createCobraCmd(
     base64PasswordFlag := "base64-password"
     base64TokenFlag := "base64-token"
 
+	descriptionFlag := "description"
+
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.secretType, "type", "", fmt.Sprintf("the desired secret type to convert an existing secret into. Supported types are: %v.", galasaapi.AllowedGalasaSecretTypeEnumValues))
-    secretsSetCobraCmd.Flags().StringVar(&cmd.values.description, "description", "", "the description to associate with the secret being created or updated")
+    secretsSetCobraCmd.Flags().StringVar(&cmd.values.description, descriptionFlag, "", "the description to associate with the secret being created or updated")
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.username, usernameFlag, "", "a username to set into a secret")
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.password, passwordFlag, "", "a password to set into a secret")
     secretsSetCobraCmd.Flags().StringVar(&cmd.values.token, tokenFlag, "", "a token to set into a secret")
@@ -128,6 +130,7 @@ func (cmd *SecretsSetCommand) createCobraCmd(
 		base64UsernameFlag,
 		base64PasswordFlag,
 		base64TokenFlag,
+		descriptionFlag,
 	)
 
     secretsCommand.CobraCommand().AddCommand(secretsSetCobraCmd)
