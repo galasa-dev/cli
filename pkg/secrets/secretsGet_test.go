@@ -108,8 +108,8 @@ func TestCanGetASecretByName(t *testing.T) {
 
     // Then...
     expectedOutput :=
-`name    type             description       last-updated(UTC)   last-updated-by
-SYSTEM1 UsernamePassword my SYSTEM1 secret 2024-01-01 10:00:00 dummy-username
+`name    type             last-updated(UTC)   last-updated-by description
+SYSTEM1 UsernamePassword 2024-01-01 10:00:00 dummy-username  my SYSTEM1 secret
 
 Total:1
 `
@@ -211,9 +211,9 @@ func TestCanGetAllSecretsOk(t *testing.T) {
 
     // Then...
     expectedOutput :=
-`name type             description    last-updated(UTC)   last-updated-by
-BOB  UsernamePassword my BOB secret  2024-01-01 10:00:00 dummy-username
-BLAH UsernamePassword my BLAH secret 2024-01-01 10:00:00 dummy-username
+`name type             last-updated(UTC)   last-updated-by description
+BOB  UsernamePassword 2024-01-01 10:00:00 dummy-username  my BOB secret
+BLAH UsernamePassword 2024-01-01 10:00:00 dummy-username  my BLAH secret
 
 Total:2
 `
