@@ -6,11 +6,11 @@
 package secretsformatter
 
 import (
-	"fmt"
-	"testing"
+    "testing"
+    "time"
 
-	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/stretchr/testify/assert"
+    "github.com/galasa-dev/cli/pkg/galasaapi"
+    "github.com/stretchr/testify/assert"
 )
 
 const (
@@ -20,7 +20,10 @@ const (
     DUMMY_PASSWORD = "dummy-password"
 )
 
-func createMockGalasaSecretWithDescription(secretName string, description string) galasaapi.GalasaSecret {
+func createMockGalasaSecretWithDescription(
+    secretName string,
+    description string,
+) galasaapi.GalasaSecret {
     secret := *galasaapi.NewGalasaSecret()
 
     secret.SetApiVersion(API_VERSION)
@@ -30,10 +33,12 @@ func createMockGalasaSecretWithDescription(secretName string, description string
     secretMetadata.SetName(secretName)
     secretMetadata.SetEncoding(DUMMY_ENCODING)
     secretMetadata.SetType("UsernamePassword")
+    secretMetadata.SetLastUpdatedBy(DUMMY_USERNAME)
+    secretMetadata.SetLastUpdatedTime(time.Date(2024, 01, 01, 10, 0, 0, 0, time.UTC))
 
-	if description != "" {
-		secretMetadata.SetDescription(description)
-	}
+    if description != "" {
+        secretMetadata.SetDescription(description)
+    }
 
     secretData := *galasaapi.NewGalasaSecretData()
     secretData.SetUsername(DUMMY_USERNAME)
@@ -61,8 +66,8 @@ func TestSecretSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
 func TestSecretSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
     // Given...
     formatter := NewSecretSummaryFormatter()
-	description := "secret for system1"
-	secretName := "MYSECRET"
+    description := "secret for system1"
+    secretName := "MYSECRET"
     secret1 := createMockGalasaSecretWithDescription(secretName, description)
     secrets := []galasaapi.GalasaSecret{ secret1 }
 
@@ -71,12 +76,12 @@ func TestSecretSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 
     // Then...
     assert.Nil(t, err)
-    expectedFormattedOutput := fmt.Sprintf(
-`name     type             description
-%s UsernamePassword %s
+    expectedFormattedOutput :=
+`name     type             last-updated(UTC)   last-updated-by description
+MYSECRET UsernamePassword 2024-01-01 10:00:00 dummy-username  secret for system1
 
 Total:1
-`, secretName, description)
+`
     assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
@@ -85,12 +90,12 @@ func TestSecretSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
     formatter := NewSecretSummaryFormatter()
     secrets := make([]galasaapi.GalasaSecret, 0)
 
-	secret1Name := "SECRET1"
-	secret1Description := "my first secret"
-	secret2Name := "SECRET2"
-	secret2Description := "my second secret"
-	secret3Name := "SECRET3"
-	secret3Description := "my third secret"
+    secret1Name := "SECRET1"
+    secret1Description := "my first secret"
+    secret2Name := "SECRET2"
+    secret2Description := "my second secret"
+    secret3Name := "SECRET3"
+    secret3Description := "my third secret"
 
     secret1 := createMockGalasaSecretWithDescription(secret1Name, secret1Description)
     secret2 := createMockGalasaSecretWithDescription(secret2Name, secret2Description)
@@ -102,13 +107,13 @@ func TestSecretSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 
     // Then...
     assert.Nil(t, err)
-    expectedFormattedOutput := fmt.Sprintf(
-`name    type             description
-%s UsernamePassword %s
-%s UsernamePassword %s
-%s UsernamePassword %s
+    expectedFormattedOutput :=
+`name    type             last-updated(UTC)   last-updated-by description
+SECRET1 UsernamePassword 2024-01-01 10:00:00 dummy-username  my first secret
+SECRET2 UsernamePassword 2024-01-01 10:00:00 dummy-username  my second secret
+SECRET3 UsernamePassword 2024-01-01 10:00:00 dummy-username  my third secret
 
 Total:3
-`, secret1Name, secret1Description, secret2Name, secret2Description, secret3Name, secret3Description)
+`
     assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }

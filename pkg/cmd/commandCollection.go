@@ -61,6 +61,7 @@ const (
 	COMMAND_NAME_RESOURCES_DELETE         = "resources delete"
 	COMMAND_NAME_SECRETS                  = "secrets"
 	COMMAND_NAME_SECRETS_GET              = "secrets get"
+	COMMAND_NAME_SECRETS_SET              = "secrets set"
 	COMMAND_NAME_SECRETS_DELETE           = "secrets delete"
 	COMMAND_NAME_USERS                    = "users"
 	COMMAND_NAME_USERS_GET                = "users get"
@@ -387,6 +388,7 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 	var err error
 	var secretsCommand spi.GalasaCommand
 	var secretsGetCommand spi.GalasaCommand
+	var secretsSetCommand spi.GalasaCommand
 	var secretsDeleteCommand spi.GalasaCommand
 
 	secretsCommand, err = NewSecretsCmd(rootCommand)
@@ -396,12 +398,17 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 	}
 
 	if err == nil {
+		secretsSetCommand, err = NewSecretsSetCommand(factory, secretsCommand, rootCommand)
+	}
+
+	if err == nil {
 		secretsDeleteCommand, err = NewSecretsDeleteCommand(factory, secretsCommand, rootCommand)
 	}
 
 	if err == nil {
 		commands.commandMap[secretsCommand.Name()] = secretsCommand
 		commands.commandMap[secretsGetCommand.Name()] = secretsGetCommand
+		commands.commandMap[secretsSetCommand.Name()] = secretsSetCommand
 		commands.commandMap[secretsDeleteCommand.Name()] = secretsDeleteCommand
 	}
 
