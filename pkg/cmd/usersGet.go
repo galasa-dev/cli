@@ -84,7 +84,7 @@ func (cmd *UsersGetCommand) createCobraCmd(
 		},
 	}
 
-	addLoginIdFlag(usersGetCobraCmd, true, userCommandValues)
+	addLoginIdFlag(usersGetCobraCmd, userCommandValues)
 
 	usersCommand.CobraCommand().AddCommand(usersGetCobraCmd)
 

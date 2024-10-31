@@ -22,13 +22,6 @@ func validateLoginIdFlag(loginId string) (string, error) {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG)
 	}
 
-	if err == nil {
-
-		if loginId != "me" {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_LOGIN_ID_NOT_SUPPORTED, loginId)
-		}
-	}
-
 	return loginId, err
 
 }

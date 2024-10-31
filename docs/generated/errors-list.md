@@ -150,8 +150,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.
 - GAL1153E: Failed to revoke the token with ID '{}'. Reason: '{}'.
 - GAL1154E: The provided token ID, '{}', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.
-- GAL1155E: The id provided by the --id field cannot be an empty string.
-- GAL1156E: '{}' is not supported as a valid value. Valid values are 'me'.
+- GAL1155E: The loginId provided by the --login-id field cannot be an empty string.
+- GAL1156E: Could not get list of users from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
 - GAL1157E: An attempt to delete a run named '{}' failed. Cause is {}
 - GAL1158E: An attempt to delete a run named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
 - GAL1159E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server.
