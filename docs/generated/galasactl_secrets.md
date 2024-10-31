@@ -24,4 +24,5 @@ The parent command for operations to manipulate secrets in the Galasa service's 
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
 * [galasactl secrets delete](galasactl_secrets_delete.md)	 - Deletes a secret from the credentials store
+* [galasactl secrets get](galasactl_secrets_get.md)	 - Get secrets from the credentials store
 

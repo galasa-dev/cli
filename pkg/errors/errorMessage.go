@@ -271,6 +271,20 @@ var (
 	GALASA_ERROR_INVALID_SECRET_NAME                     = NewMessageType("GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty or contain spaces, and must only contain characters in the Latin-1 character set.", 1172, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_SECRET_REQUEST_FAILED            = NewMessageType("GAL1173E: An attempt to delete a secret named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1173, STACK_TRACE_NOT_WANTED)
 
+	GALASA_ERROR_GET_SECRET_NO_RESPONSE_CONTENT          = NewMessageType("GAL1174E: An attempt to get a secret named '%s' failed. Unexpected http status code %v received from the server.", 1174, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRET_RESPONSE_BODY_UNREADABLE     = NewMessageType("GAL1175E: An attempt to get a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1175, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRET_UNPARSEABLE_CONTENT          = NewMessageType("GAL1176E: An attempt to get a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1176, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRET_SERVER_REPORTED_ERROR        = NewMessageType("GAL1177E: An attempt to get a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1177, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRET_EXPLANATION_NOT_JSON         = NewMessageType("GAL1178E: An attempt to get a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1178, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRET_REQUEST_FAILED               = NewMessageType("GAL1179E: An attempt to get a secret named '%s' failed. Sending the get request to the Galasa service failed. Cause is %v", 1179, STACK_TRACE_NOT_WANTED)
+
+	GALASA_ERROR_GET_SECRETS_NO_RESPONSE_CONTENT         = NewMessageType("GAL1180E: Failed to get secrets. Unexpected http status code %v received from the server.", 1180, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRETS_RESPONSE_BODY_UNREADABLE    = NewMessageType("GAL1181E: Failed to get secrets. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1181, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRETS_UNPARSEABLE_CONTENT         = NewMessageType("GAL1182E: Failed to get secrets. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1182, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRETS_SERVER_REPORTED_ERROR       = NewMessageType("GAL1183E: Failed to get secrets. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1183, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRETS_EXPLANATION_NOT_JSON        = NewMessageType("GAL1184E: Failed to get secrets. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1184, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_SECRETS_REQUEST_FAILED              = NewMessageType("GAL1185E: Failed to get secrets. Sending the get request to the Galasa service failed. Cause is %v", 1185, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 
