@@ -19,6 +19,9 @@ const (
 	SUMMARY_FORMATTER_NAME = "summary"
 )
 
+const CLIENT_WEB_UI = "web-ui"
+const CLIENT_REST_API = "rest-api"
+
 type UserSummaryFormatter struct {
 }
 
@@ -53,9 +56,9 @@ func (*UserSummaryFormatter) FormatUsers(users []galasaapi.UserData) (string, er
 
 			for _, client := range clients {
 				switch client.GetClientName() {
-				case "web-ui":
+				case CLIENT_WEB_UI:
 					webLastLogin = utils.FormatTimeToNearestDateTimeMins(client.GetLastLogin().String())
-				case "rest-api":
+				case CLIENT_REST_API:
 					restLastLogin = utils.FormatTimeToNearestDateTimeMins(client.GetLastLogin().String())
 				}
 			}
