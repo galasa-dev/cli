@@ -162,6 +162,34 @@ The `galasactl` tool can generate the following errors:
 - GAL1164E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1165E: '{}' is not supported as a valid login ID. Login ID should not contain spaces.
 - GAL1166E: The loginId provided by the --user field cannot be an empty string.
+- GAL1167E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server.
+- GAL1168E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1169E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1170E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1171E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.
+- GAL1173E: An attempt to delete a secret named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1174E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server.
+- GAL1175E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1176E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1177E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1178E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1179E: An attempt to get a secret named '{}' failed. Sending the get request to the Galasa service failed. Cause is {}
+- GAL1180E: Failed to get secrets. Unexpected http status code {} received from the server.
+- GAL1181E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1182E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1183E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1184E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1185E: Failed to get secrets. Sending the get request to the Galasa service failed. Cause is {}
+- GAL1186E: Invalid secret type provided. Supported secret types are: {}. Check your provided command parameters and try again.
+- GAL1187E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server.
+- GAL1188E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1189E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1190E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1191E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1192E: Failed to set a secret named '{}'. Sending the put request to the Galasa service failed. Cause is {}
+- GAL1193E: Invalid flag combination provided. --username cannot be provided with --base64-username, --password cannot be provided with --base64-password, and --token cannot be provided with --base64-token. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1194E: Invalid secret description provided. The description provided with the --description flag cannot be an empty string, and must only contain characters in the Latin-1 character set.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
