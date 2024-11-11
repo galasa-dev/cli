@@ -20,13 +20,3 @@ func TestValidateLoginIdFlagReturnsError_EmptyOrNullValue(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Empty(t, loginId)
 }
-
-func TestValidateLoginIdFlagReturnsError_UnsupportedValue(t *testing.T) {
-
-	invalidLoginId := "notMe"
-
-	loginId, err := validateLoginIdFlag(invalidLoginId)
-
-	assert.NotNil(t, err)
-	assert.NotNil(t, loginId)
-}

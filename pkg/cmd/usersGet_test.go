@@ -35,26 +35,12 @@ func TestUsersGetHelpFlagSetCorrectly(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestUsersGetNoArgsReturnsError(t *testing.T) {
-	// Given...
-	factory := utils.NewMockFactory()
-	var args []string = []string{"users", "get"}
-	// When...
-	err := Execute(factory, args)
-
-	// Then...
-	checkOutput("", "Error: required flag(s) \"id\" not set", factory, t)
-
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "required flag(s) \"id\" not set")
-}
-
 func TestUsersGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_USERS_GET, factory, t)
 
-	var args []string = []string{"users", "get", "--id", "me"}
+	var args []string = []string{"users", "get", "--login-id", "me"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -68,20 +54,4 @@ func TestUsersGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_USERS)
 	assert.Nil(t, err)
 	assert.Contains(t, parentCmd.Values().(*UsersCmdValues).name, "me")
-}
-
-func TestUsersGetNamespaceNameMissingFlagsReturnsError(t *testing.T) {
-	// Given...
-	factory := utils.NewMockFactory()
-	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_USERS_GET, factory, t)
-
-	var args []string = []string{"users", "get"}
-
-	// When...
-	err := commandCollection.Execute(args)
-
-	// Then...
-	assert.NotNil(t, err)
-
-	assert.ErrorContains(t, err, "required flag(s) \"id\" not set")
 }

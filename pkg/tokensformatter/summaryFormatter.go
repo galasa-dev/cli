@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // -----------------------------------------------------
@@ -44,7 +45,7 @@ func (*TokenSummaryFormatter) FormatTokens(authTokens []galasaapi.AuthToken) (st
 		for _, token := range authTokens {
 			var line []string
 			id := token.GetTokenId()
-			creationTime := formatTimeToNearestDate(token.GetCreationTime())
+			creationTime := utils.FormatTimeToNearestDate(token.GetCreationTime())
 			owner := token.GetOwner()
 			ownerLoginId := owner.GetLoginId()
 			description := token.GetDescription()

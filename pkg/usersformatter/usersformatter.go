@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package tokensformatter
+package usersformatter
 
 import (
 	"fmt"
@@ -14,24 +14,23 @@ import (
 )
 
 //Print in the following fashion:
-// tokenid                   created(YYYY-MM-DD)  user     description
-// 098234980123-1283182389   2023-12-03           mcobbett So I can access ecosystem1 from my laptop.
-// 8218971d287s1-dhj32er2323 2024-03-03           mcobbett Automated build of example repo can change CPS properties
-// 87a6sd87ahq2-2y8hqwdjj273 2023-08-04           savvas   CLI access from vscode
-// Total:3
+// login-id                web-last-login   rest-api-last-login
+// mcobbett@mydomain.co.uk 2024-09-08:14:24 2024-09-08:14:24
+// eamon@mydomain.co.uk    2024-09-08:15:18 2024-09-08:15:18
+//
+// Total:2
 
 // -----------------------------------------------------
-// TokensFormatter - implementations can take a collection of auth tokens results
+// UsersFormatter - implementations can take a collection of user results
 // and turn them into a string for display to the user.
 const (
-	HEADER_TOKEN_ID            = "tokenid"
-	HEADER_TOKEN_CREATION_TIME = "created(YYYY-MM-DD)"
-	HEADER_TOKEN_USER          = "user"
-	HEADER_TOKEN_DESCRIPTION   = "description"
+	HEADER_USER_LOGIN_ID      = "login-id"
+	HEADER_WEBUI_LAST_LOGIN   = "web-last-login(UTC)"
+	HEADER_RESTAPI_LAST_LOGIN = "rest-api-last-login(UTC)"
 )
 
-type TokenFormatter interface {
-	FormatTokens(tokenResults []galasaapi.AuthToken) (string, error)
+type UserFormatter interface {
+	FormatUsers(userResults []galasaapi.UserData) (string, error)
 	GetName() string
 }
 
