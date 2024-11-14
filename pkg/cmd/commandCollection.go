@@ -65,6 +65,7 @@ const (
 	COMMAND_NAME_SECRETS_DELETE           = "secrets delete"
 	COMMAND_NAME_USERS                    = "users"
 	COMMAND_NAME_USERS_GET                = "users get"
+	COMMAND_NAME_USERS_DELETE             = "users delete"
 )
 
 // -----------------------------------------------------------------
@@ -420,16 +421,20 @@ func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, roo
 	var err error
 	var usersCommand spi.GalasaCommand
 	var usersGetCommand spi.GalasaCommand
+	var usersDeleteCommand spi.GalasaCommand
 
 	usersCommand, err = NewUsersCommand(rootCommand)
+	usersDeleteCommand, err = NewUsersCommand(rootCommand)
 
 	if err == nil {
 		usersGetCommand, err = NewUsersGetCommand(factory, usersCommand, rootCommand)
+		usersDeleteCommand, err = NewUsersDeleteCommand(factory, usersCommand, rootCommand)
 	}
 
 	if err == nil {
 		commands.commandMap[usersCommand.Name()] = usersCommand
 		commands.commandMap[usersGetCommand.Name()] = usersGetCommand
+		commands.commandMap[usersDeleteCommand.Name()] = usersDeleteCommand
 	}
 
 	return err

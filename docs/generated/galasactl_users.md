@@ -23,5 +23,6 @@ Allows interaction with the user servlet to return information about users.
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
+* [galasactl users delete](galasactl_users_delete.md)	 - Deletes a user by login ID
 * [galasactl users get](galasactl_users_get.md)	 - Get a list of users
 

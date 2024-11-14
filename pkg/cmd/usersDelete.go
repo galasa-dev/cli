@@ -18,38 +18,38 @@ import (
 
 // Objective: Allow user to do this:
 //
-//	users get
-type UsersGetCommand struct {
+//	users delete
+type UsersDeleteCommand struct {
 	cobraCommand *cobra.Command
 }
 
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewUsersGetCommand(
+func NewUsersDeleteCommand(
 	factory spi.Factory,
-	usersGetCommand spi.GalasaCommand,
+	usersDeleteCommand spi.GalasaCommand,
 	rootCmd spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
-	cmd := new(UsersGetCommand)
+	cmd := new(UsersDeleteCommand)
 
-	err := cmd.init(factory, usersGetCommand, rootCmd)
+	err := cmd.init(factory, usersDeleteCommand, rootCmd)
 	return cmd, err
 }
 
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *UsersGetCommand) Name() string {
-	return COMMAND_NAME_USERS_GET
+func (cmd *UsersDeleteCommand) Name() string {
+	return COMMAND_NAME_USERS_DELETE
 }
 
-func (cmd *UsersGetCommand) CobraCommand() *cobra.Command {
+func (cmd *UsersDeleteCommand) CobraCommand() *cobra.Command {
 	return cmd.cobraCommand
 }
 
-func (cmd *UsersGetCommand) Values() interface{} {
+func (cmd *UsersDeleteCommand) Values() interface{} {
 	// There are no values.
 	return nil
 }
@@ -57,7 +57,7 @@ func (cmd *UsersGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *UsersGetCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *UsersDeleteCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 	var err error
 
 	cmd.cobraCommand, err = cmd.createCobraCmd(factory, usersCommand, rootCmd)
@@ -65,7 +65,7 @@ func (cmd *UsersGetCommand) init(factory spi.Factory, usersCommand spi.GalasaCom
 	return err
 }
 
-func (cmd *UsersGetCommand) createCobraCmd(
+func (cmd *UsersDeleteCommand) createCobraCmd(
 	factory spi.Factory,
 	usersCommand,
 	rootCmd spi.GalasaCommand,
@@ -75,23 +75,23 @@ func (cmd *UsersGetCommand) createCobraCmd(
 
 	userCommandValues := usersCommand.Values().(*UsersCmdValues)
 	usersGetCobraCmd := &cobra.Command{
-		Use:     "get",
-		Short:   "Get a list of users",
-		Long:    "Get a list of users stored in the Galasa API server",
-		Aliases: []string{COMMAND_NAME_USERS_GET},
+		Use:     "delete",
+		Short:   "Deletes a user by login ID",
+		Long:    "Deletes a sinlge user by their login ID from the ecosystem",
+		Aliases: []string{COMMAND_NAME_USERS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeUsersGet(factory, usersCommand.Values().(*UsersCmdValues), rootCmd.Values().(*RootCmdValues))
+			return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
-	addLoginIdFlag(usersGetCobraCmd, false, userCommandValues)
+	addLoginIdFlag(usersGetCobraCmd, true, userCommandValues)
 
 	usersCommand.CobraCommand().AddCommand(usersGetCobraCmd)
 
 	return usersGetCobraCmd, err
 }
 
-func (cmd *UsersGetCommand) executeUsersGet(
+func (cmd *UsersDeleteCommand) executeUsersDelete(
 	factory spi.Factory,
 	userCmdValues *UsersCmdValues,
 	rootCmdValues *RootCmdValues,
@@ -106,7 +106,7 @@ func (cmd *UsersGetCommand) executeUsersGet(
 	if err == nil {
 		rootCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Get users from the ecosystem")
+		log.Println("Galasa CLI - Delete user from the ecosystem")
 
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
@@ -136,7 +136,7 @@ func (cmd *UsersGetCommand) executeUsersGet(
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.
-					err = users.GetUsers(userCmdValues.name, apiClient, console)
+					err = users.DeleteUser(userCmdValues.name, apiClient, console)
 				}
 			}
 		}
