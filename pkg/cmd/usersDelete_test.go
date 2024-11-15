@@ -28,14 +28,14 @@ func TestUsersDeleteHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 
-	var args []string = []string{"users", "get", "--help"}
+	var args []string = []string{"users", "delete", "--help"}
 
 	// When...
 	err := Execute(factory, args)
 
 	// Then...
 	// Check what the user saw is reasonable.
-	checkOutput("Displays the options for the 'users get' command.", "", factory, t)
+	checkOutput("Displays the options for the 'users delete' command.", "", factory, t)
 
 	assert.Nil(t, err)
 }

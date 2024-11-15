@@ -74,21 +74,21 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 	var err error
 
 	userCommandValues := usersCommand.Values().(*UsersCmdValues)
-	usersGetCobraCmd := &cobra.Command{
+	usersDeleteCobraCmd := &cobra.Command{
 		Use:     "delete",
 		Short:   "Deletes a user by login ID",
-		Long:    "Deletes a sinlge user by their login ID from the ecosystem",
+		Long:    "Deletes a single user by their login ID from the ecosystem",
 		Aliases: []string{COMMAND_NAME_USERS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
 			return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), rootCmd.Values().(*RootCmdValues))
 		},
 	}
 
-	addLoginIdFlag(usersGetCobraCmd, true, userCommandValues)
+	addLoginIdFlag(usersDeleteCobraCmd, true, userCommandValues)
 
-	usersCommand.CobraCommand().AddCommand(usersGetCobraCmd)
+	usersCommand.CobraCommand().AddCommand(usersDeleteCobraCmd)
 
-	return usersGetCobraCmd, err
+	return usersDeleteCobraCmd, err
 }
 
 func (cmd *UsersDeleteCommand) executeUsersDelete(
@@ -100,6 +100,7 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
+	byteReader := factory.GetByteReader()
 
 	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 
@@ -121,8 +122,6 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, userCmdValues.ecosystemBootstrap, urlService)
 			if err == nil {
 
-				var console = factory.GetStdOutConsole()
-
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
@@ -136,7 +135,7 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.
-					err = users.DeleteUser(userCmdValues.name, apiClient, console)
+					err = users.DeleteUser(userCmdValues.name, apiClient, byteReader)
 				}
 			}
 		}

@@ -250,12 +250,8 @@ var (
 	GALASA_ERROR_MISSING_USER_LOGIN_ID_FLAG           = NewMessageType("GAL1155E: The loginId provided by the --login-id field cannot be an empty string.", 1155, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RETRIEVING_USER_LIST_FROM_API_SERVER = NewMessageType("GAL1156E: Could not get list of users from API server. Reason: '%s'."+
 		" Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file", 1156, STACK_TRACE_WANTED)
-	GALASA_ERROR_DELETE_RUN_FAILED            = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED    = NewMessageType("GAL1158E: An attempt to delete a run named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1158, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_LOGIN_ID             = NewMessageType("GAL1165E: '%s' is not supported as a valid login ID. Login ID should not contain spaces.", 1165, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_USER_FLAG_VALUE      = NewMessageType("GAL1166E: The loginId provided by the --user field cannot be an empty string.", 1166, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_FAILED_TO_DELETE_USER        = NewMessageType("GAL1167E: Failed to delete user from database by user number.", 1167, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_SERVER_DELETE_USER_NOT_FOUND = NewMessageType("GAL1168E: The user could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete", 1168, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_RUN_FAILED         = NewMessageType("GAL1157E: An attempt to delete a run named '%s' failed. Cause is %s", 1157, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_DELETE_RUNS_FAILED = NewMessageType("GAL1158E: An attempt to delete a run named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1158, STACK_TRACE_NOT_WANTED)
 
 	// 4 related but slightly different errors, when an HTTP response arrives from the Galasa server, and we can/can't parse the payload to get the message details out.
 	GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT         = NewMessageType("GAL1159E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server.", 1159, STACK_TRACE_NOT_WANTED)
@@ -265,6 +261,9 @@ var (
 
 	GALASA_ERROR_SERVER_DELETE_RUN_NOT_FOUND      = NewMessageType("GAL1163E: The run named '%s' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete", 1163, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_RUNS_EXPLANATION_NOT_JSON = NewMessageType("GAL1164E: An attempt to delete a run named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1164, STACK_TRACE_NOT_WANTED)
+
+	GALASA_ERROR_INVALID_LOGIN_ID        = NewMessageType("GAL1165E: '%s' is not supported as a valid login ID. Login ID should not contain spaces.", 1165, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_USER_FLAG_VALUE = NewMessageType("GAL1166E: The loginId provided by the --login-id field cannot be an empty string.", 1166, STACK_TRACE_NOT_WANTED)
 
 	GALASA_ERROR_DELETE_SECRET_NO_RESPONSE_CONTENT      = NewMessageType("GAL1167E: An attempt to delete a secret named '%s' failed. Unexpected http status code %v received from the server.", 1167, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_SECRET_RESPONSE_BODY_UNREADABLE = NewMessageType("GAL1168E: An attempt to delete a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1168, STACK_TRACE_NOT_WANTED)
@@ -297,7 +296,15 @@ var (
 	GALASA_ERROR_SET_SECRET_REQUEST_FAILED           = NewMessageType("GAL1192E: Failed to set a secret named '%s'. Sending the put request to the Galasa service failed. Cause is %v", 1192, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_SET_SECRET_INVALID_FLAG_COMBINATION = NewMessageType("GAL1193E: Invalid flag combination provided. --username cannot be provided with --base64-username, --password cannot be provided with --base64-password, and --token cannot be provided with --base64-token."+SEE_COMMAND_REFERENCE, 1193, STACK_TRACE_NOT_WANTED)
 
-	GALASA_ERROR_INVALID_SECRET_DESCRIPTION = NewMessageType("GAL1194E: Invalid secret description provided. The description provided with the --description flag cannot be an empty string, and must only contain characters in the Latin-1 character set.", 1194, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_SECRET_DESCRIPTION              = NewMessageType("GAL1194E: Invalid secret description provided. The description provided with the --description flag cannot be an empty string, and must only contain characters in the Latin-1 character set.", 1194, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_DELETE_USER                   = NewMessageType("GAL1195E: Failed to delete user from database by user number.", 1195, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_DELETE_USER_NOT_FOUND            = NewMessageType("GAL1196E: The user could not be deleted by login ID because it was not found by the Galasa service. Try listing users using 'galasactl users get' to identify the one you wish to delete", 1196, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_DELETE_USER_FAILED               = NewMessageType("GAL1197E: An attempt to delete a user failed. Sending the delete request to the Galasa service failed. Cause is %v", 1197, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_NO_RESPONSE_CONTENT         = NewMessageType("GAL1198E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server.", 1198, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_RESPONSE_PAYLOAD_UNREADABLE = NewMessageType("GAL1199E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1199, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_UNPARSEABLE_CONTENT         = NewMessageType("GAL1200E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1200, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1201E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1201, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1202E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1202, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

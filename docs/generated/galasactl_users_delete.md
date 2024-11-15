@@ -4,7 +4,7 @@ Deletes a user by login ID
 
 ### Synopsis
 
-Deletes a sinlge user by their login ID from the ecosystem
+Deletes a single user by their login ID from the ecosystem
 
 ```
 galasactl users delete [flags]

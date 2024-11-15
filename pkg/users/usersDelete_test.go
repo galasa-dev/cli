@@ -83,19 +83,20 @@ func TestUserDeleteAUser(t *testing.T) {
 	console := utils.NewMockConsole()
 	apiServerUrl := server.Server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockByteReader := utils.NewMockByteReader()
 
 	// When...
 	err := DeleteUser(
 		loginId,
 		apiClient,
-		console)
+		mockByteReader)
 
 	// Then...
 	assert.Nil(t, err, "DeleteUser returned an unexpected error")
 	assert.Empty(t, console.ReadText(), "The console was written to on a successful deletion, it should be empty")
 }
 
-func TestUserDeleteAUserThrowsError(t *testing.T) {
+func TestUserDeleteAUserThrowsAnUnexpectedError(t *testing.T) {
 
 	//Given...
 	userNumber := "dummy-doc-id"
@@ -125,21 +126,21 @@ func TestUserDeleteAUserThrowsError(t *testing.T) {
 	server := utils.NewMockHttpServer(t, interactions)
 	defer server.Server.Close()
 
-	console := utils.NewMockConsole()
 	apiServerUrl := server.Server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockByteReader := utils.NewMockByteReader()
 
 	// When...
 	err := DeleteUser(
 		loginId,
 		apiClient,
-		console)
+		mockByteReader)
 
 	// Then...
 	assert.NotNil(t, err, "DeleteUser returned an unexpected error")
 	assert.Contains(t, err.Error(), strconv.Itoa(http.StatusInternalServerError))
-	assert.Contains(t, err.Error(), "GAL1167E")
-	assert.Contains(t, err.Error(), "Failed to delete user from database by user number.")
+	assert.Contains(t, err.Error(), "GAL1201E")
+	assert.Contains(t, err.Error(), "An attempt to delete a user numbered 'dummy-doc-id' failed")
 }
 
 func TestUserDeleteAUserNotFoundThrowsError(t *testing.T) {
@@ -161,18 +162,18 @@ func TestUserDeleteAUserNotFoundThrowsError(t *testing.T) {
 	server := utils.NewMockHttpServer(t, interactions)
 	defer server.Server.Close()
 
-	console := utils.NewMockConsole()
 	apiServerUrl := server.Server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockByteReader := utils.NewMockByteReader()
 
 	// When...
 	err := DeleteUser(
 		loginId,
 		apiClient,
-		console)
+		mockByteReader)
 
 	// Then...
 	assert.NotNil(t, err, "DeleteUser returned an unexpected error")
-	assert.Contains(t, err.Error(), "GAL1168E")
-	assert.Contains(t, err.Error(), "The user could not be deleted because it was not found by the Galasa service.")
+	assert.Contains(t, err.Error(), "GAL1196E")
+	assert.Contains(t, err.Error(), "The user could not be deleted by login ID because it was not found by the Galasa service.")
 }
