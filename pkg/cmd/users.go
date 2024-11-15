@@ -77,10 +77,16 @@ func (cmd *UsersCommand) createCobraCommand(
 	return usersCobraCmd
 }
 
-func addLoginIdFlag(cmd *cobra.Command, userCmdValues *UsersCmdValues) {
+func addLoginIdFlag(cmd *cobra.Command, isMandatory bool, userCmdValues *UsersCmdValues) {
 
 	flagName := "login-id"
-	var description = "Optional. Retrieves a list of users in an ecosystem."
+	var description string
+
+	if isMandatory{
+		description = "A mandatory field indicating the login ID of a user."
+	} else {
+		description = "An optional field indicating the login ID of a user."
+	}
 
 	cmd.Flags().StringVar(&userCmdValues.name, flagName, "", description)
 

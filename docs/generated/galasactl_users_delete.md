@@ -1,20 +1,20 @@
-## galasactl users get
+## galasactl users delete
 
-Get a list of users
+Deletes a user by login ID
 
 ### Synopsis
 
-Get a list of users stored in the Galasa API server
+Deletes a single user by their login ID from the ecosystem
 
 ```
-galasactl users get [flags]
+galasactl users delete [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help              Displays the options for the 'users get' command.
-      --login-id string   An optional field indicating the login ID of a user.
+  -h, --help              Displays the options for the 'users delete' command.
+      --login-id string   A mandatory field indicating the login ID of a user.
 ```
 
 ### Options inherited from parent commands

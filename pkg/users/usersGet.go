@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -49,6 +50,9 @@ func getUserDataFromRestApi(
 	var context context.Context = nil
 	var users []galasaapi.UserData
 	var err error
+	var restApiVersion string
+
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	apiCall := apiClient.UsersAPIApi.GetUserByLoginId(context)
 
@@ -57,7 +61,7 @@ func getUserDataFromRestApi(
 		loginId, err = validateLoginIdFlag(loginId)
 
 		if err == nil {
-			apiCall = apiCall.LoginId(loginId)
+			apiCall = apiCall.LoginId(loginId).ClientApiVersion(restApiVersion)
 		}
 	}
 

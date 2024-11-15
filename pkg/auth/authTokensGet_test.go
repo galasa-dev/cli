@@ -164,7 +164,7 @@ func TestMissingLoginIdFlagReturnsBadRequest(t *testing.T) {
 	defer server.Close()
 
 	console := utils.NewMockConsole()
-	expectedOutput := `GAL1166E: The loginId provided by the --user field cannot be an empty string.`
+	expectedOutput := `GAL1166E: The loginId provided by the --login-id field cannot be an empty string.`
 
 	//When
 	err := GetTokens(apiClient, console, "   ")

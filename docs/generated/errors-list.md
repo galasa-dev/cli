@@ -161,7 +161,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1163E: The run named '{}' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete
 - GAL1164E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1165E: '{}' is not supported as a valid login ID. Login ID should not contain spaces.
-- GAL1166E: The loginId provided by the --user field cannot be an empty string.
+- GAL1166E: The loginId provided by the --login-id field cannot be an empty string.
 - GAL1167E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server.
 - GAL1168E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
 - GAL1169E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
@@ -190,6 +190,14 @@ The `galasactl` tool can generate the following errors:
 - GAL1192E: Failed to set a secret named '{}'. Sending the put request to the Galasa service failed. Cause is {}
 - GAL1193E: Invalid flag combination provided. --username cannot be provided with --base64-username, --password cannot be provided with --base64-password, and --token cannot be provided with --base64-token. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1194E: Invalid secret description provided. The description provided with the --description flag cannot be an empty string, and must only contain characters in the Latin-1 character set.
+- GAL1195E: Failed to delete user from database by user number.
+- GAL1196E: The user could not be deleted by login ID because it was not found by the Galasa service. Try listing users using 'galasactl users get' to identify the one you wish to delete
+- GAL1197E: An attempt to delete a user failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1198E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server.
+- GAL1199E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1200E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1201E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1202E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
