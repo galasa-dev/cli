@@ -23,6 +23,12 @@ jobs:
       - name: Checkout CLI
         uses: actions/checkout@v4
 
+      - name: Turn script into an executable
+        run: chmod +x detect-secrets.sh
+    
+      - name: Run the detect secrets script
+        run: ./detect-secrets.sh
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -93,12 +99,6 @@ jobs:
       - name: Run local test script with Gradle
         run : |
           ./test-galasactl-local.sh --buildTool gradle
-
-      - name: Turn script into an executable
-        run: chmod +x detect-secrets.sh
-    
-      - name: Run the detect secrets script
-        run: ./detect-secrets.sh
 
       # Commenting out for now as we cannot reach the prod1 ecosystem from GitHub Actions.
       # - name: Chmod ecosystem test script
