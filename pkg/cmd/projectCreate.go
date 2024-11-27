@@ -696,9 +696,10 @@ func createOBRFolderBuildGradle(fileGenerator *utils.FileGenerator, targetOBRFol
 	featureNames []string, forceOverwrite bool) error {
 
 	type OBRGradleParameters struct {
-		Parent      GradleCoordinates
-		Coordinates GradleCoordinates
-		Modules     []GradleCoordinates
+		Parent        GradleCoordinates
+		Coordinates   GradleCoordinates
+		Modules       []GradleCoordinates
+		GalasaVersion string
 	}
 
 	buildGradleTemplateParameters := OBRGradleParameters{
@@ -712,12 +713,19 @@ func createOBRFolderBuildGradle(fileGenerator *utils.FileGenerator, targetOBRFol
 			GroupId: packageName, Name: packageName + "." + featureName}
 	}
 
-	targetFile := utils.GeneratedFileDef{
-		FileType:                 "gradle",
-		TargetFilePath:           targetOBRFolderPath + "/build.gradle",
-		EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/build.gradle.template",
-		TemplateParameters:       buildGradleTemplateParameters}
+	var galasaVersion string
+	var err error
+	galasaVersion, err = embedded.GetGalasaVersion()
+	if err == nil {
+		buildGradleTemplateParameters.GalasaVersion = galasaVersion
 
-	err := fileGenerator.CreateFile(targetFile, forceOverwrite, true)
+		targetFile := utils.GeneratedFileDef{
+			FileType:                 "gradle",
+			TargetFilePath:           targetOBRFolderPath + "/build.gradle",
+			EmbeddedTemplateFilePath: "templates/projectCreate/parent-project/obr-project/build.gradle.template",
+			TemplateParameters:       buildGradleTemplateParameters}
+
+		err = fileGenerator.CreateFile(targetFile, forceOverwrite, true)
+	}
 	return err
 }
