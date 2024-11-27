@@ -8,6 +8,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -323,10 +324,10 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 
 	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
-	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
+	assertOBRFolderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
 
-func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem spi.FileSystem, isMaven bool, isGradle bool) {
+func assertOBRFolderAndContentsCreatedOK(t *testing.T, mockFileSystem spi.FileSystem, isMaven bool, isGradle bool) {
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.obr")
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test folder was not created.")
@@ -352,7 +353,39 @@ func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem spi.FileSy
 		text, err := mockFileSystem.ReadTextFile(expectedBuildGradleFilePath)
 		assert.Nil(t, err)
 		assert.Contains(t, text, "group = 'my.test.pkg'", "Test folder build.gradle didn't substitute the group id")
+
+		var line string
+		line, err = findLineContaining(text, "dev.galasa.obr")
+		assert.Nil(t, err)
+
+		pattern := ".*version '(.*)'$"
+		galasaObrLineRegex, err := regexp.Compile(pattern)
+		assert.Nil(t, err)
+
+		match := galasaObrLineRegex.FindStringSubmatch(line)
+		assert.NotNil(t, match, "No line declaring dev.galasa.obr line version")
+		assert.Equal(t, len(match), 2, "Failed to find more that 0 matches")
+		assert.NotEmpty(t, match[1])
+
 	}
+}
+
+func findLineContaining(text string, textToFindOnLine string) (string, error) {
+	textLines := strings.Split(text, "\n")
+	lineMatching := ""
+	isMatched := false
+	var err error
+	for _, line := range textLines {
+		if strings.Contains(line, textToFindOnLine) {
+			lineMatching = line
+			isMatched = true
+		}
+	}
+
+	if !isMatched {
+		err = errors.New("Failed to find string " + textToFindOnLine)
+	}
+	return lineMatching, err
 }
 
 func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
@@ -457,7 +490,7 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 
 	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
-	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
+	assertOBRFolderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
 
 func TestCanCreateMavenAndGradleProject(t *testing.T) {
