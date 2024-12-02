@@ -92,7 +92,7 @@ function auth_tokens_get_all_tokens_without_loginId {
     "
 
     info "Command is: $cmd"
-
+    mkdir -p $ORIGINAL_DIR/temp
     output_file="$ORIGINAL_DIR/temp/auth-get-output.txt"
     $cmd | tee $output_file
     rc=$?
@@ -125,6 +125,7 @@ function auth_tokens_get_all_tokens_by_loginId {
     "
 
     info "Command is: $cmd"
+    mkdir -p $ORIGINAL_DIR/temp
     output_file="$ORIGINAL_DIR/temp/auth-get-output.txt"
 
     $cmd | tee $output_file
