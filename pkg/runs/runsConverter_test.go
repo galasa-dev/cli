@@ -436,3 +436,41 @@ func TestGherkinRunReturnsCorrectFormattableTestly(t *testing.T) {
 	assert.Equal(t, "Passed", output.Result)
 	assert.Equal(t, "myStatus", output.Status)
 }
+
+func TestGetAvailableResultLabelsInOrderWithNo2ExtraLabels(t *testing.T) {
+	testRun1 := runsformatter.FormattableTest{
+		Name:   "",
+		Bundle: "",
+		Status: "myStatus",
+		Result: "Passed",
+	}
+	testRun2 := runsformatter.FormattableTest{
+		Name:   "",
+		Bundle: "",
+		Status: "myStatus",
+		Result: "MyWeirdResultCode",
+	}
+	testRun3 := runsformatter.FormattableTest{
+		Name:   "",
+		Bundle: "",
+		Status: "myStatus",
+		Result: "MyWeirdResultalternativeCode",
+	}
+	testRun4 := runsformatter.FormattableTest{
+		Name:   "",
+		Bundle: "",
+		Status: "myStatus",
+		Result: "MyWeirdResultalternativeCode",
+	}
+	testRun5 := runsformatter.FormattableTest{
+		Name:   "",
+		Bundle: "",
+		Status: "myStatus",
+		Result: "MyWeirdResultalternativeCode",
+	}
+	testRunsArray := [5]runsformatter.FormattableTest{testRun1, testRun2, testRun3, testRun4, testRun5}
+	labelsGotBack := getAvailableResultLabelsinOrder(testRunsArray[:])
+
+	assert.NotEmpty(t, labelsGotBack)
+	assert.Equal(t, 7, len(labelsGotBack))
+}

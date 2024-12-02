@@ -6,6 +6,7 @@
 package runs
 
 import (
+	"log"
 	"sort"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -18,6 +19,8 @@ func orderFormattableTests(formattableTest []runsformatter.FormattableTest) []ru
 	//get slice of all result labels in ordered form
 	orderedResultLabels := getAvailableResultLabelsinOrder(formattableTest)
 
+	log.Printf("orderFormattableTests: ordered result labels: '%v': %v\n", len(orderedResultLabels), orderedResultLabels)
+
 	//formattableTest runs grouped by results
 	//map["passed"] = [run1, run2, ...]
 	runsGroupedByResultsMap := make(map[string][]runsformatter.FormattableTest)
@@ -27,13 +30,21 @@ func orderFormattableTests(formattableTest []runsformatter.FormattableTest) []ru
 
 	//append tests in order
 	for _, result := range orderedResultLabels {
+		log.Printf("Gathering test results under the '%v' label\n", result)
 		orderedFormattableTest = append(orderedFormattableTest, runsGroupedByResultsMap[result]...)
+		log.Printf("Now there are %v results in total\n", len(orderedFormattableTest))
 	}
+
+	log.Printf("Returning %v test results\n", len(orderedFormattableTest))
 	return orderedFormattableTest
 }
 
+// getAvailableResultLabelsinOrder - returns a slice of all available result labels in the order they should be displayed
+// The order is important as it determines how the tests will be displayed on the screen
+// The standard labels are shown first, followed by any extra labels present in the test data.
+// These laels can be used as columns in the eventual output.
 func getAvailableResultLabelsinOrder(formattableTest []runsformatter.FormattableTest) []string {
-	var orderedResultLabels []string
+	var orderedResultLabels []string = make([]string, 0)
 	orderedResultLabels = append(orderedResultLabels, RESULT_PASSED)
 	orderedResultLabels = append(orderedResultLabels, RESULT_PASSED_WITH_DEFECTS)
 	orderedResultLabels = append(orderedResultLabels, RESULT_FAILED)
@@ -41,23 +52,35 @@ func getAvailableResultLabelsinOrder(formattableTest []runsformatter.Formattable
 	orderedResultLabels = append(orderedResultLabels, RESULT_ENVFAIL)
 
 	//Build a list of standard labels to prevent duplication
-	var standardResultLabels = make(map[string]struct{})
+	var standardResultLabels = make(map[string]struct{}, 0)
 	for _, key := range orderedResultLabels {
 		//'struct{}{}' allocates no storage. In Go 1.19 we can use just '{}' instead
 		standardResultLabels[key] = struct{}{}
 	}
 
+	log.Printf("There are %v standard labels: %v\n", len(standardResultLabels), standardResultLabels)
+
 	//Gathering custom labels
-	var customResultLabels []string
+	var customResultLabels []string = make([]string, 0)
+	// A map to make sure we never add the same custom label to the list twice.
+	customResultLabelMap := make(map[string]string, 0)
 	for _, run := range formattableTest {
 		_, isStandardLabel := standardResultLabels[run.Result]
 		if !isStandardLabel {
-			customResultLabels = append(customResultLabels, run.Result)
+
+			_, isCustomLabelWeAlreadyKnowAbout := customResultLabelMap[run.Result]
+			if !isCustomLabelWeAlreadyKnowAbout {
+				log.Printf("Label '%v' is not a standard result label\n", run.Result)
+				customResultLabels = append(customResultLabels, run.Result)
+				customResultLabelMap[run.Result] = "known"
+			}
 		}
 	}
 
 	sort.Strings(customResultLabels)
 	orderedResultLabels = append(orderedResultLabels, customResultLabels...)
+
+	log.Printf("There are %v labels overall: %v", len(orderedResultLabels), orderedResultLabels)
 
 	return orderedResultLabels
 }
@@ -65,13 +88,19 @@ func getAvailableResultLabelsinOrder(formattableTest []runsformatter.Formattable
 func FormattableTestFromGalasaApi(runs []galasaapi.Run, apiServerUrl string) []runsformatter.FormattableTest {
 	var formattableTest []runsformatter.FormattableTest
 
+	log.Printf("FormattableTestFromGalasaApi: There are %v runs passed\n", len(runs))
+
 	for _, run := range runs {
 		//Get the data for each TestStructure in runs
 		newFormattableTest := getTestStructureData(run, apiServerUrl)
 		formattableTest = append(formattableTest, newFormattableTest)
 	}
 
+	log.Printf("FormattableTestFromGalasaApi: There are %v runs to format\n", len(formattableTest))
+
 	orderedFormattableTest := orderFormattableTests(formattableTest)
+
+	log.Printf("FormattableTestFromGalasaApi: There are %v runs returned\n", len(orderedFormattableTest))
 
 	return orderedFormattableTest
 }
