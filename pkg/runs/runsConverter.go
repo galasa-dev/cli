@@ -19,8 +19,6 @@ func orderFormattableTests(formattableTest []runsformatter.FormattableTest) []ru
 	//get slice of all result labels in ordered form
 	orderedResultLabels := getAvailableResultLabelsinOrder(formattableTest)
 
-	log.Printf("orderFormattableTests: ordered result labels: '%v': %v\n", len(orderedResultLabels), orderedResultLabels)
-
 	//formattableTest runs grouped by results
 	//map["passed"] = [run1, run2, ...]
 	runsGroupedByResultsMap := make(map[string][]runsformatter.FormattableTest)
@@ -30,12 +28,10 @@ func orderFormattableTests(formattableTest []runsformatter.FormattableTest) []ru
 
 	//append tests in order
 	for _, result := range orderedResultLabels {
-		log.Printf("Gathering test results under the '%v' label\n", result)
 		orderedFormattableTest = append(orderedFormattableTest, runsGroupedByResultsMap[result]...)
-		log.Printf("Now there are %v results in total\n", len(orderedFormattableTest))
 	}
 
-	log.Printf("Returning %v test results\n", len(orderedFormattableTest))
+	// log.Printf("Returning %v test results\n", len(orderedFormattableTest))
 	return orderedFormattableTest
 }
 

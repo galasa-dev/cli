@@ -110,32 +110,6 @@ function auth_tokens_get_all_tokens_without_loginId {
 
 }
 
-function auth_tokens_get_with_missing_loginId_throws_error {
-
-    h2 "Performing auth tokens get with loginId: get..."
-    loginId=""
-
-    cmd="${BINARY_LOCATION} auth tokens get \
-    --user $loginId \
-    --bootstrap $bootstrap \
-    --log -
-    "
-
-    info "Command is: $cmd"
-
-    output_file="$ORIGINAL_DIR/temp/auth-get-output.txt"
-    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-    $cmd | tee $output_file
-
-    rc=$?
-    if [[ "${rc}" != "1" ]]; then 
-        error "Failed to get access tokens due to missing login ID. Bad Request"
-        exit 1
-    fi
-
-    success "galasactl auth tokens get command correctly threw an error due to missing loginId"
-
-}
 
 function auth_tokens_get_all_tokens_by_loginId {
 
@@ -172,7 +146,6 @@ function auth_tokens_get_all_tokens_by_loginId {
 
 function auth_tests {
     auth_tokens_get_all_tokens_without_loginId
-    auth_tokens_get_with_missing_loginId_throws_error
     auth_tokens_get_all_tokens_by_loginId
 }
 

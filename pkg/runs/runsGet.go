@@ -191,9 +191,7 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS, strconv.Itoa(httpResponse.StatusCode))
 				} else {
-					log.Printf("Adding those details into the list of runs. Length")
 					runsDetails = append(runsDetails, *details)
-					log.Printf("Now there are %v runs\n", len(runsDetails))
 				}
 			}
 		}
