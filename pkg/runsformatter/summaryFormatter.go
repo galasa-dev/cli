@@ -5,7 +5,10 @@
  */
 package runsformatter
 
-import "strings"
+import (
+	"log"
+	"strings"
+)
 
 // -----------------------------------------------------
 // Summary format.
@@ -29,11 +32,13 @@ func (*SummaryFormatter) IsNeedingMethodDetails() bool {
 }
 
 func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, error) {
-	var result string = ""
+	var result string
 	var err error
 	buff := strings.Builder{}
 	totalResults := len(testResultsData)
 	resultCountsMap := initialiseResultMap()
+
+	log.Printf("Formatter passed %v runs to show.\n", len(testResultsData))
 
 	if totalResults > 0 {
 		var table [][]string

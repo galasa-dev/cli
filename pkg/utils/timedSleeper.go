@@ -40,13 +40,13 @@ func (ts *realTimedSleeper) Interrupt(message string) {
 // Sleep for a bit. Waking up if anything calls the interrupt method.
 func (ts *realTimedSleeper) Sleep(duration time.Duration) {
 
-	log.Printf("timeService: %v : sleep entered\n", *ts)
+	// log.Printf("timeService: %v : sleep entered\n", *ts)
 	timer := time.After(duration)
 
 	select {
 	case msg := <-ts.interruptEventChannel:
 		log.Printf("timeService: %v : received interrupt message %s\n", *ts, msg)
 	case <-timer:
-		log.Printf("timeService: %v : sleep timed out\n", *ts)
+		// log.Printf("timeService: %v : sleep timed out\n", *ts)
 	}
 }
