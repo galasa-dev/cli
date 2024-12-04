@@ -15,7 +15,7 @@ import (
 
 const (
 	PROPERTY_NAMESPACE_PATTERN = "^[a-z][a-z0-9]+$"
-	PROPERTY_NAME_PATTERN      = "^[a-zA-Z][a-zA-Z0-9\\.\\-\\_]+$"
+	PROPERTY_NAME_PATTERN      = "^[a-zA-Z][a-zA-Z0-9\\.\\-\\_@]+$"
 )
 
 func validateInputsAreNotEmpty(namespace string, name string) error {
