@@ -85,6 +85,22 @@ func TestDeletePropertyValueReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestDeletePropertyValueWithAtSymbolReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validnamespace"
+	name := "Galasadelivery@ibm.com"
+
+	server := newDeletePropertiesServletMock(t)
+	apiClient := api.InitialiseAPI(server.URL)
+	defer server.Close()
+
+	//When
+	err := DeleteProperty(namespace, name, apiClient)
+
+	//Then
+	assert.Nil(t, err)
+}
+
 // invalid OR empty namespace, valid propertyname
 func TestDeletePropertyWithInvalidNamesapceFormatReturnsError(t *testing.T) {
 	//Given...

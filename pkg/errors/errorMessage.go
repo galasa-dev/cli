@@ -231,7 +231,7 @@ var (
 		"The namespace must start with a character in the 'a-z' range, followed by characters in the 'a'-'z' or '0'-'9' ranges only.", 1140, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_COMPILE_PROPERTY_FIELD_REGEX = NewMessageType("GAL1141E: Unable to compile the regex pattern for Galasa Property field '%s'. Reason: '%s'", 1141, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_PROPERTY_FIELD_FORMAT          = NewMessageType("GAL1142E: The %s field value, '%s', provided does not match formatting requirements. "+
-		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.", 1142, STACK_TRACE_NOT_WANTED)
+		"The %s field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) or '@' (at) ranges only.", 1142, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS              = NewMessageType("GAL1143E: Could not query run results. Server returned a non-200 code (%s)", 1143, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_TEST_CATALOG_CONTENTS_FAILED      = NewMessageType("GAL1144E: Could not use url '%s' to retrieve the contents of the test catalog from stream '%s'. Http error from the Galasa server is '%v'", 1144, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_FAILED_TO_CREATE_BEARER_TOKEN_FOLDER  = NewMessageType("GAL1145E: Failed to create folder for bearer tokens at '%s'\n", 1145, STACK_TRACE_NOT_WANTED)
