@@ -2,6 +2,7 @@
 
 The Galasa command line interface (Galasa CLI) is used to interact with the Galasa ecosystem or local development environment.
 
+[![Main build](https://github.com/galasa-dev/cli/actions/workflows/build.yml/badge.svg)](https://github.com/galasa-dev/cli/actions/workflows/build.yml)
 
 ## Environment variables
 
