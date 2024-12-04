@@ -30,15 +30,16 @@ repositories {
 }
 apply plugin: 'java'
 dependencies {
+    implementation platform('dev.galasa:dev.galasa.platform:0.38.0')
     // We need the galasa-boot jar so we can launch tests in a local JVM
-    implementation 'dev.galasa:galasa-boot:' + galasaBootJarVersion
+    implementation 'dev.galasa:galasa-boot'
     // We need the openapi generator to turn a yaml file into go client stubs, 
     // so we can call the api server REST services
     // https://mvnrepository.com/artifact/org.openapitools/openapi-generator
-    implementation 'org.openapitools:openapi-generator-cli:6.6.0'
+    implementation 'org.openapitools:openapi-generator-cli'
 
     // Download the openapi.yaml specification for the REST APIs.
-    compileOnly group: "dev.galasa", name: "dev.galasa.framework.api.openapi", version: "$galasaOpenApiYamlVersion", ext: "yaml"
+    compileOnly group: "dev.galasa", name: "dev.galasa.framework.api.openapi", version: "$galasaOpenApiYamlVersion", ext: "yaml" // to do
 }
 
 
