@@ -424,17 +424,17 @@ func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, roo
 	var usersDeleteCommand spi.GalasaCommand
 
 	usersCommand, err = NewUsersCommand(rootCommand)
-	usersDeleteCommand, err = NewUsersCommand(rootCommand)
 
 	if err == nil {
 		usersGetCommand, err = NewUsersGetCommand(factory, usersCommand, rootCommand)
-		usersDeleteCommand, err = NewUsersDeleteCommand(factory, usersCommand, rootCommand)
-	}
-
-	if err == nil {
-		commands.commandMap[usersCommand.Name()] = usersCommand
-		commands.commandMap[usersGetCommand.Name()] = usersGetCommand
-		commands.commandMap[usersDeleteCommand.Name()] = usersDeleteCommand
+		if err == nil {
+			usersDeleteCommand, err = NewUsersDeleteCommand(factory, usersCommand, rootCommand)
+			if err == nil {
+				commands.commandMap[usersCommand.Name()] = usersCommand
+				commands.commandMap[usersGetCommand.Name()] = usersGetCommand
+				commands.commandMap[usersDeleteCommand.Name()] = usersDeleteCommand
+			}
+		}
 	}
 
 	return err
