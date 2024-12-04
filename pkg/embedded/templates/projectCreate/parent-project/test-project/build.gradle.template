@@ -1,9 +1,23 @@
+{{/*	
+	This template expects the following parameters:
 
+	type ParentPomParameters struct {
+		Coordinates MavenCoordinates
+
+		// Version of Galasa we are targetting
+		GalasaVersion string
+
+		IsOBRRequired    bool
+		ObrName          string
+		ChildModuleNames []string
+		IsDevelopment    bool 
+	}
+*/}}
 // This section tells gradle which gradle plugins to use to build this project.
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'dev.galasa.tests' version '0.36.0'
+    id 'dev.galasa.tests' version '{{.GalasaVersion}}'
     id 'biz.aQute.bnd.builder' version '6.4.0'
 }
 

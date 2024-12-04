@@ -102,8 +102,13 @@ export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 CALLED_BY_MAIN="true"
 # Bootstrap is in the $bootstrap variable.
 
+
+
 source ${BASEDIR}/test-scripts/calculate-galasactl-executables.sh
 calculate_galasactl_executable
+
+source ${BASEDIR}/test-scripts/auth-tests.sh --bootstrap "${bootstrap}"
+auth_tests
 
 source ${BASEDIR}/test-scripts/runs-tests.sh --bootstrap "${bootstrap}"
 test_runs_commands
@@ -114,8 +119,7 @@ properties_tests
 source ${BASEDIR}/test-scripts/resources-tests.sh --bootstrap "${bootstrap}"
 resources_tests
 
-source ${BASEDIR}/test-scripts/auth-tests.sh --bootstrap "${bootstrap}"
-auth_tests
+
 
 # Test the hybrid configuration where the local test runs locally, but
 # draws it's CPS properties from a remote ecosystem via a REST extension.

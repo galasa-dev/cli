@@ -89,11 +89,14 @@ func GetRuns(
 			if err == nil {
 				// Some formatters need extra fields filled-in so they can be displayed.
 				if chosenFormatter.IsNeedingMethodDetails() {
+					log.Println("This type of formatter needs extra detail about each run to display")
 					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiClient)
 				}
 
 				if err == nil {
 					var outputText string
+
+					log.Printf("There are %v results to display in total.\n", len(runJson))
 
 					//convert galsaapi.Runs tests into formattable data
 					formattableTest := FormattableTestFromGalasaApi(runJson, apiServerUrl)
@@ -179,6 +182,7 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 
 		for _, run := range runs {
 			runid := run.GetRunId()
+			log.Printf("Getting details for run %v\n", runid)
 			details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).ClientApiVersion(restApiVersion).Execute()
 			if err != nil {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
@@ -267,11 +271,17 @@ func GetRunsFromRestApi(
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
 				} else {
 
+					log.Printf("HTTP status was OK")
+
 					// Copy the results from this page into our bigger list of results.
 					runsOnThisPage := runData.GetRuns()
+					log.Printf("runsOnThisPage: %v", len(runsOnThisPage))
+
 					// Add all the runs into our set of results.
 					// Note: The ... syntax means 'all of the array', so they all get appended at once.
 					results = append(results, runsOnThisPage...)
+
+					log.Printf("total runs: %v", len(results))
 
 					// Have we processed the last page ?
 					if !runData.HasNextCursor() || len(runsOnThisPage) < int(runData.GetPageSize()) {
@@ -284,6 +294,8 @@ func GetRunsFromRestApi(
 			}
 		}
 	}
+
+	log.Printf("total runs returned: %v", len(results))
 
 	return results, err
 }

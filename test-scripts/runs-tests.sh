@@ -834,7 +834,7 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
 
 #--------------------------------------------------------------------------
 function runs_get_check_requestor_parameter {
-    requestor="galasadelivery@ibm.com"
+    requestor="Galasadelivery@ibm.com"
     h2 "Performing runs get with details format providing a from age and requestor as $requestor..."
 
     cd ${BASEDIR}/temp
