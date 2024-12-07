@@ -14,8 +14,8 @@
 // into the code, so the code knows what versions of galasa it should be 
 // dealing with. Do not mess with the `def {variableName}` part of hte following 
 // lines, only change the versions we rely upon.
-def galasaBootJarVersion = '0.38.0'
-def galasaFrameworkVersion = '0.38.0'
+def galasaBootJarVersion = '0.39.0'
+def galasaFrameworkVersion = '0.39.0'
 
 // Right now, the REST interface spec is always the same version as the galasa framework bundles.
 def galasaOpenApiYamlVersion = galasaFrameworkVersion

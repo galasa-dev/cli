@@ -135,7 +135,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1139E: Unable to compile the regex pattern for Galasa Property field 'namespace'. Reason: '{}'
 - GAL1140E: The namespace, '{}', provided does not match formatting requirements. The namespace must start with a character in the 'a-z' range, followed by characters in the 'a'-'z' or '0'-'9' ranges only.
 - GAL1141E: Unable to compile the regex pattern for Galasa Property field '{}'. Reason: '{}'
-- GAL1142E: The {} field value, '{}', provided does not match formatting requirements. The {} field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.
+- GAL1142E: The {} field value, '{}', provided does not match formatting requirements. The {} field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) or '@' (at) ranges only.
 - GAL1143E: Could not query run results. Server returned a non-200 code ({})
 - GAL1144E: Could not use url '{}' to retrieve the contents of the test catalog from stream '{}'. Http error from the Galasa server is '{}'
 - GAL1145E: Failed to create folder for bearer tokens at '{}'
