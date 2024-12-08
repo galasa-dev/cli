@@ -23,6 +23,12 @@ jobs:
       - name: Checkout CLI
         uses: actions/checkout@v4
 
+      - name: Turn script into an executable
+        run: chmod +x detect-secrets.sh
+    
+      - name: Run the detect secrets script
+        run: ./detect-secrets.sh
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
