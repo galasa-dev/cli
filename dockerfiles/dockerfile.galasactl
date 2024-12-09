@@ -1,0 +1,15 @@
+FROM harbor.galasa.dev/docker_proxy_cache/library/ubuntu:20.04
+
+RUN apt-get update \
+    && apt-get install -y ca-certificates
+
+ARG platform
+
+RUN addgroup galasa && \ 
+    adduser -D -G galasa -h /galasa -s /bin/sh galasa 
+
+COPY bin/galasactl-${platform} /bin/galasactl
+RUN chmod +x /bin/galasactl
+
+WORKDIR /galasa
+USER galasa

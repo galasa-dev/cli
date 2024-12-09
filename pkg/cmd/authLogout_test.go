@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthogoutCommandInCommandCollectionHasName(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	authLogoutommand, err := commands.GetCommand(COMMAND_NAME_AUTH_LOGOUT)
@@ -21,13 +22,13 @@ func TestAuthogoutCommandInCommandCollectionHasName(t *testing.T) {
 
 	assert.NotNil(t, authLogoutommand)
 	assert.Equal(t, COMMAND_NAME_AUTH_LOGOUT, authLogoutommand.Name())
-	assert.Nil(t, authLogoutommand.Values())
+	assert.NotNil(t, authLogoutommand.Values())
 	assert.NotNil(t, authLogoutommand.CobraCommand())
 }
 
 func TestAuthLogoutHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"auth", "logout", "--help"}
 
@@ -43,12 +44,13 @@ func TestAuthLogoutHelpFlagSetCorrectly(t *testing.T) {
 }
 func TestAuthLogoutNoFlagsExecutesOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_AUTH_LOGOUT, factory, t)
 
 	var args []string = []string{"auth", "logout"}
 
 	// When...
-	err := Execute(factory, args)
+	err := commandCollection.Execute(args)
 
 	// Then...
 	// Check what the user saw is reasonable.

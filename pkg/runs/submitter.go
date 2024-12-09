@@ -22,26 +22,29 @@ import (
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/props"
 	"github.com/galasa-dev/cli/pkg/runsformatter"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 type Submitter struct {
-	galasaHome  utils.GalasaHome
-	fileSystem  files.FileSystem
-	launcher    launcher.Launcher
-	timeService utils.TimeService
-	env         utils.Environment
-	console     utils.Console
-	expander    images.ImageExpander
+	galasaHome   spi.GalasaHome
+	fileSystem   spi.FileSystem
+	launcher     launcher.Launcher
+	timeService  spi.TimeService
+	timedSleeper spi.TimedSleeper
+	env          spi.Environment
+	console      spi.Console
+	expander     images.ImageExpander
 }
 
 func NewSubmitter(
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
 	launcher launcher.Launcher,
-	timeService utils.TimeService,
-	env utils.Environment,
-	console utils.Console,
+	timeService spi.TimeService,
+	timedSleeper spi.TimedSleeper,
+	env spi.Environment,
+	console spi.Console,
 	expander images.ImageExpander,
 ) *Submitter {
 	instance := new(Submitter)
@@ -49,6 +52,7 @@ func NewSubmitter(
 	instance.fileSystem = fileSystem
 	instance.launcher = launcher
 	instance.timeService = timeService
+	instance.timedSleeper = timedSleeper
 	instance.env = env
 	instance.console = console
 	instance.expander = expander
@@ -61,7 +65,7 @@ func (submitter *Submitter) ExecuteSubmitRuns(
 
 ) error {
 
-	var err error = nil
+	var err error
 
 	err = submitter.validateAndCorrectParams(params, TestSelectionFlagValues)
 	if err == nil {
@@ -87,7 +91,7 @@ func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
 	params utils.RunsSubmitCmdValues,
 ) error {
 
-	var err error = nil
+	var err error
 
 	// Build list of runs to submit
 	readyRuns := submitter.buildListOfRunsToSubmit(portfolio, runOverrides)
@@ -125,7 +129,7 @@ func (submitter *Submitter) executePortfolio(portfolio *Portfolio,
 func reportRendedImages(finishedRuns map[string]*TestRun, submitter *Submitter) error {
 	var err error
 
-	for runName, _ := range finishedRuns {
+	for runName := range finishedRuns {
 
 		folderToScan := submitter.galasaHome.GetNativeFolderPath() + "/ras/" + runName
 		err = submitter.expander.ExpandImages(folderToScan)
@@ -143,7 +147,7 @@ func (submitter *Submitter) executeSubmitRuns(
 	runOverrides map[string]string,
 ) (map[string]*TestRun, map[string]*TestRun, error) {
 
-	var err error = nil
+	var err error
 
 	submittedRuns := make(map[string]*TestRun)
 	rerunRuns := make(map[string]*TestRun)
@@ -185,7 +189,7 @@ func (submitter *Submitter) executeSubmitRuns(
 			now := submitter.timeService.Now()
 			if now.After(nextProgressReport) {
 				//convert TestRun
-				displayInterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
+				submitter.displayInterrimProgressReport(readyRuns, submittedRuns, finishedRuns, lostRuns, throttle)
 				nextProgressReport = now.Add(progressReportInterval)
 			}
 		}
@@ -196,16 +200,16 @@ func (submitter *Submitter) executeSubmitRuns(
 
 		// Only sleep if there are runs in progress but not yet finished.
 		if len(submittedRuns) > 0 || len(rerunRuns) > 0 {
-			log.Printf("Sleeping for the poll interval of %v seconds\n", params.PollIntervalSeconds)
-			submitter.timeService.Sleep(pollInterval)
-			log.Printf("Awake from poll interval sleep of %v seconds\n", params.PollIntervalSeconds)
+			// log.Printf("Sleeping for the poll interval of %v seconds\n", params.PollIntervalSeconds)
+			submitter.timedSleeper.Sleep(pollInterval)
+			// log.Printf("Awake from poll interval sleep of %v Gathering test results under theseconds\n", params.PollIntervalSeconds)
 		}
 	}
 
 	return finishedRuns, lostRuns, err
 }
 
-func displayInterrimProgressReport(readyRuns []TestRun,
+func (submitter *Submitter) displayInterrimProgressReport(readyRuns []TestRun,
 	submittedRuns map[string]*TestRun,
 	finishedRuns map[string]*TestRun,
 	lostRuns map[string]*TestRun,
@@ -216,22 +220,21 @@ func displayInterrimProgressReport(readyRuns []TestRun,
 	finished := len(finishedRuns)
 	lost := len(lostRuns)
 
-	fmt.Println("Progress report")
+	log.Println("Progress report")
 	for runName, run := range submittedRuns {
 		log.Printf("***     Run %v is currently %v - %v/%v/%v\n", runName, run.Status, run.Stream, run.Bundle, run.Class)
-		fmt.Printf("Run %v - %v/%v/%v\n", runName, run.Stream, run.Bundle, run.Class)
 	}
-	fmt.Println("----------------------------------------------------------------------------")
-	fmt.Printf("Run status: Ready=%v, Submitted=%v, Finished=%v, Lost=%v\n", ready, submitted, finished, lost)
-	fmt.Printf("Throttle=%v\n", throttle)
+	log.Println("----------------------------------------------------------------------------")
+	log.Printf("Run status: Ready=%v, Submitted=%v, Finished=%v, Lost=%v\n", ready, submitted, finished, lost)
+	log.Printf("Throttle=%v\n", throttle)
 
 	if finished > 0 {
-		displayTestRunResults(finishedRuns, lostRuns)
+		submitter.displayTestRunResults(finishedRuns, lostRuns)
 	}
 }
 
 func (submitter *Submitter) writeThrottleFile(throttleFileName string, throttle int) error {
-	var err error = nil
+	var err error
 	if throttleFileName != "" {
 		// Throttle filename was specified. Lets use a throttle file.
 		err = submitter.fileSystem.WriteTextFile(throttleFileName, strconv.Itoa(throttle))
@@ -313,7 +316,7 @@ func (submitter *Submitter) submitRun(
 	requestType string,
 ) ([]TestRun, error) {
 
-	var err error = nil
+	var err error
 	if len(readyRuns) >= 1 {
 
 		nextRun := readyRuns[0]
@@ -386,7 +389,11 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 
 			// now check to see if it is finished
 			if currentRun.GetStatus() == "finished" {
+
 				finishedRuns[runName] = checkRun
+
+				checkRun.Status = *currentRun.Status
+
 				delete(submittedRuns, runName)
 
 				result := "unknown"
@@ -421,9 +428,9 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 				}
 
 				if checkRun.GherkinUrl != "" {
-					log.Printf("Run %v has finished(%v) - %v\n", runName, result, checkRun.GherkinFeature)
+					log.Printf("Run %v has finished(%v) - %v (Gherkin)\n", runName, result, checkRun.GherkinFeature)
 				} else {
-					log.Printf("Run %v has finished(%v) - %v/%v/%v\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class)
+					log.Printf("Run %v has finished(%v) - %v/%v/%v - %s\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class, currentRun.GetStatus())
 				}
 			} else {
 				// Check to see if there was a status change
@@ -452,9 +459,9 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
 	finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) error {
 
 	//convert TestRun tests into formattable data
-	displayTestRunResults(finishedRuns, lostRuns)
+	submitter.displayTestRunResults(finishedRuns, lostRuns)
 
-	var err error = nil
+	var err error
 	if params.ReportYamlFilename != "" {
 		err = ReportYaml(submitter.fileSystem, params.ReportYamlFilename, finishedRuns, lostRuns)
 	}
@@ -474,15 +481,15 @@ func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
 	return err
 }
 
-func displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
+func (submitter *Submitter) displayTestRunResults(finishedRuns map[string]*TestRun, lostRuns map[string]*TestRun) {
 	var formatter = runsformatter.NewSummaryFormatter()
-	var err error = nil
+	var err error
 	var outputText string
 
 	formattableTest := FormattableTestFromTestRun(finishedRuns, lostRuns)
 	outputText, err = formatter.FormatRuns(formattableTest)
 	if err == nil {
-		print(outputText)
+		submitter.console.WriteString(outputText)
 	}
 }
 
@@ -547,7 +554,7 @@ func (submitter *Submitter) validateAndCorrectParams(
 	submitSelectionFlags *utils.TestSelectionFlagValues,
 ) error {
 
-	var err error = nil
+	var err error
 
 	// Guard against the poll time being less than 1 second
 	if params.PollIntervalSeconds < 1 {
@@ -619,7 +626,7 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 }
 
 func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValues) error {
-	var err error = nil
+	var err error
 
 	params.OverrideFilePath, err = files.TildaExpansion(submitter.fileSystem, params.OverrideFilePath)
 
@@ -676,7 +683,7 @@ func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[strin
 }
 
 func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string) (map[string]string, error) {
-	var err error = nil
+	var err error
 
 	// Convert overrides to a map
 	for _, override := range commandLineOverrides {
@@ -704,7 +711,7 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 func (submitter *Submitter) getPortfolio(portfolioFileName string, submitSelectionFlags *utils.TestSelectionFlagValues) (*Portfolio, error) {
 	// Load the portfolio of tests
 	var portfolio *Portfolio = nil
-	var err error = nil
+	var err error
 
 	if portfolioFileName != "" {
 		portfolio, err = ReadPortfolio(submitter.fileSystem, portfolioFileName)
@@ -733,7 +740,7 @@ func (submitter *Submitter) GetCurrentUserName() string {
 }
 
 func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFilename string) error {
-	var err error = nil
+	var err error
 	if portfolio.Classes == nil || len(portfolio.Classes) < 1 {
 		// Empty portfolio
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_EMPTY_PORTFOLIO, portfolioFilename)
@@ -743,7 +750,7 @@ func (submitter *Submitter) validatePortfolio(portfolio *Portfolio, portfolioFil
 
 func (submitter *Submitter) checkIfGroupAlreadyInUse(groupName string) (bool, error) {
 	isInUse := false
-	var err error = nil
+	var err error
 
 	// Just check if it is already in use,  which is perfectly valid for custom group names
 	var uuidCheck *galasaapi.TestRuns

@@ -13,7 +13,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/props"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 const (
@@ -53,7 +53,7 @@ type RealUrlResolutionService struct {
 func (*RealUrlResolutionService) Get(url string) (string, error) {
 	var resp *http.Response
 	var contents string = ""
-	var err error = nil
+	var err error
 
 	resp, err = http.Get(url)
 	// Wrap the error inside a galasa error.
@@ -72,7 +72,7 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 }
 
 // getDefaultBootstrapPath - Work out where the boostrap file can normally be found.
-func getDefaultBootstrapPath(galasaHome utils.GalasaHome) string {
+func getDefaultBootstrapPath(galasaHome spi.GalasaHome) string {
 
 	// Turn the path into a URL
 	// This may involve changing the direction of slash characters.
@@ -87,18 +87,55 @@ func getDefaultBootstrapPath(galasaHome utils.GalasaHome) string {
 // loadBootstrap - Loads the contents of a bootstrap file into memory.
 // bootstrapPath - Where do we find the bootstrap contents from ? This can be a URL must end in /bootstrap
 func LoadBootstrap(
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
-	env utils.Environment,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
+	env spi.Environment,
 	bootstrapPath string,
 	urlResolutionService UrlResolutionService,
 ) (*BootstrapData, error) {
 
-	var err error = nil
-
-	path := bootstrapPath
+	var err error
 
 	var bootstrap *BootstrapData = nil
+
+	path := GetBootstrapLocation(env, galasaHome, bootstrapPath)
+
+	// Default the API server to assume it's running locally, natively.
+	defaultApiServerURL := "http://127.0.0.1"
+
+	if strings.HasPrefix(path, "http:") || strings.HasPrefix(path, "https:") {
+		// The path looks like a URL...
+		bootstrap, err = loadBootstrapFromUrl(path, defaultApiServerURL, urlResolutionService)
+	} else {
+
+		// The path looks like a file...
+		bootstrap, err = loadBootstrapFromFile(path, defaultApiServerURL, fileSystem)
+	}
+
+	if err == nil {
+		// Now we have a collection of boot properties. Find the Api server URL if there is one
+		// to populate the specified field in the structure.
+		if bootstrap.Properties != nil {
+			apiServerUrlFromPropsFile := bootstrap.Properties[BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL]
+			if apiServerUrlFromPropsFile != "" {
+				bootstrap.ApiServerURL = apiServerUrlFromPropsFile
+			}
+		}
+	} else {
+		// Don't return any data if there was a failure.
+		bootstrap = nil
+	}
+
+	if err != nil {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_BOOTSTRAP_FILE, path, err.Error())
+	}
+
+	return bootstrap, err
+}
+
+func GetBootstrapLocation(env spi.Environment, galasaHome spi.GalasaHome, explicitUserBootstrap string) string {
+
+	path := explicitUserBootstrap
 
 	// If the --bootstrap flag wasn't specified by the user... default to the value in the
 	// GALASA_BOOTSTRAP environment variable.
@@ -110,49 +147,15 @@ func LoadBootstrap(
 	if path == "" {
 		path = getDefaultBootstrapPath(galasaHome)
 	}
-
-	if err == nil {
-
-		// Default the API server to assume it's running locally, natively.
-		defaultApiServerURL := "http://127.0.0.1"
-
-		if strings.HasPrefix(path, "http:") || strings.HasPrefix(path, "https:") {
-			// The path looks like a URL...
-			bootstrap, err = loadBootstrapFromUrl(path, defaultApiServerURL, urlResolutionService)
-		} else {
-
-			// The path looks like a file...
-			bootstrap, err = loadBootstrapFromFile(path, defaultApiServerURL, fileSystem)
-		}
-
-		if err == nil {
-			// Now we have a collection of boot properties. Find the Api server URL if there is one
-			// to populate the specified field in the structure.
-			if bootstrap.Properties != nil {
-				apiServerUrlFromPropsFile := bootstrap.Properties[BOOTSTRAP_PROPERTY_NAME_REMOTE_API_SERVER_URL]
-				if apiServerUrlFromPropsFile != "" {
-					bootstrap.ApiServerURL = apiServerUrlFromPropsFile
-				}
-			}
-		} else {
-			// Don't return any data if there was a failure.
-			bootstrap = nil
-		}
-	}
-
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_BOOTSTRAP_FILE, path, err.Error())
-	}
-
-	return bootstrap, err
+	return path
 }
 
-func cleanPath(fileSystem files.FileSystem, path string) (string, error) {
-	var err error = nil
+func cleanPath(fileSystem spi.FileSystem, path string) (string, error) {
+	var err error
 	if path != "" {
 		path = removeLeadingFileColon(path)
 		err = validateURL(path)
-		if err == nil{
+		if err == nil {
 			path, err = files.TildaExpansion(fileSystem, path)
 		}
 	}
@@ -165,17 +168,17 @@ func removeLeadingFileColon(path string) string {
 }
 
 func validateURL(path string) error {
-	var err error = nil
+	var err error
 	if strings.HasPrefix(path, "file:") {
-		err=galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_BOOTSTRAP_FILE_URL, path)
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_BAD_BOOTSTRAP_FILE_URL, path)
 	}
 	return err
 }
 
-func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem files.FileSystem) (*BootstrapData, error) {
+func loadBootstrapFromFile(path string, defaultApiServerURL string, fileSystem spi.FileSystem) (*BootstrapData, error) {
 	bootstrap := new(BootstrapData)
 	var content string
-	var err error = nil
+	var err error
 
 	bootstrap.ApiServerURL = defaultApiServerURL
 
@@ -203,7 +206,7 @@ func loadBootstrapFromUrl(path string, defaultApiServerURL string,
 
 	bootstrap := new(BootstrapData)
 	bootstrap.Path = path
-	var err error = nil
+	var err error
 
 	bootstrap.ApiServerURL = defaultApiServerURL
 

@@ -14,7 +14,7 @@ import (
 
 func TestLogRedirectorFailsWhenLogFileIsAFolder(t *testing.T) {
 
-	var err error = nil
+	var err error
 
 	fileSystem := files.NewOverridableMockFileSystem()
 

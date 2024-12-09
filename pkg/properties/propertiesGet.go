@@ -17,7 +17,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/propertiesformatter"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 var (
@@ -35,7 +35,7 @@ func GetProperties(
 	infix string,
 	apiClient *galasaapi.APIClient,
 	propertiesOutputFormat string,
-	console utils.Console,
+	console spi.Console,
 ) error {
 	var err error
 
@@ -49,7 +49,7 @@ func GetProperties(
 			chosenFormatter, err = validateOutputFormatFlagValue(propertiesOutputFormat, validPropertyFormatters)
 			if err == nil {
 				var cpsProperty []galasaapi.GalasaProperty
-				cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient, console)
+				cpsProperty, err = getCpsPropertiesFromRestApi(namespace, name, prefix, suffix, infix, apiClient)
 
 				log.Printf("GetProperties - Galasa Properties collected: %s", getCpsPropertyArrayAsString(cpsProperty))
 				if err == nil {
@@ -77,10 +77,9 @@ func getCpsPropertiesFromRestApi(
 	suffix string,
 	infix string,
 	apiClient *galasaapi.APIClient,
-	console utils.Console,
 ) ([]galasaapi.GalasaProperty, error) {
 
-	var err error = nil
+	var err error
 	var context context.Context = nil
 
 	var restApiVersion string
@@ -228,7 +227,7 @@ func ValidateInfixes(infix string) error {
 	for _, infixElem := range infixElements {
 		err = validatePropertyFieldFormat(infixElem, "infix")
 		if err != nil {
-			//as soon as an invalid value is found, 
+			//as soon as an invalid value is found,
 			//exit the for loop and return
 			break
 		}

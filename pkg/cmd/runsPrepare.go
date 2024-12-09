@@ -10,11 +10,11 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ type RunsPrepareCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsPrepareCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsPrepareCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsPrepareCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -57,7 +57,7 @@ func (cmd *RunsPrepareCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsPrepareCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsPrepareCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsPrepareCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(
@@ -68,11 +68,11 @@ func (cmd *RunsPrepareCommand) init(factory Factory, runsCommand GalasaCommand, 
 	return err
 }
 func (cmd *RunsPrepareCommand) createCobraCommand(
-	factory Factory,
-	runsCommand GalasaCommand,
+	factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
-	var err error = nil
+	var err error
 
 	cmd.values.prepareSelectionFlags = runs.NewTestSelectionFlagValues()
 
@@ -100,11 +100,11 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 }
 
 func (cmd *RunsPrepareCommand) executeAssemble(
-	factory Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
-	var err error = nil
+	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
@@ -118,7 +118,7 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
@@ -148,23 +148,25 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
 				if err == nil {
 
-					timeService := factory.GetTimeService()
-
 					// Create an API client
 					var apiClient *galasaapi.APIClient
 					apiServerUrl := bootstrapData.ApiServerURL
-					apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+					authenticator := factory.GetAuthenticator(
+						apiServerUrl,
+						galasaHome,
+					)
+					apiClient, err = authenticator.GetAuthenticatedAPIClient()
 					if err == nil {
 						launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
-	
+
 						validator := runs.NewStreamBasedValidator()
 						err = validator.Validate(cmd.values.prepareSelectionFlags)
 						if err == nil {
-	
+
 							var testSelection runs.TestSelection
 							testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
 							if err == nil {
-	
+
 								count := len(testSelection.Classes)
 								if count < 1 {
 									err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
@@ -175,19 +177,19 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 										log.Printf("%v tests were selected", count)
 									}
 								}
-	
+
 								if err == nil {
-	
+
 									var portfolio *runs.Portfolio
 									if *cmd.values.prepareAppend {
 										portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
 									} else {
 										portfolio = runs.NewPortfolio()
 									}
-	
+
 									if err == nil {
 										runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
-	
+
 										err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
 										if err == nil {
 											if *cmd.values.prepareAppend {

@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunsCancelCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	runsCancelCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_CANCEL)
@@ -27,7 +28,7 @@ func TestRunsCancelCommandInCommandCollection(t *testing.T) {
 
 func TestRunsCancelHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "cancel", "--help"}
 
@@ -43,7 +44,7 @@ func TestRunsCancelHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsCancelNoFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "cancel"}
 
@@ -59,7 +60,7 @@ func TestRunsCancelNoFlagsReturnsError(t *testing.T) {
 
 func TestRunsCancelNameFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_CANCEL, factory, t)
 
 	var args []string = []string{"runs", "cancel", "--name", "name"}
@@ -77,7 +78,7 @@ func TestRunsCancelNameFlagReturnsOk(t *testing.T) {
 
 func TestRunsCancelNameNoParameterReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_CANCEL, factory, t)
 
 	var args []string = []string{"runs", "cancel", "--name"}
@@ -95,7 +96,7 @@ func TestRunsCancelNameNoParameterReturnsError(t *testing.T) {
 
 func TestRunsCancelUnknownParameterReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_CANCEL, factory, t)
 
 	var args []string = []string{"runs", "cancel", "--name", "name1", "--random", "random"}
@@ -113,7 +114,7 @@ func TestRunsCancelUnknownParameterReturnsError(t *testing.T) {
 
 func TestRunsCancelNameTwiceOverridesToLatestValue(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_CANCEL, factory, t)
 
 	var args []string = []string{"runs", "cancel", "--name", "name1", "--name", "name2"}

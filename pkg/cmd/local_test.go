@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCommandListContainsLocalCommand(t *testing.T) {
 	/// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	// When...
@@ -28,7 +29,7 @@ func TestCommandListContainsLocalCommand(t *testing.T) {
 
 func TestLocalHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"local", "--help"}
 
@@ -44,7 +45,7 @@ func TestLocalHelpFlagSetCorrectly(t *testing.T) {
 
 func TestLocalNoCommandsProducesUsageReport(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"local"}
 
 	// When...

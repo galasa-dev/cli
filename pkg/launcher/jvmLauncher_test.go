@@ -8,12 +8,14 @@ package launcher
 import (
 	"log"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -50,15 +52,20 @@ var (
     }`
 )
 
+const (
+	BLANK_JWT = ""
+)
+
 func NewMockLauncherParams() (
 	props.JavaProperties,
 	*utils.MockEnv,
-	files.FileSystem,
+	spi.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
-	utils.TimeService,
+	spi.TimeService,
+	spi.TimedSleeper,
 	ProcessFactory,
-	utils.GalasaHome,
+	spi.GalasaHome,
 ) {
 	// Given...
 	env := utils.NewMockEnv()
@@ -68,13 +75,14 @@ func NewMockLauncherParams() (
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	bootstrapProps := getBasicBootstrapProperties()
 
 	return bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome
 }
 
 func TestCanCreateAJVMLauncher(t *testing.T) {
@@ -89,15 +97,24 @@ func TestCanCreateAJVMLauncher(t *testing.T) {
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
 	bootstrapProps := getBasicBootstrapProperties()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 	if err != nil {
 		assert.Fail(t, "Constructor should not have failed but it did. error:%s", err.Error())
 	}
@@ -132,13 +149,22 @@ func TestCantCreateAJVMLauncherIfJVMHomeNotSet(t *testing.T) {
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 	if err == nil {
 		assert.Fail(t, "Constructor should have failed but it did not.")
 	}
@@ -155,15 +181,24 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 
 	jvmLaunchParams := getBasicJvmLaunchParams()
 	timeService := utils.NewMockTimeService()
+	timedSleeper := utils.NewRealTimedSleeper()
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 	galasaHome, _ := utils.NewGalasaHome(fs, env, "")
 
 	bootstrapProps := getBasicBootstrapProperties()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -174,11 +209,19 @@ func TestCanCreateJvmLauncher(t *testing.T) {
 func TestCanLaunchLocalJvmTest(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
+
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -229,9 +272,17 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 
 	bootstrapProps := getBasicBootstrapProperties()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embedded.GetReadOnlyFileSystem(),
+		jvmLaunchParams, mockProcessFactory, galasaHome, utils.NewRealTimedSleeper(),
+	)
 	if err != nil {
 		assert.Fail(t, "Launcher should have launched command OK")
 	}
@@ -367,11 +418,18 @@ func TestBadlyFormedObrFromProfileInfoCausesError(t *testing.T) {
 
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
+
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 
 	launcher, _ := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
@@ -402,11 +460,17 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 	launcher, _ := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})
@@ -438,8 +502,8 @@ func TestNoObrsFromParameterOrProfileCausesError(t *testing.T) {
 
 func getDefaultCommandSyntaxTestParameters() (
 	props.JavaProperties,
-	utils.Environment,
-	utils.GalasaHome,
+	spi.Environment,
+	spi.GalasaHome,
 	*files.MockFileSystem,
 	string,
 	[]utils.MavenCoordinates,
@@ -510,6 +574,7 @@ func TestCommandIncludesTraceWhenTraceIsEnabled(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -545,7 +610,7 @@ func TestCommandDoesNotIncludeTraceWhenTraceIsDisabled(t *testing.T) {
 		overridesFilePath,
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
-		isDebugEnabled, debugPort, debugMode,
+		isDebugEnabled, debugPort, debugMode, BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -583,6 +648,7 @@ func TestCommandSyntaxContainsJavaHomeUnixSlashes(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -622,6 +688,7 @@ func TestCommandSyntaxContainsJavaHomeWindowsSlashes(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -696,6 +763,7 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 		isDebugEnabled,
 		debugPort,
 		debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -703,6 +771,88 @@ func TestCommandIncludesGALASA_HOMESystemProperty(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Contains(t, args, `-DGALASA_HOME="/User/Home/testuser/.galasa"`)
+}
+
+func TestCommandAllDashDSystemPropertiesPassedAppearBeforeTheDashJar(t *testing.T) {
+
+	bootstrapProps, _, galasaHome, fs,
+		javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		localMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		_ := getDefaultCommandSyntaxTestParameters()
+
+	isTraceEnabled := true
+	isDebugEnabled := false
+	var debugPort uint32 = 0
+	debugMode := ""
+
+	cmd, args, err := getCommandSyntax(
+		bootstrapProps,
+		galasaHome,
+		fs, javaHome,
+		testObrs,
+		testLocation,
+		remoteMaven,
+		localMaven,
+		galasaVersionToRun,
+		overridesFilePath,
+		"", // No Gherkin URL supplied
+		isTraceEnabled,
+		isDebugEnabled,
+		debugPort,
+		debugMode,
+		BLANK_JWT,
+	)
+
+	assert.NotNil(t, cmd)
+	assert.NotNil(t, args)
+	assert.Nil(t, err)
+
+	// Combine all arguments into a single string.
+	allArgs := strings.Join(args, " ")
+
+	allDashDIndexes := getAllIndexesOfSubstring(allArgs, "-D")
+	allDashJarIndexes := getAllIndexesOfSubstring(allArgs, "-jar")
+
+	assert.Equal(t, 1, len(allDashJarIndexes), "-jar option is found in command launch parameters an unexpected number of times")
+	dashJarIndex := allDashJarIndexes[0]
+	for _, dashDIndex := range allDashDIndexes {
+		assert.Less(t, dashDIndex, dashJarIndex, "A -Dxxx parameter is found after the -jar parameter, so will do nothing. -D parameters should appear before the -jar parameter")
+	}
+}
+
+func TestFindingIndexesOfSubstring(t *testing.T) {
+	originalString := "012345678901234567890"
+	indexes := getAllIndexesOfSubstring(originalString, "01")
+	if assert.Equal(t, 2, len(indexes)) {
+		assert.Equal(t, 0, indexes[0])
+		assert.Equal(t, 10, indexes[1])
+	}
+}
+
+func getAllIndexesOfSubstring(originalString string, subString string) []int {
+	var result []int = make([]int, 0)
+
+	searchString := originalString
+	charactersProcessed := 0
+	isDone := false
+	for !isDone {
+
+		index := strings.Index(searchString, subString)
+		if index == -1 {
+			isDone = true
+		} else {
+			result = append(result, index+charactersProcessed)
+			searchString = searchString[index+1:]
+			charactersProcessed += index + 1
+		}
+	}
+
+	return result
 }
 
 func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {
@@ -732,6 +882,7 @@ func TestCommandIncludesFlagsFromBootstrapProperties(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -770,6 +921,7 @@ func TestCommandIncludesTwoFlagsFromBootstrapProperties(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, cmd)
@@ -808,6 +960,7 @@ func TestCommandIncludesDefaultDebugPortAndMode(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -847,6 +1000,7 @@ func TestCommandDrawsValidDebugPortFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -886,6 +1040,7 @@ func TestCommandDrawsInvalidDebugPortFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, err)
@@ -925,6 +1080,7 @@ func TestCommandDrawsValidDebugModeFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -970,6 +1126,7 @@ func TestCommandDrawsInvalidDebugModeFromBootstrap(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, err)
@@ -1007,6 +1164,7 @@ func TestCommandDrawsValidDebugModeListenFromCommandLine(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -1050,6 +1208,7 @@ func TestCommandDrawsValidDebugModeAttachFromCommandLine(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, command)
@@ -1093,6 +1252,7 @@ func TestCommandDrawsInvalidDebugModeFromCommandLine(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	assert.NotNil(t, err)
@@ -1132,6 +1292,7 @@ func TestLocalMavenNotSetDefaults(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	// Then...
@@ -1172,6 +1333,7 @@ func TestLocalMavenSet(t *testing.T) {
 		"", // No Gherkin URL supplied
 		isTraceEnabled,
 		isDebugEnabled, debugPort, debugMode,
+		BLANK_JWT,
 	)
 
 	// Then...
@@ -1184,12 +1346,13 @@ func TestLocalMavenSet(t *testing.T) {
 func NewMockGherkinParams() (
 	props.JavaProperties,
 	*utils.MockEnv,
-	files.FileSystem,
+	spi.FileSystem,
 	embedded.ReadOnlyFileSystem,
 	*RunsSubmitLocalCmdParameters,
-	utils.TimeService,
+	spi.TimeService,
+	spi.TimedSleeper,
 	ProcessFactory,
-	utils.GalasaHome,
+	spi.GalasaHome,
 ) {
 	// Given...
 	env := utils.NewMockEnv()
@@ -1205,17 +1368,25 @@ func NewMockGherkinParams() (
 	bootstrapProps := getBasicBootstrapProperties()
 
 	return bootstrapProps, env, fs, embedded.GetReadOnlyFileSystem(),
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome
+		jvmLaunchParams, timeService, utils.NewRealTimedSleeper(), mockProcessFactory, galasaHome
 }
 
 func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -1251,12 +1422,19 @@ func TestCanLaunchLocalJvmGherkinTest(t *testing.T) {
 func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
-
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
 	}
@@ -1286,11 +1464,19 @@ func TestBadGherkinURLSuffixReturnsError(t *testing.T) {
 func TestBadGherkinURLPrefixReutrnsError(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome := NewMockGherkinParams()
+		jvmLaunchParams, timeService, timedSleeper, mockProcessFactory, galasaHome := NewMockGherkinParams()
+
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
 
 	launcher, err := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 
 	if err != nil {
 		assert.Fail(t, "JVM launcher should have been creatable.")
@@ -1325,7 +1511,7 @@ func TestSetTestStructureFromRasFileValidFileContentReturnsOk(t *testing.T) {
 	jsonFileName := "structure.json"
 
 	_, _, fs, _,
-		_, _, _, galasaHome := NewMockLauncherParams()
+		_, _, _, _, galasaHome := NewMockLauncherParams()
 
 	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
 	fs.WriteTextFile(jsonFilePath, validStructureJsonFileContent)
@@ -1375,7 +1561,7 @@ func TestSetTestStructureFromRasFileInvalidFileContentReturnsError(t *testing.T)
 		]
 	}`
 	_, _, fs, _,
-		_, _, _, galasaHome := NewMockLauncherParams()
+		_, _, _, _, galasaHome := NewMockLauncherParams()
 
 	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
 	fs.WriteTextFile(jsonFilePath, invalidStructureJsonFileContent)
@@ -1395,7 +1581,7 @@ func TestSetTestStructureFromRasFileEmptyFileContentReturnsError(t *testing.T) {
 	jsonFileName := "structure.json"
 
 	_, _, fs, _,
-		_, _, _, galasaHome := NewMockLauncherParams()
+		_, _, _, _, galasaHome := NewMockLauncherParams()
 
 	jsonFilePath := galasaHome.GetNativeFolderPath() + "/" + jsonFileName
 	fs.WriteTextFile(jsonFilePath, "")
@@ -1414,7 +1600,7 @@ func TestSetTestStructureFromRasFileInvalidFilePathReturnsError(t *testing.T) {
 	jsonFileName := "structure.json"
 
 	_, _, fs, _,
-		_, _, _, _ := NewMockLauncherParams()
+		_, _, _, _, _ := NewMockLauncherParams()
 
 	invalidJsonFilePath := "invalidJsonFilePath/" + jsonFileName
 
@@ -1429,9 +1615,9 @@ func TestSetTestStructureFromRasFileInvalidFilePathReturnsError(t *testing.T) {
 func TestCreateRunFromLocalTestValidRasFolderPathReturnsOk(t *testing.T) {
 	//Given...
 	_, _, fs, _,
-		_, timeService, mockProcessFactory, galasaHome := NewMockLauncherParams()
+		_, _, timedSleeper, mockProcessFactory, galasaHome := NewMockLauncherParams()
 
-	localTest := NewLocalTest(timeService, fs, mockProcessFactory)
+	localTest := NewLocalTest(timedSleeper, fs, mockProcessFactory)
 	localTest.runId = "L0"
 	localTest.rasFolderPathUrl = galasaHome.GetNativeFolderPath()
 
@@ -1448,14 +1634,15 @@ func TestCreateRunFromLocalTestValidRasFolderPathReturnsOk(t *testing.T) {
 	assert.Equal(t, "dev.galasa.examples.banking.account", run.TestStructure.GetBundle())
 	assert.Equal(t, "Passed", run.TestStructure.GetResult())
 	assert.Equal(t, "simpleSampleTest", run.GetTestStructure().Methods[0].GetMethodName())
+	assert.Equal(t, "finished", run.TestStructure.GetStatus())
 }
 
 func TestCreateRunFromLocalTestInvalidRasFolderPathReturnsError(t *testing.T) {
 	//Given...
 	_, _, fs, _,
-		_, timeService, mockProcessFactory, _ := NewMockLauncherParams()
+		_, _, timedSleeper, mockProcessFactory, _ := NewMockLauncherParams()
 
-	localTest := NewLocalTest(timeService, fs, mockProcessFactory)
+	localTest := NewLocalTest(timedSleeper, fs, mockProcessFactory)
 	localTest.runId = "L0"
 	localTest.rasFolderPathUrl = ""
 
@@ -1470,14 +1657,22 @@ func TestCreateRunFromLocalTestInvalidRasFolderPathReturnsError(t *testing.T) {
 func TestGetRunsByIdReturnsOk(t *testing.T) {
 	// Given...
 	bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, _, galasaHome := NewMockLauncherParams()
+		jvmLaunchParams, timeService, timedSleeper, _, galasaHome := NewMockLauncherParams()
 
 	mockProcess := NewMockProcess()
 	mockProcessFactory := NewMockProcessFactory(mockProcess)
 
+	mockFactory := &utils.MockFactory{
+		Env:         env,
+		FileSystem:  fs,
+		TimeService: timeService,
+	}
+
 	launcher, _ := NewJVMLauncher(
-		bootstrapProps, env, fs, embeddedReadOnlyFS,
-		jvmLaunchParams, timeService, mockProcessFactory, galasaHome)
+		mockFactory,
+		bootstrapProps, embeddedReadOnlyFS,
+		jvmLaunchParams, mockProcessFactory, galasaHome, timedSleeper,
+	)
 
 	isTraceEnabled := true
 	var overrides map[string]interface{} = make(map[string]interface{})

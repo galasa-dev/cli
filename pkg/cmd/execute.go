@@ -5,8 +5,10 @@
  */
 package cmd
 
+import "github.com/galasa-dev/cli/pkg/spi"
+
 // The main entry point into the cmd package.
-func Execute(factory Factory, args []string) error {
+func Execute(factory spi.Factory, args []string) error {
 	var err error
 
 	finalWordHandler := factory.GetFinalWordHandler()

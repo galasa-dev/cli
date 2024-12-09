@@ -6,64 +6,61 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
-
-// We use the factory to create instances of various classes.
-// Some are cached, so you get the same one back each time
-// Some are fresh objects created each time.
-// We do this so we can have a real and a mock implementation
-// to make unit testing easier.
-type Factory interface {
-	GetFileSystem() files.FileSystem
-	GetEnvironment() utils.Environment
-	GetFinalWordHandler() FinalWordHandler
-	GetStdOutConsole() utils.Console
-	GetStdErrConsole() utils.Console
-	GetTimeService() utils.TimeService
-}
 
 // Allocates real objects with real implementations,
 // none of which are generally great for unit testing.
 // eg: A real file system can leave debris behind when a test runs.
 type RealFactory struct {
-	stdOutConsole utils.Console
-	stdErrConsole utils.Console
+	stdOutConsole spi.Console
+	stdErrConsole spi.Console
 }
 
-func NewRealFactory() Factory {
+func NewRealFactory() spi.Factory {
 	return &RealFactory{}
 }
 
-func (*RealFactory) GetFileSystem() files.FileSystem {
+func (*RealFactory) GetFileSystem() spi.FileSystem {
 	return files.NewOSFileSystem()
 }
 
-func (*RealFactory) GetEnvironment() utils.Environment {
+func (*RealFactory) GetEnvironment() spi.Environment {
 	return utils.NewEnvironment()
 }
 
-func (*RealFactory) GetFinalWordHandler() FinalWordHandler {
+func (*RealFactory) GetFinalWordHandler() spi.FinalWordHandler {
 	return NewRealFinalWordHandler()
 }
 
 // We only ever expect there to be a single console object, which collects all the
 // command output.
-func (factory *RealFactory) GetStdOutConsole() utils.Console {
+func (factory *RealFactory) GetStdOutConsole() spi.Console {
 	if factory.stdOutConsole == nil {
 		factory.stdOutConsole = utils.NewRealConsole()
 	}
 	return factory.stdOutConsole
 }
 
-func (factory *RealFactory) GetStdErrConsole() utils.Console {
+func (factory *RealFactory) GetStdErrConsole() spi.Console {
 	if factory.stdErrConsole == nil {
 		factory.stdErrConsole = utils.NewRealConsole()
 	}
 	return factory.stdErrConsole
 }
 
-func (*RealFactory) GetTimeService() utils.TimeService {
+func (*RealFactory) GetTimeService() spi.TimeService {
 	return utils.NewRealTimeService()
+}
+
+func (factory *RealFactory) GetAuthenticator(apiServerUrl string, galasaHome spi.GalasaHome) spi.Authenticator {
+	jwtCache := auth.NewJwtCache(factory.GetFileSystem(), galasaHome, factory.GetTimeService())
+	return auth.NewAuthenticator(apiServerUrl, factory.GetFileSystem(), galasaHome, factory.GetTimeService(), factory.GetEnvironment(), jwtCache)
+}
+
+func (*RealFactory) GetByteReader() spi.ByteReader {
+	return utils.NewByteReader()
 }

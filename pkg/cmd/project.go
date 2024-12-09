@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,7 @@ type ProjectCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewProjectCmd(rootCmd GalasaCommand) (GalasaCommand, error) {
+func NewProjectCmd(rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(ProjectCommand)
 	err := cmd.init(rootCmd)
 	return cmd, err
@@ -41,13 +42,13 @@ func (cmd *ProjectCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ProjectCommand) init(rootCommand GalasaCommand) error {
+func (cmd *ProjectCommand) init(rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.cobraCommand = cmd.createProjectCobraCommand(rootCommand)
 	return err
 }
 
-func (cmd *ProjectCommand) createProjectCobraCommand(rootCmd GalasaCommand) *cobra.Command {
+func (cmd *ProjectCommand) createProjectCobraCommand(rootCmd spi.GalasaCommand) *cobra.Command {
 
 	projectCmd := &cobra.Command{
 		Use:   "project",

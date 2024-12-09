@@ -10,9 +10,9 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/properties"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +34,7 @@ type PropertiesSetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesSetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesSetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesSetCommand)
 	err := cmd.init(factory, propertiesCommand, rootCommand)
@@ -60,9 +60,9 @@ func (cmd *PropertiesSetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCmd GalasaCommand) error {
+func (cmd *PropertiesSetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 	cmd.values = &PropertiesSetCmdValues{}
 
 	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesCommand, rootCmd.Values().(*RootCmdValues))
@@ -71,12 +71,12 @@ func (cmd *PropertiesSetCommand) init(factory Factory, propertiesCommand GalasaC
 }
 
 func (cmd *PropertiesSetCommand) createCobraCommand(
-	factory Factory,
-	propertiesCommand GalasaCommand,
+	factory spi.Factory,
+	propertiesCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertiesSetCobraCmd := &cobra.Command{
@@ -91,7 +91,7 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 		},
 	}
 
-	propertiesSetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertyValue, "value", "", "A mandatory flag indicating the value of the property you want to create. "+
+	propertiesSetCobraCmd.PersistentFlags().StringVarP(&cmd.values.propertyValue, "value", "v", "", "A mandatory flag indicating the value of the property you want to create. "+
 		"Empty values and values with spaces must be put in quotation marks.")
 	propertiesSetCobraCmd.MarkPersistentFlagRequired("value")
 
@@ -105,7 +105,7 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 }
 
 func (cmd *PropertiesSetCommand) executePropertiesSet(
-	factory Factory,
+	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -124,7 +124,7 @@ func (cmd *PropertiesSetCommand) executePropertiesSet(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
@@ -134,13 +134,15 @@ func (cmd *PropertiesSetCommand) executePropertiesSet(
 			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
 			if err == nil {
 
-				timeService := factory.GetTimeService()
-
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.

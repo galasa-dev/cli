@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -237,10 +236,7 @@ func WriteMockRasRunsResponse(
 	writer.Header().Set("Content-Type", "application/json")
 
 	values := req.URL.Query()
-	pageRequestedStr := values.Get("page")
 	runNameQueryParameter := values.Get("runname")
-	pageRequested, _ := strconv.Atoi(pageRequestedStr)
-	assert.Equal(t, pageRequested, 1)
 
 	assert.Equal(t, runNameQueryParameter, runName)
 
@@ -254,9 +250,7 @@ func WriteMockRasRunsResponse(
 
 	writer.Write([]byte(fmt.Sprintf(`
 	{
-		"pageNumber": 1,
 		"pageSize": 1,
-		"numPages": 1,
 		"amountOfRuns": %d,
 		"runs":[ %s ]
 	}`, len(runResultStrings), combinedRunResultStrings)))
@@ -473,7 +467,6 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockFileSystem.WriteTextFile(runName+separator+"artifacts"+separator+"dummy.txt", "dummy text file")
 	mockFileSystem.WriteTextFile(runName+dummyRunLog.path, "dummy log")
 
-
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
 
@@ -519,7 +512,6 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	separator := string(os.PathSeparator)
 	mockFileSystem.WriteTextFile(runName+separator+"dummy.txt", "dummy text file")
 	mockFileSystem.WriteTextFile(runName+separator+"run.log", "dummy log")
-
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")
@@ -777,7 +769,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockTimeService.Sleep(time.Second)
+	mockTimeService.AdvanceClock(time.Second)
 
 	// When...
 	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, apiClient, ".")

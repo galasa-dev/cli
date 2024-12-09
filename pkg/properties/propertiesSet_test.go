@@ -105,6 +105,25 @@ func TestCreatePropertyWithValidNamespaceReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestCreatePropertyWithValidNamespaceWithAtSymbolReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validnamespace"
+	name := "Galasadelivery@ibm.com"
+	value := "someValue"
+
+	server := newSetPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	apiClient := api.InitialiseAPI(apiServerUrl)
+
+	//When
+	err := SetProperty(namespace, name, value, apiClient)
+
+	//Then
+	assert.Nil(t, err)
+}
+
 func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t *testing.T) {
 	//Given...
 	namespace := "invalidnamespace"
@@ -122,7 +141,7 @@ func TestUpdatePropertyWithInvalidNamespaceAndInvalidPropertyNameReturnsError(t 
 
 	//Then
 	assert.Error(t, err)
-	assert.ErrorContains(t, err, "GAL1098E:")
+	assert.ErrorContains(t, err, "GAL1100E:")
 }
 
 // --------
@@ -131,6 +150,25 @@ func TestUpdatePropertyWithValidNamespaceAndVaidNameValueReturnsOk(t *testing.T)
 	//Given...
 	namespace := "validnamespace"
 	name := "validName"
+	value := "updatedValue"
+
+	server := newSetPropertiesServletMock(t)
+	apiServerUrl := server.URL
+	defer server.Close()
+
+	apiClient := api.InitialiseAPI(apiServerUrl)
+
+	//When
+	err := SetProperty(namespace, name, value, apiClient)
+
+	//Then
+	assert.Nil(t, err)
+}
+
+func TestUpdatePropertyWithValidNamespaceAndVaidNameValueWithAtSymbolReturnsOk(t *testing.T) {
+	//Given...
+	namespace := "validnamespace"
+	name := "Galasadelivery@ibm.com"
 	value := "updatedValue"
 
 	server := newSetPropertiesServletMock(t)
@@ -163,7 +201,7 @@ func TestUpdatePropertyWithInvalidNamespaceAndValidNameReturnsError(t *testing.T
 
 	//Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "GAL1098E")
+	assert.Contains(t, err.Error(), "GAL1100E")
 }
 
 func TestSetNoNamespaceReturnsError(t *testing.T) {

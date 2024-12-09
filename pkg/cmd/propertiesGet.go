@@ -10,9 +10,9 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/properties"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +40,7 @@ type PropertiesGetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesGetCommand(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewPropertiesGetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesGetCommand)
 	err := cmd.init(factory, propertiesCommand, rootCommand)
@@ -66,9 +66,9 @@ func (cmd *PropertiesGetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 
-	var err error = nil
+	var err error
 
 	cmd.values = &PropertiesGetCmdValues{}
 	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, rootCommand.Values().(*RootCmdValues))
@@ -77,8 +77,8 @@ func (cmd *PropertiesGetCommand) init(factory Factory, propertiesCommand GalasaC
 }
 
 func (cmd *PropertiesGetCommand) createCobraCommand(
-	factory Factory,
-	propertiesCommand GalasaCommand,
+	factory spi.Factory,
+	propertiesCommand spi.GalasaCommand,
 	rootCommandValues *RootCmdValues,
 ) *cobra.Command {
 
@@ -99,19 +99,19 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 	formatters := properties.GetFormatterNamesString(properties.CreateFormatters(propertiesHasYamlFormat))
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesPrefix, "prefix", "",
 		"Prefix to match against the start of the property name within the namespace."+
-			" Optional. Cannot be used in conjunction with the '--name' option." +
-		" The first character of the prefix must be in the 'a'-'z' or 'A'-'Z' ranges, " +
-		"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)")
+			" Optional. Cannot be used in conjunction with the '--name' option."+
+			" The first character of the prefix must be in the 'a'-'z' or 'A'-'Z' ranges, "+
+			"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)")
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesSuffix, "suffix", "",
 		"Suffix to match against the end of the property name within the namespace."+
-			" Optional. Cannot be used in conjunction with the '--name' option." +
-			" The first character of the suffix must be in the 'a'-'z' or 'A'-'Z' ranges, " +
+			" Optional. Cannot be used in conjunction with the '--name' option."+
+			" The first character of the suffix must be in the 'a'-'z' or 'A'-'Z' ranges, "+
 			"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)")
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesInfix, "infix", "",
 		"Infix(es) that could be part of the property name within the namespace."+
 			" Multiple infixes can be supplied as a comma-separated list without spaces. "+
 			" Optional. Cannot be used in conjunction with the '--name' option."+
-			" The first character of each infix must be in the 'a'-'z' or 'A'-'Z' ranges, " +
+			" The first character of each infix must be in the 'a'-'z' or 'A'-'Z' ranges, "+
 			"and following characters can be 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore)")
 	propertiesGetCobraCmd.PersistentFlags().StringVar(&cmd.values.propertiesOutputFormat, "format", "summary",
 		"output format for the data returned. Supported formats are: "+formatters+".")
@@ -131,7 +131,7 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 }
 
 func (cmd *PropertiesGetCommand) executePropertiesGet(
-	factory Factory,
+	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -150,7 +150,7 @@ func (cmd *PropertiesGetCommand) executePropertiesGet(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
@@ -161,13 +161,16 @@ func (cmd *PropertiesGetCommand) executePropertiesGet(
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()
-				timeService := factory.GetTimeService()
 
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)
 
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
 					// Call to process the command in a unit-testable way.

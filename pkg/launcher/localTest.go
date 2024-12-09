@@ -13,9 +13,8 @@ import (
 	"time"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // A local test which gets run.
@@ -44,11 +43,11 @@ type LocalTest struct {
 	testRun *galasaapi.TestRun
 
 	// A time service. When a significant event occurs, we interrupt it.
-	timeService utils.TimeService
+	mainPollLoopSleeper spi.TimedSleeper
 
 	// The file system the local test deposits results onto.
 	// We use this to read the results back to find out if it passed/failed. ...etc.
-	fileSystem files.FileSystem
+	fileSystem spi.FileSystem
 
 	// Something which can create new processes in the operating system
 	processFactory ProcessFactory
@@ -56,8 +55,8 @@ type LocalTest struct {
 
 // A structure which tells us all we know about a JVM process we launched.
 func NewLocalTest(
-	timeService utils.TimeService,
-	fileSystem files.FileSystem,
+	mainPollLoopSleeper spi.TimedSleeper,
+	fileSystem spi.FileSystem,
 	processFactory ProcessFactory,
 ) *LocalTest {
 
@@ -67,7 +66,7 @@ func NewLocalTest(
 	localTest.stderr = bytes.NewBuffer([]byte{})
 	localTest.runId = ""
 	localTest.testRun = nil
-	localTest.timeService = timeService
+	localTest.mainPollLoopSleeper = mainPollLoopSleeper
 	localTest.fileSystem = fileSystem
 	localTest.processFactory = processFactory
 
@@ -96,6 +95,10 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 		localTest.runId, err = localTest.waitForRunIdAllocation(localTest.stdout)
 		if err == nil {
 			localTest.rasFolderPathUrl, err = localTest.waitForRasFolderPathUrl(localTest.stdout, localTest.runId)
+
+			if err == nil {
+				log.Printf("JVM test started and in progress. We know how to monitor it now.\n")
+			}
 		}
 	}
 	return err
@@ -104,27 +107,30 @@ func (localTest *LocalTest) launch(cmd string, args []string) error {
 // Block this thread until we can gather where the RAS folder is for this test.
 // It is resolved within the JVM, and traced, where we pick it up from.
 func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputProcessor, runId string) (string, error) {
-	var err error = nil
-	rasFolderPathUrl := ""
+	var err error
+	var rasFolderPathUrl string
 
 	// Wait for the ras location to be detected in the JVM output.
 	isDoneWaiting := false
 
 	for !isDoneWaiting {
-		select {
-		case <-outputProcessor.publishResultChannel:
-			rasFolderPathUrl = outputProcessor.detectedRasFolderPathUrl
+
+		// No ras path available yet.
+		if localTest.isCompleted() {
+			// Completed before the ras location was available.
 			isDoneWaiting = true
-		default:
-			// No ras path available yet.
-			if localTest.isCompleted() {
-				// Completed before the ras location was available.
+		} else {
+			timer := time.After(time.Duration(time.Second))
+			select {
+			case <-outputProcessor.publishResultChannel:
+
 				isDoneWaiting = true
-			} else {
-				localTest.timeService.Sleep(time.Duration(time.Second))
+			case <-timer:
 			}
 		}
 	}
+
+	rasFolderPathUrl = outputProcessor.detectedRasFolderPathUrl
 
 	if rasFolderPathUrl == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RAS_FOLDER_NOT_DETECTED, runId)
@@ -136,28 +142,35 @@ func (localTest *LocalTest) waitForRasFolderPathUrl(outputProcessor *JVMOutputPr
 // Block this thread until we can gather what the RunId for this test is
 // It is allocated within the JVM, and traced, where we pick it up from.
 func (localTest *LocalTest) waitForRunIdAllocation(outputProcessor *JVMOutputProcessor) (string, error) {
-	var err error = nil
-	var runId string = ""
+	var err error
+	var runId string
 
 	// Wait for the runId to be detected in the JVM output.
 	isDoneWaiting := false
 
 	for !isDoneWaiting {
-		select {
-		case <-outputProcessor.publishResultChannel:
-			// We have a RunId
-			runId = outputProcessor.detectedRunId
+
+		// No runid available yet.
+		if localTest.isCompleted() {
+			// Completed before the runId was available.
 			isDoneWaiting = true
-		default:
-			// No runid available yet.
-			if localTest.isCompleted() {
-				// Completed before the runId was available.
+		} else {
+
+			timer := time.After(time.Duration(time.Second))
+
+			select {
+			case <-outputProcessor.publishResultChannel:
+				// We have a RunId
 				isDoneWaiting = true
-			} else {
-				localTest.timeService.Sleep(time.Duration(time.Second))
+
+			case <-timer:
 			}
 		}
 	}
+
+	// If the timer went, and we hadn't noted that the localTest was completed yet, there
+	// is a timing window where we don't collect the detected runId.
+	runId = outputProcessor.detectedRunId
 
 	if runId == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RUN_ID_NOT_DETECTED)
@@ -189,7 +202,7 @@ func (localTest *LocalTest) waitForCompletion() error {
 	close(localTest.reportingChannel)
 
 	msg := fmt.Sprintf("Test run %s completed.", localTest.runId)
-	localTest.timeService.Interrupt(msg)
+	localTest.mainPollLoopSleeper.Interrupt(msg)
 
 	return err
 }
@@ -198,10 +211,10 @@ func (localTest *LocalTest) waitForCompletion() error {
 // ras folder.
 func (localTest *LocalTest) updateTestStatusFromRasFile() error {
 
-	var err error = nil
+	var err error
 
 	if localTest.runId == "" || localTest.rasFolderPathUrl == "" {
-		log.Printf("Don't have enough information to find the structure.json in the RAS folder.\n")
+		log.Printf("Don't have enough information to find the structure.json in the RAS folder yet. Test JVM is starting up.\n")
 	} else {
 
 		jsonFilePath := strings.TrimPrefix(localTest.rasFolderPathUrl, "file:///") + "/" + localTest.runId + "/structure.json"
@@ -226,6 +239,7 @@ func (localTest *LocalTest) isCompleted() bool {
 
 	if localTest.testRun != nil && localTest.testRun.GetStatus() == "finished" {
 		// The test is already complete.
+		// log.Printf("Test is already complete\n")
 		isComplete = true
 	} else {
 
@@ -246,6 +260,7 @@ func (localTest *LocalTest) isCompleted() bool {
 		localTest.updateTestStatusFromRasFile()
 		if localTest.testRun != nil && localTest.testRun.GetStatus() == "finished" {
 			// The test is already complete.
+			log.Printf("Test is already complete when it wasn't before.\n")
 			isComplete = true
 		}
 	}

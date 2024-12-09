@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestResourcesCreateCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	resourcesCreateCommand, err := commands.GetCommand(COMMAND_NAME_RESOURCES_CREATE)
@@ -28,7 +29,7 @@ func TestResourcesCreateCommandInCommandCollection(t *testing.T) {
 
 func TestResourcesCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"resources", "create", "--help"}
 
@@ -45,7 +46,7 @@ func TestResourcesCreateHelpFlagSetCorrectly(t *testing.T) {
 
 func TestResourcesCreateNoFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"resources", "create"}
 
@@ -62,7 +63,7 @@ func TestResourcesCreateNoFlagsReturnsError(t *testing.T) {
 
 func TestResourcesCreateFileFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RESOURCES_CREATE, factory, t)
 
 	var args []string = []string{"resources", "create", "--file", "mince.yaml"}

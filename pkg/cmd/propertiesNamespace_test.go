@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPropertiesNamespaceCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesNamespaceCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_NAMESPACE)
@@ -26,7 +27,7 @@ func TestPropertiesNamespaceCommandInCommandCollection(t *testing.T) {
 
 func TestPropertiesNamespaceHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "namespaces", "--help"}
 
@@ -43,7 +44,7 @@ func TestPropertiesNamespaceHelpFlagSetCorrectly(t *testing.T) {
 
 func TestPropertiesNamespaceProducesUsageReport(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "namespaces"}
 

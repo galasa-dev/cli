@@ -11,7 +11,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 	MAVEN_REPO_URL_MAVEN_CENTRAL        = "https://repo.maven.apache.org/maven2"
 )
 
-func InitialiseM2Folder(fileSystem files.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem, isDevelopment bool) error {
+func InitialiseM2Folder(fileSystem spi.FileSystem, embeddedFileSystem embedded.ReadOnlyFileSystem, isDevelopment bool) error {
 
 	var err error
 	var userHomeDir string
@@ -41,7 +41,7 @@ func InitialiseM2Folder(fileSystem files.FileSystem, embeddedFileSystem embedded
 
 func createSettingsXMLFile(
 	fileGenerator *FileGenerator,
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	m2Dir string,
 	isDevelopment bool,
 ) error {
@@ -75,7 +75,7 @@ func createSettingsXMLFile(
 	return err
 }
 
-func warnIfFileDoesntContainGalasaOBRMavenRepository(fileSystem files.FileSystem, filePath string) error {
+func warnIfFileDoesntContainGalasaOBRMavenRepository(fileSystem spi.FileSystem, filePath string) error {
 
 	content, err := fileSystem.ReadTextFile(filePath)
 	if err == nil {

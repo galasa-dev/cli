@@ -37,7 +37,7 @@ func isJavaReservedWord(stringToCheck string) bool {
 
 // To validate the string as a valid java package name before we start to use it.
 func ValidateJavaPackageName(javaPackageName string) error {
-	var err error = nil
+	var err error
 
 	if javaPackageName == "" {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PACKAGE_NAME_BLANK)

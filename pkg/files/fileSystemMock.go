@@ -14,6 +14,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // ------------------------------------------------------------------------------------
@@ -58,7 +60,7 @@ type MockFileSystem struct {
 // NewMockFileSystem creates an implementation of the thin file system layer which delegates
 // to a memory map. This uses the default behaviour for all the virtual functions in our
 // MockFileSystem
-func NewMockFileSystem() FileSystem {
+func NewMockFileSystem() spi.FileSystem {
 	mockFileSystem := NewOverridableMockFileSystem()
 	return mockFileSystem
 }
@@ -270,7 +272,7 @@ func mockFSWriteTextFile(fs MockFileSystem, targetFilePath string, desiredConten
 
 func mockFSReadBinaryFile(fs MockFileSystem, filePath string) ([]byte, error) {
 	bytes := make([]byte, 0)
-	var err error = nil
+	var err error
 	node := fs.data[filePath]
 	if node == nil {
 		err = os.ErrNotExist
@@ -282,7 +284,7 @@ func mockFSReadBinaryFile(fs MockFileSystem, filePath string) ([]byte, error) {
 
 func mockFSReadTextFile(fs MockFileSystem, filePath string) (string, error) {
 	text := ""
-	var err error = nil
+	var err error
 	node := fs.data[filePath]
 	if node == nil {
 		err = os.ErrNotExist
@@ -294,7 +296,7 @@ func mockFSReadTextFile(fs MockFileSystem, filePath string) (string, error) {
 
 func mockFSExists(fs MockFileSystem, path string) (bool, error) {
 	isExists := true
-	var err error = nil
+	var err error
 	node := fs.data[path]
 	if node == nil {
 		isExists = false
@@ -303,8 +305,8 @@ func mockFSExists(fs MockFileSystem, path string) (bool, error) {
 }
 
 func mockFSDirExists(fs MockFileSystem, path string) (bool, error) {
-	isDirExists := true
-	var err error = nil
+	var isDirExists bool // set to true by default.
+	var err error
 	node := fs.data[path]
 	if node == nil {
 		isDirExists = false

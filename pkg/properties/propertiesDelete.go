@@ -27,7 +27,7 @@ func DeleteProperty(
 	var err error
 
 	err = validateInputsAreNotEmpty(namespace, name)
-	if err == nil{
+	if err == nil {
 		err = validateNamespaceAndNameFlagStringFormats(namespace, name)
 		if err == nil {
 			log.Printf("DeleteProperty - Galasa Property field values are valid")
@@ -41,7 +41,7 @@ func deleteCpsProperty(namespace string,
 	name string,
 	apiClient *galasaapi.APIClient,
 ) error {
-	var err error = nil
+	var err error
 	var resp *http.Response
 	var context context.Context = nil
 	var responseBody []byte
@@ -68,7 +68,7 @@ func deleteCpsProperty(namespace string,
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
 				} else {
 					//unable to parse response into api error
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
+					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
 				}
 			} else {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)

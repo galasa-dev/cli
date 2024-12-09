@@ -2,6 +2,7 @@
 
 The Galasa command line interface (Galasa CLI) is used to interact with the Galasa ecosystem or local development environment.
 
+[![Main build](https://github.com/galasa-dev/cli/actions/workflows/build.yml/badge.svg)](https://github.com/galasa-dev/cli/actions/workflows/build.yml)
 
 ## Environment variables
 
@@ -122,6 +123,9 @@ Logging in to an ecosystem:
 galasactl auth login
 ```
 
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_login.md).
+
+
 ## auth logout
 
 To log out of a Galasa ecosystem using `galasactl`, you can use the `auth logout` command. If you run a `galasactl` command that interacts with an ecosystem while logged out, `galasactl` will attempt to automatically log in using the properties in your `galasactl.properties` file within your `GALASA_HOME` directory.
@@ -133,6 +137,47 @@ Logging out of an ecosystem:
 ```
 galasactl auth logout
 ```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_logout.md).
+
+
+## auth tokens get
+Tokens, auth tokens or personal access tokens, enable a user to be authenticated with a Galasa Ecosystem before interacting with it. This command allows a user to see details of all tokens authenticated with a Galasa Ecosystem.
+
+Before running this command, it is advised to run the `auth tokens logout` and then `auth tokens login` commands (as seen above).
+
+### Examples
+
+```
+> galasactl auth tokens get
+tokenid                   created(YYYY-MM-DD) user     description
+098234980123-1283182389   2023-12-03          mcobbett So I can access ecosystem1 from my laptop.
+8218971d287s1-dhj32er2323 2024-03-03          mcobbett Automated build of example repo can change CPS properties
+87a6sd87ahq2-2y8hqwdjj273 2023-08-04          savvas   CLI access from vscode
+
+Total:3
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_get.md).
+
+
+## auth tokens delete
+
+This command revokes a personal access token identified by the given token ID. This command is useful if you have lost access to your personal access token or if your token has been compromised, and you wish to prevent it from being used maliciously.
+
+To retrieve a list of available personal access tokens that have been created and their token IDs, see [auth tokens get](#auth-tokens-get).
+
+### Examples
+
+Revoking a token with ID 'myId'
+
+```
+galasactl auth tokens delete --tokenid myId
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_auth_tokens_delete.md).
+
+
 
 ## runs prepare
 
@@ -339,6 +384,20 @@ For a complete list of supported formatters try running the command with a known
 galasactl runs get --name C1234 --format badFormatterName
 ```
 For a complete list of supported parameters see [here](./docs/generated/galasactl_runs_get.md).
+
+## runs delete
+
+This command deletes a test run from an ecosystem's RAS. The name of the test run to delete can be provided to delete it along with any associated artifacts that have been stored.
+
+### Examples
+
+A run named "C1234" can be deleted using the following command:
+
+```
+galasactl runs delete --name C1234
+```
+
+A complete list of supported parameters for the `runs delete` command is available [here](./docs/generated/galasactl_runs_delete.md)
 
 ## runs download
 
@@ -573,8 +632,101 @@ galasactl resources delete -f my_resources.yaml
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_resources_delete.md).
 
+## secrets get
 
+This command retrieves a list of secrets stored in the Galasa Ecosystem's credentials store. The retrieved secrets can be displayed in different formats, including `summary` and `yaml` formats, based on the value provided by the `--format` flag. If `--format` is not provided, secrets will be displayed in the `summary` format by default.
 
+### Examples
+
+All secrets stored in a Galasa Ecosystem can be retrieved using the following command:
+
+```
+galasactl secrets get
+```
+
+To get a specific secret named `SYSTEM1`, the `--name` flag can be provided as follows:
+
+```
+galasactl secrets get --name SYSTEM1
+```
+
+To display a secret in a different format, like YAML, the `--format` flag can be provided:
+
+```
+galasactl secrets get --name SYSTEM1 --format yaml
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_get.md).
+
+## secrets set
+
+This command can be used to create and update secrets in the Galasa Ecosystem. These secrets can then be used in Galasa tests to authenticate with test systems and perform other secure operations. The name of a secret to create or update must be provided using the `--name` flag.
+
+### Examples
+
+The `--username`, `--password`, and `--token` flags can be used in different combinations to create different types of secret.
+
+For example, a UsernamePassword secret can be created by supplying `--username` and `--password`:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username" --password "my-password"
+```
+
+A UsernameToken secret can be created by supplying `--username` and `--token`:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username" --token "my-token"
+```
+
+A Token secret can be created by supplying `--token` on its own:
+```
+galasactl secrets set --name SYSTEM1 --token "my-token"
+```
+
+A Username secret can be created by supplying `--username` on its own:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username"
+```
+
+Base64-encoded credentials can be supplied using the `--base64-username`, `--base64-password`, and `--base64-token` flags.
+
+For example, to create a UsernamePassword secret where both the username and password are base64-encoded:
+
+```
+galasactl secrets set --name SYSTEM1 --base64-username "my-base64-username" --base64-password "my-base64-password"
+```
+
+It is also possible to mix these flags with their non-encoded variants discussed previously. For example, to create a UsernameToken secret where only the token is base64-encoded:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-base64-username" --base64-token "my-base64-token"
+```
+
+Once a secret has been created, you can change the type of the secret by supplying your desired secret type using the `--type` flag. When supplying the `--type` flag, all credentials for the new secret type must be provided. To find out what secret types are supported, run `galasactl secrets set --help`.
+
+For example, to create a UsernamePassword secret and then change it to a Token secret:
+
+```
+galasactl secrets set --name SYSTEM1 --username "my-username" --password "my-password"
+galasactl secrets set --name SYSTEM1 --token "my-token" --type Token
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_set.md).
+
+## secrets delete
+
+This command deletes a secret with the given name from the Galasa Ecosystem's credentials store. The name of the secret to be deleted must be provided using the `--name` flag.
+
+### Examples
+
+To delete a secret named `SYSTEM1`, run the following command:
+
+```
+galasactl secrets delete --name SYSTEM1
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_delete.md).
 
 ## Reference Material
 
@@ -620,3 +772,22 @@ So, invoke the `galasactl` without installing on your local machine, using the d
 ```
 docker run harbor.galasa.dev/galasadev/galasa-cli-amd64:main galasactl --version
 ```
+
+## Running a test locally, but using shared configuration properties on a remote Galasa server
+This configuration is supported. An ecosystem can be set up with CPS (configuration properties store) properties.
+
+The galasactl tool can be configured to communicate with that CPS.
+
+To do this, assuming `https://myhost/api/bootstrap` can be used to 
+communicate with the remote server, add the following to your `bootstrap.properties` file, 
+```
+# Tell the galasactl tool that local tests should use the REST API to get shared configuration properties from a remote server.
+# https://myhost/api is the location of the Galasa REST API endpoints.
+framework.config.store=galasacps://myhost/api
+framework.extra.bundles=dev.galasa.cps.rest
+```
+
+The user must perform a `galasactl auth login` to the same ecosystem before trying to launch a local test.
+
+# Gherkin Support
+Gherkin support is described [here](./gherkin-docs.md)

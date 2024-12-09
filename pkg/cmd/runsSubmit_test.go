@@ -14,7 +14,7 @@ import (
 
 func TestRunsSubmitCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_SUBMIT)
@@ -28,7 +28,7 @@ func TestRunsSubmitCommandInCommandCollection(t *testing.T) {
 
 func TestRunsSubmitHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "submit", "--help"}
 
@@ -44,7 +44,7 @@ func TestRunsSubmitHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsSubmitNoFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit"}
@@ -61,7 +61,7 @@ func TestRunsSubmitNoFlagsReturnsOk(t *testing.T) {
 
 func TestRunsSubmitBundleFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--bundle", "1lilbundle"}
@@ -80,7 +80,7 @@ func TestRunsSubmitBundleFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitBundleFlagCSListReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--bundle", "bundle,list,woo"}
@@ -101,7 +101,7 @@ func TestRunsSubmitBundleFlagCSListReturnsOk(t *testing.T) {
 
 func TestRunsSubmitClassFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--class", "1lilclass"}
@@ -120,7 +120,7 @@ func TestRunsSubmitClassFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitClassFlagCSListReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--class", "class,list,woo"}
@@ -141,7 +141,7 @@ func TestRunsSubmitClassFlagCSListReturnsOk(t *testing.T) {
 
 func TestRunsSubmitGroupFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--group", "group.name"}
@@ -160,7 +160,7 @@ func TestRunsSubmitGroupFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitNoexitcodeontestfailuresFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--noexitcodeontestfailures"}
@@ -179,7 +179,7 @@ func TestRunsSubmitNoexitcodeontestfailuresFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitOverrideFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--override", "1liloverride"}
@@ -198,7 +198,7 @@ func TestRunsSubmitOverrideFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitOverrideFlagCSListReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--override", "override,list,woo"}
@@ -219,7 +219,7 @@ func TestRunsSubmitOverrideFlagCSListReturnsOk(t *testing.T) {
 
 func TestRunsSubmitOverridefileFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--overridefile", "filepathtotheoverrides"}
@@ -238,7 +238,7 @@ func TestRunsSubmitOverridefileFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitPackageFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--package", "1lilpackage"}
@@ -257,7 +257,7 @@ func TestRunsSubmitPackageFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitPackageFlagCSListReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--package", "package,list,woo"}
@@ -278,7 +278,7 @@ func TestRunsSubmitPackageFlagCSListReturnsOk(t *testing.T) {
 
 func TestRunsSubmitTagFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--tag", "1liltag"}
@@ -297,7 +297,7 @@ func TestRunsSubmitTagFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitTagFlagCSListReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--tag", "tag,list,woo"}
@@ -318,7 +318,7 @@ func TestRunsSubmitTagFlagCSListReturnsOk(t *testing.T) {
 
 func TestRunsSubmitTestFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--test", "1liltest"}
@@ -337,7 +337,7 @@ func TestRunsSubmitTestFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitTestFlagCSListReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--test", "test,list,woo"}
@@ -358,7 +358,7 @@ func TestRunsSubmitTestFlagCSListReturnsOk(t *testing.T) {
 
 func TestRunsSubmitPollFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--poll", "10"}
@@ -377,7 +377,7 @@ func TestRunsSubmitPollFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitPollStringParamFlagReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--poll", "badstringinput"}
@@ -396,7 +396,7 @@ func TestRunsSubmitPollStringParamFlagReturnsError(t *testing.T) {
 
 func TestRunsSubmitProtfolioFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--portfolio", "yay.portfolio"}
@@ -415,7 +415,7 @@ func TestRunsSubmitProtfolioFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitRegexFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--regex"}
@@ -434,7 +434,7 @@ func TestRunsSubmitRegexFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitReportJsonFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--reportjson", "aFile.json"}
@@ -453,7 +453,7 @@ func TestRunsSubmitReportJsonFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitReportjunitFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--reportjunit", "afile.junit"}
@@ -472,7 +472,7 @@ func TestRunsSubmitReportjunitFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitReportyamlFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--reportyaml", "afile.yaml"}
@@ -491,7 +491,7 @@ func TestRunsSubmitReportyamlFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitRequestTypeFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--requesttype", "nonsense"}
@@ -510,7 +510,7 @@ func TestRunsSubmitRequestTypeFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitStreamFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--stream", "streamname"}
@@ -529,7 +529,7 @@ func TestRunsSubmitStreamFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitThrottleFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--throttle", "1"}
@@ -548,7 +548,7 @@ func TestRunsSubmitThrottleFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitThrottleStringParamFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--throttle", "badparam"}
@@ -566,7 +566,7 @@ func TestRunsSubmitThrottleStringParamFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitThrottleFileFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--throttlefile", "filepathnamething"}
@@ -585,7 +585,7 @@ func TestRunsSubmitThrottleFileFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitTraceFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit", "--trace"}
@@ -604,7 +604,7 @@ func TestRunsSubmitTraceFlagReturnsOk(t *testing.T) {
 
 func TestRunsSubmitAllFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_SUBMIT, factory, t)
 
 	var args []string = []string{"runs", "submit",

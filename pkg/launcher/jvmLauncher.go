@@ -15,9 +15,9 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 )
 
@@ -45,13 +45,13 @@ type JvmLauncher struct {
 	cmdParams RunsSubmitLocalCmdParameters
 
 	// An abstraction of the environment, so we can look up things like JAVA_HOME
-	env utils.Environment
+	env spi.Environment
 
 	// An abstraction of the file system so we can mock it out easily for unit tests.
-	fileSystem files.FileSystem
+	fileSystem spi.FileSystem
 
 	// A location galasa can call home
-	galasaHome utils.GalasaHome
+	galasaHome spi.GalasaHome
 
 	// A file system so we can get at embedded content if required.
 	// (Like so we can unpack the boot.jar)
@@ -60,14 +60,20 @@ type JvmLauncher struct {
 	// The collection of tests which are running, or have completed.
 	localTests []*LocalTest
 
-	// This timer service can be interrupted when we don't want it to sleep.
-	timeService utils.TimeService
+	// This timer service allows unit tests to control the time explicitly.
+	timeService spi.TimeService
+
+	// Used by the main polling loop to sleep and be interrupted.
+	timedSleeper spi.TimedSleeper
 
 	// A service which can create OS processes.
 	processFactory ProcessFactory
 
 	// A map of bootstrap properties
 	bootstrapProps props.JavaProperties
+
+	// So we can get common objects easily.
+	factory spi.Factory
 }
 
 // These parameters are gathered from the command-line and passed into the laucher.
@@ -113,21 +119,25 @@ const (
 
 // NewJVMLauncher creates a JVM launcher. Primes it with references to services
 // which can be used to launch JVM servers.
+// We get the caller's timer service so we can interrupt the caller when we are done.
 func NewJVMLauncher(
+	factory spi.Factory,
 	bootstrapProps props.JavaProperties,
-	env utils.Environment,
-	fileSystem files.FileSystem,
 	embeddedFileSystem embedded.ReadOnlyFileSystem,
 	runsSubmitLocalCmdParams *RunsSubmitLocalCmdParameters,
-	timeService utils.TimeService,
 	processFactory ProcessFactory,
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
+	timedSleeper spi.TimedSleeper,
+
 ) (*JvmLauncher, error) {
 
 	var (
-		err      error        = nil
+		err      error
 		launcher *JvmLauncher = nil
 	)
+
+	env := factory.GetEnvironment()
+	fileSystem := factory.GetFileSystem()
 
 	javaHome := env.GetEnv("JAVA_HOME")
 
@@ -135,6 +145,7 @@ func NewJVMLauncher(
 
 	if err == nil {
 		launcher = new(JvmLauncher)
+		launcher.factory = factory
 		launcher.javaHome = javaHome
 		launcher.cmdParams = *runsSubmitLocalCmdParams
 		launcher.env = env
@@ -142,7 +153,8 @@ func NewJVMLauncher(
 		launcher.embeddedFileSystem = embeddedFileSystem
 		launcher.processFactory = processFactory
 		launcher.galasaHome = galasaHome
-		launcher.timeService = timeService
+		launcher.timeService = factory.GetTimeService()
+		launcher.timedSleeper = timedSleeper
 		launcher.bootstrapProps = bootstrapProps
 
 		// Make sure the home folder has the boot jar unpacked and ready to invoke.
@@ -240,44 +252,59 @@ func (launcher *JvmLauncher) SubmitTestRun(
 				}
 
 				if err == nil {
-					var (
-						cmd  string
-						args []string
-					)
-					cmd, args, err = getCommandSyntax(
-						launcher.bootstrapProps,
-						launcher.galasaHome,
-						launcher.fileSystem, launcher.javaHome, obrs,
-						*testClassToLaunch, launcher.cmdParams.RemoteMaven, launcher.cmdParams.LocalMaven,
-						launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
-						gherkinURL,
-						isTraceEnabled,
-						launcher.cmdParams.IsDebugEnabled,
-						launcher.cmdParams.DebugPort,
-						launcher.cmdParams.DebugMode,
-					)
+
+					var jwt = ""
+					if launcher.isCPSRemote() {
+						// Though this is a local test run being launched, the CPS will be remote on an ecosystem via REST.
+						// If the config store value doesn't start wiht that, then it's not a remote CPS, so we don't need the JWT.
+						apiServerUrl := launcher.getCPSRemoteApiServerUrl()
+						authenticator := launcher.factory.GetAuthenticator(apiServerUrl, launcher.galasaHome)
+						log.Printf("framework.config.store bootstrap property indicates a remote CPS will be used. So we need a valid JWT.\n")
+						jwt, err = authenticator.GetBearerToken()
+					}
+
 					if err == nil {
-						log.Printf("Launching command '%s' '%v'\n", cmd, args)
-						localTest := NewLocalTest(launcher.timeService, launcher.fileSystem, launcher.processFactory)
-						err = localTest.launch(cmd, args)
 
+						var (
+							cmd  string
+							args []string
+						)
+						cmd, args, err = getCommandSyntax(
+							launcher.bootstrapProps,
+							launcher.galasaHome,
+							launcher.fileSystem, launcher.javaHome, obrs,
+							*testClassToLaunch, launcher.cmdParams.RemoteMaven, launcher.cmdParams.LocalMaven,
+							launcher.cmdParams.TargetGalasaVersion, overridesFilePath,
+							gherkinURL,
+							isTraceEnabled,
+							launcher.cmdParams.IsDebugEnabled,
+							launcher.cmdParams.DebugPort,
+							launcher.cmdParams.DebugMode,
+							jwt,
+						)
 						if err == nil {
-							// The JVM process started. Store away its' details
-							launcher.localTests = append(launcher.localTests, localTest)
+							log.Printf("Launching command '%s' '%v'\n", cmd, args)
+							localTest := NewLocalTest(launcher.timedSleeper, launcher.fileSystem, launcher.processFactory)
+							err = localTest.launch(cmd, args)
 
-							localTest.testRun = new(galasaapi.TestRun)
-							if testClassToLaunch.OSGiBundleName != "" {
-								localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+							if err == nil {
+								// The JVM process started. Store away its' details
+								launcher.localTests = append(launcher.localTests, localTest)
+
+								localTest.testRun = new(galasaapi.TestRun)
+								if testClassToLaunch.OSGiBundleName != "" {
+									localTest.testRun.SetBundleName(testClassToLaunch.OSGiBundleName)
+								}
+								localTest.testRun.SetStream(stream)
+								localTest.testRun.SetGroup(groupName)
+								localTest.testRun.SetRequestor(requestor)
+								localTest.testRun.SetTrace(isTraceEnabled)
+								localTest.testRun.SetType(requestType)
+								localTest.testRun.SetName(localTest.runId)
+
+								// The test run we started can be returned to the submitter.
+								testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
 							}
-							localTest.testRun.SetStream(stream)
-							localTest.testRun.SetGroup(groupName)
-							localTest.testRun.SetRequestor(requestor)
-							localTest.testRun.SetTrace(isTraceEnabled)
-							localTest.testRun.SetType(requestType)
-							localTest.testRun.SetName(localTest.runId)
-
-							// The test run we started can be returned to the submitter.
-							testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
 						}
 					}
 				}
@@ -288,7 +315,25 @@ func (launcher *JvmLauncher) SubmitTestRun(
 	return testRuns, err
 }
 
-func defaultLocalMavenIfNotSet(localMaven string, fileSystem files.FileSystem) (string, error) {
+// isCPSRemote - decide whether the config store used by tests is remote or not.
+// If it is remote, we are going to have to get a valid JWT to use.
+func (launcher *JvmLauncher) isCPSRemote() bool {
+	isRemote := false
+	configStoreProp := launcher.bootstrapProps["framework.config.store"]
+	isRemote = strings.HasPrefix(configStoreProp, "galasacps")
+	return isRemote
+}
+
+// Gets the https URL of the config store, to be used contacting the remote CPS.
+func (launcher *JvmLauncher) getCPSRemoteApiServerUrl() string {
+	configStoreGalasaUrl := launcher.bootstrapProps["framework.config.store"]
+	// The configuration has a URL like galasacps://myhost/api
+	// We need to turn it into something like https://myhost/api
+	httpsUrl := strings.Replace(configStoreGalasaUrl, "galasacps", "https", 1)
+	return httpsUrl
+}
+
+func defaultLocalMavenIfNotSet(localMaven string, fileSystem spi.FileSystem) (string, error) {
 	var err error
 	returnMavenPath := ""
 	if localMaven == "" {
@@ -319,20 +364,20 @@ func buildListOfAllObrs(obrsFromCommandLine []string, obrFromPortfolio string) (
 	return obrs, err
 }
 
-func deleteTempFiles(fileSystem files.FileSystem, temporaryFolderPath string) {
+func deleteTempFiles(fileSystem spi.FileSystem, temporaryFolderPath string) {
 	fileSystem.DeleteDir(temporaryFolderPath)
 }
 
 func prepareTempFiles(
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
 	overrides map[string]interface{},
 ) (string, string, error) {
 
 	var (
-		temporaryFolderPath string = ""
-		overridesFilePath   string = ""
-		err                 error  = nil
+		temporaryFolderPath string
+		overridesFilePath   string
+		err                 error
 	)
 
 	// Create a temporary folder
@@ -358,8 +403,8 @@ func prepareTempFiles(
 // - error if there was one.
 func createTemporaryOverridesFile(
 	temporaryFolderPath string,
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
 	overrides map[string]interface{},
 ) (string, error) {
 	overrides = addStandardOverrideProperties(galasaHome, overrides)
@@ -371,7 +416,7 @@ func createTemporaryOverridesFile(
 }
 
 func addStandardOverrideProperties(
-	galasaHome utils.GalasaHome,
+	galasaHome spi.GalasaHome,
 	overrides map[string]interface{},
 ) map[string]interface{} {
 
@@ -404,7 +449,7 @@ func overrideLocalRunIdPrefixProperty(overrides map[string]interface{}) {
 	}
 }
 
-func overrideRasStoreProperty(galasaHome utils.GalasaHome, overrides map[string]interface{}) {
+func overrideRasStoreProperty(galasaHome spi.GalasaHome, overrides map[string]interface{}) {
 	// Set the ras location to be local disk always.
 	const OVERRIDE_PROPERTY_FRAMEWORK_RESULT_STORE = "framework.resultarchive.store"
 
@@ -502,7 +547,7 @@ func createRunFromLocalTest(localTest *LocalTest) (*galasaapi.Run, error) {
 	return run, err
 }
 
-func setTestStructureFromRasFile(run *galasaapi.Run, jsonFilePath string, fileSystem files.FileSystem) error {
+func setTestStructureFromRasFile(run *galasaapi.Run, jsonFilePath string, fileSystem spi.FileSystem) error {
 
 	var testStructure = galasaapi.NewTestStructure()
 	var err error
@@ -584,8 +629,8 @@ func (launcher *JvmLauncher) GetTestCatalog(stream string) (TestCatalog, error) 
 //	    --test dev.galasa.example.banking.payee/dev.galasa.example.banking.payee.TestPayee
 func getCommandSyntax(
 	bootstrapProperties props.JavaProperties,
-	galasaHome utils.GalasaHome,
-	fileSystem files.FileSystem,
+	galasaHome spi.GalasaHome,
+	fileSystem spi.FileSystem,
 	javaHome string,
 	testObrs []utils.MavenCoordinates,
 	testLocation TestLocation,
@@ -598,6 +643,7 @@ func getCommandSyntax(
 	isDebugEnabled bool,
 	debugPort uint32,
 	debugMode string,
+	jwt string,
 ) (string, []string, error) {
 
 	var cmd string = ""
@@ -627,13 +673,20 @@ func getCommandSyntax(
 
 		args = appendArgsBootstrapJvmLaunchOptions(args, bootstrapProperties)
 
-		args = append(args, "-jar")
-		args = append(args, bootJarPath)
-
+		// Note: Any -D properties are options for the JVM, so must appear before the -jar parameter.
+		// Parameters after the -jar parameter get passed into the 'main' of the launched java program.
 		args = append(args, "-Dfile.encoding=UTF-8")
 
 		nativeGalasaHomeFolderPath := galasaHome.GetNativeFolderPath()
 		args = append(args, `-DGALASA_HOME="`+nativeGalasaHomeFolderPath+`"`)
+
+		// If there is a jwt, pass it through.
+		if jwt != "" {
+			args = append(args, "-DGALASA_JWT="+jwt)
+		}
+
+		args = append(args, "-jar")
+		args = append(args, bootJarPath)
 
 		// --localmaven file://${M2_PATH}/repository/
 		// Note: URLs always have forward-slashes
@@ -787,7 +840,7 @@ func calculateDebugMode(debugMode string, bootstrapProperties props.JavaProperti
 }
 
 func checkDebugModeValueIsValid(debugMode string, errorMessageIfInvalid *galasaErrors.MessageType) error {
-	var err error = nil
+	var err error
 
 	lowerCaseDebugMode := strings.ToLower(debugMode)
 

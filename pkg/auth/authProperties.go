@@ -10,10 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/props"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
@@ -24,34 +23,34 @@ const (
 )
 
 // Gets authentication properties from the user's galasactl.properties file or from the environment or a mixture.
-func GetAuthProperties(fileSystem files.FileSystem, galasaHome utils.GalasaHome, env utils.Environment) (galasaapi.AuthProperties, error) {
-	var err error = nil
+func getAuthProperties(fileSystem spi.FileSystem, galasaHome spi.GalasaHome, env spi.Environment) (galasaapi.AuthProperties, string, error) {
+	var err error
 	authProperties := galasaapi.NewAuthProperties()
 
 	// Work out which file we we want to draw properties from.
 	galasactlPropertiesFilePath := filepath.Join(galasaHome.GetNativeFolderPath(), "galasactl.properties")
 
 	// Get the file-based token property if we can
-	tokenProperty, fileAccessErr := getPropertyFromFile(fileSystem, galasactlPropertiesFilePath, TOKEN_PROPERTY)
+	galasaToken, fileAccessErr := getPropertyFromFile(fileSystem, galasactlPropertiesFilePath, TOKEN_PROPERTY)
 
 	// Over-write the token property value if there is an environment variable set to do that.
-	tokenProperty = getPropertyWithOverride(env, tokenProperty, galasactlPropertiesFilePath, TOKEN_PROPERTY)
+	galasaToken = getPropertyWithOverride(env, galasaToken, galasactlPropertiesFilePath, TOKEN_PROPERTY)
 
 	// Make sure all the properties have values that we need.
-	err = checkPropertyIsSet(tokenProperty, TOKEN_PROPERTY, galasactlPropertiesFilePath, fileAccessErr)
+	err = checkPropertyIsSet(galasaToken, TOKEN_PROPERTY, galasactlPropertiesFilePath, fileAccessErr)
 	if err == nil {
 		var refreshToken string
 		var clientId string
 
 		// Get the authentication properties from the token
-		refreshToken, clientId, err = extractPropertiesFromToken(tokenProperty)
+		refreshToken, clientId, err = extractPropertiesFromToken(galasaToken)
 		if err == nil {
 			authProperties.SetClientId(clientId)
 			authProperties.SetRefreshToken(refreshToken)
 		}
 	}
 
-	return *authProperties, err
+	return *authProperties, galasaToken, err
 }
 
 func checkPropertyIsSet(propertyValue string, propertyName string, galasactlPropertiesFilePath string, fileAccessErr error) error {
@@ -69,7 +68,7 @@ func checkPropertyIsSet(propertyValue string, propertyName string, galasactlProp
 	return err
 }
 
-func getPropertyWithOverride(env utils.Environment, valueFromFile string, filePathGatheredFrom string, propertyName string) string {
+func getPropertyWithOverride(env spi.Environment, valueFromFile string, filePathGatheredFrom string, propertyName string) string {
 	value := env.GetEnv(propertyName)
 	if value != "" {
 		// env var has been set.
@@ -85,8 +84,8 @@ func getPropertyWithOverride(env utils.Environment, valueFromFile string, filePa
 }
 
 // Gets a property from the user's galasactl.properties file
-func getPropertyFromFile(fileSystem files.FileSystem, galasactlPropertiesFilePath string, propertyName string) (string, error) {
-	var err error = nil
+func getPropertyFromFile(fileSystem spi.FileSystem, galasactlPropertiesFilePath string, propertyName string) (string, error) {
+	var err error
 	var galasactlProperties props.JavaProperties
 	galasactlProperties, err = props.ReadPropertiesFile(fileSystem, galasactlPropertiesFilePath)
 	if err != nil {

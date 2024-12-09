@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunsPrepareCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	cmd, err := commands.GetCommand(COMMAND_NAME_RUNS_PREPARE)
@@ -27,7 +28,7 @@ func TestRunsPrepareCommandInCommandCollection(t *testing.T) {
 
 func TestRunsPrepareHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "prepare", "--help"}
 
@@ -44,7 +45,7 @@ func TestRunsPrepareHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsPrepareNoParametersReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "prepare"}
 
@@ -62,7 +63,7 @@ func TestRunsPrepareNoParametersReturnsError(t *testing.T) {
 
 func TestRunsPreparePortfolioFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "portfolio.file"}
@@ -81,7 +82,7 @@ func TestRunsPreparePortfolioFlagReturnsOk(t *testing.T) {
 
 func TestRunsPrepareCheckFlagNoParamsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio"}
@@ -100,7 +101,7 @@ func TestRunsPrepareCheckFlagNoParamsReturnsError(t *testing.T) {
 
 func TestRunsPreparePortfolioAppendFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--append"}
@@ -120,7 +121,7 @@ func TestRunsPreparePortfolioAppendFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioBundlesFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--bundle", "bundle.name"}
@@ -140,7 +141,7 @@ func TestRunsPreparePortfolioBundlesFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioBundleFlagCommaSeperatedListValuesSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--bundle", "comma,seperated,bundles"}
@@ -162,7 +163,7 @@ func TestRunsPreparePortfolioBundleFlagCommaSeperatedListValuesSetCorrectly(t *t
 
 func TestRunsPreparePortfolioClassFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--class", "class.stuff"}
@@ -183,7 +184,7 @@ func TestRunsPreparePortfolioClassFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioClassFlagCommaSeperatedListValuesSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--class", "comma,seperated,classes"}
@@ -205,7 +206,7 @@ func TestRunsPreparePortfolioClassFlagCommaSeperatedListValuesSetCorrectly(t *te
 
 func TestRunsPreparePortfolioOverrideFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--override", "override string one"}
@@ -225,7 +226,7 @@ func TestRunsPreparePortfolioOverrideFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioOverrideFlagCommaSeperatedListValuesSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--override", "comma,seperated,overrides"}
@@ -247,7 +248,7 @@ func TestRunsPreparePortfolioOverrideFlagCommaSeperatedListValuesSetCorrectly(t 
 
 func TestRunsPreparePortfolioPackageFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--package", "packagethingy"}
@@ -267,7 +268,7 @@ func TestRunsPreparePortfolioPackageFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioPackagesFlagCommaSeperatedListValuesSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--package", "comma,seperated,packages"}
@@ -289,7 +290,7 @@ func TestRunsPreparePortfolioPackagesFlagCommaSeperatedListValuesSetCorrectly(t 
 
 func TestRunsPreparePortfolioRegexFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--regex"}
@@ -309,7 +310,7 @@ func TestRunsPreparePortfolioRegexFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioStreamFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--stream", "arlo.stream"}
@@ -329,7 +330,7 @@ func TestRunsPreparePortfolioStreamFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioTagFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--tag", "tag.stuff"}
@@ -349,7 +350,7 @@ func TestRunsPreparePortfolioTagFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioTagFlagCommaSeperatedListValuesSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--tag", "comma,seperated,tags"}
@@ -371,7 +372,7 @@ func TestRunsPreparePortfolioTagFlagCommaSeperatedListValuesSetCorrectly(t *test
 
 func TestRunsPreparePortfolioTestFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--test", "test.stuff"}
@@ -391,7 +392,7 @@ func TestRunsPreparePortfolioTestFlagReturnsOk(t *testing.T) {
 
 func TestRunsPreparePortfolioTestFlagCommaSeperatedListValuesSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--test", "comma,seperated,tests"}
@@ -413,7 +414,7 @@ func TestRunsPreparePortfolioTestFlagCommaSeperatedListValuesSetCorrectly(t *tes
 
 func TestRunsPrepareAllFlagsReturnOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_PREPARE, factory, t)
 
 	var args []string = []string{"runs", "prepare", "--portfolio", "roo.yaml", "--test", "test,stuff", "--tag", "tag,list",

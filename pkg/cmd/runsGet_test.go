@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunsGetCommandInCommandCollection(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	runsGetCommand, err := commands.GetCommand(COMMAND_NAME_RUNS_GET)
@@ -27,7 +28,7 @@ func TestRunsGetCommandInCommandCollection(t *testing.T) {
 
 func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "get", "--help"}
 
@@ -43,7 +44,7 @@ func TestRunsGetHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get"}
@@ -60,7 +61,7 @@ func TestRunsGetNoFlagsReturnsOk(t *testing.T) {
 
 func TestRunsGetActiveFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--active"}
@@ -79,7 +80,7 @@ func TestRunsGetActiveFlagReturnsOk(t *testing.T) {
 
 func TestRunsGetRequestorFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--requestor", "galasateam"}
@@ -98,7 +99,7 @@ func TestRunsGetRequestorFlagReturnsOk(t *testing.T) {
 
 func TestRunsGetResultFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--result", "passed"}
@@ -117,7 +118,7 @@ func TestRunsGetResultFlagReturnsOk(t *testing.T) {
 
 func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--name", "gerald"}
@@ -136,7 +137,7 @@ func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 
 func TestRunsGetageFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--age", "10h"}
@@ -155,7 +156,7 @@ func TestRunsGetageFlagReturnsOk(t *testing.T) {
 
 func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--format", "yaml"}
@@ -174,7 +175,7 @@ func TestRunsGetFormatFlagReturnsOk(t *testing.T) {
 
 func TestRunsGetMultipleNameOverridesToLast(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--name", "C2020", "--name", "C4091"}
@@ -193,7 +194,7 @@ func TestRunsGetMultipleNameOverridesToLast(t *testing.T) {
 
 func TestRunsGetMultipleResultFlagsOverridesToLast(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--result", "passed", "--result", "failed"}
@@ -212,7 +213,7 @@ func TestRunsGetMultipleResultFlagsOverridesToLast(t *testing.T) {
 
 func TestRunsGetMultipleRequestorFlagsOverridesToLast(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
 
 	var args []string = []string{"runs", "get", "--requestor", "root", "--requestor", "galasa"}
@@ -231,7 +232,7 @@ func TestRunsGetMultipleRequestorFlagsOverridesToLast(t *testing.T) {
 
 func TestRunsGetNameRequestorMutuallyExclusive(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "get", "--name", "Miller", "--requestor", "root"}
 
@@ -248,7 +249,7 @@ func TestRunsGetNameRequestorMutuallyExclusive(t *testing.T) {
 
 func TestRunsGetNameResultMutuallyExclusive(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "get", "--name", "Miller", "--result", "passed"}
 
@@ -265,7 +266,7 @@ func TestRunsGetNameResultMutuallyExclusive(t *testing.T) {
 
 func TestRunsGetNameActiveMutuallyExclusive(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "get", "--name", "Miller", "--active"}
 
@@ -282,7 +283,7 @@ func TestRunsGetNameActiveMutuallyExclusive(t *testing.T) {
 
 func TestRunsGetResultActiveMutuallyExclusive(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "get", "--result", "failed", "--active"}
 

@@ -19,7 +19,7 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runsformatter"
-	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 var (
@@ -47,8 +47,8 @@ func GetRuns(
 	resultParameter string,
 	shouldGetActive bool,
 	outputFormatString string,
-	timeService utils.TimeService,
-	console utils.Console,
+	timeService spi.TimeService,
+	console spi.Console,
 	apiServerUrl string,
 	apiClient *galasaapi.APIClient,
 ) error {
@@ -89,11 +89,14 @@ func GetRuns(
 			if err == nil {
 				// Some formatters need extra fields filled-in so they can be displayed.
 				if chosenFormatter.IsNeedingMethodDetails() {
+					log.Println("This type of formatter needs extra detail about each run to display")
 					runJson, err = GetRunDetailsFromRasSearchRuns(runJson, apiClient)
 				}
 
 				if err == nil {
 					var outputText string
+
+					log.Printf("There are %v results to display in total.\n", len(runJson))
 
 					//convert galsaapi.Runs tests into formattable data
 					formattableTest := FormattableTestFromGalasaApi(runJson, apiServerUrl)
@@ -124,7 +127,7 @@ func CreateFormatters() map[string]runsformatter.RunsFormatter {
 	return validFormatters
 }
 
-func writeOutput(outputText string, console utils.Console) error {
+func writeOutput(outputText string, console spi.Console) error {
 	err := console.WriteString(outputText)
 	return err
 }
@@ -166,7 +169,7 @@ func validateOutputFormatFlagValue(outputFormatString string, validFormatters ma
 }
 
 func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.APIClient) ([]galasaapi.Run, error) {
-	var err error = nil
+	var err error
 	var runsDetails []galasaapi.Run = make([]galasaapi.Run, 0)
 	var context context.Context = nil
 	var details *galasaapi.Run
@@ -179,6 +182,7 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 
 		for _, run := range runs {
 			runid := run.GetRunId()
+			log.Printf("Getting details for run %v\n", runid)
 			details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).ClientApiVersion(restApiVersion).Execute()
 			if err != nil {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
@@ -205,11 +209,11 @@ func GetRunsFromRestApi(
 	fromAgeMins int,
 	toAgeMins int,
 	shouldGetActive bool,
-	timeService utils.TimeService,
+	timeService spi.TimeService,
 	apiClient *galasaapi.APIClient,
 ) ([]galasaapi.Run, error) {
 
-	var err error = nil
+	var err error
 	var results []galasaapi.Run = make([]galasaapi.Run, 0)
 
 	var context context.Context = nil
@@ -222,6 +226,7 @@ func GetRunsFromRestApi(
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 	var restApiVersion string
+	var pageCursor string
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
@@ -232,7 +237,7 @@ func GetRunsFromRestApi(
 			var runData *galasaapi.RunResults
 			var httpResponse *http.Response
 			log.Printf("Requesting page '%d' ", pageNumberWanted)
-			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion)
+			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).IncludeCursor("true")
 			if fromAgeMins != 0 {
 				apicall = apicall.From(fromTime)
 			}
@@ -251,8 +256,10 @@ func GetRunsFromRestApi(
 			if shouldGetActive {
 				apicall = apicall.Status(activeStatusNames)
 			}
-			apicall = apicall.Page(pageNumberWanted)
-			apicall = apicall.Sort("to:desc")
+			if pageCursor != "" {
+				apicall = apicall.Cursor(pageCursor)
+			}
+			apicall = apicall.Sort("from:desc")
 			runData, httpResponse, err = apicall.Execute()
 
 			if err != nil {
@@ -264,22 +271,31 @@ func GetRunsFromRestApi(
 					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
 				} else {
 
+					log.Printf("HTTP status was OK")
+
 					// Copy the results from this page into our bigger list of results.
 					runsOnThisPage := runData.GetRuns()
+					log.Printf("runsOnThisPage: %v", len(runsOnThisPage))
+
 					// Add all the runs into our set of results.
 					// Note: The ... syntax means 'all of the array', so they all get appended at once.
 					results = append(results, runsOnThisPage...)
 
+					log.Printf("total runs: %v", len(results))
+
 					// Have we processed the last page ?
-					if pageNumberWanted == runData.GetNumPages() {
+					if !runData.HasNextCursor() || len(runsOnThisPage) < int(runData.GetPageSize()) {
 						gotAllResults = true
 					} else {
+						pageCursor = runData.GetNextCursor()
 						pageNumberWanted++
 					}
 				}
 			}
 		}
 	}
+
+	log.Printf("total runs returned: %v", len(results))
 
 	return results, err
 }

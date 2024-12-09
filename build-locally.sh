@@ -63,6 +63,18 @@ function read_boot_jar_version {
 }
 
 
+#----------------------------------------------------------------------------
+function check_exit_code () {
+    # This function takes 3 parameters in the form:
+    # $1 an integer value of the expected exit code
+    # $2 an error message to display if $1 is not equal to 0
+    if [[ "$1" != "0" ]]; then 
+        error "$2" 
+        exit 1  
+    fi
+}
+
+
 #--------------------------------------------------------------------------
 # 
 # Main script logic
@@ -528,6 +540,10 @@ function run_test_locally_using_galasactl {
 
     unset GALASA_BOOTSTRAP
 
+    rm -f results.junit
+    rm -f results.yaml
+    rm -f results.json
+
     cmd="${BASEDIR}/bin/${galasactl_command} runs submit local \
     --obr mvn:${OBR_GROUP_ID}/${OBR_ARTIFACT_ID}/${OBR_VERSION}/obr \
     --class ${BUNDLE}/${JAVA_CLASS} \
@@ -537,6 +553,7 @@ function run_test_locally_using_galasactl {
     --requesttype MikeCLI \
     --poll 10 \
     --progress 1 \
+    --reportjunit results.junit --reportyaml results.yaml --reportjson results.json  \
     --log ${LOG_FILE}"
 
     # --reportjson myreport.json \
@@ -570,13 +587,53 @@ function cleanup_temp {
     cd ${BASEDIR}/temp
 }
 
+
+#-------------------------------------------
+#Detect secrets
+function check_secrets {
+    h2 "updating secrets baseline"
+    cd ${BASEDIR}
+    detect-secrets scan --update .secrets.baseline
+    rc=$? 
+    check_exit_code $rc "Failed to run detect-secrets. Please check it is installed properly" 
+    success "updated secrets file"
+
+    h2 "running audit for secrets"
+    detect-secrets audit .secrets.baseline
+    rc=$? 
+    check_exit_code $rc "Failed to audit detect-secrets."
+    
+    #Check all secrets have been audited
+    secrets=$(grep -c hashed_secret .secrets.baseline)
+    audits=$(grep -c is_secret .secrets.baseline)
+    if [[ "$secrets" != "$audits" ]]; then 
+        error "Not all secrets found have been audited"
+        exit 1  
+    fi
+    success "secrets audit complete"
+
+    h2 "Removing the timestamp from the secrets baseline file so it doesn't always cause a git change."
+    mkdir -p temp
+    rc=$? 
+    check_exit_code $rc "Failed to create a temporary folder"
+    cat .secrets.baseline | grep -v "generated_at" > temp/.secrets.baseline.temp
+    rc=$? 
+    check_exit_code $rc "Failed to create a temporary file with no timestamp inside"
+    mv temp/.secrets.baseline.temp .secrets.baseline
+    rc=$? 
+    check_exit_code $rc "Failed to overwrite the secrets baseline with one containing no timestamp inside."
+    success "secrets baseline timestamp content has been removed ok"
+}
+
+
+
+
 # The steps to build the CLI
 clean
 download_dependencies
 generate_rest_client
 go_mod_tidy
 build_executables
-
 
 
 
@@ -623,7 +680,7 @@ build_generated_source_gradle
 run_test_locally_using_galasactl ${BASEDIR}/temp/local-run-log-gradle.txt
 
 
-
+check_secrets
 
 # launch_test_on_ecosystem
 # test_on_windows

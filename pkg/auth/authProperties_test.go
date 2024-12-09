@@ -29,12 +29,13 @@ func TestGetAuthPropertiesWithValidPropertiesUnmarshalsAuthProperties(t *testing
 		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
 	// When...
-	authProperties, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	authProperties, tokenGotBack, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and the token property is present")
 	assert.Equal(t, clientIdValue, authProperties.GetClientId())
 	assert.Equal(t, accessTokenValue, authProperties.GetRefreshToken())
+	assert.Equal(t, tokenGotBack, tokenPropertyValue)
 }
 
 func TestGetAuthPropertiesWithNoClientIdInTokenReturnsError(t *testing.T) {
@@ -50,7 +51,7 @@ func TestGetAuthPropertiesWithNoClientIdInTokenReturnsError(t *testing.T) {
 		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing part of the token value.")
@@ -69,7 +70,7 @@ func TestGetAuthPropertiesWithOnlySeparatorReturnsError(t *testing.T) {
 		fmt.Sprintf("GALASA_TOKEN=%s", TOKEN_SEPARATOR))
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing the access token and client ID parts of the token.")
@@ -90,7 +91,7 @@ func TestGetAuthPropertiesWithSeparatorButNoClientIdReturnsError(t *testing.T) {
 		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing the client ID part of the token.")
@@ -111,7 +112,7 @@ func TestGetAuthPropertiesWithSeparatorButNoAccessTokenReturnsError(t *testing.T
 		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but is missing the access token part of the token.")
@@ -132,7 +133,7 @@ func TestGetAuthPropertiesWithBadlyFormattedTokenReturnsError(t *testing.T) {
 		fmt.Sprintf("GALASA_TOKEN=%s", tokenPropertyValue))
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error as the galasactl.properties exists but the access token is missing from the file.")
@@ -149,7 +150,7 @@ func TestGetAuthPropertiesWithEmptyGalasactlPropertiesReturnsError(t *testing.T)
 	mockFileSystem.WriteTextFile(mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties", "")
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the galasactl.properties is empty and an environment variable has not been set")
@@ -166,7 +167,7 @@ func TestGetAuthPropertiesWithMissingTokenPropertyReturnsError(t *testing.T) {
 	mockFileSystem.WriteTextFile(mockGalasaHome.GetNativeFolderPath()+"/galasactl.properties", "unknown.value=blah")
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the galasactl.properties exists and is missing a token property")
@@ -180,7 +181,7 @@ func TestGetAuthPropertiesWithMissingGalasactlPropertiesFileReturnsError(t *test
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
 	// When...
-	_, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	_, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.NotNil(t, err, "Should return an error if the galasactl.properties does not exist")
@@ -208,7 +209,7 @@ func TestGetAuthPropertiesTokenEnvVarOverridesFileValue(t *testing.T) {
 	mockEnvironment.SetEnv(TOKEN_PROPERTY, tokenPropertyValue)
 
 	// When...
-	authProperties, err := GetAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
+	authProperties, _, err := getAuthProperties(mockFileSystem, mockGalasaHome, mockEnvironment)
 
 	// Then...
 	assert.Nil(t, err, "Should not return an error if the galasactl.properties exists and all required properties are present")

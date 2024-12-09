@@ -105,16 +105,16 @@ The `galasactl` tool can generate the following errors:
 - GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1103E: Could not query CPS results. Reason: '{}'
 - GAL1104E: Unable to delete the bearer token file '{}'.
-- GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Please ensure you have allocated a personal access token and configured your client program by storing it in your galasactl.properties file together with the related client ID and secret
-- GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
-- GAL1108E: Invalid bearer token. Please ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
+- GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
+- GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
+- GAL1108E: Invalid bearer token. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
 - GAL1109E: Unable to access the file. Reason: '{}'
 - GAL1110E: Could not retrieve the content of the file provided. Reason: '{}'
 - GAL1111E: Error parsing the file '{}'. The file is not in the expected yaml format. Reason: '{}'. Invalid yaml:'{}'
 - GAL1112E: Error converting the parsed yaml content into a json payload for the http request. Reason: '{}'
 - GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program or the user input. Errors returned: '{}'
-- GAL1114E: The resources operation failed due to a problem on the server. Please collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
-- GAL1115E: An unexpected response was received from the Galasa Ecosystem. Please collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
+- GAL1114E: The resources operation failed due to a problem on the server. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
+- GAL1115E: An unexpected response was received from the Galasa Ecosystem. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.
 - GAL1116E: Error reading the HTTP Response body. Reason: '{}'
 - GAL1117E: The delete operation failed. Unable to process the error information returned from the server.
 - GAL1118E: The resource operation failed. Unable to process the error information returned from the server. Reason: '{}'
@@ -124,7 +124,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1122E: Authentication property {} is not available, which is needed to connect to the Galasa Ecosystem. It either needs to be in a file '{}' or set as an environment variable.
 - GAL1123E: Failed to read 3270 terminal JSON because the content is in the wrong format. Reason: {}
 - GAL1124E: Internal Failure. Terminal image could not be encoded into PNG format. Reason: {}
-- GAL1125E: Authentication property {} is invalid. Please ensure that it the value is made up of two parts that are separated by a '{}'.
+- GAL1125E: Authentication property {} is invalid. Ensure that it the value is made up of two parts that are separated by a '{}'.
 - GAL1132E: No active run found matching run name '{}'.
 - GAL1133E: Error resetting run '{}'. Reason: '{}'
 - GAL1134E: The runs reset operation failed. Unable to process the error information returned from the server.
@@ -135,8 +135,69 @@ The `galasactl` tool can generate the following errors:
 - GAL1139E: Unable to compile the regex pattern for Galasa Property field 'namespace'. Reason: '{}'
 - GAL1140E: The namespace, '{}', provided does not match formatting requirements. The namespace must start with a character in the 'a-z' range, followed by characters in the 'a'-'z' or '0'-'9' ranges only.
 - GAL1141E: Unable to compile the regex pattern for Galasa Property field '{}'. Reason: '{}'
-- GAL1142E: The {} field value, '{}', provided does not match formatting requirements. The {} field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) ranges only.
+- GAL1142E: The {} field value, '{}', provided does not match formatting requirements. The {} field value must start with a character in the 'a-z' or 'A-Z' range, followed by any characters in the 'a'-'z', 'A'-'Z', '0'-'9', '.' (period), '-' (dash) or '_' (underscore) or '@' (at) ranges only.
 - GAL1143E: Could not query run results. Server returned a non-200 code ({})
+- GAL1144E: Could not use url '{}' to retrieve the contents of the test catalog from stream '{}'. Http error from the Galasa server is '{}'
+- GAL1145E: Failed to create folder for bearer tokens at '{}'
+
+- GAL1146E: Could not get list of tokens from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
+- GAL1147E: The cache of access tokens contains a java web token (jwt) which is invalid or can't be parsed. File is '{}'. This could indicate a corruption in the file. To resolve, manually delete the file and authenticate against the server again with the 'galasactl auth login' command. If the problem persists, contact your Galasa system administrator. Detailed cause of this problem: '{}'
+- GAL1148E: The cache of access tokens contains a java web token (jwt) in file '{}', from which an expiration time could not be extracted. This could indicate a problem with the authentication configuration on the Galasa server. Contect your Galasa system administrator. Detailed problem : '{}'
+
+- GAL1149E: Programming logic error: Cannot encrypt because the length of the key is too small.
+- GAL1150E: Programming logic error: Decryption of cached bearer token failed. Reason: {}
+- GAL1151E: Programming logic error: Decryption of cached bearer token failed. Cipher is not long enough. Cipher size: {}, AES block size: {}
+- GAL1152E: Programming logic error: Too much data passed to the encryption process. Please contact your Galasa systems administrator.
+- GAL1153E: Failed to revoke the token with ID '{}'. Reason: '{}'.
+- GAL1154E: The provided token ID, '{}', does not match formatting requirements. The token ID can contain any character in the 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), or '_' (underscore) ranges only.
+- GAL1155E: The loginId provided by the --login-id field cannot be an empty string.
+- GAL1156E: Could not get list of users from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
+- GAL1157E: An attempt to delete a run named '{}' failed. Cause is {}
+- GAL1158E: An attempt to delete a run named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1159E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server.
+- GAL1160E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1161E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1162E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1163E: The run named '{}' could not be deleted because it was not found by the Galasa service. Try listing runs using 'galasactl runs get' to identify the one you wish to delete
+- GAL1164E: An attempt to delete a run named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1165E: '{}' is not supported as a valid login ID. Login ID should not contain spaces.
+- GAL1166E: The loginId provided by the --login-id field cannot be an empty string.
+- GAL1167E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server.
+- GAL1168E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1169E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1170E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1171E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.
+- GAL1173E: An attempt to delete a secret named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1174E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server.
+- GAL1175E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1176E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1177E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1178E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1179E: An attempt to get a secret named '{}' failed. Sending the get request to the Galasa service failed. Cause is {}
+- GAL1180E: Failed to get secrets. Unexpected http status code {} received from the server.
+- GAL1181E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1182E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1183E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1184E: Failed to get secrets. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1185E: Failed to get secrets. Sending the get request to the Galasa service failed. Cause is {}
+- GAL1186E: Invalid secret type provided. Supported secret types are: {}. Check your provided command parameters and try again.
+- GAL1187E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server.
+- GAL1188E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1189E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1190E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1191E: Failed to set a secret named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1192E: Failed to set a secret named '{}'. Sending the put request to the Galasa service failed. Cause is {}
+- GAL1193E: Invalid flag combination provided. --username cannot be provided with --base64-username, --password cannot be provided with --base64-password, and --token cannot be provided with --base64-token. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
+- GAL1194E: Invalid secret description provided. The description provided with the --description flag cannot be an empty string, and must only contain characters in the Latin-1 character set.
+- GAL1195E: Failed to delete user from database by user number.
+- GAL1196E: The user could not be deleted by login ID because it was not found by the Galasa service. Try listing users using 'galasactl users get' to identify the one you wish to delete
+- GAL1197E: An attempt to delete a user failed. Sending the delete request to the Galasa service failed. Cause is {}
+- GAL1198E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server.
+- GAL1199E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1200E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1201E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1202E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

@@ -9,9 +9,9 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ type RunsCancelCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsCancelCommand(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewRunsCancelCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsCancelCommand)
 	err := cmd.init(factory, runsCommand, rootCommand)
 	return cmd, err
@@ -56,7 +56,7 @@ func (cmd *RunsCancelCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsCancelCommand) init(factory Factory, runsCommand GalasaCommand, rootCommand GalasaCommand) error {
+func (cmd *RunsCancelCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsCancelCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsCancelCobraCmd(
@@ -67,12 +67,12 @@ func (cmd *RunsCancelCommand) init(factory Factory, runsCommand GalasaCommand, r
 	return err
 }
 
-func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory Factory,
-	runsCommand GalasaCommand,
+func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
+	runsCommand spi.GalasaCommand,
 	rootCmdValues *RootCmdValues,
 ) (*cobra.Command, error) {
 
-	var err error = nil
+	var err error
 	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsCancelCmd := &cobra.Command{
@@ -96,7 +96,7 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory Factory,
 }
 
 func (cmd *RunsCancelCommand) executeCancel(
-	factory Factory,
+	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
 	rootCmdValues *RootCmdValues,
 ) error {
@@ -115,7 +115,7 @@ func (cmd *RunsCancelCommand) executeCancel(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
@@ -131,8 +131,13 @@ func (cmd *RunsCancelCommand) executeCancel(
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API Server is at '%s'\n", apiServerUrl)
 
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+
 				var apiClient *galasaapi.APIClient
-				apiClient, err = auth.GetAuthenticatedAPIClient(apiServerUrl, fileSystem, galasaHome, timeService, env)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 				if err == nil {
 					// Call to process command in unit-testable way.

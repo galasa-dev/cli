@@ -10,13 +10,8 @@ import (
 	"os/user"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
-
-// Environment is a thin interface layer above the os package which can be mocked out
-type Environment interface {
-	GetEnv(propertyName string) string
-	GetUserName() (string, error)
-}
 
 //------------------------------------------------------------------------------------
 // The implementation of the real os-delegating variant of the interface
@@ -31,7 +26,7 @@ func NewOSEnvironment() *OSEnvironment {
 	return env
 }
 
-func NewEnvironment() Environment {
+func NewEnvironment() spi.Environment {
 	return NewOSEnvironment()
 }
 

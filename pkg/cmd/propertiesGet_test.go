@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPropertiesGetCommandInCommandCollectionHasName(t *testing.T) {
 
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	propertiesGetCommand, err := commands.GetCommand(COMMAND_NAME_PROPERTIES_GET)
@@ -27,7 +28,7 @@ func TestPropertiesGetCommandInCommandCollectionHasName(t *testing.T) {
 
 func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"properties", "get", "--help"}
 
@@ -43,7 +44,7 @@ func TestPropertiesGetHelpFlagSetCorrectly(t *testing.T) {
 
 func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"properties", "get"}
 	// When...
 	err := Execute(factory, args)
@@ -57,7 +58,7 @@ func TestPropertiesGetNoArgsReturnsError(t *testing.T) {
 
 func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty"}
@@ -79,7 +80,7 @@ func TestPropertiesGetNamespaceNameFlagsReturnsOk(t *testing.T) {
 
 func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince"}
@@ -99,7 +100,7 @@ func TestPropertiesGetNamespaceFlagsReturnsOk(t *testing.T) {
 
 func TestPropertiesGetNamespaceNamePrefixFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--prefix", "something"}
@@ -116,7 +117,7 @@ func TestPropertiesGetNamespaceNamePrefixFlagsReturnsError(t *testing.T) {
 
 func TestPropertiesGetNamespaceNameSuffixFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--suffix", "something"}
@@ -133,7 +134,7 @@ func TestPropertiesGetNamespaceNameSuffixFlagsReturnsError(t *testing.T) {
 
 func TestPropertiesGetNamespaceNameInfixFlagsReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--infix", "something"}
@@ -150,7 +151,7 @@ func TestPropertiesGetNamespaceNameInfixFlagsReturnsError(t *testing.T) {
 
 func TestPropertiesGetNamespacePrefixFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--prefix", "something"}
@@ -171,7 +172,7 @@ func TestPropertiesGetNamespacePrefixFlagsReturnsOk(t *testing.T) {
 
 func TestPropertiesGetNamespaceSufffixFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--suffix", "something"}
@@ -192,7 +193,7 @@ func TestPropertiesGetNamespaceSufffixFlagsReturnsOk(t *testing.T) {
 
 func TestPropertiesGetNamespaceInfixFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--infix", "something"}
@@ -213,7 +214,7 @@ func TestPropertiesGetNamespaceInfixFlagsReturnsOk(t *testing.T) {
 
 func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--prefix", "something", "--suffix", "suffixthingy", "--infix", "infixthingy"}
@@ -237,7 +238,7 @@ func TestPropertiesGetNamespacePrefixSuffixInfixFlagsReturnsOk(t *testing.T) {
 
 func TestPropertiesGetNameAndPrefixSuffixInfixMutuallyExclusive(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "mince", "--name", "pies.are.so.tasty", "--prefix", "something", "--suffix", "suffixthingy", "--infix", "infixthingy"}
@@ -255,7 +256,7 @@ func TestPropertiesGetNameAndPrefixSuffixInfixMutuallyExclusive(t *testing.T) {
 
 func TestPropertiesGetNamespaceNoParameterReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace"}
@@ -273,7 +274,7 @@ func TestPropertiesGetNamespaceNoParameterReturnsError(t *testing.T) {
 
 func TestPropertiesGetNamespaceSuffixNoParameterReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "guitar", "--suffix"}
@@ -291,7 +292,7 @@ func TestPropertiesGetNamespaceSuffixNoParameterReturnsError(t *testing.T) {
 
 func TestPropertiesGetNamespaceRepeatedOverridesToLast(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROPERTIES_GET, factory, t)
 
 	var args []string = []string{"properties", "get", "--namespace", "wildwest", "--namespace", "whistle"}

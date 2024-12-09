@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"net/url"
 
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/spi"
 
 	"log"
 )
@@ -52,7 +52,7 @@ import (
 
 // Read a test run file from disk into the in-memory structure.
 func readTestRunFromJsonFile(
-	fileSystem files.FileSystem,
+	fileSystem spi.FileSystem,
 	jsonFilePath string,
 ) (*galasaapi.TestRun, error) {
 

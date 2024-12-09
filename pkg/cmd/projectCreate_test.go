@@ -8,10 +8,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/files"
+	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -62,7 +64,7 @@ func TestCanCreateProjectGoldenPathNoOBR(t *testing.T) {
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
 }
 
-func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool, packageName string) {
+func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem spi.FileSystem, isObrProjectRequired bool, isMaven bool, isGradle bool, packageName string) {
 	parentFolderExists, err := mockFileSystem.DirExists(packageName)
 	assert.Nil(t, err)
 	assert.True(t, parentFolderExists, "Parent folder was not created.")
@@ -113,7 +115,7 @@ func assertParentFolderAndContentsCreated(t *testing.T, mockFileSystem files.Fil
 	}
 }
 
-func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem files.FileSystem, featureName string, isMaven bool, isGradle bool) {
+func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem spi.FileSystem, featureName string, isMaven bool, isGradle bool) {
 
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg." + featureName)
 	assert.Nil(t, err)
@@ -170,7 +172,7 @@ func assertTestFolderAndContentsCreatedOk(t *testing.T, mockFileSystem files.Fil
 	assert.True(t, isTestResourcesTextFileExists, "Test text resource file was not created.")
 }
 
-func assertJavaFileWasGenerated(t *testing.T, mockFileSystem files.FileSystem, expectedJavaFilePath string, packageName string) {
+func assertJavaFileWasGenerated(t *testing.T, mockFileSystem spi.FileSystem, expectedJavaFilePath string, packageName string) {
 	testJavaFileExists, err := mockFileSystem.Exists(expectedJavaFilePath)
 	assert.Nil(t, err)
 	assert.True(t, testJavaFileExists, "Test java file was not created.")
@@ -322,10 +324,10 @@ func TestCanCreateProjectGoldenPathWithOBR(t *testing.T) {
 
 	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
-	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
+	assertOBRFolderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
 
-func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem files.FileSystem, isMaven bool, isGradle bool) {
+func assertOBRFolderAndContentsCreatedOK(t *testing.T, mockFileSystem spi.FileSystem, isMaven bool, isGradle bool) {
 	testFolderExists, err := mockFileSystem.DirExists("my.test.pkg/my.test.pkg.obr")
 	assert.Nil(t, err)
 	assert.True(t, testFolderExists, "Test folder was not created.")
@@ -351,7 +353,39 @@ func assertOBRFOlderAndContentsCreatedOK(t *testing.T, mockFileSystem files.File
 		text, err := mockFileSystem.ReadTextFile(expectedBuildGradleFilePath)
 		assert.Nil(t, err)
 		assert.Contains(t, text, "group = 'my.test.pkg'", "Test folder build.gradle didn't substitute the group id")
+
+		var line string
+		line, err = findLineContaining(text, "dev.galasa.obr")
+		assert.Nil(t, err)
+
+		pattern := ".*version '(.*)'$"
+		galasaObrLineRegex, err := regexp.Compile(pattern)
+		assert.Nil(t, err)
+
+		match := galasaObrLineRegex.FindStringSubmatch(line)
+		assert.NotNil(t, match, "No line declaring dev.galasa.obr line version")
+		assert.Equal(t, len(match), 2, "Failed to find more that 0 matches")
+		assert.NotEmpty(t, match[1])
+
 	}
+}
+
+func findLineContaining(text string, textToFindOnLine string) (string, error) {
+	textLines := strings.Split(text, "\n")
+	lineMatching := ""
+	isMatched := false
+	var err error
+	for _, line := range textLines {
+		if strings.Contains(line, textToFindOnLine) {
+			lineMatching = line
+			isMatched = true
+		}
+	}
+
+	if !isMatched {
+		err = errors.New("Failed to find string " + textToFindOnLine)
+	}
+	return lineMatching, err
 }
 
 func TestCreateProjectWithTwoFeaturesWorks(t *testing.T) {
@@ -456,7 +490,7 @@ func TestCanCreateGradleProjectWithOBR(t *testing.T) {
 
 	assertParentFolderAndContentsCreated(t, mockFileSystem, isObrProjectRequired, maven, gradle, packageName)
 	assertTestFolderAndContentsCreatedOk(t, mockFileSystem, "test", maven, gradle)
-	assertOBRFOlderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
+	assertOBRFolderAndContentsCreatedOK(t, mockFileSystem, maven, gradle)
 }
 
 func TestCanCreateMavenAndGradleProject(t *testing.T) {
@@ -568,7 +602,7 @@ func TestCanCreateGradleProjectDevelopmentModeGeneratesMavenRepoReference(t *tes
 
 func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"project", "create"}
 
@@ -584,7 +618,7 @@ func TestCreateProjectUsingCommandLineNoPackageSet(t *testing.T) {
 
 func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"project", "create", "--package", "my.pkg", "--maven"}
 
@@ -608,7 +642,7 @@ func TestCreateProjectUsingCommandLineNoFeaturesSetWorks(t *testing.T) {
 
 func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	// Note: No --maven or --gradle flags here:
 	var args []string = []string{"project", "create", "--package", "my.package"}
@@ -627,7 +661,7 @@ func TestCreateProjectUsingCommandLineNoMavenNorGradleFails(t *testing.T) {
 
 func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	// When...
 	commands, _ := NewCommandCollection(factory)
@@ -642,7 +676,7 @@ func TestCommandsCollectionContainsProjectCreateCommand(t *testing.T) {
 
 func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"project", "create", "--help"}
 
@@ -658,7 +692,7 @@ func TestProjectCreateHelpFlagSetCorrectly(t *testing.T) {
 
 func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create"}
@@ -676,7 +710,7 @@ func TestProjectCreateNoFlagReturnsError(t *testing.T) {
 
 func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name"}
@@ -694,7 +728,7 @@ func TestProjectCreatePackageFlagReturnsNoError(t *testing.T) {
 
 func TestProjectCreatePackageFlagNoPackageReturnsError(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package"}
@@ -711,7 +745,7 @@ func TestProjectCreatePackageFlagNoPackageReturnsError(t *testing.T) {
 
 func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "comma,seperated,test,list"}
@@ -730,7 +764,7 @@ func TestProjectCreatePackageAndFeatureFlagsReturnsOk(t *testing.T) {
 
 func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--force"}
@@ -749,7 +783,7 @@ func TestProjectCreatePackageAndForceFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--obr"}
@@ -768,7 +802,7 @@ func TestProjectCreatePackageAndObrFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--maven"}
@@ -787,7 +821,7 @@ func TestProjectCreatePackageAndMavenFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--gradle"}
@@ -806,7 +840,7 @@ func TestProjectCreatePackageAndGradleFlagsReturnsNoOk(t *testing.T) {
 
 func TestProjectCreateAllFlagsReturnsNoOk(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_PROJECT_CREATE, factory, t)
 
 	var args []string = []string{"project", "create", "--package", "package.name", "--features", "feature,list", "--force", "--obr", "--maven", "--gradle"}

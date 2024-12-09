@@ -30,7 +30,7 @@ func (*RawFormatter) IsNeedingMethodDetails() bool {
 
 func (*RawFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 	var result string = ""
-	var err error = nil
+	var err error
 	buff := strings.Builder{}
 
 	for _, run := range runs {

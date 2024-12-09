@@ -8,12 +8,13 @@ package cmd
 import (
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCommandListContainsRunsCommand(t *testing.T) {
 	/// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	commands, _ := NewCommandCollection(factory)
 
 	// When...
@@ -29,7 +30,7 @@ func TestCommandListContainsRunsCommand(t *testing.T) {
 
 func TestRunsHelpFlagSetCorrectly(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 
 	var args []string = []string{"runs", "--help"}
 
@@ -45,7 +46,7 @@ func TestRunsHelpFlagSetCorrectly(t *testing.T) {
 
 func TestRunsNoCommandsProducesUsageReport(t *testing.T) {
 	// Given...
-	factory := NewMockFactory()
+	factory := utils.NewMockFactory()
 	var args []string = []string{"runs"}
 
 	// When...

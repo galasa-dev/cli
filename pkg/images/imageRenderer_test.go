@@ -362,7 +362,7 @@ func TestRenderTerminalWithFullRowRendersOk(t *testing.T) {
 	}
 
 	textField := createTextField(10, 0, "0          1          2          3          4          5          6          7", "d")
-	fullRowField := createTextField(11, 0, "01234567890123456789012345678901234567890123456789012345678901234567890123456789", "d")
+	fullRowField := createTextField(11, 0, "01234567890123456789012345678901234567890123456789012345678901234567890123456789", "d") //This is a unit test value, not a secret //pragma: allowlist secret
 
 	terminalImage := TerminalImage{
 		Id:           imageId,
@@ -454,7 +454,7 @@ func TestRenderTerminalWithWrappingRowRendersOk(t *testing.T) {
 	}
 
 	textField := createTextField(10, 0, "The next row should wrap around and continue on the row below it", "d")
-	wrappedField := createTextField(11, 20, "0123456789012345678901234567890123456789012345678901234567890123456789", "d")
+	wrappedField := createTextField(11, 20, "0123456789012345678901234567890123456789012345678901234567890123456789", "d") //This is a unit test value, not a secret //pragma: allowlist secret
 
 	terminalImage := TerminalImage{
 		Id:           imageId,

@@ -9,7 +9,8 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/auth"
+	"github.com/galasa-dev/cli/pkg/spi"
+
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +27,7 @@ type AuthLoginComamnd struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthLoginCommand(factory Factory, authCommand GalasaCommand, rootCommand GalasaCommand) (GalasaCommand, error) {
+func NewAuthLoginCommand(factory spi.Factory, authCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(AuthLoginComamnd)
 	err := cmd.init(factory, authCommand, rootCommand)
 	return cmd, err
@@ -50,8 +51,8 @@ func (cmd *AuthLoginComamnd) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, rootCmd GalasaCommand) error {
-	var err error = nil
+func (cmd *AuthLoginComamnd) init(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+	var err error
 
 	cmd.values = &AuthLoginCmdValues{}
 
@@ -61,9 +62,9 @@ func (cmd *AuthLoginComamnd) init(factory Factory, authCommand GalasaCommand, ro
 }
 
 func (cmd *AuthLoginComamnd) createCobraCommand(
-	factory Factory,
-	authCommand GalasaCommand,
-	rootCmd GalasaCommand,
+	factory spi.Factory,
+	authCommand spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -88,7 +89,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 }
 
 func (cmd *AuthLoginComamnd) executeAuthLogin(
-	factory Factory,
+	factory spi.Factory,
 	rootCmdValues *RootCmdValues,
 ) error {
 
@@ -106,7 +107,7 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 		// Get the ability to query environment variables.
 		env := factory.GetEnvironment()
 
-		var galasaHome utils.GalasaHome
+		var galasaHome spi.GalasaHome
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
 		if err != nil {
 			panic(err)
@@ -120,13 +121,11 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 			apiServerUrl := bootstrapData.ApiServerURL
 			log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-			// Call to process the command in a unit-testable way.
-			err = auth.Login(
+			authenticator := factory.GetAuthenticator(
 				apiServerUrl,
-				fileSystem,
 				galasaHome,
-				env,
 			)
+			err = authenticator.Login()
 		}
 	}
 	return err
