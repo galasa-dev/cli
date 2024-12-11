@@ -103,7 +103,7 @@ function update_build_gradle_version {
     info "Using temporary file $temp_file"
     info "Updating file $source_file"
 
-    cat $source_file | sed "s/galasaBootJarVersion[ ]*=.*$/galasaBootJarVersion = '$component_version'/1" > $temp_file
+    cat $source_file | sed "s/galasaVersion[ ]*=.*$/galasaVersion = '$component_version'/1" > $temp_file
     rc=$?; if [[ "${rc}" != "0" ]]; then error "Failed to set version into $source_file file."; exit 1; fi
     cp $temp_file ${source_file}
     rc=$?; if [[ "${rc}" != "0" ]]; then error "Failed to overwrite new version of $source_file file."; exit 1; fi

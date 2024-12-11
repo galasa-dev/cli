@@ -58,7 +58,7 @@ EOF
 
 #--------------------------------------------------------------------------
 function read_boot_jar_version {
-    export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion[ ]*=" | cut -f2 -d"'" )
+    export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaVersion[ ]*=" | cut -f2 -d"'" )
     info "Boot jar version is $BOOT_JAR_VERSION"
 }
 
