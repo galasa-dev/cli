@@ -195,7 +195,7 @@ export TEST_OBR_VERSION=0.0.1-SNAPSHOT
 
 
 # Could get this bootjar from https://development.galasa.dev/main/maven-repo/obr/dev/galasa/galasa-boot/0.27.0/
-export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaBootJarVersion" | head -1 | cut -f2 -d"'")
+export BOOT_JAR_VERSION=$(cat ${BASEDIR}/build.gradle | grep "galasaVersion" | head -1 | cut -f2 -d"'")
 
 export OBR_VERSION=$(cat ${BASEDIR}/VERSION)
 
