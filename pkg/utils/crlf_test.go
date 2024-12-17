@@ -36,9 +36,23 @@ func TestCRLFtoLFReplacesSingleCRWithNewLine(t *testing.T) {
 	assert.Equal(t, expected, output)
 }
 
+func TestCRLFtoLFReplacesSingleCRAtEndOfLineWithNewLine(t *testing.T) {
+	input := "my test string\r"
+	expected := "my test string\n"
+	output := StringWithNewLinesInsteadOfCRLFs(input)
+	assert.Equal(t, expected, output)
+}
+
 func TestCRLFtoLFReplacesSingleCRLFWithNewLine(t *testing.T) {
 	input := "my test string\f\rwith multiple lines"
 	expected := "my test string\nwith multiple lines"
+	output := StringWithNewLinesInsteadOfCRLFs(input)
+	assert.Equal(t, expected, output)
+}
+
+func TestCRLFtoLFReplacesSingleCRLFAtEndOfLinbeWithNewLine(t *testing.T) {
+	input := "my test string\f\r"
+	expected := "my test string\n"
 	output := StringWithNewLinesInsteadOfCRLFs(input)
 	assert.Equal(t, expected, output)
 }
@@ -50,9 +64,23 @@ func TestCRLFtoLFReplacesSingleLFCRWithNewLine(t *testing.T) {
 	assert.Equal(t, expected, output)
 }
 
+func TestCRLFtoLFReplacesSingleAtEndOfLineLFCRWithNewLine(t *testing.T) {
+	input := "my test string\r\f"
+	expected := "my test string\n"
+	output := StringWithNewLinesInsteadOfCRLFs(input)
+	assert.Equal(t, expected, output)
+}
+
 func TestCRLFtoLFReplacesSinglCRWithNewLine(t *testing.T) {
 	input := "my test string\fwith multiple lines"
 	expected := "my test string\nwith multiple lines"
+	output := StringWithNewLinesInsteadOfCRLFs(input)
+	assert.Equal(t, expected, output)
+}
+
+func TestCRLFtoLFReplacesSinglCRAtEndOfLineWithNewLine(t *testing.T) {
+	input := "my test string\f"
+	expected := "my test string\n"
 	output := StringWithNewLinesInsteadOfCRLFs(input)
 	assert.Equal(t, expected, output)
 }
