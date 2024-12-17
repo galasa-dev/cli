@@ -10,6 +10,8 @@ import (
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // JVMOutputProcessor Sometjing which pretends to be an io.Writer interface implementation,
@@ -74,10 +76,16 @@ func (processor *JVMOutputProcessor) Write(bytesToWrite []byte) (int, error) {
 		// "d.g.f.FrameworkInitialisation - Allocated Run Name U525 to this run"
 		stringToSearch := string(bytesToWrite)
 		jvmStringNoTrailingNewline := strings.TrimSpace(stringToSearch)
+
+		// Golang doesn't like printing 0x0d characters, it would rather they are 0x0a characters instead.
+		// So for the purposes of echoing a log record to the terminal, do the conversion so it
+		// comes out correctly.
+		stringToLog := utils.StringWithNewLinesInsteadOfCRLFs(jvmStringNoTrailingNewline)
+
 		if processor.detectedRunId != "" {
-			log.Printf("JVM output: (runid:%s) : %s\n", processor.detectedRunId, jvmStringNoTrailingNewline)
+			log.Printf("JVM output: (runid:%s) : %s\n", processor.detectedRunId, stringToLog)
 		} else {
-			log.Printf("JVM output: %s\n", jvmStringNoTrailingNewline)
+			log.Printf("JVM output: %s\n", stringToLog)
 		}
 
 		isAlertable := false
