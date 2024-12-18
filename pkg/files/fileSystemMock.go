@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/galasa-dev/cli/pkg/spi"
 )
@@ -27,6 +28,9 @@ type Node struct {
 }
 
 type MockFileSystem struct {
+	// Used so we can keep the logic inside thread-safe.
+	mutexLock *sync.Mutex
+
 	// Where the in-memory data is kept.
 	data map[string]*Node
 
@@ -79,6 +83,8 @@ func NewOverridableMockFileSystem() *MockFileSystem {
 	mockFileSystem.executableExtension = ""
 
 	mockFileSystem.filePathSeparator = "/"
+
+	mockFileSystem.mutexLock = &sync.Mutex{}
 
 	// Set up functions inside the structure to call the basic/default mock versions...
 	// These can later be over-ridden on a test-by-test basis.
@@ -146,6 +152,8 @@ func (fs *MockFileSystem) SetExecutableExtension(newExtension string) {
 //------------------------------------------------------------------------------------
 
 func (fs *MockFileSystem) Create(path string) (io.WriteCloser, error) {
+	// log.Printf("Create entered")
+	// defer log.Printf("Create exited")
 	return fs.VirtualFunction_Create(path)
 }
 
@@ -159,55 +167,97 @@ func (fs *MockFileSystem) GetExecutableExtension() string {
 
 func (fs *MockFileSystem) DeleteDir(pathToDelete string) {
 	// Call the virtual function.
+	// log.Printf("DeleteDir entered")
+	// defer log.Printf("DeleteDir exited")
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	fs.VirtualFunction_DeleteDir(pathToDelete)
 }
 
 func (fs *MockFileSystem) DeleteFile(pathToDelete string) {
+	log.Printf("DeleteFile entered")
+	defer log.Printf("DeleteFile exited")
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	// Call the virtual function.
 	fs.VirtualFunction_DeleteFile(pathToDelete)
 }
 
 func (fs *MockFileSystem) MkTempDir() (string, error) {
+	// log.Printf("MkTempDir entered")
+	// defer log.Printf("MkTempDir exited")
 	// Call the virtual function.
 	return fs.VirtualFunction_MkTempDir()
 }
 
 func (fs *MockFileSystem) MkdirAll(targetFolderPath string) error {
+	// log.Printf("MkdirAll entered")
+	// defer log.Printf("MkdirAll exited")
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	// Call the virtual function.
 	return fs.VirtualFunction_MkdirAll(targetFolderPath)
 }
 
 func (fs *MockFileSystem) WriteBinaryFile(targetFilePath string, desiredContents []byte) error {
+	log.Printf("WriteBinaryFile entered")
+	defer log.Printf("WriteBinaryFile exited")
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	return fs.VirtualFunction_WriteBinaryFile(targetFilePath, desiredContents)
 }
 
 // WriteTextFile writes a string to a text file
 func (fs *MockFileSystem) WriteTextFile(targetFilePath string, desiredContents string) error {
+	// log.Printf("WriteTextFile entered")
+	// defer log.Printf("WriteTextFile exited")
 	// Call the virtual function.
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	return fs.VirtualFunction_WriteTextFile(targetFilePath, desiredContents)
 }
 
 func (fs *MockFileSystem) ReadBinaryFile(filePath string) ([]byte, error) {
+	// log.Printf("ReadBinaryFile entered")
+	// defer log.Printf("ReadBinaryFile exited")
 	// Call the virtual function.
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	return fs.VirtualFunction_ReadBinaryFile(filePath)
 }
 
 func (fs *MockFileSystem) ReadTextFile(filePath string) (string, error) {
+	// log.Printf("ReadTextFile entered")
+	// defer log.Printf("ReadTextFile exited")
 	// Call the virtual function.
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	return fs.VirtualFunction_ReadTextFile(filePath)
 }
 
 func (fs *MockFileSystem) Exists(path string) (bool, error) {
+	// log.Printf("Exists entered")
+	// defer log.Printf("Exists exited")
 	// Call the virtual function.
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	return fs.VirtualFunction_Exists(path)
 }
 
 func (fs *MockFileSystem) DirExists(path string) (bool, error) {
+	// log.Printf("DirExists entered")
+	// defer log.Printf("DirExists exited")
 	// Call the virtual function.
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	return fs.VirtualFunction_DirExists(path)
 }
 
 func (fs *MockFileSystem) GetUserHomeDirPath() (string, error) {
+	// log.Printf("GetUserHomeDirPath entered")
+	// defer log.Printf("GetUserHomeDirPath exited")
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
 	return fs.VirtualFunction_GetUserHomeDirPath()
 }
 
@@ -337,6 +387,11 @@ func (fs MockFileSystem) GetAllWarningMessages() string {
 }
 
 func (fs *MockFileSystem) GetAllFilePaths(rootPath string) ([]string, error) {
+	// log.Printf("GetAllFilePaths entered")
+	// defer log.Printf("GetAllFilePaths exited")
+	fs.mutexLock.Lock()
+	defer fs.mutexLock.Unlock()
+
 	var collectedFilePaths []string
 	var err error
 
