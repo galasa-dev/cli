@@ -43,7 +43,7 @@ func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, 
 	if totalResults > 0 {
 		var table [][]string
 
-		var headers = []string{HEADER_SUBMITTED_TIME, HEADER_RUNNAME, HEADER_REQUESTOR, HEADER_STATUS, HEADER_RESULT, HEADER_TEST_NAME}
+		var headers = []string{HEADER_SUBMITTED_TIME, HEADER_RUNNAME, HEADER_REQUESTOR, HEADER_STATUS, HEADER_RESULT, HEADER_TEST_NAME, HEADER_GROUP}
 
 		table = append(table, headers)
 		for _, run := range testResultsData {
@@ -56,7 +56,7 @@ func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, 
 
 				accumulateResults(resultCountsMap, run)
 
-				line = append(line, submittedTimeReadable, run.Name, run.Requestor, run.Status, run.Result, run.TestName)
+				line = append(line, submittedTimeReadable, run.Name, run.Requestor, run.Status, run.Result, run.TestName, run.Group)
 				table = append(table, line)
 			}
 		}

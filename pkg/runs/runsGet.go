@@ -51,6 +51,7 @@ func GetRuns(
 	console spi.Console,
 	apiServerUrl string,
 	apiClient *galasaapi.APIClient,
+	group string,
 ) error {
 	var err error
 	var fromAge int
@@ -85,7 +86,7 @@ func GetRuns(
 		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
 			var runJson []galasaapi.Run
-			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, shouldGetActive, timeService, apiClient)
+			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, shouldGetActive, timeService, apiClient, group)
 			if err == nil {
 				// Some formatters need extra fields filled-in so they can be displayed.
 				if chosenFormatter.IsNeedingMethodDetails() {
@@ -211,6 +212,7 @@ func GetRunsFromRestApi(
 	shouldGetActive bool,
 	timeService spi.TimeService,
 	apiClient *galasaapi.APIClient,
+	group string,
 ) ([]galasaapi.Run, error) {
 
 	var err error
@@ -258,6 +260,9 @@ func GetRunsFromRestApi(
 			}
 			if pageCursor != "" {
 				apicall = apicall.Cursor(pageCursor)
+			}
+			if group != "" {
+				apicall = apicall.Group(group)
 			}
 			apicall = apicall.Sort("from:desc")
 			runData, httpResponse, err = apicall.Execute()

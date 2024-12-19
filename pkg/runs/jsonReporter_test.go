@@ -18,16 +18,16 @@ func TestJsonReportWorks(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	finishedRuns := TestRun{
-		Name:      "myTestRun",
-		Bundle:    "myBundle",
-		Class:     "com.myco.MyClass",
-		Stream:    "myStream",
-		Obr:       "myOBR",
-		Status:    "myStatus",
-		Result:    "PASSED",
-		Overrides: make(map[string]string, 1),
-		Tests:     []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}},
-		GherkinUrl: "file:///my.feature",
+		Name:           "myTestRun",
+		Bundle:         "myBundle",
+		Class:          "com.myco.MyClass",
+		Stream:         "myStream",
+		Obr:            "myOBR",
+		Status:         "myStatus",
+		Result:         "PASSED",
+		Overrides:      make(map[string]string, 1),
+		Tests:          []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}},
+		GherkinUrl:     "file:///my.feature",
 		GherkinFeature: "my",
 	}
 
@@ -78,7 +78,8 @@ func TestJsonReportWorks(t *testing.T) {
 					}
 				],
 				"GherkinUrl":"file:///my.feature",
-				"GherkinFeature":"my"
+				"GherkinFeature":"my",
+				"group":""
 			}
 		]
 	}`
