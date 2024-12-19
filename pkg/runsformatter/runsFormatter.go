@@ -44,6 +44,7 @@ const (
 	HEADER_RUN_LOG        = "run-log"
 	HEADER_METHOD_NAME    = "method"
 	HEADER_METHOD_TYPE    = "type"
+	HEADER_GROUP          = "group"
 
 	RAS_RUNS_URL = "/ras/runs/"
 )
@@ -62,6 +63,7 @@ type FormattableTest struct {
 	Requestor     string
 	Bundle        string
 	ApiServerUrl  string
+	Group         string
 	Methods       []galasaapi.TestMethod
 	Lost          bool
 }

@@ -40,15 +40,16 @@ func DownloadArtifacts(
 	var runs []galasaapi.Run
 
 	if runName != "" {
-		err = ValidateRunName(runName)
+		err = ValidateFlagValue(runName)
 	}
 	if err == nil {
 		requestorParameter := ""
 		resultParameter := ""
+		group := ""
 		fromAgeHours := 0
 		toAgeHours := 0
 		shouldGetActive := false
-		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, apiClient)
+		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, apiClient, group)
 		if err == nil {
 			if len(runs) > 1 {
 				// get list of runs that are reRuns - get list of runs that are reRuns of each other

@@ -19,6 +19,7 @@ type TestRun struct {
 	Tests          []TestMethod      `yaml:"tests" json:"tests"`
 	GherkinUrl     string            `yaml:"gherkin"`
 	GherkinFeature string            `yaml:"feature"`
+	Group          string            `yaml:"group" json:"group"`
 }
 
 type TestMethod struct {
