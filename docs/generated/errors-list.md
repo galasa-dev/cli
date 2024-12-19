@@ -75,7 +75,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1072E: Invalid value '{}' detected for optional property '{}' in bootstrap properties. Valid values must be a non-zero positive integer, for a port number. Only used when --debug flag is set. Defaults to '{}'. Can be overridden with the --debugPort flag.
 - GAL1073E: Could not get run artifacts. Reason: '{}'
 - GAL1074E: Could not download artifact '{}'. Reason: '{}'
-- GAL1075E: run name '{}' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.
+- GAL1075E: Flag value '{}' is invalid. Expected it to be in format starting with letters, and ending in a number with no non-alphanumeric characters.
 - GAL1076E: Badly formed from or to value '{}' specified in the age parameter. The value could not be converted into an integer value.
 - GAL1077E: Invalid value '{}' detected for age parameter. The 'from' value must be greater than the 'to' value.
 - GAL1078E: Badly formed '--age' parameter value '{}' specified. Age of the test runs should be specified in the format '{FROM}{TIME-UNIT}:{TO}{TIME-UNIT}' or '{FROM}{TIME-UNIT}', where 'FROM' is a positive, non-zero integer, 'TO' is a non-negative integer, and 'TIME-UNIT' can be {}. 'FROM' must be greater than 'TO'. 'TO' defaults to 0 if not specified. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
