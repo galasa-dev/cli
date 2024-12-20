@@ -8,7 +8,6 @@ package errors
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 )
