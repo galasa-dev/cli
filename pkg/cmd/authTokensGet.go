@@ -31,11 +31,12 @@ func NewAuthTokensGetCommand(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
 	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(AuthTokensGetCommand)
 
-	err := cmd.init(factory, authTokensCommand, rootCmd)
+	err := cmd.init(factory, authTokensCommand, rootCmd, commsCmd)
 	return cmd, err
 }
 
@@ -58,10 +59,15 @@ func (cmd *AuthTokensGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthTokensGetCommand) init(factory spi.Factory, authTokensCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *AuthTokensGetCommand) init(
+	factory spi.Factory,
+	authTokensCommand spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
+) error {
 	var err error
 
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, rootCmd, commsCmd)
 
 	return err
 }
@@ -70,6 +76,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 	factory spi.Factory,
 	authTokensCommand,
 	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -81,7 +88,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 		Long:    "Get a list of tokens used for authentication with the Galasa API server",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthTokensGet(factory, authTokensCommand.Values().(*AuthTokensCmdValues), rootCmd.Values().(*RootCmdValues))
+			return cmd.executeAuthTokensGet(factory, authTokensCommand.Values().(*AuthTokensCmdValues), rootCmd.Values().(*RootCmdValues), commsCmd.Values().(*CommsCmdValues))
 		},
 	}
 
@@ -95,6 +102,7 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 	factory spi.Factory,
 	authTokenCmdValues *AuthTokensCmdValues,
 	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -118,7 +126,7 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, authTokenCmdValues.bootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()

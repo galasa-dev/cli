@@ -15,9 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type AuthLoginCmdValues struct {
-	bootstrap string
-}
+type AuthLoginCmdValues struct {}
 
 type AuthLoginComamnd struct {
 	values       *AuthLoginCmdValues
@@ -27,9 +25,14 @@ type AuthLoginComamnd struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthLoginCommand(factory spi.Factory, authCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewAuthLoginCommand(
+	factory spi.Factory,
+	authCommand spi.GalasaCommand,
+	rootCommand spi.GalasaCommand,
+	commsCommand spi.GalasaCommand,
+) (spi.GalasaCommand, error) {
 	cmd := new(AuthLoginComamnd)
-	err := cmd.init(factory, authCommand, rootCommand)
+	err := cmd.init(factory, authCommand, rootCommand, commsCommand)
 	return cmd, err
 }
 
@@ -51,12 +54,12 @@ func (cmd *AuthLoginComamnd) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLoginComamnd) init(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *AuthLoginComamnd) init(factory spi.Factory, authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
 	var err error
 
 	cmd.values = &AuthLoginCmdValues{}
 
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, authCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, authCommand, rootCmd, commsCmd)
 
 	return err
 }
@@ -65,6 +68,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 	factory spi.Factory,
 	authCommand spi.GalasaCommand,
 	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -77,11 +81,9 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"auth login"},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthLogin(factory, rootCmd.Values().(*RootCmdValues))
+			return cmd.executeAuthLogin(factory, rootCmd.Values().(*RootCmdValues), commsCmd.Values().(*CommsCmdValues))
 		},
 	}
-
-	addBootstrapFlag(authLoginCobraCmd, &cmd.values.bootstrap)
 
 	authCommand.CobraCommand().AddCommand(authLoginCobraCmd)
 
@@ -91,6 +93,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 func (cmd *AuthLoginComamnd) executeAuthLogin(
 	factory spi.Factory,
 	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -116,7 +119,7 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, cmd.values.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 		if err == nil {
 			apiServerUrl := bootstrapData.ApiServerURL
 			log.Printf("The API server is at '%s'\n", apiServerUrl)

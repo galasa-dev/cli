@@ -34,10 +34,11 @@ func NewAuthTokensDeleteCommand(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
 	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(AuthTokensDeleteCommand)
-	err := cmd.init(factory, authTokensCommand, rootCmd)
+	err := cmd.init(factory, authTokensCommand, rootCmd, commsCmd)
 	return cmd, err
 }
 
@@ -59,11 +60,16 @@ func (cmd *AuthTokensDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthTokensDeleteCommand) init(factory spi.Factory, authTokensCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *AuthTokensDeleteCommand) init(
+	factory spi.Factory,
+	authTokensCommand spi.GalasaCommand,
+	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
+) error {
 	var err error
 
 	cmd.values = &AuthTokensDeleteCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, rootCmd, commsCmd)
 
 	return err
 }
@@ -72,6 +78,7 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
 	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -82,7 +89,7 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 		Long:    "Revokes a token used for authentication with the Galasa API server through the provided token id",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthTokensDelete(factory, authTokensCommand.Values().(*AuthTokensCmdValues), rootCmd.Values().(*RootCmdValues))
+			return cmd.executeAuthTokensDelete(factory, rootCmd.Values().(*RootCmdValues), commsCmd.Values().(*CommsCmdValues))
 		},
 	}
 
@@ -96,8 +103,8 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 
 func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 	factory spi.Factory,
-	authTokenCmdValues *AuthTokensCmdValues,
 	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -121,7 +128,7 @@ func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, authTokenCmdValues.bootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				apiServerUrl := bootstrapData.ApiServerURL

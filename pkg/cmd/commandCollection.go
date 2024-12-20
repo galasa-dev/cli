@@ -173,11 +173,11 @@ func (commands *commandCollectionImpl) addAuthCommands(factory spi.Factory, root
 
 	authCommand, err = NewAuthCommand(rootCommand, commsCommand)
 	if err == nil {
-		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
+		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand, commsCommand)
 		if err == nil {
 			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
 			if err == nil {
-				err = commands.addAuthTokensCommands(factory, authCommand, commsCommand)
+				err = commands.addAuthTokensCommands(factory, authCommand, rootCommand, commsCommand)
 			}
 		}
 	}
@@ -191,17 +191,22 @@ func (commands *commandCollectionImpl) addAuthCommands(factory spi.Factory, root
 	return err
 }
 
-func (commands *commandCollectionImpl) addAuthTokensCommands(factory spi.Factory, authCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addAuthTokensCommands(
+	factory spi.Factory,
+	authCommand spi.GalasaCommand,
+	rootCommand spi.GalasaCommand,
+	commsCommand spi.GalasaCommand,
+) error {
 	var err error
 	var authTokensCommand spi.GalasaCommand
 	var authTokensGetCommand spi.GalasaCommand
 	var authTokensDeleteCommand spi.GalasaCommand
 
-	authTokensCommand, err = NewAuthTokensCommand(authCommand, rootCommand)
+	authTokensCommand, err = NewAuthTokensCommand(authCommand)
 	if err == nil {
-		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand)
+		authTokensGetCommand, err = NewAuthTokensGetCommand(factory, authTokensCommand, rootCommand, commsCommand)
 		if err == nil {
-			authTokensDeleteCommand, err = NewAuthTokensDeleteCommand(factory, authTokensCommand, rootCommand)
+			authTokensDeleteCommand, err = NewAuthTokensDeleteCommand(factory, authTokensCommand, rootCommand, commsCommand)
 		}
 	}
 
