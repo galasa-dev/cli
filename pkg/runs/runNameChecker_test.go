@@ -14,7 +14,7 @@ import (
 // ---------------------------------------------------
 // Functions
 func TestValidRunNamePassesValidation(t *testing.T) {
-	err := ValidateFlagValue("U345")
+	err := ValidateRunName("U345")
 	assert.Nil(t, err)
 }
 
@@ -31,7 +31,7 @@ func TestInvalidRunNameContainsNumberInMiddleValidationFailsWithError(t *testing
 }
 
 func checkInvalidRunNameFails(t *testing.T, runName string) {
-	err := ValidateFlagValue(runName)
+	err := ValidateRunName(runName)
 	assert.NotNil(t, err, "Should not have validated OK.")
 	if err != nil {
 		assert.ErrorContains(t, err, "GAL1075E")

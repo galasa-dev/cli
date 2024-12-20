@@ -34,7 +34,7 @@ func RunsDelete(
 
 	if runName != "" {
 		// Validate the runName as best we can without contacting the ecosystem.
-		err = ValidateFlagValue(runName)
+		err = ValidateRunName(runName)
 	}
 
 	if err == nil {

@@ -40,7 +40,7 @@ func DownloadArtifacts(
 	var runs []galasaapi.Run
 
 	if runName != "" {
-		err = ValidateFlagValue(runName)
+		err = ValidateRunName(runName)
 	}
 	if err == nil {
 		requestorParameter := ""

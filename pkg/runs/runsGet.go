@@ -65,12 +65,7 @@ func GetRuns(
 
 	if (err == nil) && (runName != "") {
 		// Validate the runName as best we can without contacting the ecosystem.
-		err = ValidateFlagValue(runName)
-	}
-
-	if (err == nil) && (group != "") {
-		// Validate the group as best we can without contacting the ecosystem.
-		err = ValidateFlagValue(group)
+		err = ValidateRunName(runName)
 	}
 
 	if (err == nil) && (age != "") {

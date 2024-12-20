@@ -40,7 +40,7 @@ func CancelRun(
 	}
 
 	if (err == nil) && (runName != "") {
-		err = ValidateFlagValue(runName)
+		err = ValidateRunName(runName)
 	}
 
 	if err == nil {

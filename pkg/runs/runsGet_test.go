@@ -52,6 +52,39 @@ const (
 		 }]
 	 }`
 
+	RUN_U457 = `{
+		"runId": "xxx876xxx",
+		"testStructure": {
+			"runName": "U457",
+			"bundle": "myBundleId",
+			"testName": "myTestPackage.MyTestName",
+			"testShortName": "MyTestName",
+			"requestor": "unitTesting",
+			"status" : "Finished",
+			"result" : "Passed",
+			"group"  : "dummyGroup",
+			"queued" : "2023-05-10T06:00:13.043037Z",
+			"startTime": "2023-05-10T06:00:36.159003Z",
+			"endTime": "2023-05-10T06:02:53.823338Z",
+			"methods": [{
+				"className": "myTestPackage.MyTestName",
+				"methodName": "myTestMethodName",
+				"type": "test",
+				"status": "Done",
+				"result": "Success",
+				"startTime": "2023-05-10T06:00:13.254335Z",
+				"endTime": "2023-05-10T06:03:11.882739Z",
+				"runLogStart":null,
+				"runLogEnd":null,
+				"befores":[]
+			}]
+		},
+		"artifacts": [{
+			"artifactPath": "myPathToArtifact1",
+			"contentType":	"application/json"
+		}]
+	}`
+
 	RUN_U456_v2 = `{
 		 "runId": "xxx543xxx",
 		 "testStructure": {
@@ -1435,4 +1468,40 @@ func TestRunsGetWithNextCursorGetsNextPageOfRuns(t *testing.T) {
 	run := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId||" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
 	expectedResults := run + run
 	assert.Equal(t, runsReturned, expectedResults)
+}
+
+func TestRunsGetOfGroupWhichExistsProducesExpectedRaw(t *testing.T) {
+
+	// Given ...
+	pages := make(map[string][]string, 0)
+	pages[""] = []string{RUN_U457}
+	nextPageCursors := []string{""}
+	age := ""
+	runName := "U457"
+	requestor := ""
+	result := ""
+	shouldGetActive := false
+	pageSize := 100
+	group := "dummyGroup"
+
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursors, pages, pageSize, runName)
+	defer server.Close()
+
+	outputFormat := "raw"
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, mockTimeService, mockConsole, apiServerUrl, apiClient, group)
+
+	// Then...
+	// We expect
+	assert.Nil(t, err)
+	textGotBack := mockConsole.ReadText()
+	assert.Contains(t, textGotBack, runName)
+	want := "U457|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|dummyGroup|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
+	assert.Equal(t, textGotBack, want)
 }

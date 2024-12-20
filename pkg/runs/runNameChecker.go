@@ -16,7 +16,7 @@ var (
 	// ^ matches the start of the string
 	// $ matches the end of the string
 	// If ^ and $ are not specified, then M2M2 would match (two instances of the match)!
-	FLAG_NAME_PATTERN *regexp.Regexp = regexp.MustCompile("^[a-zA-Z]+[0-9]+$")
+	RUN_NAME_PATTERN *regexp.Regexp = regexp.MustCompile("^[a-zA-Z]+[0-9]+$")
 )
 
 // ---------------------------------------------------
@@ -26,11 +26,11 @@ var (
 // Returns an error if it's invalid, nil if it looks valid.
 // This function does not consult with an ecosystem, just checks the
 // format of the runName.
-func ValidateFlagValue(value string) error {
+func ValidateRunName(value string) error {
 
 	var err error
 
-	isMatching := FLAG_NAME_PATTERN.MatchString(value)
+	isMatching := RUN_NAME_PATTERN.MatchString(value)
 
 	if !isMatching {
 		err = errors.NewGalasaError(errors.GALASA_ERROR_INVALID_FLAG_VALUE, value)
