@@ -42,7 +42,7 @@ func createFormattableTestForDetails(runId string,
 	endTimeUTC string,
 	apiServerUrl string,
 	methods []galasaapi.TestMethod,
-	isLost bool) FormattableTest {
+	isLost bool, group string) FormattableTest {
 	// runId := ""
 	// name := ""
 	// testName := ""
@@ -69,6 +69,7 @@ func createFormattableTestForDetails(runId string,
 		ApiServerUrl:  apiServerUrl,
 		Methods:       methods,
 		Lost:          isLost,
+		Group:         group,
 	}
 	return formattableTest
 }
@@ -97,7 +98,7 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 	formattableTest := make([]FormattableTest, 0)
 	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa",
 		"dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z",
-		"2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
+		"2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
 	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
@@ -115,6 +116,7 @@ func TestDetailsFormatterReturnsExpectedFormat(t *testing.T) {
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -133,9 +135,9 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 	methods = append(methods, method1)
 
 	formattableTest := make([]FormattableTest, 0)
-	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
 	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3)
 
 	// When...
@@ -153,6 +155,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -170,6 +173,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -187,6 +191,7 @@ func TestDetailsFormatterWithMultipleRunsReturnsSeparatedWithDashes(t *testing.T
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-789/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -205,7 +210,7 @@ func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) 
 	methods = append(methods, method1)
 
 	formattableTest := make([]FormattableTest, 0)
-	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false, "none")
 	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
@@ -223,6 +228,7 @@ func TestDetailsNoRunEndtimeReturnsBlankEndtimeFieldAndNoDuration(t *testing.T) 
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -241,7 +247,7 @@ func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 	methods = append(methods, method1)
 
 	formattableTest := make([]FormattableTest, 0)
-	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U456", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
 	formattableTest = append(formattableTest, formattableTest1)
 
 	// When...
@@ -259,6 +265,7 @@ func TestMethodTableRendersOkIfNoEndtime(t *testing.T) {
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC) duration(ms)\n" +
@@ -277,15 +284,15 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 	methods = append(methods, method1)
 
 	formattableTest := make([]FormattableTest, 0)
-	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest4 := createFormattableTestForDetails("cbd-12345", "C123", "Finished", "Passed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest5 := createFormattableTestForDetails("cbd-67890", "C456", "UNKNOWN", "EnvFail", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest6 := createFormattableTestForDetails("cbd-98765", "C789", "Finished", "Failed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest7 := createFormattableTestForDetails("cbd-543210", "L111", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest8 := createFormattableTestForDetails("cbd-222", "L222", "Building", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false)
-	formattableTest9 := createFormattableTestForDetails("cbd-333", "L333", "Generating", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest4 := createFormattableTestForDetails("cbd-12345", "C123", "Finished", "Passed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest5 := createFormattableTestForDetails("cbd-67890", "C456", "UNKNOWN", "EnvFail", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest6 := createFormattableTestForDetails("cbd-98765", "C789", "Finished", "Failed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest7 := createFormattableTestForDetails("cbd-543210", "L111", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest8 := createFormattableTestForDetails("cbd-222", "L222", "Building", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false, "none")
+	formattableTest9 := createFormattableTestForDetails("cbd-333", "L333", "Generating", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false, "none")
 	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3, formattableTest4, formattableTest5, formattableTest6, formattableTest7, formattableTest8, formattableTest9)
 
 	// When...
@@ -303,6 +310,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-123/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -320,6 +328,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -337,6 +346,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-789/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -354,6 +364,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-12345/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -371,6 +382,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-67890/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -388,6 +400,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-98765/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -405,6 +418,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-543210/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -422,6 +436,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-222/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -439,6 +454,7 @@ func TestDetailsFormatterMultipleRunsDifferentResultsProducesExpectedTotalsCount
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-333/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -457,15 +473,15 @@ func TestDetailsFormatterMultipleRunsDoesNotDisplayLostRunsAndProducesExpectedTo
 	methods = append(methods, method1)
 
 	formattableTest := make([]FormattableTest, 0)
-	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, true)
-	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, true)
-	formattableTest4 := createFormattableTestForDetails("cbd-12345", "C123", "Finished", "Passed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest5 := createFormattableTestForDetails("cbd-67890", "C456", "UNKNOWN", "EnvFail", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, true)
-	formattableTest6 := createFormattableTestForDetails("cbd-98765", "C789", "Finished", "Failed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest7 := createFormattableTestForDetails("cbd-543210", "L111", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false)
-	formattableTest8 := createFormattableTestForDetails("cbd-222", "L222", "Building", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, true)
-	formattableTest9 := createFormattableTestForDetails("cbd-333", "L333", "Generating", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false)
+	formattableTest1 := createFormattableTestForDetails("cbd-123", "U123", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, true, "none")
+	formattableTest2 := createFormattableTestForDetails("cbd-456", "U456", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest3 := createFormattableTestForDetails("cbd-789", "U789", "Finished", "Passed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, true, "none")
+	formattableTest4 := createFormattableTestForDetails("cbd-12345", "C123", "Finished", "Passed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest5 := createFormattableTestForDetails("cbd-67890", "C456", "UNKNOWN", "EnvFail", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, true, "none")
+	formattableTest6 := createFormattableTestForDetails("cbd-98765", "C789", "Finished", "Failed With Defects", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest7 := createFormattableTestForDetails("cbd-543210", "L111", "Finished", "Failed", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "2023-05-05T06:00:15.654565Z", "https://127.0.0.1", methods, false, "none")
+	formattableTest8 := createFormattableTestForDetails("cbd-222", "L222", "Building", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, true, "none")
+	formattableTest9 := createFormattableTestForDetails("cbd-333", "L333", "Generating", "", "dev.galasa", "dev.galasa.Zos3270LocalJava11Ubuntu", "galasa", "2023-05-04T10:55:29.545323Z", "2023-05-05T06:00:14.496953Z", "", "https://127.0.0.1", methods, false, "none")
 	formattableTest = append(formattableTest, formattableTest1, formattableTest2, formattableTest3, formattableTest4, formattableTest5, formattableTest6, formattableTest7, formattableTest8, formattableTest9)
 
 	// When...
@@ -483,6 +499,7 @@ func TestDetailsFormatterMultipleRunsDoesNotDisplayLostRunsAndProducesExpectedTo
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-456/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -500,6 +517,7 @@ func TestDetailsFormatterMultipleRunsDoesNotDisplayLostRunsAndProducesExpectedTo
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-12345/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -517,6 +535,7 @@ func TestDetailsFormatterMultipleRunsDoesNotDisplayLostRunsAndProducesExpectedTo
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-98765/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -534,6 +553,7 @@ func TestDetailsFormatterMultipleRunsDoesNotDisplayLostRunsAndProducesExpectedTo
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-543210/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -551,6 +571,7 @@ func TestDetailsFormatterMultipleRunsDoesNotDisplayLostRunsAndProducesExpectedTo
 			"test-name           : dev.galasa.Zos3270LocalJava11Ubuntu\n" +
 			"requestor           : galasa\n" +
 			"bundle              : dev.galasa\n" +
+			"group               : none\n" +
 			"run-log             : https://127.0.0.1/ras/runs/cbd-333/runlog\n" +
 			"\n" +
 			"method          type status   result start-time(UTC)     end-time(UTC)       duration(ms)\n" +

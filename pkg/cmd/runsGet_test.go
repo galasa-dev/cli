@@ -135,6 +135,25 @@ func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "gerald")
 }
 
+func TestRunsGetGroupFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--group", "someGroup"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).group, "someGroup")
+}
+
 func TestRunsGetageFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()

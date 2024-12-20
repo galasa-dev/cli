@@ -103,6 +103,7 @@ func tabulateCoreRunDetails(run FormattableTest) [][]string {
 		{HEADER_TEST_NAME, ": " + run.TestName},
 		{HEADER_REQUESTOR, ": " + run.Requestor},
 		{HEADER_BUNDLE, ": " + run.Bundle},
+		{HEADER_GROUP, ": " + run.Group},
 		{HEADER_RUN_LOG, ": " + run.ApiServerUrl + RAS_RUNS_URL + run.RunId + "/runlog"},
 	}
 	return table

@@ -55,6 +55,7 @@ func (*RawFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 			run.TestName + "|" +
 			run.Requestor + "|" +
 			run.Bundle + "|" +
+			run.Group + "|" +
 			runLog,
 		)
 
