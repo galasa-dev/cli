@@ -125,11 +125,6 @@ func (err *GalasaError) Error() string {
 	return err.message
 }
 
-func (err *GalasaError) isRetryRequired() bool {
-	isRetryRequired := true 
-	return isRetryRequired 
-}
-
 const (
 	STACK_TRACE_WANTED     = true
 	STACK_TRACE_NOT_WANTED = false
@@ -255,7 +250,7 @@ var (
 	GALASA_ERROR_UNABLE_TO_MARSHAL_INTO_JSON             = NewMessageType("GAL1112E: Error converting the parsed yaml content into a json payload for the http request. Reason: '%s'", 1112, STACK_TRACE_WANTED)
 	GALASA_ERROR_RESOURCES_RESP_BAD_REQUEST              = NewMessageType("GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program or the user input. Errors returned: '%s'", 1113, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR             = NewMessageType("GAL1114E: The resources operation failed due to a problem on the server. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1114, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR         = NewMessageType("GAL1115E: An unexpected response was received from the Galasa Ecosystem. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1115, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RESP_UNEXPECTED_ERROR                   = NewMessageType("GAL1115E: An unexpected response was received from the Galasa Ecosystem. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1115, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY            = NewMessageType("GAL1116E: Error reading the HTTP Response body. Reason: '%s'", 1116, STACK_TRACE_WANTED)
 	GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING        = NewMessageType("GAL1117E: The delete operation failed. Unable to process the error information returned from the server.", 1117, STACK_TRACE_WANTED)
 	GALASA_ERROR_RESOURCE_RESPONSE_PARSING               = NewMessageType("GAL1118E: The resource operation failed. Unable to process the error information returned from the server. Reason: '%s'", 1118, STACK_TRACE_WANTED)

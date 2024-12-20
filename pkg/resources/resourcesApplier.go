@@ -103,7 +103,7 @@ func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string,
 					} else if statusCode == 500 {
 						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR)
 					} else {
-						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR)
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESP_UNEXPECTED_ERROR)
 					}
 				} else {
 					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
