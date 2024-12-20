@@ -114,6 +114,7 @@ func (commands *commandCollectionImpl) Execute(args []string) error {
 // Private functions.
 // -----------------------------------------------------------------
 func (commands *commandCollectionImpl) init(factory spi.Factory) error {
+	var commsCommand spi.GalasaCommand
 
 	commands.commandMap = make(map[string]spi.GalasaCommand)
 
@@ -121,10 +122,12 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 	if err == nil {
 		commands.rootCommand = rootCommand
 		commands.commandMap[rootCommand.Name()] = rootCommand
+
+		commsCommand, err = NewCommsCommand(rootCommand)
 	}
 
 	if err == nil {
-		err = commands.addAuthCommands(factory, rootCommand)
+		err = commands.addAuthCommands(factory, rootCommand, commsCommand)
 	}
 
 	if err == nil {
@@ -136,23 +139,23 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 	}
 
 	if err == nil {
-		err = commands.addPropertiesCommands(factory, rootCommand)
+		err = commands.addPropertiesCommands(factory, rootCommand, commsCommand)
 	}
 
 	if err == nil {
-		err = commands.addRunsCommands(factory, rootCommand)
+		err = commands.addRunsCommands(factory, rootCommand, commsCommand)
 	}
 
 	if err == nil {
-		err = commands.addResourcesCommands(factory, rootCommand)
+		err = commands.addResourcesCommands(factory, rootCommand, commsCommand)
 	}
 
 	if err == nil {
-		err = commands.addSecretsCommands(factory, rootCommand)
+		err = commands.addSecretsCommands(factory, rootCommand, commsCommand)
 	}
 
 	if err == nil {
-		err = commands.addUsersCommands(factory, rootCommand)
+		err = commands.addUsersCommands(factory, rootCommand, commsCommand)
 	}
 
 	if err == nil {
@@ -162,19 +165,19 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 	return err
 }
 
-func (commands *commandCollectionImpl) addAuthCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addAuthCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 	var authCommand spi.GalasaCommand
 	var authLoginCommand spi.GalasaCommand
 	var authLogoutCommand spi.GalasaCommand
 
-	authCommand, err = NewAuthCommand(rootCommand)
+	authCommand, err = NewAuthCommand(rootCommand, commsCommand)
 	if err == nil {
 		authLoginCommand, err = NewAuthLoginCommand(factory, authCommand, rootCommand)
 		if err == nil {
 			authLogoutCommand, err = NewAuthLogoutCommand(factory, authCommand, rootCommand)
 			if err == nil {
-				err = commands.addAuthTokensCommands(factory, authCommand, rootCommand)
+				err = commands.addAuthTokensCommands(factory, authCommand, commsCommand)
 			}
 		}
 	}
@@ -248,14 +251,14 @@ func (commands *commandCollectionImpl) addProjectCommands(factory spi.Factory, r
 	return err
 }
 
-func (commands *commandCollectionImpl) addPropertiesCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addPropertiesCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 	var propertiesCommand spi.GalasaCommand
 	var propertiesGetCommand spi.GalasaCommand
 	var propertiesDeleteCommand spi.GalasaCommand
 	var propertiesSetCommand spi.GalasaCommand
 
-	propertiesCommand, err = NewPropertiesCommand(rootCommand)
+	propertiesCommand, err = NewPropertiesCommand(rootCommand, commsCommand)
 	if err == nil {
 		propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, rootCommand)
 		if err == nil {
@@ -296,7 +299,7 @@ func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory sp
 	return err
 }
 
-func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 	var runsCommand spi.GalasaCommand
@@ -309,7 +312,7 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 	var runsCancelCommand spi.GalasaCommand
 	var runsDeleteCommand spi.GalasaCommand
 
-	runsCommand, err = NewRunsCmd(rootCommand)
+	runsCommand, err = NewRunsCmd(rootCommand, commsCommand)
 	if err == nil {
 		runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
 		if err == nil {
@@ -350,7 +353,7 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 	return err
 }
 
-func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 	var resourcesCommand spi.GalasaCommand
@@ -359,7 +362,7 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory,
 	var resourcesUpdateCommand spi.GalasaCommand
 	var resourcesDeleteCommand spi.GalasaCommand
 
-	resourcesCommand, err = NewResourcesCmd(rootCommand)
+	resourcesCommand, err = NewResourcesCmd(rootCommand, commsCommand)
 	if err == nil {
 		resourcesApplyCommand, err = NewResourcesApplyCommand(factory, resourcesCommand, rootCommand)
 		if err == nil {
@@ -384,7 +387,7 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory,
 	return err
 }
 
-func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 	var secretsCommand spi.GalasaCommand
@@ -392,7 +395,7 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 	var secretsSetCommand spi.GalasaCommand
 	var secretsDeleteCommand spi.GalasaCommand
 
-	secretsCommand, err = NewSecretsCmd(rootCommand)
+	secretsCommand, err = NewSecretsCmd(rootCommand, commsCommand)
 
 	if err == nil {
 		secretsGetCommand, err = NewSecretsGetCommand(factory, secretsCommand, rootCommand)
@@ -416,14 +419,14 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 	return err
 }
 
-func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, rootCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 	var usersCommand spi.GalasaCommand
 	var usersGetCommand spi.GalasaCommand
 	var usersDeleteCommand spi.GalasaCommand
 
-	usersCommand, err = NewUsersCommand(rootCommand)
+	usersCommand, err = NewUsersCommand(rootCommand, commsCommand)
 
 	if err == nil {
 		usersGetCommand, err = NewUsersGetCommand(factory, usersCommand, rootCommand)

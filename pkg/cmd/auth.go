@@ -17,10 +17,10 @@ type AuthCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewAuthCommand(rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewAuthCommand(rootCmd spi.GalasaCommand, commsCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(AuthCommand)
 
-	cmd.init(rootCmd)
+	cmd.init(rootCmd, commsCmd)
 	return cmd, nil
 }
 
@@ -43,13 +43,13 @@ func (cmd *AuthCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *AuthCommand) init(rootCmd spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd, commsCmd)
 	return err
 }
 
-func (cmd *AuthCommand) createCobraCommand(rootCmd spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *AuthCommand) createCobraCommand(rootCmd spi.GalasaCommand, commsCmd spi.GalasaCommand) (*cobra.Command, error) {
 
 	var err error
 
@@ -61,6 +61,7 @@ func (cmd *AuthCommand) createCobraCommand(rootCmd spi.GalasaCommand) (*cobra.Co
 	}
 
 	rootCmd.CobraCommand().AddCommand(authCmd)
+	commsCmd.CobraCommand().AddCommand(authCmd)
 
 	return authCmd, err
 }

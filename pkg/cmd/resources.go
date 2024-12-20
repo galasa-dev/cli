@@ -25,9 +25,9 @@ type ResourcesCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewResourcesCmd(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesCmd(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(ResourcesCommand)
-	err := cmd.init(rootCommand)
+	err := cmd.init(rootCommand, commsCommand)
 	return cmd, err
 }
 
@@ -51,17 +51,17 @@ func (cmd *ResourcesCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *ResourcesCommand) init(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 
 	cmd.values = &ResourcesCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand, commsCommand)
 
 	return err
 }
 
-func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (*cobra.Command, error) {
 
 	var err error
 
@@ -79,6 +79,7 @@ func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand) (
 	resourcesCobraCmd.MarkPersistentFlagRequired("file")
 
 	rootCommand.CobraCommand().AddCommand(resourcesCobraCmd)
+	commsCommand.CobraCommand().AddCommand(resourcesCobraCmd)
 
 	return resourcesCobraCmd, err
 }
