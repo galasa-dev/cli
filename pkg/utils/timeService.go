@@ -30,3 +30,8 @@ func NewRealTimeService() spi.TimeService {
 func (ts *timeService) Now() time.Time {
 	return time.Now().UTC()
 }
+
+// Sleeps for a given duration
+func (ts *timeService) Sleep(duration time.Duration) {
+	time.Sleep(duration)
+}
