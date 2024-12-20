@@ -25,10 +25,10 @@ type PropertiesCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesCommand(rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesCommand(rootCmd spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesCommand)
-	err := cmd.init(rootCmd)
+	err := cmd.init(rootCmd, commsCommand)
 	return cmd, err
 }
 
@@ -51,18 +51,19 @@ func (cmd *PropertiesCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *PropertiesCommand) init(rootCmd spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 
 	cmd.values = &PropertiesCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand = cmd.createCobraCommand(rootCmd, commsCommand)
 
 	return err
 }
 
 func (cmd *PropertiesCommand) createCobraCommand(
 	rootCommand spi.GalasaCommand,
+	commsCommand spi.GalasaCommand,
 ) *cobra.Command {
 	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",
@@ -73,6 +74,7 @@ func (cmd *PropertiesCommand) createCobraCommand(
 	addBootstrapFlag(propertiesCobraCmd, &cmd.values.ecosystemBootstrap)
 
 	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
+	commsCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 
 	return propertiesCobraCmd
 }

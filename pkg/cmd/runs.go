@@ -23,9 +23,9 @@ type RunsCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewRunsCmd(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsCmd(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsCommand)
-	err := cmd.init(rootCommand)
+	err := cmd.init(rootCommand, commsCommand)
 	return cmd, err
 }
 
@@ -49,17 +49,17 @@ func (cmd *RunsCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *RunsCommand) init(rootCmd spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 
 	cmd.values = &RunsCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd, commsCommand)
 
 	return err
 }
 
-func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (*cobra.Command, error) {
 
 	var err error
 
@@ -72,6 +72,7 @@ func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobr
 	addBootstrapFlag(runsCobraCmd, &cmd.values.bootstrap)
 
 	rootCommand.CobraCommand().AddCommand(runsCobraCmd)
+	commsCommand.CobraCommand().AddCommand(runsCobraCmd)
 
 	return runsCobraCmd, err
 }
