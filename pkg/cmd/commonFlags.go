@@ -22,3 +22,12 @@ func addBootstrapFlag(cobraCommand *cobra.Command, parsedValueLocation *string) 
 			"If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. "+
 			"Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties")
 }
+
+func addRateLimitRetryFlags(cobraCommand *cobra.Command, maxRetries *int, retryBackoffSeconds *float64) {
+	cobraCommand.PersistentFlags().IntVar(maxRetries, "rate-limit-retries", 3,
+		"The maximum number of retries that should be made when requests to the Galasa Service fail due to rate limits being exceeded. Must be a whole number. "+
+			"Defaults to 3 retries")
+
+	cobraCommand.PersistentFlags().Float64Var(retryBackoffSeconds, "rate-limit-retry-backoff", float64(1),
+	"The amount of time in seconds to wait before retrying a command if it failed due to rate limits being exceeded. Defaults to 1 second.")
+}

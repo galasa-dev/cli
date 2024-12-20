@@ -13,6 +13,13 @@ import (
 	"strings"
 )
 
+var (
+	RATE_LIMIT_STATUS_CODES_MAP = map[int]struct{}{
+		http.StatusServiceUnavailable: {},
+		http.StatusTooManyRequests: {},
+	}
+)
+
 // The 'type' of a message, used inside Galasa errors
 type MessageType struct {
 	Template           string
@@ -119,6 +126,26 @@ func GetGalasaErrorFromCommsResponse(httpResponse *http.Response, possibleCommsE
 // as a normal error.
 func (err *GalasaError) Error() string {
 	return err.message
+}
+
+func (err *GalasaError) IsRetryRequired() bool {
+	var statusCode int
+	currentError := err
+	isGalasaError := true
+
+	// Unwrap all Galasa errors to get the original error
+	for isGalasaError && currentError.GetCause() != nil {
+		currentError, isGalasaError = currentError.GetCause().(*GalasaError)
+	}
+	
+	// Pull the HTTP status code out of the original error, which could be 0 if the error is client-side
+	if isGalasaError && currentError != nil {
+		statusCode = currentError.GetHttpStatusCode()
+	}
+
+	_, isRetryRequired := RATE_LIMIT_STATUS_CODES_MAP[statusCode]
+
+	return isRetryRequired 
 }
 
 const (

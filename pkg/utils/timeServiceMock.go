@@ -28,9 +28,13 @@ func NewOverridableMockTimeService(now time.Time) spi.TimeService {
 }
 
 func (ts *MockTimeService) AdvanceClock(duration time.Duration) {
-	ts.MockNow.Add(duration)
+	ts.MockNow = ts.MockNow.Add(duration)
 }
 
 func (ts *MockTimeService) Now() time.Time {
 	return ts.MockNow
+}
+
+func (ts *MockTimeService) Sleep(duration time.Duration) {
+	ts.AdvanceClock(duration)
 }
