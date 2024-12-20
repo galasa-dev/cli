@@ -64,7 +64,7 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 
 		statusCode := resp.StatusCode
 		if statusCode != http.StatusOK {
-			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESP_UNEXPECTED_ERROR, err)
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESP_UNEXPECTED_ERROR)
 		} else {
 			buffer := new(strings.Builder)
 			_, err = io.Copy(buffer, resp.Body)
