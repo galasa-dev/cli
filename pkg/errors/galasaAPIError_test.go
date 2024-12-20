@@ -7,6 +7,7 @@
 package errors
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,11 +19,12 @@ func TestGetApiErrorEmptyParsesInputOk(t *testing.T) {
 	bodyString := `{}`
 
 	bodyBytes := []byte(bodyString)
+	statusCode := http.StatusInternalServerError
 
 	var err error
 
 	// When
-	_, err = GetApiErrorFromResponse(bodyBytes)
+	_, err = GetApiErrorFromResponse(statusCode, bodyBytes)
 
 	// Then
 	assert.Nil(t, err, "GetApiErrorFromResponse, empty body failed with a non-nil error!")
@@ -37,12 +39,13 @@ func TestGetApiErrorSingleJsonObjectsParsesInputOk(t *testing.T) {
         }`
 
 	bodyBytes := []byte(bodyString)
+	statusCode := http.StatusInternalServerError
 
 	var parsedError *GalasaAPIError
 	var err error
 
 	// When
-	parsedError, err = GetApiErrorFromResponse(bodyBytes)
+	parsedError, err = GetApiErrorFromResponse(statusCode, bodyBytes)
 
 	// Then
 	assert.Nil(t, err, "NewGalasaApiErrorsArray failed with a non-nil error!")

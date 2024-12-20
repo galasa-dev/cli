@@ -8,6 +8,7 @@ package errors
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -47,6 +48,11 @@ func NewMessageType(template string, ordinal int, isStackTraceWanted bool) *Mess
 type GalasaError struct {
 	msgType *MessageType
 	message string
+	httpStatus int
+}
+
+type GalasaCommsError interface {
+	isRetryRequired() bool
 }
 
 func (err *GalasaError) GetMessageType() *MessageType {
@@ -71,10 +77,21 @@ func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	return galasaError
 }
 
+func NewGalasaErrorWithHttpStatusCode(httpStatusCode int, msgType *MessageType, params ...interface{}) *GalasaError {
+	err := NewGalasaError(msgType, params...)
+	err.httpStatus = httpStatusCode
+	return err
+}
+
 // Render a galasa error into a string, so the GalasaError structure can be used
 // as a normal error.
 func (err *GalasaError) Error() string {
 	return err.message
+}
+
+func (err *GalasaError) isRetryRequired() bool {
+	isRetryRequired := true 
+	return isRetryRequired 
 }
 
 const (

@@ -184,12 +184,19 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 			runid := run.GetRunId()
 			log.Printf("Getting details for run %v\n", runid)
 			details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runid).ClientApiVersion(restApiVersion).Execute()
-			if err != nil {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-			} else {
-				if httpResponse.StatusCode != http.StatusOK {
 
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS, strconv.Itoa(httpResponse.StatusCode))
+			var statusCode int
+			if httpResponse != nil {
+				defer httpResponse.Body.Close()
+				statusCode = httpResponse.StatusCode
+			}
+
+			if err != nil {
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+			} else {
+				if statusCode != http.StatusOK {
+
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS, strconv.Itoa(httpResponse.StatusCode))
 				} else {
 					runsDetails = append(runsDetails, *details)
 				}
@@ -262,13 +269,19 @@ func GetRunsFromRestApi(
 			apicall = apicall.Sort("from:desc")
 			runData, httpResponse, err = apicall.Execute()
 
+			var statusCode int
+			if httpResponse != nil {
+				defer httpResponse.Body.Close()
+				statusCode = httpResponse.StatusCode
+			}
+
 			if err != nil {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
 			} else {
-				if httpResponse.StatusCode != http.StatusOK {
-					httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
+				if statusCode != http.StatusOK {
+					httpError := "\nhttp response status code: " + strconv.Itoa(statusCode)
 					errString := httpError
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
 				} else {
 
 					log.Printf("HTTP status was OK")

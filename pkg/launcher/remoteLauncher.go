@@ -156,11 +156,19 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
+		var cpsResponse *http.Response
+		cpsProperty, cpsResponse, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
+
+		var statusCode int
+		if cpsResponse != nil {
+			defer cpsResponse.Body.Close()
+			statusCode = cpsResponse.StatusCode
+		}
+
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
 		} else if len(cpsProperty) < 1 {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
 		}
 		if err == nil {
 			streamLocation :=cpsProperty[0].Data.Value

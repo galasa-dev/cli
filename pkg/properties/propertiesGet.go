@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"sort"
 	"strings"
 
@@ -92,6 +93,7 @@ func getCpsPropertiesFromRestApi(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
+		var resp *http.Response
 		if name == "" {
 			apicall := apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context, namespace).ClientApiVersion(restApiVersion)
 			if prefix != "" {
@@ -103,14 +105,20 @@ func getCpsPropertiesFromRestApi(
 			if infix != "" {
 				apicall = apicall.Infix(infix)
 			}
-			cpsProperties, _, err = apicall.Execute()
+			cpsProperties, resp, err = apicall.Execute()
 		} else {
 			apicall := apiClient.ConfigurationPropertyStoreAPIApi.GetCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
-			cpsProperties, _, err = apicall.Execute()
+			cpsProperties, resp, err = apicall.Execute()
+		}
+
+		var statusCode int
+		if resp != nil {
+			defer resp.Body.Close()
+			statusCode = resp.StatusCode
 		}
 
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_FAILED, err.Error())
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_NAMESPACE_FAILED, err.Error())
 		}
 	}
 

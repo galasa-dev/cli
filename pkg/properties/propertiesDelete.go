@@ -53,25 +53,29 @@ func deleteCpsProperty(namespace string,
 		apicall := apiClient.ConfigurationPropertyStoreAPIApi.DeleteCpsProperty(context, namespace, name).ClientApiVersion(restApiVersion)
 		_, resp, err = apicall.Execute()
 
-		if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+		if resp != nil {
 			defer resp.Body.Close()
 
-			responseBody, err = io.ReadAll(resp.Body)
-			log.Printf("deleteCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
+			statusCode := resp.StatusCode
+			if statusCode != http.StatusOK {
 
-			if err == nil {
-				var errorFromServer *galasaErrors.GalasaAPIError
-				errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+				responseBody, err = io.ReadAll(resp.Body)
+				log.Printf("deleteCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", statusCode, string(responseBody))
 
 				if err == nil {
-					//return galasa api error, because status code is not 200 (OK)
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
+					var errorFromServer *galasaErrors.GalasaAPIError
+					errorFromServer, err = galasaErrors.GetApiErrorFromResponse(statusCode, responseBody)
+
+					if err == nil {
+						//return galasa api error, because status code is not 200 (OK)
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_DELETE_PROPERTY_FAILED, name, errorFromServer.Message)
+					} else {
+						//unable to parse response into api error
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
+					}
 				} else {
-					//unable to parse response into api error
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING)
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 				}
-			} else {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 			}
 		}
 	}
