@@ -8,7 +8,6 @@ package errors
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 )
@@ -57,6 +56,10 @@ type GalasaCommsError interface {
 
 func (err *GalasaError) GetMessageType() *MessageType {
 	return err.msgType
+}
+
+func (err *GalasaError) GetHttpStatusCode() int {
+	return err.httpStatus
 }
 
 // NewGalasaError creates a new GalasaError structure.
