@@ -14,6 +14,22 @@ import (
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
+type WrappedGalasaError struct {
+	HttpStatusCode int
+	GalasaError error
+}
+
+func NewWrappedGalasaError(httpStatusCode int, galasaError error) *WrappedGalasaError {
+	return &WrappedGalasaError{
+		HttpStatusCode: httpStatusCode,
+		GalasaError: galasaError,
+	}
+}
+
+func (err *WrappedGalasaError) Error() string {
+	return err.GalasaError.Error()
+}
+
 type GalasaAPIError struct {
 	Code    int    `json:"error_code"`
 	Message string `json:"error_message"`

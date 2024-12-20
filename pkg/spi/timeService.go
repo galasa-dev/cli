@@ -9,4 +9,5 @@ import "time"
 
 type TimeService interface {
 	Now() time.Time
+	Sleep(duration time.Duration)
 }

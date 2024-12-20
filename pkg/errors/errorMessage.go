@@ -121,6 +121,11 @@ func (err *GalasaError) Error() string {
 	return err.message
 }
 
+func (err *GalasaError) isRetryRequired() bool {
+	isRetryRequired := true 
+	return isRetryRequired 
+}
+
 const (
 	STACK_TRACE_WANTED     = true
 	STACK_TRACE_NOT_WANTED = false
