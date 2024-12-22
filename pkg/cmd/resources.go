@@ -12,7 +12,6 @@ import (
 )
 
 type ResourcesCmdValues struct {
-	bootstrap string
 	filePath  string
 }
 
@@ -71,7 +70,6 @@ func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand, c
 		Long:  "Allows interaction with the Resources endpoint to create and maintain resources in the Galasa Ecosystem",
 	}
 
-	addBootstrapFlag(resourcesCobraCmd, &cmd.values.bootstrap)
 	resourcesCobraCmd.PersistentFlags().StringVarP(&cmd.values.filePath, "file", "f", "",
 		"The file containing yaml definitions of resources to be applied manipulated by this command. "+
 			"This can be a fully-qualified path or path relative to the current directory."+

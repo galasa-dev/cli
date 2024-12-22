@@ -368,13 +368,13 @@ func (commands *commandCollectionImpl) addResourcesCommands(factory spi.Factory,
 
 	resourcesCommand, err = NewResourcesCmd(rootCommand, commsCommand)
 	if err == nil {
-		resourcesApplyCommand, err = NewResourcesApplyCommand(factory, resourcesCommand, rootCommand)
+		resourcesApplyCommand, err = NewResourcesApplyCommand(factory, resourcesCommand, commsCommand)
 		if err == nil {
-			resourcesCreateCommand, err = NewResourcesCreateCommand(factory, resourcesCommand, rootCommand)
+			resourcesCreateCommand, err = NewResourcesCreateCommand(factory, resourcesCommand, commsCommand)
 			if err == nil {
-				resourcesUpdateCommand, err = NewResourcesUpdateCommand(factory, resourcesCommand, rootCommand)
+				resourcesUpdateCommand, err = NewResourcesUpdateCommand(factory, resourcesCommand, commsCommand)
 				if err == nil {
-					resourcesDeleteCommand, err = NewResourcesDeleteCommand(factory, resourcesCommand, rootCommand)
+					resourcesDeleteCommand, err = NewResourcesDeleteCommand(factory, resourcesCommand, commsCommand)
 				}
 			}
 		}

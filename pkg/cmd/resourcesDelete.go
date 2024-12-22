@@ -23,10 +23,10 @@ type ResourcesDeleteCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesDeleteCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesDeleteCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesDeleteCommand)
-	err := cmd.init(factory, resourcesCommand, rootCommand)
+	err := cmd.init(factory, resourcesCommand, commsCommand)
 	return cmd, err
 }
 
@@ -49,12 +49,12 @@ func (cmd *ResourcesDeleteCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 
 	cmd.values = &ResourcesDeleteCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, commsCommand.Values().(*CommsCmdValues))
 
 	return err
 }
@@ -62,7 +62,7 @@ func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand sp
 func (cmd *ResourcesDeleteCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	rootCommandValues *RootCmdValues,
+	commsCommandValues *CommsCmdValues,
 ) *cobra.Command {
 
 	resourcesDeleteCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -74,7 +74,7 @@ func (cmd *ResourcesDeleteCommand) createCobraCommand(
 		Aliases: []string{"resources delete"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return executeResourcesDelete(factory,
-				resourcesDeleteCommandValues, rootCommandValues)
+				resourcesDeleteCommandValues, commsCommandValues)
 		},
 	}
 
@@ -85,11 +85,11 @@ func (cmd *ResourcesDeleteCommand) createCobraCommand(
 
 func executeResourcesDelete(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 	action := "delete"
 
-	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, rootCmdValues)
+	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsCmdValues)
 
 	return err
 }

@@ -28,10 +28,10 @@ type ResourcesApplyCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesApplyCommand)
-	err := cmd.init(factory, resourcesCommand, rootCommand)
+	err := cmd.init(factory, resourcesCommand, commsCommand)
 	return cmd, err
 }
 
@@ -54,12 +54,12 @@ func (cmd *ResourcesApplyCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 
 	var err error
 
 	cmd.values = &ResourcesApplyCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesApplyCommand, rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesApplyCommand, commsCommand.Values().(*CommsCmdValues))
 
 	return err
 }
@@ -67,7 +67,7 @@ func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyComman
 func (cmd *ResourcesApplyCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	rootCommandValues *RootCmdValues,
+	commsCommandValues *CommsCmdValues,
 ) *cobra.Command {
 
 	resourcesApplyCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -79,7 +79,7 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 		Aliases: []string{"resources apply"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return executeResourcesApply(factory,
-				resourcesApplyCommandValues, rootCommandValues)
+				resourcesApplyCommandValues, commsCommandValues)
 		},
 	}
 
@@ -90,24 +90,24 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 
 func executeResourcesApply(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 	action := "apply"
 
-	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, rootCmdValues)
+	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsCmdValues)
 
 	return err
 }
 
-func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
+func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, commsCmdValues *CommsCmdValues) error {
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI -", action, "Resources Command")
 
@@ -115,13 +115,13 @@ func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourc
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 
 		if err == nil {
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, resourcesCmdValues.bootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				apiServerUrl := bootstrapData.ApiServerURL
