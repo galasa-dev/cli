@@ -24,10 +24,10 @@ type PropertiesDeleteCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesDeleteCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesDeleteCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(PropertiesDeleteCommand)
 
-	err := cmd.init(factory, propertiesCommand, rootCommand)
+	err := cmd.init(factory, propertiesCommand, commsCommand)
 	return cmd, err
 }
 
@@ -50,9 +50,9 @@ func (cmd *PropertiesDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesDeleteCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *PropertiesDeleteCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, commsCmd)
 	return err
 }
 
@@ -63,7 +63,7 @@ func (cmd *PropertiesDeleteCommand) init(factory spi.Factory, propertiesCommand 
 func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 	factory spi.Factory,
 	propertiesCommand spi.GalasaCommand,
-	rootCmd spi.GalasaCommand) (*cobra.Command, error) {
+	commsCmd spi.GalasaCommand) (*cobra.Command, error) {
 
 	var err error
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
@@ -74,7 +74,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executePropertiesDelete(factory, propertiesCmdValues, rootCmd.Values().(*RootCmdValues))
+			return cmd.executePropertiesDelete(factory, propertiesCmdValues, commsCmd.Values().(*CommsCmdValues))
 		},
 		Aliases: []string{"properties delete"},
 	}
@@ -89,16 +89,16 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 	return propertiesDeleteCmd, err
 }
 
-func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory, propertiesCmdValues *PropertiesCmdValues, rootCmdValues *RootCmdValues) error {
+func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory, propertiesCmdValues *PropertiesCmdValues, commsCmdValues *CommsCmdValues) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
 
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Delete ecosystem properties")
 
@@ -106,13 +106,13 @@ func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory,
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				apiServerUrl := bootstrapData.ApiServerURL

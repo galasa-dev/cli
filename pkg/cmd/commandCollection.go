@@ -264,13 +264,13 @@ func (commands *commandCollectionImpl) addPropertiesCommands(factory spi.Factory
 
 	propertiesCommand, err = NewPropertiesCommand(rootCommand, commsCommand)
 	if err == nil {
-		propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, rootCommand)
+		propertiesGetCommand, err = NewPropertiesGetCommand(factory, propertiesCommand, commsCommand)
 		if err == nil {
-			propertiesSetCommand, err = NewPropertiesSetCommand(factory, propertiesCommand, rootCommand)
+			propertiesSetCommand, err = NewPropertiesSetCommand(factory, propertiesCommand, commsCommand)
 			if err == nil {
-				propertiesDeleteCommand, err = NewPropertiesDeleteCommand(factory, propertiesCommand, rootCommand)
+				propertiesDeleteCommand, err = NewPropertiesDeleteCommand(factory, propertiesCommand, commsCommand)
 				if err == nil {
-					err = commands.addPropertiesNamespaceCommands(factory, rootCommand, propertiesCommand)
+					err = commands.addPropertiesNamespaceCommands(factory, commsCommand, propertiesCommand)
 				}
 			}
 		}
@@ -286,14 +286,14 @@ func (commands *commandCollectionImpl) addPropertiesCommands(factory spi.Factory
 	return err
 }
 
-func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory spi.Factory, rootCommand spi.GalasaCommand, propertiesCommand spi.GalasaCommand) error {
+func (commands *commandCollectionImpl) addPropertiesNamespaceCommands(factory spi.Factory, commsCommand spi.GalasaCommand, propertiesCommand spi.GalasaCommand) error {
 	var err error
 	var propertiesNamespaceCommand spi.GalasaCommand
 	var propertiesNamespaceGetCommand spi.GalasaCommand
 
-	propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(propertiesCommand, rootCommand)
+	propertiesNamespaceCommand, err = NewPropertiesNamespaceCommand(propertiesCommand)
 	if err == nil {
-		propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
+		propertiesNamespaceGetCommand, err = NewPropertiesNamespaceGetCommand(factory, propertiesNamespaceCommand, propertiesCommand, commsCommand)
 	}
 
 	if err == nil {

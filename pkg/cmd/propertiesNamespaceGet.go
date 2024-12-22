@@ -37,12 +37,12 @@ func NewPropertiesNamespaceGetCommand(
 	factory spi.Factory,
 	propertiesNamespaceCommand spi.GalasaCommand,
 	propertiesCommand spi.GalasaCommand,
-	rootCommand spi.GalasaCommand,
+	commsCommand spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesNamespaceGetCommand)
 
-	err := cmd.init(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
+	err := cmd.init(factory, propertiesNamespaceCommand, propertiesCommand, commsCommand)
 	return cmd, err
 }
 
@@ -64,10 +64,10 @@ func (cmd *PropertiesNamespaceGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, propertiesCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, propertiesCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
 	var err error
 	cmd.values = &PropertiesNamespaceGetCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, propertiesCommand, commsCmd)
 	return err
 }
 
@@ -75,7 +75,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesNamespaceCommand spi.GalasaCommand,
 	propertiesCommand spi.GalasaCommand,
-	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -87,7 +87,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 		Long:  "Get a list of namespaces within the CPS",
 		Args:  cobra.NoArgs,
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executePropertiesNamespaceGet(factory, propertiesCmdValues, rootCmd.Values().(*RootCmdValues))
+			return cmd.executePropertiesNamespaceGet(factory, propertiesCmdValues, commsCmd.Values().(*CommsCmdValues))
 		},
 		Aliases: []string{"namespaces get"},
 	}
@@ -104,17 +104,17 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
 
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Get ecosystem namespaces")
 
@@ -122,13 +122,13 @@ func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()

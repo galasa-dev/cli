@@ -12,7 +12,6 @@ import (
 )
 
 type PropertiesCmdValues struct {
-	ecosystemBootstrap string
 	namespace          string
 	propertyName       string
 }
@@ -70,8 +69,6 @@ func (cmd *PropertiesCommand) createCobraCommand(
 		Short: "Manages properties in an ecosystem",
 		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
 	}
-
-	addBootstrapFlag(propertiesCobraCmd, &cmd.values.ecosystemBootstrap)
 
 	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 	commsCommand.CobraCommand().AddCommand(propertiesCobraCmd)
