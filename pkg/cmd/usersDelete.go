@@ -29,12 +29,12 @@ type UsersDeleteCommand struct {
 func NewUsersDeleteCommand(
 	factory spi.Factory,
 	usersDeleteCommand spi.GalasaCommand,
-	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(UsersDeleteCommand)
 
-	err := cmd.init(factory, usersDeleteCommand, rootCmd)
+	err := cmd.init(factory, usersDeleteCommand, commsCmd)
 	return cmd, err
 }
 
@@ -57,10 +57,10 @@ func (cmd *UsersDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *UsersDeleteCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *UsersDeleteCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
 	var err error
 
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, usersCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, usersCommand, commsCmd)
 
 	return err
 }
@@ -68,7 +68,7 @@ func (cmd *UsersDeleteCommand) init(factory spi.Factory, usersCommand spi.Galasa
 func (cmd *UsersDeleteCommand) createCobraCmd(
 	factory spi.Factory,
 	usersCommand,
-	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -80,7 +80,7 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 		Long:    "Deletes a single user by their login ID from the ecosystem",
 		Aliases: []string{COMMAND_NAME_USERS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), rootCmd.Values().(*RootCmdValues))
+			return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), commsCmd.Values().(*CommsCmdValues))
 		},
 	}
 
@@ -94,7 +94,7 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 func (cmd *UsersDeleteCommand) executeUsersDelete(
 	factory spi.Factory,
 	userCmdValues *UsersCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -102,10 +102,10 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 	fileSystem := factory.GetFileSystem()
 	byteReader := factory.GetByteReader()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Delete user from the ecosystem")
 
@@ -113,13 +113,13 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap users.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, userCmdValues.ecosystemBootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				apiServerUrl := bootstrapData.ApiServerURL

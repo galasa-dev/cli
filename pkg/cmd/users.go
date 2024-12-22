@@ -12,7 +12,6 @@ import (
 )
 
 type UsersCmdValues struct {
-	ecosystemBootstrap string
 	name               string
 }
 
@@ -70,8 +69,6 @@ func (cmd *UsersCommand) createCobraCommand(
 		Short: "Manages users in an ecosystem",
 		Long:  "Allows interaction with the user servlet to return information about users.",
 	}
-
-	addBootstrapFlag(usersCobraCmd, &cmd.values.ecosystemBootstrap)
 
 	rootCommand.CobraCommand().AddCommand(usersCobraCmd)
 	commsCommand.CobraCommand().AddCommand(usersCobraCmd)

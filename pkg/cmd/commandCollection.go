@@ -433,9 +433,9 @@ func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, roo
 	usersCommand, err = NewUsersCommand(rootCommand, commsCommand)
 
 	if err == nil {
-		usersGetCommand, err = NewUsersGetCommand(factory, usersCommand, rootCommand)
+		usersGetCommand, err = NewUsersGetCommand(factory, usersCommand, commsCommand)
 		if err == nil {
-			usersDeleteCommand, err = NewUsersDeleteCommand(factory, usersCommand, rootCommand)
+			usersDeleteCommand, err = NewUsersDeleteCommand(factory, usersCommand, commsCommand)
 			if err == nil {
 				commands.commandMap[usersCommand.Name()] = usersCommand
 				commands.commandMap[usersGetCommand.Name()] = usersGetCommand

@@ -29,12 +29,12 @@ type UsersGetCommand struct {
 func NewUsersGetCommand(
 	factory spi.Factory,
 	usersGetCommand spi.GalasaCommand,
-	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(UsersGetCommand)
 
-	err := cmd.init(factory, usersGetCommand, rootCmd)
+	err := cmd.init(factory, usersGetCommand, commsCmd)
 	return cmd, err
 }
 
@@ -57,10 +57,10 @@ func (cmd *UsersGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *UsersGetCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *UsersGetCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
 	var err error
 
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, usersCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, usersCommand, commsCmd)
 
 	return err
 }
@@ -68,7 +68,7 @@ func (cmd *UsersGetCommand) init(factory spi.Factory, usersCommand spi.GalasaCom
 func (cmd *UsersGetCommand) createCobraCmd(
 	factory spi.Factory,
 	usersCommand,
-	rootCmd spi.GalasaCommand,
+	commsCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -80,7 +80,7 @@ func (cmd *UsersGetCommand) createCobraCmd(
 		Long:    "Get a list of users stored in the Galasa API server",
 		Aliases: []string{COMMAND_NAME_USERS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeUsersGet(factory, usersCommand.Values().(*UsersCmdValues), rootCmd.Values().(*RootCmdValues))
+			return cmd.executeUsersGet(factory, usersCommand.Values().(*UsersCmdValues), commsCmd.Values().(*CommsCmdValues))
 		},
 	}
 
@@ -94,17 +94,17 @@ func (cmd *UsersGetCommand) createCobraCmd(
 func (cmd *UsersGetCommand) executeUsersGet(
 	factory spi.Factory,
 	userCmdValues *UsersCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Get users from the ecosystem")
 
@@ -112,13 +112,13 @@ func (cmd *UsersGetCommand) executeUsersGet(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap users.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, userCmdValues.ecosystemBootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()
