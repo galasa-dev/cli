@@ -83,7 +83,7 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs prepare"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeAssemble(factory, runsCommand.Values().(*RunsCmdValues), commsCmdValues)
+			return cmd.executeAssemble(factory, commsCmdValues)
 		},
 	}
 
@@ -101,7 +101,6 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 
 func (cmd *RunsPrepareCommand) executeAssemble(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 	var err error

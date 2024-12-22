@@ -69,7 +69,6 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 ) (*cobra.Command, error) {
 
 	var err error
-	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsDeleteCobraCmd := &cobra.Command{
 		Use:     "delete",
@@ -78,7 +77,7 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs delete"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsDelete(factory, runsCmdValues, commsCmdValues)
+			return cmd.executeRunsDelete(factory, commsCmdValues)
 		},
 	}
 
@@ -93,7 +92,6 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 
 func (cmd *RunsDeleteCommand) executeRunsDelete(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 

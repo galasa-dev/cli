@@ -73,7 +73,6 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 ) (*cobra.Command, error) {
 
 	var err error
-	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsCancelCmd := &cobra.Command{
 		Use:     "cancel",
@@ -82,7 +81,7 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs cancel"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeCancel(factory, runsCmdValues, commsCmdValues)
+			return cmd.executeCancel(factory, commsCmdValues)
 		},
 	}
 
@@ -97,7 +96,6 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 
 func (cmd *RunsCancelCommand) executeCancel(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 

@@ -38,7 +38,7 @@ type RunsSubmitLocalCommand struct {
 // ------------------------------------------------------------------------------------------------
 func NewRunsSubmitLocalCommand(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsSubmitLocalCommand)
-	err := cmd.init(factory, runsSubmitCommand, runsCommand, commsCommand)
+	err := cmd.init(factory, runsSubmitCommand, commsCommand)
 	return cmd, err
 }
 
@@ -61,7 +61,7 @@ func (cmd *RunsSubmitLocalCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 
 	// Allocate storage to capture the parsed values.
@@ -73,7 +73,6 @@ func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand s
 	cmd.cobraCommand, err = cmd.createRunsSubmitLocalCobraCmd(
 		factory,
 		runsSubmitCommand,
-		runsCommand.Values().(*RunsCmdValues),
 		commsCommand.Values().(*CommsCmdValues),
 	)
 	return err
@@ -82,7 +81,6 @@ func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand s
 func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 	factory spi.Factory,
 	runsSubmitCmd spi.GalasaCommand,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 	var err error
@@ -94,7 +92,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit local"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), runsCmdValues, commsCmdValues)
+			return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), commsCmdValues)
 		},
 	}
 
@@ -157,7 +155,6 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	factory spi.Factory,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 

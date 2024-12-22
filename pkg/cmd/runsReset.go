@@ -73,7 +73,6 @@ func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory spi.Factory,
 ) (*cobra.Command, error) {
 
 	var err error
-	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsResetCmd := &cobra.Command{
 		Use:     "reset",
@@ -82,7 +81,7 @@ func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs reset"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeReset(factory, runsCmdValues, commsCmdValues)
+			return cmd.executeReset(factory, commsCmdValues)
 		},
 	}
 
@@ -97,7 +96,6 @@ func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory spi.Factory,
 
 func (cmd *RunsResetCommand) executeReset(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 

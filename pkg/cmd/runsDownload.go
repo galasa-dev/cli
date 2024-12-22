@@ -77,7 +77,6 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 ) (*cobra.Command, error) {
 
 	var err error
-	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsDownloadCobraCmd := &cobra.Command{
 		Use:     "download",
@@ -86,7 +85,7 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs download"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsDownload(factory, runsCmdValues, commsCmdValues)
+			return cmd.executeRunsDownload(factory, commsCmdValues)
 		},
 	}
 
@@ -104,7 +103,6 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 
 func (cmd *RunsDownloadCommand) executeRunsDownload(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 

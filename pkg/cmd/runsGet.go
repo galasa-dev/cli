@@ -74,7 +74,6 @@ func (cmd *RunsGetCommand) createCobraCommand(
 ) (*cobra.Command, error) {
 
 	var err error
-	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsGetCobraCmd := &cobra.Command{
 		Use:     "get",
@@ -83,7 +82,7 @@ func (cmd *RunsGetCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs get"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsGet(factory, runsCmdValues, commsCmdValues)
+			return cmd.executeRunsGet(factory, commsCmdValues)
 		},
 	}
 
@@ -115,7 +114,6 @@ func (cmd *RunsGetCommand) createCobraCommand(
 
 func (cmd *RunsGetCommand) executeRunsGet(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 

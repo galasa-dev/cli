@@ -42,7 +42,7 @@ func NewPropertiesNamespaceGetCommand(
 
 	cmd := new(PropertiesNamespaceGetCommand)
 
-	err := cmd.init(factory, propertiesNamespaceCommand, propertiesCommand, commsCommand)
+	err := cmd.init(factory, propertiesNamespaceCommand, commsCommand)
 	return cmd, err
 }
 
@@ -64,22 +64,20 @@ func (cmd *PropertiesNamespaceGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, propertiesCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
+func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
 	var err error
 	cmd.values = &PropertiesNamespaceGetCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, propertiesCommand, commsCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, commsCmd)
 	return err
 }
 
 func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesNamespaceCommand spi.GalasaCommand,
-	propertiesCommand spi.GalasaCommand,
 	commsCmd spi.GalasaCommand,
 ) (*cobra.Command, error) {
 
 	var err error
-	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
 
 	propertieNamespaceGetCobraCommand := &cobra.Command{
 		Use:   "get",
@@ -87,7 +85,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 		Long:  "Get a list of namespaces within the CPS",
 		Args:  cobra.NoArgs,
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executePropertiesNamespaceGet(factory, propertiesCmdValues, commsCmd.Values().(*CommsCmdValues))
+			return cmd.executePropertiesNamespaceGet(factory, commsCmd.Values().(*CommsCmdValues))
 		},
 		Aliases: []string{"namespaces get"},
 	}
@@ -103,7 +101,6 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 
 func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 	factory spi.Factory,
-	propertiesCmdValues *PropertiesCmdValues,
 	commsCmdValues *CommsCmdValues,
 ) error {
 	var err error
