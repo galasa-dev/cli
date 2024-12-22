@@ -402,15 +402,15 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 	secretsCommand, err = NewSecretsCmd(rootCommand, commsCommand)
 
 	if err == nil {
-		secretsGetCommand, err = NewSecretsGetCommand(factory, secretsCommand, rootCommand)
+		secretsGetCommand, err = NewSecretsGetCommand(factory, secretsCommand, commsCommand)
 	}
 
 	if err == nil {
-		secretsSetCommand, err = NewSecretsSetCommand(factory, secretsCommand, rootCommand)
+		secretsSetCommand, err = NewSecretsSetCommand(factory, secretsCommand, commsCommand)
 	}
 
 	if err == nil {
-		secretsDeleteCommand, err = NewSecretsDeleteCommand(factory, secretsCommand, rootCommand)
+		secretsDeleteCommand, err = NewSecretsDeleteCommand(factory, secretsCommand, commsCommand)
 	}
 
 	if err == nil {

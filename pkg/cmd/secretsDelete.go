@@ -26,12 +26,12 @@ type SecretsDeleteCommand struct {
 func NewSecretsDeleteCommand(
     factory spi.Factory,
     secretsDeleteCommand spi.GalasaCommand,
-    rootCmd spi.GalasaCommand,
+    commsCmd spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
     cmd := new(SecretsDeleteCommand)
 
-    err := cmd.init(factory, secretsDeleteCommand, rootCmd)
+    err := cmd.init(factory, secretsDeleteCommand, commsCmd)
     return cmd, err
 }
 
@@ -53,10 +53,10 @@ func (cmd *SecretsDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *SecretsDeleteCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *SecretsDeleteCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
     var err error
 
-    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, rootCmd.Values().(*RootCmdValues))
+    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, commsCmd.Values().(*CommsCmdValues))
 
     return err
 }
@@ -64,7 +64,7 @@ func (cmd *SecretsDeleteCommand) init(factory spi.Factory, secretsCommand spi.Ga
 func (cmd *SecretsDeleteCommand) createCobraCmd(
     factory spi.Factory,
     secretsCommand spi.GalasaCommand,
-    rootCommandValues *RootCmdValues,
+    commsCommandValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 
     var err error
@@ -76,7 +76,7 @@ func (cmd *SecretsDeleteCommand) createCobraCmd(
         Long:    "Deletes a secret from the credentials store",
         Aliases: []string{COMMAND_NAME_SECRETS_DELETE},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-            return cmd.executeSecretsDelete(factory, secretsCommand.Values().(*SecretsCmdValues), rootCommandValues)
+            return cmd.executeSecretsDelete(factory, secretsCommand.Values().(*SecretsCmdValues), commsCommandValues)
         },
     }
 
@@ -90,29 +90,29 @@ func (cmd *SecretsDeleteCommand) createCobraCmd(
 func (cmd *SecretsDeleteCommand) executeSecretsDelete(
     factory spi.Factory,
     secretsCmdValues *SecretsCmdValues,
-    rootCmdValues *RootCmdValues,
+    commsCmdValues *CommsCmdValues,
 ) error {
 
     var err error
     // Operations on the file system will all be relative to the current folder.
     fileSystem := factory.GetFileSystem()
 
-    err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+    err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 
     if err == nil {
-        rootCmdValues.isCapturingLogs = true
+        commsCmdValues.isCapturingLogs = true
 
         log.Println("Galasa CLI - Delete a secret from the credentials store")
 
         env := factory.GetEnvironment()
 
         var galasaHome spi.GalasaHome
-        galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+        galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
         if err == nil {
 
             var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
             var bootstrapData *api.BootstrapData
-            bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, secretsCmdValues.bootstrap, urlService)
+            bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
             if err == nil {
 
 				var console = factory.GetStdOutConsole()

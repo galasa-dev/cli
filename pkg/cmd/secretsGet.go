@@ -31,12 +31,12 @@ type SecretsGetCommand struct {
 func NewSecretsGetCommand(
     factory spi.Factory,
     secretsGetCommand spi.GalasaCommand,
-    rootCmd spi.GalasaCommand,
+    commsCmd spi.GalasaCommand,
 ) (spi.GalasaCommand, error) {
 
     cmd := new(SecretsGetCommand)
 
-    err := cmd.init(factory, secretsGetCommand, rootCmd)
+    err := cmd.init(factory, secretsGetCommand, commsCmd)
     return cmd, err
 }
 
@@ -58,11 +58,11 @@ func (cmd *SecretsGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *SecretsGetCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *SecretsGetCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
     var err error
 
 	cmd.values = &SecretsGetCmdValues{}
-    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, rootCmd.Values().(*RootCmdValues))
+    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, commsCmd.Values().(*CommsCmdValues))
 
     return err
 }
@@ -70,7 +70,7 @@ func (cmd *SecretsGetCommand) init(factory spi.Factory, secretsCommand spi.Galas
 func (cmd *SecretsGetCommand) createCobraCmd(
     factory spi.Factory,
     secretsCommand spi.GalasaCommand,
-    rootCommandValues *RootCmdValues,
+    commsCommandValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 
     var err error
@@ -82,7 +82,7 @@ func (cmd *SecretsGetCommand) createCobraCmd(
         Long:    "Get a list of secrets or a specific secret from the credentials store",
         Aliases: []string{COMMAND_NAME_SECRETS_GET},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-            return cmd.executeSecretsGet(factory, secretsCommand.Values().(*SecretsCmdValues), rootCommandValues)
+            return cmd.executeSecretsGet(factory, secretsCommand.Values().(*SecretsCmdValues), commsCommandValues)
         },
     }
 
@@ -99,29 +99,29 @@ func (cmd *SecretsGetCommand) createCobraCmd(
 func (cmd *SecretsGetCommand) executeSecretsGet(
     factory spi.Factory,
     secretsCmdValues *SecretsCmdValues,
-    rootCmdValues *RootCmdValues,
+    commsCmdValues *CommsCmdValues,
 ) error {
 
     var err error
     // Operations on the file system will all be relative to the current folder.
     fileSystem := factory.GetFileSystem()
 
-    err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+    err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 
     if err == nil {
-        rootCmdValues.isCapturingLogs = true
+        commsCmdValues.isCapturingLogs = true
 
         log.Println("Galasa CLI - Get secrets from the ecosystem")
 
         env := factory.GetEnvironment()
 
         var galasaHome spi.GalasaHome
-        galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+        galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
         if err == nil {
 
             var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
             var bootstrapData *api.BootstrapData
-            bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, secretsCmdValues.bootstrap, urlService)
+            bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
             if err == nil {
 
                 var console = factory.GetStdOutConsole()

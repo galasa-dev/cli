@@ -11,7 +11,6 @@ import (
 )
 
 type SecretsCmdValues struct {
-    bootstrap string
     name string
 }
 
@@ -69,8 +68,6 @@ func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand, com
         Short: "Manage secrets stored in the Galasa service's credentials store",
         Long:  "The parent command for operations to manipulate secrets in the Galasa service's credentials store",
     }
-
-    addBootstrapFlag(secretsCobraCmd, &cmd.values.bootstrap)
 
     rootCommand.CobraCommand().AddCommand(secretsCobraCmd)
     commsCommand.CobraCommand().AddCommand(secretsCobraCmd)
