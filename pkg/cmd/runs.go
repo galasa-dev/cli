@@ -11,7 +11,6 @@ import (
 )
 
 type RunsCmdValues struct {
-	bootstrap string
 }
 
 type RunsCommand struct {
@@ -68,8 +67,6 @@ func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsC
 		Short: "Manage test runs in the ecosystem",
 		Long:  "Assembles, submits and monitors test runs in Galasa Ecosystem",
 	}
-
-	addBootstrapFlag(runsCobraCmd, &cmd.values.bootstrap)
 
 	rootCommand.CobraCommand().AddCommand(runsCobraCmd)
 	commsCommand.CobraCommand().AddCommand(runsCobraCmd)

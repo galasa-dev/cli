@@ -35,9 +35,9 @@ type RunsDownloadCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsDownloadCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsDownloadCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsDownloadCommand)
-	err := cmd.init(factory, runsCommand, rootCommand)
+	err := cmd.init(factory, runsCommand, commsCommand)
 	return cmd, err
 }
 
@@ -60,12 +60,12 @@ func (cmd *RunsDownloadCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsDownloadCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsDownloadCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsDownloadCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsDownloadCobraCmd(factory,
 		runsCommand,
-		rootCommand.Values().(*RootCmdValues),
+		commsCommand.Values().(*CommsCmdValues),
 	)
 	return err
 }
@@ -73,7 +73,7 @@ func (cmd *RunsDownloadCommand) init(factory spi.Factory, runsCommand spi.Galasa
 func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 	factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -86,7 +86,7 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs download"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsDownload(factory, runsCmdValues, rootCmdValues)
+			return cmd.executeRunsDownload(factory, runsCmdValues, commsCmdValues)
 		},
 	}
 
@@ -105,7 +105,7 @@ func (cmd *RunsDownloadCommand) createRunsDownloadCobraCmd(
 func (cmd *RunsDownloadCommand) executeRunsDownload(
 	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -113,10 +113,10 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
 
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Download artifacts for a run")
 
@@ -124,13 +124,13 @@ func (cmd *RunsDownloadCommand) executeRunsDownload(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()

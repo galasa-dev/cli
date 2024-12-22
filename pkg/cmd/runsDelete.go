@@ -30,9 +30,9 @@ type RunsDeleteCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsDeleteCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsDeleteCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsDeleteCommand)
-	err := cmd.init(factory, runsCommand, rootCommand)
+	err := cmd.init(factory, runsCommand, commsCommand)
 	return cmd, err
 }
 
@@ -55,17 +55,17 @@ func (cmd *RunsDeleteCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsDeleteCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsDeleteCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsDeleteCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, runsCommand, rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, runsCommand, commsCommand.Values().(*CommsCmdValues))
 	return err
 }
 
 func (cmd *RunsDeleteCommand) createCobraCommand(
 	factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -78,7 +78,7 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs delete"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsDelete(factory, runsCmdValues, rootCmdValues)
+			return cmd.executeRunsDelete(factory, runsCmdValues, commsCmdValues)
 		},
 	}
 
@@ -94,7 +94,7 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 func (cmd *RunsDeleteCommand) executeRunsDelete(
 	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -102,9 +102,9 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Delete runs about to execute")
 
@@ -112,13 +112,13 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()

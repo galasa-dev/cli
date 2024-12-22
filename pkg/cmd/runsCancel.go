@@ -32,9 +32,9 @@ type RunsCancelCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsCancelCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsCancelCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsCancelCommand)
-	err := cmd.init(factory, runsCommand, rootCommand)
+	err := cmd.init(factory, runsCommand, commsCommand)
 	return cmd, err
 }
 
@@ -56,20 +56,20 @@ func (cmd *RunsCancelCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsCancelCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsCancelCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsCancelCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsCancelCobraCmd(
 		factory,
 		runsCommand,
-		rootCommand.Values().(*RootCmdValues),
+		commsCommand.Values().(*CommsCmdValues),
 	)
 	return err
 }
 
 func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -82,7 +82,7 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs cancel"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeCancel(factory, runsCmdValues, rootCmdValues)
+			return cmd.executeCancel(factory, runsCmdValues, commsCmdValues)
 		},
 	}
 
@@ -98,7 +98,7 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 func (cmd *RunsCancelCommand) executeCancel(
 	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -106,9 +106,9 @@ func (cmd *RunsCancelCommand) executeCancel(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Cancel an active run by abandoning it.")
 
@@ -116,13 +116,13 @@ func (cmd *RunsCancelCommand) executeCancel(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()

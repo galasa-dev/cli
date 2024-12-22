@@ -35,9 +35,9 @@ type RunsGetCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsGetCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsGetCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsGetCommand)
-	err := cmd.init(factory, runsCommand, rootCommand)
+	err := cmd.init(factory, runsCommand, commsCommand)
 	return cmd, err
 }
 
@@ -60,17 +60,17 @@ func (cmd *RunsGetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsGetCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsGetCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsGetCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, runsCommand, rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, runsCommand, commsCommand.Values().(*CommsCmdValues))
 	return err
 }
 
 func (cmd *RunsGetCommand) createCobraCommand(
 	factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -83,7 +83,7 @@ func (cmd *RunsGetCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs get"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsGet(factory, runsCmdValues, rootCmdValues)
+			return cmd.executeRunsGet(factory, runsCmdValues, commsCmdValues)
 		},
 	}
 
@@ -116,7 +116,7 @@ func (cmd *RunsGetCommand) createCobraCommand(
 func (cmd *RunsGetCommand) executeRunsGet(
 	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 
 	var err error
@@ -124,9 +124,9 @@ func (cmd *RunsGetCommand) executeRunsGet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Get info about a run")
 
@@ -134,13 +134,13 @@ func (cmd *RunsGetCommand) executeRunsGet(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
 				var console = factory.GetStdOutConsole()

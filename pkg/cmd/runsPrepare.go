@@ -32,9 +32,9 @@ type RunsPrepareCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsPrepareCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsPrepareCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(RunsPrepareCommand)
-	err := cmd.init(factory, runsCommand, rootCommand)
+	err := cmd.init(factory, runsCommand, commsCommand)
 	return cmd, err
 }
 
@@ -57,20 +57,20 @@ func (cmd *RunsPrepareCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsPrepareCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsPrepareCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
 	var err error
 	cmd.values = &RunsPrepareCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(
 		factory,
 		runsCommand,
-		rootCommand.Values().(*RootCmdValues),
+		commsCommand.Values().(*CommsCmdValues),
 	)
 	return err
 }
 func (cmd *RunsPrepareCommand) createCobraCommand(
 	factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) (*cobra.Command, error) {
 	var err error
 
@@ -83,7 +83,7 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs prepare"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeAssemble(factory, runsCommand.Values().(*RunsCmdValues), rootCmdValues)
+			return cmd.executeAssemble(factory, runsCommand.Values().(*RunsCmdValues), commsCmdValues)
 		},
 	}
 
@@ -102,16 +102,16 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 func (cmd *RunsPrepareCommand) executeAssemble(
 	factory spi.Factory,
 	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsCmdValues *CommsCmdValues,
 ) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
+		commsCmdValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Assemble tests")
 
@@ -119,7 +119,7 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
 			// Convert overrides to a map
@@ -145,7 +145,7 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 				// Load the bootstrap properties.
 				var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 				var bootstrapData *api.BootstrapData
-				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 				if err == nil {
 
 					// Create an API client

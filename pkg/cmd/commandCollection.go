@@ -318,21 +318,21 @@ func (commands *commandCollectionImpl) addRunsCommands(factory spi.Factory, root
 
 	runsCommand, err = NewRunsCmd(rootCommand, commsCommand)
 	if err == nil {
-		runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, rootCommand)
+		runsDownloadCommand, err = NewRunsDownloadCommand(factory, runsCommand, commsCommand)
 		if err == nil {
-			runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, rootCommand)
+			runsGetCommand, err = NewRunsGetCommand(factory, runsCommand, commsCommand)
 			if err == nil {
-				runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, rootCommand)
+				runsPrepareCommand, err = NewRunsPrepareCommand(factory, runsCommand, commsCommand)
 				if err == nil {
-					runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, rootCommand)
+					runsSubmitCommand, err = NewRunsSubmitCommand(factory, runsCommand, commsCommand)
 					if err == nil {
-						runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, rootCommand)
+						runsSubmitLocalCommand, err = NewRunsSubmitLocalCommand(factory, runsSubmitCommand, runsCommand, commsCommand)
 						if err == nil {
-							runsResetCommand, err = NewRunsResetCommand(factory, runsCommand, rootCommand)
+							runsResetCommand, err = NewRunsResetCommand(factory, runsCommand, commsCommand)
 							if err == nil {
-								runsCancelCommand, err = NewRunsCancelCommand(factory, runsCommand, rootCommand)
+								runsCancelCommand, err = NewRunsCancelCommand(factory, runsCommand, commsCommand)
 								if err == nil {
-									runsDeleteCommand, err = NewRunsDeleteCommand(factory, runsCommand, rootCommand)
+									runsDeleteCommand, err = NewRunsDeleteCommand(factory, runsCommand, commsCommand)
 								}
 							}
 						}
