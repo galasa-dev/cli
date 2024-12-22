@@ -14,6 +14,7 @@ type CommsCmdValues struct {
 	bootstrap string
     maxRetries int
     retryBackoffSeconds float64
+	*RootCmdValues
 }
 
 type CommsCommand struct {
@@ -56,7 +57,9 @@ func (cmd *CommsCommand) init(rootCmd spi.GalasaCommand) error {
 
 	var err error
 
-	cmd.values = &CommsCmdValues{}
+	cmd.values = &CommsCmdValues{
+		RootCmdValues: rootCmd.Values().(*RootCmdValues),
+	}
 	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
 
 	return err
