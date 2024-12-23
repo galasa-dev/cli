@@ -57,10 +57,10 @@ func (retrier *CommsRetrier) ExecuteCommandWithRateLimitRetries(
             // Try to convert the error received from the command into an API error
             galasaError, isGalasaError := err.(galasaErrors.GalasaCommsError)
             if isGalasaError && galasaError.IsRetryRequired() {
-				log.Printf("Rate limit exceeded on attempt %v/%v", attempt, maxAttempts)
+				log.Printf("Rate limit exceeded on attempt %v/%v", (attempt + 1), maxAttempts)
 				
 				if (attempt + 1) < maxAttempts {
-					log.Printf("Retrying in %v seconds", retryBackoffSeconds)
+					log.Printf("Retrying in %v second(s)", retryBackoffSeconds)
 					timeService.Sleep(time.Duration(retryBackoffSeconds) * time.Second)
 					isDone = false
 					attempt++
