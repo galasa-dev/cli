@@ -59,10 +59,6 @@ type GalasaError struct {
 	cause error
 }
 
-type GalasaCommsError interface {
-	isRetryRequired() bool
-}
-
 func (err *GalasaError) GetMessageType() *MessageType {
 	return err.msgType
 }
