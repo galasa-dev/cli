@@ -6,7 +6,9 @@
 package cmd
 
 import (
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/spi"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -70,6 +72,7 @@ func (cmd *CommsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cob
 	var err error
 
 	commsCobraCmd := &cobra.Command{
+		Use: "",
 		Hidden: true,
 		SilenceUsage: true,
 	}
@@ -80,4 +83,12 @@ func (cmd *CommsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cob
 	rootCommand.CobraCommand().AddCommand(commsCobraCmd)
 
 	return commsCobraCmd, err
+}
+
+func executeCommandWithRetries(factory spi.Factory, commsCmdValues *CommsCmdValues, executionFunc func() error) error {
+	retryFunc := func() error {
+		commsRetrier := api.NewCommsRetrier(commsCmdValues.maxRetries, commsCmdValues.retryBackoffSeconds, factory.GetTimeService())
+		return commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)
+	}
+	return utils.CaptureExecutionLogs(factory, commsCmdValues.logFileName, retryFunc)
 }

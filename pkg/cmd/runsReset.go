@@ -81,7 +81,10 @@ func (cmd *RunsResetCommand) createRunsResetCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs reset"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeReset(factory, commsCmdValues)
+			executionFunc := func() error {
+				return cmd.executeReset(factory, commsCmdValues)
+			}
+			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
 		},
 	}
 
@@ -104,48 +107,45 @@ func (cmd *RunsResetCommand) executeReset(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	commsCmdValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Reset an active run by requeuing it.")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 	if err == nil {
-		commsCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Reset an active run by requeuing it.")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+			var console = factory.GetStdOutConsole()
+			timeService := factory.GetTimeService()
+
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API Server is at '%s'\n", apiServerUrl)
+
+			var apiClient *galasaapi.APIClient
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+
 			if err == nil {
-
-				var console = factory.GetStdOutConsole()
-				timeService := factory.GetTimeService()
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API Server is at '%s'\n", apiServerUrl)
-
-				var apiClient *galasaapi.APIClient
-				authenticator := factory.GetAuthenticator(
+				// Call to process command in unit-testable way.
+				err = runs.ResetRun(
+					cmd.values.runName,
+					timeService,
+					console,
 					apiServerUrl,
-					galasaHome,
+					apiClient,
 				)
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-				if err == nil {
-					// Call to process command in unit-testable way.
-					err = runs.ResetRun(
-						cmd.values.runName,
-						timeService,
-						console,
-						apiServerUrl,
-						apiClient,
-					)
-				}
 			}
 		}
 	}

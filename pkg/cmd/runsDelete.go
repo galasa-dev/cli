@@ -77,7 +77,10 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs delete"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeRunsDelete(factory, commsCmdValues)
+			executionFunc := func() error {
+				return cmd.executeRunsDelete(factory, commsCmdValues)
+			}
+			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
 		},
 	}
 
@@ -100,52 +103,49 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	commsCmdValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Delete runs about to execute")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 	if err == nil {
-		commsCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Delete runs about to execute")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+			var console = factory.GetStdOutConsole()
+			timeService := factory.GetTimeService()
+
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+
+			var apiClient *galasaapi.APIClient
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+
+			byteReader := factory.GetByteReader()
+
 			if err == nil {
-
-				var console = factory.GetStdOutConsole()
-				timeService := factory.GetTimeService()
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-				authenticator := factory.GetAuthenticator(
+				// Call to process the command in a unit-testable way.
+				err = runs.RunsDelete(
+					cmd.values.runName,
+					console,
 					apiServerUrl,
-					galasaHome,
+					apiClient,
+					timeService,
+					byteReader,
 				)
-
-				var apiClient *galasaapi.APIClient
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-				byteReader := factory.GetByteReader()
-
-				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = runs.RunsDelete(
-						cmd.values.runName,
-						console,
-						apiServerUrl,
-						apiClient,
-						timeService,
-						byteReader,
-					)
-				}
 			}
 		}
 	}

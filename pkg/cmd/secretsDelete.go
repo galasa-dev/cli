@@ -76,7 +76,10 @@ func (cmd *SecretsDeleteCommand) createCobraCmd(
         Long:    "Deletes a secret from the credentials store",
         Aliases: []string{COMMAND_NAME_SECRETS_DELETE},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-            return cmd.executeSecretsDelete(factory, secretsCommand.Values().(*SecretsCmdValues), commsCommandValues)
+			executionFunc := func() error {
+            	return cmd.executeSecretsDelete(factory, secretsCommand.Values().(*SecretsCmdValues), commsCommandValues)
+			}
+			return executeCommandWithRetries(factory, commsCommandValues, executionFunc)
         },
     }
 
@@ -97,44 +100,40 @@ func (cmd *SecretsDeleteCommand) executeSecretsDelete(
     // Operations on the file system will all be relative to the current folder.
     fileSystem := factory.GetFileSystem()
 
-    err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	commsCmdValues.isCapturingLogs = true
 
-    if err == nil {
-        commsCmdValues.isCapturingLogs = true
+	log.Println("Galasa CLI - Delete a secret from the credentials store")
 
-        log.Println("Galasa CLI - Delete a secret from the credentials store")
+	env := factory.GetEnvironment()
 
-        env := factory.GetEnvironment()
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	if err == nil {
 
-        var galasaHome spi.GalasaHome
-        galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
-        if err == nil {
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		if err == nil {
 
-            var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-            var bootstrapData *api.BootstrapData
-            bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
-            if err == nil {
+			var console = factory.GetStdOutConsole()
 
-				var console = factory.GetStdOutConsole()
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-                apiServerUrl := bootstrapData.ApiServerURL
-                log.Printf("The API server is at '%s'\n", apiServerUrl)
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
 
-                authenticator := factory.GetAuthenticator(
-                    apiServerUrl,
-                    galasaHome,
-                )
+			var apiClient *galasaapi.APIClient
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
-                var apiClient *galasaapi.APIClient
-                apiClient, err = authenticator.GetAuthenticatedAPIClient()
+			byteReader := factory.GetByteReader()
 
-				byteReader := factory.GetByteReader()
-
-                if err == nil {
-                    err = secrets.DeleteSecret(secretsCmdValues.name, console, apiClient, byteReader)
-                }
-            }
-        }
-    }
+			if err == nil {
+				err = secrets.DeleteSecret(secretsCmdValues.name, console, apiClient, byteReader)
+			}
+		}
+	}
     return err
 }

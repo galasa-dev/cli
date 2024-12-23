@@ -83,7 +83,10 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs prepare"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeAssemble(factory, commsCmdValues)
+			executionFunc := func() error {
+				return cmd.executeAssemble(factory, commsCmdValues)
+			}
+			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
 		},
 	}
 
@@ -108,94 +111,91 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	commsCmdValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Assemble tests")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 	if err == nil {
-		commsCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Assemble tests")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
-		if err == nil {
-
-			// Convert overrides to a map
-			testOverrides := make(map[string]string)
-			for _, override := range *cmd.values.prepareFlagOverrides {
-				pos := strings.Index(override, "=")
-				if pos < 1 {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
-					break
-				}
-				key := override[:pos]
-				value := override[pos+1:]
-				if value == "" {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
-					break
-				}
-
-				testOverrides[key] = value
+		// Convert overrides to a map
+		testOverrides := make(map[string]string)
+		for _, override := range *cmd.values.prepareFlagOverrides {
+			pos := strings.Index(override, "=")
+			if pos < 1 {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
+				break
+			}
+			key := override[:pos]
+			value := override[pos+1:]
+			if value == "" {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PREPARE_INVALID_OVERRIDE, override)
+				break
 			}
 
+			testOverrides[key] = value
+		}
+
+		if err == nil {
+
+			// Load the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 			if err == nil {
 
-				// Load the bootstrap properties.
-				var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-				var bootstrapData *api.BootstrapData
-				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+				// Create an API client
+				var apiClient *galasaapi.APIClient
+				apiServerUrl := bootstrapData.ApiServerURL
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 				if err == nil {
+					launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
-					// Create an API client
-					var apiClient *galasaapi.APIClient
-					apiServerUrl := bootstrapData.ApiServerURL
-					authenticator := factory.GetAuthenticator(
-						apiServerUrl,
-						galasaHome,
-					)
-					apiClient, err = authenticator.GetAuthenticatedAPIClient()
+					validator := runs.NewStreamBasedValidator()
+					err = validator.Validate(cmd.values.prepareSelectionFlags)
 					if err == nil {
-						launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
-						validator := runs.NewStreamBasedValidator()
-						err = validator.Validate(cmd.values.prepareSelectionFlags)
+						var testSelection runs.TestSelection
+						testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
 						if err == nil {
 
-							var testSelection runs.TestSelection
-							testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
+							count := len(testSelection.Classes)
+							if count < 1 {
+								err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
+							} else {
+								if count == 1 {
+									log.Println("1 test was selected")
+								} else {
+									log.Printf("%v tests were selected", count)
+								}
+							}
+
 							if err == nil {
 
-								count := len(testSelection.Classes)
-								if count < 1 {
-									err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
+								var portfolio *runs.Portfolio
+								if *cmd.values.prepareAppend {
+									portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
 								} else {
-									if count == 1 {
-										log.Println("1 test was selected")
-									} else {
-										log.Printf("%v tests were selected", count)
-									}
+									portfolio = runs.NewPortfolio()
 								}
 
 								if err == nil {
+									runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
 
-									var portfolio *runs.Portfolio
-									if *cmd.values.prepareAppend {
-										portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
-									} else {
-										portfolio = runs.NewPortfolio()
-									}
-
+									err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
 									if err == nil {
-										runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
-
-										err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
-										if err == nil {
-											if *cmd.values.prepareAppend {
-												log.Println("Portfolio appended")
-											} else {
-												log.Println("Portfolio created")
-											}
+										if *cmd.values.prepareAppend {
+											log.Println("Portfolio appended")
+										} else {
+											log.Println("Portfolio created")
 										}
 									}
 								}

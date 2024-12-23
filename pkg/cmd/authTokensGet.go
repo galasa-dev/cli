@@ -78,6 +78,8 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 
 	var err error
 
+	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
+
 	authTokensGetCommandValues := authTokensCommand.Values().(*AuthTokensCmdValues)
 	authGetTokensCobraCmd := &cobra.Command{
 		Use:     "get",
@@ -85,7 +87,10 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 		Long:    "Get a list of tokens used for authentication with the Galasa API server",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeAuthTokensGet(factory, authTokensCommand.Values().(*AuthTokensCmdValues), commsCmd.Values().(*CommsCmdValues))
+			executionFunc := func() error {
+				return cmd.executeAuthTokensGet(factory, authTokensCommand.Values().(*AuthTokensCmdValues), commsCmdValues)
+			}
+			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
 		},
 	}
 
@@ -105,42 +110,38 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	commsCmdValues.isCapturingLogs = true
 
+	log.Println("Galasa CLI - Get tokens from the ecosystem")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 	if err == nil {
-		commsCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Get tokens from the ecosystem")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+			var console = factory.GetStdOutConsole()
+
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+
+			var apiClient *galasaapi.APIClient
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+
 			if err == nil {
-
-				var console = factory.GetStdOutConsole()
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-
-				var apiClient *galasaapi.APIClient
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-				if err == nil {
-					err = auth.GetTokens(apiClient, console, authTokenCmdValues.loginId)
-				}
+				err = auth.GetTokens(apiClient, console, authTokenCmdValues.loginId)
 			}
 		}
 	}

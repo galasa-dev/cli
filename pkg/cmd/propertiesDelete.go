@@ -67,6 +67,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 
 	var err error
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
+	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
 
 	propertiesDeleteCmd := &cobra.Command{
 		Use:   "delete",
@@ -74,7 +75,10 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executePropertiesDelete(factory, propertiesCmdValues, commsCmd.Values().(*CommsCmdValues))
+			executionFunc := func() error {
+				return cmd.executePropertiesDelete(factory, propertiesCmdValues, commsCmdValues)
+			}
+			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
 		},
 		Aliases: []string{"properties delete"},
 	}
@@ -95,39 +99,35 @@ func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory,
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	commsCmdValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Delete ecosystem properties")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 	if err == nil {
 
-		commsCmdValues.isCapturingLogs = true
-
-		log.Println("Galasa CLI - Delete ecosystem properties")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+			var apiClient *galasaapi.APIClient
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
 			if err == nil {
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-				var apiClient *galasaapi.APIClient
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
-				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiClient)
-				}
+				// Call to process the command in a unit-testable way.
+				err = properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiClient)
 			}
 		}
 	}

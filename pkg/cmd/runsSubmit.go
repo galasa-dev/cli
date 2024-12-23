@@ -81,7 +81,10 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeSubmit(factory, commsCmdValues)
+			executionFunc := func() error {
+				return cmd.executeSubmit(factory, commsCmdValues)
+			}
+			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
 		},
 	}
 
@@ -148,52 +151,48 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	commsCmdValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Submit tests (Remote)")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 	if err == nil {
 
-		commsCmdValues.isCapturingLogs = true
-
-		log.Println("Galasa CLI - Submit tests (Remote)")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+			timeService := factory.GetTimeService()
+			timedSleeper := utils.NewRealTimedSleeper()
+			var launcherInstance launcher.Launcher
+
+			// The launcher we are going to use to start/monitor tests.
+			apiServerUrl := bootstrapData.ApiServerURL
+
+			var apiClient *galasaapi.APIClient
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
 			if err == nil {
+				launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
-				timeService := factory.GetTimeService()
-				timedSleeper := utils.NewRealTimedSleeper()
-				var launcherInstance launcher.Launcher
-
-				// The launcher we are going to use to start/monitor tests.
-				apiServerUrl := bootstrapData.ApiServerURL
-
-				var apiClient *galasaapi.APIClient
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
+				validator := runs.NewStreamBasedValidator()
+				err = validator.Validate(cmd.values.TestSelectionFlagValues)
 				if err == nil {
-					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
-					validator := runs.NewStreamBasedValidator()
-					err = validator.Validate(cmd.values.TestSelectionFlagValues)
-					if err == nil {
+					var console = factory.GetStdOutConsole()
 
-						var console = factory.GetStdOutConsole()
+					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
 
-						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
-
-						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
-					}
+					err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 				}
 			}
 		}
