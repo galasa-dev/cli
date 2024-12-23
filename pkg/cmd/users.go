@@ -70,8 +70,8 @@ func (cmd *UsersCommand) createCobraCommand(
 		Long:  "Allows interaction with the user servlet to return information about users.",
 	}
 
+	usersCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
 	rootCommand.CobraCommand().AddCommand(usersCobraCmd)
-	commsCommand.CobraCommand().AddCommand(usersCobraCmd)
 
 	return usersCobraCmd
 }

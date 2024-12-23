@@ -60,8 +60,8 @@ func (cmd *AuthCommand) createCobraCommand(rootCmd spi.GalasaCommand, commsCmd s
 			"enabling secure interactions with the ecosystem.",
 	}
 
+	authCmd.PersistentFlags().AddFlagSet(commsCmd.CobraCommand().PersistentFlags())
 	rootCmd.CobraCommand().AddCommand(authCmd)
-	commsCmd.CobraCommand().AddCommand(authCmd)
 
 	return authCmd, err
 }

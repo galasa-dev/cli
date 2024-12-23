@@ -62,25 +62,22 @@ func (cmd *CommsCommand) init(rootCmd spi.GalasaCommand) error {
 	cmd.values = &CommsCmdValues{
 		RootCmdValues: rootCmd.Values().(*RootCmdValues),
 	}
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand()
 
 	return err
 }
 
-func (cmd *CommsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *CommsCommand) createCobraCommand() (*cobra.Command, error) {
 
 	var err error
 
 	commsCobraCmd := &cobra.Command{
-		Use: "",
 		Hidden: true,
 		SilenceUsage: true,
 	}
 
 	addBootstrapFlag(commsCobraCmd, &cmd.values.bootstrap)
     addRateLimitRetryFlags(commsCobraCmd, &cmd.values.maxRetries, &cmd.values.retryBackoffSeconds)
-
-	rootCommand.CobraCommand().AddCommand(commsCobraCmd)
 
 	return commsCobraCmd, err
 }

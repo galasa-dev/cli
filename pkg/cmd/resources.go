@@ -76,8 +76,8 @@ func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand, c
 			"Example: my_resources.yaml")
 	resourcesCobraCmd.MarkPersistentFlagRequired("file")
 
+	resourcesCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
 	rootCommand.CobraCommand().AddCommand(resourcesCobraCmd)
-	commsCommand.CobraCommand().AddCommand(resourcesCobraCmd)
 
 	return resourcesCobraCmd, err
 }

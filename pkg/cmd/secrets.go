@@ -69,8 +69,8 @@ func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand, com
         Long:  "The parent command for operations to manipulate secrets in the Galasa service's credentials store",
     }
 
+    secretsCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
     rootCommand.CobraCommand().AddCommand(secretsCobraCmd)
-    commsCommand.CobraCommand().AddCommand(secretsCobraCmd)
 
     return secretsCobraCmd, err
 }

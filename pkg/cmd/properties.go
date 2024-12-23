@@ -70,8 +70,8 @@ func (cmd *PropertiesCommand) createCobraCommand(
 		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
 	}
 
+	propertiesCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
 	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
-	commsCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 
 	return propertiesCobraCmd
 }

@@ -68,8 +68,8 @@ func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsC
 		Long:  "Assembles, submits and monitors test runs in Galasa Ecosystem",
 	}
 
+	runsCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
 	rootCommand.CobraCommand().AddCommand(runsCobraCmd)
-	commsCommand.CobraCommand().AddCommand(runsCobraCmd)
 
 	return runsCobraCmd, err
 }
