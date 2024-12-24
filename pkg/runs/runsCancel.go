@@ -89,28 +89,28 @@ func cancelRun(runName string,
 			UpdateRunStatusRequest(*runStatusUpdateRequest).
 			ClientApiVersion(restApiVersion).Execute()
 
-		if (resp != nil) && (resp.StatusCode != http.StatusAccepted) {
+		if resp != nil {
 			defer resp.Body.Close()
-
-			responseBody, err = io.ReadAll(resp.Body)
-			log.Printf("putRasRunStatusById Failed - HTTP Response - Status Code: '%v' Payload: '%v'\n", resp.StatusCode, string(responseBody))
-
-			if err == nil {
-				var errorFromServer *galasaErrors.GalasaAPIError
-				errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+			statusCode := resp.StatusCode
+			if statusCode != http.StatusAccepted {
+				responseBody, err = io.ReadAll(resp.Body)
+				log.Printf("putRasRunStatusById Failed - HTTP Response - Status Code: '%v' Payload: '%v'\n", statusCode, string(responseBody))
 
 				if err == nil {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANCEL_RUN_FAILED, runName, errorFromServer.Message)
-				} else {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CANCEL_RUN_RESPONSE_PARSING)
-				}
+					var errorFromServer *galasaErrors.GalasaAPIError
+					errorFromServer, err = galasaErrors.GetApiErrorFromResponse(statusCode, responseBody)
 
-			} else {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
+					if err == nil {
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_CANCEL_RUN_FAILED, runName, errorFromServer.Message)
+					} else {
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_CANCEL_RUN_RESPONSE_PARSING)
+					}
+
+				} else {
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
+				}
 			}
 		}
-
 	}
-
 	return err
 }
