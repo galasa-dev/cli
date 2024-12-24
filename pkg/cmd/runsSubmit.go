@@ -81,10 +81,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeSubmit(factory, commsCmdValues)
-			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return cmd.executeSubmit(factory, commsCmdValues)
 		},
 	}
 
@@ -151,48 +148,59 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Submit tests (Remote)")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
 	if err == nil {
 
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		commsCmdValues.isCapturingLogs = true
+
+		log.Println("Galasa CLI - Submit tests (Remote)")
+
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			timeService := factory.GetTimeService()
-			timedSleeper := utils.NewRealTimedSleeper()
-			var launcherInstance launcher.Launcher
+			commsRetrier := api.NewCommsRetrier(commsCmdValues.maxRetries, commsCmdValues.retryBackoffSeconds, factory.GetTimeService())
 
-			// The launcher we are going to use to start/monitor tests.
-			apiServerUrl := bootstrapData.ApiServerURL
+			// Read the bootstrap properties.
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+				return err
+			}
 
-			var apiClient *galasaapi.APIClient
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
-				launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
 
-				validator := runs.NewStreamBasedValidator()
-				err = validator.Validate(cmd.values.TestSelectionFlagValues)
+				timeService := factory.GetTimeService()
+				timedSleeper := utils.NewRealTimedSleeper()
+				var launcherInstance launcher.Launcher
+
+				// The launcher we are going to use to start/monitor tests.
+				apiServerUrl := bootstrapData.ApiServerURL
+
+				var apiClient *galasaapi.APIClient
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 				if err == nil {
+					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient, commsRetrier)
 
-					var console = factory.GetStdOutConsole()
+					validator := runs.NewStreamBasedValidator()
+					err = validator.Validate(cmd.values.TestSelectionFlagValues)
+					if err == nil {
 
-					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
+						var console = factory.GetStdOutConsole()
 
-					err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
+						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
+
+						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
+					}
 				}
 			}
 		}

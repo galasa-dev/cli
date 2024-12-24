@@ -21,14 +21,18 @@ var (
 	}
 )
 
-type CommsRetrier struct {
+type CommsRetrierImpl struct {
 	maxAttempts int
 	retryBackoffSeconds float64
 	timeService spi.TimeService
 }
 
-func NewCommsRetrier(maxAttempts int, retryBackoffSeconds float64, timeService spi.TimeService) *CommsRetrier {
-	return &CommsRetrier{
+type CommsRetrier interface {
+	ExecuteCommandWithRateLimitRetries(commandExecutionFunc func() error) error
+}
+
+func NewCommsRetrier(maxAttempts int, retryBackoffSeconds float64, timeService spi.TimeService) CommsRetrier {
+	return &CommsRetrierImpl{
 		maxAttempts: maxAttempts,
 		retryBackoffSeconds: retryBackoffSeconds,
 		timeService: timeService,
@@ -37,7 +41,7 @@ func NewCommsRetrier(maxAttempts int, retryBackoffSeconds float64, timeService s
 
 // ExecuteCommandWithRateLimitRetries keeps trying until we've tried enough, it worked, 
 // or it's failed too many times with rate limit issues.
-func (retrier *CommsRetrier) ExecuteCommandWithRateLimitRetries(
+func (retrier *CommsRetrierImpl) ExecuteCommandWithRateLimitRetries(
     commandExecutionFunc func() error,
 ) error {
     var err error
