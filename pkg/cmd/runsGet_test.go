@@ -316,3 +316,20 @@ func TestRunsGetResultActiveMutuallyExclusive(t *testing.T) {
 	// Check what the user saw is reasonable.
 	checkOutput("", "Error: if any flags in the group [result active] are set none of the others can be; [active result] were all set", factory, t)
 }
+
+func TestRunsGetGroupRunNameMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+
+	var args []string = []string{"runs", "get", "--group", "group-1", "--name", "CV123"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [group name] are set none of the others can be; [group name] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [group name] are set none of the others can be; [group name] were all set", factory, t)
+}
