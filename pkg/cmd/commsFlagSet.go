@@ -9,80 +9,77 @@ import (
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
-	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
-type CommsCmdValues struct {
+type GalasaFlagSet interface {
+	Flags() *pflag.FlagSet
+	Values() interface{}
+}
+
+type CommsFlagSetValues struct {
 	bootstrap string
     maxRetries int
     retryBackoffSeconds float64
 	*RootCmdValues
 }
 
-type CommsCommand struct {
-	cobraCommand *cobra.Command
-	values       *CommsCmdValues
+type CommsFlagSet struct {
+	flagSet *pflag.FlagSet
+	values  *CommsFlagSetValues
 }
 
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewCommsCommand(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
-	cmd := new(CommsCommand)
-	err := cmd.init(rootCommand)
-	return cmd, err
+func NewCommsFlagSet(rootCommand spi.GalasaCommand) (*CommsFlagSet, error) {
+	flagSet := new(CommsFlagSet)
+	err := flagSet.init(rootCommand)
+	return flagSet, err
 }
 
 // ------------------------------------------------------------------------------------------------
 // Public functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *CommsCommand) Name() string {
-    // This is a hidden command, so no assume no name
-	return ""
+func (commsFlagSet *CommsFlagSet) Flags() *pflag.FlagSet {
+	return commsFlagSet.flagSet
 }
 
-func (cmd *CommsCommand) CobraCommand() *cobra.Command {
-	return cmd.cobraCommand
-}
-
-func (cmd *CommsCommand) Values() interface{} {
-	return cmd.values
+func (commsFlagSet *CommsFlagSet) Values() interface{} {
+	return commsFlagSet.values
 }
 
 // ------------------------------------------------------------------------------------------------
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *CommsCommand) init(rootCmd spi.GalasaCommand) error {
+func (commsFlagSet *CommsFlagSet) init(rootCmd spi.GalasaCommand) error {
 
 	var err error
 
-	cmd.values = &CommsCmdValues{
+	commsFlagSet.values = &CommsFlagSetValues{
 		RootCmdValues: rootCmd.Values().(*RootCmdValues),
 	}
-	cmd.cobraCommand, err = cmd.createCobraCommand()
+	commsFlagSet.flagSet, err = commsFlagSet.createFlagSet()
 
 	return err
 }
 
-func (cmd *CommsCommand) createCobraCommand() (*cobra.Command, error) {
+func (commsFlagSet *CommsFlagSet) createFlagSet() (*pflag.FlagSet, error) {
 
 	var err error
 
-	commsCobraCmd := &cobra.Command{
-		Hidden: true,
-		SilenceUsage: true,
-	}
+	flagSet := pflag.NewFlagSet("comms", pflag.ContinueOnError)
 
-	addBootstrapFlag(commsCobraCmd, &cmd.values.bootstrap)
-    addRateLimitRetryFlags(commsCobraCmd, &cmd.values.maxRetries, &cmd.values.retryBackoffSeconds)
+	addBootstrapFlag(flagSet, &commsFlagSet.values.bootstrap)
+    addRateLimitRetryFlags(flagSet, &commsFlagSet.values.maxRetries, &commsFlagSet.values.retryBackoffSeconds)
 
-	return commsCobraCmd, err
+	return flagSet, err
 }
 
-func executeCommandWithRetries(factory spi.Factory, commsCmdValues *CommsCmdValues, executionFunc func() error) error {
+func executeCommandWithRetries(factory spi.Factory, commsCmdValues *CommsFlagSetValues, executionFunc func() error) error {
 	retryFunc := func() error {
 		commsRetrier := api.NewCommsRetrier(commsCmdValues.maxRetries, commsCmdValues.retryBackoffSeconds, factory.GetTimeService())
 		return commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)

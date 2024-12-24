@@ -23,10 +23,10 @@ type ResourcesCreateCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesCreateCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesCreateCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesCreateCommand)
-	err := cmd.init(factory, resourcesCommand, commsCommand)
+	err := cmd.init(factory, resourcesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -49,12 +49,12 @@ func (cmd *ResourcesCreateCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesCreateCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *ResourcesCreateCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &ResourcesCreateCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, commsCommand.Values().(*CommsCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -62,7 +62,7 @@ func (cmd *ResourcesCreateCommand) init(factory spi.Factory, resourcesCommand sp
 func (cmd *ResourcesCreateCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	commsCommandValues *CommsCmdValues,
+	commsCommandValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesCreateCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -88,7 +88,7 @@ func (cmd *ResourcesCreateCommand) createCobraCommand(
 
 func executeResourcesCreate(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	action := "create"
 

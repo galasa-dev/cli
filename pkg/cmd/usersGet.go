@@ -29,12 +29,12 @@ type UsersGetCommand struct {
 func NewUsersGetCommand(
 	factory spi.Factory,
 	usersGetCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(UsersGetCommand)
 
-	err := cmd.init(factory, usersGetCommand, commsCmd)
+	err := cmd.init(factory, usersGetCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -57,23 +57,23 @@ func (cmd *UsersGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *UsersGetCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
+func (cmd *UsersGetCommand) init(factory spi.Factory, usersCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, usersCommand, commsCmd)
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, usersCommand, commsFlagSet)
 
 	return err
 }
 
 func (cmd *UsersGetCommand) createCobraCmd(
 	factory spi.Factory,
-	usersCommand,
-	commsCmd spi.GalasaCommand,
+	usersCommand spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (*cobra.Command, error) {
 
 	var err error
 
-	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
+	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	userCommandValues := usersCommand.Values().(*UsersCmdValues)
 	usersGetCobraCmd := &cobra.Command{
@@ -99,7 +99,7 @@ func (cmd *UsersGetCommand) createCobraCmd(
 func (cmd *UsersGetCommand) executeUsersGet(
 	factory spi.Factory,
 	userCmdValues *UsersCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 
 	var err error

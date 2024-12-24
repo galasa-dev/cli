@@ -6,8 +6,8 @@
 package cmd
 
 import (
-    "github.com/galasa-dev/cli/pkg/spi"
-    "github.com/spf13/cobra"
+	"github.com/galasa-dev/cli/pkg/spi"
+	"github.com/spf13/cobra"
 )
 
 type SecretsCmdValues struct {
@@ -23,9 +23,9 @@ type SecretsCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewSecretsCmd(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewSecretsCmd(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
     cmd := new(SecretsCommand)
-    err := cmd.init(rootCommand, commsCommand)
+    err := cmd.init(rootCommand, commsFlagSet)
     return cmd, err
 }
 
@@ -49,17 +49,17 @@ func (cmd *SecretsCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *SecretsCommand) init(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *SecretsCommand) init(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
     var err error
 
     cmd.values = &SecretsCmdValues{}
-    cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand, commsCommand)
+    cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand, commsFlagSet)
 
     return err
 }
 
-func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
     var err error
 
@@ -69,7 +69,7 @@ func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand, com
         Long:  "The parent command for operations to manipulate secrets in the Galasa service's credentials store",
     }
 
-    secretsCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
+    secretsCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
     rootCommand.CobraCommand().AddCommand(secretsCobraCmd)
 
     return secretsCobraCmd, err

@@ -30,9 +30,9 @@ type RunsDeleteCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsDeleteCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsDeleteCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsDeleteCommand)
-	err := cmd.init(factory, runsCommand, commsCommand)
+	err := cmd.init(factory, runsCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -55,17 +55,17 @@ func (cmd *RunsDeleteCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsDeleteCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *RunsDeleteCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 	cmd.values = &RunsDeleteCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, runsCommand, commsCommand.Values().(*CommsCmdValues))
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, runsCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 	return err
 }
 
 func (cmd *RunsDeleteCommand) createCobraCommand(
 	factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -95,7 +95,7 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 
 func (cmd *RunsDeleteCommand) executeRunsDelete(
 	factory spi.Factory,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 
 	var err error

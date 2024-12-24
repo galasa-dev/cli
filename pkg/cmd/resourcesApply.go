@@ -28,10 +28,10 @@ type ResourcesApplyCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesApplyCommand)
-	err := cmd.init(factory, resourcesCommand, commsCommand)
+	err := cmd.init(factory, resourcesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -54,12 +54,12 @@ func (cmd *ResourcesApplyCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &ResourcesApplyCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesApplyCommand, commsCommand.Values().(*CommsCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesApplyCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -67,7 +67,7 @@ func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyComman
 func (cmd *ResourcesApplyCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	commsCommandValues *CommsCmdValues,
+	commsCommandValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesApplyCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -93,7 +93,7 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 
 func executeResourcesApply(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	action := "apply"
 
@@ -102,7 +102,7 @@ func executeResourcesApply(factory spi.Factory,
 	return err
 }
 
-func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, commsCmdValues *CommsCmdValues) error {
+func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, commsCmdValues *CommsFlagSetValues) error {
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()

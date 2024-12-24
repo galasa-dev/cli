@@ -33,11 +33,11 @@ type AuthTokensDeleteCommand struct {
 func NewAuthTokensDeleteCommand(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(AuthTokensDeleteCommand)
-	err := cmd.init(factory, authTokensCommand, commsCmd)
+	err := cmd.init(factory, authTokensCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -62,12 +62,12 @@ func (cmd *AuthTokensDeleteCommand) Values() interface{} {
 func (cmd *AuthTokensDeleteCommand) init(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) error {
 	var err error
 
 	cmd.values = &AuthTokensDeleteCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, commsCmd)
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, commsFlagSet)
 
 	return err
 }
@@ -75,12 +75,12 @@ func (cmd *AuthTokensDeleteCommand) init(
 func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (*cobra.Command, error) {
 
 	var err error
 
-	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
+	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	authDeleteTokensCobraCmd := &cobra.Command{
 		Use:     "delete",
@@ -105,7 +105,7 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 
 func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 	factory spi.Factory,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 
 	var err error

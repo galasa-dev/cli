@@ -6,15 +6,15 @@
 package cmd
 
 import (
-    "fmt"
-    "log"
+	"fmt"
+	"log"
 
-    "github.com/galasa-dev/cli/pkg/api"
-    "github.com/galasa-dev/cli/pkg/galasaapi"
-    "github.com/galasa-dev/cli/pkg/secrets"
-    "github.com/galasa-dev/cli/pkg/spi"
-    "github.com/galasa-dev/cli/pkg/utils"
-    "github.com/spf13/cobra"
+	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/secrets"
+	"github.com/galasa-dev/cli/pkg/spi"
+	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 )
 
 type SecretsSetCmdValues struct {
@@ -39,12 +39,12 @@ type SecretsSetCommand struct {
 func NewSecretsSetCommand(
     factory spi.Factory,
     secretsSetCommand spi.GalasaCommand,
-    commsCmd spi.GalasaCommand,
+    commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
     cmd := new(SecretsSetCommand)
 
-    err := cmd.init(factory, secretsSetCommand, commsCmd)
+    err := cmd.init(factory, secretsSetCommand, commsFlagSet)
     return cmd, err
 }
 
@@ -66,11 +66,11 @@ func (cmd *SecretsSetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *SecretsSetCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
+func (cmd *SecretsSetCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
     var err error
 
     cmd.values = &SecretsSetCmdValues{}
-    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, commsCmd.Values().(*CommsCmdValues))
+    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
     return err
 }
@@ -78,7 +78,7 @@ func (cmd *SecretsSetCommand) init(factory spi.Factory, secretsCommand spi.Galas
 func (cmd *SecretsSetCommand) createCobraCmd(
     factory spi.Factory,
     secretsCommand spi.GalasaCommand,
-    commsCommandValues *CommsCmdValues,
+    commsCommandValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
     var err error
@@ -144,7 +144,7 @@ func (cmd *SecretsSetCommand) createCobraCmd(
 func (cmd *SecretsSetCommand) executeSecretsSet(
     factory spi.Factory,
     secretsCmdValues *SecretsCmdValues,
-    commsCmdValues *CommsCmdValues,
+    commsCmdValues *CommsFlagSetValues,
 ) error {
 
     var err error

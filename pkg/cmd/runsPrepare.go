@@ -32,9 +32,9 @@ type RunsPrepareCommand struct {
 	cobraCommand *cobra.Command
 }
 
-func NewRunsPrepareCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsPrepareCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsPrepareCommand)
-	err := cmd.init(factory, runsCommand, commsCommand)
+	err := cmd.init(factory, runsCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -57,20 +57,20 @@ func (cmd *RunsPrepareCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsPrepareCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *RunsPrepareCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 	cmd.values = &RunsPrepareCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCommand(
 		factory,
 		runsCommand,
-		commsCommand.Values().(*CommsCmdValues),
+		commsFlagSet.Values().(*CommsFlagSetValues),
 	)
 	return err
 }
 func (cmd *RunsPrepareCommand) createCobraCommand(
 	factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 	var err error
 
@@ -101,7 +101,7 @@ func (cmd *RunsPrepareCommand) createCobraCommand(
 
 func (cmd *RunsPrepareCommand) executeAssemble(
 	factory spi.Factory,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	var err error
 

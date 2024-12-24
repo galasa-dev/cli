@@ -34,10 +34,10 @@ type PropertiesSetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesSetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesSetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesSetCommand)
-	err := cmd.init(factory, propertiesCommand, commsCommand)
+	err := cmd.init(factory, propertiesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -60,12 +60,12 @@ func (cmd *PropertiesSetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesSetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
+func (cmd *PropertiesSetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 	cmd.values = &PropertiesSetCmdValues{}
 
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesCommand, commsCmd.Values().(*CommsCmdValues))
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -73,7 +73,7 @@ func (cmd *PropertiesSetCommand) init(factory spi.Factory, propertiesCommand spi
 func (cmd *PropertiesSetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesCommand spi.GalasaCommand,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -110,7 +110,7 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 func (cmd *PropertiesSetCommand) executePropertiesSet(
 	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	var err error
 

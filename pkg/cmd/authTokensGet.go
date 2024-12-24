@@ -30,12 +30,12 @@ type AuthTokensGetCommand struct {
 func NewAuthTokensGetCommand(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(AuthTokensGetCommand)
 
-	err := cmd.init(factory, authTokensCommand, commsCmd)
+	err := cmd.init(factory, authTokensCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -61,24 +61,24 @@ func (cmd *AuthTokensGetCommand) Values() interface{} {
 func (cmd *AuthTokensGetCommand) init(
 	factory spi.Factory,
 	authTokensCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) error {
 	var err error
 
-	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, commsCmd)
+	cmd.cobraCommand, err = cmd.createCobraCmd(factory, authTokensCommand, commsFlagSet)
 
 	return err
 }
 
 func (cmd *AuthTokensGetCommand) createCobraCmd(
 	factory spi.Factory,
-	authTokensCommand,
-	commsCmd spi.GalasaCommand,
+	authTokensCommand spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (*cobra.Command, error) {
 
 	var err error
 
-	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
+	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	authTokensGetCommandValues := authTokensCommand.Values().(*AuthTokensCmdValues)
 	authGetTokensCobraCmd := &cobra.Command{
@@ -103,7 +103,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 	factory spi.Factory,
 	authTokenCmdValues *AuthTokensCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 
 	var err error

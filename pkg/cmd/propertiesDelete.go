@@ -24,10 +24,10 @@ type PropertiesDeleteCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesDeleteCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesDeleteCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(PropertiesDeleteCommand)
 
-	err := cmd.init(factory, propertiesCommand, commsCommand)
+	err := cmd.init(factory, propertiesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -50,9 +50,9 @@ func (cmd *PropertiesDeleteCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesDeleteCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
+func (cmd *PropertiesDeleteCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, commsCmd)
+	cmd.cobraCommand, err = cmd.createPropertiesDeleteCobraCmd(factory, propertiesCommand, commsFlagSet)
 	return err
 }
 
@@ -63,11 +63,11 @@ func (cmd *PropertiesDeleteCommand) init(factory spi.Factory, propertiesCommand 
 func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 	factory spi.Factory,
 	propertiesCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand) (*cobra.Command, error) {
+	commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
 	var err error
 	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
-	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
+	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	propertiesDeleteCmd := &cobra.Command{
 		Use:   "delete",
@@ -93,7 +93,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 	return propertiesDeleteCmd, err
 }
 
-func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory, propertiesCmdValues *PropertiesCmdValues, commsCmdValues *CommsCmdValues) error {
+func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory, propertiesCmdValues *PropertiesCmdValues, commsCmdValues *CommsFlagSetValues) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.

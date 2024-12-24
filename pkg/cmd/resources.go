@@ -24,9 +24,9 @@ type ResourcesCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewResourcesCmd(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesCmd(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(ResourcesCommand)
-	err := cmd.init(rootCommand, commsCommand)
+	err := cmd.init(rootCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -50,17 +50,17 @@ func (cmd *ResourcesCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesCommand) init(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *ResourcesCommand) init(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &ResourcesCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand, commsCommand)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand, commsFlagSet)
 
 	return err
 }
 
-func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
 	var err error
 
@@ -76,7 +76,7 @@ func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand, c
 			"Example: my_resources.yaml")
 	resourcesCobraCmd.MarkPersistentFlagRequired("file")
 
-	resourcesCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
+	resourcesCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
 	rootCommand.CobraCommand().AddCommand(resourcesCobraCmd)
 
 	return resourcesCobraCmd, err

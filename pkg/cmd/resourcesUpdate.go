@@ -23,10 +23,10 @@ type ResourcesUpdateCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesUpdateCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesUpdateCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesUpdateCommand)
-	err := cmd.init(factory, resourcesCommand, commsCommand)
+	err := cmd.init(factory, resourcesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -49,12 +49,12 @@ func (cmd *ResourcesUpdateCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesUpdateCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *ResourcesUpdateCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &ResourcesUpdateCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, commsCommand.Values().(*CommsCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -62,7 +62,7 @@ func (cmd *ResourcesUpdateCommand) init(factory spi.Factory, resourcesCommand sp
 func (cmd *ResourcesUpdateCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	commsCommandValues *CommsCmdValues,
+	commsCommandValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesUpdateCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -88,7 +88,7 @@ func (cmd *ResourcesUpdateCommand) createCobraCommand(
 
 func executeResourcesUpdate(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	action := "update"
 

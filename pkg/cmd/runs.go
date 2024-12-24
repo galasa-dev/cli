@@ -22,9 +22,9 @@ type RunsCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewRunsCmd(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsCmd(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsCommand)
-	err := cmd.init(rootCommand, commsCommand)
+	err := cmd.init(rootCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -48,17 +48,17 @@ func (cmd *RunsCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsCommand) init(rootCmd spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *RunsCommand) init(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &RunsCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd, commsCommand)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd, commsFlagSet)
 
 	return err
 }
 
-func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
 	var err error
 
@@ -68,7 +68,7 @@ func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsC
 		Long:  "Assembles, submits and monitors test runs in Galasa Ecosystem",
 	}
 
-	runsCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
+	runsCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
 	rootCommand.CobraCommand().AddCommand(runsCobraCmd)
 
 	return runsCobraCmd, err

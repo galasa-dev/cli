@@ -24,10 +24,10 @@ type PropertiesCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesCommand(rootCmd spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesCommand(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesCommand)
-	err := cmd.init(rootCmd, commsCommand)
+	err := cmd.init(rootCmd, commsFlagSet)
 	return cmd, err
 }
 
@@ -50,19 +50,19 @@ func (cmd *PropertiesCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesCommand) init(rootCmd spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *PropertiesCommand) init(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &PropertiesCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(rootCmd, commsCommand)
+	cmd.cobraCommand = cmd.createCobraCommand(rootCmd, commsFlagSet)
 
 	return err
 }
 
 func (cmd *PropertiesCommand) createCobraCommand(
 	rootCommand spi.GalasaCommand,
-	commsCommand spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) *cobra.Command {
 	propertiesCobraCmd := &cobra.Command{
 		Use:   "properties",
@@ -70,7 +70,7 @@ func (cmd *PropertiesCommand) createCobraCommand(
 		Long:  "Allows interaction with the CPS to create, query and maintain properties in Galasa Ecosystem",
 	}
 
-	propertiesCobraCmd.PersistentFlags().AddFlagSet(commsCommand.CobraCommand().PersistentFlags())
+	propertiesCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
 	rootCommand.CobraCommand().AddCommand(propertiesCobraCmd)
 
 	return propertiesCobraCmd

@@ -37,12 +37,12 @@ func NewPropertiesNamespaceGetCommand(
 	factory spi.Factory,
 	propertiesNamespaceCommand spi.GalasaCommand,
 	propertiesCommand spi.GalasaCommand,
-	commsCommand spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesNamespaceGetCommand)
 
-	err := cmd.init(factory, propertiesNamespaceCommand, commsCommand)
+	err := cmd.init(factory, propertiesNamespaceCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -64,21 +64,21 @@ func (cmd *PropertiesNamespaceGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
+func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 	cmd.values = &PropertiesNamespaceGetCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, commsCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, commsFlagSet)
 	return err
 }
 
 func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesNamespaceCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (*cobra.Command, error) {
 
 	var err error
-	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
+	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	propertieNamespaceGetCobraCommand := &cobra.Command{
 		Use:   "get",
@@ -105,7 +105,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 
 func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 	factory spi.Factory,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	var err error
 

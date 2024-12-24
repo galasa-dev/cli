@@ -29,10 +29,10 @@ func NewAuthLoginCommand(
 	factory spi.Factory,
 	authCommand spi.GalasaCommand,
 	rootCommand spi.GalasaCommand,
-	commsCommand spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 	cmd := new(AuthLoginComamnd)
-	err := cmd.init(factory, authCommand, commsCommand)
+	err := cmd.init(factory, authCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -54,12 +54,12 @@ func (cmd *AuthLoginComamnd) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthLoginComamnd) init(factory spi.Factory, authCommand spi.GalasaCommand, commsCmd spi.GalasaCommand) error {
+func (cmd *AuthLoginComamnd) init(factory spi.Factory, authCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 
 	cmd.values = &AuthLoginCmdValues{}
 
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, authCommand, commsCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, authCommand, commsFlagSet)
 
 	return err
 }
@@ -67,12 +67,12 @@ func (cmd *AuthLoginComamnd) init(factory spi.Factory, authCommand spi.GalasaCom
 func (cmd *AuthLoginComamnd) createCobraCommand(
 	factory spi.Factory,
 	authCommand spi.GalasaCommand,
-	commsCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (*cobra.Command, error) {
 
 	var err error
 
-	commsCmdValues := commsCmd.Values().(*CommsCmdValues)
+	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	authLoginCobraCmd := &cobra.Command{
 		Use:   "login",
@@ -97,7 +97,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 
 func (cmd *AuthLoginComamnd) executeAuthLogin(
 	factory spi.Factory,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 
 	var err error

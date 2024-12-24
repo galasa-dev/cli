@@ -40,10 +40,10 @@ type PropertiesGetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesGetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesGetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesGetCommand)
-	err := cmd.init(factory, propertiesCommand, commsCommand)
+	err := cmd.init(factory, propertiesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -66,12 +66,12 @@ func (cmd *PropertiesGetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &PropertiesGetCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, commsCommand.Values().(*CommsCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -79,7 +79,7 @@ func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi
 func (cmd *PropertiesGetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesCommand spi.GalasaCommand,
-	commsCommandValues *CommsCmdValues,
+	commsCommandValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	propertiesCommandValues := propertiesCommand.Values().(*PropertiesCmdValues)
@@ -136,7 +136,7 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 func (cmd *PropertiesGetCommand) executePropertiesGet(
 	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	var err error
 

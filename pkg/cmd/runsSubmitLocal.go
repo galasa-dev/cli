@@ -36,9 +36,9 @@ type RunsSubmitLocalCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitLocalCommand(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsSubmitLocalCommand(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsSubmitLocalCommand)
-	err := cmd.init(factory, runsSubmitCommand, commsCommand)
+	err := cmd.init(factory, runsSubmitCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -61,7 +61,7 @@ func (cmd *RunsSubmitLocalCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 
 	// Allocate storage to capture the parsed values.
@@ -73,7 +73,7 @@ func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand s
 	cmd.cobraCommand, err = cmd.createRunsSubmitLocalCobraCmd(
 		factory,
 		runsSubmitCommand,
-		commsCommand.Values().(*CommsCmdValues),
+		commsFlagSet.Values().(*CommsFlagSetValues),
 	)
 	return err
 }
@@ -81,7 +81,7 @@ func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand s
 func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 	factory spi.Factory,
 	runsSubmitCmd spi.GalasaCommand,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 	var err error
 
@@ -158,7 +158,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	factory spi.Factory,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 
 	var err error

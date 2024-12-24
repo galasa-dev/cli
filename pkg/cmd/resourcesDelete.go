@@ -23,10 +23,10 @@ type ResourcesDeleteCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesDeleteCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesDeleteCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesDeleteCommand)
-	err := cmd.init(factory, resourcesCommand, commsCommand)
+	err := cmd.init(factory, resourcesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -49,12 +49,12 @@ func (cmd *ResourcesDeleteCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsCommand spi.GalasaCommand) error {
+func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &ResourcesDeleteCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, commsCommand.Values().(*CommsCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -62,7 +62,7 @@ func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand sp
 func (cmd *ResourcesDeleteCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	commsCommandValues *CommsCmdValues,
+	commsCommandValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesDeleteCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -88,7 +88,7 @@ func (cmd *ResourcesDeleteCommand) createCobraCommand(
 
 func executeResourcesDelete(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	commsCmdValues *CommsCmdValues,
+	commsCmdValues *CommsFlagSetValues,
 ) error {
 	action := "delete"
 
