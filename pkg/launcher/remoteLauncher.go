@@ -53,7 +53,10 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 	)
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 	if err == nil {
-		testRuns, _, err = launcher.apiClient.RunsAPIApi.GetRunsGroup(context.TODO(), groupName).ClientApiVersion(restApiVersion).Execute()
+		var httpResponse *http.Response
+		testRuns, httpResponse, err = launcher.apiClient.RunsAPIApi.GetRunsGroup(context.TODO(), groupName).ClientApiVersion(restApiVersion).Execute()
+
+		err = galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
 	}
 	return testRuns, err
 }
@@ -91,7 +94,10 @@ func (launcher *RemoteLauncher) SubmitTestRun(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		resultGroup, _, err = launcher.apiClient.RunsAPIApi.PostSubmitTestRuns(context.TODO(), groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
+		var httpResponse *http.Response
+		resultGroup, httpResponse, err = launcher.apiClient.RunsAPIApi.PostSubmitTestRuns(context.TODO(), groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
+
+		err = galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
 	}
 	return resultGroup, err
 }
@@ -104,7 +110,10 @@ func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
+		var httpResponse *http.Response
 		rasRun, _, err = launcher.apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context.TODO(), runId).ClientApiVersion(restApiVersion).Execute()
+
+		err = galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
 	}
 	return rasRun, err
 }
@@ -120,8 +129,11 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 	if err == nil {
 		var properties []galasaapi.GalasaProperty
-		properties, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.
+		var httpResponse *http.Response
+		properties, httpResponse, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.
 			QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream").Suffix("repo").ClientApiVersion(restApiVersion).Execute()
+
+		err = galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
 		if err == nil {
 
 			streams, err = getStreamNamesFromProperties(properties)
@@ -156,11 +168,19 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		cpsProperty, _, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
+		var cpsResponse *http.Response
+		cpsProperty, cpsResponse, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
+
+		var statusCode int
+		if cpsResponse != nil {
+			defer cpsResponse.Body.Close()
+			statusCode = cpsResponse.StatusCode
+		}
+
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
 		} else if len(cpsProperty) < 1 {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
 		}
 		if err == nil {
 			streamLocation :=cpsProperty[0].Data.Value

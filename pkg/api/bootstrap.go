@@ -62,10 +62,17 @@ func (*RealUrlResolutionService) Get(url string) (string, error) {
 		// Make sure the http response is closed (eventually).
 		defer resp.Body.Close()
 
-		buffer := new(strings.Builder)
-		_, err = io.Copy(buffer, resp.Body)
-		if err == nil {
-			contents = buffer.String()
+		statusCode := resp.StatusCode
+		if statusCode != http.StatusOK {
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESP_UNEXPECTED_ERROR)
+		} else {
+			buffer := new(strings.Builder)
+			_, err = io.Copy(buffer, resp.Body)
+			if err == nil {
+				contents = buffer.String()
+			} else {
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
+			}
 		}
 	}
 	return contents, err
@@ -224,7 +231,7 @@ func loadBootstrapFromUrl(path string, defaultApiServerURL string,
 		bootstrapContents, err = urlResolutionService.Get(path)
 		if err != nil {
 			// Wrap any http error as a galasa error.
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP, path, err.Error())
+			err = galasaErrors.NewGalasaErrorWithCause(err, galasaErrors.GALASA_ERROR_FAILED_TO_GET_BOOTSTRAP, path, err.Error())
 		} else {
 			// read the lines and extract the properties
 			//	fmt.Printf("bootstrap contents:-\n%v\n", bootstrapString.String())

@@ -244,7 +244,7 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 				closeErr := httpResponse.Body.Close()
 				// The first error is most important so needs preserving...
 				if closeErr != nil && err == nil {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_HTTP_RESPONSE_CLOSE_FAILED, closeErr.Error())
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(httpResponse.StatusCode, galasaErrors.GALASA_ERROR_HTTP_RESPONSE_CLOSE_FAILED, closeErr.Error())
 				}
 			}
 		}
@@ -287,10 +287,15 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 			ClientApiVersion(restApiVersion).
 			Execute()
 
-		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED, err.Error())
-		} else {
+		var statusCode int
+		if httpResponse != nil {
 			defer httpResponse.Body.Close()
+			statusCode = httpResponse.StatusCode
+		}
+
+		if err != nil {
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED, err.Error())
+		} else {
 			for _, artifact := range artifactsList {
 				artifactPaths = append(artifactPaths, artifact.GetPath())
 			}
@@ -431,8 +436,13 @@ func GetFileFromRestApi(runId string, artifactPath string, apiClient *galasaapi.
 			ClientApiVersion(restApiVersion).
 			Execute()
 
+		var statusCode int
+		if httpResponse != nil {
+			statusCode = httpResponse.StatusCode
+		}
+
 		if err != nil {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
 			log.Printf("Failed to download artifact. %s\n", err.Error())
 		} else {
 			log.Printf("Artifact '%s' http response from API server OK\n", artifactPath)

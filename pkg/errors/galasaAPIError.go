@@ -23,10 +23,9 @@ type GalasaAPIError struct {
 // the reason for the failure.
 // NOTE: when this function is called ensure that the calling function has the  `defer resp.Body.Close()`
 // called in order to ensure that the response body is closed when the function completes
-func GetApiErrorFromResponse(body []byte) (*GalasaAPIError, error) {
+func GetApiErrorFromResponse(statusCode int, body []byte) (*GalasaAPIError, error) {
 	return GetApiErrorFromResponseBytes(body, func(marshallingError error) error{
-			err := NewGalasaError(GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, marshallingError)
-			return err
+			return NewGalasaErrorWithHttpStatusCode(statusCode, GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, marshallingError)
 		},
 	) 
 }
@@ -97,9 +96,9 @@ func HttpResponseToGalasaError(
 func createResponseError(errorMsg *MessageType, identifier string, statusCode int) error {
     var err error
     if identifier == "" {
-        err = NewGalasaError(errorMsg, statusCode)
+        err = NewGalasaErrorWithHttpStatusCode(statusCode, errorMsg, statusCode)
     } else {
-        err = NewGalasaError(errorMsg, identifier, statusCode)
+        err = NewGalasaErrorWithHttpStatusCode(statusCode, errorMsg, identifier, statusCode)
     }
     return err
 }
@@ -107,9 +106,9 @@ func createResponseError(errorMsg *MessageType, identifier string, statusCode in
 func createResponseErrorWithCause(errorMsg *MessageType, identifier string, statusCode int, cause interface{}) error {
     var err error
     if identifier == "" {
-        err = NewGalasaError(errorMsg, statusCode, cause)
+        err = NewGalasaErrorWithHttpStatusCode(statusCode, errorMsg, statusCode, cause)
     } else {
-        err = NewGalasaError(errorMsg, identifier, statusCode, cause)
+        err = NewGalasaErrorWithHttpStatusCode(statusCode, errorMsg, identifier, statusCode, cause)
     }
     return err
 }

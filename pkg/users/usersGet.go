@@ -72,11 +72,16 @@ func getUserDataFromRestApi(
 
 		usersIn, resp, err = apiCall.Execute()
 
+		var statusCode int
+		if resp != nil {
+			defer resp.Body.Close()
+			statusCode = resp.StatusCode
+		}
+
 		if err != nil {
 			log.Println("getUserDataFromRestApi - Failed to retrieve list of users from API server")
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_USER_LIST_FROM_API_SERVER, err.Error())
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RETRIEVING_USER_LIST_FROM_API_SERVER, err.Error())
 		} else {
-			defer resp.Body.Close()
 			users = usersIn
 			log.Printf("getUserDataFromRestApi -  %v users collected", len(users))
 		}

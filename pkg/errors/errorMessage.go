@@ -8,6 +8,7 @@ package errors
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -41,16 +42,33 @@ func NewMessageType(template string, ordinal int, isStackTraceWanted bool) *Mess
 	return messageType
 }
 
+// NewMessageTypeFromError creates a basic message type that includes an error message as its template
+func NewMessageTypeFromError(err error) *MessageType {
+	messageType := new(MessageType)
+	messageType.Template = err.Error()
+	return messageType
+}
+
 // A Galasa errror instance.
 // It can be treated as a normal error, but also holds a message-type
 // So we can programmatically tell the difference between various errors as required.
 type GalasaError struct {
 	msgType *MessageType
 	message string
+	httpStatus int
+	cause error
 }
 
 func (err *GalasaError) GetMessageType() *MessageType {
 	return err.msgType
+}
+
+func (err *GalasaError) GetHttpStatusCode() int {
+	return err.httpStatus
+}
+
+func (err *GalasaError) GetCause() error {
+	return err.cause
 }
 
 // NewGalasaError creates a new GalasaError structure.
@@ -69,6 +87,32 @@ func NewGalasaError(msgType *MessageType, params ...interface{}) *GalasaError {
 	}
 
 	return galasaError
+}
+
+func NewGalasaErrorWithHttpStatusCode(httpStatusCode int, msgType *MessageType, params ...interface{}) *GalasaError {
+	err := NewGalasaError(msgType, params...)
+	err.httpStatus = httpStatusCode
+	return err
+}
+
+func NewGalasaErrorWithCause(cause error, msgType *MessageType, params ...interface{}) *GalasaError {
+	err := NewGalasaError(msgType, params...)
+	err.cause = cause
+	return err
+}
+
+func GetGalasaErrorFromCommsResponse(httpResponse *http.Response, possibleCommsError error) error {
+	err := possibleCommsError
+	var statusCode int
+	if httpResponse != nil {
+		defer httpResponse.Body.Close()
+		statusCode = httpResponse.StatusCode
+	}
+
+	if err != nil {
+		err = NewGalasaErrorWithHttpStatusCode(statusCode, NewMessageTypeFromError(err))
+	}
+	return err
 }
 
 // Render a galasa error into a string, so the GalasaError structure can be used
@@ -202,7 +246,7 @@ var (
 	GALASA_ERROR_UNABLE_TO_MARSHAL_INTO_JSON             = NewMessageType("GAL1112E: Error converting the parsed yaml content into a json payload for the http request. Reason: '%s'", 1112, STACK_TRACE_WANTED)
 	GALASA_ERROR_RESOURCES_RESP_BAD_REQUEST              = NewMessageType("GAL1113E: Failure reported by the Galasa Ecosystem. The Ecosystem believes there is a problem with this client program or the user input. Errors returned: '%s'", 1113, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR             = NewMessageType("GAL1114E: The resources operation failed due to a problem on the server. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1114, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR         = NewMessageType("GAL1115E: An unexpected response was received from the Galasa Ecosystem. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1115, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RESP_UNEXPECTED_ERROR                   = NewMessageType("GAL1115E: An unexpected response was received from the Galasa Ecosystem. Collect a log with the --log option and contact your Galasa Ecosystem adminstrator.", 1115, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY            = NewMessageType("GAL1116E: Error reading the HTTP Response body. Reason: '%s'", 1116, STACK_TRACE_WANTED)
 	GALASA_ERROR_DELETE_PROPERTY_RESPONSE_PARSING        = NewMessageType("GAL1117E: The delete operation failed. Unable to process the error information returned from the server.", 1117, STACK_TRACE_WANTED)
 	GALASA_ERROR_RESOURCE_RESPONSE_PARSING               = NewMessageType("GAL1118E: The resource operation failed. Unable to process the error information returned from the server. Reason: '%s'", 1118, STACK_TRACE_WANTED)

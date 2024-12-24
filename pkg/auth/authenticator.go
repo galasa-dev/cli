@@ -143,11 +143,17 @@ func (authenticator *authenticatorImpl) getJwtFromRestApi(apiServerUrl string, a
 			AuthProperties(authProperties).
 			ClientApiVersion(restApiVersion).
 			Execute()
+
+		var statusCode int
+		if httpResponse != nil {
+			defer httpResponse.Body.Close()
+			statusCode = httpResponse.StatusCode
+		}
+
 		if err != nil {
 			log.Println("Failed to retrieve bearer token from API server")
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER, err.Error())
 		} else {
-			defer httpResponse.Body.Close()
 			log.Println("Bearer token received from API server OK")
 			jwt = tokenResponse.GetJwt()
 		}

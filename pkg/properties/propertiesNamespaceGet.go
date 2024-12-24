@@ -9,6 +9,7 @@ package properties
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -39,7 +40,15 @@ func GetPropertiesNamespaces(
 		chosenFormatter, err = validateOutputFormatFlagValue(namespaceOutputFormat, validNamespaceFormatters)
 		if err == nil {
 			var namespaces []galasaapi.Namespace
-			namespaces, _, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).ClientApiVersion(restApiVersion).Execute()
+			var resp *http.Response
+			namespaces, resp, err = apiClient.ConfigurationPropertyStoreAPIApi.GetAllCpsNamespaces(context).ClientApiVersion(restApiVersion).Execute()
+
+			var statusCode int
+			if resp != nil {
+				defer resp.Body.Close()
+				statusCode = resp.StatusCode
+			}
+			
 			log.Printf("GetPropertiesNamespaces -  namespaces collected: %v", namespaces)
 
 			if err == nil {
@@ -52,7 +61,7 @@ func GetPropertiesNamespaces(
 				}
 
 			} else {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_CPS_FAILED, err.Error())
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_CPS_FAILED, err.Error())
 			}
 		}
 	}
