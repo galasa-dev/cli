@@ -17,10 +17,10 @@ type AuthCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewAuthCommand(rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewAuthCommand(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(AuthCommand)
 
-	cmd.init(rootCmd)
+	cmd.init(rootCmd, commsFlagSet)
 	return cmd, nil
 }
 
@@ -43,13 +43,13 @@ func (cmd *AuthCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *AuthCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *AuthCommand) init(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd, commsFlagSet)
 	return err
 }
 
-func (cmd *AuthCommand) createCobraCommand(rootCmd spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *AuthCommand) createCobraCommand(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
 	var err error
 
@@ -60,6 +60,7 @@ func (cmd *AuthCommand) createCobraCommand(rootCmd spi.GalasaCommand) (*cobra.Co
 			"enabling secure interactions with the ecosystem.",
 	}
 
+	authCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
 	rootCmd.CobraCommand().AddCommand(authCmd)
 
 	return authCmd, err

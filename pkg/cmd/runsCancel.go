@@ -32,9 +32,9 @@ type RunsCancelCmdValues struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewRunsCancelCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsCancelCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsCancelCommand)
-	err := cmd.init(factory, runsCommand, rootCommand)
+	err := cmd.init(factory, runsCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -56,24 +56,23 @@ func (cmd *RunsCancelCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *RunsCancelCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsCancelCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 	cmd.values = &RunsCancelCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsCancelCobraCmd(
 		factory,
 		runsCommand,
-		rootCommand.Values().(*RootCmdValues),
+		commsFlagSet.Values().(*CommsFlagSetValues),
 	)
 	return err
 }
 
 func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
 	var err error
-	runsCmdValues := runsCommand.Values().(*RunsCmdValues)
 
 	runsCancelCmd := &cobra.Command{
 		Use:     "cancel",
@@ -82,7 +81,10 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs cancel"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeCancel(factory, runsCmdValues, rootCmdValues)
+			executionFunc := func() error {
+				return cmd.executeCancel(factory, commsFlagSetValues)
+			}
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -97,8 +99,7 @@ func (cmd *RunsCancelCommand) createRunsCancelCobraCmd(factory spi.Factory,
 
 func (cmd *RunsCancelCommand) executeCancel(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
@@ -106,49 +107,46 @@ func (cmd *RunsCancelCommand) executeCancel(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	commsFlagSetValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Cancel an active run by abandoning it.")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Cancel an active run by abandoning it.")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			var console = factory.GetStdOutConsole()
+			timeService := factory.GetTimeService()
+
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API Server is at '%s'\n", apiServerUrl)
+
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+
+			var apiClient *galasaapi.APIClient
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+
 			if err == nil {
-
-				var console = factory.GetStdOutConsole()
-				timeService := factory.GetTimeService()
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API Server is at '%s'\n", apiServerUrl)
-
-				authenticator := factory.GetAuthenticator(
+				// Call to process command in unit-testable way.
+				err = runs.CancelRun(
+					cmd.values.runName,
+					timeService,
+					console,
 					apiServerUrl,
-					galasaHome,
+					apiClient,
 				)
-
-				var apiClient *galasaapi.APIClient
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-				if err == nil {
-					// Call to process command in unit-testable way.
-					err = runs.CancelRun(
-						cmd.values.runName,
-						timeService,
-						console,
-						apiServerUrl,
-						apiClient,
-					)
-				}
 			}
 		}
 	}

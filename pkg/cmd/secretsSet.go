@@ -6,15 +6,15 @@
 package cmd
 
 import (
-    "fmt"
-    "log"
+	"fmt"
+	"log"
 
-    "github.com/galasa-dev/cli/pkg/api"
-    "github.com/galasa-dev/cli/pkg/galasaapi"
-    "github.com/galasa-dev/cli/pkg/secrets"
-    "github.com/galasa-dev/cli/pkg/spi"
-    "github.com/galasa-dev/cli/pkg/utils"
-    "github.com/spf13/cobra"
+	"github.com/galasa-dev/cli/pkg/api"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/secrets"
+	"github.com/galasa-dev/cli/pkg/spi"
+	"github.com/galasa-dev/cli/pkg/utils"
+	"github.com/spf13/cobra"
 )
 
 type SecretsSetCmdValues struct {
@@ -39,12 +39,12 @@ type SecretsSetCommand struct {
 func NewSecretsSetCommand(
     factory spi.Factory,
     secretsSetCommand spi.GalasaCommand,
-    rootCmd spi.GalasaCommand,
+    commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
     cmd := new(SecretsSetCommand)
 
-    err := cmd.init(factory, secretsSetCommand, rootCmd)
+    err := cmd.init(factory, secretsSetCommand, commsFlagSet)
     return cmd, err
 }
 
@@ -66,11 +66,11 @@ func (cmd *SecretsSetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *SecretsSetCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *SecretsSetCommand) init(factory spi.Factory, secretsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
     var err error
 
     cmd.values = &SecretsSetCmdValues{}
-    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, rootCmd.Values().(*RootCmdValues))
+    cmd.cobraCommand, err = cmd.createCobraCmd(factory, secretsCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
     return err
 }
@@ -78,7 +78,7 @@ func (cmd *SecretsSetCommand) init(factory spi.Factory, secretsCommand spi.Galas
 func (cmd *SecretsSetCommand) createCobraCmd(
     factory spi.Factory,
     secretsCommand spi.GalasaCommand,
-    rootCommandValues *RootCmdValues,
+    commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
     var err error
@@ -90,7 +90,10 @@ func (cmd *SecretsSetCommand) createCobraCmd(
         Long:    "Creates or updates a secret in the credentials store",
         Aliases: []string{COMMAND_NAME_SECRETS_SET},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-            return cmd.executeSecretsSet(factory, secretsCommand.Values().(*SecretsCmdValues), rootCommandValues)
+			executionFunc := func() error {
+            	return cmd.executeSecretsSet(factory, secretsCommand.Values().(*SecretsCmdValues), commsFlagSetValues)
+			}
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
         },
     }
 
@@ -141,65 +144,61 @@ func (cmd *SecretsSetCommand) createCobraCmd(
 func (cmd *SecretsSetCommand) executeSecretsSet(
     factory spi.Factory,
     secretsCmdValues *SecretsCmdValues,
-    rootCmdValues *RootCmdValues,
+    commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
     var err error
     // Operations on the file system will all be relative to the current folder.
     fileSystem := factory.GetFileSystem()
 
-    err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	commsFlagSetValues.isCapturingLogs = true
 
-    if err == nil {
-        rootCmdValues.isCapturingLogs = true
+	log.Println("Galasa CLI - Set secrets from the ecosystem")
 
-        log.Println("Galasa CLI - Set secrets from the ecosystem")
+	env := factory.GetEnvironment()
 
-        env := factory.GetEnvironment()
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	if err == nil {
 
-        var galasaHome spi.GalasaHome
-        galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
-        if err == nil {
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		if err == nil {
 
-            var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-            var bootstrapData *api.BootstrapData
-            bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, secretsCmdValues.bootstrap, urlService)
-            if err == nil {
+			var console = factory.GetStdOutConsole()
 
-                var console = factory.GetStdOutConsole()
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
 
-                apiServerUrl := bootstrapData.ApiServerURL
-                log.Printf("The API server is at '%s'\n", apiServerUrl)
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
 
-                authenticator := factory.GetAuthenticator(
-                    apiServerUrl,
-                    galasaHome,
-                )
+			var apiClient *galasaapi.APIClient
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
-                var apiClient *galasaapi.APIClient
-                apiClient, err = authenticator.GetAuthenticatedAPIClient()
+			byteReader := factory.GetByteReader()
 
-                byteReader := factory.GetByteReader()
-
-                if err == nil {
-                    err = secrets.SetSecret(
-                        secretsCmdValues.name,
-                        cmd.values.username,
-                        cmd.values.password,
-                        cmd.values.token,
-                        cmd.values.base64Username,
-                        cmd.values.base64Password,
-                        cmd.values.base64Token,
-                        cmd.values.secretType,
-						cmd.values.description,
-                        console,
-                        apiClient,
-                        byteReader,
-                    )
-                }
-            }
-        }
-    }
+			if err == nil {
+				err = secrets.SetSecret(
+					secretsCmdValues.name,
+					cmd.values.username,
+					cmd.values.password,
+					cmd.values.token,
+					cmd.values.base64Username,
+					cmd.values.base64Password,
+					cmd.values.base64Token,
+					cmd.values.secretType,
+					cmd.values.description,
+					console,
+					apiClient,
+					byteReader,
+				)
+			}
+		}
+	}
 
     return err
 }

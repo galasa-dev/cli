@@ -12,7 +12,6 @@ import (
 )
 
 type ResourcesCmdValues struct {
-	bootstrap string
 	filePath  string
 }
 
@@ -25,9 +24,9 @@ type ResourcesCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewResourcesCmd(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesCmd(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(ResourcesCommand)
-	err := cmd.init(rootCommand)
+	err := cmd.init(rootCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -51,17 +50,17 @@ func (cmd *ResourcesCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *ResourcesCommand) init(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &ResourcesCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand, commsFlagSet)
 
 	return err
 }
 
-func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
 	var err error
 
@@ -71,13 +70,13 @@ func (cmd *ResourcesCommand) createCobraCommand(rootCommand spi.GalasaCommand) (
 		Long:  "Allows interaction with the Resources endpoint to create and maintain resources in the Galasa Ecosystem",
 	}
 
-	addBootstrapFlag(resourcesCobraCmd, &cmd.values.bootstrap)
 	resourcesCobraCmd.PersistentFlags().StringVarP(&cmd.values.filePath, "file", "f", "",
 		"The file containing yaml definitions of resources to be applied manipulated by this command. "+
 			"This can be a fully-qualified path or path relative to the current directory."+
 			"Example: my_resources.yaml")
 	resourcesCobraCmd.MarkPersistentFlagRequired("file")
 
+	resourcesCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
 	rootCommand.CobraCommand().AddCommand(resourcesCobraCmd)
 
 	return resourcesCobraCmd, err

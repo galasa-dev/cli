@@ -11,7 +11,6 @@ import (
 )
 
 type RunsCmdValues struct {
-	bootstrap string
 }
 
 type RunsCommand struct {
@@ -23,9 +22,9 @@ type RunsCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewRunsCmd(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsCmd(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsCommand)
-	err := cmd.init(rootCommand)
+	err := cmd.init(rootCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -49,17 +48,17 @@ func (cmd *RunsCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *RunsCommand) init(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &RunsCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd, commsFlagSet)
 
 	return err
 }
 
-func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
 	var err error
 
@@ -69,8 +68,7 @@ func (cmd *RunsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobr
 		Long:  "Assembles, submits and monitors test runs in Galasa Ecosystem",
 	}
 
-	addBootstrapFlag(runsCobraCmd, &cmd.values.bootstrap)
-
+	runsCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
 	rootCommand.CobraCommand().AddCommand(runsCobraCmd)
 
 	return runsCobraCmd, err

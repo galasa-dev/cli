@@ -28,9 +28,9 @@ type RunsSubmitCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitCommand(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsSubmitCommand(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsSubmitCommand)
-	err := cmd.init(factory, runsCommand, rootCommand)
+	err := cmd.init(factory, runsCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -53,20 +53,20 @@ func (cmd *RunsSubmitCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsSubmitCommand) init(factory spi.Factory, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 	cmd.values = &utils.RunsSubmitCmdValues{}
 	cmd.cobraCommand, err = cmd.createRunsSubmitCobraCmd(
 		factory,
 		runsCommand,
-		rootCommand.Values().(*RootCmdValues),
+		commsFlagSet.Values().(*CommsFlagSetValues),
 	)
 	return err
 }
 
 func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -81,7 +81,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeSubmit(factory, runsCommand.Values().(*RunsCmdValues), rootCmdValues)
+			return cmd.executeSubmit(factory, commsFlagSetValues)
 		},
 	}
 
@@ -140,8 +140,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 
 func (cmd *RunsSubmitCommand) executeSubmit(
 	factory spi.Factory,
-	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
@@ -149,10 +148,10 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
 
-		rootCmdValues.isCapturingLogs = true
+		commsFlagSetValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Submit tests (Remote)")
 
@@ -160,13 +159,20 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
+
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
 
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
+			}
+
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
 
 				timeService := factory.GetTimeService()
@@ -183,7 +189,7 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 				)
 				apiClient, err = authenticator.GetAuthenticatedAPIClient()
 				if err == nil {
-					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient)
+					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient, commsRetrier)
 
 					validator := runs.NewStreamBasedValidator()
 					err = validator.Validate(cmd.values.TestSelectionFlagValues)

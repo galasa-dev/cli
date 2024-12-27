@@ -28,10 +28,10 @@ type ResourcesApplyCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewResourcesApplyCommand(factory spi.Factory, resourcesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(ResourcesApplyCommand)
-	err := cmd.init(factory, resourcesCommand, rootCommand)
+	err := cmd.init(factory, resourcesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -54,12 +54,12 @@ func (cmd *ResourcesApplyCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &ResourcesApplyCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesApplyCommand, rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, resourcesApplyCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -67,7 +67,7 @@ func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyComman
 func (cmd *ResourcesApplyCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	rootCommandValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesApplyCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -78,8 +78,11 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"resources apply"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeResourcesApply(factory,
-				resourcesApplyCommandValues, rootCommandValues)
+			executionFunc := func() error {
+				return executeResourcesApply(factory,
+					resourcesApplyCommandValues, commsFlagSetValues)
+			}
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -90,63 +93,57 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 
 func executeResourcesApply(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	action := "apply"
 
-	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, rootCmdValues)
+	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsFlagSetValues)
 
 	return err
 }
 
-func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, rootCmdValues *RootCmdValues) error {
+func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, commsFlagSetValues *CommsFlagSetValues) error {
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	commsFlagSetValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI -", action, "Resources Command")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
-
-		log.Println("Galasa CLI -", action, "Resources Command")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
-
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, resourcesCmdValues.bootstrap, urlService)
+
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+			var bearerToken string
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+			bearerToken, err = authenticator.GetBearerToken()
+
 			if err == nil {
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-				var bearerToken string
-				authenticator := factory.GetAuthenticator(
+				err = resources.ApplyResources(
+					action,
+					resourcesCmdValues.filePath,
+					fileSystem,
 					apiServerUrl,
-					galasaHome,
+					bearerToken,
 				)
-				bearerToken, err = authenticator.GetBearerToken()
-
-				if err == nil {
-					err = resources.ApplyResources(
-						action,
-						resourcesCmdValues.filePath,
-						fileSystem,
-						apiServerUrl,
-						bearerToken,
-					)
-				}
 			}
-
 		}
-
 	}
 
 	return err

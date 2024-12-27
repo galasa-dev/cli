@@ -36,9 +36,9 @@ type RunsSubmitLocalCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors
 // ------------------------------------------------------------------------------------------------
-func NewRunsSubmitLocalCommand(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewRunsSubmitLocalCommand(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 	cmd := new(RunsSubmitLocalCommand)
-	err := cmd.init(factory, runsSubmitCommand, runsCommand, rootCommand)
+	err := cmd.init(factory, runsSubmitCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -61,7 +61,7 @@ func (cmd *RunsSubmitLocalCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, runsCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 
 	// Allocate storage to capture the parsed values.
@@ -73,8 +73,7 @@ func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand s
 	cmd.cobraCommand, err = cmd.createRunsSubmitLocalCobraCmd(
 		factory,
 		runsSubmitCommand,
-		runsCommand.Values().(*RunsCmdValues),
-		rootCommand.Values().(*RootCmdValues),
+		commsFlagSet.Values().(*CommsFlagSetValues),
 	)
 	return err
 }
@@ -82,8 +81,7 @@ func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand s
 func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 	factory spi.Factory,
 	runsSubmitCmd spi.GalasaCommand,
-	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 	var err error
 
@@ -94,7 +92,10 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit local"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), runsCmdValues, rootCmdValues)
+			executionFunc := func() error {
+				return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), commsFlagSetValues)
+			}
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -157,83 +158,79 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	factory spi.Factory,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
-	runsCmdValues *RunsCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
 
+	commsFlagSetValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Submit tests (Local)")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	// Work out where galasa home is, only once.
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
-		rootCmdValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Submit tests (Local)")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		// Work out where galasa home is, only once.
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, runsCmdValues.bootstrap, urlService)
+			timeService := utils.NewRealTimeService()
+			timedSleeper := utils.NewRealTimedSleeper()
+
+			// the submit is targetting a local JVM
+			embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+
+			// Something which can kick off new operating system processes
+			processFactory := launcher.NewRealProcessFactory()
+
+			// Validate the test selection parameters.
+			validator := runs.NewObrBasedValidator()
+			err = validator.Validate(cmd.values.submitLocalSelectionFlags)
 			if err == nil {
 
-				timeService := utils.NewRealTimeService()
-				timedSleeper := utils.NewRealTimedSleeper()
+				// A launcher is needed to launch anythihng
+				var launcherInstance launcher.Launcher
+				launcherInstance, err = launcher.NewJVMLauncher(
+					factory,
+					bootstrapData.Properties, embeddedFileSystem,
+					cmd.values.runsSubmitLocalCmdParams,
+					processFactory, galasaHome, timedSleeper)
 
-				// the submit is targetting a local JVM
-				embeddedFileSystem := embedded.GetReadOnlyFileSystem()
-
-				// Something which can kick off new operating system processes
-				processFactory := launcher.NewRealProcessFactory()
-
-				// Validate the test selection parameters.
-				validator := runs.NewObrBasedValidator()
-				err = validator.Validate(cmd.values.submitLocalSelectionFlags)
 				if err == nil {
+					var console = factory.GetStdOutConsole()
 
-					// A launcher is needed to launch anythihng
-					var launcherInstance launcher.Launcher
-					launcherInstance, err = launcher.NewJVMLauncher(
-						factory,
-						bootstrapData.Properties, embeddedFileSystem,
-						cmd.values.runsSubmitLocalCmdParams,
-						processFactory, galasaHome, timedSleeper)
+					renderer := images.NewImageRenderer(embeddedFileSystem)
+					expander := images.NewImageExpander(fileSystem, renderer, true)
+
+					// Do the launching of the tests.
+					submitter := runs.NewSubmitter(
+						galasaHome,
+						fileSystem,
+						launcherInstance,
+						timeService,
+						timedSleeper,
+						env,
+						console,
+						expander,
+					)
+
+					err = submitter.ExecuteSubmitRuns(
+						runsSubmitCmdValues,
+						cmd.values.submitLocalSelectionFlags,
+					)
 
 					if err == nil {
-						var console = factory.GetStdOutConsole()
-
-						renderer := images.NewImageRenderer(embeddedFileSystem)
-						expander := images.NewImageExpander(fileSystem, renderer, true)
-
-						// Do the launching of the tests.
-						submitter := runs.NewSubmitter(
-							galasaHome,
-							fileSystem,
-							launcherInstance,
-							timeService,
-							timedSleeper,
-							env,
-							console,
-							expander,
-						)
-
-						err = submitter.ExecuteSubmitRuns(
-							runsSubmitCmdValues,
-							cmd.values.submitLocalSelectionFlags,
-						)
-
-						if err == nil {
-							reportOnExpandedImages(expander)
-						}
+						reportOnExpandedImages(expander)
 					}
 				}
 			}
