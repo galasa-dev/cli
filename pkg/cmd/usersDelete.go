@@ -73,7 +73,7 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 
 	var err error
 
-	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
+	commsFlagSetValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	userCommandValues := usersCommand.Values().(*UsersCmdValues)
 	usersDeleteCobraCmd := &cobra.Command{
@@ -83,9 +83,9 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 		Aliases: []string{COMMAND_NAME_USERS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
 			executionFunc := func() error {
-				return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), commsCmdValues)
+				return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -99,7 +99,7 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 func (cmd *UsersDeleteCommand) executeUsersDelete(
 	factory spi.Factory,
 	userCmdValues *UsersCmdValues,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
@@ -107,7 +107,7 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 	fileSystem := factory.GetFileSystem()
 	byteReader := factory.GetByteReader()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Delete user from the ecosystem")
 
@@ -115,13 +115,13 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 	env := factory.GetEnvironment()
 
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
 		// Read the bootstrap users.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			apiServerUrl := bootstrapData.ApiServerURL

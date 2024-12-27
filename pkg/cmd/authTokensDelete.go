@@ -80,7 +80,7 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 
 	var err error
 
-	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
+	commsFlagSetValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	authDeleteTokensCobraCmd := &cobra.Command{
 		Use:     "delete",
@@ -89,9 +89,9 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
 			executionFunc := func() error {
-				return cmd.executeAuthTokensDelete(factory, commsCmdValues)
+				return cmd.executeAuthTokensDelete(factory, commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -105,14 +105,14 @@ func (cmd *AuthTokensDeleteCommand) createCobraCmd(
 
 func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 	factory spi.Factory,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Revoke a token from the ecosystem")
 
@@ -120,13 +120,13 @@ func (cmd *AuthTokensDeleteCommand) executeAuthTokensDelete(
 	env := factory.GetEnvironment()
 
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			apiServerUrl := bootstrapData.ApiServerURL

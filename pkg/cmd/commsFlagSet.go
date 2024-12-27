@@ -79,10 +79,10 @@ func (commsFlagSet *CommsFlagSet) createFlagSet() (*pflag.FlagSet, error) {
 	return flagSet, err
 }
 
-func executeCommandWithRetries(factory spi.Factory, commsCmdValues *CommsFlagSetValues, executionFunc func() error) error {
+func executeCommandWithRetries(factory spi.Factory, commsFlagSetValues *CommsFlagSetValues, executionFunc func() error) error {
 	retryFunc := func() error {
-		commsRetrier := api.NewCommsRetrier(commsCmdValues.maxRetries, commsCmdValues.retryBackoffSeconds, factory.GetTimeService())
+		commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
 		return commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)
 	}
-	return utils.CaptureExecutionLogs(factory, commsCmdValues.logFileName, retryFunc)
+	return utils.CaptureExecutionLogs(factory, commsFlagSetValues.logFileName, retryFunc)
 }

@@ -62,7 +62,7 @@ func (cmd *ResourcesUpdateCommand) init(factory spi.Factory, resourcesCommand sp
 func (cmd *ResourcesUpdateCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	commsCommandValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesUpdateCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -75,9 +75,9 @@ func (cmd *ResourcesUpdateCommand) createCobraCommand(
 		RunE: func(cmd *cobra.Command, args []string) error {
 			executionFunc := func() error {
 				return executeResourcesUpdate(factory,
-					resourcesUpdateCommandValues, commsCommandValues)
+					resourcesUpdateCommandValues, commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCommandValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -88,11 +88,11 @@ func (cmd *ResourcesUpdateCommand) createCobraCommand(
 
 func executeResourcesUpdate(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	action := "update"
 
-	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsCmdValues)
+	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsFlagSetValues)
 
 	return err
 }

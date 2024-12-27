@@ -66,7 +66,7 @@ func (cmd *RunsSubmitCommand) init(factory spi.Factory, runsCommand spi.GalasaCo
 
 func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -81,7 +81,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executeSubmit(factory, commsCmdValues)
+			return cmd.executeSubmit(factory, commsFlagSetValues)
 		},
 	}
 
@@ -140,7 +140,7 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 
 func (cmd *RunsSubmitCommand) executeSubmit(
 	factory spi.Factory,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
@@ -148,10 +148,10 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, commsCmdValues.logFileName)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
 
-		commsCmdValues.isCapturingLogs = true
+		commsFlagSetValues.isCapturingLogs = true
 
 		log.Println("Galasa CLI - Submit tests (Remote)")
 
@@ -159,16 +159,16 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 		env := factory.GetEnvironment()
 
 		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			commsRetrier := api.NewCommsRetrier(commsCmdValues.maxRetries, commsCmdValues.retryBackoffSeconds, factory.GetTimeService())
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
 
 			// Read the bootstrap properties.
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
 			loadBootstrapWithRetriesFunc := func() error {
-				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 				return err
 			}
 

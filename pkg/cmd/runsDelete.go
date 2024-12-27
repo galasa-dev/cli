@@ -65,7 +65,7 @@ func (cmd *RunsDeleteCommand) init(factory spi.Factory, runsCommand spi.GalasaCo
 func (cmd *RunsDeleteCommand) createCobraCommand(
 	factory spi.Factory,
 	runsCommand spi.GalasaCommand,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -78,9 +78,9 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 		Aliases: []string{"runs delete"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
 			executionFunc := func() error {
-				return cmd.executeRunsDelete(factory, commsCmdValues)
+				return cmd.executeRunsDelete(factory, commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -95,7 +95,7 @@ func (cmd *RunsDeleteCommand) createCobraCommand(
 
 func (cmd *RunsDeleteCommand) executeRunsDelete(
 	factory spi.Factory,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
@@ -103,7 +103,7 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Delete runs about to execute")
 
@@ -111,13 +111,13 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 	env := factory.GetEnvironment()
 
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			var console = factory.GetStdOutConsole()

@@ -81,7 +81,7 @@ func (cmd *RunsSubmitLocalCommand) init(factory spi.Factory, runsSubmitCommand s
 func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 	factory spi.Factory,
 	runsSubmitCmd spi.GalasaCommand,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 	var err error
 
@@ -93,9 +93,9 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 		Aliases: []string{"runs submit local"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
 			executionFunc := func() error {
-				return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), commsCmdValues)
+				return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -158,7 +158,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	factory spi.Factory,
 	runsSubmitCmdValues *utils.RunsSubmitCmdValues,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
@@ -166,7 +166,7 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Submit tests (Local)")
 
@@ -175,13 +175,13 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 
 	// Work out where galasa home is, only once.
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			timeService := utils.NewRealTimeService()

@@ -78,7 +78,7 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 ) (*cobra.Command, error) {
 
 	var err error
-	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
+	commsFlagSetValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	propertieNamespaceGetCobraCommand := &cobra.Command{
 		Use:   "get",
@@ -87,9 +87,9 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 		Args:  cobra.NoArgs,
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
 			executionFunc := func() error {
-				return cmd.executePropertiesNamespaceGet(factory, commsCmdValues)
+				return cmd.executePropertiesNamespaceGet(factory, commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 		Aliases: []string{"namespaces get"},
 	}
@@ -105,14 +105,14 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 
 func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 	factory spi.Factory,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Get ecosystem namespaces")
 
@@ -120,13 +120,13 @@ func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 	env := factory.GetEnvironment()
 
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			var console = factory.GetStdOutConsole()

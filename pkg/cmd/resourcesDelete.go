@@ -62,7 +62,7 @@ func (cmd *ResourcesDeleteCommand) init(factory spi.Factory, resourcesCommand sp
 func (cmd *ResourcesDeleteCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	commsCommandValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesDeleteCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -75,9 +75,9 @@ func (cmd *ResourcesDeleteCommand) createCobraCommand(
 		RunE: func(cmd *cobra.Command, args []string) error {
 			executionFunc := func() error {
 				return executeResourcesDelete(factory,
-					resourcesDeleteCommandValues, commsCommandValues)
+					resourcesDeleteCommandValues, commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCommandValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -88,11 +88,11 @@ func (cmd *ResourcesDeleteCommand) createCobraCommand(
 
 func executeResourcesDelete(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	action := "delete"
 
-	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsCmdValues)
+	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsFlagSetValues)
 
 	return err
 }

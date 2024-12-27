@@ -67,7 +67,7 @@ func (cmd *ResourcesApplyCommand) init(factory spi.Factory, resourcesApplyComman
 func (cmd *ResourcesApplyCommand) createCobraCommand(
 	factory spi.Factory,
 	resourcesCommand spi.GalasaCommand,
-	commsCommandValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	resourcesApplyCommandValues := resourcesCommand.Values().(*ResourcesCmdValues)
@@ -80,9 +80,9 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 		RunE: func(cmd *cobra.Command, args []string) error {
 			executionFunc := func() error {
 				return executeResourcesApply(factory,
-					resourcesApplyCommandValues, commsCommandValues)
+					resourcesApplyCommandValues, commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCommandValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -93,21 +93,21 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 
 func executeResourcesApply(factory spi.Factory,
 	resourcesCmdValues *ResourcesCmdValues,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	action := "apply"
 
-	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsCmdValues)
+	err := loadAndPassDataIntoResourcesApi(action, factory, resourcesCmdValues, commsFlagSetValues)
 
 	return err
 }
 
-func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, commsCmdValues *CommsFlagSetValues) error {
+func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourcesCmdValues *ResourcesCmdValues, commsFlagSetValues *CommsFlagSetValues) error {
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI -", action, "Resources Command")
 
@@ -115,13 +115,13 @@ func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourc
 	env := factory.GetEnvironment()
 
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 
 	if err == nil {
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			apiServerUrl := bootstrapData.ApiServerURL

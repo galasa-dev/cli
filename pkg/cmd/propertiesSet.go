@@ -73,7 +73,7 @@ func (cmd *PropertiesSetCommand) init(factory spi.Factory, propertiesCommand spi
 func (cmd *PropertiesSetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesCommand spi.GalasaCommand,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) (*cobra.Command, error) {
 
 	var err error
@@ -88,9 +88,9 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 		Aliases: []string{"properties set"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
 			executionFunc := func() error {
-				return cmd.executePropertiesSet(factory, propertiesCmdValues, commsCmdValues)
+				return cmd.executePropertiesSet(factory, propertiesCmdValues, commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -110,14 +110,14 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 func (cmd *PropertiesSetCommand) executePropertiesSet(
 	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Set ecosystem properties")
 
@@ -125,13 +125,13 @@ func (cmd *PropertiesSetCommand) executePropertiesSet(
 	env := factory.GetEnvironment()
 
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
 		// Read the bootstrap properties.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			apiServerUrl := bootstrapData.ApiServerURL

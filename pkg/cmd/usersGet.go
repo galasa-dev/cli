@@ -73,7 +73,7 @@ func (cmd *UsersGetCommand) createCobraCmd(
 
 	var err error
 
-	commsCmdValues := commsFlagSet.Values().(*CommsFlagSetValues)
+	commsFlagSetValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	userCommandValues := usersCommand.Values().(*UsersCmdValues)
 	usersGetCobraCmd := &cobra.Command{
@@ -83,9 +83,9 @@ func (cmd *UsersGetCommand) createCobraCmd(
 		Aliases: []string{COMMAND_NAME_USERS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
 			executionFunc := func() error {
-				return cmd.executeUsersGet(factory, usersCommand.Values().(*UsersCmdValues), commsCmdValues)
+				return cmd.executeUsersGet(factory, usersCommand.Values().(*UsersCmdValues), commsFlagSetValues)
 			}
-			return executeCommandWithRetries(factory, commsCmdValues, executionFunc)
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -99,14 +99,14 @@ func (cmd *UsersGetCommand) createCobraCmd(
 func (cmd *UsersGetCommand) executeUsersGet(
 	factory spi.Factory,
 	userCmdValues *UsersCmdValues,
-	commsCmdValues *CommsFlagSetValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsCmdValues.isCapturingLogs = true
+	commsFlagSetValues.isCapturingLogs = true
 
 	log.Println("Galasa CLI - Get users from the ecosystem")
 
@@ -114,13 +114,13 @@ func (cmd *UsersGetCommand) executeUsersGet(
 	env := factory.GetEnvironment()
 
 	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsCmdValues.CmdParamGalasaHomePath)
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
 		// Read the bootstrap users.
 		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsCmdValues.bootstrap, urlService)
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
 			var console = factory.GetStdOutConsole()
