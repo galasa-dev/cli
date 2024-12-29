@@ -35,11 +35,17 @@ func ValidateResultParameter(resultInputString string, apiClient *galasaapi.APIC
 
 		rasResultNamesData, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasResultNames(context).ClientApiVersion(restApiVersion).Execute()
 
+		var statusCode int
+		if httpResponse != nil {
+			defer httpResponse.Body.Close()
+			statusCode = httpResponse.StatusCode
+		}
+
 		if err == nil {
-			if httpResponse.StatusCode != http.StatusOK {
-				httpError := "\nhttp response status code: " + strconv.Itoa(httpResponse.StatusCode)
+			if statusCode != http.StatusOK {
+				httpError := "\nhttp response status code: " + strconv.Itoa(statusCode)
 				errString := httpError
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_QUERY_RESULTNAMES_FAILED, errString)
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RESULTNAMES_FAILED, errString)
 			} else {
 				rasResultNames := rasResultNamesData.GetResultnames()
 				log.Println("List of valid result names from the ecosystem: " + covertArrayToCommaSeparatedStringWithQuotes(rasResultNames))
@@ -63,12 +69,14 @@ func ValidateResultParameter(resultInputString string, apiClient *galasaapi.APIC
 				}
 
 				if len(invalidResultInputs) > 0 {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_RESULT_ARGUMENT, covertArrayToCommaSeparatedStringWithQuotes(invalidResultInputs), covertArrayToCommaSeparatedStringWithQuotes(rasResultNames))
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_INVALID_RESULT_ARGUMENT, covertArrayToCommaSeparatedStringWithQuotes(invalidResultInputs), covertArrayToCommaSeparatedStringWithQuotes(rasResultNames))
 				}
 				if err == nil {
 					resultQuery = strings.Join(validResultInputs[:], ",")
 				}
 			}
+		} else {
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RESULTNAMES_FAILED, err.Error())
 		}
 	}
 

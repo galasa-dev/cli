@@ -28,22 +28,24 @@ galasactl runs submit local [flags]
 ### Options inherited from parent commands
 
 ```
-  -b, --bootstrap string           Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
-      --galasahome string          Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
-  -g, --group string               the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
-  -l, --log string                 File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
-      --noexitcodeontestfailures   set to true if you don't want an exit code to be returned from galasactl if a test fails
-      --override strings           overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
-      --overridefile string        path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. Overrides from --override options will take precedence over properties in this property file. A file path of '-' disables reading any properties file.
-      --poll int                   Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
-      --progress int               in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting. (default 5)
-      --reportjson string          json file to record the final results in
-      --reportjunit string         junit xml file to record the final results in
-      --reportyaml string          yaml file to record the final results in
-      --requesttype string         the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
-      --throttle int               how many test runs can be submitted in parallel, 0 or less will disable throttling. 1 causes tests to be run sequentially. (default 3)
-      --throttlefile string        a file where the current throttle is stored. Periodically the throttle value is read from the file used. Someone with edit access to the file can change it which dynamically takes effect. Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). And they can be resumed (un-paused) if the value is set back. This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.Optional. If not specified, no throttle file is used.
-      --trace                      Trace to be enabled on the test runs
+  -b, --bootstrap string                      Bootstrap URL. Should start with 'http://' or 'file://'. If it starts with neither, it is assumed to be a fully-qualified path. If missing, it defaults to use the 'bootstrap.properties' file in your GALASA_HOME. Example: http://example.com/bootstrap, file:///user/myuserid/.galasa/bootstrap.properties , file://C:/Users/myuserid/.galasa/bootstrap.properties
+      --galasahome string                     Path to a folder where Galasa will read and write files and configuration settings. The default is '${HOME}/.galasa'. This overrides the GALASA_HOME environment variable which may be set instead.
+  -g, --group string                          the group name to assign the test runs to, if not provided, a psuedo unique id will be generated
+  -l, --log string                            File to which log information will be sent. Any folder referred to must exist. An existing file will be overwritten. Specify "-" to log to stderr. Defaults to not logging.
+      --noexitcodeontestfailures              set to true if you don't want an exit code to be returned from galasactl if a test fails
+      --override strings                      overrides to be sent with the tests (overrides in the portfolio will take precedence). Each override is of the form 'name=value'. Multiple instances of this flag can be used. For example --override=prop1=val1 --override=prop2=val2
+      --overridefile string                   path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. Overrides from --override options will take precedence over properties in this property file. A file path of '-' disables reading any properties file.
+      --poll int                              Optional. The interval time in seconds between successive polls of the test runs status. Defaults to 30 seconds. If less than 1, then default value is used. (default 30)
+      --progress int                          in minutes, how often the cli will report the overall progress of the test runs. A value of 0 or less disables progress reporting. (default 5)
+      --rate-limit-retries int                The maximum number of retries that should be made when requests to the Galasa Service fail due to rate limits being exceeded. Must be a whole number. Defaults to 3 retries (default 3)
+      --rate-limit-retry-backoff-secs float   The amount of time in seconds to wait before retrying a command if it failed due to rate limits being exceeded. Defaults to 1 second. (default 1)
+      --reportjson string                     json file to record the final results in
+      --reportjunit string                    junit xml file to record the final results in
+      --reportyaml string                     yaml file to record the final results in
+      --requesttype string                    the type of request, used to allocate a run name. Defaults to CLI. (default "CLI")
+      --throttle int                          how many test runs can be submitted in parallel, 0 or less will disable throttling. 1 causes tests to be run sequentially. (default 3)
+      --throttlefile string                   a file where the current throttle is stored. Periodically the throttle value is read from the file used. Someone with edit access to the file can change it which dynamically takes effect. Long-running large portfolios can be throttled back to nothing (paused) using this mechanism (if throttle is set to 0). And they can be resumed (un-paused) if the value is set back. This facility can allow the tests to not show a failure when the system under test is taken out of service for maintainence.Optional. If not specified, no throttle file is used.
+      --trace                                 Trace to be enabled on the test runs
 ```
 
 ### SEE ALSO

@@ -15,7 +15,6 @@ import (
 //	auth tokens ...
 
 type AuthTokensCmdValues struct {
-	bootstrap string
 	loginId   string
 }
 
@@ -27,7 +26,7 @@ type AuthTokensCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewAuthTokensCommand(authCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewAuthTokensCommand(authCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(AuthTokensCommand)
 
 	err := cmd.init(authCommand)
@@ -72,7 +71,6 @@ func (cmd *AuthTokensCommand) createAuthTokensCobraCmd(
 		Args:    cobra.NoArgs,
 	}
 
-	addBootstrapFlag(authTokensCmd, &cmd.values.bootstrap)
 	authCommand.CobraCommand().AddCommand(authTokensCmd)
 
 	return authTokensCmd, err

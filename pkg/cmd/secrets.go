@@ -6,12 +6,11 @@
 package cmd
 
 import (
-    "github.com/galasa-dev/cli/pkg/spi"
-    "github.com/spf13/cobra"
+	"github.com/galasa-dev/cli/pkg/spi"
+	"github.com/spf13/cobra"
 )
 
 type SecretsCmdValues struct {
-    bootstrap string
     name string
 }
 
@@ -24,9 +23,9 @@ type SecretsCommand struct {
 // Constructors
 // ------------------------------------------------------------------------------------------------
 
-func NewSecretsCmd(rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewSecretsCmd(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
     cmd := new(SecretsCommand)
-    err := cmd.init(rootCommand)
+    err := cmd.init(rootCommand, commsFlagSet)
     return cmd, err
 }
 
@@ -50,17 +49,17 @@ func (cmd *SecretsCommand) Values() interface{} {
 // Private functions
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *SecretsCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *SecretsCommand) init(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
     var err error
 
     cmd.values = &SecretsCmdValues{}
-    cmd.cobraCommand, err = cmd.createCobraCommand(rootCmd)
+    cmd.cobraCommand, err = cmd.createCobraCommand(rootCommand, commsFlagSet)
 
     return err
 }
 
-func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*cobra.Command, error) {
+func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (*cobra.Command, error) {
 
     var err error
 
@@ -70,8 +69,7 @@ func (cmd *SecretsCommand) createCobraCommand(rootCommand spi.GalasaCommand) (*c
         Long:  "The parent command for operations to manipulate secrets in the Galasa service's credentials store",
     }
 
-    addBootstrapFlag(secretsCobraCmd, &cmd.values.bootstrap)
-
+    secretsCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
     rootCommand.CobraCommand().AddCommand(secretsCobraCmd)
 
     return secretsCobraCmd, err

@@ -74,19 +74,23 @@ func updateCpsProperty(namespace string,
 		_, resp, err = apicall.Execute()
 		if err != nil {
 			log.Printf("updateCpsPtoperty Failed - Error: '%v'", err.Error())
-			if (resp != nil) && (resp.StatusCode != http.StatusNotFound) {
+			if resp != nil {
 				defer resp.Body.Close()
 
-				responseBody, err = io.ReadAll(resp.Body)
-				log.Printf("updateCpsPtoperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
+				statusCode := resp.StatusCode
+				if statusCode != http.StatusNotFound {
 
-				if err == nil {
-					var errorFromServer *galasaErrors.GalasaAPIError
-					errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+					responseBody, err = io.ReadAll(resp.Body)
+					log.Printf("updateCpsPtoperty Failed - HTTP response - status code: '%v' payload: '%v' ", statusCode, string(responseBody))
+
 					if err == nil {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, errorFromServer.Message)
-					} else {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+						var errorFromServer *galasaErrors.GalasaAPIError
+						errorFromServer, err = galasaErrors.GetApiErrorFromResponse(statusCode, responseBody)
+						if err == nil {
+							err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, errorFromServer.Message)
+						} else {
+							err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_PUT_PROPERTY_FAILED, name, err.Error())
+						}
 					}
 				}
 			}
@@ -112,24 +116,25 @@ func createCpsProperty(namespace string,
 	if err == nil {
 		apicall := apiClient.ConfigurationPropertyStoreAPIApi.CreateCpsProperty(context, namespace).GalasaProperty(*property).ClientApiVersion(restApiVersion)
 		_, resp, err = apicall.Execute()
-		log.Printf("createCpsProperty - HTTP response status code: '%v'", resp.StatusCode)
+		statusCode := resp.StatusCode
+		log.Printf("createCpsProperty - HTTP response status code: '%v'", statusCode)
 
 		if err != nil {
-			if (resp != nil) {
+			if resp != nil {
 				defer resp.Body.Close()
 
 				var errorFromServer *galasaErrors.GalasaAPIError
 				responseBody, err = io.ReadAll(resp.Body)
 				if err == nil {
-					log.Printf("createCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", resp.StatusCode, string(responseBody))
-					errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+					log.Printf("createCpsProperty Failed - HTTP response - status code: '%v' payload: '%v' ", statusCode, string(responseBody))
+					errorFromServer, err = galasaErrors.GetApiErrorFromResponse(statusCode, responseBody)
 					if err == nil {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, errorFromServer.Message)
-					}else {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, errorFromServer.Message)
+					} else {
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
 					}
 				} else {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_POST_PROPERTY_FAILED, name, err.Error())
 				}
 			}
 		}

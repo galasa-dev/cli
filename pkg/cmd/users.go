@@ -12,7 +12,6 @@ import (
 )
 
 type UsersCmdValues struct {
-	ecosystemBootstrap string
 	name               string
 }
 
@@ -24,10 +23,10 @@ type UsersCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewUsersCommand(rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewUsersCommand(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(UsersCommand)
-	err := cmd.init(rootCmd)
+	err := cmd.init(rootCmd, commsFlagSet)
 	return cmd, err
 }
 
@@ -50,18 +49,19 @@ func (cmd *UsersCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *UsersCommand) init(rootCmd spi.GalasaCommand) error {
+func (cmd *UsersCommand) init(rootCmd spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &UsersCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(rootCmd)
+	cmd.cobraCommand = cmd.createCobraCommand(rootCmd, commsFlagSet)
 
 	return err
 }
 
 func (cmd *UsersCommand) createCobraCommand(
 	rootCommand spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) *cobra.Command {
 
 	usersCobraCmd := &cobra.Command{
@@ -70,8 +70,7 @@ func (cmd *UsersCommand) createCobraCommand(
 		Long:  "Allows interaction with the user servlet to return information about users.",
 	}
 
-	addBootstrapFlag(usersCobraCmd, &cmd.values.ecosystemBootstrap)
-
+	usersCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())
 	rootCommand.CobraCommand().AddCommand(usersCobraCmd)
 
 	return usersCobraCmd

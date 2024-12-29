@@ -40,10 +40,10 @@ type PropertiesGetCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesGetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesGetCommand(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesGetCommand)
-	err := cmd.init(factory, propertiesCommand, rootCommand)
+	err := cmd.init(factory, propertiesCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -66,12 +66,12 @@ func (cmd *PropertiesGetCommand) Values() interface{} {
 // Private methods
 // ------------------------------------------------------------------------------------------------
 
-func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, rootCommand spi.GalasaCommand) error {
+func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
 
 	cmd.values = &PropertiesGetCmdValues{}
-	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, rootCommand.Values().(*RootCmdValues))
+	cmd.cobraCommand = cmd.createCobraCommand(factory, propertiesCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
 	return err
 }
@@ -79,7 +79,7 @@ func (cmd *PropertiesGetCommand) init(factory spi.Factory, propertiesCommand spi
 func (cmd *PropertiesGetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesCommand spi.GalasaCommand,
-	rootCommandValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) *cobra.Command {
 
 	propertiesCommandValues := propertiesCommand.Values().(*PropertiesCmdValues)
@@ -90,8 +90,11 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executePropertiesGet(factory,
-				propertiesCommandValues, rootCommandValues)
+			executionFunc := func() error {
+				return cmd.executePropertiesGet(factory,
+					propertiesCommandValues, commsFlagSetValues)
+			}
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 	}
 
@@ -133,58 +136,54 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 func (cmd *PropertiesGetCommand) executePropertiesGet(
 	factory spi.Factory,
 	propertiesCmdValues *PropertiesCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	commsFlagSetValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Get ecosystem properties")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
-		rootCmdValues.isCapturingLogs = true
-
-		log.Println("Galasa CLI - Get ecosystem properties")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
+			var console = factory.GetStdOutConsole()
+
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+			var apiClient *galasaapi.APIClient
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+
 			if err == nil {
-
-				var console = factory.GetStdOutConsole()
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-				var apiClient *galasaapi.APIClient
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
+				// Call to process the command in a unit-testable way.
+				err = properties.GetProperties(
+					propertiesCmdValues.namespace,
+					propertiesCmdValues.propertyName,
+					cmd.values.propertiesPrefix,
+					cmd.values.propertiesSuffix,
+					cmd.values.propertiesInfix,
+					apiClient,
+					cmd.values.propertiesOutputFormat,
+					console,
 				)
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = properties.GetProperties(
-						propertiesCmdValues.namespace,
-						propertiesCmdValues.propertyName,
-						cmd.values.propertiesPrefix,
-						cmd.values.propertiesSuffix,
-						cmd.values.propertiesInfix,
-						apiClient,
-						cmd.values.propertiesOutputFormat,
-						console,
-					)
-				}
 			}
 		}
 	}

@@ -337,7 +337,7 @@ func (submitter *Submitter) submitRun(
 		if err != nil {
 			log.Printf("Failed to submit test %v/%v - %v\n", nextRun.Bundle, nextRun.Class, err)
 			lostRuns[className] = &nextRun
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
+			err = galasaErrors.NewGalasaErrorWithCause(err, galasaErrors.GALASA_ERROR_FAILED_TO_SUBMIT_TEST, nextRun.Bundle, nextRun.Class, err.Error())
 		} else {
 			if len(resultGroup.GetRuns()) < 1 {
 				log.Printf("Lost the run attempting to submit test %v/%v\n", nextRun.Bundle, nextRun.Class)
@@ -756,7 +756,7 @@ func (submitter *Submitter) checkIfGroupAlreadyInUse(groupName string) (bool, er
 	var uuidCheck *galasaapi.TestRuns
 	uuidCheck, err = submitter.launcher.GetRunsByGroup(groupName)
 	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
+		err = galasaErrors.NewGalasaErrorWithCause(err, galasaErrors.GALASA_ERROR_SUBMIT_RUNS_GROUP_CHECK, groupName, err.Error())
 	} else {
 
 		if uuidCheck.Runs != nil && len(uuidCheck.Runs) > 0 {

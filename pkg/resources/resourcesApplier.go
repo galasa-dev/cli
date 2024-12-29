@@ -94,19 +94,19 @@ func sendResourcesRequestToServer(payloadJsonToSend []byte, apiServerUrl string,
 						if err == nil {
 							errMessages := errorsFromServer.GetErrorMessages()
 							responseString := fmt.Sprint(strings.Join(errMessages, "\n"))
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_BAD_REQUEST, responseString)
+							err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESOURCES_RESP_BAD_REQUEST, responseString)
 						} else {
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCE_RESPONSE_PARSING, err)
+							err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESOURCE_RESPONSE_PARSING, err)
 						}
 					} else if statusCode == 401 {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCE_RESP_UNAUTHORIZED_OPERATION)
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESOURCE_RESP_UNAUTHORIZED_OPERATION)
 					} else if statusCode == 500 {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR)
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESOURCES_RESP_SERVER_ERROR)
 					} else {
-						err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RESOURCES_RESP_UNEXPECTED_ERROR)
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RESP_UNEXPECTED_ERROR)
 					}
 				} else {
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 				}
 
 			} else {

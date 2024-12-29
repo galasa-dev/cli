@@ -14,6 +14,7 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -90,8 +91,9 @@ func TestGetTestCatalogHttpErrorGetsReported(t *testing.T) {
 
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
+	commsRetrier := api.NewCommsRetrier(0, 0, utils.NewMockTimeService())
 
-	launcher := NewRemoteLauncher(apiServerUrl, apiClient)
+	launcher := NewRemoteLauncher(apiServerUrl, apiClient, commsRetrier)
 
 	_, err := launcher.GetTestCatalog("myStream")
 

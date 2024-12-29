@@ -66,20 +66,25 @@ func deleteTokenFromRestApi(tokenId string, apiClient *galasaapi.APIClient) erro
 	
 		if err != nil {
 			// Try to get the error returned from the API server and return that message
-			if (resp != nil) && (resp.StatusCode != http.StatusOK) {
+			if resp != nil {
 				defer resp.Body.Close()
+				statusCode := resp.StatusCode
+				if statusCode != http.StatusOK {
 					responseBody, err = io.ReadAll(resp.Body)
 					log.Printf("deleteTokenFromRestApi - HTTP response - Status Code: '%v' Payload: '%v' ", resp.StatusCode, string(responseBody))
 			
 					if err == nil {
 						var errorFromServer *galasaErrors.GalasaAPIError
-						errorFromServer, err = galasaErrors.GetApiErrorFromResponse(responseBody)
+						errorFromServer, err = galasaErrors.GetApiErrorFromResponse(statusCode, responseBody)
 			
 						if err == nil {
 							// Return a Galasa API error, because the status code is not 200 (OK)
-							err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_REVOKE_TOKEN_FAILED, tokenId, errorFromServer.Message)
+							err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_REVOKE_TOKEN_FAILED, tokenId, errorFromServer.Message)
 						}
+					} else {
+						err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UNABLE_TO_READ_RESPONSE_BODY, err)
 					}
+				}
 			} else {
 				// No response was received from the API server, so something else may have gone wrong
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_REVOKE_TOKEN_FAILED, tokenId, err.Error())
