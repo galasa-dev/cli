@@ -7,9 +7,6 @@
 package usersformatter
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
@@ -32,35 +29,4 @@ const (
 type UserFormatter interface {
 	FormatUsers(userResults []galasaapi.UserData) (string, error)
 	GetName() string
-}
-
-// -----------------------------------------------------
-// Functions for tables
-func calculateMaxLengthOfEachColumn(table [][]string) []int {
-	columnLengths := make([]int, len(table[0]))
-	for _, row := range table {
-		for i, val := range row {
-			if len(val) > columnLengths[i] {
-				columnLengths[i] = len(val)
-			}
-		}
-	}
-	return columnLengths
-}
-
-func writeFormattedTableToStringBuilder(table [][]string, buff *strings.Builder, columnLengths []int) {
-	for _, row := range table {
-		for column, val := range row {
-
-			// For every column except the last one, add spacing.
-			if column < len(row)-1 {
-				// %-*s : variable space-padding length, padding is on the right.
-				buff.WriteString(fmt.Sprintf("%-*s", columnLengths[column], val))
-				buff.WriteString(" ")
-			} else {
-				buff.WriteString(val)
-			}
-		}
-		buff.WriteString("\n")
-	}
 }
