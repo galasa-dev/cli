@@ -81,8 +81,8 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"
     export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}"
     export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
-    export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
-    export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
+    export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="14"
+    export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="11"
     export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 
 fi
@@ -653,9 +653,9 @@ function runs_get_check_details_format_output {
         fi
     done
 
-    #check methods start on line 13 - implies other test details have outputted
+    #check methods start on line 14 - implies other test details have outputted
     line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time(UTC)[[:space:]]*end-time(UTC)[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
-    expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT
+    expected_line_count=14
     if [[ "${line_count}" != "${expected_line_count}" ]]; then
         # We expect a return code of '0' because the method header should be output on line 13.
         error "line count is wrong. expected methods to start on ${expected_line_count} got ${line_count}"
@@ -692,9 +692,9 @@ function runs_get_check_raw_format_output {
         exit 1
     fi
 
-    # Check that we got 10 pipes
+    # Check that we got 11 pipes
     pipe_count=$(grep -o "|" $output_file | wc -l | xargs)
-    expected_pipe_count=$GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT
+    expected_pipe_count=11
     if [[ "${pipe_count}" != "${expected_pipe_count}" ]]; then
         error "pipe count is wrong. expected ${expected_pipe_count} got ${pipe_count}"
         exit 1
