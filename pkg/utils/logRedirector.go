@@ -13,6 +13,17 @@ import (
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
+// CaptureExecutionLogs captures the logs for a given execution function to a file or stderr.
+func CaptureExecutionLogs(factory spi.Factory, logFileName string, executionFunc func() error) error {
+	var err error
+	fileSystem := factory.GetFileSystem()
+	err = CaptureLog(fileSystem, logFileName)
+	if err == nil {
+		err = executionFunc()
+	}
+	return err
+}
+
 /*
  * CaptureLog(logFileName) decides whether to re-direct the log information to the
  * specified file, or if the file name is "-" or empty, the log information won't be

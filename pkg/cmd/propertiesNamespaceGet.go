@@ -37,12 +37,12 @@ func NewPropertiesNamespaceGetCommand(
 	factory spi.Factory,
 	propertiesNamespaceCommand spi.GalasaCommand,
 	propertiesCommand spi.GalasaCommand,
-	rootCommand spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
 	cmd := new(PropertiesNamespaceGetCommand)
 
-	err := cmd.init(factory, propertiesNamespaceCommand, propertiesCommand, rootCommand)
+	err := cmd.init(factory, propertiesNamespaceCommand, commsFlagSet)
 	return cmd, err
 }
 
@@ -64,22 +64,21 @@ func (cmd *PropertiesNamespaceGetCommand) Values() interface{} {
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, propertiesCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) error {
+func (cmd *PropertiesNamespaceGetCommand) init(factory spi.Factory, propertiesNamespaceCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 	var err error
 	cmd.values = &PropertiesNamespaceGetCmdValues{}
-	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, propertiesCommand, rootCmd)
+	cmd.cobraCommand, err = cmd.createCobraCommand(factory, propertiesNamespaceCommand, commsFlagSet)
 	return err
 }
 
 func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 	factory spi.Factory,
 	propertiesNamespaceCommand spi.GalasaCommand,
-	propertiesCommand spi.GalasaCommand,
-	rootCmd spi.GalasaCommand,
+	commsFlagSet GalasaFlagSet,
 ) (*cobra.Command, error) {
 
 	var err error
-	propertiesCmdValues := propertiesCommand.Values().(*PropertiesCmdValues)
+	commsFlagSetValues := commsFlagSet.Values().(*CommsFlagSetValues)
 
 	propertieNamespaceGetCobraCommand := &cobra.Command{
 		Use:   "get",
@@ -87,7 +86,10 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 		Long:  "Get a list of namespaces within the CPS",
 		Args:  cobra.NoArgs,
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			return cmd.executePropertiesNamespaceGet(factory, propertiesCmdValues, rootCmd.Values().(*RootCmdValues))
+			executionFunc := func() error {
+				return cmd.executePropertiesNamespaceGet(factory, commsFlagSetValues)
+			}
+			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
 		},
 		Aliases: []string{"namespaces get"},
 	}
@@ -103,50 +105,45 @@ func (cmd *PropertiesNamespaceGetCommand) createCobraCommand(
 
 func (cmd *PropertiesNamespaceGetCommand) executePropertiesNamespaceGet(
 	factory spi.Factory,
-	propertiesCmdValues *PropertiesCmdValues,
-	rootCmdValues *RootCmdValues,
+	commsFlagSetValues *CommsFlagSetValues,
 ) error {
 	var err error
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	err = utils.CaptureLog(fileSystem, rootCmdValues.logFileName)
+	commsFlagSetValues.isCapturingLogs = true
+
+	log.Println("Galasa CLI - Get ecosystem namespaces")
+
+	// Get the ability to query environment variables.
+	env := factory.GetEnvironment()
+
+	var galasaHome spi.GalasaHome
+	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
-		rootCmdValues.isCapturingLogs = true
-
-		log.Println("Galasa CLI - Get ecosystem namespaces")
-
-		// Get the ability to query environment variables.
-		env := factory.GetEnvironment()
-
-		var galasaHome spi.GalasaHome
-		galasaHome, err = utils.NewGalasaHome(fileSystem, env, rootCmdValues.CmdParamGalasaHomePath)
+		// Read the bootstrap properties.
+		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+		var bootstrapData *api.BootstrapData
+		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
 		if err == nil {
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, propertiesCmdValues.ecosystemBootstrap, urlService)
+			var console = factory.GetStdOutConsole()
+
+			apiServerUrl := bootstrapData.ApiServerURL
+			log.Printf("The API server is at '%s'\n", apiServerUrl)
+
+			var apiClient *galasaapi.APIClient
+			authenticator := factory.GetAuthenticator(
+				apiServerUrl,
+				galasaHome,
+			)
+			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+
 			if err == nil {
-
-				var console = factory.GetStdOutConsole()
-
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-				var apiClient *galasaapi.APIClient
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = properties.GetPropertiesNamespaces(apiClient, cmd.values.namespaceOutputFormat, console)
-				}
+				// Call to process the command in a unit-testable way.
+				err = properties.GetPropertiesNamespaces(apiClient, cmd.values.namespaceOutputFormat, console)
 			}
 		}
 	}

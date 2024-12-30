@@ -22,7 +22,7 @@ type PropertiesNamespaceCommand struct {
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewPropertiesNamespaceCommand(propertiesCommand spi.GalasaCommand, rootCmd spi.GalasaCommand) (spi.GalasaCommand, error) {
+func NewPropertiesNamespaceCommand(propertiesCommand spi.GalasaCommand) (spi.GalasaCommand, error) {
 	cmd := new(PropertiesNamespaceCommand)
 
 	err := cmd.init(propertiesCommand)
