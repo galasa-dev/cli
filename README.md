@@ -731,7 +731,7 @@ For a complete list of supported parameters see [here](./docs/generated/galasact
 ## roles get
 To list the roles which are available on a Galasa service.
 
-Note: Roles are currently read-only and cannot be used in conjunction with the `galasactl resources apply -f` or simuilar commands at this time.
+Note: Roles are currently read-only and cannot be used in conjunction with the `galasactl resources apply -f` or similar commands at this time.
 
 ### Examples
 ```

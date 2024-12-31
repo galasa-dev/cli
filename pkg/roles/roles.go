@@ -15,7 +15,7 @@ func validateRoleName(nameToValidate string) (string, error) {
 	var err error
 	name := strings.TrimSpace(nameToValidate)
 
-	if name == "" || strings.ContainsAny(name, " .\n\t") || !isLatin1(name) {
+	if name == "" || !usesValidRoleCharacters(name) {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_ROLE_NAME)
 	}
 	return name, err
@@ -23,7 +23,7 @@ func validateRoleName(nameToValidate string) (string, error) {
 
 // Checks if a given string contains only characters in the Latin-1 character set (codepoints 0-255),
 // returning true if so, and false otherwise
-func isLatin1(str string) bool {
+func usesValidRoleCharacters(str string) bool {
 	isValidLatin1 := true
 	for _, character := range str {
 		if !((character >= 'a' && character <= 'z') ||

@@ -80,9 +80,9 @@ func addRolesNameFlag(cmd *cobra.Command, isMandatory bool, RolesCmdValues *Role
 	flagName := "name"
 	var description string
 	if isMandatory {
-		description = "A mandatory flag that identifies the secret to be created or manipulated."
+		description = "A mandatory flag that identifies the role to be created or manipulated."
 	} else {
-		description = "An optional flag that identifies the secret to be retrieved."
+		description = "An optional flag that identifies the role to be retrieved by name."
 	}
 
 	cmd.Flags().StringVar(&RolesCmdValues.name, flagName, "", description)
