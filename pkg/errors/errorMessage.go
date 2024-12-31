@@ -16,7 +16,7 @@ import (
 var (
 	RATE_LIMIT_STATUS_CODES_MAP = map[int]struct{}{
 		http.StatusServiceUnavailable: {},
-		http.StatusTooManyRequests: {},
+		http.StatusTooManyRequests:    {},
 	}
 )
 
@@ -60,10 +60,10 @@ func NewMessageTypeFromError(err error) *MessageType {
 // It can be treated as a normal error, but also holds a message-type
 // So we can programmatically tell the difference between various errors as required.
 type GalasaError struct {
-	msgType *MessageType
-	message string
+	msgType    *MessageType
+	message    string
 	httpStatus int
-	cause error
+	cause      error
 }
 
 type GalasaCommsError interface {
@@ -141,7 +141,7 @@ func (err *GalasaError) IsRetryRequired() bool {
 	for isGalasaError && currentError.GetCause() != nil {
 		currentError, isGalasaError = currentError.GetCause().(*GalasaError)
 	}
-	
+
 	// Pull the HTTP status code out of the original error, which could be 0 if the error is client-side
 	if isGalasaError && currentError != nil {
 		statusCode = currentError.GetHttpStatusCode()
@@ -149,7 +149,7 @@ func (err *GalasaError) IsRetryRequired() bool {
 
 	_, isRetryRequired := RATE_LIMIT_STATUS_CODES_MAP[statusCode]
 
-	return isRetryRequired 
+	return isRetryRequired
 }
 
 const (
@@ -380,6 +380,25 @@ var (
 	GALASA_ERROR_DELETE_USER_UNPARSEABLE_CONTENT         = NewMessageType("GAL1200E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1200, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1201E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1201, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1202E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1202, STACK_TRACE_NOT_WANTED)
+
+	// When getting multiple roles...
+	GALASA_ERROR_GET_ROLES_REQUEST_FAILED           = NewMessageType("GAL1203E: Failed to get roles. Sending the get request to the Galasa service failed. Cause is %v", 1203, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLES_NO_RESPONSE_CONTENT      = NewMessageType("GAL1204E: Failed to get roles. Unexpected http status code %v received from the server.", 1204, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLES_RESPONSE_BODY_UNREADABLE = NewMessageType("GAL1205E: Failed to get roles. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1205, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLES_UNPARSEABLE_CONTENT      = NewMessageType("GAL1206E: Failed to get roles. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1206, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLES_SERVER_REPORTED_ERROR    = NewMessageType("GAL1207E: Failed to get roles. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1207, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLES_EXPLANATION_NOT_JSON     = NewMessageType("GAL1208E: Failed to get roles. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1208, STACK_TRACE_NOT_WANTED)
+
+	// When getting a single named role...
+	GALASA_ERROR_GET_ROLE_NO_RESPONSE_CONTENT               = NewMessageType("GAL1209E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server.", 1209, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLE_RESPONSE_BODY_UNREADABLE          = NewMessageType("GAL1210E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1210, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLE_UNPARSEABLE_CONTENT               = NewMessageType("GAL1211E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1211, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLE_SERVER_REPORTED_ERROR             = NewMessageType("GAL1212E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1212, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLE_EXPLANATION_NOT_JSON              = NewMessageType("GAL1213E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1213, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_ROLE_REQUEST_FAILED                    = NewMessageType("GAL1214E: An attempt to get a role named '%s' failed. Sending the get request to the Galasa service failed. Cause is %v", 1214, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_ROLE_NAME                          = NewMessageType("GAL1215E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.", 1215, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_ROLE_NAME_NOT_FOUND                        = NewMessageType("GAL1216E: Role name %v is not known on the Galasa service.", 1216, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_ROLES_LIST_NOT_COMPATIBLE_WITH_YAML_FORMAT = NewMessageType("GAL1217E: Role output format %v is not usable when a list of roles is requested. Use the --name flag if you wish to see a role in yaml format.", 1217, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

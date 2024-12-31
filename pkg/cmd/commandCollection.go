@@ -66,6 +66,8 @@ const (
 	COMMAND_NAME_USERS                    = "users"
 	COMMAND_NAME_USERS_GET                = "users get"
 	COMMAND_NAME_USERS_DELETE             = "users delete"
+	COMMAND_NAME_ROLES                    = "roles"
+	COMMAND_NAME_ROLES_GET                = "roles get"
 )
 
 // -----------------------------------------------------------------
@@ -156,6 +158,10 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 
 	if err == nil {
 		err = commands.addUsersCommands(factory, rootCommand, commsFlagSet)
+	}
+
+	if err == nil {
+		err = commands.addRolesCommands(factory, rootCommand, commsFlagSet)
 	}
 
 	if err == nil {
@@ -441,6 +447,25 @@ func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, roo
 				commands.commandMap[usersGetCommand.Name()] = usersGetCommand
 				commands.commandMap[usersDeleteCommand.Name()] = usersDeleteCommand
 			}
+		}
+	}
+
+	return err
+}
+
+func (commands *commandCollectionImpl) addRolesCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
+
+	var err error
+	var rolesCommand spi.GalasaCommand
+	var rolesGetCommand spi.GalasaCommand
+
+	rolesCommand, err = NewRolesCmd(rootCommand, commsFlagSet)
+
+	if err == nil {
+		rolesGetCommand, err = NewRolesGetCommand(factory, rolesCommand, commsFlagSet)
+		if err == nil {
+			commands.commandMap[rolesCommand.Name()] = rolesCommand
+			commands.commandMap[rolesGetCommand.Name()] = rolesGetCommand
 		}
 	}
 
