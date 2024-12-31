@@ -11,9 +11,9 @@ import (
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 )
 
-func validateRoleName(name string) (string, error) {
+func validateRoleName(nameToValidate string) (string, error) {
 	var err error
-	name = strings.TrimSpace(name)
+	name := strings.TrimSpace(nameToValidate)
 
 	if name == "" || strings.ContainsAny(name, " .\n\t") || !isLatin1(name) {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_ROLE_NAME)
@@ -26,7 +26,9 @@ func validateRoleName(name string) (string, error) {
 func isLatin1(str string) bool {
 	isValidLatin1 := true
 	for _, character := range str {
-		if character > 255 {
+		if !((character >= 'a' && character <= 'z') ||
+			(character >= 'A' && character <= 'Z') ||
+			(character >= '0' && character <= '9')) {
 			isValidLatin1 = false
 			break
 		}
