@@ -64,6 +64,7 @@ jobs:
       # The generated code needs adjustment for various reasons.
       - name: Fix generated code
         run : |
+          whoami
           chmod +x ./fix-generated-code.sh
           chmod 0666 /var/workspace/pkg/galasaapi/*
           ls -l /var/workspace/pkg/galasaapi/*
