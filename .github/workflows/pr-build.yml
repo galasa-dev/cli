@@ -56,9 +56,9 @@ jobs:
       - name: Fix generated code
         run : |
           whoami
+          ls -l ./pkg/galasaapi/*
           chmod +x ./fix-generated-code.sh
           chmod 0666 ./pkg/galasaapi/*
-          ls -l ./pkg/galasaapi/*
           ./fix-generated-code.sh
 
       # The go.mod and go.sum are out of date, as they do not include the generated code so they are deleted here. They get re-generated when we compile.
