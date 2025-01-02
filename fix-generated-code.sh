@@ -93,10 +93,6 @@ while IFS= read -r file_to_process; do
     cat ${file_to_process} | sed "s/json:\(.*\)\"\`/json:\1\" yaml:\1\"\`/g" > ${BASEDIR}/temp/${file_to_process}.temp
     rc=$? ; if [[ "$rc" != "0" ]]; then error "Failed to substitute yaml serialisation annotation into generated model file ${file_to_process}" ; exit 1; fi
 
-    # Make the source file read-write, just in case we can't write to it currently.
-    chmod +w ${file_to_process}
-    rc=$? ; if [[ "$rc" != "0" ]]; then error "Failed to make file ${file_to_process} writeable." ; exit 1; fi
-
     # Copy the transformed version over the top of the original, leaving a copy in the temp folder to diagnose problems with.
     cp ${BASEDIR}/temp/${file_to_process}.temp ${file_to_process}
     rc=$? ; if [[ "$rc" != "0" ]]; then error "Failed to copy fixed code over the generated original code at ${file_to_process}" ; exit 1; fi

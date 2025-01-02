@@ -65,6 +65,7 @@ jobs:
       - name: Fix generated code
         run : |
           chmod +x ./fix-generated-code.sh
+          chmod +w /var/workspace/pkg/galasaapi/*
           ./fix-generated-code.sh
 
       # The go.mod and go.sum are out of date, as they do not include the generated code so they are deleted here. They get re-generated when we compile.
