@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // -----------------------------------------------------
@@ -30,7 +31,7 @@ func (*PropertySummaryFormatter) GetName() string {
 }
 
 func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.GalasaProperty) (string, error) {
-	var result string = ""
+	var result string
 	var err error
 	buff := strings.Builder{}
 	totalProperties := len(cpsProperties)
@@ -52,8 +53,8 @@ func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.Gala
 			table = append(table, line)
 		}
 
-		columnLengths := calculateMaxLengthOfEachColumn(table)
-		writeFormattedTableToStringBuilder(table, &buff, columnLengths)
+		columnLengths := utils.CalculateMaxLengthOfEachColumn(table)
+		utils.WriteFormattedTableToStringBuilder(table, &buff, columnLengths)
 
 		buff.WriteString("\n")
 
@@ -65,7 +66,7 @@ func (*PropertySummaryFormatter) FormatProperties(cpsProperties []galasaapi.Gala
 }
 
 func (*PropertySummaryFormatter) FormatNamespaces(namespaces []galasaapi.Namespace) (string, error) {
-	var result string = ""
+	var result string
 	var err error
 	buff := strings.Builder{}
 	totalNamespaces := len(namespaces)
@@ -83,8 +84,8 @@ func (*PropertySummaryFormatter) FormatNamespaces(namespaces []galasaapi.Namespa
 			table = append(table, line)
 		}
 
-		columnLengths := calculateMaxLengthOfEachColumn(table)
-		writeFormattedTableToStringBuilder(table, &buff, columnLengths)
+		columnLengths := utils.CalculateMaxLengthOfEachColumn(table)
+		utils.WriteFormattedTableToStringBuilder(table, &buff, columnLengths)
 
 		buff.WriteString("\n")
 

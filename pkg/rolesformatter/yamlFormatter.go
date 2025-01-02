@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package secretsformatter
+package rolesformatter
 
 import (
 	"strings"
@@ -16,36 +16,36 @@ const (
 	YAML_FORMATTER_NAME = "yaml"
 )
 
-type SecretYamlFormatter struct {
+type RolesYamlFormatter struct {
 }
 
-func NewSecretYamlFormatter() SecretsFormatter {
-	return new(SecretYamlFormatter)
+func NewRolesYamlFormatter() RolesFormatter {
+	return new(RolesYamlFormatter)
 }
 
-func (*SecretYamlFormatter) GetName() string {
+func (*RolesYamlFormatter) GetName() string {
 	return YAML_FORMATTER_NAME
 }
 
-func (*SecretYamlFormatter) FormatSecrets(secrets []galasaapi.GalasaSecret) (string, error) {
+func (*RolesYamlFormatter) FormatRoles(roles []galasaapi.RBACRole) (string, error) {
 	var err error
 	buff := strings.Builder{}
 
-	for index, secret := range secrets {
-		secretString := ""
+	for index, role := range roles {
+		content := ""
 
 		if index > 0 {
-			secretString += "---\n"
+			content += "---\n"
 		}
 
 		var yamlRepresentationBytes []byte
-		yamlRepresentationBytes, err = yaml.Marshal(secret)
+		yamlRepresentationBytes, err = yaml.Marshal(role)
 		if err == nil {
 			yamlStr := string(yamlRepresentationBytes)
-			secretString += yamlStr
+			content += yamlStr
 		}
 
-		buff.WriteString(secretString)
+		buff.WriteString(content)
 	}
 
 	result := buff.String()

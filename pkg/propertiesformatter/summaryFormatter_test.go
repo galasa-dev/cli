@@ -18,6 +18,8 @@ import (
 func CreateMockGalasaProperty(namespace string, name string, value string) *galasaapi.GalasaProperty {
 	var property = galasaapi.NewGalasaProperty()
 
+	property.SetApiVersion("myApiVersion")
+	property.SetKind("GalasaProperty")
 	metadata := galasaapi.NewGalasaPropertyMetadata()
 	metadata.SetNamespace(namespace)
 	metadata.SetName(name)
