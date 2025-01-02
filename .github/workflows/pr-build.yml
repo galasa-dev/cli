@@ -55,9 +55,12 @@ jobs:
       # The generated code needs adjustment for various reasons.
       - name: Fix generated code
         run : |
+          whoami
           chmod +x ./fix-generated-code.sh
+          chmod 0666 /var/workspace/pkg/galasaapi/*
+          ls -l /var/workspace/pkg/galasaapi/*
           ./fix-generated-code.sh
-
+          
       # The go.mod and go.sum are out of date, as they do not include the generated code so they are deleted here. They get re-generated when we compile.
       # Due to permissions, deleting the go.mod and go.sum must be done by the openapi image as the image generated those files.
 
