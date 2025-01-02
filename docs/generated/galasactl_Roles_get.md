@@ -15,7 +15,7 @@ galasactl roles get [flags]
 ```
       --format string   the output format of the returned Roles. Supported formats are: 'summary', 'yaml'. (default "summary")
   -h, --help            Displays the options for the 'roles get' command.
-      --name string     An optional flag that identifies the secret to be retrieved.
+      --name string     An optional flag that identifies the role to be retrieved by name.
 ```
 
 ### Options inherited from parent commands

@@ -40,8 +40,8 @@ func TestPropertiesYamlFormatterSingleDataReturnsCorrectly(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput := `apiVersion: null
-kind: null
+	expectedFormattedOutput := `apiVersion: myApiVersion
+kind: GalasaProperty
 metadata:
     namespace: namespace
     name: name1
@@ -65,16 +65,16 @@ func TestPropertiesYamlFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput := `apiVersion: null
-kind: null
+	expectedFormattedOutput := `apiVersion: myApiVersion
+kind: GalasaProperty
 metadata:
     namespace: namespace
     name: name1
 data:
     value: value1
 ---
-apiVersion: null
-kind: null
+apiVersion: myApiVersion
+kind: GalasaProperty
 metadata:
     namespace: namespace
     name: name2

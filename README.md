@@ -728,6 +728,39 @@ galasactl secrets delete --name SYSTEM1
 
 For a complete list of supported parameters see [here](./docs/generated/galasactl_secrets_delete.md).
 
+## roles get
+To list the roles which are available on a Galasa service.
+
+Note: Roles are currently read-only and cannot be used in conjunction with the `galasactl resources apply -f` or similar commands at this time.
+
+### Examples
+```
+> galasactl roles get
+name        description
+admin       Administrator access
+deactivated User has no access
+tester      Test developer and runner
+
+Total:3
+```
+
+To get a named role in yaml format
+```
+>galasactl roles get --name admin --format yaml
+apiVersion: galasa-dev/v1alpha1
+kind: GalasaRole
+metadata:
+    id: "2"
+    name: admin
+    description: Administrator access
+    url: http://prod1-galasa-dev.cicsk8s.hursley.ibm.com/rbac/roles/2
+data:
+    actions:
+        - GENERAL_API_ACCESS
+        - SECRETS_GET
+        - USER_ROLE_UPDATE_ANY
+```
+
 ## Reference Material
 
 ### Syntax

@@ -390,15 +390,8 @@ var (
 	GALASA_ERROR_GET_ROLES_EXPLANATION_NOT_JSON     = NewMessageType("GAL1208E: Failed to get roles. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1208, STACK_TRACE_NOT_WANTED)
 
 	// When getting a single named role...
-	GALASA_ERROR_GET_ROLE_NO_RESPONSE_CONTENT               = NewMessageType("GAL1209E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server.", 1209, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_GET_ROLE_RESPONSE_BODY_UNREADABLE          = NewMessageType("GAL1210E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1210, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_GET_ROLE_UNPARSEABLE_CONTENT               = NewMessageType("GAL1211E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1211, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_GET_ROLE_SERVER_REPORTED_ERROR             = NewMessageType("GAL1212E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1212, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_GET_ROLE_EXPLANATION_NOT_JSON              = NewMessageType("GAL1213E: An attempt to get a role named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1213, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_GET_ROLE_REQUEST_FAILED                    = NewMessageType("GAL1214E: An attempt to get a role named '%s' failed. Sending the get request to the Galasa service failed. Cause is %v", 1214, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_ROLE_NAME                          = NewMessageType("GAL1215E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.", 1215, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_ROLE_NAME_NOT_FOUND                        = NewMessageType("GAL1216E: Role name %v is not known on the Galasa service.", 1216, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_ROLES_LIST_NOT_COMPATIBLE_WITH_YAML_FORMAT = NewMessageType("GAL1217E: Role output format %v is not usable when a list of roles is requested. Use the --name flag if you wish to see a role in yaml format.", 1217, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_ROLE_NAME   = NewMessageType("GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.", 1209, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_ROLE_NAME_NOT_FOUND = NewMessageType("GAL1210E: Role name %v is not known on the Galasa service.", 1210, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

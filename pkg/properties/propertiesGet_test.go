@@ -73,8 +73,8 @@ func CheckName(name string) (string, int) {
 	case "property0":
 		namespaceProperties = `[
 		{
-			"apiVersion": null,
-			"kind": null,
+			"apiVersion": "myApiVersion",
+			"kind": "GalasaProperty",
 			"metadata": {
 				"namespace": "validnamespace",
 				"name": "property0"
@@ -89,8 +89,8 @@ func CheckName(name string) (string, int) {
 	case "emptyValueName": //property name does not exist
 		namespaceProperties = `[
 			{
-				"apiVersion": null,
-				"kind": null,
+				"apiVersion": "myApiVersion",
+				"kind": "GalasaProperty",
 				"metadata": {
 					"namespace": "validnamespace",
 					"name": "emptyValueName"
@@ -112,8 +112,8 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 		if infixParameter == "anInfix" { //for a single infix
 			namespaceProperties = `[
 				{
-					"apiVersion": null,
-					"kind": null,
+					"apiVersion": "myApiVersion",
+					"kind": "GalasaProperty",
 					"metadata": {
 						"namespace": "validnamespace",
 						"name": "aPrefix.anInfix.property.aSuffix"
@@ -127,8 +127,8 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 		} else { //no infix
 			namespaceProperties = `[
 				{
-					"apiVersion": null,
-					"kind": null,
+					"apiVersion": "myApiVersion",
+					"kind": "GalasaProperty",
 					"metadata": {
 						"namespace": "validnamespace",
 						"name": "aPrefix.property.aSuffix"
@@ -146,8 +146,8 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 		if infixParameter == "anInfix" {
 			namespaceProperties = `[
 				{
-					"apiVersion": null,
-					"kind": null,
+					"apiVersion": "myApiVersion",
+					"kind": "GalasaProperty",
 					"metadata": {
 						"namespace": "validnamespace",
 						"name": "property.anInfix.aSuffix"
@@ -161,8 +161,8 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 		} else {
 			namespaceProperties = `[
 				{
-					"apiVersion": null,
-					"kind": null,
+					"apiVersion": "myApiVersion",
+					"kind": "GalasaProperty",
 					"metadata": {
 						"namespace": "validnamespace",
 						"name": "property.aSuffix"
@@ -180,8 +180,8 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 		if infixParameter == "anInfix" {
 			namespaceProperties = `[
 				{
-					"apiVersion": null,
-					"kind": null,
+					"apiVersion": "myApiVersion",
+					"kind": "GalasaProperty",
 					"metadata": {
 						"namespace": "validnamespace",
 						"name": "aPrefix.anInfix.property"
@@ -194,8 +194,8 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 		} else {
 			namespaceProperties = `[
 				{
-					"apiVersion": null,
-					"kind": null,
+					"apiVersion": "myApiVersion",
+					"kind": "GalasaProperty",
 					"metadata": {
 						"namespace": "validnamespace",
 						"name": "aPrefix.property"
@@ -222,8 +222,8 @@ func checkQueryParameters(prefixParameter string, suffixParameter string, infixP
 		if infixParameter == "anInfix" {
 			namespaceProperties = `[
 				{
-					"apiVersion": null,
-					"kind": null,
+					"apiVersion": "myApiVersion",
+					"kind": "GalasaProperty",
 					"metadata": {
 						"namespace": "validnamespace",
 						"name": "extra.anInfix.extra"
@@ -249,8 +249,8 @@ func CheckNamespace(namespace string) (int, string) {
 	case "validnamespace":
 		namespaceProperties = `[
 			{
-				"apiVersion": null,
-				"kind": null,
+				"apiVersion": "myApiVersion",
+				"kind": "GalasaProperty",
 				"metadata": {
 					"namespace": "validnamespace",
 					"name": "property0"
@@ -260,8 +260,8 @@ func CheckNamespace(namespace string) (int, string) {
 				}
 			},
 			{
-				"apiVersion": null,
-				"kind": null,
+				"apiVersion": "myApiVersion",
+				"kind": "GalasaProperty",
 				"metadata": {
 					"namespace": "validnamespace",
 					"name": "property1"
@@ -271,8 +271,8 @@ func CheckNamespace(namespace string) (int, string) {
 				}
 			},
 			{
-				"apiVersion": null,
-				"kind": null,
+				"apiVersion": "myApiVersion",
+				"kind": "GalasaProperty",
 				"metadata": {
 					"namespace": "validnamespace",
 					"name": "property2"
@@ -282,8 +282,8 @@ func CheckNamespace(namespace string) (int, string) {
 				}
 			},
 			{
-				"apiVersion": null,
-				"kind": null,
+				"apiVersion": "myApiVersion",
+				"kind": "GalasaProperty",
 				"metadata": {
 					"namespace": "validnamespace",
 					"name": "property3"
@@ -912,32 +912,32 @@ func TestValidNamespaceYamlFormatReturnsOk(t *testing.T) {
 
 	apiClient := api.InitialiseAPI(apiServerUrl)
 
-	expectedOutput := `apiVersion: null
-kind: null
+	expectedOutput := `apiVersion: myApiVersion
+kind: GalasaProperty
 metadata:
     namespace: validnamespace
     name: property0
 data:
     value: value0
 ---
-apiVersion: null
-kind: null
+apiVersion: myApiVersion
+kind: GalasaProperty
 metadata:
     namespace: validnamespace
     name: property1
 data:
     value: value1
 ---
-apiVersion: null
-kind: null
+apiVersion: myApiVersion
+kind: GalasaProperty
 metadata:
     namespace: validnamespace
     name: property2
 data:
     value: value2
 ---
-apiVersion: null
-kind: null
+apiVersion: myApiVersion
+kind: GalasaProperty
 metadata:
     namespace: validnamespace
     name: property3

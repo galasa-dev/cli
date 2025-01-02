@@ -50,7 +50,13 @@ jobs:
       # Generate client code so galasactl can communicate with the API server.
       - name: Generate Go client code using openapi.yaml
         run : |
-          docker run --rm -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main java -jar /opt/openapi/openapi-generator-cli.jar generate -i /var/workspace/build/dependencies/openapi.yaml -g go -o /var/workspace/pkg/galasaapi --additional-properties=packageName=galasaapi --global-property=apiTests=false
+          docker run --rm --user $(id -u):$(id -g) -v ${{ github.workspace }}:/var/workspace ghcr.io/galasa-dev/openapi:main java -jar /opt/openapi/openapi-generator-cli.jar generate -i /var/workspace/build/dependencies/openapi.yaml -g go -o /var/workspace/pkg/galasaapi --additional-properties=packageName=galasaapi --global-property=apiTests=false
+
+      # The generated code needs adjustment for various reasons.
+      - name: Fix generated code
+        run : |
+          chmod +x ./fix-generated-code.sh
+          ./fix-generated-code.sh
 
       # The go.mod and go.sum are out of date, as they do not include the generated code so they are deleted here. They get re-generated when we compile.
       # Due to permissions, deleting the go.mod and go.sum must be done by the openapi image as the image generated those files.

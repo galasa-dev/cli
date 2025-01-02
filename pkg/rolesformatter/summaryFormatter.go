@@ -6,7 +6,6 @@
 package rolesformatter
 
 import (
-	"log"
 	"strconv"
 	"strings"
 
@@ -50,7 +49,6 @@ func (*RolesSummaryFormatter) FormatRoles(roles []galasaapi.RBACRole) (string, e
 			var line []string
 			name := role.Metadata.GetName()
 			description := role.Metadata.GetDescription()
-			log.Printf("FormatRoles: adding role name %s\n", name)
 			line = append(line, name, description)
 			table = append(table, line)
 		}

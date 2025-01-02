@@ -204,15 +204,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1206E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1207E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1208E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
-- GAL1209E: An attempt to get a role named '{}' failed. Unexpected http status code {} received from the server.
-- GAL1210E: An attempt to get a role named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
-- GAL1211E: An attempt to get a role named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
-- GAL1212E: An attempt to get a role named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
-- GAL1213E: An attempt to get a role named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
-- GAL1214E: An attempt to get a role named '{}' failed. Sending the get request to the Galasa service failed. Cause is {}
-- GAL1215E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.
-- GAL1216E: Role name {} is not known on the Galasa service.
-- GAL1217E: Role output format {} is not usable when a list of roles is requested. Use the --name flag if you wish to see a role in yaml format.
+- GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.
+- GAL1210E: Role name {} is not known on the Galasa service.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

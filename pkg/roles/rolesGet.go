@@ -34,8 +34,9 @@ func GetRoles(
 	var chosenFormatter rolesformatter.RolesFormatter
 	roles := make([]galasaapi.RBACRole, 0)
 
-	chosenFormatter, err = validateFormatFlag(format, roleName)
+	chosenFormatter, err = validateFormatFlag(format)
 	if err == nil {
+		log.Printf("formatter flag is valid.\n")
 		if roleName != "" {
 			// The user has provided a Role name, so try to get that Role
 			var role *galasaapi.RBACRole
@@ -68,6 +69,7 @@ func getRoleByName(
 ) (*galasaapi.RBACRole, error) {
 	var err error
 	var role *galasaapi.RBACRole
+
 	roleName, err = validateRoleName(roleName)
 	if err == nil {
 		role, err = getRoleFromRestApiGivenName(roleName, apiClient, byteReader)
@@ -81,69 +83,15 @@ func getRoleFromRestApiGivenName(
 	apiClient *galasaapi.APIClient,
 	byteReader spi.ByteReader,
 ) (*galasaapi.RBACRole, error) {
-	var err error
 	var role *galasaapi.RBACRole
 
-	roleId, err := roleNameToRoleId(roleName, apiClient, byteReader)
-	if err == nil {
-		role, err = getRoleFromRestApiGivenId(roleId, apiClient, byteReader)
-	}
-	return role, err
-}
-
-func getRoleFromRestApiGivenId(
-	roleId string,
-	apiClient *galasaapi.APIClient,
-	byteReader spi.ByteReader,
-) (*galasaapi.RBACRole, error) {
-	var err error
-	var httpResponse *http.Response
-	var context context.Context = context.Background()
-	var restApiVersion string
-	var role *galasaapi.RBACRole
-
-	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
-	if err == nil {
-		role, httpResponse, err = apiClient.RoleBasedAccessControlAPIApi.GetRBACRole(context, roleId).
-			ClientApiVersion(restApiVersion).
-			Execute()
-
-		if httpResponse != nil {
-			defer httpResponse.Body.Close()
-		}
-
-		if err != nil {
-			if httpResponse == nil {
-				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_GET_ROLE_REQUEST_FAILED, err.Error())
-			} else {
-				err = galasaErrors.HttpResponseToGalasaError(
-					httpResponse,
-					roleId,
-					byteReader,
-					galasaErrors.GALASA_ERROR_GET_ROLE_NO_RESPONSE_CONTENT,
-					galasaErrors.GALASA_ERROR_GET_ROLE_RESPONSE_BODY_UNREADABLE,
-					galasaErrors.GALASA_ERROR_GET_ROLE_UNPARSEABLE_CONTENT,
-					galasaErrors.GALASA_ERROR_GET_ROLE_SERVER_REPORTED_ERROR,
-					galasaErrors.GALASA_ERROR_GET_ROLE_EXPLANATION_NOT_JSON,
-				)
-			}
-		}
-	}
-	return role, err
-}
-
-func roleNameToRoleId(roleName string, apiClient *galasaapi.APIClient, byteReader spi.ByteReader) (string, error) {
-
-	var roleId string
-
+	// Query all the roles.
 	roles, err := getRolesFromRestApi(apiClient, byteReader)
 	if err == nil {
-		role, err := findRoleWithName(roles, roleName)
-		if err == nil {
-			roleId = *(role.Metadata).Id
-		}
+		// Find the one with a matching name, or fail.
+		role, err = findRoleWithName(roles, roleName)
 	}
-	return roleId, err
+	return role, err
 }
 
 func findRoleWithName(roles []galasaapi.RBACRole, roleNameToFind string) (*galasaapi.RBACRole, error) {
@@ -172,12 +120,12 @@ func getRolesFromRestApi(
 	var context context.Context = context.Background()
 	var restApiVersion string
 	var roles []galasaapi.RBACRole
-	var rolesMetadata []galasaapi.RBACRoleMetadata
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		rolesMetadata, httpResponse, err = apiClient.RoleBasedAccessControlAPIApi.GetRBACRoles(context).
+		log.Printf("Getting role data from remote service\n")
+		roles, httpResponse, err = apiClient.RoleBasedAccessControlAPIApi.GetRBACRoles(context).
 			ClientApiVersion(restApiVersion).
 			Execute()
 
@@ -201,32 +149,10 @@ func getRolesFromRestApi(
 				)
 			}
 		} else {
-			// The role metadata for all the roles was obtained.
-			// Turn these into simulated full role records so they can all be formatted with the same code.
-			// But we must beware, because lots of the data is missing.
-			// (So we can't output in yaml for example)
-			roles = createSimulatedRoleRecordsFromRolesMetadata(rolesMetadata)
+			log.Printf("Got back %v roles %v", len(roles), roles)
 		}
 	}
 	return roles, err
-}
-
-func createSimulatedRoleRecordsFromRolesMetadata(rolesMetadata []galasaapi.RBACRoleMetadata) []galasaapi.RBACRole {
-	var roles []galasaapi.RBACRole = make([]galasaapi.RBACRole, 0)
-	// Note: We use the index here and de-reference it ourselves on purpose.
-	// This is subtle:
-	// If we used the value, then taking the address of that value will result in filling the roles array returned
-	// with records which all point to the same variable defined in this scope. The variable is defined only once,
-	// so it essentially creates an array of values where each one is referencing the same metadata instance.
-	// If we didn't do that we would have to create our own metadata structure, and copy fields from one to the other.
-	for index := range rolesMetadata {
-		role := galasaapi.RBACRole{}
-		role.Metadata = &(rolesMetadata[index])
-		roles = append(roles, role)
-
-		log.Printf("roles: %v\n", roles)
-	}
-	return roles
 }
 
 func createFormatters() map[string]rolesformatter.RolesFormatter {
@@ -259,17 +185,13 @@ func GetFormatterNamesAsString() string {
 	return formatterNames.String()
 }
 
-func validateFormatFlag(outputFormatString string, roleName string) (rolesformatter.RolesFormatter, error) {
+func validateFormatFlag(outputFormatString string) (rolesformatter.RolesFormatter, error) {
 	var err error
 
 	chosenFormatter, isPresent := formatters[outputFormatString]
 
 	if !isPresent {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_OUTPUT_FORMAT, outputFormatString, GetFormatterNamesAsString())
-	}
-
-	if roleName == "" && chosenFormatter.GetName() == rolesformatter.YAML_FORMATTER_NAME {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_ROLES_LIST_NOT_COMPATIBLE_WITH_YAML_FORMAT, outputFormatString)
 	}
 
 	return chosenFormatter, err
