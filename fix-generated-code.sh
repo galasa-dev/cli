@@ -1,4 +1,4 @@
-#! /usr/bin/env bash 
+#! /usr/bin/env sh 
 
 #
 # Copyright contributors to the Galasa project
