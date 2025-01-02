@@ -747,7 +747,7 @@ Total:3
 To get a named role in yaml format
 ```
 >galasactl roles get --name admin --format yaml
-apiversion: galasa-dev/v1alpha1
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaRole
 metadata:
     id: "2"

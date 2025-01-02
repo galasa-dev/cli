@@ -32,7 +32,6 @@ func (*SecretYamlFormatter) FormatSecrets(secrets []galasaapi.GalasaSecret) (str
 	buff := strings.Builder{}
 
 	for index, secret := range secrets {
-		galasaSecret := NewGalasaSecret(secret)
 		secretString := ""
 
 		if index > 0 {
@@ -40,7 +39,7 @@ func (*SecretYamlFormatter) FormatSecrets(secrets []galasaapi.GalasaSecret) (str
 		}
 
 		var yamlRepresentationBytes []byte
-		yamlRepresentationBytes, err = yaml.Marshal(galasaSecret)
+		yamlRepresentationBytes, err = yaml.Marshal(secret)
 		if err == nil {
 			yamlStr := string(yamlRepresentationBytes)
 			secretString += yamlStr

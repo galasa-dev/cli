@@ -46,12 +46,6 @@ func (*PropertyYamlFormatter) FormatProperties(cpsProperties []galasaapi.GalasaP
 		yamlRepresentationBytes, err = yaml.Marshal(property)
 		if err == nil {
 			yamlStr := string(yamlRepresentationBytes)
-
-			// The generated bean serialises in json as 'apiVersion' which is correct. In yaml it serialises as 'apiversion' (incorrect)
-			// So this is a hack to correct that failure.
-			// Note: This will corrupt any value string which also has 'apiversion' inside it !
-			// TODO: The fix is to change the bean and add a 'yaml' annotation so it gets rendered correctly. Golang has yaml annotations, but does the generator support them ?
-			yamlStr = strings.ReplaceAll(yamlStr, "apiversion", "apiVersion")
 			propertyString += yamlStr
 		}
 

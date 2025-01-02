@@ -27,7 +27,7 @@ func TestRolesYamlFormatterValidData(t *testing.T) {
 
 	// Then...
 	assert.Nil(t, err)
-	expectedFormattedOutput := `apiversion: galasa-dev/v1alpha1
+	expectedFormattedOutput := `apiVersion: galasa-dev/v1alpha1
 kind: GalasaRole
 metadata:
     id: role1Id
@@ -39,7 +39,7 @@ data:
         - action1
         - action2
 ---
-apiversion: galasa-dev/v1alpha1
+apiVersion: galasa-dev/v1alpha1
 kind: GalasaRole
 metadata:
     id: role2Id

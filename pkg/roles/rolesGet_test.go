@@ -32,6 +32,7 @@ func createTestGalasaRole(id string, name string, description string) galasaapi.
 	if description != "" {
 		metadata.SetDescription(description)
 	}
+	metadata.SetUrl("https://myhost:myport/rbac/roles/" + id)
 
 	data := *galasaapi.NewRBACRoleData()
 	actionStrings := make([]string, 2)
@@ -199,13 +200,13 @@ func TestCanGetARoleByIdWhenRoleExistsFindsItOkInYamlFormat(t *testing.T) {
 
 	// Then...
 	expectedOutput :=
-		`apiversion: galasa-dev/v1alpha1
+		`apiVersion: galasa-dev/v1alpha1
 kind: GalasaRole
 metadata:
     id: role1
     name: role1Name
     description: role1Description
-    url: null
+    url: https://myhost:myport/rbac/roles/role1
 data:
     actions:
         - action1
