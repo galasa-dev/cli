@@ -640,7 +640,7 @@ function check_secrets {
 clean
 download_dependencies
 generate_rest_client
-go_mod_tidy
+# go_mod_tidy - don't tidy the go.mod as it gets rid of transitive/indirect dependencies.
 build_executables
 
 
