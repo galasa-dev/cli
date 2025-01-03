@@ -22,18 +22,18 @@ var (
 // ---------------------------------------------------
 // Functions called by other things
 
-// ValidateRunName - Checks that a run name is valid, as much as we can.
+// ValidateFlagValue - Checks that a flag value is valid, as much as we can.
 // Returns an error if it's invalid, nil if it looks valid.
 // This function does not consult with an ecosystem, just checks the
 // format of the runName.
-func ValidateRunName(runName string) error {
+func ValidateRunName(value string) error {
 
 	var err error
 
-	isMatching := RUN_NAME_PATTERN.MatchString(runName)
+	isMatching := RUN_NAME_PATTERN.MatchString(value)
 
 	if !isMatching {
-		err = errors.NewGalasaError(errors.GALASA_ERROR_INVALID_RUN_NAME, runName)
+		err = errors.NewGalasaError(errors.GALASA_ERROR_INVALID_FLAG_VALUE, value)
 	}
 
 	return err
