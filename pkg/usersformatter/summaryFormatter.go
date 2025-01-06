@@ -42,7 +42,7 @@ func (*UserSummaryFormatter) FormatUsers(users []galasaapi.UserData) (string, er
 	if totalUsers > 0 {
 		var table [][]string
 
-		var headers = []string{HEADER_USER_LOGIN_ID, HEADER_WEBUI_LAST_LOGIN, HEADER_RESTAPI_LAST_LOGIN}
+		var headers = []string{HEADER_USER_LOGIN_ID, HEADER_USER_ROLE, HEADER_WEBUI_LAST_LOGIN, HEADER_RESTAPI_LAST_LOGIN}
 
 		table = append(table, headers)
 		for _, user := range users {
@@ -63,7 +63,9 @@ func (*UserSummaryFormatter) FormatUsers(users []galasaapi.UserData) (string, er
 				}
 			}
 
-			line = append(line, loginId, webLastLogin, restLastLogin)
+			userRole := user.Synthetic.GetRole().Metadata.GetName()
+
+			line = append(line, loginId, userRole, webLastLogin, restLastLogin)
 			table = append(table, line)
 		}
 
