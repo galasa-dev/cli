@@ -1505,3 +1505,38 @@ func TestRunsGetOfGroupWhichExistsProducesExpectedRaw(t *testing.T) {
 	want := "U457|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|dummyGroup|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
 	assert.Equal(t, textGotBack, want)
 }
+
+func TestRunsGetWithBadGroupNameThrowsError(t *testing.T) {
+
+	// Given ...
+	pages := make(map[string][]string, 0)
+	pages[""] = []string{}
+	nextPageCursors := []string{ "" }
+
+    runName := "U457"
+	age := ""
+	requestor := ""
+	result := ""
+	shouldGetActive := false
+	pageSize := 100
+	outputFormat := "raw"
+
+	group := string(rune(300)) + "NONLATIN1"
+
+	server := NewRunsGetServletMock(t, http.StatusOK, nextPageCursors, pages, pageSize, runName)
+	defer server.Close()
+
+	mockConsole := utils.NewMockConsole()
+
+	apiServerUrl := server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockTimeService := utils.NewMockTimeService()
+
+	// When...
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+
+	// Then...
+	assert.NotNil(t, err, "A non-Latin-1 group name should throw an error")
+    assert.ErrorContains(t, err, "GAL1105E")
+    assert.ErrorContains(t, err, "Invalid group name provided")
+}
