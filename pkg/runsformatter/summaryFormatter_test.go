@@ -25,27 +25,24 @@ func TestSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
 	assert.Equal(t, expectedFormattedOutput, actualFormattedOutput)
 }
 
-func createFormattableTestForSummary(queuedTimeUTC string, name string, testName string, status string, result string, requestor string, isLost bool, group string) FormattableTest {
-	// run1Id := "ar"
-	// bundle := ""
-	// testName := ""
-	// requestor := ""
-	// queued := ""
-	// startTime := ""
-	// endTime := ""
-	// isLost := false
+func createFormattableTestForSummary(
+	queuedTimeUTC string,
+	name string,
+	testName string,
+	status string,
+	result string,
+	requestor string,
+	isLost bool,
+	group string,
+) FormattableTest {
 	formattableTest := FormattableTest{
 		Name: name,
-		//Bundle:        &bundle,
-		//TestName:      &testName,
 		TestName:      testName,
 		Requestor:     requestor,
 		Status:        status,
 		Result:        result,
 		QueuedTimeUTC: queuedTimeUTC,
 		Group:         group,
-		// StartTime:     &startTime,
-		// EndTime:       &endTime,
 		Lost: isLost,
 	}
 	return formattableTest

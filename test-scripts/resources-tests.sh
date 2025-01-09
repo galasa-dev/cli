@@ -74,17 +74,6 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     fi
 
     info "Running tests against ecosystem bootstrap ${bootstrap}"
-
-    #-----------------------------------------------------------------------------------------                   
-    # Constants
-    #-----------------------------------------------------------------------------------------   
-    export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"   
-    export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}" 
-    export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
-    export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
-    export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
-    export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
-
 fi
 
 # generate a random number to append to test names to avoid multiple running at once overriding each other

@@ -42,19 +42,9 @@ func createFormattableTestForDetails(runId string,
 	endTimeUTC string,
 	apiServerUrl string,
 	methods []galasaapi.TestMethod,
-	isLost bool, group string) FormattableTest {
-	// runId := ""
-	// name := ""
-	// testName := ""
-	// status := ""
-	// result := ""
-	// startTimeUTC := ""
-	// endTimeUTC := ""
-	// queuedTimeUTC := ""
-	// requestor := ""
-	// bundle := ""
-	// apiServerUrl := ""
-	// isLost = false
+	isLost bool,
+	group string,
+) FormattableTest {
 	formattableTest := FormattableTest{
 		RunId:         runId,
 		Name:          name,

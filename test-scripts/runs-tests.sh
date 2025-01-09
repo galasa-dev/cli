@@ -655,7 +655,7 @@ function runs_get_check_details_format_output {
 
     #check methods start on line 14 - implies other test details have outputted
     line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time(UTC)[[:space:]]*end-time(UTC)[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
-    expected_line_count=14
+    expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then
         # We expect a return code of '0' because the method header should be output on line 13.
         error "line count is wrong. expected methods to start on ${expected_line_count} got ${line_count}"
@@ -694,7 +694,7 @@ function runs_get_check_raw_format_output {
 
     # Check that we got 11 pipes
     pipe_count=$(grep -o "|" $output_file | wc -l | xargs)
-    expected_pipe_count=11
+    expected_pipe_count=$GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT
     if [[ "${pipe_count}" != "${expected_pipe_count}" ]]; then
         error "pipe count is wrong. expected ${expected_pipe_count} got ${pipe_count}"
         exit 1
