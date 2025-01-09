@@ -169,11 +169,11 @@ func (cmd *RunsGetCommand) executeRunsGet(
 					cmd.values.result,
 					cmd.values.isActiveRuns,
 					cmd.values.outputFormatString,
+					cmd.values.group,
 					timeService,
 					console,
 					apiServerUrl,
 					apiClient,
-					cmd.values.group,
 				)
 			}
 		}

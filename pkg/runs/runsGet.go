@@ -47,11 +47,11 @@ func GetRuns(
 	resultParameter string,
 	shouldGetActive bool,
 	outputFormatString string,
+	group string,
 	timeService spi.TimeService,
 	console spi.Console,
 	apiServerUrl string,
 	apiClient *galasaapi.APIClient,
-	group string,
 ) error {
 	var err error
 	var fromAge int
@@ -59,20 +59,24 @@ func GetRuns(
 
 	log.Printf("GetRuns entered.")
 
-	if (runName == "") && (age == "") {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_RUNNAME_OR_AGE_SPECIFIED)
+	if runName == "" && age == "" && group == "" {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TEST_RUN_IDENTIFIER_FLAG_SPECIFIED)
 	}
 
-	if (err == nil) && (runName != "") {
+	if err == nil && runName != "" {
 		// Validate the runName as best we can without contacting the ecosystem.
 		err = ValidateRunName(runName)
 	}
 
-	if (err == nil) && (age != "") {
+	if err == nil && age != "" {
 		fromAge, toAge, err = getTimesFromAge(age)
 	}
 
-	if (err == nil) && (resultParameter != "") {
+	if err == nil && group != "" {
+		group, err = validateGroupname(group)
+	}
+
+	if err == nil && resultParameter != "" {
 		if shouldGetActive {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_ACTIVE_AND_RESULT_ARE_MUTUALLY_EXCLUSIVE)
 		}
