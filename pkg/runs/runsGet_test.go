@@ -28,8 +28,9 @@ const (
 			 "testName": "myTestPackage.MyTestName",
 			 "testShortName": "MyTestName",
 			 "requestor": "unitTesting",
-			 "status" : "Finished",
-			 "result" : "Passed",
+			 "status": "Finished",
+			 "result": "Passed",
+			 "group": "dummyGroup",
 			 "queued" : "2023-05-10T06:00:13.043037Z",
 			 "startTime": "2023-05-10T06:00:36.159003Z",
 			 "endTime": "2023-05-10T06:02:53.823338Z",
@@ -51,39 +52,6 @@ const (
 			 "contentType":	"application/json"
 		 }]
 	 }`
-
-	RUN_U457 = `{
-		"runId": "xxx876xxx",
-		"testStructure": {
-			"runName": "U457",
-			"bundle": "myBundleId",
-			"testName": "myTestPackage.MyTestName",
-			"testShortName": "MyTestName",
-			"requestor": "unitTesting",
-			"status" : "Finished",
-			"result" : "Passed",
-			"group"  : "dummyGroup",
-			"queued" : "2023-05-10T06:00:13.043037Z",
-			"startTime": "2023-05-10T06:00:36.159003Z",
-			"endTime": "2023-05-10T06:02:53.823338Z",
-			"methods": [{
-				"className": "myTestPackage.MyTestName",
-				"methodName": "myTestMethodName",
-				"type": "test",
-				"status": "Done",
-				"result": "Success",
-				"startTime": "2023-05-10T06:00:13.254335Z",
-				"endTime": "2023-05-10T06:03:11.882739Z",
-				"runLogStart":null,
-				"runLogEnd":null,
-				"befores":[]
-			}]
-		},
-		"artifacts": [{
-			"artifactPath": "myPathToArtifact1",
-			"contentType":	"application/json"
-		}]
-	}`
 
 	RUN_U456_v2 = `{
 		 "runId": "xxx543xxx",
@@ -305,7 +273,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 		assert.Contains(t, textGotBack, runName)
 		want :=
 			"submitted-time(UTC) name requestor   status   result test-name                group\n" +
-				"2023-05-10 06:00:13 U456 unitTesting Finished Passed myTestPackage.MyTestName \n" +
+				"2023-05-10 06:00:13 U456 unitTesting Finished Passed myTestPackage.MyTestName dummyGroup\n" +
 				"\n" +
 				"Total:1 Passed:1\n"
 		assert.Equal(t, want, textGotBack)
@@ -382,7 +350,7 @@ func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 		assert.Contains(t, textGotBack, runName)
 		want :=
 			"submitted-time(UTC) name requestor     status   result           test-name                group\n" +
-				"2023-05-10 06:00:13 U456 unitTesting   Finished Passed           myTestPackage.MyTestName \n" +
+				"2023-05-10 06:00:13 U456 unitTesting   Finished Passed           myTestPackage.MyTestName dummyGroup\n" +
 				"2023-05-10 06:00:13 U456 unitTesting22 Finished LongResultString myTestPackage.MyTest2    \n" +
 				"\n" +
 				"Total:2 Passed:1\n"
@@ -472,7 +440,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 				"test-name           : myTestPackage.MyTestName\n" +
 				"requestor           : unitTesting\n" +
 				"bundle              : myBundleId\n" +
-				"group               : \n" +
+				"group               : dummyGroup\n" +
 				"run-log             : " + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n" +
 				"\n" +
 				"method           type status result  start-time(UTC)     end-time(UTC)       duration(ms)\n" +
@@ -559,7 +527,7 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 	assert.Nil(t, err)
 	textGotBack := mockConsole.ReadText()
 	assert.Contains(t, textGotBack, runName)
-	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId||" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
+	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|dummyGroup|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
 	assert.Equal(t, textGotBack, want)
 }
 
@@ -1465,7 +1433,7 @@ func TestRunsGetWithNextCursorGetsNextPageOfRuns(t *testing.T) {
 	runsReturned := mockConsole.ReadText()
 	assert.Contains(t, runsReturned, runName)
 
-	run := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId||" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
+	run := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|dummyGroup|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
 	expectedResults := run + run
 	assert.Equal(t, runsReturned, expectedResults)
 }
@@ -1474,10 +1442,10 @@ func TestRunsGetOfGroupWhichExistsProducesExpectedRaw(t *testing.T) {
 
 	// Given ...
 	pages := make(map[string][]string, 0)
-	pages[""] = []string{RUN_U457}
+	pages[""] = []string{RUN_U456}
 	nextPageCursors := []string{""}
 	age := ""
-	runName := "U457"
+	runName := "U456"
 	requestor := ""
 	result := ""
 	shouldGetActive := false
@@ -1502,7 +1470,7 @@ func TestRunsGetOfGroupWhichExistsProducesExpectedRaw(t *testing.T) {
 	assert.Nil(t, err)
 	textGotBack := mockConsole.ReadText()
 	assert.Contains(t, textGotBack, runName)
-	want := "U457|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|dummyGroup|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
+	want := "U456|Finished|Passed|2023-05-10T06:00:13.043037Z|2023-05-10T06:00:36.159003Z|2023-05-10T06:02:53.823338Z|137664|myTestPackage.MyTestName|unitTesting|myBundleId|dummyGroup|" + apiServerUrl + "/ras/runs/xxx876xxx/runlog\n"
 	assert.Equal(t, textGotBack, want)
 }
 
