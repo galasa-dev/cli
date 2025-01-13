@@ -22,6 +22,7 @@ import (
 // and turn them into a string for display to the user.
 const (
 	HEADER_USER_LOGIN_ID      = "login-id"
+	HEADER_USER_ROLE          = "role"
 	HEADER_WEBUI_LAST_LOGIN   = "web-last-login(UTC)"
 	HEADER_RESTAPI_LAST_LOGIN = "rest-api-last-login(UTC)"
 )

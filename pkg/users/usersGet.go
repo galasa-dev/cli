@@ -54,14 +54,14 @@ func getUserDataFromRestApi(
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
-	apiCall := apiClient.UsersAPIApi.GetUserByLoginId(context)
+	apiCall := apiClient.UsersAPIApi.GetUserByLoginId(context).ClientApiVersion(restApiVersion)
 
 	if loginId != "" {
 
 		loginId, err = validateLoginIdFlag(loginId)
 
 		if err == nil {
-			apiCall = apiCall.LoginId(loginId).ClientApiVersion(restApiVersion)
+			apiCall = apiCall.LoginId(loginId)
 		}
 	}
 

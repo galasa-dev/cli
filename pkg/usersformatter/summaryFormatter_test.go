@@ -37,6 +37,19 @@ func CreateMockUser(loginId string, clientName string, lastLogin string) *galasa
 	user.SetLoginId(loginId)
 	user.SetClients([]galasaapi.FrontEndClient{*client, *client2})
 
+	role := galasaapi.NewRBACRole()
+	roleMetadata := galasaapi.NewRBACRoleMetadata()
+	role.Metadata = roleMetadata
+	role.Metadata.SetId("2")
+	role.Metadata.SetName("admin")
+	role.Metadata.SetUrl("http://myhost/api/roles/2")
+	role.Metadata.SetDescription("A test role")
+
+	synthetic := galasaapi.NewUserSynthetics()
+	synthetic.SetRole(*role)
+	synthetic.Role.SetApiVersion("myVersion")
+	user.SetSynthetic(*synthetic)
+
 	return user
 }
 
@@ -58,7 +71,7 @@ func TestUserSummaryFormatterNoDataReturnsTotalCountAllZeros(t *testing.T) {
 func TestTokenSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// Given...
 	formatter := NewUserSummaryFormatter()
-	// No data to format...
+	// No data to format...x
 	users := make([]galasaapi.UserData, 0)
 	user1 := CreateMockUser("test-user", "web-ui", "2023-12-03T18:25:43.511Z")
 	users = append(users, *user1)
@@ -69,8 +82,8 @@ func TestTokenSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		`login-id  web-last-login(UTC) rest-api-last-login(UTC)
-test-user 2023-12-03 18:25    2023-12-03 18:25
+		`login-id  role  web-last-login(UTC) rest-api-last-login(UTC)
+test-user admin 2023-12-03 18:25    2023-12-03 18:25
 
 Total:1
 `
@@ -93,10 +106,10 @@ func TestTokenSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
 	// Then...
 	assert.Nil(t, err)
 	expectedFormattedOutput :=
-		`login-id    web-last-login(UTC) rest-api-last-login(UTC)
-test-user   2023-12-03 18:25    2023-12-03 18:25
-test-user-2 2023-12-03 18:25    2023-12-03 18:25
-test-user-3 2023-12-03 18:25    2023-12-03 18:25
+		`login-id    role  web-last-login(UTC) rest-api-last-login(UTC)
+test-user   admin 2023-12-03 18:25    2023-12-03 18:25
+test-user-2 admin 2023-12-03 18:25    2023-12-03 18:25
+test-user-3 admin 2023-12-03 18:25    2023-12-03 18:25
 
 Total:3
 `
