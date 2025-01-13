@@ -117,6 +117,7 @@ func getTestStructureData(run galasaapi.Run, apiServerUrl string) runsformatter.
 	newFormattableTest.Requestor = run.TestStructure.GetRequestor()
 	newFormattableTest.Bundle = run.TestStructure.GetBundle()
 	newFormattableTest.Methods = run.TestStructure.GetMethods()
+	newFormattableTest.Group = run.TestStructure.GetGroup()
 
 	return newFormattableTest
 }
@@ -160,6 +161,7 @@ func getTestRunData(run TestRun, isLost bool) runsformatter.FormattableTest {
 	newFormattableTest.Bundle = run.Bundle
 	newFormattableTest.Methods = nil
 	newFormattableTest.Lost = isLost
+	newFormattableTest.Group = run.Group
 
 	return newFormattableTest
 }

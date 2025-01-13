@@ -81,8 +81,8 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"
     export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}"
     export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
-    export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="13"
-    export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="10"
+    export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="14"
+    export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="11"
     export GALASA_TEST_RUN_GET_EXPECTED_NUMBER_ARTIFACT_RUNNING_COUNT="10"
 
 fi
@@ -100,6 +100,7 @@ function get_random_property_name_number {
 #-----------------------------------------------------------------------------------------
 function launch_test_on_ecosystem_with_portfolio {
 
+    group_name=$1
     h2 "Building a portfolio..."
 
     mkdir -p ${BASEDIR}/temp
@@ -134,6 +135,7 @@ function launch_test_on_ecosystem_with_portfolio {
     --poll 10 \
     --progress 1 \
     --noexitcodeontestfailures \
+    --group ${group_name} \
     --log -"
 
     info "Command is: $cmd"
@@ -587,7 +589,7 @@ function runs_get_check_summary_format_output {
     fi
 
     # Check headers
-    headers=("submitted-time(UTC)" "name" "status" "result" "test-name")
+    headers=("submitted-time(UTC)" "name" "status" "result" "test-name" "group")
 
     for header in "${headers[@]}"
     do
@@ -653,7 +655,7 @@ function runs_get_check_details_format_output {
         fi
     done
 
-    #check methods start on line 13 - implies other test details have outputted
+    #check methods start on line 14 - implies other test details have outputted
     line_count=$(grep -n "method[[:space:]]*type[[:space:]]*status[[:space:]]*result[[:space:]]*start-time(UTC)[[:space:]]*end-time(UTC)[[:space:]]*duration(ms)" $output_file | head -n1 | sed 's/:.*//')
     expected_line_count=$GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT
     if [[ "${line_count}" != "${expected_line_count}" ]]; then
@@ -692,7 +694,7 @@ function runs_get_check_raw_format_output {
         exit 1
     fi
 
-    # Check that we got 10 pipes
+    # Check that we got 11 pipes
     pipe_count=$(grep -o "|" $output_file | wc -l | xargs)
     expected_pipe_count=$GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT
     if [[ "${pipe_count}" != "${expected_pipe_count}" ]]; then
@@ -893,6 +895,65 @@ function runs_get_check_result_parameter {
 }
 
 #--------------------------------------------------------------------------
+function runs_get_test_can_get_runs_by_group {
+
+    group_name=$1
+    h2 "Performing runs get with details format providing group name '${group_name}'..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BINARY_LOCATION} runs get \
+    --group ${group_name} \
+    --format details \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    grep -q "group[ ]*:[ ]*${group_name}" $output_file
+
+    rc=$?
+
+    if [[ "${rc}" != "0" ]]; then
+        error "Did not find any runs with group name '${group_name}' in output"
+        exit 1
+    fi
+
+    success "galasactl runs get with group name '${group_name}' returned results OK."
+}
+
+#--------------------------------------------------------------------------
+function runs_get_test_non_existant_group_returns_zero {
+
+    group_name="non-existant-group"
+    h2 "Attempting to get runs by a non-existant group name '${group_name}'..."
+
+    cd ${BASEDIR}/temp
+
+    cmd="${BINARY_LOCATION} runs get \
+    --group ${group_name} \
+    --bootstrap ${bootstrap}"
+
+    info "Command is: $cmd"
+
+    output_file="runs-get-output.txt"
+    $cmd | tee $output_file
+
+    grep -q "Total:0" $output_file
+
+    rc=$?
+
+    if [[ "${rc}" != "0" ]]; then
+        error "Found runs with group name '${group_name}' in output when there should not have been any results"
+        exit 1
+    fi
+
+    success "galasactl runs get with non-existant group name '${group_name}' returned no results as expected."
+}
+
+#--------------------------------------------------------------------------
 function launch_test_on_ecosystem_without_portfolio {
     h2 "Launching test on an ecosystem... directly... without a portfolio."
 
@@ -1052,13 +1113,16 @@ function test_runs_commands {
     launch_test_on_ecosystem_without_portfolio
 
     # Launch test on ecosystem from a portfolio ...
-    launch_test_on_ecosystem_with_portfolio
+    group_name="cli-ecosystem-tests"
+    launch_test_on_ecosystem_with_portfolio ${group_name}
 
     # Query the result ... setting RUN_NAME to hold the one which galasa allocated
     get_result_with_runname
     runs_get_check_summary_format_output  $RUN_NAME
     runs_get_check_details_format_output  $RUN_NAME
     runs_get_check_raw_format_output  $RUN_NAME
+    runs_get_test_can_get_runs_by_group ${group_name}
+    runs_get_test_non_existant_group_returns_zero
 
     # Query the result with the age parameter
     runs_get_check_raw_format_output_with_from_and_to $RUN_NAME
@@ -1071,8 +1135,6 @@ function test_runs_commands {
     runs_get_check_requestor_parameter
     runs_get_check_result_parameter
     # Unable to test 'to' age because the smallest time unit we support is Hours so would have to query a test that happened over an hour ago
-
-
 
     # Attempt to create a test portfolio with an unknown test ...
     create_portfolio_with_unknown_test

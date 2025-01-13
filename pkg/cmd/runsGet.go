@@ -28,6 +28,7 @@ type RunsGetCmdValues struct {
 	requestor          string
 	result             string
 	isActiveRuns       bool
+	group              string
 }
 
 type RunsGetCommand struct {
@@ -93,6 +94,8 @@ func (cmd *RunsGetCommand) createCobraCommand(
 	formatters := runs.GetFormatterNamesString(runs.CreateFormatters())
 	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.runName, "name", "", "the name of the test run we want information about."+
 		" Cannot be used in conjunction with --requestor, --result or --active flags")
+	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.group, "group", "", "the name of the group to return tests under that group."+
+		" Cannot be used in conjunction with --name")
 	runsGetCobraCmd.PersistentFlags().StringVar(&cmd.values.age, "age", "", "the age of the test run(s) we want information about. Supported formats are: 'FROM' or 'FROM:TO', where FROM and TO are each ages,"+
 		" made up of an integer and a time-unit qualifier. Supported time-units are "+units+". If missing, the TO part is defaulted to '0h'. Examples: '--age 1d',"+
 		" '--age 6h:1h' (list test runs which happened from 6 hours ago to 1 hour ago)."+
@@ -109,6 +112,7 @@ func (cmd *RunsGetCommand) createCobraCommand(
 	runsGetCobraCmd.MarkFlagsMutuallyExclusive("name", "result")
 	runsGetCobraCmd.MarkFlagsMutuallyExclusive("name", "active")
 	runsGetCobraCmd.MarkFlagsMutuallyExclusive("result", "active")
+	runsGetCobraCmd.MarkFlagsMutuallyExclusive("group", "name")
 
 	runsCommand.CobraCommand().AddCommand(runsGetCobraCmd)
 
@@ -165,6 +169,7 @@ func (cmd *RunsGetCommand) executeRunsGet(
 					cmd.values.result,
 					cmd.values.isActiveRuns,
 					cmd.values.outputFormatString,
+					cmd.values.group,
 					timeService,
 					console,
 					apiServerUrl,

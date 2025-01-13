@@ -13,7 +13,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -47,6 +46,7 @@ func GetRuns(
 	resultParameter string,
 	shouldGetActive bool,
 	outputFormatString string,
+	group string,
 	timeService spi.TimeService,
 	console spi.Console,
 	apiServerUrl string,
@@ -58,20 +58,24 @@ func GetRuns(
 
 	log.Printf("GetRuns entered.")
 
-	if (runName == "") && (age == "") {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_RUNNAME_OR_AGE_SPECIFIED)
+	if runName == "" && age == "" && group == "" {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TEST_RUN_IDENTIFIER_FLAG_SPECIFIED)
 	}
 
-	if (err == nil) && (runName != "") {
+	if err == nil && runName != "" {
 		// Validate the runName as best we can without contacting the ecosystem.
 		err = ValidateRunName(runName)
 	}
 
-	if (err == nil) && (age != "") {
+	if err == nil && age != "" {
 		fromAge, toAge, err = getTimesFromAge(age)
 	}
 
-	if (err == nil) && (resultParameter != "") {
+	if err == nil && group != "" {
+		group, err = validateGroupname(group)
+	}
+
+	if err == nil && resultParameter != "" {
 		if shouldGetActive {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_ACTIVE_AND_RESULT_ARE_MUTUALLY_EXCLUSIVE)
 		}
@@ -85,7 +89,7 @@ func GetRuns(
 		chosenFormatter, err = validateOutputFormatFlagValue(outputFormatString, validFormatters)
 		if err == nil {
 			var runJson []galasaapi.Run
-			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, shouldGetActive, timeService, apiClient)
+			runJson, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAge, toAge, shouldGetActive, timeService, apiClient, group)
 			if err == nil {
 				// Some formatters need extra fields filled-in so they can be displayed.
 				if chosenFormatter.IsNeedingMethodDetails() {
@@ -178,10 +182,10 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 
 	if err == nil {
 		for _, run := range runs {
-            details, err = getRunByRunIdFromRestApi(run.GetRunId(), apiClient, restApiVersion)
-            if err == nil && details != nil {
-                runsDetails = append(runsDetails, *details)
-            }
+			details, err = getRunByRunIdFromRestApi(run.GetRunId(), apiClient, restApiVersion)
+			if err == nil && details != nil {
+				runsDetails = append(runsDetails, *details)
+			}
 		}
 	}
 
@@ -189,99 +193,32 @@ func GetRunDetailsFromRasSearchRuns(runs []galasaapi.Run, apiClient *galasaapi.A
 }
 
 func getRunByRunIdFromRestApi(
-    runId string,
-    apiClient *galasaapi.APIClient,
-    restApiVersion string,
-) (*galasaapi.Run, error) {
-    var err error
-    var details *galasaapi.Run
-    var httpResponse *http.Response
-    var context context.Context = nil
-
-    log.Printf("Getting details for run %v\n", runId)
-    details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runId).ClientApiVersion(restApiVersion).Execute()
-
-    var statusCode int
-    if httpResponse != nil {
-        defer httpResponse.Body.Close()
-        statusCode = httpResponse.StatusCode
-    }
-
-    if err != nil {
-        err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-    } else {
-        if statusCode != http.StatusOK {
-            err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS, strconv.Itoa(httpResponse.StatusCode))
-        }
-    }
-    return details, err
-}
-
-func getRunsPageFromRestApi(
-    pageCursor string,
-	runName string,
-	requestorParameter string,
-	resultParameter string,
-	fromAgeMins int,
-	toAgeMins int,
-    fromTime time.Time,
-    toTime time.Time,
-	shouldGetActive bool,
+	runId string,
 	apiClient *galasaapi.APIClient,
-    restApiVersion string,
-) (*galasaapi.RunResults, error) {
-    var err error
-    var runData *galasaapi.RunResults
-    var httpResponse *http.Response
-    var context context.Context = nil
+	restApiVersion string,
+) (*galasaapi.Run, error) {
+	var err error
+	var details *galasaapi.Run
+	var httpResponse *http.Response
+	var context context.Context = nil
 
-    apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).IncludeCursor("true")
-    if fromAgeMins != 0 {
-        apicall = apicall.From(fromTime)
-    }
-    if toAgeMins != 0 {
-        apicall = apicall.To(toTime)
-    }
-    if runName != "" {
-        apicall = apicall.Runname(runName)
-    }
-    if requestorParameter != "" {
-        apicall = apicall.Requestor(requestorParameter)
-    }
-    if resultParameter != "" {
-        apicall = apicall.Result(resultParameter)
-    }
-    if shouldGetActive {
-        apicall = apicall.Status(activeStatusNames)
-    }
-    if pageCursor != "" {
-        apicall = apicall.Cursor(pageCursor)
-    }
-    apicall = apicall.Sort("from:desc")
-    runData, httpResponse, err = apicall.Execute()
+	log.Printf("Getting details for run %v\n", runId)
+	details, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context, runId).ClientApiVersion(restApiVersion).Execute()
 
-    var statusCode int
-    if httpResponse != nil {
-        defer httpResponse.Body.Close()
-        statusCode = httpResponse.StatusCode
-    }
+	var statusCode int
+	if httpResponse != nil {
+		defer httpResponse.Body.Close()
+		statusCode = httpResponse.StatusCode
+	}
 
-    if err != nil {
-        err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-    } else {
-        if statusCode != http.StatusOK {
-            httpError := "\nhttp response status code: " + strconv.Itoa(statusCode)
-            errString := httpError
-            err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
-        } else {
-
-            log.Printf("HTTP status was OK")
-
-            // Copy the results from this page into our bigger list of results.
-            log.Printf("runsOnThisPage: %v", len(runData.GetRuns()))
-        }
-    }
-    return runData, err
+	if err != nil {
+		err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+	} else {
+		if statusCode != http.StatusOK {
+			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_NON_OK_STATUS, strconv.Itoa(httpResponse.StatusCode))
+		}
+	}
+	return details, err
 }
 
 // Retrieves test runs from the ecosystem API that match a given runName.
@@ -295,60 +232,53 @@ func GetRunsFromRestApi(
 	shouldGetActive bool,
 	timeService spi.TimeService,
 	apiClient *galasaapi.APIClient,
+	group string,
 ) ([]galasaapi.Run, error) {
 
 	var err error
 	var results []galasaapi.Run = make([]galasaapi.Run, 0)
 
-	now := timeService.Now()
-	fromTime := now.Add(-(time.Duration(fromAgeMins) * time.Minute)).UTC() // Add a minus, so subtract
-
-	toTime := now.Add(-(time.Duration(toAgeMins) * time.Minute)).UTC() // Add a minus, so subtract
-
 	var pageNumberWanted int32 = 1
 	gotAllResults := false
 	var restApiVersion string
-	var pageCursor string
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
-
 	if err == nil {
+
+		runsQuery := NewRunsQuery(
+			runName,
+			requestorParameter,
+			resultParameter,
+			group,
+			fromAgeMins,
+			toAgeMins,
+			shouldGetActive,
+			timeService.Now(),
+		)
 
 		for !gotAllResults && err == nil {
 
-            log.Printf("Requesting page '%d' ", pageNumberWanted)
+			log.Printf("Requesting page '%d' ", pageNumberWanted)
 
 			var runData *galasaapi.RunResults
-            runData, err = getRunsPageFromRestApi(
-                pageCursor,
-                runName,
-                requestorParameter,
-                resultParameter,
-                fromAgeMins,
-                toAgeMins,
-                fromTime,
-                toTime,
-                shouldGetActive,
-                apiClient,
-                restApiVersion,
-            )
+			runData, err = runsQuery.GetRunsPageFromRestApi(apiClient, restApiVersion)
 
-            if err == nil {
-                // Add all the runs into our set of results.
-                // Note: The ... syntax means 'all of the array', so they all get appended at once.
-                runsOnThisPage := runData.GetRuns()
-                results = append(results, runsOnThisPage...)
+			if err == nil {
+				// Add all the runs into our set of results.
+				// Note: The ... syntax means 'all of the array', so they all get appended at once.
+				runsOnThisPage := runData.GetRuns()
+				results = append(results, runsOnThisPage...)
 
-                log.Printf("total runs: %v", len(results))
+				log.Printf("total runs: %v", len(results))
 
-                // Have we processed the last page ?
-                if !runData.HasNextCursor() || len(runsOnThisPage) < int(runData.GetPageSize()) {
-                    gotAllResults = true
-                } else {
-                    pageCursor = runData.GetNextCursor()
-                    pageNumberWanted++
-                }
-            }
+				// Have we processed the last page ?
+				if !runData.HasNextCursor() || len(runsOnThisPage) < int(runData.GetPageSize()) {
+					gotAllResults = true
+				} else {
+					runsQuery.SetPageCursor(runData.GetNextCursor())
+					pageNumberWanted++
+				}
+			}
 		}
 	}
 

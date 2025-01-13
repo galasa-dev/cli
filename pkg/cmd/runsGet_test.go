@@ -135,6 +135,25 @@ func TestRunsGetNameFlagReturnsOk(t *testing.T) {
 	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).runName, "gerald")
 }
 
+func TestRunsGetGroupFlagReturnsOk(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+	commandCollection, cmd := setupTestCommandCollection(COMMAND_NAME_RUNS_GET, factory, t)
+
+	var args []string = []string{"runs", "get", "--group", "someGroup"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", factory, t)
+
+	assert.Contains(t, cmd.Values().(*RunsGetCmdValues).group, "someGroup")
+}
+
 func TestRunsGetageFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
@@ -296,4 +315,21 @@ func TestRunsGetResultActiveMutuallyExclusive(t *testing.T) {
 
 	// Check what the user saw is reasonable.
 	checkOutput("", "Error: if any flags in the group [result active] are set none of the others can be; [active result] were all set", factory, t)
+}
+
+func TestRunsGetGroupRunNameMutuallyExclusive(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+
+	var args []string = []string{"runs", "get", "--group", "group-1", "--name", "CV123"}
+
+	// When...
+	err := Execute(factory, args)
+
+	// Then...
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "if any flags in the group [group name] are set none of the others can be; [group name] were all set")
+
+	// Check what the user saw is reasonable.
+	checkOutput("", "Error: if any flags in the group [group name] are set none of the others can be; [group name] were all set", factory, t)
 }
