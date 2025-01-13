@@ -105,7 +105,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1102E: name '{}' is invalid. '--name' is a mandatory flag for this command. Use the --help flag for more information, or refer to the documentation at https://galasa.dev/docs/reference/cli-commands.
 - GAL1103E: Could not query CPS results. Reason: '{}'
 - GAL1104E: Unable to delete the bearer token file '{}'.
-- GAL1105E: Invalid group name provided. Group names must not contain newline or tab characters and must only contain characters in the Latin-1 character set
+- GAL1105E: Invalid group name provided. Group names must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
 - GAL1106E: Could not get security bearer token from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
 - GAL1107E: Could not get security bearer token from file '{}'. Reason: '{}'. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
 - GAL1108E: Invalid bearer token. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked
@@ -168,7 +168,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1169E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1170E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1171E: An attempt to delete a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
-- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.
+- GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
 - GAL1173E: An attempt to delete a secret named '{}' failed. Sending the delete request to the Galasa service failed. Cause is {}
 - GAL1174E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server.
 - GAL1175E: An attempt to get a secret named '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
@@ -205,7 +205,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1206E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1207E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1208E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
-- GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.
+- GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
 - GAL1210E: Role name {} is not known on the Galasa service.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}

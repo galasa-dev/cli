@@ -16,7 +16,7 @@ func validateGroupname(groupName string) (string, error) {
 	var err error
 	trimmedName := strings.TrimSpace(groupName)
 
-	if trimmedName == "" || strings.ContainsAny(trimmedName, " .\n\t") || !utils.IsLatin1(trimmedName) {
+	if trimmedName == "" || !utils.IsNameValid(trimmedName) {
 		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_GROUP_NAME_PROVIDED)
 	}
 	return trimmedName, err

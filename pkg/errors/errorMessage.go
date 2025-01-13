@@ -268,7 +268,7 @@ var (
 	GALASA_ERROR_MISSING_NAME_FLAG                       = NewMessageType("GAL1102E: name '%s' is invalid. '--name' is a mandatory flag for this command."+SEE_COMMAND_REFERENCE, 1102, STACK_TRACE_WANTED)
 	GALASA_ERROR_QUERY_CPS_FAILED                        = NewMessageType("GAL1103E: Could not query CPS results. Reason: '%s'", 1103, STACK_TRACE_WANTED)
 	GALASA_ERROR_UNABLE_TO_DELETE_BEARER_TOKEN_FILE      = NewMessageType("GAL1104E: Unable to delete the bearer token file '%s'.", 1104, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_GROUP_NAME_PROVIDED             = NewMessageType("GAL1105E: Invalid group name provided. Group names must not contain newline or tab characters and must only contain characters in the Latin-1 character set", 1105, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_GROUP_NAME_PROVIDED             = NewMessageType("GAL1105E: Invalid group name provided. Group names must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1105, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_API_SERVER = NewMessageType("GAL1106E: Could not get security bearer token from API server. Reason: '%s'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file", 1106, STACK_TRACE_WANTED)
 	GALASA_ERROR_RETRIEVING_BEARER_TOKEN_FROM_FILE       = NewMessageType("GAL1107E: Could not get security bearer token from file '%s'. Reason: '%s'. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked", 1107, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_BEARER_TOKEN                    = NewMessageType("GAL1108E: Invalid bearer token. Ensure you are authenticated by running 'galasactl auth login' and that your personal access token has not expired or been revoked", 1108, STACK_TRACE_NOT_WANTED)
@@ -346,7 +346,7 @@ var (
 	GALASA_ERROR_DELETE_SECRET_UNPARSEABLE_CONTENT      = NewMessageType("GAL1169E: An attempt to delete a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1169, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_SECRET_SERVER_REPORTED_ERROR    = NewMessageType("GAL1170E: An attempt to delete a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1170, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_SECRET_EXPLANATION_NOT_JSON     = NewMessageType("GAL1171E: An attempt to delete a secret named '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1171, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_INVALID_SECRET_NAME                    = NewMessageType("GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.", 1172, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_SECRET_NAME                    = NewMessageType("GAL1172E: Invalid secret name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1172, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_DELETE_SECRET_REQUEST_FAILED           = NewMessageType("GAL1173E: An attempt to delete a secret named '%s' failed. Sending the delete request to the Galasa service failed. Cause is %v", 1173, STACK_TRACE_NOT_WANTED)
 
 	GALASA_ERROR_GET_SECRET_NO_RESPONSE_CONTENT      = NewMessageType("GAL1174E: An attempt to get a secret named '%s' failed. Unexpected http status code %v received from the server.", 1174, STACK_TRACE_NOT_WANTED)
@@ -391,7 +391,7 @@ var (
 	GALASA_ERROR_GET_ROLES_EXPLANATION_NOT_JSON     = NewMessageType("GAL1208E: Failed to get roles. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1208, STACK_TRACE_NOT_WANTED)
 
 	// When getting a single named role...
-	GALASA_ERROR_INVALID_ROLE_NAME   = NewMessageType("GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.", 1209, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_ROLE_NAME   = NewMessageType("GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1209, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_ROLE_NAME_NOT_FOUND = NewMessageType("GAL1210E: Role name %v is not known on the Galasa service.", 1210, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
