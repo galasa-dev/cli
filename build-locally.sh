@@ -181,6 +181,14 @@ function generate_rest_client {
     rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-log.txt ; error "Failed to generate II the code from the yaml file. rc=${rc}" ; exit 1 ; fi
     rm -f build/generate-log.txt
     success "Code generation part II - OK"
+
+    #--------------------------------------------------------------------------
+    # Invoke the generator again with different parameters
+    h2 "Generate the openapi client go code... part III - fixing it up."
+    ./fix-generated-code.sh 2>&1 > build/generate-fix-log.txt
+    rc=$? ; if [[ "${rc}" != "0" ]]; then cat build/generate-fix-log.txt ; error "Failed to generate III the code. (Fixing it) rc=${rc}" ; exit 1 ; fi
+    rm -f build/generate-fix-log.txt
+    success "Code generation part III - OK"
 }
 
 #--------------------------------------------------------------------------
@@ -632,7 +640,7 @@ function check_secrets {
 clean
 download_dependencies
 generate_rest_client
-go_mod_tidy
+# go_mod_tidy - don't tidy the go.mod as it gets rid of transitive/indirect dependencies.
 build_executables
 
 

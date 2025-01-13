@@ -34,7 +34,7 @@ func (*UserSummaryFormatter) GetName() string {
 }
 
 func (*UserSummaryFormatter) FormatUsers(users []galasaapi.UserData) (string, error) {
-	var result string = ""
+	var result string
 	var err error = nil
 	buff := strings.Builder{}
 	totalUsers := len(users)
@@ -67,8 +67,8 @@ func (*UserSummaryFormatter) FormatUsers(users []galasaapi.UserData) (string, er
 			table = append(table, line)
 		}
 
-		columnLengths := calculateMaxLengthOfEachColumn(table)
-		writeFormattedTableToStringBuilder(table, &buff, columnLengths)
+		columnLengths := utils.CalculateMaxLengthOfEachColumn(table)
+		utils.WriteFormattedTableToStringBuilder(table, &buff, columnLengths)
 
 		buff.WriteString("\n")
 

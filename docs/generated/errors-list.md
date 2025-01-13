@@ -199,6 +199,14 @@ The `galasactl` tool can generate the following errors:
 - GAL1200E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1201E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1202E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1203E: Failed to get roles. Sending the get request to the Galasa service failed. Cause is {}
+- GAL1204E: Failed to get roles. Unexpected http status code {} received from the server.
+- GAL1205E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1206E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1207E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1208E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty, contain spaces or dots (.), and must only contain characters in the Latin-1 character set.
+- GAL1210E: Role name {} is not known on the Galasa service.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

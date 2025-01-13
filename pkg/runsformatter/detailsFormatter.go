@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // -----------------------------------------------------
@@ -38,7 +39,7 @@ func (*DetailsFormatter) IsNeedingMethodDetails() bool {
 }
 
 func (*DetailsFormatter) FormatRuns(runs []FormattableTest) (string, error) {
-	var result string = ""
+	var result string
 	var err error
 
 	totalResults := len(runs)
@@ -54,15 +55,15 @@ func (*DetailsFormatter) FormatRuns(runs []FormattableTest) (string, error) {
 			} else {
 				accumulateResults(resultCountsMap, run)
 				coreDetailsTable := tabulateCoreRunDetails(run)
-				coreDetailsColumnLengths := calculateMaxLengthOfEachColumn(coreDetailsTable)
-				writeFormattedTableToStringBuilder(coreDetailsTable, &buff, coreDetailsColumnLengths)
+				coreDetailsColumnLengths := utils.CalculateMaxLengthOfEachColumn(coreDetailsTable)
+				utils.WriteFormattedTableToStringBuilder(coreDetailsTable, &buff, coreDetailsColumnLengths)
 
 				buff.WriteString("\n")
 
 				methodTable := initialiseMethodTable()
 				methodTable = tabulateRunMethodsToTable(run.Methods, methodTable)
-				methodColumnLengths := calculateMaxLengthOfEachColumn(methodTable)
-				writeFormattedTableToStringBuilder(methodTable, &buff, methodColumnLengths)
+				methodColumnLengths := utils.CalculateMaxLengthOfEachColumn(methodTable)
+				utils.WriteFormattedTableToStringBuilder(methodTable, &buff, methodColumnLengths)
 
 				if i < len(runs)-1 {
 					buff.WriteString("\n---\n\n")

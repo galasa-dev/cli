@@ -54,8 +54,8 @@ func (*TokenSummaryFormatter) FormatTokens(authTokens []galasaapi.AuthToken) (st
 			table = append(table, line)
 		}
 
-		columnLengths := calculateMaxLengthOfEachColumn(table)
-		writeFormattedTableToStringBuilder(table, &buff, columnLengths)
+		columnLengths := utils.CalculateMaxLengthOfEachColumn(table)
+		utils.WriteFormattedTableToStringBuilder(table, &buff, columnLengths)
 
 		buff.WriteString("\n")
 

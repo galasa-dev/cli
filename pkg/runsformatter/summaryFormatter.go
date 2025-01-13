@@ -8,6 +8,8 @@ package runsformatter
 import (
 	"log"
 	"strings"
+
+	"github.com/galasa-dev/cli/pkg/utils"
 )
 
 // -----------------------------------------------------
@@ -61,8 +63,8 @@ func (*SummaryFormatter) FormatRuns(testResultsData []FormattableTest) (string, 
 			}
 		}
 
-		columnLengths := calculateMaxLengthOfEachColumn(table)
-		writeFormattedTableToStringBuilder(table, &buff, columnLengths)
+		columnLengths := utils.CalculateMaxLengthOfEachColumn(table)
+		utils.WriteFormattedTableToStringBuilder(table, &buff, columnLengths)
 
 		buff.WriteString("\n")
 	}
