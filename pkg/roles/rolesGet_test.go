@@ -218,17 +218,10 @@ data:
 
 func TestCanGetARoleByIdWhenRoleDoesNotExistCausesError(t *testing.T) {
 	// Given...
-	roleId := "role1"
-	roleName := "role1Name"
-	description := "role1Description"
 	outputFormat := "summary"
 
 	// Create the test role array to return
-	role := createTestGalasaRole(roleId, roleName, description)
-	roles := make([]galasaapi.RBACRole, 0)
-	roles = append(roles, role)
-	rolesBytes, _ := json.Marshal(roles)
-	rolesJson := string(rolesBytes)
+	rolesJson := "[]"
 
 	// Create the expected HTTP interactions with the API server.
 	// We expect it to call /rbac/roles to get all the roles, then use that to find the one we name.

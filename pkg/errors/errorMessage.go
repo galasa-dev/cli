@@ -394,6 +394,10 @@ var (
 	GALASA_ERROR_INVALID_ROLE_NAME   = NewMessageType("GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1209, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_ROLE_NAME_NOT_FOUND = NewMessageType("GAL1210E: Role name %v is not known on the Galasa service.", 1210, STACK_TRACE_NOT_WANTED)
 
+	// When updating a user
+	GALASA_ERROR_SERVER_USER_NOT_FOUND = NewMessageType("GAL1211E: User with login id %v is not known on the Galasa service.", 1211, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATING_USER_RECORD  = NewMessageType("GAL1212E: Failed to update user record on the Galasa service.", 1212, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 

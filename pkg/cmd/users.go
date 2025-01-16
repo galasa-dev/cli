@@ -12,7 +12,7 @@ import (
 )
 
 type UsersCmdValues struct {
-	name               string
+	name string
 }
 
 type UsersCommand struct {
@@ -81,7 +81,7 @@ func addLoginIdFlag(cmd *cobra.Command, isMandatory bool, userCmdValues *UsersCm
 	flagName := "login-id"
 	var description string
 
-	if isMandatory{
+	if isMandatory {
 		description = "A mandatory field indicating the login ID of a user."
 	} else {
 		description = "An optional field indicating the login ID of a user."

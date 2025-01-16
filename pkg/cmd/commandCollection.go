@@ -65,6 +65,7 @@ const (
 	COMMAND_NAME_SECRETS_DELETE           = "secrets delete"
 	COMMAND_NAME_USERS                    = "users"
 	COMMAND_NAME_USERS_GET                = "users get"
+	COMMAND_NAME_USERS_SET                = "users set"
 	COMMAND_NAME_USERS_DELETE             = "users delete"
 	COMMAND_NAME_ROLES                    = "roles"
 	COMMAND_NAME_ROLES_GET                = "roles get"
@@ -434,6 +435,7 @@ func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, roo
 	var err error
 	var usersCommand spi.GalasaCommand
 	var usersGetCommand spi.GalasaCommand
+	var usersSetCommand spi.GalasaCommand
 	var usersDeleteCommand spi.GalasaCommand
 
 	usersCommand, err = NewUsersCommand(rootCommand, commsFlagSet)
@@ -443,9 +445,13 @@ func (commands *commandCollectionImpl) addUsersCommands(factory spi.Factory, roo
 		if err == nil {
 			usersDeleteCommand, err = NewUsersDeleteCommand(factory, usersCommand, commsFlagSet)
 			if err == nil {
-				commands.commandMap[usersCommand.Name()] = usersCommand
-				commands.commandMap[usersGetCommand.Name()] = usersGetCommand
-				commands.commandMap[usersDeleteCommand.Name()] = usersDeleteCommand
+				usersSetCommand, err = NewUsersSetCommand(factory, usersCommand, commsFlagSet)
+				if err == nil {
+					commands.commandMap[usersCommand.Name()] = usersCommand
+					commands.commandMap[usersGetCommand.Name()] = usersGetCommand
+					commands.commandMap[usersSetCommand.Name()] = usersSetCommand
+					commands.commandMap[usersDeleteCommand.Name()] = usersDeleteCommand
+				}
 			}
 		}
 	}

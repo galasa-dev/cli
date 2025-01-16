@@ -207,6 +207,8 @@ The `galasactl` tool can generate the following errors:
 - GAL1208E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1209E: Invalid role name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
 - GAL1210E: Role name {} is not known on the Galasa service.
+- GAL1211E: User with login id {} is not known on the Galasa service.
+- GAL1212E: Failed to update user record on the Galasa service.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
