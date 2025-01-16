@@ -761,6 +761,33 @@ data:
         - USER_ROLE_UPDATE_ANY
 ```
 
+## users
+A deployed Galasa service has a number of users on the system. These can be queried:
+
+```
+> galasactl users get 
+login-id               role   web-last-login(UTC) rest-api-last-login(UTC)
+user.one@mydomain.com  tester 2025-01-13 15:33
+Jade@mydomain.com      admin  2025-01-13 15:33    2025-01-16 10:47
+mikec@mydomain.com     admin  2025-01-13 15:33    2025-01-16 16:20
+
+Total:3
+```
+
+If you only want get details about a single user:
+```
+> galasactl users get --login-id mikec@mydomain.com
+login-id               role   web-last-login(UTC) rest-api-last-login(UTC)
+mikec@mydomain.com     admin  2025-01-13 15:33    2025-01-16 16:20
+
+Total:1
+```
+
+An administrator can change the role of a user:
+```
+> galasactl users set --login-id user.one@mydomain.com --role tester
+```
+
 ## Reference Material
 
 ### Syntax
