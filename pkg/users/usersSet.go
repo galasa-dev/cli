@@ -11,6 +11,8 @@ import (
 	"log"
 	"net/http"
 
+	"encoding/json"
+
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -33,7 +35,7 @@ func SetUsers(loginId string, roleName string, apiClient *galasaapi.APIClient, c
 			roleId := *roleWithThatName.GetMetadata().Id
 
 			// Send the update to the rest API
-			err = sendUserUpdateToRestApi(userId, roleId, apiClient)
+			_, err = sendUserUpdateToRestApi(userId, roleId, apiClient)
 		}
 	}
 	return err
@@ -59,11 +61,12 @@ func sendUserUpdateToRestApi(
 	userNumber string,
 	roleId string,
 	apiClient *galasaapi.APIClient,
-) error {
+) (*galasaapi.UserData, error) {
 
 	var context context.Context = nil
 	var err error
 	var restApiVersion string
+	var userDataGotBack galasaapi.UserData
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
@@ -88,22 +91,26 @@ func sendUserUpdateToRestApi(
 			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UPDATING_USER_RECORD, err.Error())
 		} else {
 			log.Println("sendUserUpdateToRestApi - User record updated ok.")
+
+			if statusCode == http.StatusOK {
+				err = json.NewDecoder(resp.Body).Decode(&userDataGotBack)
+			}
 		}
 
 	}
 
-	return err
+	return &userDataGotBack, err
 }
 
 func getRoleFromRestApi(
 	roleName string,
 	apiClient *galasaapi.APIClient,
-) (galasaapi.RBACRole, error) {
+) (*galasaapi.RBACRole, error) {
 
 	var context context.Context = nil
 	var err error
 	var restApiVersion string
-	var roleToReturn galasaapi.RBACRole
+	var roleToReturn *galasaapi.RBACRole
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
@@ -131,7 +138,7 @@ func getRoleFromRestApi(
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_ROLE_NAME_NOT_FOUND, roleName)
 			} else {
 				// The role we got back is good.
-				roleToReturn = roles[0]
+				roleToReturn = &(roles[0])
 			}
 		}
 
