@@ -83,32 +83,50 @@ func getRoleFromRestApiGivenName(
 	apiClient *galasaapi.APIClient,
 	byteReader spi.ByteReader,
 ) (*galasaapi.RBACRole, error) {
+
+	var roles []galasaapi.RBACRole
 	var role *galasaapi.RBACRole
+	var httpResponse *http.Response
+	var context context.Context = context.Background()
 
-	// Query all the roles.
-	roles, err := getRolesFromRestApi(apiClient, byteReader)
+	restApiVersion, err := embedded.GetGalasactlRestApiVersion()
 	if err == nil {
-		// Find the one with a matching name, or fail.
-		role, err = findRoleWithName(roles, roleName)
-	}
-	return role, err
-}
+		log.Printf("Getting single role data from remote service\n")
+		roles, httpResponse, err = apiClient.RoleBasedAccessControlAPIApi.GetRBACRoles(context).
+			ClientApiVersion(restApiVersion).
+			Name(roleName).
+			Execute()
 
-func findRoleWithName(roles []galasaapi.RBACRole, roleNameToFind string) (*galasaapi.RBACRole, error) {
-	var roleFound *galasaapi.RBACRole
-	var err error
+		if httpResponse != nil {
+			defer httpResponse.Body.Close()
+		}
 
-	for index, role := range roles {
-		if *role.Metadata.Name == roleNameToFind {
-			roleFound = &roles[index]
+		if err != nil {
+			if httpResponse == nil {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_GET_ROLES_REQUEST_FAILED, err.Error())
+			} else {
+				err = galasaErrors.HttpResponseToGalasaError(
+					httpResponse,
+					"",
+					byteReader,
+					galasaErrors.GALASA_ERROR_GET_ROLES_NO_RESPONSE_CONTENT,
+					galasaErrors.GALASA_ERROR_GET_ROLES_RESPONSE_BODY_UNREADABLE,
+					galasaErrors.GALASA_ERROR_GET_ROLES_UNPARSEABLE_CONTENT,
+					galasaErrors.GALASA_ERROR_GET_ROLES_SERVER_REPORTED_ERROR,
+					galasaErrors.GALASA_ERROR_GET_ROLES_EXPLANATION_NOT_JSON,
+				)
+			}
+		} else {
+			log.Printf("Got back %v roles %v", len(roles), roles)
+			if len(roles) < 1 {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_ROLE_NAME_NOT_FOUND, roleName)
+			} else {
+				role = &roles[0]
+			}
 		}
 	}
 
-	if roleFound == nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_ROLE_NAME_NOT_FOUND, roleNameToFind)
-	}
-
-	return roleFound, err
+	return role, err
 }
 
 func getRolesFromRestApi(

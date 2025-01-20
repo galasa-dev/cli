@@ -9,6 +9,11 @@ import (
 	"github.com/spf13/pflag"
 )
 
+const (
+	MANDATORY_FLAG = true
+	OPTIONAL_FLAG  = false
+)
+
 // ------------------------------------------------------------------------------------------------
 // Objectives
 //   Functions which add a flag to a cobra command in a different way,
@@ -29,5 +34,5 @@ func addRateLimitRetryFlags(flagSet *pflag.FlagSet, maxRetries *int, retryBackof
 			"Defaults to 3 retries")
 
 	flagSet.Float64Var(retryBackoffSeconds, "rate-limit-retry-backoff-secs", float64(1),
-	"The amount of time in seconds to wait before retrying a command if it failed due to rate limits being exceeded. Defaults to 1 second.")
+		"The amount of time in seconds to wait before retrying a command if it failed due to rate limits being exceeded. Defaults to 1 second.")
 }

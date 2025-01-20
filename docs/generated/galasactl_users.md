@@ -27,4 +27,5 @@ Allows interaction with the user servlet to return information about users.
 * [galasactl](galasactl.md)	 - CLI for Galasa
 * [galasactl users delete](galasactl_users_delete.md)	 - Deletes a user by login ID
 * [galasactl users get](galasactl_users_get.md)	 - Get a list of users
+* [galasactl users set](galasactl_users_set.md)	 - Set various mutable fields in a selected user record
 

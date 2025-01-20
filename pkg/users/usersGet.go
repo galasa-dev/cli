@@ -43,7 +43,7 @@ func formatFetchedUsersAndWriteToConsole(users []galasaapi.UserData, console spi
 }
 
 func getUserDataFromRestApi(
-	loginId string,
+	loginId string, // Optional. Could be ""
 	apiClient *galasaapi.APIClient,
 ) ([]galasaapi.UserData, error) {
 
