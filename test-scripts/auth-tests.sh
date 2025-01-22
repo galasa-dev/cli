@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Dummy comment added so I have something benign to commit....
 #
 # Copyright contributors to the Galasa project
 #
