@@ -11,8 +11,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  NAMESPACE: galasa-dev
-  IMAGE_TAG: main
 
 jobs:
   build-cli:
@@ -127,7 +125,7 @@ jobs:
           load: true
           tags: galasactl-ibm-x86_64:test
           build-args: |
-            dockerRepository=ghcr.io
+            dockerRepository=${{ env.REGISTRY }}
             tag=main
 
       - name: Build Docker image for development download site
