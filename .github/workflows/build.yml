@@ -144,8 +144,8 @@ jobs:
           WRITE_GITHUB_PACKAGES_TOKEN: ${{ secrets.WRITE_GITHUB_PACKAGES_TOKEN }}
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ env.WRITE_GITHUB_PACKAGES_USERNAME }}
-          password: ${{ env.WRITE_GITHUB_PACKAGES_TOKEN }}
+          username: ${{ vars.WRITE_GITHUB_PACKAGES_USERNAME }}
+          password: ${{ secrets.WRITE_GITHUB_PACKAGES_TOKEN }}
   
       - name: Extract metadata for galasactl image
         id: metadata-galasactl
@@ -238,8 +238,8 @@ jobs:
           WRITE_GITHUB_PACKAGES_TOKEN: ${{ secrets.WRITE_GITHUB_PACKAGES_TOKEN }}
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ env.WRITE_GITHUB_PACKAGES_USERNAME }}
-          password: ${{ env.WRITE_GITHUB_PACKAGES_TOKEN }}
+          username: ${{ vars.WRITE_GITHUB_PACKAGES_USERNAME }}
+          password: ${{ secrets.WRITE_GITHUB_PACKAGES_TOKEN }}
 
       - name: Extract metadata for galasactl-ibm-testing image
         id: meta
