@@ -65,8 +65,10 @@ func TestSendUpdateOfUserGoodPath(t *testing.T) {
 
 	apiClient := api.InitialiseAPI(server.Server.URL)
 
+	mockByteReader := utils.NewMockByteReader()
+
 	//When
-	updatedUser, err := sendUserUpdateToRestApi("usernumber201", "2", apiClient)
+	updatedUser, err := sendUserUpdateToRestApi("usernumber201", "2", apiClient, "user201loginId", mockByteReader)
 
 	//Then
 	assert.Nil(t, err)
