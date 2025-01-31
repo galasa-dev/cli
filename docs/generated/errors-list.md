@@ -194,11 +194,11 @@ The `galasactl` tool can generate the following errors:
 - GAL1195E: Failed to delete user from database by user number.
 - GAL1196E: The user could not be deleted by login ID because it was not found by the Galasa service. Try listing users using 'galasactl users get' to identify the one you wish to delete
 - GAL1197E: An attempt to delete a user failed. Sending the delete request to the Galasa service failed. Cause is {}
-- GAL1198E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server.
-- GAL1199E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
-- GAL1200E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
-- GAL1201E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
-- GAL1202E: An attempt to delete a user numbered '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1198E: An attempt to delete a user '{}' failed. Unexpected http status code {} received from the server.
+- GAL1199E: An attempt to delete a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1200E: An attempt to delete a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1201E: An attempt to delete a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1202E: An attempt to delete a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1203E: Failed to get roles. Sending the get request to the Galasa service failed. Cause is {}
 - GAL1204E: Failed to get roles. Unexpected http status code {} received from the server.
 - GAL1205E: Failed to get roles. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
@@ -209,6 +209,11 @@ The `galasactl` tool can generate the following errors:
 - GAL1210E: Role name {} is not known on the Galasa service.
 - GAL1211E: User with login id {} is not known on the Galasa service.
 - GAL1212E: Failed to update user record on the Galasa service.
+- GAL1213E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server.
+- GAL1214E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1215E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1216E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1217E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}

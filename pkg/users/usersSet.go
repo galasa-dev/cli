@@ -19,7 +19,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
-func SetUsers(loginId string, roleName string, apiClient *galasaapi.APIClient, console spi.Console) error {
+func SetUsers(loginId string, roleName string, apiClient *galasaapi.APIClient, console spi.Console, byteReader spi.ByteReader) error {
 
 	// We have the role name, but we need the role ID.
 	roleWithThatName, err := getRoleFromRestApi(roleName, apiClient)
@@ -35,7 +35,7 @@ func SetUsers(loginId string, roleName string, apiClient *galasaapi.APIClient, c
 			roleId := *roleWithThatName.GetMetadata().Id
 
 			// Send the update to the rest API
-			_, err = sendUserUpdateToRestApi(userId, roleId, apiClient)
+			_, err = sendUserUpdateToRestApi(userId, roleId, apiClient, loginId, byteReader)
 		}
 	}
 	return err
@@ -61,6 +61,8 @@ func sendUserUpdateToRestApi(
 	userNumber string,
 	roleId string,
 	apiClient *galasaapi.APIClient,
+	loginId string,
+	byteReader spi.ByteReader,
 ) (*galasaapi.UserData, error) {
 
 	var context context.Context = nil
@@ -88,7 +90,26 @@ func sendUserUpdateToRestApi(
 
 		if err != nil {
 			log.Println("sendUserUpdateToRestApi - Failed to update user record on from API server")
-			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UPDATING_USER_RECORD, err.Error())
+
+			if resp == nil {
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_UPDATING_USER_RECORD, err.Error())
+			} else {
+				// Report errors to the user using the user-id rather than the user number, as the
+				// user number means nothing to them.
+				err = galasaErrors.HttpResponseToGalasaError(
+					resp,
+					loginId,
+					byteReader,
+					galasaErrors.GALASA_ERROR_UPDATE_USER_NO_RESPONSE_CONTENT,
+					galasaErrors.GALASA_ERROR_UPDATE_USER_RESPONSE_PAYLOAD_UNREADABLE,
+					galasaErrors.GALASA_ERROR_UPDATE_USER_UNPARSEABLE_CONTENT,
+					galasaErrors.GALASA_ERROR_UPDATE_USER_SERVER_REPORTED_ERROR,
+					galasaErrors.GALASA_ERROR_UPDATE_USER_EXPLANATION_NOT_JSON,
+				)
+			}
+
+			log.Printf("User with user number '%s', was deleted OK.\n", userNumber)
+
 		} else {
 			log.Println("sendUserUpdateToRestApi - User record updated ok.")
 

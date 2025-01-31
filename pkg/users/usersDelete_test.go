@@ -140,7 +140,7 @@ func TestUserDeleteAUserThrowsAnUnexpectedError(t *testing.T) {
 	assert.NotNil(t, err, "DeleteUser returned an unexpected error")
 	assert.Contains(t, err.Error(), strconv.Itoa(http.StatusInternalServerError))
 	assert.Contains(t, err.Error(), "GAL1201E")
-	assert.Contains(t, err.Error(), "An attempt to delete a user numbered 'dummy-doc-id' failed")
+	assert.Contains(t, err.Error(), "An attempt to delete a user", loginId)
 }
 
 func TestUserDeleteAUserNotFoundThrowsError(t *testing.T) {
