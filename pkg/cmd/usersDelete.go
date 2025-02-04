@@ -89,7 +89,7 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 		},
 	}
 
-	addLoginIdFlag(usersDeleteCobraCmd, true, userCommandValues)
+	addLoginIdFlag(usersDeleteCobraCmd, MANDATORY_FLAG, userCommandValues)
 
 	usersCommand.CobraCommand().AddCommand(usersDeleteCobraCmd)
 

@@ -89,4 +89,8 @@ func addLoginIdFlag(cmd *cobra.Command, isMandatory bool, userCmdValues *UsersCm
 
 	cmd.Flags().StringVar(&userCmdValues.name, flagName, "", description)
 
+	if isMandatory {
+		cmd.MarkFlagRequired(flagName)
+	}
+
 }
