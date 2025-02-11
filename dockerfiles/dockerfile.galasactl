@@ -5,8 +5,10 @@ RUN apt-get update \
 
 ARG platform
 
-RUN addgroup galasa && \ 
-    adduser -D -G galasa -h /galasa -s /bin/sh galasa 
+RUN groupadd -r galasa && \
+    useradd -r -g galasa -d /galasa -s /bin/bash galasa && \
+    mkdir -p /galasa && \
+    chown galasa:galasa /galasa
 
 COPY bin/galasactl-${platform} /bin/galasactl
 RUN chmod +x /bin/galasactl
