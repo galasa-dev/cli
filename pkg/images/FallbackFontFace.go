@@ -8,7 +8,6 @@ package images
 import (
 	"image"
 	"io/fs"
-	"path/filepath"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	"golang.org/x/image/font"
@@ -50,7 +49,10 @@ func loadFontsFromDirectory(fileSystem embedded.ReadOnlyFileSystem, fontDirector
 		for _, fontFile := range fontFiles {
 			var fontFace font.Face
 
-			fontFilePath := filepath.Join(fontDirectoryPath, fontFile.Name())
+			// Don't use filepath.Join to build path, as that uses the OS file separator, and
+			// we need to use the file separator from the file system, which may be different.
+			// eg: The embedded file system in golang uses '/' even when on Windows...
+			fontFilePath := fontDirectoryPath + fileSystem.GetFileSeparator() + fontFile.Name()
 			fontFace, err = loadFont(fileSystem, fontFilePath)
 			if err == nil {
 				fonts = append(fonts, fontFace)
