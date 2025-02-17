@@ -316,6 +316,7 @@ func TestCanGetRunGroupStatus(t *testing.T) {
 		"requestor": "unknown",
 		"status": "finished",
 		"result": "Passed",
+		"group": "none",
 		"queued": "2023-02-17T16:24:52.041118Z",
 		"startTime": "2023-02-17T16:24:52.068591Z",
 		"endTime": "2023-02-17T16:24:52.268396Z",
