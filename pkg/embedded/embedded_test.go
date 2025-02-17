@@ -43,9 +43,9 @@ func TestDoesntReReadVersionsFromEmbeddedFSWhenAlreadyKnowAnswers(t *testing.T) 
 	fs.WriteFile(propsFileName, content)
 
 	alreadyKnownVersions := &versions{
-		galasaFrameworkVersion: "myFrameworkVersion",
-		galasaBootJarVersion:   "myBootJarVersion",
-		galasactlVersion:       "myGalasaCtlVersion",
+		galasaFrameworkVersion:  "myFrameworkVersion",
+		galasaBootJarVersion:    "myBootJarVersion",
+		galasactlVersion:        "myGalasaCtlVersion",
 		galasactlRestApiVersion: "myRestApiVersion",
 	}
 

@@ -58,9 +58,11 @@ func deleteUserFromRestApi(
 			if resp == nil {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_USER_FAILED, err.Error())
 			} else {
+				// Report errors to the user using the user-id rather than the user number, as the
+				// user number means nothing to them.
 				err = galasaErrors.HttpResponseToGalasaError(
 					resp,
-					userNumber,
+					user.GetLoginId(),
 					byteReader,
 					galasaErrors.GALASA_ERROR_DELETE_USER_NO_RESPONSE_CONTENT,
 					galasaErrors.GALASA_ERROR_DELETE_USER_RESPONSE_PAYLOAD_UNREADABLE,

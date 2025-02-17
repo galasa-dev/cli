@@ -151,7 +151,8 @@ func (cmd *UsersSetCommand) executeUsersSet(
 
 			if err == nil {
 				// Call to process the command in a unit-testable way.
-				err = users.SetUsers(userCmdValues.name, cmd.values.role, apiClient, console)
+				byteReader := factory.GetByteReader()
+				err = users.SetUsers(userCmdValues.name, cmd.values.role, apiClient, console, byteReader)
 			}
 		}
 	}

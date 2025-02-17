@@ -376,11 +376,11 @@ var (
 	GALASA_ERROR_FAILED_TO_DELETE_USER                   = NewMessageType("GAL1195E: Failed to delete user from database by user number.", 1195, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_SERVER_DELETE_USER_NOT_FOUND            = NewMessageType("GAL1196E: The user could not be deleted by login ID because it was not found by the Galasa service. Try listing users using 'galasactl users get' to identify the one you wish to delete", 1196, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_SERVER_DELETE_USER_FAILED               = NewMessageType("GAL1197E: An attempt to delete a user failed. Sending the delete request to the Galasa service failed. Cause is %v", 1197, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_USER_NO_RESPONSE_CONTENT         = NewMessageType("GAL1198E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server.", 1198, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_USER_RESPONSE_PAYLOAD_UNREADABLE = NewMessageType("GAL1199E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1199, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_USER_UNPARSEABLE_CONTENT         = NewMessageType("GAL1200E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1200, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1201E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1201, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_DELETE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1202E: An attempt to delete a user numbered '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1202, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_NO_RESPONSE_CONTENT         = NewMessageType("GAL1198E: An attempt to delete a user '%s' failed. Unexpected http status code %v received from the server.", 1198, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_RESPONSE_PAYLOAD_UNREADABLE = NewMessageType("GAL1199E: An attempt to delete a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1199, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_UNPARSEABLE_CONTENT         = NewMessageType("GAL1200E: An attempt to delete a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1200, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1201E: An attempt to delete a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1201, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1202E: An attempt to delete a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1202, STACK_TRACE_NOT_WANTED)
 
 	// When getting multiple roles...
 	GALASA_ERROR_GET_ROLES_REQUEST_FAILED           = NewMessageType("GAL1203E: Failed to get roles. Sending the get request to the Galasa service failed. Cause is %v", 1203, STACK_TRACE_NOT_WANTED)
@@ -395,8 +395,13 @@ var (
 	GALASA_ERROR_ROLE_NAME_NOT_FOUND = NewMessageType("GAL1210E: Role name %v is not known on the Galasa service.", 1210, STACK_TRACE_NOT_WANTED)
 
 	// When updating a user
-	GALASA_ERROR_SERVER_USER_NOT_FOUND = NewMessageType("GAL1211E: User with login id %v is not known on the Galasa service.", 1211, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UPDATING_USER_RECORD  = NewMessageType("GAL1212E: Failed to update user record on the Galasa service.", 1212, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_SERVER_USER_NOT_FOUND                   = NewMessageType("GAL1211E: User with login id %v is not known on the Galasa service.", 1211, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATING_USER_RECORD                    = NewMessageType("GAL1212E: Failed to update user record on the Galasa service.", 1212, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_USER_NO_RESPONSE_CONTENT         = NewMessageType("GAL1213E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server.", 1213, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_USER_RESPONSE_PAYLOAD_UNREADABLE = NewMessageType("GAL1214E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1214, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_USER_UNPARSEABLE_CONTENT         = NewMessageType("GAL1215E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1215, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1216E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1216, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1217E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1217, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

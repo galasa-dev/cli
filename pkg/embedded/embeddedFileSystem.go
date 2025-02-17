@@ -15,6 +15,7 @@ import (
 type ReadOnlyFileSystem interface {
 	ReadFile(filePath string) ([]byte, error)
 	ReadDir(directoryPath string) ([]fs.DirEntry, error)
+	GetFileSeparator() string
 }
 
 type EmbeddedFileSystem struct {
@@ -28,9 +29,12 @@ func NewReadOnlyFileSystem() ReadOnlyFileSystem {
 	return &result
 }
 
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 // Interface methods...
-//------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+func (fs *EmbeddedFileSystem) GetFileSeparator() string {
+	return "/"
+}
 
 // The only thing which this class actually supports.
 func (fs *EmbeddedFileSystem) ReadFile(filePath string) ([]byte, error) {
