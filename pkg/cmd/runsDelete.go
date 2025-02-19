@@ -126,7 +126,7 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
 	
-				console := factory.GetStdOutConsole()
+				var console = factory.GetStdOutConsole()
 	
 				apiServerUrl := bootstrapData.ApiServerURL
 				log.Printf("The API server is at '%s'\n", apiServerUrl)

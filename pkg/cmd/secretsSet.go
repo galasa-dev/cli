@@ -90,10 +90,7 @@ func (cmd *SecretsSetCommand) createCobraCmd(
         Long:    "Creates or updates a secret in the credentials store",
         Aliases: []string{COMMAND_NAME_SECRETS_SET},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-            	return cmd.executeSecretsSet(factory, secretsCommand.Values().(*SecretsCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+            return cmd.executeSecretsSet(factory, secretsCommand.Values().(*SecretsCmdValues), commsFlagSetValues)
         },
     }
 
@@ -151,54 +148,73 @@ func (cmd *SecretsSetCommand) executeSecretsSet(
     // Operations on the file system will all be relative to the current folder.
     fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Set secrets from the ecosystem")
-
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
+        commsFlagSetValues.isCapturingLogs = true
+    
+        log.Println("Galasa CLI - Set secrets from the ecosystem")
+    
+        env := factory.GetEnvironment()
+    
+        var galasaHome spi.GalasaHome
+        galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+        if err == nil {
+    
+			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
-		if err == nil {
-
-			var console = factory.GetStdOutConsole()
-
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-			byteReader := factory.GetByteReader()
-
-			if err == nil {
-				err = secrets.SetSecret(
-					secretsCmdValues.name,
-					cmd.values.username,
-					cmd.values.password,
-					cmd.values.token,
-					cmd.values.base64Username,
-					cmd.values.base64Password,
-					cmd.values.base64Token,
-					cmd.values.secretType,
-					cmd.values.description,
-					console,
-					apiClient,
-					byteReader,
-				)
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
 			}
-		}
-	}
+
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
+            if err == nil {
+    
+                var console = factory.GetStdOutConsole()
+    
+                apiServerUrl := bootstrapData.ApiServerURL
+                log.Printf("The API server is at '%s'\n", apiServerUrl)
+    
+                authenticator := factory.GetAuthenticator(
+                    apiServerUrl,
+                    galasaHome,
+                )
+    
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+    
+                byteReader := factory.GetByteReader()
+    
+                if err == nil {
+                    setSecretFunc := func(apiClient *galasaapi.APIClient) error {
+                        return secrets.SetSecret(
+                            secretsCmdValues.name,
+                            cmd.values.username,
+                            cmd.values.password,
+                            cmd.values.token,
+                            cmd.values.base64Username,
+                            cmd.values.base64Password,
+                            cmd.values.base64Token,
+                            cmd.values.secretType,
+                            cmd.values.description,
+                            console,
+                            apiClient,
+                            byteReader,
+                        )
+                    }
+                    err = commsRetrier.ExecuteCommandWithRetries(setSecretFunc)
+                }
+            }
+        }
+    }
 
     return err
 }

@@ -82,10 +82,7 @@ func (cmd *UsersDeleteCommand) createCobraCmd(
 		Long:    "Deletes a single user by their login ID from the ecosystem",
 		Aliases: []string{COMMAND_NAME_USERS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeUsersDelete(factory, usersCommand.Values().(*UsersCmdValues), commsFlagSetValues)
 		},
 	}
 
@@ -107,37 +104,55 @@ func (cmd *UsersDeleteCommand) executeUsersDelete(
 	fileSystem := factory.GetFileSystem()
 	byteReader := factory.GetByteReader()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Delete user from the ecosystem")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		// Read the bootstrap users.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Delete user from the ecosystem")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
+	
+			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
+			}
 
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
-				// Call to process the command in a unit-testable way.
-				err = users.DeleteUser(userCmdValues.name, apiClient, byteReader)
+	
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+	
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+	
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+	
+				if err == nil {
+					deleteUserFunc := func(apiClient *galasaapi.APIClient) error {
+						// Call to process the command in a unit-testable way.
+						return users.DeleteUser(userCmdValues.name, apiClient, byteReader)
+					}
+					err = commsRetrier.ExecuteCommandWithRetries(deleteUserFunc)
+				}
 			}
 		}
 	}

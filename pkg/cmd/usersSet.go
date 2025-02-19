@@ -88,10 +88,7 @@ func (cmd *UsersSetCommand) createCobraCmd(
 		Long:    "Set various mutable fields in a selected user record",
 		Aliases: []string{COMMAND_NAME_USERS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeUsersSet(factory, usersCommand.Values().(*UsersCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeUsersSet(factory, usersCommand.Values().(*UsersCmdValues), commsFlagSetValues)
 		},
 	}
 
@@ -119,40 +116,59 @@ func (cmd *UsersSetCommand) executeUsersSet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Sets properties on an existibg user in the ecosystem")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		// Read the bootstrap users.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Sets properties on an existibg user in the ecosystem")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
+	
+			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-			var console = factory.GetStdOutConsole()
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
+			}
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
-				// Call to process the command in a unit-testable way.
+	
+				var console = factory.GetStdOutConsole()
+	
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+	
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+	
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+				
 				byteReader := factory.GetByteReader()
-				err = users.SetUsers(userCmdValues.name, cmd.values.role, apiClient, console, byteReader)
+
+				if err == nil {
+					setUsersFunc := func(apiClient *galasaapi.APIClient) error {
+						// Call to process the command in a unit-testable way.
+						return users.SetUsers(userCmdValues.name, cmd.values.role, apiClient, console, byteReader)
+					}
+					err = commsRetrier.ExecuteCommandWithRetries(setUsersFunc)
+				}
 			}
 		}
 	}
