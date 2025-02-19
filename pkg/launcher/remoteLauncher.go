@@ -17,14 +17,11 @@ import (
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
-	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // RemoteLauncher A launcher, which launches and monitors tests on a remote ecosystem via HTTP/HTTPS.
 type RemoteLauncher struct {
-	apiClient *galasaapi.APIClient
 	commsRetrier api.CommsRetrier
-	authenticator spi.Authenticator
 }
 
 //----------------------------------------------------------------------------------
@@ -32,20 +29,15 @@ type RemoteLauncher struct {
 //----------------------------------------------------------------------------------
 
 // NewRemoteLauncher create a remote launcher.
-func NewRemoteLauncher(apiServerUrl string, commsRetrier api.CommsRetrier, authenticator spi.Authenticator) (*RemoteLauncher, error) {
-	var err error
+func NewRemoteLauncher(apiServerUrl string, commsRetrier api.CommsRetrier) *RemoteLauncher {
 	log.Printf("NewRemoteLauncher(%s) entered.", apiServerUrl)
 
 	launcher := new(RemoteLauncher)
 
-
-	// An HTTP client which can communicate with the api server in an ecosystem.
-	launcher.authenticator = authenticator
-	
+	// A comms retrier that uses a HTTP client to communicate with the API server in a Galasa service.
 	launcher.commsRetrier = commsRetrier
-	launcher.apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-	return launcher, err
+	
+	return launcher
 }
 
 //----------------------------------------------------------------------------------
@@ -67,7 +59,7 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 			testRuns, httpResponse, err = apiClient.RunsAPIApi.GetRunsGroup(context.TODO(), groupName).ClientApiVersion(restApiVersion).Execute()
 
 			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
-		}, launcher.apiClient, launcher.authenticator)
+		})
 	}
 	return testRuns, err
 }
@@ -110,7 +102,7 @@ func (launcher *RemoteLauncher) SubmitTestRun(
 			resultGroup, httpResponse, err = apiClient.RunsAPIApi.PostSubmitTestRuns(context.TODO(), groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
 
 			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
-		}, launcher.apiClient, launcher.authenticator)
+		})
 	}
 	return resultGroup, err
 }
@@ -128,7 +120,7 @@ func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error
 			rasRun, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context.TODO(), runId).ClientApiVersion(restApiVersion).Execute()
 
 			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
-		}, launcher.apiClient, launcher.authenticator)
+		})
 	}
 	return rasRun, err
 }
@@ -150,7 +142,7 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 				QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream").Suffix("repo").ClientApiVersion(restApiVersion).Execute()
 
 			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
-		}, launcher.apiClient, launcher.authenticator)
+		})
 
 		if err == nil {
 			streams, err = getStreamNamesFromProperties(properties)
@@ -201,7 +193,7 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
 			}
 			return err
-		}, launcher.apiClient, launcher.authenticator)
+		})
 
 		if err == nil {
 			streamLocation :=cpsProperty[0].Data.Value

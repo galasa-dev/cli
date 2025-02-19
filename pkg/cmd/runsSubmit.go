@@ -161,9 +161,10 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
+			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-			// Read the bootstrap properties.
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
 			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
 			var bootstrapData *api.BootstrapData
 			loadBootstrapWithRetriesFunc := func() error {
@@ -185,8 +186,16 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 					apiServerUrl,
 					galasaHome,
 				)
-				launcherInstance, err = launcher.NewRemoteLauncher(apiServerUrl, commsRetrier, authenticator)
+
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+
 				if err == nil {
+					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, commsRetrier)
 
 					validator := runs.NewStreamBasedValidator()
 					err = validator.Validate(cmd.values.TestSelectionFlagValues)

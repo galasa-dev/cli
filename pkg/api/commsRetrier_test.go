@@ -31,7 +31,7 @@ func TestExecuteCommandWithRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
 	now := time.Now()
     timeService := utils.NewOverridableMockTimeService(now)
     mockAuthenticator := utils.NewMockAuthenticator()
-	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+	commsRetrier, _ := NewCommsRetrierWithAPIClient(maxAttempts, float64(retryBackoffSeconds), timeService, mockAuthenticator)
     runCounter := 0
     executionFunc := func(apiClient *galasaapi.APIClient) error {
         runCounter++
@@ -39,7 +39,7 @@ func TestExecuteCommandWithRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRetries(executionFunc, nil, mockAuthenticator)
+    err := commsRetrier.ExecuteCommandWithRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)
@@ -55,10 +55,18 @@ func TestExecuteCommandWithRetriesTriesAgainOnAuthFailure(t *testing.T) {
 	now := time.Now()
     timeService := utils.NewOverridableMockTimeService(now)
 
-    apiClient := InitialiseAPI("my-server-url")
+    oldApiClient := InitialiseAPI("my-server-url")
     newApiClient := InitialiseAPI("my-new-server-url")
     mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(newApiClient)
-	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+
+    commsRetrier := &CommsRetrierImpl{
+        maxAttempts: maxAttempts,
+        retryBackoffSeconds: float64(retryBackoffSeconds),
+        timeService: timeService,
+        apiClient: oldApiClient, // When a new JWT is retrieved, a new API client with that JWT gets created
+        authenticator: mockAuthenticator,
+    }
+
     attemptCounter := 0
     executionFunc := func(apiClient *galasaapi.APIClient) error {
         var err error
@@ -70,13 +78,13 @@ func TestExecuteCommandWithRetriesTriesAgainOnAuthFailure(t *testing.T) {
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRetries(executionFunc, apiClient, mockAuthenticator)
+    err := commsRetrier.ExecuteCommandWithRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)
     assert.Equal(t, 2, attemptCounter, "The execution function should have been run twice")
 	assert.Equal(t, now.Add(10 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
-    assert.Equal(t, newApiClient, apiClient)
+    assert.Equal(t, newApiClient, commsRetrier.apiClient)
 }
 
 func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
@@ -88,7 +96,7 @@ func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
     timeService := utils.NewOverridableMockTimeService(now)
 
     mockAuthenticator := utils.NewMockAuthenticator()
-	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+	commsRetrier, _ := NewCommsRetrierWithAPIClient(maxAttempts, float64(retryBackoffSeconds), timeService, mockAuthenticator)
     attemptCounter := 0
     executionFunc := func(apiClient *galasaapi.APIClient) error {
         var err error
@@ -100,7 +108,7 @@ func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRetries(executionFunc, nil, mockAuthenticator)
+    err := commsRetrier.ExecuteCommandWithRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)

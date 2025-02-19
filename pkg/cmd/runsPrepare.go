@@ -140,7 +140,8 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 
 			if err == nil {
 
-				commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
+				timeService := factory.GetTimeService()
+				commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
 				// Load the bootstrap properties.
 				var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
@@ -160,9 +161,15 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 						galasaHome,
 					)
 
-					var launcherInstance launcher.Launcher
-					launcherInstance, err = launcher.NewRemoteLauncher(apiServerUrl, commsRetrier, authenticator)
+					commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+						commsFlagSetValues.maxRetries,
+						commsFlagSetValues.retryBackoffSeconds,
+						timeService,
+						authenticator,
+					)
+
 					if err == nil {
+						launcherInstance := launcher.NewRemoteLauncher(apiServerUrl, commsRetrier)
 
 						validator := runs.NewStreamBasedValidator()
 						err = validator.Validate(cmd.values.prepareSelectionFlags)

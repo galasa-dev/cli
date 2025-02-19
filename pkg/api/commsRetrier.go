@@ -18,11 +18,14 @@ type CommsRetrierImpl struct {
 	maxAttempts int
 	retryBackoffSeconds float64
 	timeService spi.TimeService
+
+	apiClient *galasaapi.APIClient
+	authenticator spi.Authenticator
 }
 
 type CommsRetrier interface {
 	ExecuteCommandWithRateLimitRetries(commandExecutionFunc func() error) error
-	ExecuteCommandWithRetries(commandExecutionFunc func(apiClient *galasaapi.APIClient) error, apiClient *galasaapi.APIClient, authenticator spi.Authenticator) error
+	ExecuteCommandWithRetries(commandExecutionFunc func(apiClient *galasaapi.APIClient) error) error
 }
 
 func NewCommsRetrier(maxAttempts int, retryBackoffSeconds float64, timeService spi.TimeService) CommsRetrier {
@@ -33,13 +36,34 @@ func NewCommsRetrier(maxAttempts int, retryBackoffSeconds float64, timeService s
 	}
 }
 
+func NewCommsRetrierWithAPIClient(
+	maxAttempts int,
+	retryBackoffSeconds float64,
+	timeService spi.TimeService,
+	authenticator spi.Authenticator,
+) (CommsRetrier, error) {
+	var err error
+	var apiClient *galasaapi.APIClient
+	var commsRetrier CommsRetrier
+
+	apiClient, err = authenticator.GetAuthenticatedAPIClient()
+	if err == nil {
+		commsRetrier = &CommsRetrierImpl{
+			maxAttempts: maxAttempts,
+			retryBackoffSeconds: retryBackoffSeconds,
+			timeService: timeService,
+			authenticator: authenticator,
+			apiClient: apiClient,
+		}
+	}
+	return commsRetrier, err
+}
+
 // ExecuteCommandWithRetries tries to run a given execution function until we've tried enough, it worked, 
 // or it has failed too many times with rate limit or auth issues. If an unauthorized error is encountered,
 // then this function will attempt to re-authenticate with the API server.
 func (retrier *CommsRetrierImpl) ExecuteCommandWithRetries(
 	commandExecutionFunc func(apiClient *galasaapi.APIClient) error,
-	apiClient *galasaapi.APIClient,
-	authenticator spi.Authenticator,
 ) error {
 	var err error
     isDone := false
@@ -50,7 +74,7 @@ func (retrier *CommsRetrierImpl) ExecuteCommandWithRetries(
 
     for !isDone {
 
-        err = commandExecutionFunc(apiClient)
+        err = commandExecutionFunc(retrier.apiClient)
 
         isDone = true
         if err != nil {
@@ -66,11 +90,11 @@ func (retrier *CommsRetrierImpl) ExecuteCommandWithRetries(
 				if galasaError.IsReauthRequired() {
 					log.Printf("Reauthentication required. Login attempt %v/%v", (attempt + 1), maxAttempts)
 					var newApiClient *galasaapi.APIClient
-					newApiClient, err = authenticator.GetAuthenticatedAPIClient()
+					newApiClient, err = retrier.authenticator.GetAuthenticatedAPIClient()
 
 					if err == nil {
 						// Overwrite the API client being used to avoid having to re-authenticate again
-						*apiClient = *newApiClient
+						retrier.apiClient = newApiClient
 						isRetryRequired = true
 					}
 				} else if galasaError.IsRetryRequired() {

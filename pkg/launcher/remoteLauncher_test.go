@@ -127,10 +127,10 @@ func TestGetTestCatalogHttpErrorGetsReported(t *testing.T) {
 
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
-	commsRetrier := api.NewCommsRetrier(0, 0, utils.NewMockTimeService())
 	authenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(0, 0, utils.NewMockTimeService(), authenticator)
 
-	launcher, _ := NewRemoteLauncher(apiServerUrl, commsRetrier, authenticator)
+	launcher := NewRemoteLauncher(apiServerUrl, commsRetrier)
 
 	_, err := launcher.GetTestCatalog("myStream")
 
@@ -193,18 +193,18 @@ func TestGetRunsByGroupWithInvalidBearerTokenGetsNewTokenOk(t *testing.T) {
     defer server.Server.Close()
 
 	apiServerUrl := server.Server.URL
-	commsRetrier := api.NewCommsRetrier(3, 0, utils.NewMockTimeService())
 	mockFileSystem := files.NewMockFileSystem()
 	mockEnvironment := utils.NewMockEnv()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 	mockTimeService := utils.NewMockTimeService()
 	jwtCache := auth.NewJwtCache(mockFileSystem, mockGalasaHome, mockTimeService)
-
-	authenticator := auth.NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, jwtCache)
-
+	
 	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/galasactl.properties", "GALASA_TOKEN=my:token")
 
-	launcher, _ := NewRemoteLauncher(apiServerUrl, commsRetrier, authenticator)
+	authenticator := auth.NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, jwtCache)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(3, 0, utils.NewMockTimeService(), authenticator)
+
+	launcher := NewRemoteLauncher(apiServerUrl, commsRetrier)
 
 	_, err := launcher.GetRunsByGroup(groupId)
 
