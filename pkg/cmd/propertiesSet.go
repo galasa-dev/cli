@@ -87,10 +87,7 @@ func (cmd *PropertiesSetCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties set"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executePropertiesSet(factory, propertiesCmdValues, commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executePropertiesSet(factory, propertiesCmdValues, commsFlagSetValues)
 		},
 	}
 
@@ -117,42 +114,62 @@ func (cmd *PropertiesSetCommand) executePropertiesSet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Set ecosystem properties")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Set ecosystem properties")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
+	
+			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
+			}
 
-			var apiClient *galasaapi.APIClient
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
-				// Call to process the command in a unit-testable way.
-				err = properties.SetProperty(
-					propertiesCmdValues.namespace,
-					propertiesCmdValues.propertyName,
-					cmd.values.propertyValue,
-					apiClient)
+	
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+	
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+	
+				if err == nil {
+					setPropertyFunc := func(apiClient *galasaapi.APIClient) error {
+						// Call to process the command in a unit-testable way.
+						return properties.SetProperty(
+							propertiesCmdValues.namespace,
+							propertiesCmdValues.propertyName,
+							cmd.values.propertyValue,
+							apiClient)
+					}
+					err = commsRetrier.ExecuteCommandWithRetries(setPropertyFunc)
+				}
 			}
 		}
 	}
+
 	return err
 }
