@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/spi"
 	"github.com/galasa-dev/cli/pkg/utils"
@@ -83,10 +82,7 @@ func (cmd *RunsGetCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs get"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeRunsGet(factory, commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeRunsGet(factory, commsFlagSetValues)
 		},
 	}
 
@@ -129,55 +125,70 @@ func (cmd *RunsGetCommand) executeRunsGet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Get info about a run")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Get info about a run")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			var console = factory.GetStdOutConsole()
 			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
+			}
 
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
-				// Call to process the command in a unit-testable way.
-				err = runs.GetRuns(
-					cmd.values.runName,
-					cmd.values.age,
-					cmd.values.requestor,
-					cmd.values.result,
-					cmd.values.isActiveRuns,
-					cmd.values.outputFormatString,
-					cmd.values.group,
-					timeService,
-					console,
+	
+				console := factory.GetStdOutConsole()
+	
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+	
+				authenticator := factory.GetAuthenticator(
 					apiServerUrl,
-					apiClient,
+					galasaHome,
 				)
+	
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+
+				if err == nil {
+					// Call to process the command in a unit-testable way.
+					err = runs.GetRuns(
+						cmd.values.runName,
+						cmd.values.age,
+						cmd.values.requestor,
+						cmd.values.result,
+						cmd.values.isActiveRuns,
+						cmd.values.outputFormatString,
+						cmd.values.group,
+						timeService,
+						console,
+						apiServerUrl,
+						commsRetrier,
+					)
+				}
 			}
 		}
 	}
+
 
 	log.Printf("executeRunsGet returning %v", err)
 	return err

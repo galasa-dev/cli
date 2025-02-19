@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -32,7 +33,7 @@ func DownloadArtifacts(
 	fileSystem spi.FileSystem,
 	timeService spi.TimeService,
 	console spi.Console,
-	apiClient *galasaapi.APIClient,
+	commsRetrier api.CommsRetrier,
 	runDownloadTargetFolder string,
 ) error {
 
@@ -49,7 +50,7 @@ func DownloadArtifacts(
 		fromAgeHours := 0
 		toAgeHours := 0
 		shouldGetActive := false
-		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, apiClient, group)
+		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsRetrier, group)
 		if err == nil {
 			if len(runs) > 1 {
 				// get list of runs that are reRuns - get list of runs that are reRuns of each other
@@ -60,7 +61,7 @@ func DownloadArtifacts(
 					reRunsByQueuedTime,
 					forceDownload,
 					fileSystem,
-					apiClient,
+					commsRetrier,
 					console,
 					timeService,
 					runDownloadTargetFolder,
@@ -70,7 +71,7 @@ func DownloadArtifacts(
 				var folderName string
 				folderName, err = nameDownloadFolder(runs[0], runName, timeService)
 				if err == nil {
-					err = downloadArtifactsAndRenderImagesToDirectory(apiClient, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
+					err = downloadArtifactsAndRenderImagesToDirectory(commsRetrier, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
 				}
 			} else {
 				log.Printf("No artifacts to download for run: '%s'\n", runName)
@@ -86,7 +87,7 @@ func downloadReRunArtfifacts(
 	reRunsByQueuedTime map[string][]galasaapi.Run,
 	forceDownload bool,
 	fileSystem spi.FileSystem,
-	apiClient *galasaapi.APIClient,
+	commsRetrier api.CommsRetrier,
 	console spi.Console,
 	timeService spi.TimeService,
 	runDownloadTargetFolder string,
@@ -98,7 +99,7 @@ func downloadReRunArtfifacts(
 				if err == nil {
 					directoryName := nameReRunArtifactDownloadDirectory(reRun, reRunIndex, timeService)
 					err = downloadArtifactsAndRenderImagesToDirectory(
-						apiClient,
+						commsRetrier,
 						directoryName,
 						reRun,
 						fileSystem,
@@ -158,7 +159,8 @@ func nameDownloadFolder(run galasaapi.Run, runName string, timeService spi.TimeS
 	return directoryName, err
 }
 
-func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
+func downloadArtifactsAndRenderImagesToDirectory(
+	commsRetrier api.CommsRetrier,
 	directoryName string,
 	run galasaapi.Run,
 	fileSystem spi.FileSystem,
@@ -177,7 +179,7 @@ func downloadArtifactsAndRenderImagesToDirectory(apiClient *galasaapi.APIClient,
 	}
 
 	var filePathsCreated []string
-	filePathsCreated, err = downloadArtifactsToDirectory(apiClient, directoryName, run, fileSystem, forceDownload, console)
+	filePathsCreated, err = downloadArtifactsToDirectory(commsRetrier, directoryName, run, fileSystem, forceDownload, console)
 
 	if err == nil {
 		renderImages(fileSystem, filePathsCreated, forceDownload)
@@ -208,7 +210,8 @@ func renderImages(fileSystem spi.FileSystem, filePathsCreated []string, forceOve
 	return err
 }
 
-func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
+func downloadArtifactsToDirectory(
+	commsRetrier api.CommsRetrier,
 	directoryName string,
 	run galasaapi.Run,
 	fileSystem spi.FileSystem,
@@ -221,14 +224,14 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 
 	filesWrittenOkCount := 0
 
-	artifactPaths, err := GetArtifactPathsFromRestApi(runId, apiClient)
+	artifactPaths, err := GetArtifactPathsFromRestApi(runId, commsRetrier)
 	if err == nil {
 		for _, artifactPath := range artifactPaths {
 			if err == nil {
 				var artifactData io.Reader
 				var httpResponse *http.Response
 				var isArtifactDataEmpty bool
-				artifactData, isArtifactDataEmpty, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), apiClient)
+				artifactData, isArtifactDataEmpty, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), commsRetrier)
 				if err == nil {
 					if !isArtifactDataEmpty {
 
@@ -269,7 +272,7 @@ func downloadArtifactsToDirectory(apiClient *galasaapi.APIClient,
 }
 
 // Retrieves the paths of all artifacts for a given test run using its runId.
-func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) ([]string, error) {
+func GetArtifactPathsFromRestApi(runId string, commsRetrier api.CommsRetrier) ([]string, error) {
 
 	var err error
 	var artifactPaths []string
@@ -279,29 +282,32 @@ func GetArtifactPathsFromRestApi(runId string, apiClient *galasaapi.APIClient) (
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-
-		var httpResponse *http.Response
-		var artifactsList []galasaapi.ArtifactIndexEntry
-
-		artifactsList, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
-			GetRasRunArtifactList(context.Background(), runId).
-			ClientApiVersion(restApiVersion).
-			Execute()
-
-		var statusCode int
-		if httpResponse != nil {
-			defer httpResponse.Body.Close()
-			statusCode = httpResponse.StatusCode
-		}
-
-		if err != nil {
-			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED, err.Error())
-		} else {
-			for _, artifact := range artifactsList {
-				artifactPaths = append(artifactPaths, artifact.GetPath())
+		err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+			var err error
+			var httpResponse *http.Response
+			var artifactsList []galasaapi.ArtifactIndexEntry
+	
+			artifactsList, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
+				GetRasRunArtifactList(context.Background(), runId).
+				ClientApiVersion(restApiVersion).
+				Execute()
+	
+			var statusCode int
+			if httpResponse != nil {
+				defer httpResponse.Body.Close()
+				statusCode = httpResponse.StatusCode
 			}
-		}
-		log.Printf("%v artifact path(s) found\n", len(artifactPaths))
+	
+			if err != nil {
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RETRIEVING_ARTIFACTS_FAILED, err.Error())
+			} else {
+				for _, artifact := range artifactsList {
+					artifactPaths = append(artifactPaths, artifact.GetPath())
+				}
+			}
+			log.Printf("%v artifact path(s) found\n", len(artifactPaths))
+			return err
+		})
 	}
 
 	return artifactPaths, err
@@ -419,7 +425,7 @@ func CreateEmptyArtifactFile(fileSystem spi.FileSystem, targetFilePath string) (
 
 // GetFileFromRestApi Retrieves an artifact for a given test run using its runId from the ecosystem API.
 // Note: The call leaves closing the http request as a responsibility of the caller.
-func GetFileFromRestApi(runId string, artifactPath string, apiClient *galasaapi.APIClient) (io.Reader, bool, *http.Response, error) {
+func GetFileFromRestApi(runId string, artifactPath string, commsRetrier api.CommsRetrier) (io.Reader, bool, *http.Response, error) {
 
 	var err error
 	isFileEmpty := false
@@ -432,27 +438,31 @@ func GetFileFromRestApi(runId string, artifactPath string, apiClient *galasaapi.
 
 	if err == nil {
 
-		fileDownloaded, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
-			GetRasRunArtifactByPath(context.Background(), runId, artifactPath).
-			ClientApiVersion(restApiVersion).
-			Execute()
-
-		var statusCode int
-		if httpResponse != nil {
-			statusCode = httpResponse.StatusCode
-		}
-
-		if err != nil {
-			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
-			log.Printf("Failed to download artifact. %s\n", err.Error())
-		} else {
-			log.Printf("Artifact '%s' http response from API server OK\n", artifactPath)
-
-			if fileDownloaded == nil {
-				log.Printf("Artifact '%s' http response returned nil file content.\n", artifactPath)
-				isFileEmpty = true
+		err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+			var err error
+			fileDownloaded, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
+				GetRasRunArtifactByPath(context.Background(), runId, artifactPath).
+				ClientApiVersion(restApiVersion).
+				Execute()
+	
+			var statusCode int
+			if httpResponse != nil {
+				statusCode = httpResponse.StatusCode
 			}
-		}
+	
+			if err != nil {
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
+				log.Printf("Failed to download artifact. %s\n", err.Error())
+			} else {
+				log.Printf("Artifact '%s' http response from API server OK\n", artifactPath)
+	
+				if fileDownloaded == nil {
+					log.Printf("Artifact '%s' http response returned nil file content.\n", artifactPath)
+					isFileEmpty = true
+				}
+			}
+			return err
+		})
 	}
 
 	return fileDownloaded, isFileEmpty, httpResponse, err

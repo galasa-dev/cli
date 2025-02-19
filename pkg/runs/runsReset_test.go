@@ -90,9 +90,11 @@ func TestRunsResetWithOneActiveRunReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
 
 	// Then...
 	assert.Nil(t, err)
@@ -116,9 +118,11 @@ func TestRunsResetWithMultipleActiveRunsReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
 
 	// Then...
 	assert.Nil(t, err)
@@ -142,9 +146,11 @@ func TestRunsResetWithNoActiveRunReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1132")
@@ -166,9 +172,11 @@ func TestRunsResetWithInvalidRunNameReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1075")
@@ -190,9 +198,11 @@ func TestRunsResetWhereOperationFailedServerSideReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
 
 	// Then...
 	assert.Error(t, err)
@@ -214,9 +224,11 @@ func TestRunsResetWhereServerSideResponseCannotBeParsedReturnsError(t *testing.T
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
 
 	// Then...
 	assert.Error(t, err)

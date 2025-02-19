@@ -260,9 +260,11 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedSummary(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	// We expect
@@ -302,9 +304,11 @@ func TestRunsGetOfRunNameWhichDoesNotExistProducesError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	// We expect
@@ -337,9 +341,11 @@ func TestRunsGetWhereRunNameExistsTwiceProducesTwoRunResultLines(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	// We expect
@@ -366,6 +372,7 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 	}))
 	defer server.Close()
 
+	group := ""
 	age := ""
 	runName := "garbage"
 	requestor := ""
@@ -377,10 +384,11 @@ func TestFailingGetRunsRequestReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	group := ""
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1075")
@@ -418,9 +426,11 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedDetails(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	// We expect
@@ -484,9 +494,11 @@ func TestAPIInternalErrorIsHandledOk(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	// We expect
@@ -518,9 +530,11 @@ func TestRunsGetOfRunNameWhichExistsProducesExpectedRaw(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	// We expect
@@ -654,9 +668,11 @@ func TestRunsGetURLQueryWithFromAndToDate(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -688,9 +704,11 @@ func TestRunsGetURLQueryJustFromAge(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -722,9 +740,11 @@ func TestRunsGetURLQueryWithNoRunNameAndNoFromAgeReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.NotNil(t, err)
@@ -757,9 +777,11 @@ func TestRunsGetURLQueryWithOlderToAgeThanFromAgeReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.NotNil(t, err)
@@ -792,9 +814,11 @@ func TestRunsGetURLQueryWithBadlyFormedFromAndToParameterReturnsError(t *testing
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.NotNil(t, err)
@@ -982,9 +1006,11 @@ func TestRunsGetURLQueryWithRequestorNotSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1018,9 +1044,11 @@ func TestRunsGetURLQueryWithRequestorSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1054,9 +1082,11 @@ func TestRunsGetURLQueryWithNumericRequestorSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1090,9 +1120,11 @@ func TestRunsGetURLQueryWithDashInRequestorSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1126,9 +1158,11 @@ func TestRunsGetURLQueryWithAmpersandRequestorSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1163,9 +1197,11 @@ func TestRunsGetURLQueryWithSpecialCharactersRequestorSuppliedReturnsOK(t *testi
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1193,9 +1229,11 @@ func TestRunsGetURLQueryWithResultSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1225,10 +1263,12 @@ func TestRunsGetURLQueryWithMultipleResultSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
 
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1258,9 +1298,11 @@ func TestRunsGetURLQueryWithResultNotSuppliedReturnsOK(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1288,9 +1330,11 @@ func TestRunsGetURLQueryWithInvalidResultSuppliedReturnsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Error(t, err)
@@ -1320,9 +1364,11 @@ func TestActiveAndResultAreMutuallyExclusiveShouldReturnError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Error(t, err)
@@ -1351,9 +1397,11 @@ func TestActiveParameterReturnsOk(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1390,9 +1438,11 @@ func TestRunsGetActiveRunsBuildsQueryCorrectly(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then ...
 	assert.Nil(t, err)
@@ -1424,9 +1474,11 @@ func TestRunsGetWithNextCursorGetsNextPageOfRuns(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	assert.Nil(t, err)
@@ -1461,9 +1513,11 @@ func TestRunsGetOfGroupWhichExistsProducesExpectedRaw(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	// We expect
@@ -1499,9 +1553,11 @@ func TestRunsGetWithBadGroupNameThrowsError(t *testing.T) {
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
+	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
+	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
 
 	// When...
-	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, apiClient)
+	err := GetRuns(runName, age, requestor, result, shouldGetActive, outputFormat, group, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
 
 	// Then...
 	assert.NotNil(t, err, "A non-Latin-1 group name should throw an error")

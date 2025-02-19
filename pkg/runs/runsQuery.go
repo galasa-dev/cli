@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
@@ -61,62 +62,67 @@ func (query *RunsQuery) SetPageCursor(newPageCursor string) {
 }
 
 func (query *RunsQuery) GetRunsPageFromRestApi(
-    apiClient *galasaapi.APIClient,
+    commsRetrier api.CommsRetrier,
     restApiVersion string,
 ) (*galasaapi.RunResults, error) {
     var err error
     var runData *galasaapi.RunResults
-    var httpResponse *http.Response
-    var context context.Context = nil
 
-    apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).IncludeCursor("true")
-    if !query.fromTime.IsZero() {
-        apicall = apicall.From(query.fromTime)
-    }
-    if !query.toTime.IsZero() {
-        apicall = apicall.To(query.toTime)
-    }
-    if query.runName != "" {
-        apicall = apicall.Runname(query.runName)
-    }
-    if query.requestor != "" {
-        apicall = apicall.Requestor(query.requestor)
-    }
-    if query.result != "" {
-        apicall = apicall.Result(query.result)
-    }
-    if query.shouldGetActive {
-        apicall = apicall.Status(activeStatusNames)
-    }
-    if query.pageCursor != "" {
-        apicall = apicall.Cursor(query.pageCursor)
-    }
-    if query.group != "" {
-        apicall = apicall.Group(query.group)
-    }
-    apicall = apicall.Sort("from:desc")
-    runData, httpResponse, err = apicall.Execute()
-
-    var statusCode int
-    if httpResponse != nil {
-        defer httpResponse.Body.Close()
-        statusCode = httpResponse.StatusCode
-    }
-
-    if err != nil {
-        err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
-    } else {
-        if statusCode != http.StatusOK {
-            httpError := "\nhttp response status code: " + strconv.Itoa(statusCode)
-            errString := httpError
-            err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
-        } else {
-
-            log.Printf("HTTP status was OK")
-
-            // Copy the results from this page into our bigger list of results.
-            log.Printf("runsOnThisPage: %v", len(runData.GetRuns()))
+    err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+        var err error
+        var httpResponse *http.Response
+        var context context.Context = nil
+    
+        apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).IncludeCursor("true")
+        if !query.fromTime.IsZero() {
+            apicall = apicall.From(query.fromTime)
         }
-    }
+        if !query.toTime.IsZero() {
+            apicall = apicall.To(query.toTime)
+        }
+        if query.runName != "" {
+            apicall = apicall.Runname(query.runName)
+        }
+        if query.requestor != "" {
+            apicall = apicall.Requestor(query.requestor)
+        }
+        if query.result != "" {
+            apicall = apicall.Result(query.result)
+        }
+        if query.shouldGetActive {
+            apicall = apicall.Status(activeStatusNames)
+        }
+        if query.pageCursor != "" {
+            apicall = apicall.Cursor(query.pageCursor)
+        }
+        if query.group != "" {
+            apicall = apicall.Group(query.group)
+        }
+        apicall = apicall.Sort("from:desc")
+        runData, httpResponse, err = apicall.Execute()
+    
+        var statusCode int
+        if httpResponse != nil {
+            defer httpResponse.Body.Close()
+            statusCode = httpResponse.StatusCode
+        }
+    
+        if err != nil {
+            err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+        } else {
+            if statusCode != http.StatusOK {
+                httpError := "\nhttp response status code: " + strconv.Itoa(statusCode)
+                errString := httpError
+                err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
+            } else {
+    
+                log.Printf("HTTP status was OK")
+    
+                // Copy the results from this page into our bigger list of results.
+                log.Printf("runsOnThisPage: %v", len(runData.GetRuns()))
+            }
+        }
+        return err
+    })
     return runData, err
 }
