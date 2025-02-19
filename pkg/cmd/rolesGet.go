@@ -82,10 +82,7 @@ func (cmd *RolesGetCommand) createCobraCmd(
 		Long:    "Get a list of Roles from a Galasa service",
 		Aliases: []string{COMMAND_NAME_ROLES_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeRolesGet(factory, RolesCommand.Values().(*RolesCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeRolesGet(factory, RolesCommand.Values().(*RolesCmdValues), commsFlagSetValues)
 		},
 	}
 
@@ -109,38 +106,57 @@ func (cmd *RolesGetCommand) executeRolesGet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Get Roles from the ecosystem")
-
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Get Roles from the ecosystem")
+	
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			var console = factory.GetStdOutConsole()
+			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
+			}
 
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-			byteReader := factory.GetByteReader()
-
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
-				err = roles.GetRoles(RolesCmdValues.name, cmd.values.outputFormat, console, apiClient, byteReader)
+	
+				var console = factory.GetStdOutConsole()
+	
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+	
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+
+				byteReader := factory.GetByteReader()
+	
+				if err == nil {
+					getRolesFunc := func(apiClient *galasaapi.APIClient) error {
+						return roles.GetRoles(RolesCmdValues.name, cmd.values.outputFormat, console, apiClient, byteReader)
+					}
+					err = commsRetrier.ExecuteCommandWithRetries(getRolesFunc)
+				}
 			}
 		}
 	}

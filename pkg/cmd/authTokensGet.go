@@ -87,10 +87,7 @@ func (cmd *AuthTokensGetCommand) createCobraCmd(
 		Long:    "Get a list of tokens used for authentication with the Galasa API server",
 		Aliases: []string{COMMAND_NAME_AUTH_TOKENS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeAuthTokensGet(factory, authTokensCommand.Values().(*AuthTokensCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeAuthTokensGet(factory, authTokensCommand.Values().(*AuthTokensCmdValues), commsFlagSetValues)
 		},
 	}
 
@@ -110,38 +107,56 @@ func (cmd *AuthTokensGetCommand) executeAuthTokensGet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Get tokens from the ecosystem")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Get tokens from the ecosystem")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			var console = factory.GetStdOutConsole()
+			timeService := factory.GetTimeService()
+			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
+			// Read the bootstrap properties, retrying if a rate limit has been exceeded
+			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
+			var bootstrapData *api.BootstrapData
+			loadBootstrapWithRetriesFunc := func() error {
+				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+				return err
+			}
 
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
-				galasaHome,
-			)
-
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
+			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
-				err = auth.GetTokens(apiClient, console, authTokenCmdValues.loginId)
+	
+				var console = factory.GetStdOutConsole()
+	
+				apiServerUrl := bootstrapData.ApiServerURL
+				log.Printf("The API server is at '%s'\n", apiServerUrl)
+	
+				authenticator := factory.GetAuthenticator(
+					apiServerUrl,
+					galasaHome,
+				)
+
+				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					timeService,
+					authenticator,
+				)
+
+				if err == nil {
+					getTokensFunc := func(apiClient *galasaapi.APIClient) error {
+						return auth.GetTokens(apiClient, console, authTokenCmdValues.loginId)
+					}
+					err = commsRetrier.ExecuteCommandWithRetries(getTokensFunc)
+				}
 			}
 		}
 	}
