@@ -11,12 +11,17 @@ import (
 )
 
 type MockAuthenticator struct {
+	apiClient *galasaapi.APIClient
 }
 
 func NewMockAuthenticator() spi.Authenticator {
+	return NewMockAuthenticatorWithAPIClient(nil)
+}
+
+func NewMockAuthenticatorWithAPIClient(apiClient *galasaapi.APIClient) spi.Authenticator {
 
 	authenticator := new(MockAuthenticator)
-
+	authenticator.apiClient = apiClient
 	return authenticator
 }
 
@@ -29,9 +34,8 @@ func (authenticator *MockAuthenticator) GetBearerToken() (string, error) {
 
 // Gets a new authenticated API client, attempting to log in if a bearer token file does not exist
 func (authenticator *MockAuthenticator) GetAuthenticatedAPIClient() (*galasaapi.APIClient, error) {
-	var apiClient *galasaapi.APIClient = nil
 	var err error
-	return apiClient, err
+	return authenticator.apiClient, err
 }
 
 // Login - performs all the logic to implement the `galasactl auth login` command

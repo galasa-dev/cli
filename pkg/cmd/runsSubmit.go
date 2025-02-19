@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
@@ -182,14 +181,12 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 				// The launcher we are going to use to start/monitor tests.
 				apiServerUrl := bootstrapData.ApiServerURL
 
-				var apiClient *galasaapi.APIClient
 				authenticator := factory.GetAuthenticator(
 					apiServerUrl,
 					galasaHome,
 				)
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
+				launcherInstance, err = launcher.NewRemoteLauncher(apiServerUrl, commsRetrier, authenticator)
 				if err == nil {
-					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient, commsRetrier)
 
 					validator := runs.NewStreamBasedValidator()
 					err = validator.Validate(cmd.values.TestSelectionFlagValues)

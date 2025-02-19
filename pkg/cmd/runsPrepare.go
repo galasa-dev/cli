@@ -11,7 +11,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -155,22 +154,22 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 				if err == nil {
 
 					// Create an API client
-					var apiClient *galasaapi.APIClient
 					apiServerUrl := bootstrapData.ApiServerURL
 					authenticator := factory.GetAuthenticator(
 						apiServerUrl,
 						galasaHome,
 					)
-					apiClient, err = authenticator.GetAuthenticatedAPIClient()
+
+					var launcherInstance launcher.Launcher
+					launcherInstance, err = launcher.NewRemoteLauncher(apiServerUrl, commsRetrier, authenticator)
 					if err == nil {
-						launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient, commsRetrier)
 
 						validator := runs.NewStreamBasedValidator()
 						err = validator.Validate(cmd.values.prepareSelectionFlags)
 						if err == nil {
 
 							var testSelection runs.TestSelection
-							testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
+							testSelection, err = runs.SelectTests(launcherInstance, cmd.values.prepareSelectionFlags)
 							if err == nil {
 
 								count := len(testSelection.Classes)

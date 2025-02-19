@@ -17,12 +17,14 @@ import (
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
+	"github.com/galasa-dev/cli/pkg/spi"
 )
 
 // RemoteLauncher A launcher, which launches and monitors tests on a remote ecosystem via HTTP/HTTPS.
 type RemoteLauncher struct {
 	apiClient *galasaapi.APIClient
 	commsRetrier api.CommsRetrier
+	authenticator spi.Authenticator
 }
 
 //----------------------------------------------------------------------------------
@@ -30,17 +32,20 @@ type RemoteLauncher struct {
 //----------------------------------------------------------------------------------
 
 // NewRemoteLauncher create a remote launcher.
-func NewRemoteLauncher(apiServerUrl string, apiClient *galasaapi.APIClient, commsRetrier api.CommsRetrier) *RemoteLauncher {
+func NewRemoteLauncher(apiServerUrl string, commsRetrier api.CommsRetrier, authenticator spi.Authenticator) (*RemoteLauncher, error) {
+	var err error
 	log.Printf("NewRemoteLauncher(%s) entered.", apiServerUrl)
 
 	launcher := new(RemoteLauncher)
 
+
 	// An HTTP client which can communicate with the api server in an ecosystem.
-	launcher.apiClient = apiClient
-
+	launcher.authenticator = authenticator
+	
 	launcher.commsRetrier = commsRetrier
+	launcher.apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
-	return launcher
+	return launcher, err
 }
 
 //----------------------------------------------------------------------------------
@@ -57,10 +62,12 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 	)
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 	if err == nil {
-		var httpResponse *http.Response
-		testRuns, httpResponse, err = launcher.apiClient.RunsAPIApi.GetRunsGroup(context.TODO(), groupName).ClientApiVersion(restApiVersion).Execute()
+		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+			var httpResponse *http.Response
+			testRuns, httpResponse, err = apiClient.RunsAPIApi.GetRunsGroup(context.TODO(), groupName).ClientApiVersion(restApiVersion).Execute()
 
-		err = galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
+			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
+		}, launcher.apiClient, launcher.authenticator)
 	}
 	return testRuns, err
 }
@@ -98,12 +105,12 @@ func (launcher *RemoteLauncher) SubmitTestRun(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		err = launcher.commsRetrier.ExecuteCommandWithRateLimitRetries(func() error {
+		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
 			var httpResponse *http.Response
-			resultGroup, httpResponse, err = launcher.apiClient.RunsAPIApi.PostSubmitTestRuns(context.TODO(), groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
+			resultGroup, httpResponse, err = apiClient.RunsAPIApi.PostSubmitTestRuns(context.TODO(), groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
 
 			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
-		})
+		}, launcher.apiClient, launcher.authenticator)
 	}
 	return resultGroup, err
 }
@@ -116,12 +123,12 @@ func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		err = launcher.commsRetrier.ExecuteCommandWithRateLimitRetries(func() error {
+		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
 			var httpResponse *http.Response
-			rasRun, _, err = launcher.apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context.TODO(), runId).ClientApiVersion(restApiVersion).Execute()
+			rasRun, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context.TODO(), runId).ClientApiVersion(restApiVersion).Execute()
 
 			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
-		})
+		}, launcher.apiClient, launcher.authenticator)
 	}
 	return rasRun, err
 }
@@ -137,15 +144,15 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 	if err == nil {
 		var properties []galasaapi.GalasaProperty
-		err = launcher.commsRetrier.ExecuteCommandWithRateLimitRetries(func() error {
+		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
 			var httpResponse *http.Response
-			properties, httpResponse, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.
+			properties, httpResponse, err = apiClient.ConfigurationPropertyStoreAPIApi.
 				QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream").Suffix("repo").ClientApiVersion(restApiVersion).Execute()
 
 			return galasaErrors.GetGalasaErrorFromCommsResponse(httpResponse, err)
-		})
-		if err == nil {
+		}, launcher.apiClient, launcher.authenticator)
 
+		if err == nil {
 			streams, err = getStreamNamesFromProperties(properties)
 		}
 	}
@@ -179,8 +186,8 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 
 	if err == nil {
 		var cpsResponse *http.Response
-		err = launcher.commsRetrier.ExecuteCommandWithRateLimitRetries(func() error {
-			cpsProperty, cpsResponse, err = launcher.apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
+		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+			cpsProperty, cpsResponse, err = apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
 	
 			var statusCode int
 			if cpsResponse != nil {
@@ -194,7 +201,7 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_CATALOG_NOT_FOUND, stream)
 			}
 			return err
-		})
+		}, launcher.apiClient, launcher.authenticator)
 
 		if err == nil {
 			streamLocation :=cpsProperty[0].Data.Value

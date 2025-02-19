@@ -13,6 +13,7 @@ import (
 	"time"
 
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
+	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,6 +21,91 @@ import (
 
 func createMockErrorMessageType() *galasaErrors.MessageType {
 	return galasaErrors.NewMessageType("TEST123: simulating a failure on attempt %v", 123, false)
+}
+
+func TestExecuteCommandWithRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
+    // Given...
+    maxAttempts := 3
+    retryBackoffSeconds := 1
+	
+	now := time.Now()
+    timeService := utils.NewOverridableMockTimeService(now)
+    mockAuthenticator := utils.NewMockAuthenticator()
+	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+    runCounter := 0
+    executionFunc := func(apiClient *galasaapi.APIClient) error {
+        runCounter++
+        return nil
+    }
+
+    // When...
+    err := commsRetrier.ExecuteCommandWithRetries(executionFunc, nil, mockAuthenticator)
+
+    // Then...
+    assert.Nil(t, err)
+    assert.Equal(t, 1, runCounter, "The execution function should only have been run once")
+	assert.Equal(t, now, timeService.Now(), "Time should not have advanced")
+}
+
+func TestExecuteCommandWithRetriesTriesAgainOnAuthFailure(t *testing.T) {
+    // Given...
+    maxAttempts := 3
+    retryBackoffSeconds := 10
+
+	now := time.Now()
+    timeService := utils.NewOverridableMockTimeService(now)
+
+    apiClient := InitialiseAPI("my-server-url")
+    newApiClient := InitialiseAPI("my-new-server-url")
+    mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(newApiClient)
+	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+    attemptCounter := 0
+    executionFunc := func(apiClient *galasaapi.APIClient) error {
+        var err error
+        attemptCounter++
+        if attemptCounter != 2 {
+            err = galasaErrors.NewGalasaErrorWithHttpStatusCode(http.StatusUnauthorized, createMockErrorMessageType(), attemptCounter)
+        }
+        return err
+    }
+
+    // When...
+    err := commsRetrier.ExecuteCommandWithRetries(executionFunc, apiClient, mockAuthenticator)
+
+    // Then...
+    assert.Nil(t, err)
+    assert.Equal(t, 2, attemptCounter, "The execution function should have been run twice")
+	assert.Equal(t, now.Add(10 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
+    assert.Equal(t, newApiClient, apiClient)
+}
+
+func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
+    // Given...
+    maxAttempts := 3
+    retryBackoffSeconds := 10
+
+	now := time.Now()
+    timeService := utils.NewOverridableMockTimeService(now)
+
+    mockAuthenticator := utils.NewMockAuthenticator()
+	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+    attemptCounter := 0
+    executionFunc := func(apiClient *galasaapi.APIClient) error {
+        var err error
+        attemptCounter++
+        if attemptCounter != 2 {
+            err = galasaErrors.NewGalasaErrorWithHttpStatusCode(http.StatusTooManyRequests, createMockErrorMessageType(), attemptCounter)
+        }
+        return err
+    }
+
+    // When...
+    err := commsRetrier.ExecuteCommandWithRetries(executionFunc, nil, mockAuthenticator)
+
+    // Then...
+    assert.Nil(t, err)
+    assert.Equal(t, 2, attemptCounter, "The execution function should have been run twice")
+	assert.Equal(t, now.Add(10 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
 }
 
 func TestExecuteCommandWithRateLimitRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
