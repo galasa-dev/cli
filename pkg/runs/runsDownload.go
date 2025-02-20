@@ -451,7 +451,14 @@ func GetFileFromRestApi(runId string, artifactPath string, commsRetrier api.Comm
 			}
 	
 			if err != nil {
-				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
+				downloadErr := galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_DOWNLOADING_ARTIFACT_FAILED, artifactPath, err.Error())
+				err = downloadErr
+
+				// Close the response body if we're going to retry the download to avoid leaving responses open
+				if httpResponse != nil && (downloadErr.IsReauthRequired() || downloadErr.IsRetryRequired()) {
+					defer httpResponse.Body.Close()
+				}
+
 				log.Printf("Failed to download artifact. %s\n", err.Error())
 			} else {
 				log.Printf("Artifact '%s' http response from API server OK\n", artifactPath)

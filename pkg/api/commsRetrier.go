@@ -90,9 +90,10 @@ func (retrier *CommsRetrierImpl) ExecuteCommandWithRetries(
 				if galasaError.IsReauthRequired() {
 					log.Printf("Reauthentication required. Login attempt %v/%v", (attempt + 1), maxAttempts)
 					var newApiClient *galasaapi.APIClient
-					newApiClient, err = retrier.authenticator.GetAuthenticatedAPIClient()
+					var apiClientErr error
+					newApiClient, apiClientErr = retrier.authenticator.GetAuthenticatedAPIClient()
 
-					if err == nil {
+					if apiClientErr == nil {
 						// Overwrite the API client being used to avoid having to re-authenticate again
 						retrier.apiClient = newApiClient
 						isRetryRequired = true
