@@ -88,13 +88,11 @@ func TestRunsResetWithOneActiveRunReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -116,13 +114,11 @@ func TestRunsResetWithMultipleActiveRunsReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -144,13 +140,11 @@ func TestRunsResetWithNoActiveRunReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1132")
@@ -170,13 +164,11 @@ func TestRunsResetWithInvalidRunNameReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1075")
@@ -196,13 +188,11 @@ func TestRunsResetWhereOperationFailedServerSideReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Error(t, err)
@@ -222,13 +212,11 @@ func TestRunsResetWhereServerSideResponseCannotBeParsedReturnsError(t *testing.T
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := ResetRun(runName, mockTimeService, mockConsole, commsRetrier)
+	err := ResetRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Error(t, err)

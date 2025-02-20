@@ -19,7 +19,7 @@ import (
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 )
 
-func ValidateResultParameter(resultInputString string, commsRetrier api.CommsRetrier) (string, error) {
+func ValidateResultParameter(resultInputString string, commsClient api.APICommsClient) (string, error) {
 	var err error
 	var validResultInputs []string
 	var invalidResultInputs []string
@@ -30,7 +30,7 @@ func ValidateResultParameter(resultInputString string, commsRetrier api.CommsRet
 
 	if err == nil {
 
-		err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var err error
 			var context context.Context = nil
 			var rasResultNamesData *galasaapi.ResultNames

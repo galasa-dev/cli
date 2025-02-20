@@ -92,10 +92,7 @@ func (cmd *RunsSubmitLocalCommand) createRunsSubmitLocalCobraCmd(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"runs submit local"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeSubmitLocal(factory, runsSubmitCmd.Values().(*utils.RunsSubmitCmdValues), commsFlagSetValues)
 		},
 	}
 
@@ -178,10 +175,15 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 	if err == nil {
 
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		var commsClient api.APICommsClient
+		commsClient, err = api.NewAPICommsClient(
+			commsFlagSetValues.bootstrap,
+			commsFlagSetValues.maxRetries,
+			commsFlagSetValues.retryBackoffSeconds,
+			factory,
+			galasaHome,
+		)
+
 		if err == nil {
 
 			timeService := utils.NewRealTimeService()
@@ -197,6 +199,8 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 			validator := runs.NewObrBasedValidator()
 			err = validator.Validate(cmd.values.submitLocalSelectionFlags)
 			if err == nil {
+
+				bootstrapData := commsClient.GetBootstrapData()
 
 				// A launcher is needed to launch anythihng
 				var launcherInstance launcher.Launcher

@@ -59,17 +59,15 @@ func TestCanDeleteARun(t *testing.T) {
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -135,17 +133,15 @@ func TestCanDeleteRunAndReruns(t *testing.T) {
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -171,17 +167,15 @@ func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         nonExistantRunName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -224,17 +218,15 @@ func TestRunsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *test
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -278,17 +270,15 @@ func TestRunsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrec
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -334,17 +324,15 @@ func TestRunsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCo
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -399,17 +387,15 @@ func TestRunsDeleteFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *test
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -456,17 +442,15 @@ func TestRunsDeleteFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *test
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReaderAsMock(true)
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        commsRetrier,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 

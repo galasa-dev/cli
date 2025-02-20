@@ -18,7 +18,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/auth"
-	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -125,12 +124,25 @@ func TestGetTestCatalogHttpErrorGetsReported(t *testing.T) {
 	}))
 	defer server.Close()
 
+
+	mockFactory := utils.NewMockFactory()
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
 	authenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(0, 0, utils.NewMockTimeService(), authenticator)
+	mockFactory.Authenticator = authenticator
 
-	launcher := NewRemoteLauncher(apiServerUrl, commsRetrier)
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	bootstrap := ""
+    maxAttempts := 3
+    retryBackoffSeconds := 1
+
+	commsClient, _ := api.NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
+
+	launcher := NewRemoteLauncher(commsClient)
 
 	_, err := launcher.GetTestCatalog("myStream")
 
@@ -192,19 +204,28 @@ func TestGetRunsByGroupWithInvalidBearerTokenGetsNewTokenOk(t *testing.T) {
     server := utils.NewMockHttpServer(t, interactions)
     defer server.Server.Close()
 
+	mockFactory := utils.NewMockFactory()
+
 	apiServerUrl := server.Server.URL
-	mockFileSystem := files.NewMockFileSystem()
-	mockEnvironment := utils.NewMockEnv()
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockTimeService := utils.NewMockTimeService()
+	mockTimeService := mockFactory.GetTimeService()
 	jwtCache := auth.NewJwtCache(mockFileSystem, mockGalasaHome, mockTimeService)
 	
 	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/galasactl.properties", "GALASA_TOKEN=my:token")
+	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
 
 	authenticator := auth.NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, jwtCache)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(3, 0, utils.NewMockTimeService(), authenticator)
+	mockFactory.Authenticator = authenticator
 
-	launcher := NewRemoteLauncher(apiServerUrl, commsRetrier)
+	bootstrap := ""
+    maxAttempts := 3
+    retryBackoffSeconds := 1
+
+	commsClient, _ := api.NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
+
+	launcher := NewRemoteLauncher(commsClient)
 
 	_, err := launcher.GetRunsByGroup(groupId)
 

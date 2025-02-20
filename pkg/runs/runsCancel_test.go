@@ -32,7 +32,7 @@ func WriteMockRasRunsPutStatusFinishedResponse(
 	} else if runName == "U120" {
 		statusCode = 400
 		response = `{
-			 "error_code": 5049, 
+			 "error_code": 5049,
 			 "error_message": "GAL5049E: Error occured when trying to cancel the run 'U120'. The run has already completed."
 		 }`
 		writer.Header().Set("Content-Type", "application/json")
@@ -87,13 +87,11 @@ func TestRunsCancelWithOneActiveRunReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := CancelRun(runName, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
+	err := CancelRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -115,13 +113,11 @@ func TestRunsCancelWithMultipleActiveRunsReturnsOK(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := CancelRun(runName, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
+	err := CancelRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -143,13 +139,11 @@ func TestRunsCancelWithNoActiveRunReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := CancelRun(runName, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
+	err := CancelRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1132")
@@ -169,13 +163,11 @@ func TestRunsCancelWithInvalidRunNameReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := CancelRun(runName, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
+	err := CancelRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1075")
@@ -195,13 +187,11 @@ func TestRunsCancelWhereOperationFailedServerSideReturnsError(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := CancelRun(runName, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
+	err := CancelRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Error(t, err)
@@ -221,13 +211,11 @@ func TestRunsCancelWhereServerSideResponseCannotBeParsedReturnsError(t *testing.
 	mockConsole := utils.NewMockConsole()
 
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := CancelRun(runName, mockTimeService, mockConsole, apiServerUrl, commsRetrier)
+	err := CancelRun(runName, mockTimeService, mockConsole, commsClient)
 
 	// Then...
 	assert.Error(t, err)

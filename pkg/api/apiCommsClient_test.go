@@ -27,11 +27,18 @@ func TestExecuteCommandWithRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
     // Given...
     maxAttempts := 3
     retryBackoffSeconds := 1
-	
-	now := time.Now()
-    timeService := utils.NewOverridableMockTimeService(now)
-    mockAuthenticator := utils.NewMockAuthenticator()
-	commsRetrier, _ := NewCommsRetrierWithAPIClient(maxAttempts, float64(retryBackoffSeconds), timeService, mockAuthenticator)
+
+    mockFactory := utils.NewMockFactory()
+    mockTimeService := mockFactory.GetTimeService()
+	now := mockTimeService.Now()
+    bootstrap := ""
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+    mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	commsClient, _ := NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
     runCounter := 0
     executionFunc := func(apiClient *galasaapi.APIClient) error {
         runCounter++
@@ -39,12 +46,12 @@ func TestExecuteCommandWithRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRetries(executionFunc)
+    err := commsClient.RunAuthenticatedCommandWithRateLimitRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)
     assert.Equal(t, 1, runCounter, "The execution function should only have been run once")
-	assert.Equal(t, now, timeService.Now(), "Time should not have advanced")
+	assert.Equal(t, now, mockTimeService.Now(), "Time should not have advanced")
 }
 
 func TestExecuteCommandWithRetriesTriesAgainOnAuthFailure(t *testing.T) {
@@ -59,7 +66,7 @@ func TestExecuteCommandWithRetriesTriesAgainOnAuthFailure(t *testing.T) {
     newApiClient := InitialiseAPI("my-new-server-url")
     mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(newApiClient)
 
-    commsRetrier := &CommsRetrierImpl{
+    commsClient := &APICommsClientImpl{
         maxAttempts: maxAttempts,
         retryBackoffSeconds: float64(retryBackoffSeconds),
         timeService: timeService,
@@ -78,13 +85,13 @@ func TestExecuteCommandWithRetriesTriesAgainOnAuthFailure(t *testing.T) {
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRetries(executionFunc)
+    err := commsClient.RunAuthenticatedCommandWithRateLimitRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)
     assert.Equal(t, 2, attemptCounter, "The execution function should have been run twice")
 	assert.Equal(t, now.Add(10 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
-    assert.Equal(t, newApiClient, commsRetrier.apiClient)
+    assert.Equal(t, newApiClient, commsClient.apiClient)
 }
 
 func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
@@ -92,11 +99,18 @@ func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
     maxAttempts := 3
     retryBackoffSeconds := 10
 
-	now := time.Now()
-    timeService := utils.NewOverridableMockTimeService(now)
+    mockFactory := utils.NewMockFactory()
+    mockTimeService := mockFactory.GetTimeService()
+	now := mockTimeService.Now()
+    bootstrap := ""
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 
-    mockAuthenticator := utils.NewMockAuthenticator()
-	commsRetrier, _ := NewCommsRetrierWithAPIClient(maxAttempts, float64(retryBackoffSeconds), timeService, mockAuthenticator)
+    mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	commsClient, _ := NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
+
     attemptCounter := 0
     executionFunc := func(apiClient *galasaapi.APIClient) error {
         var err error
@@ -108,22 +122,30 @@ func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRetries(executionFunc)
+    err := commsClient.RunAuthenticatedCommandWithRateLimitRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)
     assert.Equal(t, 2, attemptCounter, "The execution function should have been run twice")
-	assert.Equal(t, now.Add(10 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
+	assert.Equal(t, now.Add(10 * time.Second), mockTimeService.Now(), "Time should have advanced after each attempt")
 }
 
 func TestExecuteCommandWithRateLimitRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
     // Given...
     maxAttempts := 3
     retryBackoffSeconds := 1
-	
-	now := time.Now()
-    timeService := utils.NewOverridableMockTimeService(now)
-	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+
+    mockFactory := utils.NewMockFactory()
+    mockTimeService := mockFactory.GetTimeService()
+	now := mockTimeService.Now()
+    bootstrap := ""
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+    mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	commsClient, _ := NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
     runCounter := 0
     executionFunc := func() error {
         runCounter++
@@ -131,12 +153,12 @@ func TestExecuteCommandWithRateLimitRetriesOnlyRunsOnceOnSuccess(t *testing.T) {
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)
+    err := commsClient.RunCommandWithRateLimitRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)
     assert.Equal(t, 1, runCounter, "The execution function should only have been run once")
-	assert.Equal(t, now, timeService.Now(), "Time should not have advanced")
+	assert.Equal(t, now, mockTimeService.Now(), "Time should not have advanced")
 }
 
 func TestExecuteCommandWithRateLimitRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
@@ -144,9 +166,17 @@ func TestExecuteCommandWithRateLimitRetriesTriesAgainOnRateLimitFailure(t *testi
     maxAttempts := 3
     retryBackoffSeconds := 10
 
-	now := time.Now()
-    timeService := utils.NewOverridableMockTimeService(now)
-	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+    mockFactory := utils.NewMockFactory()
+    mockTimeService := mockFactory.GetTimeService()
+	now := mockTimeService.Now()
+    bootstrap := ""
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+    mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	commsClient, _ := NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
     attemptCounter := 0
     executionFunc := func() error {
         var err error
@@ -158,12 +188,12 @@ func TestExecuteCommandWithRateLimitRetriesTriesAgainOnRateLimitFailure(t *testi
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)
+    err := commsClient.RunCommandWithRateLimitRetries(executionFunc)
 
     // Then...
     assert.Nil(t, err)
     assert.Equal(t, 2, attemptCounter, "The execution function should have been run twice")
-	assert.Equal(t, now.Add(10 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
+	assert.Equal(t, now.Add(10 * time.Second), mockTimeService.Now(), "Time should have advanced after each attempt")
 }
 
 func TestExecuteCommandWithRateLimitRetriesGivesUpAfterMaxAttempts(t *testing.T) {
@@ -171,9 +201,17 @@ func TestExecuteCommandWithRateLimitRetriesGivesUpAfterMaxAttempts(t *testing.T)
     maxAttempts := 4
     retryBackoffSeconds := 10
 
-	now := time.Now()
-    timeService := utils.NewOverridableMockTimeService(now)
-	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+    mockFactory := utils.NewMockFactory()
+    mockTimeService := mockFactory.GetTimeService()
+	now := mockTimeService.Now()
+    bootstrap := ""
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+    mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	commsClient, _ := NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
     attemptCounter := 0
     executionFunc := func() error {
         attemptCounter++
@@ -181,13 +219,13 @@ func TestExecuteCommandWithRateLimitRetriesGivesUpAfterMaxAttempts(t *testing.T)
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)
+    err := commsClient.RunCommandWithRateLimitRetries(executionFunc)
 
     // Then...
     assert.NotNil(t, err)
     assert.ErrorContains(t, err, strconv.Itoa(maxAttempts), "The last error should have been returned")
     assert.Equal(t, maxAttempts, attemptCounter, "The execution function should have been run the maximum number of times")
-	assert.Equal(t, now.Add(30 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
+	assert.Equal(t, now.Add(30 * time.Second), mockTimeService.Now(), "Time should have advanced after each attempt")
 }
 
 func TestExecuteCommandWithRateLimitRetriesRunsOnceOnNonRateLimitedFailure(t *testing.T) {
@@ -195,9 +233,17 @@ func TestExecuteCommandWithRateLimitRetriesRunsOnceOnNonRateLimitedFailure(t *te
     maxAttempts := 3
     retryBackoffSeconds := 1
 
-	now := time.Now()
-    timeService := utils.NewOverridableMockTimeService(now)
-	commsRetrier := NewCommsRetrier(maxAttempts, float64(retryBackoffSeconds), timeService)
+    mockFactory := utils.NewMockFactory()
+    mockTimeService := mockFactory.GetTimeService()
+	now := mockTimeService.Now()
+    bootstrap := ""
+	mockFileSystem := mockFactory.GetFileSystem()
+	mockEnvironment := mockFactory.GetEnvironment()
+	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
+
+    mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	commsClient, _ := NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
     attemptCounter := 0
     errorMsg := "simulating an error that is not related to the API server response"
     executionFunc := func() error {
@@ -206,11 +252,11 @@ func TestExecuteCommandWithRateLimitRetriesRunsOnceOnNonRateLimitedFailure(t *te
     }
 
     // When...
-    err := commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)
+    err := commsClient.RunCommandWithRateLimitRetries(executionFunc)
 
     // Then...
     assert.NotNil(t, err)
     assert.ErrorContains(t, err, errorMsg)
     assert.Equal(t, 1, attemptCounter, "The execution function should only have been run once")
-	assert.Equal(t, now, timeService.Now(), "Time should not have advanced")
+	assert.Equal(t, now, mockTimeService.Now(), "Time should not have advanced")
 }

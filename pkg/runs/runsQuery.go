@@ -62,13 +62,13 @@ func (query *RunsQuery) SetPageCursor(newPageCursor string) {
 }
 
 func (query *RunsQuery) GetRunsPageFromRestApi(
-    commsRetrier api.CommsRetrier,
+    commsClient api.APICommsClient,
     restApiVersion string,
 ) (*galasaapi.RunResults, error) {
     var err error
     var runData *galasaapi.RunResults
 
-    err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+    err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
         var err error
         var httpResponse *http.Response
         var context context.Context = nil

@@ -72,7 +72,7 @@ type GalasaError struct {
 }
 
 type GalasaCommsError interface {
-	IsRetryRequired() bool
+	IsRateLimitedRetryRequired() bool
 	IsReauthRequired() bool
 }
 
@@ -138,7 +138,7 @@ func (err *GalasaError) Error() string {
 	return err.message
 }
 
-func (err *GalasaError) IsRetryRequired() bool {
+func (err *GalasaError) IsRateLimitedRetryRequired() bool {
 	isRetryRequired := isRootErrorStatusCodeInMap(err, RATE_LIMIT_STATUS_CODES_MAP)
 	return isRetryRequired
 }

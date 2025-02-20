@@ -138,53 +138,33 @@ func (cmd *RunsGetCommand) executeRunsGet(
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			timeService := factory.GetTimeService()
-			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
-
-			// Read the bootstrap properties, retrying if a rate limit has been exceeded
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			loadBootstrapWithRetriesFunc := func() error {
-				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
-				return err
-			}
-
-			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
+				galasaHome,
+			)
+			
 			if err == nil {
-	
-				var console = factory.GetStdOutConsole()
-	
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-	
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-	
-				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
-					commsFlagSetValues.maxRetries,
-					commsFlagSetValues.retryBackoffSeconds,
-					timeService,
-					authenticator,
-				)
 
-				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = runs.GetRuns(
-						cmd.values.runName,
-						cmd.values.age,
-						cmd.values.requestor,
-						cmd.values.result,
-						cmd.values.isActiveRuns,
-						cmd.values.outputFormatString,
-						cmd.values.group,
-						timeService,
-						console,
-						apiServerUrl,
-						commsRetrier,
-					)
-				}
+				var console = factory.GetStdOutConsole()
+				timeService := factory.GetTimeService()
+
+				// Call to process the command in a unit-testable way.
+				err = runs.GetRuns(
+					cmd.values.runName,
+					cmd.values.age,
+					cmd.values.requestor,
+					cmd.values.result,
+					cmd.values.isActiveRuns,
+					cmd.values.outputFormatString,
+					cmd.values.group,
+					timeService,
+					console,
+					commsClient,
+				)
 			}
 		}
 	}

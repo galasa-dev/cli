@@ -24,7 +24,7 @@ import (
 func RunsDelete(
 	runName string,
 	console spi.Console,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 	timeService spi.TimeService,
 	byteReader spi.ByteReader,
 ) error {
@@ -46,14 +46,14 @@ func RunsDelete(
 		group := ""
 		shouldGetActive := false
 		var runs []galasaapi.Run
-		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsRetrier, group)
+		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsClient, group)
 
 		if err == nil {
 
 			if len(runs) == 0 {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_RUN_NOT_FOUND, runName)
 			} else {
-				err = deleteRuns(runs, commsRetrier, byteReader)
+				err = deleteRuns(runs, commsClient, byteReader)
 			}
 		}
 
@@ -67,7 +67,7 @@ func RunsDelete(
 
 func deleteRuns(
 	runs []galasaapi.Run,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 	byteReader spi.ByteReader,
 ) error {
 	var err error
@@ -76,7 +76,7 @@ func deleteRuns(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 	if err == nil {
 		for _, run := range runs {
-			err = deleteRun(run, commsRetrier, byteReader, restApiVersion)
+			err = deleteRun(run, commsClient, byteReader, restApiVersion)
 			if err != nil {
 				break
 			}
@@ -88,7 +88,7 @@ func deleteRuns(
 
 func deleteRun(
 	run galasaapi.Run,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 	byteReader spi.ByteReader,
 	restApiVersion string,
 ) error {
@@ -97,7 +97,7 @@ func deleteRun(
 	runId := run.GetRunId()
 	runName := *run.GetTestStructure().RunName
 
-	err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+	err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 		var err error
 		var context context.Context = nil
 		var httpResponse *http.Response

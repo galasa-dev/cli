@@ -18,7 +18,7 @@ import (
 
 func getRunIdFromRunName(runName string,
 	timeService spi.TimeService,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 ) (string, error) {
 	var err error
 	var runs []galasaapi.Run
@@ -31,7 +31,7 @@ func getRunIdFromRunName(runName string,
 	toAgeHours := 0
 	shouldGetActive := true
 
-	runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsRetrier, group)
+	runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsClient, group)
 
 	if err == nil {
 

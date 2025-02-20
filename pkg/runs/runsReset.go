@@ -28,7 +28,7 @@ func ResetRun(
 	runName string,
 	timeService spi.TimeService,
 	console spi.Console,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 ) error {
 	var err error
 	var runId string
@@ -45,13 +45,13 @@ func ResetRun(
 
 	if err == nil {
 
-		runId, err = getRunIdFromRunName(runName, timeService, commsRetrier)
+		runId, err = getRunIdFromRunName(runName, timeService, commsClient)
 
 		if err == nil {
 
 			updateRunStatusRequest := createUpdateRunStatusRequest(RESET_STATUS, RESET_RESULT)
 
-			err = resetRun(runName, runId, updateRunStatusRequest, commsRetrier)
+			err = resetRun(runName, runId, updateRunStatusRequest, commsClient)
 
 			if err == nil {
 				consoleErr := console.WriteString(fmt.Sprintf(galasaErrors.GALASA_INFO_RUNS_RESET_SUCCESS.Template, runName))
@@ -73,7 +73,7 @@ func ResetRun(
 func resetRun(runName string,
 	runId string,
 	runStatusUpdateRequest *galasaapi.UpdateRunStatusRequest,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 ) error {
 	var err error
 	var restApiVersion string
@@ -82,7 +82,7 @@ func resetRun(runName string,
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var err error
 			var resp *http.Response
 			var context context.Context = nil

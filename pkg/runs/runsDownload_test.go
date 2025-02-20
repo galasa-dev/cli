@@ -328,13 +328,11 @@ func TestRunsDownloadFailingFileWriteReturnsError(t *testing.T) {
 	}
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -404,13 +402,11 @@ func TestRunsDownloadFailingFileCreationReturnsError(t *testing.T) {
 	}
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1042")
@@ -480,13 +476,11 @@ func TestRunsDownloadFailingFolderCreationReturnsError(t *testing.T) {
 	}
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1041")
@@ -554,10 +548,8 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
     defer server.Server.Close()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 	mockConsole := utils.NewMockConsole()
 
 	mockFileSystem := files.NewMockFileSystem()
@@ -566,7 +558,7 @@ func TestRunsDownloadExistingFileForceOverwritesMultipleArtifactsToFileSystem(t 
 	mockFileSystem.WriteTextFile(runName+dummyRunLog.Path, "dummy log")
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.Nil(t, err)
@@ -646,11 +638,9 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
     defer server.Server.Close()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockConsole := utils.NewMockConsole()
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	mockFileSystem := files.NewMockFileSystem()
 	separator := string(os.PathSeparator)
@@ -658,7 +648,7 @@ func TestRunsDownloadExistingFileNoForceReturnsError(t *testing.T) {
 	mockFileSystem.WriteTextFile(runName+separator+"run.log", "dummy log")
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.NotNil(t, err)
@@ -739,13 +729,11 @@ func TestRunsDownloadWritesMultipleArtifactsToFileSystem(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	downloadedTxtArtifactExists, _ := mockFileSystem.Exists(runName + dummyTxtArtifact.Path)
@@ -821,13 +809,11 @@ func TestRunsDownloadWritesSingleArtifactToFileSystem(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	separator := string(os.PathSeparator)
@@ -897,15 +883,13 @@ func TestFailingGetFileRequestReturnsError(t *testing.T) {
 
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 	mockFileSystem := files.NewMockFileSystem()
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1074")
@@ -975,16 +959,13 @@ func TestUnauthorizedGetFileRequestReauthenticatesOk(t *testing.T) {
 
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	maxAttempts := 2
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(maxAttempts, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 	mockFileSystem := files.NewMockFileSystem()
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.Nil(t, err)
@@ -1038,15 +1019,13 @@ func TestFailingGetArtifactsRequestReturnsError(t *testing.T) {
 
 	mockConsole := utils.NewMockConsole()
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 	mockFileSystem := files.NewMockFileSystem()
 	forceDownload := false
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	assert.Contains(t, err.Error(), "GAL1073")
@@ -1130,13 +1109,11 @@ func TestRunsDownloadMultipleReRunsWithCorrectOrderFolders(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	// U27-1-2023-2023-05-10T06:00:13 	(test did not finish)
@@ -1280,14 +1257,12 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 	mockTimeService.AdvanceClock(time.Second)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	// U27-1-2023-05-10T06:00:13 	(test did not finish)
@@ -1354,13 +1329,11 @@ func TestRunsDownloadWithValidRunNameNoArtifacts(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 	// Then...
 
 	assert.Contains(t, err.Error(), "GAL1083E")
@@ -1378,13 +1351,11 @@ func TestRunsDownloadWithInvalidRunName(t *testing.T) {
 	mockConsole := utils.NewMockConsole()
 	mockFileSystem := files.NewMockFileSystem()
 
-	apiClient := api.InitialiseAPI("api-server-url")
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient("api-server-url")
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 
@@ -1449,13 +1420,11 @@ func TestRunsDownloadAddsTimestampToFolderIfRunNotFinished(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, ".")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, ".")
 
 	// Then...
 	run1FolderName := runName + "-" + mockTimeService.Now().Format("2006-01-02_15:04:05")
@@ -1530,13 +1499,11 @@ func TestRunsDownloadWritesSingleArtifactToDestinationFolder(t *testing.T) {
 	mockFileSystem := files.NewMockFileSystem()
 
 	apiServerUrl := server.Server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
 	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsRetrier, "/myfolder")
+	err := DownloadArtifacts(runName, forceDownload, mockFileSystem, mockTimeService, mockConsole, commsClient, "/myfolder")
 
 	// Then...
 	downloadedArtifactExists, _ := mockFileSystem.Exists("/myfolder/" + runName + dummyArtifact.Path)

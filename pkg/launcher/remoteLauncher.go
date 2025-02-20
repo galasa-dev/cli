@@ -21,7 +21,7 @@ import (
 
 // RemoteLauncher A launcher, which launches and monitors tests on a remote ecosystem via HTTP/HTTPS.
 type RemoteLauncher struct {
-	commsRetrier api.CommsRetrier
+	commsClient api.APICommsClient
 }
 
 //----------------------------------------------------------------------------------
@@ -29,13 +29,13 @@ type RemoteLauncher struct {
 //----------------------------------------------------------------------------------
 
 // NewRemoteLauncher create a remote launcher.
-func NewRemoteLauncher(apiServerUrl string, commsRetrier api.CommsRetrier) *RemoteLauncher {
-	log.Printf("NewRemoteLauncher(%s) entered.", apiServerUrl)
+func NewRemoteLauncher(commsClient api.APICommsClient) *RemoteLauncher {
+	log.Printf("NewRemoteLauncher(%s) entered.", commsClient.GetBootstrapData().ApiServerURL)
 
 	launcher := new(RemoteLauncher)
 
-	// A comms retrier that uses a HTTP client to communicate with the API server in a Galasa service.
-	launcher.commsRetrier = commsRetrier
+	// A comms client that communicates with the API server in a Galasa service.
+	launcher.commsClient = commsClient
 	
 	return launcher
 }
@@ -54,7 +54,7 @@ func (launcher *RemoteLauncher) GetRunsByGroup(groupName string) (*galasaapi.Tes
 	)
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 	if err == nil {
-		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = launcher.commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var httpResponse *http.Response
 			testRuns, httpResponse, err = apiClient.RunsAPIApi.GetRunsGroup(context.TODO(), groupName).ClientApiVersion(restApiVersion).Execute()
 
@@ -97,7 +97,7 @@ func (launcher *RemoteLauncher) SubmitTestRun(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = launcher.commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var httpResponse *http.Response
 			resultGroup, httpResponse, err = apiClient.RunsAPIApi.PostSubmitTestRuns(context.TODO(), groupName).TestRunRequest(*testRunRequest).ClientApiVersion(restApiVersion).Execute()
 
@@ -115,7 +115,7 @@ func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = launcher.commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var httpResponse *http.Response
 			rasRun, _, err = apiClient.ResultArchiveStoreAPIApi.GetRasRunById(context.TODO(), runId).ClientApiVersion(restApiVersion).Execute()
 
@@ -136,7 +136,7 @@ func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 	if err == nil {
 		var properties []galasaapi.GalasaProperty
-		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = launcher.commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var httpResponse *http.Response
 			properties, httpResponse, err = apiClient.ConfigurationPropertyStoreAPIApi.
 				QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream").Suffix("repo").ClientApiVersion(restApiVersion).Execute()
@@ -178,7 +178,7 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 
 	if err == nil {
 		var cpsResponse *http.Response
-		err = launcher.commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = launcher.commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			cpsProperty, cpsResponse, err = apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
 	
 			var statusCode int

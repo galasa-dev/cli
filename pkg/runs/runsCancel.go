@@ -28,8 +28,7 @@ func CancelRun(
 	runName string,
 	timeService spi.TimeService,
 	console spi.Console,
-	apiServerUrl string,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 ) error {
 	var err error
 	var runId string
@@ -46,13 +45,13 @@ func CancelRun(
 
 	if err == nil {
 
-		runId, err = getRunIdFromRunName(runName, timeService, commsRetrier)
+		runId, err = getRunIdFromRunName(runName, timeService, commsClient)
 
 		if err == nil {
 
 			updateRunStatusRequest := createUpdateRunStatusRequest(CANCEL_STATUS, CANCEL_RESULT)
 
-			err = cancelRun(runName, runId, updateRunStatusRequest, commsRetrier)
+			err = cancelRun(runName, runId, updateRunStatusRequest, commsClient)
 
 			if err == nil {
 				consoleErr := console.WriteString(fmt.Sprintf(galasaErrors.GALASA_INFO_RUNS_CANCEL_SUCCESS.Template, runName))
@@ -74,7 +73,7 @@ func CancelRun(
 func cancelRun(runName string,
 	runId string,
 	runStatusUpdateRequest *galasaapi.UpdateRunStatusRequest,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 ) error {
 	var err error
 	var restApiVersion string
@@ -84,7 +83,7 @@ func cancelRun(runName string,
 
 	if err == nil {
 
-		err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var err error
 			var resp *http.Response
 			var context context.Context = nil

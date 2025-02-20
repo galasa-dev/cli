@@ -33,7 +33,7 @@ func DownloadArtifacts(
 	fileSystem spi.FileSystem,
 	timeService spi.TimeService,
 	console spi.Console,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 	runDownloadTargetFolder string,
 ) error {
 
@@ -50,7 +50,7 @@ func DownloadArtifacts(
 		fromAgeHours := 0
 		toAgeHours := 0
 		shouldGetActive := false
-		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsRetrier, group)
+		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsClient, group)
 		if err == nil {
 			if len(runs) > 1 {
 				// get list of runs that are reRuns - get list of runs that are reRuns of each other
@@ -61,7 +61,7 @@ func DownloadArtifacts(
 					reRunsByQueuedTime,
 					forceDownload,
 					fileSystem,
-					commsRetrier,
+					commsClient,
 					console,
 					timeService,
 					runDownloadTargetFolder,
@@ -71,7 +71,7 @@ func DownloadArtifacts(
 				var folderName string
 				folderName, err = nameDownloadFolder(runs[0], runName, timeService)
 				if err == nil {
-					err = downloadArtifactsAndRenderImagesToDirectory(commsRetrier, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
+					err = downloadArtifactsAndRenderImagesToDirectory(commsClient, folderName, runs[0], fileSystem, forceDownload, console, runDownloadTargetFolder)
 				}
 			} else {
 				log.Printf("No artifacts to download for run: '%s'\n", runName)
@@ -87,7 +87,7 @@ func downloadReRunArtfifacts(
 	reRunsByQueuedTime map[string][]galasaapi.Run,
 	forceDownload bool,
 	fileSystem spi.FileSystem,
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 	console spi.Console,
 	timeService spi.TimeService,
 	runDownloadTargetFolder string,
@@ -99,7 +99,7 @@ func downloadReRunArtfifacts(
 				if err == nil {
 					directoryName := nameReRunArtifactDownloadDirectory(reRun, reRunIndex, timeService)
 					err = downloadArtifactsAndRenderImagesToDirectory(
-						commsRetrier,
+						commsClient,
 						directoryName,
 						reRun,
 						fileSystem,
@@ -160,7 +160,7 @@ func nameDownloadFolder(run galasaapi.Run, runName string, timeService spi.TimeS
 }
 
 func downloadArtifactsAndRenderImagesToDirectory(
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 	directoryName string,
 	run galasaapi.Run,
 	fileSystem spi.FileSystem,
@@ -179,7 +179,7 @@ func downloadArtifactsAndRenderImagesToDirectory(
 	}
 
 	var filePathsCreated []string
-	filePathsCreated, err = downloadArtifactsToDirectory(commsRetrier, directoryName, run, fileSystem, forceDownload, console)
+	filePathsCreated, err = downloadArtifactsToDirectory(commsClient, directoryName, run, fileSystem, forceDownload, console)
 
 	if err == nil {
 		renderImages(fileSystem, filePathsCreated, forceDownload)
@@ -211,7 +211,7 @@ func renderImages(fileSystem spi.FileSystem, filePathsCreated []string, forceOve
 }
 
 func downloadArtifactsToDirectory(
-	commsRetrier api.CommsRetrier,
+	commsClient api.APICommsClient,
 	directoryName string,
 	run galasaapi.Run,
 	fileSystem spi.FileSystem,
@@ -224,14 +224,14 @@ func downloadArtifactsToDirectory(
 
 	filesWrittenOkCount := 0
 
-	artifactPaths, err := GetArtifactPathsFromRestApi(runId, commsRetrier)
+	artifactPaths, err := GetArtifactPathsFromRestApi(runId, commsClient)
 	if err == nil {
 		for _, artifactPath := range artifactPaths {
 			if err == nil {
 				var artifactData io.Reader
 				var httpResponse *http.Response
 				var isArtifactDataEmpty bool
-				artifactData, isArtifactDataEmpty, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), commsRetrier)
+				artifactData, isArtifactDataEmpty, httpResponse, err = GetFileFromRestApi(runId, strings.TrimPrefix(artifactPath, "/"), commsClient)
 				if err == nil {
 					if !isArtifactDataEmpty {
 
@@ -272,7 +272,7 @@ func downloadArtifactsToDirectory(
 }
 
 // Retrieves the paths of all artifacts for a given test run using its runId.
-func GetArtifactPathsFromRestApi(runId string, commsRetrier api.CommsRetrier) ([]string, error) {
+func GetArtifactPathsFromRestApi(runId string, commsClient api.APICommsClient) ([]string, error) {
 
 	var err error
 	var artifactPaths []string
@@ -282,7 +282,7 @@ func GetArtifactPathsFromRestApi(runId string, commsRetrier api.CommsRetrier) ([
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 
 	if err == nil {
-		err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var err error
 			var httpResponse *http.Response
 			var artifactsList []galasaapi.ArtifactIndexEntry
@@ -425,7 +425,7 @@ func CreateEmptyArtifactFile(fileSystem spi.FileSystem, targetFilePath string) (
 
 // GetFileFromRestApi Retrieves an artifact for a given test run using its runId from the ecosystem API.
 // Note: The call leaves closing the http request as a responsibility of the caller.
-func GetFileFromRestApi(runId string, artifactPath string, commsRetrier api.CommsRetrier) (io.Reader, bool, *http.Response, error) {
+func GetFileFromRestApi(runId string, artifactPath string, commsClient api.APICommsClient) (io.Reader, bool, *http.Response, error) {
 
 	var err error
 	isFileEmpty := false
@@ -438,7 +438,7 @@ func GetFileFromRestApi(runId string, artifactPath string, commsRetrier api.Comm
 
 	if err == nil {
 
-		err = commsRetrier.ExecuteCommandWithRetries(func(apiClient *galasaapi.APIClient) error {
+		err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 			var err error
 			fileDownloaded, httpResponse, err = apiClient.ResultArchiveStoreAPIApi.
 				GetRasRunArtifactByPath(context.Background(), runId, artifactPath).
@@ -455,7 +455,7 @@ func GetFileFromRestApi(runId string, artifactPath string, commsRetrier api.Comm
 				err = downloadErr
 
 				// Close the response body if we're going to retry the download to avoid leaving responses open
-				if httpResponse != nil && (downloadErr.IsReauthRequired() || downloadErr.IsRetryRequired()) {
+				if httpResponse != nil && (downloadErr.IsReauthRequired() || downloadErr.IsRateLimitedRetryRequired()) {
 					defer httpResponse.Body.Close()
 				}
 

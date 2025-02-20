@@ -161,52 +161,30 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			timeService := factory.GetTimeService()
-			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
+				galasaHome,
+			)
 
-			// Read the bootstrap properties, retrying if a rate limit has been exceeded
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			loadBootstrapWithRetriesFunc := func() error {
-				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
-				return err
-			}
-
-			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
 
 				timeService := factory.GetTimeService()
 				timedSleeper := utils.NewRealTimedSleeper()
-				var launcherInstance launcher.Launcher
+				launcherInstance := launcher.NewRemoteLauncher(commsClient)
 
-				// The launcher we are going to use to start/monitor tests.
-				apiServerUrl := bootstrapData.ApiServerURL
-
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-
-				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
-					commsFlagSetValues.maxRetries,
-					commsFlagSetValues.retryBackoffSeconds,
-					timeService,
-					authenticator,
-				)
-
+				validator := runs.NewStreamBasedValidator()
+				err = validator.Validate(cmd.values.TestSelectionFlagValues)
 				if err == nil {
-					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, commsRetrier)
 
-					validator := runs.NewStreamBasedValidator()
-					err = validator.Validate(cmd.values.TestSelectionFlagValues)
-					if err == nil {
+					var console = factory.GetStdOutConsole()
 
-						var console = factory.GetStdOutConsole()
+					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
 
-						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
-
-						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
-					}
+					err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 				}
 			}
 		}

@@ -83,10 +83,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"auth login"},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeAuthLogin(factory, commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeAuthLogin(factory, commsFlagSetValues)
 		},
 	}
 

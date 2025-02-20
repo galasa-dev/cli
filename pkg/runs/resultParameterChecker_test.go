@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,13 +46,10 @@ func TestValidResultNamePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+	commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("Passed", commsRetrier)
+	result, err := ValidateResultParameter("Passed", commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -65,13 +61,10 @@ func TestValidResultNameLowercasePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+	commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("envfail", commsRetrier)
+	result, err := ValidateResultParameter("envfail", commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -83,13 +76,10 @@ func TestValidResultNameUppercasePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("FAILED", commsRetrier)
+	result, err := ValidateResultParameter("FAILED", commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -101,13 +91,10 @@ func TestMultipleValidResultNamesMixedCasePassesValidation(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("unKnown,PASSed,Failed", commsRetrier)
+	result, err := ValidateResultParameter("unKnown,PASSed,Failed", commsClient)
 
 	// Then...
 	assert.Nil(t, err)
@@ -119,13 +106,10 @@ func TestGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("garbage", commsRetrier)
+	result, err := ValidateResultParameter("garbage", commsClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
@@ -143,13 +127,10 @@ func TestValidResultFollowedByGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("passed,garbage", commsRetrier)
+	result, err := ValidateResultParameter("passed,garbage", commsClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
@@ -167,13 +148,10 @@ func TestMultipleGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("fail,garbage", commsRetrier)
+	result, err := ValidateResultParameter("fail,garbage", commsClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")
@@ -192,13 +170,10 @@ func TestMixOfValidAndGarbageResultNameFailsWithError(t *testing.T) {
 	server := NewResultNamesServletMock(t, http.StatusOK)
 	defer server.Close()
 	apiServerUrl := server.URL
-	apiClient := api.InitialiseAPI(apiServerUrl)
-	mockTimeService := utils.NewMockTimeService()
-	mockAuthenticator := utils.NewMockAuthenticatorWithAPIClient(apiClient)
-	commsRetrier, _ := api.NewCommsRetrierWithAPIClient(1, 0, mockTimeService, mockAuthenticator)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
 	// When...
-	result, err := ValidateResultParameter("passed,garbage,envfail,rubbish", commsRetrier)
+	result, err := ValidateResultParameter("passed,garbage,envfail,rubbish", commsClient)
 
 	// Then...
 	assert.NotNil(t, err, "Should not have validated OK.")

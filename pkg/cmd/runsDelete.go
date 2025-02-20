@@ -112,49 +112,29 @@ func (cmd *RunsDeleteCommand) executeRunsDelete(
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			timeService := factory.GetTimeService()
-			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, timeService)
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
+				galasaHome,
+			)
 
-			// Read the bootstrap properties, retrying if a rate limit has been exceeded
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			loadBootstrapWithRetriesFunc := func() error {
-				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
-				return err
-			}
-
-			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
 	
 				var console = factory.GetStdOutConsole()
-	
-				apiServerUrl := bootstrapData.ApiServerURL
-				log.Printf("The API server is at '%s'\n", apiServerUrl)
-	
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-
 				byteReader := factory.GetByteReader()
+				timeService := factory.GetTimeService()
 
-				commsRetrier, err = api.NewCommsRetrierWithAPIClient(
-					commsFlagSetValues.maxRetries,
-					commsFlagSetValues.retryBackoffSeconds,
+				// Call to process the command in a unit-testable way.
+				err = runs.RunsDelete(
+					cmd.values.runName,
+					console,
+					commsClient,
 					timeService,
-					authenticator,
+					byteReader,
 				)
-	
-				if err == nil {
-					// Call to process the command in a unit-testable way.
-					err = runs.RunsDelete(
-						cmd.values.runName,
-						console,
-						commsRetrier,
-						timeService,
-						byteReader,
-					)
-				}
 			}
 		}
 	}
