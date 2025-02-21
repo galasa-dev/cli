@@ -29,7 +29,7 @@ type APICommsClient interface {
 	RunAuthenticatedCommandWithRateLimitRetries(commandExecutionFunc func(apiClient *galasaapi.APIClient) error) error
 
 	GetBootstrapData() *BootstrapData
-	GetBearerToken() (string, error)
+	GetAuthenticator() spi.Authenticator
 }
 
 func NewAPICommsClient(
@@ -77,8 +77,8 @@ func (commsClient *APICommsClientImpl) GetBootstrapData() *BootstrapData {
 	return commsClient.bootstrapData
 }
 
-func (commsClient *APICommsClientImpl) GetBearerToken() (string, error) {
-	return commsClient.authenticator.GetBearerToken()
+func (commsClient *APICommsClientImpl) GetAuthenticator() spi.Authenticator {
+	return commsClient.authenticator
 }
 
 // RunAuthenticatedCommandWithRateLimitRetries tries to run a given execution function until we've tried enough, it worked,

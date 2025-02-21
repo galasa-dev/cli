@@ -61,7 +61,7 @@ func sendResourcesRequestToServer(payloadJsonToSend []byte, commsClient api.APIC
 
 	err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
 		var err error
-		bearerToken, err = commsClient.GetBearerToken()
+		bearerToken, err = commsClient.GetAuthenticator().GetBearerToken()
 		if err == nil {
 			var req *http.Request
 			req, err = http.NewRequest("POST", resourcesApiServerUrl, bytes.NewBuffer(payloadJsonToSend))

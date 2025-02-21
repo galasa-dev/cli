@@ -163,78 +163,81 @@ func (cmd *RunsSubmitLocalCommand) executeSubmitLocal(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Submit tests (Local)")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	// Work out where galasa home is, only once.
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		var commsClient api.APICommsClient
-		commsClient, err = api.NewAPICommsClient(
-			commsFlagSetValues.bootstrap,
-			commsFlagSetValues.maxRetries,
-			commsFlagSetValues.retryBackoffSeconds,
-			factory,
-			galasaHome,
-		)
-
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Submit tests (Local)")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		// Work out where galasa home is, only once.
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
-
-			timeService := utils.NewRealTimeService()
-			timedSleeper := utils.NewRealTimedSleeper()
-
-			// the submit is targetting a local JVM
-			embeddedFileSystem := embedded.GetReadOnlyFileSystem()
-
-			// Something which can kick off new operating system processes
-			processFactory := launcher.NewRealProcessFactory()
-
-			// Validate the test selection parameters.
-			validator := runs.NewObrBasedValidator()
-			err = validator.Validate(cmd.values.submitLocalSelectionFlags)
+	
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
+				galasaHome,
+			)
+	
 			if err == nil {
-
-				bootstrapData := commsClient.GetBootstrapData()
-
-				// A launcher is needed to launch anythihng
-				var launcherInstance launcher.Launcher
-				launcherInstance, err = launcher.NewJVMLauncher(
-					factory,
-					bootstrapData.Properties, embeddedFileSystem,
-					cmd.values.runsSubmitLocalCmdParams,
-					processFactory, galasaHome, timedSleeper)
-
+	
+				timeService := utils.NewRealTimeService()
+				timedSleeper := utils.NewRealTimedSleeper()
+	
+				// the submit is targetting a local JVM
+				embeddedFileSystem := embedded.GetReadOnlyFileSystem()
+	
+				// Something which can kick off new operating system processes
+				processFactory := launcher.NewRealProcessFactory()
+	
+				// Validate the test selection parameters.
+				validator := runs.NewObrBasedValidator()
+				err = validator.Validate(cmd.values.submitLocalSelectionFlags)
 				if err == nil {
-					var console = factory.GetStdOutConsole()
-
-					renderer := images.NewImageRenderer(embeddedFileSystem)
-					expander := images.NewImageExpander(fileSystem, renderer, true)
-
-					// Do the launching of the tests.
-					submitter := runs.NewSubmitter(
-						galasaHome,
-						fileSystem,
-						launcherInstance,
-						timeService,
-						timedSleeper,
-						env,
-						console,
-						expander,
-					)
-
-					err = submitter.ExecuteSubmitRuns(
-						runsSubmitCmdValues,
-						cmd.values.submitLocalSelectionFlags,
-					)
-
+	
+					bootstrapData := commsClient.GetBootstrapData()
+	
+					// A launcher is needed to launch anythihng
+					var launcherInstance launcher.Launcher
+					launcherInstance, err = launcher.NewJVMLauncher(
+						factory,
+						bootstrapData.Properties, embeddedFileSystem,
+						cmd.values.runsSubmitLocalCmdParams,
+						processFactory, galasaHome, timedSleeper)
+	
 					if err == nil {
-						reportOnExpandedImages(expander)
+						var console = factory.GetStdOutConsole()
+	
+						renderer := images.NewImageRenderer(embeddedFileSystem)
+						expander := images.NewImageExpander(fileSystem, renderer, true)
+	
+						// Do the launching of the tests.
+						submitter := runs.NewSubmitter(
+							galasaHome,
+							fileSystem,
+							launcherInstance,
+							timeService,
+							timedSleeper,
+							env,
+							console,
+							expander,
+						)
+	
+						err = submitter.ExecuteSubmitRuns(
+							runsSubmitCmdValues,
+							cmd.values.submitLocalSelectionFlags,
+						)
+	
+						if err == nil {
+							reportOnExpandedImages(expander)
+						}
 					}
 				}
 			}
