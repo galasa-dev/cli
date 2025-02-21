@@ -1250,7 +1250,7 @@ func TestRunsDownloadMultipleSetsOfUnrelatedReRunsWithCorrectOrderFolders(t *tes
 		downloadTxt2bArtifactInteraction,
     }
 
-    server := utils.NewMockHttpServer(t, interactions)
+    server := utils.NewMockHttpServerWithUnorderedInteractions(t, interactions)
     defer server.Server.Close()
 
 	mockConsole := utils.NewMockConsole()

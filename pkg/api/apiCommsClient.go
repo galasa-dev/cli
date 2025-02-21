@@ -50,9 +50,9 @@ func NewAPICommsClient(
 	fileSystem := factory.GetFileSystem()
 
 	var bootstrapData *BootstrapData
+	var urlService *RealUrlResolutionService = new(RealUrlResolutionService)
 	err = commsClient.RunCommandWithRateLimitRetries(func() error {
 		// Read the bootstrap properties, retrying if a rate limit has been exceeded
-		var urlService *RealUrlResolutionService = new(RealUrlResolutionService)
 		bootstrapData, err = LoadBootstrap(galasaHome, fileSystem, env, bootstrap, urlService)
 		return err
 	})
@@ -122,14 +122,11 @@ func (commsClient *APICommsClientImpl) RunAuthenticatedCommandWithRateLimitRetri
 					attempt++
 					log.Printf("Reauthentication required. Login attempt %v/%v", attempt, maxAttempts)
 
-					// Overwrite the API client being used to avoid having to re-authenticate again
-					commsClient.apiClient, apiClientErr = commsClient.authenticator.GetAuthenticatedAPIClient()
+					// Unset the API client so that we re-authenticate at the start of the next loop
+					// and can then cope with rate limit or auth issues after re-authenticating
+					commsClient.apiClient = nil
+					isRetryRequired = true
 
-					if apiClientErr == nil {
-						isRetryRequired = true
-					} else {
-						err = apiClientErr
-					}
 				} else if galasaError.IsRateLimitedRetryRequired() {
 					attempt++
 					log.Printf("Rate limit exceeded on attempt %v/%v", attempt, maxAttempts)
