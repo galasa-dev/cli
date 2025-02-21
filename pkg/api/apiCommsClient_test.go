@@ -94,6 +94,40 @@ func TestExecuteCommandWithRetriesTriesAgainOnAuthFailure(t *testing.T) {
     assert.Equal(t, newApiClient, commsClient.apiClient)
 }
 
+func TestExecuteCommandWithRetriesTriesAgainOnReauthFailure(t *testing.T) {
+    // Given...
+    maxAttempts := 3
+    retryBackoffSeconds := 10
+
+	now := time.Now()
+    timeService := utils.NewOverridableMockTimeService(now)
+
+    mockAuthenticator := utils.NewMockAuthenticator()
+
+    commsClient := &APICommsClientImpl{
+        maxAttempts: maxAttempts,
+        retryBackoffSeconds: float64(retryBackoffSeconds),
+        timeService: timeService,
+        apiClient: nil,
+        authenticator: mockAuthenticator,
+    }
+
+    // Simulate a situation where the re-authentication part fails due to rate-limiting
+    mockAuthenticator.SetHttpStatusCodeToReturn(http.StatusTooManyRequests)
+
+    executionFunc := func(apiClient *galasaapi.APIClient) error {
+        var err error
+        return err
+    }
+
+    // When...
+    err := commsClient.RunAuthenticatedCommandWithRateLimitRetries(executionFunc)
+
+    // Then...
+    assert.NotNil(t, err)
+	assert.Equal(t, now.Add(20 * time.Second), timeService.Now(), "Time should have advanced after each attempt")
+}
+
 func TestExecuteCommandWithRetriesTriesAgainOnRateLimitFailure(t *testing.T) {
     // Given...
     maxAttempts := 3
