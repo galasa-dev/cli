@@ -16,7 +16,12 @@ import (
 var (
 	RATE_LIMIT_STATUS_CODES_MAP = map[int]struct{}{
 		http.StatusServiceUnavailable: {},
-		http.StatusTooManyRequests:    {},
+		http.StatusTooManyRequests: {},
+		http.StatusUnauthorized: {},
+	}
+
+	AUTH_STATUS_CODES_MAP = map[int]struct{} {
+		http.StatusUnauthorized: {},
 	}
 )
 
@@ -67,7 +72,8 @@ type GalasaError struct {
 }
 
 type GalasaCommsError interface {
-	IsRetryRequired() bool
+	IsRateLimitedRetryRequired() bool
+	IsReauthRequired() bool
 }
 
 func (err *GalasaError) GetMessageType() *MessageType {
@@ -132,7 +138,17 @@ func (err *GalasaError) Error() string {
 	return err.message
 }
 
-func (err *GalasaError) IsRetryRequired() bool {
+func (err *GalasaError) IsRateLimitedRetryRequired() bool {
+	isRetryRequired := isRootErrorStatusCodeInMap(err, RATE_LIMIT_STATUS_CODES_MAP)
+	return isRetryRequired
+}
+
+func (err *GalasaError) IsReauthRequired() bool {
+	isReauthRequired := isRootErrorStatusCodeInMap(err, AUTH_STATUS_CODES_MAP)
+	return isReauthRequired
+}
+
+func isRootErrorStatusCodeInMap(err *GalasaError, errorCodeMap map[int]struct{}) bool {
 	var statusCode int
 	currentError := err
 	isGalasaError := true
@@ -147,9 +163,9 @@ func (err *GalasaError) IsRetryRequired() bool {
 		statusCode = currentError.GetHttpStatusCode()
 	}
 
-	_, isRetryRequired := RATE_LIMIT_STATUS_CODES_MAP[statusCode]
+	_, isStatusCodeInMap := errorCodeMap[statusCode]
 
-	return isRetryRequired
+	return isStatusCodeInMap
 }
 
 const (

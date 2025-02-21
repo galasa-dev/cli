@@ -75,10 +75,7 @@ func (cmd *PropertiesDeleteCommand) createPropertiesDeleteCobraCmd(
 		Long:  "Delete a property and its value in a namespace",
 		Args:  cobra.NoArgs,
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executePropertiesDelete(factory, propertiesCmdValues, commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executePropertiesDelete(factory, propertiesCmdValues, commsFlagSetValues)
 		},
 		Aliases: []string{"properties delete"},
 	}
@@ -99,37 +96,37 @@ func (cmd *PropertiesDeleteCommand) executePropertiesDelete(factory spi.Factory,
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Delete ecosystem properties")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Delete ecosystem properties")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-			var apiClient *galasaapi.APIClient
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
 				galasaHome,
 			)
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-			if err == nil {
-				// Call to process the command in a unit-testable way.
-				err = properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiClient)
+
+			if err == nil {	
+				deletePropertyFunc := func(apiClient *galasaapi.APIClient) error {
+					// Call to process the command in a unit-testable way.
+					return properties.DeleteProperty(propertiesCmdValues.namespace, propertiesCmdValues.propertyName, apiClient)
+				}
+				err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(deletePropertyFunc)
 			}
 		}
 	}
+
 	return err
 }

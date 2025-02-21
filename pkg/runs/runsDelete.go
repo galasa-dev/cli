@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -23,8 +24,7 @@ import (
 func RunsDelete(
 	runName string,
 	console spi.Console,
-	apiServerUrl string,
-	apiClient *galasaapi.APIClient,
+	commsClient api.APICommsClient,
 	timeService spi.TimeService,
 	byteReader spi.ByteReader,
 ) error {
@@ -46,14 +46,14 @@ func RunsDelete(
 		group := ""
 		shouldGetActive := false
 		var runs []galasaapi.Run
-		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, apiClient, group)
+		runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsClient, group)
 
 		if err == nil {
 
 			if len(runs) == 0 {
 				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_RUN_NOT_FOUND, runName)
 			} else {
-				err = deleteRuns(runs, apiClient, byteReader)
+				err = deleteRuns(runs, commsClient, byteReader)
 			}
 		}
 
@@ -67,55 +67,71 @@ func RunsDelete(
 
 func deleteRuns(
 	runs []galasaapi.Run,
-	apiClient *galasaapi.APIClient,
+	commsClient api.APICommsClient,
 	byteReader spi.ByteReader,
 ) error {
 	var err error
-
 	var restApiVersion string
-	var context context.Context = nil
-
-	var httpResponse *http.Response
 
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 	if err == nil {
 		for _, run := range runs {
-			runId := run.GetRunId()
-			runName := *run.GetTestStructure().RunName
-
-			apicall := apiClient.ResultArchiveStoreAPIApi.DeleteRasRunById(context, runId).ClientApiVersion(restApiVersion)
-			httpResponse, err = apicall.Execute()
-
-			if httpResponse != nil {
-				defer httpResponse.Body.Close()
-			}
-
-			// 200-299 http status codes manifest in an error.
-			if err != nil {
-				if httpResponse == nil {
-					// We never got a response, error sending it or something ?
-					err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_RUNS_FAILED, err.Error())
-				} else {
-					err = galasaErrors.HttpResponseToGalasaError(
-						httpResponse,
-						runName,
-						byteReader,
-						galasaErrors.GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT,
-						galasaErrors.GALASA_ERROR_DELETE_RUNS_RESPONSE_PAYLOAD_UNREADABLE,
-						galasaErrors.GALASA_ERROR_DELETE_RUNS_UNPARSEABLE_CONTENT,
-						galasaErrors.GALASA_ERROR_DELETE_RUNS_SERVER_REPORTED_ERROR,
-						galasaErrors.GALASA_ERROR_DELETE_RUNS_EXPLANATION_NOT_JSON,
-					)
-				}
-			}
-
+			err = deleteRun(run, commsClient, byteReader, restApiVersion)
 			if err != nil {
 				break
-			} else {
-				log.Printf("Run with runId '%s' and runName '%s', was deleted OK.\n", runId, run.TestStructure.GetRunName())
 			}
 		}
 	}
 
+	return err
+}
+
+func deleteRun(
+	run galasaapi.Run,
+	commsClient api.APICommsClient,
+	byteReader spi.ByteReader,
+	restApiVersion string,
+) error {
+	var err error
+
+	runId := run.GetRunId()
+	runName := *run.GetTestStructure().RunName
+
+	err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
+		var err error
+		var context context.Context = nil
+		var httpResponse *http.Response
+
+		apicall := apiClient.ResultArchiveStoreAPIApi.DeleteRasRunById(context, runId).ClientApiVersion(restApiVersion)
+		httpResponse, err = apicall.Execute()
+	
+		if httpResponse != nil {
+			defer httpResponse.Body.Close()
+		}
+	
+		// 200-299 http status codes manifest in an error.
+		if err != nil {
+			if httpResponse == nil {
+				// We never got a response, error sending it or something ?
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SERVER_DELETE_RUNS_FAILED, err.Error())
+			} else {
+				err = galasaErrors.HttpResponseToGalasaError(
+					httpResponse,
+					runName,
+					byteReader,
+					galasaErrors.GALASA_ERROR_DELETE_RUNS_NO_RESPONSE_CONTENT,
+					galasaErrors.GALASA_ERROR_DELETE_RUNS_RESPONSE_PAYLOAD_UNREADABLE,
+					galasaErrors.GALASA_ERROR_DELETE_RUNS_UNPARSEABLE_CONTENT,
+					galasaErrors.GALASA_ERROR_DELETE_RUNS_SERVER_REPORTED_ERROR,
+					galasaErrors.GALASA_ERROR_DELETE_RUNS_EXPLANATION_NOT_JSON,
+				)
+			}
+		}
+	
+		if err == nil {
+			log.Printf("Run with runId '%s' and runName '%s', was deleted OK.\n", runId, run.TestStructure.GetRunName())
+		}
+		return err
+	})
 	return err
 }

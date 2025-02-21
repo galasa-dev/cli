@@ -83,10 +83,7 @@ func (cmd *AuthLoginComamnd) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"auth login"},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executeAuthLogin(factory, commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeAuthLogin(factory, commsFlagSetValues)
 		},
 	}
 
@@ -104,33 +101,37 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
-
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Log in to an ecosystem")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Read the bootstrap properties.
-	var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-	var bootstrapData *api.BootstrapData
-	bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-		apiServerUrl := bootstrapData.ApiServerURL
-		log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-		authenticator := factory.GetAuthenticator(
-			apiServerUrl,
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Log in to an ecosystem")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+		if err != nil {
+			panic(err)
+		}
+	
+		var commsClient api.APICommsClient
+		commsClient, err = api.NewAPICommsClient(
+			commsFlagSetValues.bootstrap,
+			commsFlagSetValues.maxRetries,
+			commsFlagSetValues.retryBackoffSeconds,
+			factory,
 			galasaHome,
 		)
-		err = authenticator.Login()
+
+		if err == nil {
+			authenticator := commsClient.GetAuthenticator()
+			err = commsClient.RunCommandWithRateLimitRetries(func() error {
+				return authenticator.Login()
+			})
+		}
 	}
+
 	return err
 }

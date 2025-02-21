@@ -76,10 +76,7 @@ func (cmd *SecretsDeleteCommand) createCobraCmd(
         Long:    "Deletes a secret from the credentials store",
         Aliases: []string{COMMAND_NAME_SECRETS_DELETE},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-            	return cmd.executeSecretsDelete(factory, secretsCommand.Values().(*SecretsCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executeSecretsDelete(factory, secretsCommand.Values().(*SecretsCmdValues), commsFlagSetValues)
         },
     }
 
@@ -100,40 +97,39 @@ func (cmd *SecretsDeleteCommand) executeSecretsDelete(
     // Operations on the file system will all be relative to the current folder.
     fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Delete a secret from the credentials store")
-
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Delete a secret from the credentials store")
+	
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			var console = factory.GetStdOutConsole()
-
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
 				galasaHome,
 			)
 
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
-
-			byteReader := factory.GetByteReader()
-
 			if err == nil {
-				err = secrets.DeleteSecret(secretsCmdValues.name, console, apiClient, byteReader)
+
+				var console = factory.GetStdOutConsole()
+				byteReader := factory.GetByteReader()
+
+				deleteSecretFunc := func(apiClient *galasaapi.APIClient) error {
+					return secrets.DeleteSecret(secretsCmdValues.name, console, apiClient, byteReader)
+				}
+				err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(deleteSecretFunc)
 			}
 		}
 	}
+
     return err
 }

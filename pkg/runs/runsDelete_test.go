@@ -59,16 +59,15 @@ func TestCanDeleteARun(t *testing.T) {
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -134,16 +133,15 @@ func TestCanDeleteRunAndReruns(t *testing.T) {
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -169,16 +167,15 @@ func TestDeleteNonExistantRunDisplaysError(t *testing.T) {
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         nonExistantRunName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -221,16 +218,15 @@ func TestRunsDeleteFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *test
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -274,16 +270,15 @@ func TestRunsDeleteFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrec
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -329,16 +324,15 @@ func TestRunsDeleteFailsWithBadlyFormedJsonContentExplanationErrorPayloadGivesCo
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -393,16 +387,15 @@ func TestRunsDeleteFailsWithValidErrorResponsePayloadGivesCorrectMessage(t *test
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReader()
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 
@@ -449,16 +442,15 @@ func TestRunsDeleteFailsWithFailureToReadResponseBodyGivesCorrectMessage(t *test
 
     console := utils.NewMockConsole()
     apiServerUrl := server.Server.URL
-    apiClient := api.InitialiseAPI(apiServerUrl)
     mockTimeService := utils.NewMockTimeService()
 	mockByteReader := utils.NewMockByteReaderAsMock(true)
+    commsClient := api.NewMockAPICommsClient(apiServerUrl)
 
     // When...
     err := RunsDelete(
         runName,
         console,
-        apiServerUrl,
-        apiClient,
+        commsClient,
         mockTimeService,
 		mockByteReader)
 

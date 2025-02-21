@@ -78,11 +78,7 @@ func (cmd *ResourcesApplyCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"resources apply"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return executeResourcesApply(factory,
-					resourcesApplyCommandValues, commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return executeResourcesApply(factory, resourcesApplyCommandValues, commsFlagSetValues)
 		},
 	}
 
@@ -106,41 +102,35 @@ func loadAndPassDataIntoResourcesApi(action string, factory spi.Factory, resourc
 	var err error
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
-
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI -", action, "Resources Command")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
-
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI -", action, "Resources Command")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	
 		if err == nil {
 
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-			var bearerToken string
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
 				galasaHome,
 			)
-			bearerToken, err = authenticator.GetBearerToken()
 
 			if err == nil {
 				err = resources.ApplyResources(
 					action,
 					resourcesCmdValues.filePath,
 					fileSystem,
-					apiServerUrl,
-					bearerToken,
+					commsClient,
 				)
 			}
 		}
