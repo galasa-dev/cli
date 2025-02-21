@@ -17,13 +17,17 @@ import (
 type APICommsClientImpl struct {
 	maxAttempts         int
 	retryBackoffSeconds float64
-	timeService         spi.TimeService
 
+	timeService         spi.TimeService
 	bootstrapData *BootstrapData
 	apiClient     *galasaapi.APIClient
 	authenticator spi.Authenticator
 }
 
+// APICommsClient acts as a smarter client for API server communications with the ability to retry
+// functions that send requests to the Galasa API server in the event of rate-limiting or auth-related
+// errors. It also loads the bootstrap information from a given location so that consumers can pull
+// the bootstrap data out from this comms client as needed.
 type APICommsClient interface {
 	RunCommandWithRateLimitRetries(commandExecutionFunc func() error) error
 	RunAuthenticatedCommandWithRateLimitRetries(commandExecutionFunc func(apiClient *galasaapi.APIClient) error) error

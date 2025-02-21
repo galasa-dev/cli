@@ -127,7 +127,9 @@ func (cmd *AuthLoginComamnd) executeAuthLogin(
 
 		if err == nil {
 			authenticator := commsClient.GetAuthenticator()
-			err = authenticator.Login()
+			err = commsClient.RunCommandWithRateLimitRetries(func() error {
+				return authenticator.Login()
+			})
 		}
 	}
 
