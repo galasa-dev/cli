@@ -11,7 +11,6 @@ import (
 
 	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
-	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -141,68 +140,55 @@ func (cmd *RunsPrepareCommand) executeAssemble(
 
 			if err == nil {
 
-				commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
+				var commsClient api.APICommsClient
+				commsClient, err = api.NewAPICommsClient(
+					commsFlagSetValues.bootstrap,
+					commsFlagSetValues.maxRetries,
+					commsFlagSetValues.retryBackoffSeconds,
+					factory,
+					galasaHome,
+				)
 
-				// Load the bootstrap properties.
-				var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-				var bootstrapData *api.BootstrapData
-				loadBootstrapWithRetriesFunc := func() error {
-					bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
-					return err
-				}
-	
-				err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 				if err == nil {
+					launcherInstance := launcher.NewRemoteLauncher(commsClient)
 
-					// Create an API client
-					var apiClient *galasaapi.APIClient
-					apiServerUrl := bootstrapData.ApiServerURL
-					authenticator := factory.GetAuthenticator(
-						apiServerUrl,
-						galasaHome,
-					)
-					apiClient, err = authenticator.GetAuthenticatedAPIClient()
+					validator := runs.NewStreamBasedValidator()
+					err = validator.Validate(cmd.values.prepareSelectionFlags)
 					if err == nil {
-						launcher := launcher.NewRemoteLauncher(apiServerUrl, apiClient, commsRetrier)
 
-						validator := runs.NewStreamBasedValidator()
-						err = validator.Validate(cmd.values.prepareSelectionFlags)
+						var testSelection runs.TestSelection
+						testSelection, err = runs.SelectTests(launcherInstance, cmd.values.prepareSelectionFlags)
 						if err == nil {
 
-							var testSelection runs.TestSelection
-							testSelection, err = runs.SelectTests(launcher, cmd.values.prepareSelectionFlags)
+							count := len(testSelection.Classes)
+							if count < 1 {
+								err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
+							} else {
+								if count == 1 {
+									log.Println("1 test was selected")
+								} else {
+									log.Printf("%v tests were selected", count)
+								}
+							}
+
 							if err == nil {
 
-								count := len(testSelection.Classes)
-								if count < 1 {
-									err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_NO_TESTS_SELECTED)
+								var portfolio *runs.Portfolio
+								if *cmd.values.prepareAppend {
+									portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
 								} else {
-									if count == 1 {
-										log.Println("1 test was selected")
-									} else {
-										log.Printf("%v tests were selected", count)
-									}
+									portfolio = runs.NewPortfolio()
 								}
 
 								if err == nil {
+									runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
 
-									var portfolio *runs.Portfolio
-									if *cmd.values.prepareAppend {
-										portfolio, err = runs.ReadPortfolio(fileSystem, cmd.values.portfolioFilename)
-									} else {
-										portfolio = runs.NewPortfolio()
-									}
-
+									err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
 									if err == nil {
-										runs.AddClassesToPortfolio(&testSelection, &testOverrides, portfolio)
-
-										err = runs.WritePortfolio(fileSystem, cmd.values.portfolioFilename, portfolio)
-										if err == nil {
-											if *cmd.values.prepareAppend {
-												log.Println("Portfolio appended")
-											} else {
-												log.Println("Portfolio created")
-											}
+										if *cmd.values.prepareAppend {
+											log.Println("Portfolio appended")
+										} else {
+											log.Println("Portfolio created")
 										}
 									}
 								}

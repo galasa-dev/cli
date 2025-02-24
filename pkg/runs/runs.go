@@ -10,6 +10,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
 	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/spi"
@@ -17,7 +18,7 @@ import (
 
 func getRunIdFromRunName(runName string,
 	timeService spi.TimeService,
-	apiClient *galasaapi.APIClient,
+	commsClient api.APICommsClient,
 ) (string, error) {
 	var err error
 	var runs []galasaapi.Run
@@ -30,7 +31,7 @@ func getRunIdFromRunName(runName string,
 	toAgeHours := 0
 	shouldGetActive := true
 
-	runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, apiClient, group)
+	runs, err = GetRunsFromRestApi(runName, requestorParameter, resultParameter, fromAgeHours, toAgeHours, shouldGetActive, timeService, commsClient, group)
 
 	if err == nil {
 
