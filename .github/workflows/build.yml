@@ -135,6 +135,7 @@ jobs:
         env:
           GALASA_TOKEN: ${{ secrets.GALASA_TOKEN_ECOSYSTEM1 }}
         run : |
+          export GALASA_TOKEN="${GALASA_TOKEN}"
           ./test-galasactl-ecosystem.sh --bootstrap https://galasa-ecosystem1.galasa.dev/api/bootstrap
 
       - name: Login to Github Container Registry
@@ -233,7 +234,6 @@ jobs:
             GH_TOKEN: ${{ secrets.GALASA_TEAM_GITHUB_TOKEN }}
         run: |
           gh workflow run build.yaml --repo https://github.com/galasa-dev/isolated --ref ${{ env.BRANCH }}
-
 
   report-failure:
     # Skip this job for forks
