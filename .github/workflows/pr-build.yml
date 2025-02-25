@@ -98,14 +98,15 @@ jobs:
         run : |
           ./test-galasactl-local.sh --buildTool gradle
 
-      # Commenting out for now as we cannot reach the prod1 ecosystem from GitHub Actions.
-      # - name: Chmod ecosystem test script
-      #   run : |
-      #     chmod +x test-galasactl-ecosystem.sh
+      - name: Chmod ecosystem test script
+        run : |
+          chmod +x test-galasactl-ecosystem.sh
 
-      # - name: Run ecosystem test script
-      #   run : |
-      #     ./test-galasactl-ecosystem.sh --bootstrap https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap
+      - name: Run ecosystem test script
+        env:
+          GALASA_TOKEN: ${{ secrets.GALASA_TOKEN_ECOSYSTEM1 }}
+        run : |
+          ./test-galasactl-ecosystem.sh --bootstrap https://galasa-ecosystem1.galasa.dev/api/bootstrap
 
       - name: Build Docker image with galasactl executable
         uses: docker/build-push-action@v5
