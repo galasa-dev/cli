@@ -104,8 +104,10 @@ jobs:
 
       - name: Run ecosystem test script
         env:
+          GALASA_HOME: /home/runner/galasa
           GALASA_TOKEN: ${{ secrets.GALASA_TOKEN_ECOSYSTEM1 }}
         run : |
+          export GALASA_HOME="${GALASA_HOME}"
           export GALASA_TOKEN="${GALASA_TOKEN}"
           ./test-galasactl-ecosystem.sh --bootstrap https://galasa-ecosystem1.galasa.dev/api/bootstrap
 
