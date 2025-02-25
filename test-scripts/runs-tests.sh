@@ -192,7 +192,7 @@ function runs_download_check_folder_names_during_test_run {
     --bootstrap ${bootstrap} \
     --portfolio portfolio.yaml \
     --throttle 1 \
-    --poll 10 \
+    --poll 1 \
     --progress 1 \
     --noexitcodeontestfailures \
     --log ${log_file}"
