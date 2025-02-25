@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-echo "Running script resourrces-tests.sh"
+echo "Running script resources-tests.sh"
 # This script can be ran locally or executed in a pipeline to test the various built binaries of galasactl
 # This script tests the 'galasactl resources' command against a namespace that is in our ecosystem's cps namespaces already
 # Pre-requesite: the CLI must have been built first so the binaries are present in the /bin directory
@@ -69,7 +69,7 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
 
     # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
     if [[ "${bootstrap}" == "" ]]; then
-        export bootstrap="https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap"
+        export bootstrap="https://galasa-ecosystem1.galasa.dev/api/bootstrap"
         info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
     fi
 
