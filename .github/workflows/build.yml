@@ -127,17 +127,35 @@ jobs:
         run : |
           ./test-galasactl-local.sh --buildTool gradle
 
-      - name: Chmod ecosystem test script
-        run : |
-          chmod +x test-galasactl-ecosystem.sh
+      # Skip testing of Galasa service related commands if the
+      # GALASA_TOKEN_ECOSYSTEM1 secret is not set as the test
+      # script will not be able to authenticate to ecosystem1.
+      - name: Check if secret GALASA_TOKEN_ECOSYSTEM1 exists
+        continue-on-error: true
+        env:
+          GALASA_TOKEN: ${{ secrets.GALASA_TOKEN_ECOSYSTEM1 }}
+        run: |
+          if [ -z "${GALASA_TOKEN_ECOSYSTEM1}" ] || [ "${GALASA_TOKEN_ECOSYSTEM1}" = "" ]; then
+            echo "GALASA_TOKEN_ECOSYSTEM1 is not set. Skipping tests where the CLI interacts with the Galasa service."
+            exit 1
+          else
+            echo "GALASA_TOKEN_ECOSYSTEM1 is set. Proceeding with tests where the CLI interacts with the Galasa service."
+          fi
+        id: check-galasa-token
 
-      - name: Run ecosystem test script
+      - name: Set environment variables
+        if: ${{ steps.check-galasa-token.outcome == 'success' }}
         env:
           GALASA_HOME: /home/runner/galasa
           GALASA_TOKEN: ${{ secrets.GALASA_TOKEN_ECOSYSTEM1 }}
         run : |
-          export GALASA_HOME="${GALASA_HOME}"
-          export GALASA_TOKEN="${GALASA_TOKEN}"
+          echo "GALASA_HOME=${{ env.GALASA_HOME }}" >> $GITHUB_ENV
+          echo "GALASA_TOKEN=${{ env.GALASA_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Run ecosystem test script
+        if: ${{ steps.check-galasa-token.outcome == 'success' }}
+        run : |
+          chmod +x test-galasactl-ecosystem.sh
           ./test-galasactl-ecosystem.sh --bootstrap https://galasa-ecosystem1.galasa.dev/api/bootstrap
 
       - name: Login to Github Container Registry
