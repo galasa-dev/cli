@@ -108,7 +108,7 @@ function launch_test_on_ecosystem_with_portfolio {
 
     cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
-    --stream inttests \
+    --stream ivts \
     --portfolio portfolio.yaml \
     --test ${GALASA_TEST_NAME_SHORT} \
     --log -"
@@ -166,7 +166,7 @@ function runs_download_check_folder_names_during_test_run {
     # Create the portfolio.
     cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
-    --stream inttests \
+    --stream ivts \
     --portfolio portfolio.yaml \
     --test ${GALASA_TEST_NAME_SHORT} \
     --log -"
@@ -318,8 +318,8 @@ function runs_reset_check_retry_present {
 
     cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
-    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
-    --stream inttests
+    --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
+    --stream ivts
     --throttle 1 \
     --poll 10 \
     --progress 1 \
@@ -428,8 +428,8 @@ function runs_cancel_check_test_is_finished_and_cancelled {
 
     cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
-    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
-    --stream inttests
+    --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
+    --stream ivts
     --throttle 1 \
     --poll 10 \
     --progress 1 \
@@ -525,7 +525,7 @@ function get_result_with_runname {
     # Get the RunName from the output of galasactl runs submit
     # The output of runs submit should look like:
     # submitted-time(UTC) name  requestor status   result test-name
-    # 2024-09-05 12:45:33 C9955 galasa    building Passed inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
+    # 2024-09-05 12:45:33 C9955 galasa    building Passed ivts/dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
     #
     # Total:1 Passed:1
 
@@ -961,8 +961,8 @@ function launch_test_on_ecosystem_without_portfolio {
 
     cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
-    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
-    --stream inttests
+    --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
+    --stream ivts
     --throttle 1 \
     --poll 10 \
     --progress 1 \
@@ -991,7 +991,7 @@ function create_portfolio_with_unknown_test {
 
     cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
-    --stream inttests \
+    --stream ivts \
     --portfolio unknown-portfolio.yaml \
     --test local.UnknownTest \
     --log -"
