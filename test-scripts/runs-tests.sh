@@ -79,7 +79,7 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     # Constants
     #-----------------------------------------------------------------------------------------
     export GALASA_TEST_NAME_SHORT="core.CoreManagerIVT"   
-    export GALASA_TEST_NAME_LONG="dev.galasa.ivts/dev.galasa.ivts.${GALASA_TEST_NAME_SHORT}" 
+    export GALASA_TEST_NAME_LONG="dev.galasa.ivts.${GALASA_TEST_NAME_SHORT}" 
     export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
     export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="14"
     export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="11"
