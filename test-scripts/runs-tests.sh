@@ -321,7 +321,7 @@ function runs_reset_check_retry_present {
     --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
     --stream ivts
     --throttle 1 \
-    --poll 10 \
+    --poll 1 \
     --progress 1 \
     --noexitcodeontestfailures \
     --log ${runs_submit_log_file}"
