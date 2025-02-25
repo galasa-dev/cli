@@ -69,7 +69,7 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
 
     # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
     if [[ "${bootstrap}" == "" ]]; then
-        export bootstrap="https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap"
+        export bootstrap="https://galasa-ecosystem1.galasa.dev/api/bootstrap"
         info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
     fi
 
@@ -78,8 +78,8 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     #-----------------------------------------------------------------------------------------
     # Constants
     #-----------------------------------------------------------------------------------------
-    export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"
-    export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}"
+    export GALASA_TEST_NAME_SHORT="core.CoreManagerIVT"   
+    export GALASA_TEST_NAME_LONG="dev.galasa.ivts/dev.galasa.ivts.${GALASA_TEST_NAME_SHORT}" 
     export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
     export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="14"
     export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="11"
@@ -836,7 +836,7 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
 
 #--------------------------------------------------------------------------
 function runs_get_check_requestor_parameter {
-    requestor="Galasadelivery@ibm.com"
+    requestor="galasa-team"
     h2 "Performing runs get with details format providing a from age and requestor as $requestor..."
 
     cd ${BASEDIR}/temp
