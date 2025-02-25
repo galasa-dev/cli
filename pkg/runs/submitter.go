@@ -347,7 +347,7 @@ func (submitter *Submitter) submitRun(
 
 			if err == nil {
 				submittedRun := resultGroup.GetRuns()[0]
-                nextRun.Group = *submittedRun.Group
+				nextRun.Group = *submittedRun.Group
 				nextRun.Name = *submittedRun.Name
 
 				submittedRuns[nextRun.Name] = &nextRun
@@ -608,18 +608,18 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 ) error {
 	var err error
 	// Correct the default overrideFile path if it wasn't specified.
-	if params.OverrideFilePath == "" {
+	if len(params.OverrideFilePaths) == 0 {
 
-		params.OverrideFilePath = submitter.galasaHome.GetUrlFolderPath() + "/overrides.properties"
+		defaultOverridePath := submitter.galasaHome.GetUrlFolderPath() + "/overrides.properties"
 		var isFileThere bool
-		isFileThere, err = submitter.fileSystem.Exists(params.OverrideFilePath)
+		isFileThere, err = submitter.fileSystem.Exists(defaultOverridePath)
 		if err == nil {
 			if !isFileThere {
 				// The flag wasn't specified.
 				// And we don't have an overrides file to read from the .galasa folder.
 				// So treat this the same as the user not wanting to use an override file.
 				// If the file existed, then we'd want to use it.
-				params.OverrideFilePath = "-"
+				params.OverrideFilePaths = []string{"-"}
 			}
 		}
 	}
@@ -629,7 +629,7 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValues) error {
 	var err error
 
-	params.OverrideFilePath, err = files.TildaExpansion(submitter.fileSystem, params.OverrideFilePath)
+	params.OverrideFilePaths, err = files.TildaExpansionMultiple(submitter.fileSystem, params.OverrideFilePaths)
 
 	if err == nil {
 		params.PortfolioFileName, err = files.TildaExpansion(submitter.fileSystem, params.PortfolioFileName)
@@ -655,15 +655,31 @@ func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValue
 
 func (submitter *Submitter) buildOverrideMap(commandParameters utils.RunsSubmitCmdValues) (map[string]string, error) {
 
-	path := commandParameters.OverrideFilePath
-	runOverrides, err := submitter.loadOverrideFile(path)
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE, path, err.Error())
-	} else {
-		runOverrides, err = submitter.addOverridesFromCmdLine(runOverrides, commandParameters.Overrides)
-	}
+	var err error
+	combinedOverrides := make(map[string]string)
+	var overrides map[string]string
 
-	return runOverrides, err
+	// Iterate over each file path and merge their override maps.
+	for _, overrideFilePath := range commandParameters.OverrideFilePaths {
+		overrides, err = submitter.loadOverrideFile(overrideFilePath)
+		if err == nil {
+
+			// Merge the loaded overrides into the combined map.
+			for key, value := range overrides {
+				// Ensuring the last override file has the hghest precedence over subsequent files
+				if combinedOverrides[key] == "" {
+					combinedOverrides[key] = value
+				}
+			}
+
+			//Validate the all override properties
+			combinedOverrides, err = submitter.addOverridesFromCmdLine(combinedOverrides, commandParameters.Overrides)
+		} else {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE, overrideFilePath, err.Error())
+			combinedOverrides = nil
+		}
+	}
+	return combinedOverrides, err
 }
 
 func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[string]string, error) {

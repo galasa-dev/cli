@@ -31,6 +31,23 @@ func TildaExpansion(fileSystem spi.FileSystem, path string) (string, error) {
 	return path, err
 }
 
+func TildaExpansionMultiple(fileSystem spi.FileSystem, paths []string) ([]string, error) {
+	expandedPaths := make([]string, len(paths))
+	for i, p := range paths {
+		// Check if the path is non-empty and starts with '~'
+		if len(p) > 0 && p[0] == '~' {
+			userHome, err := fileSystem.GetUserHomeDirPath()
+			if err != nil {
+				return nil, err
+			}
+			expandedPaths[i] = pathUtils.Join(userHome, p[1:])
+		} else {
+			expandedPaths[i] = p
+		}
+	}
+	return expandedPaths, nil
+}
+
 //------------------------------------------------------------------------------------
 // The implementation of the real os-delegating variant of the FileSystem interface
 //------------------------------------------------------------------------------------

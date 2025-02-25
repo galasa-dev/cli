@@ -23,6 +23,6 @@ type RunsSubmitCmdValues struct {
 	RequestType                   string
 	ThrottleFileName              string
 	PortfolioFileName             string
-	OverrideFilePath              string
+	OverrideFilePaths             []string
 	TestSelectionFlagValues       *TestSelectionFlagValues
 }
