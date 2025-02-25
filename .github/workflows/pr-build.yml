@@ -104,7 +104,7 @@ jobs:
       - name: Check if secret GALASA_TOKEN_ECOSYSTEM1 exists
         continue-on-error: true
         env:
-          GALASA_TOKEN: ${{ secrets.GALASA_TOKEN_ECOSYSTEM1 }}
+          GALASA_TOKEN_ECOSYSTEM1: ${{ secrets.GALASA_TOKEN_ECOSYSTEM1 }}
         run: |
           if [ -z "${GALASA_TOKEN_ECOSYSTEM1}" ] || [ "${GALASA_TOKEN_ECOSYSTEM1}" = "" ]; then
             echo "GALASA_TOKEN_ECOSYSTEM1 is not set. Skipping tests where the CLI interacts with the Galasa service."
