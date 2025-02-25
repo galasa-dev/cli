@@ -303,108 +303,110 @@ function runs_download_check_folder_names_during_test_run {
     success "Downloading artifacts from a running test results in folder names with a timestamp. OK"
 }
 
-function runs_reset_check_retry_present {
+# function runs_reset_check_retry_present {
 
-    h2 "Performing runs reset on an active test run..."
+#     h2 "Performing runs reset on an active test run..."
 
-    run_name=$1
+#     run_name=$1
 
-    h2 "First, launching test on an ecosystem without a portfolio in a background process, so it can be reset."
+#     h2 "First, launching test on an ecosystem without a portfolio in a background process, so it can be reset."
 
-    mkdir -p ${BASEDIR}/temp
-    cd ${BASEDIR}/temp
+#     mkdir -p ${BASEDIR}/temp
+#     cd ${BASEDIR}/temp
 
-    runs_submit_log_file="runs-submit-output-for-reset.txt"
+#     runs_submit_log_file="runs-submit-output-for-reset.txt"
 
-    cmd="${BINARY_LOCATION} runs submit \
-    --bootstrap $bootstrap \
-    --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
-    --stream ivts
-    --throttle 1 \
-    --poll 1 \
-    --progress 1 \
-    --noexitcodeontestfailures \
-    --log ${runs_submit_log_file}"
+#     cmd="${BINARY_LOCATION} runs submit \
+#     --bootstrap $bootstrap \
+#     --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
+#     --stream ivts
+#     --throttle 1 \
+#     --poll 1 \
+#     --progress 1 \
+#     --noexitcodeontestfailures \
+#     --log ${runs_submit_log_file}"
 
-    info "Command is: $cmd"
+#     info "Command is: $cmd"
 
-    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
+#     set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
 
-    # Start the test running inside a background process... so we can try to reset it while it's running
-    $cmd &
+#     # Start the test running inside a background process... so we can try to reset it while it's running
+#     $cmd &
 
-    run_name_found="false"
-    retries=0
-    max=100
-    target_line=""
+#     run_name_found="false"
+#     retries=0
+#     max=100
+#     target_line=""
 
-    # Loop waiting until we can extract the name of the test run which is running in the background.
-    while [[ "${run_name_found}" == "false" ]]; do
-        if [[ -e $runs_submit_log_file ]]; then
-            success "file exists"
-            # Check the run has been submitted before attempting to reset
-            target_line=$(cat ${runs_submit_log_file} | grep "submitted")
+#     # Loop waiting until we can extract the name of the test run which is running in the background.
+#     while [[ "${run_name_found}" == "false" ]]; do
+#         if [[ -e $runs_submit_log_file ]]; then
+#             success "file exists"
+#             # Check the run has been submitted before attempting to reset
+#             target_line=$(cat ${runs_submit_log_file} | grep "submitted")
 
-            if [[ "$target_line" != "" ]]; then
-                info "Target line is found - the test has been submitted."
-                run_name_found="true"
-                sleep 2 # arbitrary value here, hoping its long enough the test is 'active', but not too long its finished.
-            fi
-        fi
-        sleep 1
-        ((retries++))
-        if (( $retries > $max )); then
-            error "Too many retries."
-            exit 1
-        fi
-    done
+#             if [[ "$target_line" != "" ]]; then
+#                 info "Target line is found - the test has been submitted."
+#                 run_name_found="true"
+#             fi
+#         fi
+#         sleep 1
+#         ((retries++))
+#         if (( $retries > $max )); then
+#             error "Too many retries."
+#             exit 1
+#         fi
+#     done
 
-    run_name=$(echo $target_line | cut -f4 -d' ')
-    info "Run name is $run_name"
+#     run_name=$(echo $target_line | cut -f4 -d' ')
+#     info "Run name is $run_name"
 
-    h2 "Now attempting to reset the run while it's running in the background process."
+#     h2 "Now attempting to reset the run while it's running in the background process."
 
-    cmd="${BINARY_LOCATION} runs reset \
-    --name ${run_name} \
-    --bootstrap ${bootstrap}"
+#     while [[ "${test_reset}" == "false" ]]; do
+      
 
-    info "Command is: $cmd"
-    $cmd
+#     cmd="${BINARY_LOCATION} runs reset \
+#     --name ${run_name} \
+#     --bootstrap ${bootstrap}"
 
-    h2 "Now using runs get to check when the two runs finish, two show up in the runs get output."
+#     info "Command is: $cmd"
+#     $cmd
 
-    runs_get_log_file="runs-get-output-for-reset.txt"
+#     h2 "Now using runs get to check when the two runs finish, two show up in the runs get output."
 
-    # Now poll runs get to check when the tests are finished
-    cmd="${BINARY_LOCATION} runs get \
-    --name ${run_name} \
-    --bootstrap ${bootstrap}"
+#     runs_get_log_file="runs-get-output-for-reset.txt"
 
-    are_tests_finished="false"
-    retries=0
-    max=100
-    target_line=""
-    while [[ "${are_tests_finished}" == "false" ]]; do
-        sleep 2
+#     # Now poll runs get to check when the tests are finished
+#     cmd="${BINARY_LOCATION} runs get \
+#     --name ${run_name} \
+#     --bootstrap ${bootstrap}"
 
-        # Run the runs get command
-        $cmd | tee $runs_get_log_file
-        # Check for line in the runs get output to signify the 2 tests are finished
-        target_line=$(cat ${runs_get_log_file} | grep "Total:2 Passed:2")
-        if [[ "$target_line" != "" ]]; then
-            success "Target line is found - both tests are finished."
-            are_tests_finished="true"
-        fi
+#     are_tests_finished="false"
+#     retries=0
+#     max=100
+#     target_line=""
+#     while [[ "${are_tests_finished}" == "false" ]]; do
+#         sleep 2
 
-        # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
-        ((retries++))
-        if (( $retries > $max )); then
-            error "Too many retries."
-            exit 1
-        fi
-    done
+#         # Run the runs get command
+#         $cmd | tee $runs_get_log_file
+#         # Check for line in the runs get output to signify the 2 tests are finished
+#         target_line=$(cat ${runs_get_log_file} | grep "Total:2 Passed:2")
+#         if [[ "$target_line" != "" ]]; then
+#             success "Target line is found - both tests are finished."
+#             are_tests_finished="true"
+#         fi
 
-}
+#         # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
+#         ((retries++))
+#         if (( $retries > $max )); then
+#             error "Too many retries."
+#             exit 1
+#         fi
+#     done
+
+# }
 
 #--------------------------------------------------------------------------
 function get_result_with_runname {
@@ -1034,8 +1036,11 @@ function test_runs_commands {
 
     runs_download_check_folder_names_during_test_run
 
+    # NOTE: Temporarily commenting out this test scenario as the CoreManagerIVT
+    # completes too quickly to allow us a time window to reset it in.
+    # Will create a test case that has sufficient time and uncomment this then.
     # Attempt to reset an active run...
-    runs_reset_check_retry_present
+    # runs_reset_check_retry_present
 
     # Attempt to delete a run...
     runs_delete_check_run_can_be_deleted $RUN_NAME
