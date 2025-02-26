@@ -610,9 +610,9 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 	// Correct the default overrideFile path if it wasn't specified.
 	if len(params.OverrideFilePaths) == 0 {
 
-		defaultOverridePath := submitter.galasaHome.GetUrlFolderPath() + "/overrides.properties"
+		params.OverrideFilePaths = []string{submitter.galasaHome.GetUrlFolderPath() + "/overrides.properties"}
 		var isFileThere bool
-		isFileThere, err = submitter.fileSystem.Exists(defaultOverridePath)
+		isFileThere, err = submitter.fileSystem.Exists(params.OverrideFilePaths[0])
 		if err == nil {
 			if !isFileThere {
 				// The flag wasn't specified.
@@ -665,21 +665,28 @@ func (submitter *Submitter) buildOverrideMap(commandParameters utils.RunsSubmitC
 		if err == nil {
 
 			// Merge the loaded overrides into the combined map.
-			for key, value := range overrides {
-				// Ensuring the last override file has the hghest precedence over subsequent files
-				if combinedOverrides[key] == "" {
-					combinedOverrides[key] = value
-				}
-			}
+			combinedOverrides = mergeOverrideMaps(combinedOverrides, overrides, overrideFilePath)
 
 			//Validate the all override properties
-			combinedOverrides, err = submitter.addOverridesFromCmdLine(combinedOverrides, commandParameters.Overrides)
+			combinedOverrides, err = submitter.addOverridesFromCmdLine(combinedOverrides, commandParameters.Overrides, combinedOverrides)
+
 		} else {
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE, overrideFilePath, err.Error())
 			combinedOverrides = nil
 		}
 	}
 	return combinedOverrides, err
+}
+
+func mergeOverrideMaps(combinedOverrides, fileOverrides map[string]string, overrideFilePath string) map[string]string {
+	for key, value := range fileOverrides {
+		if combinedOverrides[key] == "" {
+			combinedOverrides[key] = value
+		} else {
+			log.Printf("Could not set override property %s in file %s because it was already set in a previous file or by command line --override flag.", combinedOverrides[key], overrideFilePath)
+		}
+	}
+	return combinedOverrides
 }
 
 func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[string]string, error) {
@@ -699,7 +706,7 @@ func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[strin
 	return overrides, err
 }
 
-func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string) (map[string]string, error) {
+func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string, fileOverrides map[string]string) (map[string]string, error) {
 	var err error
 
 	// Convert overrides to a map
@@ -715,6 +722,11 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
 			break
 		}
+
+		if value, exisits := fileOverrides[override]; exisits {
+			log.Printf("%s was passed as command line override. Command line overrides have precedence over file based override values.", value)
+		}
+
 		overrides[key] = value
 	}
 
@@ -722,7 +734,8 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 	if err != nil {
 		overrides = nil
 	}
-	return overrides, nil
+
+	return overrides, err
 }
 
 func (submitter *Submitter) getPortfolio(portfolioFileName string, submitSelectionFlags *utils.TestSelectionFlagValues) (*Portfolio, error) {

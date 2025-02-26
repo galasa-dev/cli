@@ -34,16 +34,11 @@ func TildaExpansion(fileSystem spi.FileSystem, path string) (string, error) {
 func TildaExpansionMultiple(fileSystem spi.FileSystem, paths []string) ([]string, error) {
 	expandedPaths := make([]string, len(paths))
 	for i, p := range paths {
-		// Check if the path is non-empty and starts with '~'
-		if len(p) > 0 && p[0] == '~' {
-			userHome, err := fileSystem.GetUserHomeDirPath()
-			if err != nil {
-				return nil, err
-			}
-			expandedPaths[i] = pathUtils.Join(userHome, p[1:])
-		} else {
-			expandedPaths[i] = p
+		expandedPath, err := TildaExpansion(fileSystem, p)
+		if err != nil {
+			return nil, err
 		}
+		expandedPaths[i] = expandedPath
 	}
 	return expandedPaths, nil
 }
