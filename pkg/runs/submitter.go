@@ -680,11 +680,10 @@ func (submitter *Submitter) buildOverrideMap(commandParameters utils.RunsSubmitC
 
 func mergeOverrideMaps(combinedOverrides, fileOverrides map[string]string, overrideFilePath string) map[string]string {
 	for key, value := range fileOverrides {
-		if combinedOverrides[key] == "" {
-			combinedOverrides[key] = value
-		} else {
-			log.Printf("Could not set override property %s in file %s because it was already set in a previous file or by command line --override flag.", combinedOverrides[key], overrideFilePath)
+		if combinedOverrides[key] != "" {
+			log.Printf("Property %s in file %s is being used in preference to the clashing property definition in a previously processed override file.", key, overrideFilePath)
 		}
+		combinedOverrides[key] = value
 	}
 	return combinedOverrides
 }
@@ -723,8 +722,10 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 			break
 		}
 
-		if value, exisits := fileOverrides[override]; exisits {
-			log.Printf("%s was passed as command line override. Command line overrides have precedence over file based override values.", value)
+		if _, exists := fileOverrides[override]; exists {
+			log.Printf("Override property %s was set by an override file using the --overridefile option, "+
+				"but is being ignored in favour of the value passed using the --override option. "+
+				"Command line overrides have precedence over file based override values.", key)
 		}
 
 		overrides[key] = value

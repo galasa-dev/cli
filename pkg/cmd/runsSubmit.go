@@ -119,7 +119,8 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 			"A file path of '-' disables reading any properties file. "+
 			"To use multiple override files, either repeat the overridefile flag for each file, or list the path (absolute or relative) of each override file, separated by commas. "+
 			"For example --overridefile file.properties --overridefile /Users/dummyUser/code/test.properties or --overridefile file.properties,/Users/dummyUser/code/test.properties. "+
-			"Last file in the sequence has the highest precedence.")
+			"The files are processed in the order given. "+
+			"When a property is be defined in multiple files, the last occurrence processed will have its value used.")
 
 	runsSubmitCmd.PersistentFlags().StringSliceVar(&cmd.values.Overrides, "override", make([]string, 0),
 		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+

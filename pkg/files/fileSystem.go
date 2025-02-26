@@ -33,14 +33,17 @@ func TildaExpansion(fileSystem spi.FileSystem, path string) (string, error) {
 
 func TildaExpansionMultiple(fileSystem spi.FileSystem, paths []string) ([]string, error) {
 	expandedPaths := make([]string, len(paths))
+	var expandedPath string
+	var err error
+
 	for i, p := range paths {
-		expandedPath, err := TildaExpansion(fileSystem, p)
+		expandedPath, err = TildaExpansion(fileSystem, p)
 		if err != nil {
-			return nil, err
+			break
 		}
 		expandedPaths[i] = expandedPath
 	}
-	return expandedPaths, nil
+	return expandedPaths, err
 }
 
 //------------------------------------------------------------------------------------
