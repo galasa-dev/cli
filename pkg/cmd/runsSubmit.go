@@ -112,10 +112,14 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 	runsSubmitCmd.PersistentFlags().IntVar(&cmd.values.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
 		"how many test runs can be submitted in parallel, 0 or less will disable throttling. 1 causes tests to be run sequentially.")
 
-	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.OverrideFilePath, "overridefile", "",
+	runsSubmitCmd.PersistentFlags().StringSliceVar(&cmd.values.OverrideFilePaths, "overridefile", []string{},
 		"path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. "+
 			"Overrides from --override options will take precedence over properties in this property file. "+
-			"A file path of '-' disables reading any properties file.")
+			"A file path of '-' disables reading any properties file. "+
+			"To use multiple override files, either repeat the overridefile flag for each file, or list the path (absolute or relative) of each override file, separated by commas. "+
+			"For example --overridefile file.properties --overridefile /Users/dummyUser/code/test.properties or --overridefile file.properties,/Users/dummyUser/code/test.properties. "+
+			"The files are processed in the order given. "+
+			"When a property is be defined in multiple files, the last occurrence processed will have its value used.")
 
 	runsSubmitCmd.PersistentFlags().StringSliceVar(&cmd.values.Overrides, "override", make([]string, 0),
 		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+

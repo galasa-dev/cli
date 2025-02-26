@@ -186,8 +186,8 @@ func TestOverridesReadFromOverridesFile(t *testing.T) {
 	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
 
 	commandParameters := utils.RunsSubmitCmdValues{
-		Overrides:        []string{"a=b"},
-		OverrideFilePath: "/tmp/temp.properties",
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{"/tmp/temp.properties"},
 	}
 
 	env := utils.NewMockEnv()
@@ -226,8 +226,8 @@ func TestOverridesFileSpecifiedButDoesNotExist(t *testing.T) {
 	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
 
 	commandParameters := utils.RunsSubmitCmdValues{
-		Overrides:        []string{"a=b"},
-		OverrideFilePath: "/tmp/temp.wrong.file.properties",
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{"/tmp/temp.wrong.file.properties"},
 	}
 
 	env := utils.NewMockEnv()
@@ -264,8 +264,8 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 	}
 
 	commandParameters := utils.RunsSubmitCmdValues{
-		Overrides:        []string{"a=b"},
-		OverrideFilePath: "",
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{"="},
 	}
 
 	mockLauncher := launcher.NewMockLauncher()
@@ -288,7 +288,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndOverridesFileNotExists(t *testing.
 	}
 	// We expect the default behaviour with missing command-line parameter, and missing overrides file in ~/.galasa to
 	// result in an ignored overrideFilePath.
-	assert.Equal(t, commandParameters.OverrideFilePath, "-")
+	assert.Equal(t, commandParameters.OverrideFilePaths, []string{"="})
 }
 
 func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testing.T) {
@@ -309,8 +309,8 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 	props.WritePropertiesFile(mockFileSystem, path, fileProps)
 
 	commandParameters := utils.RunsSubmitCmdValues{
-		Overrides:        []string{"a=b"},
-		OverrideFilePath: "",
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{path},
 	}
 
 	mockLauncher := launcher.NewMockLauncher()
@@ -331,7 +331,7 @@ func TestOverrideFileCorrectedWhenDefaultedAndNoOverridesFileDoesExist(t *testin
 	if err != nil {
 		assert.Fail(t, "Should not have failed! message = %s", err.Error())
 	}
-	assert.Equal(t, commandParameters.OverrideFilePath, path, "Wrong path of overrides file set. Expected %s", path)
+	assert.Equal(t, commandParameters.OverrideFilePaths, []string{path}, "Wrong path of overrides file set. Expected %s", path)
 }
 
 func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
@@ -341,8 +341,8 @@ func TestOverridesWithDashFileDontReadFromAnyFile(t *testing.T) {
 	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
 
 	commandParameters := utils.RunsSubmitCmdValues{
-		Overrides:        []string{"a=b"},
-		OverrideFilePath: "-",
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{"-"},
 	}
 
 	mockLauncher := launcher.NewMockLauncher()
@@ -380,8 +380,8 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 	}
 
 	commandParameters := &utils.RunsSubmitCmdValues{
-		Overrides:        []string{"a=b"},
-		OverrideFilePath: "",
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{""},
 	}
 
 	regexSelectValue := false
@@ -413,7 +413,7 @@ func TestValidateAndCorrectParametersSetsDefaultOverrideFile(t *testing.T) {
 	err = submitter.validateAndCorrectParams(commandParameters, submitSelectionFlags)
 
 	assert.Nil(t, err)
-	assert.NotEmpty(t, commandParameters.OverrideFilePath)
+	assert.NotEmpty(t, commandParameters.OverrideFilePaths)
 }
 
 func TestLocalLaunchCanUseAPortfolioOk(t *testing.T) {
@@ -666,4 +666,172 @@ func TestSubmitRunsFromGherkinPortfolioOutputsFeatureNames(t *testing.T) {
 	assert.Contains(t, readyRuns[1].GherkinFeature, "test")
 	assert.Contains(t, readyRuns[2].GherkinUrl, "file:///demo/excellent.feature")
 	assert.Contains(t, readyRuns[2].GherkinFeature, "excellent")
+}
+
+func TestOverridesReadFromMultipleOverrideFiles(t *testing.T) {
+
+	fileProps := make(map[string]interface{})
+	fileProps["c"] = "d"
+
+	dummyFileProps := make(map[string]interface{})
+	dummyFileProps["e"] = "f"
+
+	mockFileSystem := files.NewMockFileSystem()
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp2.properties", dummyFileProps)
+
+	commandParameters := utils.RunsSubmitCmdValues{
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{"/tmp/temp.properties", "/tmp/temp2.properties"},
+	}
+
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		utils.NewRealTimedSleeper(),
+		env,
+		console,
+		images.NewImageExpanderNullImpl(),
+	)
+
+	overrides, err := submitter.buildOverrideMap(commandParameters)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, overrides)
+	assert.Contains(t, overrides, "a", "command-line override wasn't used.")
+	assert.Equal(t, overrides["a"], "b", "command-line override not passed correctly.")
+	assert.Contains(t, overrides, "c", "file-based override wasn't used")
+	assert.Equal(t, overrides["c"], "d", "file-based override value wasn't passed correctly.")
+	assert.Contains(t, overrides, "e", "file-based override for 'e' wasn't used")
+	assert.Equal(t, "f", overrides["e"], "file-based override for 'e' wasn't passed correctly")
+
+}
+
+func TestOverridesReadFromMultipleWithDashSkipsOverrideFile(t *testing.T) {
+
+	fileProps := make(map[string]interface{})
+	fileProps["c"] = "d"
+
+	dummyFileProps := make(map[string]interface{})
+	dummyFileProps["e"] = "f"
+
+	mockFileSystem := files.NewMockFileSystem()
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp2.properties", dummyFileProps)
+
+	commandParameters := utils.RunsSubmitCmdValues{
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{"/tmp/temp.properties", "-", "/tmp/temp2.properties"}, //Pass an empty path (-), should skip over
+	}
+
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		utils.NewRealTimedSleeper(),
+		env,
+		console,
+		images.NewImageExpanderNullImpl(),
+	)
+
+	overrides, err := submitter.buildOverrideMap(commandParameters)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, overrides)
+	assert.Contains(t, overrides, "a", "command-line override wasn't used.")
+	assert.Equal(t, overrides["a"], "b", "command-line override not passed correctly.")
+	assert.Contains(t, overrides, "c", "file-based override wasn't used")
+	assert.Equal(t, overrides["c"], "d", "file-based override value wasn't passed correctly.")
+	assert.Contains(t, overrides, "e", "file-based override for 'e' wasn't used")
+	assert.Equal(t, "f", overrides["e"], "file-based override for 'e' wasn't passed correctly")
+
+}
+
+func TestOverridesFileSpecifiedWhereSomeFilesDoNotExistInArray(t *testing.T) {
+
+	fileProps := make(map[string]interface{})
+	fileProps["c"] = "d"
+
+	mockFileSystem := files.NewMockFileSystem()
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
+
+	commandParameters := utils.RunsSubmitCmdValues{
+		Overrides:         []string{"a=b"},
+		OverrideFilePaths: []string{"/tmp/temp.properties", "/tmp/temp.wrong.file.properties"},
+	}
+
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		utils.NewRealTimedSleeper(),
+		env,
+		console,
+		images.NewImageExpanderNullImpl(),
+	)
+	overrides, err := submitter.buildOverrideMap(commandParameters)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, overrides)
+
+	assert.Contains(t, err.Error(), "GAL1059")
+}
+
+func TestOverridesFileSpecifiedWhereSomeOverridesAreInvalid(t *testing.T) {
+
+	fileProps := make(map[string]interface{})
+	fileProps["c"] = "d"
+
+	mockFileSystem := files.NewMockFileSystem()
+	props.WritePropertiesFile(mockFileSystem, "/tmp/temp.properties", fileProps)
+
+	commandParameters := utils.RunsSubmitCmdValues{
+		Overrides:         []string{"a=b", "c&d", "e=f"},
+		OverrideFilePaths: []string{"/tmp/temp.properties"},
+	}
+
+	env := utils.NewMockEnv()
+	mockLauncher := launcher.NewMockLauncher()
+	mockTimeService := utils.NewMockTimeService()
+
+	galasaHome, _ := utils.NewGalasaHome(mockFileSystem, env, "")
+	console := utils.NewMockConsole()
+	submitter := NewSubmitter(
+		galasaHome,
+		mockFileSystem,
+		mockLauncher,
+		mockTimeService,
+		utils.NewRealTimedSleeper(),
+		env,
+		console,
+		images.NewImageExpanderNullImpl(),
+	)
+	overrides, err := submitter.buildOverrideMap(commandParameters)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, overrides)
+
+	assert.Contains(t, err.Error(), "GAL1010")
 }

@@ -233,7 +233,7 @@ func TestRunsSubmitOverridefileFlagReturnsOk(t *testing.T) {
 	// Check what the user saw is reasonable.
 	checkOutput("", "", factory, t)
 
-	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).OverrideFilePath, "filepathtotheoverrides")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).OverrideFilePaths, "filepathtotheoverrides")
 }
 
 func TestRunsSubmitPackageFlagReturnsOk(t *testing.T) {
@@ -643,7 +643,7 @@ func TestRunsSubmitAllFlagsReturnsOk(t *testing.T) {
 	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Packages, "packageParam")
 	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Tags, "tagParam")
 	assert.Contains(t, *cmd.Values().(*utils.RunsSubmitCmdValues).TestSelectionFlagValues.Tests, "testParam")
-	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).OverrideFilePath, "override/path")
+	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).OverrideFilePaths, "override/path")
 	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).PortfolioFileName, "portfolio.file")
 	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).ThrottleFileName, "throttle.file")
 	assert.Contains(t, cmd.Values().(*utils.RunsSubmitCmdValues).ReportJsonFilename, "file.json")
