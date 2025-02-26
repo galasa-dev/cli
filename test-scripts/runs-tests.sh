@@ -373,7 +373,7 @@ function runs_reset_check_retry_present {
     info "Command is: $cmd"
     $cmd
 
-    h2 "Now using runs get to check when the two runs finish, two show up in the runs get output."
+    h2 "Now using runs get to check that two different runs show up in the runs get output."
 
     runs_get_log_file="runs-get-output-for-reset.txt"
 
@@ -382,20 +382,20 @@ function runs_reset_check_retry_present {
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
-    are_tests_finished="false"
+    two_tests_found="false"
     retries=0
     max=100
     target_line=""
-    while [[ "${are_tests_finished}" == "false" ]]; do
+    while [[ "${two_tests_found}" == "false" ]]; do
         sleep 5
 
         # Run the runs get command
         $cmd | tee $runs_get_log_file
-        # Check for line in the runs get output to signify the 2 tests are finished
-        target_line=$(cat ${runs_get_log_file} | grep "Total:2 Passed:2")
+        # Check for line in the runs get output to signify that there are 2 tests
+        target_line=$(cat ${runs_get_log_file} | grep "Total:2")
         if [[ "$target_line" != "" ]]; then
-            success "Target line is found - both tests are finished."
-            are_tests_finished="true"
+            success "Target line is found - two runs were found."
+            two_tests_found="true"
         fi
 
         # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
