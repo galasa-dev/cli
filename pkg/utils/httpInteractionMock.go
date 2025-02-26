@@ -81,3 +81,25 @@ func NewMockHttpServer(t *testing.T, interactions []HttpInteraction) MockHttpSer
     }))
     return mockHttpServer
 }
+
+func NewMockHttpServerWithUnorderedInteractions(t *testing.T, unorderedInteractions []HttpInteraction) MockHttpServer {
+    mockHttpServer := MockHttpServer{}
+
+    mockHttpServer.Server = httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+
+        isInteractionFound := false
+        for _, interaction := range unorderedInteractions {
+            isInteractionFound = interaction.ExpectedPath == req.URL.Path
+            if isInteractionFound {
+                interaction.ValidateRequest(t, req)
+                interaction.WriteHttpResponseFunc(writer, req)
+                break
+            }
+        }
+
+        if !isInteractionFound {
+            assert.Fail(t, "Mock server received an unexpected request to " + req.URL.Path + " when it should not have")
+        }
+    }))
+    return mockHttpServer
+}

@@ -90,10 +90,7 @@ func (cmd *SecretsSetCommand) createCobraCmd(
         Long:    "Creates or updates a secret in the credentials store",
         Aliases: []string{COMMAND_NAME_SECRETS_SET},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-			executionFunc := func() error {
-            	return cmd.executeSecretsSet(factory, secretsCommand.Values().(*SecretsCmdValues), commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+            return cmd.executeSecretsSet(factory, secretsCommand.Values().(*SecretsCmdValues), commsFlagSetValues)
         },
     }
 
@@ -151,54 +148,52 @@ func (cmd *SecretsSetCommand) executeSecretsSet(
     // Operations on the file system will all be relative to the current folder.
     fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Set secrets from the ecosystem")
-
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
+        commsFlagSetValues.isCapturingLogs = true
+    
+        log.Println("Galasa CLI - Set secrets from the ecosystem")
+    
+        env := factory.GetEnvironment()
+    
+        var galasaHome spi.GalasaHome
+        galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+        if err == nil {
 
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
-		if err == nil {
-
-			var console = factory.GetStdOutConsole()
-
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
 				galasaHome,
 			)
 
-			var apiClient *galasaapi.APIClient
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
+            if err == nil {
+    
+                var console = factory.GetStdOutConsole()    
+                byteReader := factory.GetByteReader()
 
-			byteReader := factory.GetByteReader()
-
-			if err == nil {
-				err = secrets.SetSecret(
-					secretsCmdValues.name,
-					cmd.values.username,
-					cmd.values.password,
-					cmd.values.token,
-					cmd.values.base64Username,
-					cmd.values.base64Password,
-					cmd.values.base64Token,
-					cmd.values.secretType,
-					cmd.values.description,
-					console,
-					apiClient,
-					byteReader,
-				)
-			}
-		}
-	}
+                setSecretFunc := func(apiClient *galasaapi.APIClient) error {
+                    return secrets.SetSecret(
+                        secretsCmdValues.name,
+                        cmd.values.username,
+                        cmd.values.password,
+                        cmd.values.token,
+                        cmd.values.base64Username,
+                        cmd.values.base64Password,
+                        cmd.values.base64Token,
+                        cmd.values.secretType,
+                        cmd.values.description,
+                        console,
+                        apiClient,
+                        byteReader,
+                    )
+                }
+                err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(setSecretFunc)
+            }
+        }
+    }
 
     return err
 }

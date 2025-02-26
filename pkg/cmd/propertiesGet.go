@@ -90,11 +90,7 @@ func (cmd *PropertiesGetCommand) createCobraCommand(
 		Args:    cobra.NoArgs,
 		Aliases: []string{"properties get"},
 		RunE: func(cobraCmd *cobra.Command, args []string) error {
-			executionFunc := func() error {
-				return cmd.executePropertiesGet(factory,
-					propertiesCommandValues, commsFlagSetValues)
-			}
-			return executeCommandWithRetries(factory, commsFlagSetValues, executionFunc)
+			return cmd.executePropertiesGet(factory, propertiesCommandValues, commsFlagSetValues)
 		},
 	}
 
@@ -143,49 +139,49 @@ func (cmd *PropertiesGetCommand) executePropertiesGet(
 	// Operations on the file system will all be relative to the current folder.
 	fileSystem := factory.GetFileSystem()
 
-	commsFlagSetValues.isCapturingLogs = true
-
-	log.Println("Galasa CLI - Get ecosystem properties")
-
-	// Get the ability to query environment variables.
-	env := factory.GetEnvironment()
-
-	var galasaHome spi.GalasaHome
-	galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
+	err = utils.CaptureLog(fileSystem, commsFlagSetValues.logFileName)
 	if err == nil {
-
-		// Read the bootstrap properties.
-		var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-		var bootstrapData *api.BootstrapData
-		bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
+		commsFlagSetValues.isCapturingLogs = true
+	
+		log.Println("Galasa CLI - Get ecosystem properties")
+	
+		// Get the ability to query environment variables.
+		env := factory.GetEnvironment()
+	
+		var galasaHome spi.GalasaHome
+		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			var console = factory.GetStdOutConsole()
-
-			apiServerUrl := bootstrapData.ApiServerURL
-			log.Printf("The API server is at '%s'\n", apiServerUrl)
-
-			var apiClient *galasaapi.APIClient
-			authenticator := factory.GetAuthenticator(
-				apiServerUrl,
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
 				galasaHome,
 			)
-			apiClient, err = authenticator.GetAuthenticatedAPIClient()
 
 			if err == nil {
-				// Call to process the command in a unit-testable way.
-				err = properties.GetProperties(
-					propertiesCmdValues.namespace,
-					propertiesCmdValues.propertyName,
-					cmd.values.propertiesPrefix,
-					cmd.values.propertiesSuffix,
-					cmd.values.propertiesInfix,
-					apiClient,
-					cmd.values.propertiesOutputFormat,
-					console,
-				)
+	
+				var console = factory.GetStdOutConsole()
+	
+				getPropertiesFunc := func(apiClient *galasaapi.APIClient) error {
+					// Call to process the command in a unit-testable way.
+					return properties.GetProperties(
+						propertiesCmdValues.namespace,
+						propertiesCmdValues.propertyName,
+						cmd.values.propertiesPrefix,
+						cmd.values.propertiesSuffix,
+						cmd.values.propertiesInfix,
+						apiClient,
+						cmd.values.propertiesOutputFormat,
+						console,
+					)
+				}
+				err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(getPropertiesFunc)
 			}
 		}
 	}
+
 	return err
 }
