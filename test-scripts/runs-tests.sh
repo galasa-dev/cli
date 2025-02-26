@@ -1036,11 +1036,8 @@ function test_runs_commands {
 
     runs_download_check_folder_names_during_test_run
 
-    # NOTE: Temporarily commenting out this test scenario as the CoreManagerIVT
-    # completes too quickly to allow us a time window to reset it in.
-    # Will create a test case that has sufficient time and uncomment this then.
     # Attempt to reset an active run...
-    # runs_reset_check_retry_present
+    runs_reset_check_retry_present
 
     # Attempt to delete a run...
     runs_delete_check_run_can_be_deleted $RUN_NAME
