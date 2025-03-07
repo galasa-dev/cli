@@ -364,6 +364,22 @@ func (submitter *Submitter) submitRun(
 	return readyRuns, err
 }
 
+func updateSubmittedRunIds(
+	submittedRuns map[string]*TestRun,
+	launchedRuns *galasaapi.TestRuns,
+) {
+	for _, currentRun := range launchedRuns.GetRuns() {
+		runName := currentRun.GetName()
+
+		submittedRun, ok := submittedRuns[runName]
+		if ok {
+			if submittedRun.RunId == "" && currentRun.HasRasRunId() {
+				submittedRun.RunId = currentRun.GetRasRunId()
+			}
+		}
+	}
+}
+
 func (submitter *Submitter) runsFetchCurrentStatus(
 	groupName string,
 	submittedRuns map[string]*TestRun,
@@ -376,6 +392,9 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 		log.Printf("Received error from group request - %v\n", err)
 		return
 	}
+
+	// Launched runs will now have run IDs, so record the run IDs for the submitted runs
+	updateSubmittedRunIds(submittedRuns, currentGroup)
 
 	// a copy to find lost runs
 	checkRuns := DeepClone(submittedRuns)
@@ -390,49 +409,7 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 
 			// now check to see if it is finished
 			if currentRun.GetStatus() == "finished" {
-
-				finishedRuns[runName] = checkRun
-
-				checkRun.Status = *currentRun.Status
-
-				delete(submittedRuns, runName)
-
-				result := "unknown"
-				if currentRun.HasResult() {
-					result = currentRun.GetResult()
-				}
-				checkRun.Result = result
-
-				// Extract the ras run result to get the method names if a report is requested
-				rasRunID := currentRun.RasRunId
-				if fetchRas && rasRunID != nil {
-
-					var rasRun *galasaapi.Run
-					rasRun, err = submitter.launcher.GetRunsById(*rasRunID)
-					if err != nil {
-						log.Printf("runsFetchCurrentStatus - Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
-					} else {
-						checkRun.Tests = make([]TestMethod, 0)
-
-						testStructure := rasRun.GetTestStructure()
-						log.Printf("runsFetchCurrentStatus - testStructure- %v", testStructure)
-
-						for _, testMethod := range testStructure.GetMethods() {
-							test := TestMethod{
-								Method: testMethod.GetMethodName(),
-								Result: testMethod.GetResult(),
-							}
-
-							checkRun.Tests = append(checkRun.Tests, test)
-						}
-					}
-				}
-
-				if checkRun.GherkinUrl != "" {
-					log.Printf("Run %v has finished(%v) - %v (Gherkin)\n", runName, result, checkRun.GherkinFeature)
-				} else {
-					log.Printf("Run %v has finished(%v) - %v/%v/%v - %s\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class, currentRun.GetStatus())
-				}
+				submitter.markRunFinished(checkRun, currentRun.GetResult(), submittedRuns, finishedRuns, fetchRas)
 			} else {
 				// Check to see if there was a status change
 				if checkRun.Status != currentRun.GetStatus() {
@@ -448,12 +425,102 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 	}
 
 	// Now deal with the lost runs
-	for runName, lostRun := range checkRuns {
-		lostRuns[runName] = lostRun
-		delete(submittedRuns, runName)
-		log.Printf("Run %v was lost - %v/%v/%v\n", runName, lostRun.Stream, lostRun.Bundle, lostRun.Class)
+	submitter.processLostRuns(checkRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
+}
+
+func (submitter *Submitter) processLostRuns(
+	runsToCheck map[string]*TestRun,
+	submittedRuns map[string]*TestRun,
+	finishedRuns map[string]*TestRun,
+	lostRuns map[string]*TestRun,
+	fetchRas bool,
+) {
+	var err error
+
+	for runName, possiblyLostRun := range runsToCheck {
+		isRunLost := true
+		
+		if possiblyLostRun.RunId != "" {
+			// Check the RAS to see if the run has been saved
+			var rasRun *galasaapi.Run
+			rasRun, err = submitter.launcher.GetRunsById(possiblyLostRun.RunId)
+			if err != nil {
+				log.Printf("processLostRuns - Failed to retrieve RAS run for %v - %v\n", possiblyLostRun.Name, err)
+			} else {
+				if rasRun != nil {
+					// The run was found in the RAS, not in the DSS
+					isRunLost = false
+
+					testStructure := rasRun.GetTestStructure()
+					runStatus := testStructure.GetStatus()
+					if runStatus == "finished" {
+	
+						// The run has finished, so we no longer need to check its status
+						submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
+					}
+				}
+			}
+		}
+
+		// The run wasn't found in the DSS or the RAS, so mark it as lost
+		if isRunLost {
+			lostRuns[runName] = possiblyLostRun
+			delete(submittedRuns, runName)
+			log.Printf("Run %v was lost - %v/%v/%v\n", runName, possiblyLostRun.Stream, possiblyLostRun.Bundle, possiblyLostRun.Class)
+		}
+	}
+}
+
+func (submitter *Submitter) markRunFinished(
+	runToMarkFinished *TestRun,
+	result string,
+	submittedRuns map[string]*TestRun,
+	finishedRuns map[string]*TestRun,
+	fetchRas bool,
+) {
+	var err error
+
+	runName := runToMarkFinished.Name
+	finishedRuns[runName] = runToMarkFinished
+	delete(submittedRuns, runName)
+
+	if result == "" {
+		result = "unknown"
 	}
 
+	runToMarkFinished.Result = result
+	runToMarkFinished.Status = "finished"
+
+	// Extract the ras run result to get the method names if a report is requested
+	rasRunID := runToMarkFinished.RunId
+	if fetchRas && rasRunID != "" {
+
+		var rasRun *galasaapi.Run
+		rasRun, err = submitter.launcher.GetRunsById(rasRunID)
+		if err != nil {
+			log.Printf("runsFetchCurrentStatus - Failed to retrieve RAS run for %v - %v\n", runName, err)
+		} else {
+			runToMarkFinished.Tests = make([]TestMethod, 0)
+
+			testStructure := rasRun.GetTestStructure()
+			log.Printf("runsFetchCurrentStatus - testStructure- %v", testStructure)
+
+			for _, testMethod := range testStructure.GetMethods() {
+				test := TestMethod{
+					Method: testMethod.GetMethodName(),
+					Result: testMethod.GetResult(),
+				}
+
+				runToMarkFinished.Tests = append(runToMarkFinished.Tests, test)
+			}
+		}
+	}
+
+	if runToMarkFinished.GherkinUrl != "" {
+		log.Printf("Run %v has finished(%v) - %v (Gherkin)\n", runName, result, runToMarkFinished.GherkinFeature)
+	} else {
+		log.Printf("Run %v has finished(%v) - %v/%v/%v - %s\n", runName, runToMarkFinished.Result, runToMarkFinished.Stream, runToMarkFinished.Bundle, runToMarkFinished.Class, runToMarkFinished.Status)
+	}
 }
 
 func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
