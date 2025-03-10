@@ -364,7 +364,7 @@ func (submitter *Submitter) submitRun(
 	return readyRuns, err
 }
 
-func updateSubmittedRunIds(
+func (submitter *Submitter) updateSubmittedRunIds(
 	submittedRuns map[string]*TestRun,
 	launchedRuns *galasaapi.TestRuns,
 ) {
@@ -394,7 +394,7 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 	}
 
 	// Launched runs will now have run IDs, so record the run IDs for the submitted runs
-	updateSubmittedRunIds(submittedRuns, currentGroup)
+	submitter.updateSubmittedRunIds(submittedRuns, currentGroup)
 
 	// a copy to find lost runs
 	checkRuns := DeepClone(submittedRuns)
