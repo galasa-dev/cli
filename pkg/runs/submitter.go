@@ -453,13 +453,7 @@ func (submitter *Submitter) processLostRuns(
 						// The run was found in the RAS, not in the DSS
 						isRunLost = false
 
-						testStructure := rasRun.GetTestStructure()
-						runStatus := testStructure.GetStatus()
-						if runStatus == "finished" {
-
-							// The run has finished, so we no longer need to check its status
-							submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
-						}
+						submitter.markRunIfFinished(possiblyLostRun, rasRun, submittedRuns, finishedRuns, fetchRas)
 					}
 				}
 			}
@@ -477,13 +471,7 @@ func (submitter *Submitter) processLostRuns(
 						// The run was found in the RAS, not in the DSS
 						isRunLost = false
 
-						testStructure := rasRun.GetTestStructure()
-						runStatus := testStructure.GetStatus()
-						if runStatus == "finished" {
-
-							// The run has finished, so we no longer need to check its status
-							submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
-						}
+						submitter.markRunIfFinished(possiblyLostRun, rasRun, submittedRuns, finishedRuns, fetchRas)
 					}
 				}
 			}
@@ -495,6 +483,17 @@ func (submitter *Submitter) processLostRuns(
 			delete(submittedRuns, runName)
 			log.Printf("Run %v was lost - %v/%v/%v\n", runName, possiblyLostRun.Stream, possiblyLostRun.Bundle, possiblyLostRun.Class)
 		}
+	}
+}
+
+func (submitter *Submitter) markRunIfFinished(possiblyLostRun *TestRun, rasRun *galasaapi.Run, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, fetchRas bool) {
+
+	testStructure := rasRun.GetTestStructure()
+	runStatus := testStructure.GetStatus()
+	if runStatus == "finished" {
+
+		// The run has finished, so we no longer need to check its status
+		submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
 	}
 }
 

@@ -145,7 +145,7 @@ func (launcher *RemoteLauncher) GetRunsBySubmissionId(submissionId string, group
 			var context context.Context = nil
 
 			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).
-				IncludeCursor("false").
+				IncludeCursor("true").
 				SubmissionId(submissionId).Group(groupId).Sort("from:desc")
 
 			runData, httpResponse, err = apicall.Execute()
