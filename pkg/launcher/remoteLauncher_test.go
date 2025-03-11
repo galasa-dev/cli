@@ -124,7 +124,6 @@ func TestGetTestCatalogHttpErrorGetsReported(t *testing.T) {
 	}))
 	defer server.Close()
 
-
 	mockFactory := utils.NewMockFactory()
 	apiServerUrl := server.URL
 	apiClient := api.InitialiseAPI(apiServerUrl)
@@ -134,11 +133,11 @@ func TestGetTestCatalogHttpErrorGetsReported(t *testing.T) {
 	mockFileSystem := mockFactory.GetFileSystem()
 	mockEnvironment := mockFactory.GetEnvironment()
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
-	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath()+"/bootstrap.properties", "")
 
 	bootstrap := ""
-    maxAttempts := 3
-    retryBackoffSeconds := 1
+	maxAttempts := 3
+	retryBackoffSeconds := 1
 
 	commsClient, _ := api.NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
 
@@ -153,56 +152,56 @@ func TestGetTestCatalogHttpErrorGetsReported(t *testing.T) {
 func TestGetRunsByGroupWithInvalidBearerTokenGetsNewTokenOk(t *testing.T) {
 	groupId := "group1"
 
-    initialLoginOperation := utils.NewHttpInteraction("/auth/tokens", http.MethodPost)
-    initialLoginOperation.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
-        writer.Header().Set("Content-Type", "application/json")
-        writer.WriteHeader(http.StatusCreated)
+	initialLoginOperation := utils.NewHttpInteraction("/auth/tokens", http.MethodPost)
+	initialLoginOperation.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusCreated)
 
 		mockResponse := fmt.Sprintf(`{"jwt": "%s", "refresh_token": "abc"}`, mockExpiredJwt)
-        writer.Write([]byte(mockResponse))
-    }
+		writer.Write([]byte(mockResponse))
+	}
 
-    unauthorizedGetRunsInteraction := utils.NewHttpInteraction("/runs/" + groupId, http.MethodGet)
-    unauthorizedGetRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
-        writer.Header().Set("Content-Type", "application/json")
-        writer.WriteHeader(http.StatusUnauthorized)
-        writer.Write([]byte(`{ "error_message": "Invalid bearer token provided!" }`))
-    }
+	unauthorizedGetRunsInteraction := utils.NewHttpInteraction("/runs/"+groupId, http.MethodGet)
+	unauthorizedGetRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusUnauthorized)
+		writer.Write([]byte(`{ "error_message": "Invalid bearer token provided!" }`))
+	}
 
 	newLoginInteraction := utils.NewHttpInteraction("/auth/tokens", http.MethodPost)
-    newLoginInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
-        writer.Header().Set("Content-Type", "application/json")
-        writer.WriteHeader(http.StatusCreated)
+	newLoginInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusCreated)
 
 		newJwt := createValidMockJwt()
 		fmt.Println(newJwt)
 		mockResponse := fmt.Sprintf(`{"jwt": "%s", "refresh_token": "abc"}`, newJwt)
-        writer.Write([]byte(mockResponse))
-    }
+		writer.Write([]byte(mockResponse))
+	}
 
-    getRunsInteraction := utils.NewHttpInteraction("/runs/" + groupId, http.MethodGet)
-    getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
-        writer.Header().Set("Content-Type", "application/json")
-        writer.WriteHeader(http.StatusOK)
+	getRunsInteraction := utils.NewHttpInteraction("/runs/"+groupId, http.MethodGet)
+	getRunsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusOK)
 
 		mockRun := galasaapi.NewTestRun()
 
 		mockRuns := galasaapi.NewTestRuns()
-		mockRuns.Runs = []galasaapi.TestRun{ *mockRun }
+		mockRuns.Runs = []galasaapi.TestRun{*mockRun}
 		mockRunsBytes, _ := json.Marshal(mockRuns)
 
-        writer.Write(mockRunsBytes)
-    }
+		writer.Write(mockRunsBytes)
+	}
 
-    interactions := []utils.HttpInteraction{
+	interactions := []utils.HttpInteraction{
 		initialLoginOperation,
-        unauthorizedGetRunsInteraction,
+		unauthorizedGetRunsInteraction,
 		newLoginInteraction,
 		getRunsInteraction,
-    }
+	}
 
-    server := utils.NewMockHttpServer(t, interactions)
-    defer server.Server.Close()
+	server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
 
 	mockFactory := utils.NewMockFactory()
 
@@ -212,16 +211,16 @@ func TestGetRunsByGroupWithInvalidBearerTokenGetsNewTokenOk(t *testing.T) {
 	mockGalasaHome, _ := utils.NewGalasaHome(mockFileSystem, mockEnvironment, "")
 	mockTimeService := mockFactory.GetTimeService()
 	jwtCache := auth.NewJwtCache(mockFileSystem, mockGalasaHome, mockTimeService)
-	
-	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/galasactl.properties", "GALASA_TOKEN=my:token")
-	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath() + "/bootstrap.properties", "")
+
+	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath()+"/galasactl.properties", "GALASA_TOKEN=my:token")
+	mockFileSystem.WriteTextFile(mockGalasaHome.GetUrlFolderPath()+"/bootstrap.properties", "")
 
 	authenticator := auth.NewAuthenticator(apiServerUrl, mockFileSystem, mockGalasaHome, mockTimeService, mockEnvironment, jwtCache)
 	mockFactory.Authenticator = authenticator
 
 	bootstrap := ""
-    maxAttempts := 3
-    retryBackoffSeconds := 1
+	maxAttempts := 3
+	retryBackoffSeconds := 1
 
 	commsClient, _ := api.NewAPICommsClient(bootstrap, maxAttempts, float64(retryBackoffSeconds), mockFactory, mockGalasaHome)
 

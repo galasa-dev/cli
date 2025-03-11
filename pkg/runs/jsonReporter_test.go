@@ -29,6 +29,7 @@ func TestJsonReportWorks(t *testing.T) {
 		Tests:          []TestMethod{{Method: "method1", Result: "passed"}, {Method: "method2", Result: "passed"}},
 		GherkinUrl:     "file:///my.feature",
 		GherkinFeature: "my",
+		SubmissionId:   "123",
 	}
 
 	finishedRunsMap := make(map[string]*TestRun, 1)
@@ -79,7 +80,8 @@ func TestJsonReportWorks(t *testing.T) {
 				],
 				"GherkinUrl":"file:///my.feature",
 				"GherkinFeature":"my",
-				"group":""
+				"group":"",
+				"submissionId":"123"
 			}
 		]
 	}`

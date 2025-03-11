@@ -71,7 +71,7 @@ func (launcher *MockLauncher) SubmitTestRun(
 	stream string,
 	obrFromPortfolio string,
 	isTraceEnabled bool,
-	GherkinURL       string,
+	GherkinURL string,
 	GherkinFeature string,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
@@ -120,6 +120,11 @@ func (launcher *MockLauncher) SubmitTestRun(
 
 // GetRunsById gets the Run information for the run with a specific run identifier
 func (launcher *MockLauncher) GetRunsById(runId string) (*galasaapi.Run, error) {
+	return &galasaapi.Run{}, nil
+}
+
+// Gets a run based on the submission ID of that run.
+func (launcher *MockLauncher) GetRunsBySubmissionId(submissionId string, groupId string) (*galasaapi.Run, error) {
 	return &galasaapi.Run{}, nil
 }
 

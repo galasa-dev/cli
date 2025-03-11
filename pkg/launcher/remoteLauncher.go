@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/api"
@@ -36,7 +37,7 @@ func NewRemoteLauncher(commsClient api.APICommsClient) *RemoteLauncher {
 
 	// A comms client that communicates with the API server in a Galasa service.
 	launcher.commsClient = commsClient
-	
+
 	return launcher
 }
 
@@ -125,6 +126,60 @@ func (launcher *RemoteLauncher) GetRunsById(runId string) (*galasaapi.Run, error
 	return rasRun, err
 }
 
+// Gets the latest run based on the submission ID of that run.
+// For local runs, the submission ID is the same as the test run id.
+func (launcher *RemoteLauncher) GetRunsBySubmissionId(submissionId string, groupId string) (*galasaapi.Run, error) {
+	log.Printf("RemoteLauncher: GetRunsBySubmissionId entered. runId=%v groupId=%v", submissionId, groupId)
+	var err error
+	var rasRun *galasaapi.Run
+	var restApiVersion string
+
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+
+	if err == nil {
+		var runData *galasaapi.RunResults
+
+		err = launcher.commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
+			var err error
+			var httpResponse *http.Response
+			var context context.Context = nil
+
+			apicall := apiClient.ResultArchiveStoreAPIApi.GetRasSearchRuns(context).ClientApiVersion(restApiVersion).
+				IncludeCursor("false").
+				SubmissionId(submissionId).Group(groupId).Sort("from:desc")
+
+			runData, httpResponse, err = apicall.Execute()
+
+			var statusCode int
+			if httpResponse != nil {
+				defer httpResponse.Body.Close()
+				statusCode = httpResponse.StatusCode
+			}
+
+			if err != nil {
+				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, err.Error())
+			} else {
+				if statusCode != http.StatusOK {
+					httpError := "\nhttp response status code: " + strconv.Itoa(statusCode)
+					errString := httpError
+					err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_QUERY_RUNS_FAILED, errString)
+				} else {
+
+					log.Printf("HTTP status was OK")
+
+					if runData.GetAmountOfRuns() > 0 {
+						runs := runData.GetRuns()
+						rasRun = &runs[0]
+					}
+
+				}
+			}
+			return err
+		})
+	}
+	return rasRun, err
+}
+
 func (launcher *RemoteLauncher) GetStreams() ([]string, error) {
 
 	var streams []string
@@ -179,14 +234,14 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 	if err == nil {
 		var cpsResponse *http.Response
 		err = launcher.commsClient.RunAuthenticatedCommandWithRateLimitRetries(func(apiClient *galasaapi.APIClient) error {
-			cpsProperty, cpsResponse, err = apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream."+stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
-	
+			cpsProperty, cpsResponse, err = apiClient.ConfigurationPropertyStoreAPIApi.QueryCpsNamespaceProperties(context.TODO(), "framework").Prefix("test.stream." + stream).Suffix("location").ClientApiVersion(restApiVersion).Execute()
+
 			var statusCode int
 			if cpsResponse != nil {
 				defer cpsResponse.Body.Close()
 				statusCode = cpsResponse.StatusCode
 			}
-	
+
 			if err != nil {
 				err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_PROPERTY_GET_FAILED, stream, err)
 			} else if len(cpsProperty) < 1 {
@@ -196,7 +251,7 @@ func (launcher *RemoteLauncher) GetTestCatalog(stream string) (TestCatalog, erro
 		})
 
 		if err == nil {
-			streamLocation :=cpsProperty[0].Data.Value
+			streamLocation := cpsProperty[0].Data.Value
 			catalogString := new(strings.Builder)
 			var resp *http.Response
 			resp, err = http.Get(*streamLocation)
