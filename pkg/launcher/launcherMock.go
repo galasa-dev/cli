@@ -7,6 +7,7 @@ package launcher
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -28,9 +29,10 @@ type LaunchParameters struct {
 }
 
 type MockLauncher struct {
-	allTestRuns *galasaapi.TestRuns
-	nextRunId   int
-	launches    []LaunchParameters
+	allTestRuns  *galasaapi.TestRuns
+	nextRunId    int
+	launches     []LaunchParameters
+	submissionId int
 }
 
 func NewMockLauncher() *MockLauncher {
@@ -38,6 +40,7 @@ func NewMockLauncher() *MockLauncher {
 	launcher.allTestRuns = newEmptyTestRun()
 	launcher.allTestRuns.Runs = make([]galasaapi.TestRun, 0)
 	launcher.nextRunId = 100
+	launcher.submissionId = 0
 	return launcher
 }
 
@@ -93,6 +96,7 @@ func (launcher *MockLauncher) SubmitTestRun(
 
 	newTestRun := galasaapi.NewTestRun()
 	newTestRun.SetGroup(groupName)
+	newTestRun.SetSubmissionId(strconv.Itoa(launcher.submissionId))
 
 	classNameParts := strings.Split(className, "/")
 	bundleName := classNameParts[0]

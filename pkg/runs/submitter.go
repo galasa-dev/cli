@@ -348,6 +348,7 @@ func (submitter *Submitter) submitRun(
 			if err == nil {
 				submittedRun := resultGroup.GetRuns()[0]
 				nextRun.Group = *submittedRun.Group
+				nextRun.SubmissionId = *submittedRun.SubmissionId
 				nextRun.Name = *submittedRun.Name
 
 				submittedRuns[nextRun.Name] = &nextRun
@@ -440,6 +441,8 @@ func (submitter *Submitter) processLostRuns(
 	for runName, possiblyLostRun := range runsToCheck {
 		isRunLost := true
 
+		log.Printf("processLostRuns - entered : name:%v runId:%v submissionId:%v \n", possiblyLostRun.Name, possiblyLostRun.RunId, possiblyLostRun.SubmissionId)
+
 		if possiblyLostRun.RunId == "" {
 			if possiblyLostRun.SubmissionId != "" {
 				// We don't know this runs' RunId yet
@@ -449,6 +452,7 @@ func (submitter *Submitter) processLostRuns(
 				if err != nil {
 					log.Printf("processLostRuns - Failed to retrieve RAS run by submissionId %v - %v\n", possiblyLostRun.Name, err)
 				} else {
+					log.Printf("processLostRuns - GetRunsBySubmissionId worked, rasRun:%v \n", rasRun)
 					if rasRun != nil {
 						// The run was found in the RAS, not in the DSS
 						isRunLost = false
@@ -483,6 +487,7 @@ func (submitter *Submitter) processLostRuns(
 			delete(submittedRuns, runName)
 			log.Printf("Run %v was lost - %v/%v/%v\n", runName, possiblyLostRun.Stream, possiblyLostRun.Bundle, possiblyLostRun.Class)
 		}
+		log.Printf("processLostRuns - exiting\n")
 	}
 }
 
@@ -491,7 +496,7 @@ func (submitter *Submitter) markRunIfFinished(possiblyLostRun *TestRun, rasRun *
 	testStructure := rasRun.GetTestStructure()
 	runStatus := testStructure.GetStatus()
 	if runStatus == "finished" {
-
+		log.Printf("run is finished\n")
 		// The run has finished, so we no longer need to check its status
 		submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
 	}

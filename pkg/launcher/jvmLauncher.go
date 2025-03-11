@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -301,6 +303,7 @@ func (launcher *JvmLauncher) SubmitTestRun(
 								localTest.testRun.SetTrace(isTraceEnabled)
 								localTest.testRun.SetType(requestType)
 								localTest.testRun.SetName(localTest.runId)
+								localTest.testRun.SetSubmissionId(uuid.New().String())
 
 								// The test run we started can be returned to the submitter.
 								testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
