@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+
 	factory := cmd.NewRealFactory()
 	cmd.Execute(factory, os.Args[1:])
 }
