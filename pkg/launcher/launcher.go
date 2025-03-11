@@ -35,6 +35,9 @@ type Launcher interface {
 	// GetRunsById gets the Run information for the run with a specific run identifier
 	GetRunsById(runId string) (*galasaapi.Run, error)
 
+	// Gets a run based on the submission ID of that run.
+	GetRunsBySubmissionId(submissionId string, groupId string) (*galasaapi.Run, error)
+
 	// GetStreams gets a list of streams available on this launcher
 	GetStreams() ([]string, error)
 

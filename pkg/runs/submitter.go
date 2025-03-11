@@ -348,6 +348,7 @@ func (submitter *Submitter) submitRun(
 			if err == nil {
 				submittedRun := resultGroup.GetRuns()[0]
 				nextRun.Group = *submittedRun.Group
+				nextRun.SubmissionId = *submittedRun.SubmissionId
 				nextRun.Name = *submittedRun.Name
 
 				submittedRuns[nextRun.Name] = &nextRun
@@ -439,24 +440,42 @@ func (submitter *Submitter) processLostRuns(
 
 	for runName, possiblyLostRun := range runsToCheck {
 		isRunLost := true
-		
-		if possiblyLostRun.RunId != "" {
-			// Check the RAS to see if the run has been saved
-			var rasRun *galasaapi.Run
-			rasRun, err = submitter.launcher.GetRunsById(possiblyLostRun.RunId)
-			if err != nil {
-				log.Printf("processLostRuns - Failed to retrieve RAS run for %v - %v\n", possiblyLostRun.Name, err)
-			} else {
-				if rasRun != nil {
-					// The run was found in the RAS, not in the DSS
-					isRunLost = false
 
-					testStructure := rasRun.GetTestStructure()
-					runStatus := testStructure.GetStatus()
-					if runStatus == "finished" {
-	
-						// The run has finished, so we no longer need to check its status
-						submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
+		log.Printf("processLostRuns - entered : name:%v runId:%v submissionId:%v \n", possiblyLostRun.Name, possiblyLostRun.RunId, possiblyLostRun.SubmissionId)
+
+		if possiblyLostRun.RunId == "" {
+			if possiblyLostRun.SubmissionId != "" {
+				// We don't know this runs' RunId yet
+				// so lets try to find it in the RAS
+				var rasRun *galasaapi.Run
+				rasRun, err = submitter.launcher.GetRunsBySubmissionId(possiblyLostRun.SubmissionId, possiblyLostRun.Group)
+				if err != nil {
+					log.Printf("processLostRuns - Failed to retrieve RAS run by submissionId %v - %v\n", possiblyLostRun.Name, err)
+				} else {
+					log.Printf("processLostRuns - GetRunsBySubmissionId worked, rasRun:%v \n", rasRun)
+					if rasRun != nil {
+						// The run was found in the RAS, not in the DSS
+						isRunLost = false
+
+						submitter.markRunIfFinished(possiblyLostRun, rasRun, submittedRuns, finishedRuns, fetchRas)
+					}
+				}
+			}
+		}
+
+		if isRunLost {
+			if possiblyLostRun.RunId != "" {
+				// Check the RAS to see if the run has been saved, as we know it's run id.
+				var rasRun *galasaapi.Run
+				rasRun, err = submitter.launcher.GetRunsById(possiblyLostRun.RunId)
+				if err != nil {
+					log.Printf("processLostRuns - Failed to retrieve RAS run for %v - %v\n", possiblyLostRun.Name, err)
+				} else {
+					if rasRun != nil {
+						// The run was found in the RAS, not in the DSS
+						isRunLost = false
+
+						submitter.markRunIfFinished(possiblyLostRun, rasRun, submittedRuns, finishedRuns, fetchRas)
 					}
 				}
 			}
@@ -468,6 +487,18 @@ func (submitter *Submitter) processLostRuns(
 			delete(submittedRuns, runName)
 			log.Printf("Run %v was lost - %v/%v/%v\n", runName, possiblyLostRun.Stream, possiblyLostRun.Bundle, possiblyLostRun.Class)
 		}
+		log.Printf("processLostRuns - exiting\n")
+	}
+}
+
+func (submitter *Submitter) markRunIfFinished(possiblyLostRun *TestRun, rasRun *galasaapi.Run, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, fetchRas bool) {
+
+	testStructure := rasRun.GetTestStructure()
+	runStatus := testStructure.GetStatus()
+	if runStatus == "finished" {
+		log.Printf("run is finished\n")
+		// The run has finished, so we no longer need to check its status
+		submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
 	}
 }
 
