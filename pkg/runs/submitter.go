@@ -348,7 +348,9 @@ func (submitter *Submitter) submitRun(
 			if err == nil {
 				submittedRun := resultGroup.GetRuns()[0]
 				nextRun.Group = *submittedRun.Group
-				nextRun.SubmissionId = *submittedRun.SubmissionId
+				if submittedRun.SubmissionId != nil {
+					nextRun.SubmissionId = *submittedRun.SubmissionId
+				}
 				nextRun.Name = *submittedRun.Name
 
 				submittedRuns[nextRun.Name] = &nextRun
