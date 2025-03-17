@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/galasa-dev/cli/pkg/api"
-	"github.com/galasa-dev/cli/pkg/galasaapi"
 	"github.com/galasa-dev/cli/pkg/images"
 	"github.com/galasa-dev/cli/pkg/launcher"
 	"github.com/galasa-dev/cli/pkg/runs"
@@ -113,10 +112,14 @@ func (cmd *RunsSubmitCommand) createRunsSubmitCobraCmd(factory spi.Factory,
 	runsSubmitCmd.PersistentFlags().IntVar(&cmd.values.Throttle, "throttle", runs.DEFAULT_THROTTLE_TESTS_AT_ONCE,
 		"how many test runs can be submitted in parallel, 0 or less will disable throttling. 1 causes tests to be run sequentially.")
 
-	runsSubmitCmd.PersistentFlags().StringVar(&cmd.values.OverrideFilePath, "overridefile", "",
+	runsSubmitCmd.PersistentFlags().StringSliceVar(&cmd.values.OverrideFilePaths, "overridefile", []string{},
 		"path to a properties file containing override properties. Defaults to overrides.properties in galasa home folder if that file exists. "+
 			"Overrides from --override options will take precedence over properties in this property file. "+
-			"A file path of '-' disables reading any properties file.")
+			"A file path of '-' disables reading any properties file. "+
+			"To use multiple override files, either repeat the overridefile flag for each file, or list the path (absolute or relative) of each override file, separated by commas. "+
+			"For example --overridefile file.properties --overridefile /Users/dummyUser/code/test.properties or --overridefile file.properties,/Users/dummyUser/code/test.properties. "+
+			"The files are processed in the order given. "+
+			"When a property is be defined in multiple files, the last occurrence processed will have its value used.")
 
 	runsSubmitCmd.PersistentFlags().StringSliceVar(&cmd.values.Overrides, "override", make([]string, 0),
 		"overrides to be sent with the tests (overrides in the portfolio will take precedence). "+
@@ -162,45 +165,30 @@ func (cmd *RunsSubmitCommand) executeSubmit(
 		galasaHome, err = utils.NewGalasaHome(fileSystem, env, commsFlagSetValues.CmdParamGalasaHomePath)
 		if err == nil {
 
-			commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
+			var commsClient api.APICommsClient
+			commsClient, err = api.NewAPICommsClient(
+				commsFlagSetValues.bootstrap,
+				commsFlagSetValues.maxRetries,
+				commsFlagSetValues.retryBackoffSeconds,
+				factory,
+				galasaHome,
+			)
 
-			// Read the bootstrap properties.
-			var urlService *api.RealUrlResolutionService = new(api.RealUrlResolutionService)
-			var bootstrapData *api.BootstrapData
-			loadBootstrapWithRetriesFunc := func() error {
-				bootstrapData, err = api.LoadBootstrap(galasaHome, fileSystem, env, commsFlagSetValues.bootstrap, urlService)
-				return err
-			}
-
-			err = commsRetrier.ExecuteCommandWithRateLimitRetries(loadBootstrapWithRetriesFunc)
 			if err == nil {
 
 				timeService := factory.GetTimeService()
 				timedSleeper := utils.NewRealTimedSleeper()
-				var launcherInstance launcher.Launcher
+				launcherInstance := launcher.NewRemoteLauncher(commsClient)
 
-				// The launcher we are going to use to start/monitor tests.
-				apiServerUrl := bootstrapData.ApiServerURL
-
-				var apiClient *galasaapi.APIClient
-				authenticator := factory.GetAuthenticator(
-					apiServerUrl,
-					galasaHome,
-				)
-				apiClient, err = authenticator.GetAuthenticatedAPIClient()
+				validator := runs.NewStreamBasedValidator()
+				err = validator.Validate(cmd.values.TestSelectionFlagValues)
 				if err == nil {
-					launcherInstance = launcher.NewRemoteLauncher(apiServerUrl, apiClient, commsRetrier)
 
-					validator := runs.NewStreamBasedValidator()
-					err = validator.Validate(cmd.values.TestSelectionFlagValues)
-					if err == nil {
+					var console = factory.GetStdOutConsole()
 
-						var console = factory.GetStdOutConsole()
+					submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
 
-						submitter := runs.NewSubmitter(galasaHome, fileSystem, launcherInstance, timeService, timedSleeper, env, console, images.NewImageExpanderNullImpl())
-
-						err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
-					}
+					err = submitter.ExecuteSubmitRuns(cmd.values, cmd.values.TestSelectionFlagValues)
 				}
 			}
 		}

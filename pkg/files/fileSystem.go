@@ -31,6 +31,21 @@ func TildaExpansion(fileSystem spi.FileSystem, path string) (string, error) {
 	return path, err
 }
 
+func TildaExpansionMultiple(fileSystem spi.FileSystem, paths []string) ([]string, error) {
+	expandedPaths := make([]string, len(paths))
+	var expandedPath string
+	var err error
+
+	for i, p := range paths {
+		expandedPath, err = TildaExpansion(fileSystem, p)
+		if err != nil {
+			break
+		}
+		expandedPaths[i] = expandedPath
+	}
+	return expandedPaths, err
+}
+
 //------------------------------------------------------------------------------------
 // The implementation of the real os-delegating variant of the FileSystem interface
 //------------------------------------------------------------------------------------

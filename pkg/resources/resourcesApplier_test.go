@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
@@ -92,7 +93,7 @@ func TestCanApplySingleValidResource(t *testing.T) {
 
 	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	yamlToApply := validResourcesYamlFileContentSingleProperty
 
@@ -107,8 +108,7 @@ func TestCanApplySingleValidResource(t *testing.T) {
 		action,
 		filePath,
 		fs,
-		mockservletUrl,
-		mockBearerToken,
+		mockCommsClient,
 	)
 
 	// Then
@@ -158,7 +158,7 @@ func TestCanApplyValidMultipleResources(t *testing.T) {
 
 	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	yamlToApply := validResourcesYamlFileContentMultipleProperties
 
@@ -173,8 +173,7 @@ func TestCanApplyValidMultipleResources(t *testing.T) {
 		action,
 		filePath,
 		fs,
-		mockservletUrl,
-		mockBearerToken,
+        mockCommsClient,
 	)
 
 	// Then
@@ -214,10 +213,10 @@ func TestUnauthorizedResponseStatusFromServerShowsUnauthorizedError(t *testing.T
 
 	mockServlet := NewMockServlet(t, bytesToReturn, 401, expectedBytesArrivingAtServlet)
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	// When
-	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl, mockBearerToken)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockCommsClient)
 
 	// Then
 	assert.NotNil(t, err)
@@ -263,10 +262,10 @@ func TestBadRequestResponseStatusFromServerShowsErrorsReturned(t *testing.T) {
 
 	mockServlet := NewMockServlet(t, bytesToReturn, 400, expectedBytesArrivingAtServlet)
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	// When
-	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl, mockBearerToken)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockCommsClient)
 
 	// Then
 	assert.NotNil(t, err)
@@ -307,10 +306,10 @@ func TestInternalServerErrorResponseStatusFromServerReturnsServerError(t *testin
 
 	mockServlet := NewMockServlet(t, bytesToReturn, 500, expectedBytesArrivingAtServlet)
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	// When
-	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl, mockBearerToken)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockCommsClient)
 
 	// Then
 	assert.NotNil(t, err)
@@ -356,10 +355,10 @@ func TestResponseStatusCodeFromApiIsAnUnexpectedError(t *testing.T) {
 
 	mockServlet := NewMockServlet(t, bytesToReturn, 203, expectedBytesArrivingAtServlet)
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	// When
-	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockservletUrl, mockBearerToken)
+	err := sendResourcesRequestToServer(expectedBytesArrivingAtServlet, mockCommsClient)
 
 	// Then
 	assert.NotNil(t, err)
@@ -387,7 +386,7 @@ func TestCanDeleteSingleValidResource(t *testing.T) {
 
 	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	yamlToApply := validResourcesYamlFileContentSingleProperty
 
@@ -402,8 +401,7 @@ func TestCanDeleteSingleValidResource(t *testing.T) {
 		action,
 		filePath,
 		fs,
-		mockservletUrl,
-		mockBearerToken,
+		mockCommsClient,
 	)
 
 	// Then
@@ -453,7 +451,7 @@ func TestCanDeleteValidMultipleResources(t *testing.T) {
 
 	mockServlet := NewMockServlet(t, nil, http.StatusOK, []byte(expectedJsonArrivingInServlet))
 	mockservletUrl := mockServlet.getUrl()
-	mockBearerToken := "my-bearer-token"
+    mockCommsClient := api.NewMockAPICommsClient(mockservletUrl)
 
 	yamlToApply := validResourcesYamlFileContentMultipleProperties
 
@@ -468,8 +466,7 @@ func TestCanDeleteValidMultipleResources(t *testing.T) {
 		action,
 		filePath,
 		fs,
-		mockservletUrl,
-		mockBearerToken,
+		mockCommsClient,
 	)
 
 	// Then

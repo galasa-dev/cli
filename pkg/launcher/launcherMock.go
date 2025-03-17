@@ -7,6 +7,7 @@ package launcher
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/galasa-dev/cli/pkg/galasaapi"
@@ -28,9 +29,10 @@ type LaunchParameters struct {
 }
 
 type MockLauncher struct {
-	allTestRuns *galasaapi.TestRuns
-	nextRunId   int
-	launches    []LaunchParameters
+	allTestRuns  *galasaapi.TestRuns
+	nextRunId    int
+	launches     []LaunchParameters
+	submissionId int
 }
 
 func NewMockLauncher() *MockLauncher {
@@ -38,6 +40,7 @@ func NewMockLauncher() *MockLauncher {
 	launcher.allTestRuns = newEmptyTestRun()
 	launcher.allTestRuns.Runs = make([]galasaapi.TestRun, 0)
 	launcher.nextRunId = 100
+	launcher.submissionId = 0
 	return launcher
 }
 
@@ -71,7 +74,7 @@ func (launcher *MockLauncher) SubmitTestRun(
 	stream string,
 	obrFromPortfolio string,
 	isTraceEnabled bool,
-	GherkinURL       string,
+	GherkinURL string,
 	GherkinFeature string,
 	overrides map[string]interface{},
 ) (*galasaapi.TestRuns, error) {
@@ -93,6 +96,7 @@ func (launcher *MockLauncher) SubmitTestRun(
 
 	newTestRun := galasaapi.NewTestRun()
 	newTestRun.SetGroup(groupName)
+	newTestRun.SetSubmissionId(strconv.Itoa(launcher.submissionId))
 
 	classNameParts := strings.Split(className, "/")
 	bundleName := classNameParts[0]
@@ -120,6 +124,11 @@ func (launcher *MockLauncher) SubmitTestRun(
 
 // GetRunsById gets the Run information for the run with a specific run identifier
 func (launcher *MockLauncher) GetRunsById(runId string) (*galasaapi.Run, error) {
+	return &galasaapi.Run{}, nil
+}
+
+// Gets a run based on the submission ID of that run.
+func (launcher *MockLauncher) GetRunsBySubmissionId(submissionId string, groupId string) (*galasaapi.Run, error) {
 	return &galasaapi.Run{}, nil
 }
 

@@ -20,6 +20,8 @@ type TestRun struct {
 	GherkinUrl     string            `yaml:"gherkin"`
 	GherkinFeature string            `yaml:"feature"`
 	Group          string            `yaml:"group" json:"group"`
+	SubmissionId   string            `yaml:"submissionId" json:"submissionId"`
+	RunId          string            `yaml:"runId,omitempty" json:"runId,omitempty"`
 }
 
 type TestMethod struct {

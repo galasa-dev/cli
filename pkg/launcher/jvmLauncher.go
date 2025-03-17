@@ -302,6 +302,8 @@ func (launcher *JvmLauncher) SubmitTestRun(
 								localTest.testRun.SetType(requestType)
 								localTest.testRun.SetName(localTest.runId)
 
+								localTest.testRun.SetSubmissionId("")
+
 								// The test run we started can be returned to the submitter.
 								testRuns.Runs = append(testRuns.Runs, *localTest.testRun)
 							}
@@ -525,6 +527,15 @@ func (launcher *JvmLauncher) GetRunsById(runId string) (*galasaapi.Run, error) {
 	}
 
 	return run, err
+}
+
+// Gets a run based on the submission ID of that run.
+// For local runs, the submission ID is the same as the test run id.
+func (launcher *JvmLauncher) GetRunsBySubmissionId(submissionId string, groupId string) (*galasaapi.Run, error) {
+	log.Printf("JvmLauncher: GetRunsBySubmissionId entered. runId=%s", submissionId)
+
+	log.Printf("JvmLauncher: Local runs cannot find tests based on submission ID")
+	return nil, nil
 }
 
 func createRunFromLocalTest(localTest *LocalTest) (*galasaapi.Run, error) {

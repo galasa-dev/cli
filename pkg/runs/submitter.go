@@ -347,7 +347,10 @@ func (submitter *Submitter) submitRun(
 
 			if err == nil {
 				submittedRun := resultGroup.GetRuns()[0]
-                nextRun.Group = *submittedRun.Group
+				nextRun.Group = *submittedRun.Group
+				if submittedRun.SubmissionId != nil {
+					nextRun.SubmissionId = *submittedRun.SubmissionId
+				}
 				nextRun.Name = *submittedRun.Name
 
 				submittedRuns[nextRun.Name] = &nextRun
@@ -364,6 +367,22 @@ func (submitter *Submitter) submitRun(
 	return readyRuns, err
 }
 
+func (submitter *Submitter) updateSubmittedRunIds(
+	submittedRuns map[string]*TestRun,
+	launchedRuns *galasaapi.TestRuns,
+) {
+	for _, currentRun := range launchedRuns.GetRuns() {
+		runName := currentRun.GetName()
+
+		submittedRun, ok := submittedRuns[runName]
+		if ok {
+			if submittedRun.RunId == "" && currentRun.HasRasRunId() {
+				submittedRun.RunId = currentRun.GetRasRunId()
+			}
+		}
+	}
+}
+
 func (submitter *Submitter) runsFetchCurrentStatus(
 	groupName string,
 	submittedRuns map[string]*TestRun,
@@ -376,6 +395,9 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 		log.Printf("Received error from group request - %v\n", err)
 		return
 	}
+
+	// Launched runs will now have run IDs, so record the run IDs for the submitted runs
+	submitter.updateSubmittedRunIds(submittedRuns, currentGroup)
 
 	// a copy to find lost runs
 	checkRuns := DeepClone(submittedRuns)
@@ -390,49 +412,7 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 
 			// now check to see if it is finished
 			if currentRun.GetStatus() == "finished" {
-
-				finishedRuns[runName] = checkRun
-
-				checkRun.Status = *currentRun.Status
-
-				delete(submittedRuns, runName)
-
-				result := "unknown"
-				if currentRun.HasResult() {
-					result = currentRun.GetResult()
-				}
-				checkRun.Result = result
-
-				// Extract the ras run result to get the method names if a report is requested
-				rasRunID := currentRun.RasRunId
-				if fetchRas && rasRunID != nil {
-
-					var rasRun *galasaapi.Run
-					rasRun, err = submitter.launcher.GetRunsById(*rasRunID)
-					if err != nil {
-						log.Printf("runsFetchCurrentStatus - Failed to retrieve RAS run for %v - %v\n", checkRun.Name, err)
-					} else {
-						checkRun.Tests = make([]TestMethod, 0)
-
-						testStructure := rasRun.GetTestStructure()
-						log.Printf("runsFetchCurrentStatus - testStructure- %v", testStructure)
-
-						for _, testMethod := range testStructure.GetMethods() {
-							test := TestMethod{
-								Method: testMethod.GetMethodName(),
-								Result: testMethod.GetResult(),
-							}
-
-							checkRun.Tests = append(checkRun.Tests, test)
-						}
-					}
-				}
-
-				if checkRun.GherkinUrl != "" {
-					log.Printf("Run %v has finished(%v) - %v (Gherkin)\n", runName, result, checkRun.GherkinFeature)
-				} else {
-					log.Printf("Run %v has finished(%v) - %v/%v/%v - %s\n", runName, result, checkRun.Stream, checkRun.Bundle, checkRun.Class, currentRun.GetStatus())
-				}
+				submitter.markRunFinished(checkRun, currentRun.GetResult(), submittedRuns, finishedRuns, fetchRas)
 			} else {
 				// Check to see if there was a status change
 				if checkRun.Status != currentRun.GetStatus() {
@@ -448,12 +428,132 @@ func (submitter *Submitter) runsFetchCurrentStatus(
 	}
 
 	// Now deal with the lost runs
-	for runName, lostRun := range checkRuns {
-		lostRuns[runName] = lostRun
-		delete(submittedRuns, runName)
-		log.Printf("Run %v was lost - %v/%v/%v\n", runName, lostRun.Stream, lostRun.Bundle, lostRun.Class)
+	submitter.processLostRuns(checkRuns, submittedRuns, finishedRuns, lostRuns, fetchRas)
+}
+
+func (submitter *Submitter) processLostRuns(
+	runsToCheck map[string]*TestRun,
+	submittedRuns map[string]*TestRun,
+	finishedRuns map[string]*TestRun,
+	lostRuns map[string]*TestRun,
+	fetchRas bool,
+) {
+	var err error
+
+	for runName, possiblyLostRun := range runsToCheck {
+		isRunLost := true
+
+		log.Printf("processLostRuns - entered : name:%v runId:%v submissionId:%v \n", possiblyLostRun.Name, possiblyLostRun.RunId, possiblyLostRun.SubmissionId)
+
+		if possiblyLostRun.RunId == "" {
+			if possiblyLostRun.SubmissionId != "" {
+				// We don't know this runs' RunId yet
+				// so lets try to find it in the RAS
+				var rasRun *galasaapi.Run
+				rasRun, err = submitter.launcher.GetRunsBySubmissionId(possiblyLostRun.SubmissionId, possiblyLostRun.Group)
+				if err != nil {
+					log.Printf("processLostRuns - Failed to retrieve RAS run by submissionId %v - %v\n", possiblyLostRun.Name, err)
+				} else {
+					log.Printf("processLostRuns - GetRunsBySubmissionId worked, rasRun:%v \n", rasRun)
+					if rasRun != nil {
+						// The run was found in the RAS, not in the DSS
+						isRunLost = false
+
+						submitter.markRunIfFinished(possiblyLostRun, rasRun, submittedRuns, finishedRuns, fetchRas)
+					}
+				}
+			}
+		}
+
+		if isRunLost {
+			if possiblyLostRun.RunId != "" {
+				// Check the RAS to see if the run has been saved, as we know it's run id.
+				var rasRun *galasaapi.Run
+				rasRun, err = submitter.launcher.GetRunsById(possiblyLostRun.RunId)
+				if err != nil {
+					log.Printf("processLostRuns - Failed to retrieve RAS run for %v - %v\n", possiblyLostRun.Name, err)
+				} else {
+					if rasRun != nil {
+						// The run was found in the RAS, not in the DSS
+						isRunLost = false
+
+						submitter.markRunIfFinished(possiblyLostRun, rasRun, submittedRuns, finishedRuns, fetchRas)
+					}
+				}
+			}
+		}
+
+		// The run wasn't found in the DSS or the RAS, so mark it as lost
+		if isRunLost {
+			lostRuns[runName] = possiblyLostRun
+			delete(submittedRuns, runName)
+			log.Printf("Run %v was lost - %v/%v/%v\n", runName, possiblyLostRun.Stream, possiblyLostRun.Bundle, possiblyLostRun.Class)
+		}
+		log.Printf("processLostRuns - exiting\n")
+	}
+}
+
+func (submitter *Submitter) markRunIfFinished(possiblyLostRun *TestRun, rasRun *galasaapi.Run, submittedRuns map[string]*TestRun, finishedRuns map[string]*TestRun, fetchRas bool) {
+
+	testStructure := rasRun.GetTestStructure()
+	runStatus := testStructure.GetStatus()
+	if runStatus == "finished" {
+		log.Printf("run is finished\n")
+		// The run has finished, so we no longer need to check its status
+		submitter.markRunFinished(possiblyLostRun, testStructure.GetResult(), submittedRuns, finishedRuns, fetchRas)
+	}
+}
+
+func (submitter *Submitter) markRunFinished(
+	runToMarkFinished *TestRun,
+	result string,
+	submittedRuns map[string]*TestRun,
+	finishedRuns map[string]*TestRun,
+	fetchRas bool,
+) {
+	var err error
+
+	runName := runToMarkFinished.Name
+	finishedRuns[runName] = runToMarkFinished
+	delete(submittedRuns, runName)
+
+	if result == "" {
+		result = "unknown"
 	}
 
+	runToMarkFinished.Result = result
+	runToMarkFinished.Status = "finished"
+
+	// Extract the ras run result to get the method names if a report is requested
+	rasRunID := runToMarkFinished.RunId
+	if fetchRas && rasRunID != "" {
+
+		var rasRun *galasaapi.Run
+		rasRun, err = submitter.launcher.GetRunsById(rasRunID)
+		if err != nil {
+			log.Printf("runsFetchCurrentStatus - Failed to retrieve RAS run for %v - %v\n", runName, err)
+		} else {
+			runToMarkFinished.Tests = make([]TestMethod, 0)
+
+			testStructure := rasRun.GetTestStructure()
+			log.Printf("runsFetchCurrentStatus - testStructure- %v", testStructure)
+
+			for _, testMethod := range testStructure.GetMethods() {
+				test := TestMethod{
+					Method: testMethod.GetMethodName(),
+					Result: testMethod.GetResult(),
+				}
+
+				runToMarkFinished.Tests = append(runToMarkFinished.Tests, test)
+			}
+		}
+	}
+
+	if runToMarkFinished.GherkinUrl != "" {
+		log.Printf("Run %v has finished(%v) - %v (Gherkin)\n", runName, result, runToMarkFinished.GherkinFeature)
+	} else {
+		log.Printf("Run %v has finished(%v) - %v/%v/%v - %s\n", runName, runToMarkFinished.Result, runToMarkFinished.Stream, runToMarkFinished.Bundle, runToMarkFinished.Class, runToMarkFinished.Status)
+	}
 }
 
 func (submitter *Submitter) createReports(params utils.RunsSubmitCmdValues,
@@ -608,18 +708,18 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 ) error {
 	var err error
 	// Correct the default overrideFile path if it wasn't specified.
-	if params.OverrideFilePath == "" {
+	if len(params.OverrideFilePaths) == 0 {
 
-		params.OverrideFilePath = submitter.galasaHome.GetUrlFolderPath() + "/overrides.properties"
+		params.OverrideFilePaths = []string{submitter.galasaHome.GetUrlFolderPath() + "/overrides.properties"}
 		var isFileThere bool
-		isFileThere, err = submitter.fileSystem.Exists(params.OverrideFilePath)
+		isFileThere, err = submitter.fileSystem.Exists(params.OverrideFilePaths[0])
 		if err == nil {
 			if !isFileThere {
 				// The flag wasn't specified.
 				// And we don't have an overrides file to read from the .galasa folder.
 				// So treat this the same as the user not wanting to use an override file.
 				// If the file existed, then we'd want to use it.
-				params.OverrideFilePath = "-"
+				params.OverrideFilePaths = []string{"-"}
 			}
 		}
 	}
@@ -629,7 +729,7 @@ func (submitter *Submitter) correctOverrideFilePathParameter(
 func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValues) error {
 	var err error
 
-	params.OverrideFilePath, err = files.TildaExpansion(submitter.fileSystem, params.OverrideFilePath)
+	params.OverrideFilePaths, err = files.TildaExpansionMultiple(submitter.fileSystem, params.OverrideFilePaths)
 
 	if err == nil {
 		params.PortfolioFileName, err = files.TildaExpansion(submitter.fileSystem, params.PortfolioFileName)
@@ -655,15 +755,37 @@ func (submitter *Submitter) tildaExpandAllPaths(params *utils.RunsSubmitCmdValue
 
 func (submitter *Submitter) buildOverrideMap(commandParameters utils.RunsSubmitCmdValues) (map[string]string, error) {
 
-	path := commandParameters.OverrideFilePath
-	runOverrides, err := submitter.loadOverrideFile(path)
-	if err != nil {
-		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE, path, err.Error())
-	} else {
-		runOverrides, err = submitter.addOverridesFromCmdLine(runOverrides, commandParameters.Overrides)
-	}
+	var err error
+	combinedOverrides := make(map[string]string)
+	var overrides map[string]string
 
-	return runOverrides, err
+	// Iterate over each file path and merge their override maps.
+	for _, overrideFilePath := range commandParameters.OverrideFilePaths {
+		overrides, err = submitter.loadOverrideFile(overrideFilePath)
+		if err == nil {
+
+			// Merge the loaded overrides into the combined map.
+			combinedOverrides = mergeOverrideMaps(combinedOverrides, overrides, overrideFilePath)
+
+			//Validate the all override properties
+			combinedOverrides, err = submitter.addOverridesFromCmdLine(combinedOverrides, commandParameters.Overrides, combinedOverrides)
+
+		} else {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_FAILED_TO_LOAD_OVERRIDES_FILE, overrideFilePath, err.Error())
+			combinedOverrides = nil
+		}
+	}
+	return combinedOverrides, err
+}
+
+func mergeOverrideMaps(combinedOverrides, fileOverrides map[string]string, overrideFilePath string) map[string]string {
+	for key, value := range fileOverrides {
+		if combinedOverrides[key] != "" {
+			log.Printf("Property %s in file %s is being used in preference to the clashing property definition in a previously processed override file.", key, overrideFilePath)
+		}
+		combinedOverrides[key] = value
+	}
+	return combinedOverrides
 }
 
 func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[string]string, error) {
@@ -683,7 +805,7 @@ func (submitter *Submitter) loadOverrideFile(overrideFilePath string) (map[strin
 	return overrides, err
 }
 
-func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string) (map[string]string, error) {
+func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string, commandLineOverrides []string, fileOverrides map[string]string) (map[string]string, error) {
 	var err error
 
 	// Convert overrides to a map
@@ -699,6 +821,13 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_SUBMIT_INVALID_OVERRIDE, override)
 			break
 		}
+
+		if _, exists := fileOverrides[override]; exists {
+			log.Printf("Override property %s was set by an override file using the --overridefile option, "+
+				"but is being ignored in favour of the value passed using the --override option. "+
+				"Command line overrides have precedence over file based override values.", key)
+		}
+
 		overrides[key] = value
 	}
 
@@ -706,7 +835,8 @@ func (submitter *Submitter) addOverridesFromCmdLine(overrides map[string]string,
 	if err != nil {
 		overrides = nil
 	}
-	return overrides, nil
+
+	return overrides, err
 }
 
 func (submitter *Submitter) getPortfolio(portfolioFileName string, submitSelectionFlags *utils.TestSelectionFlagValues) (*Portfolio, error) {

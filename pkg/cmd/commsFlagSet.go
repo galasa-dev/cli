@@ -6,9 +6,7 @@
 package cmd
 
 import (
-	"github.com/galasa-dev/cli/pkg/api"
 	"github.com/galasa-dev/cli/pkg/spi"
-	"github.com/galasa-dev/cli/pkg/utils"
 	"github.com/spf13/pflag"
 )
 
@@ -79,10 +77,3 @@ func (commsFlagSet *CommsFlagSet) createFlagSet() (*pflag.FlagSet, error) {
 	return flagSet, err
 }
 
-func executeCommandWithRetries(factory spi.Factory, commsFlagSetValues *CommsFlagSetValues, executionFunc func() error) error {
-	retryFunc := func() error {
-		commsRetrier := api.NewCommsRetrier(commsFlagSetValues.maxRetries, commsFlagSetValues.retryBackoffSeconds, factory.GetTimeService())
-		return commsRetrier.ExecuteCommandWithRateLimitRetries(executionFunc)
-	}
-	return utils.CaptureExecutionLogs(factory, commsFlagSetValues.logFileName, retryFunc)
-}

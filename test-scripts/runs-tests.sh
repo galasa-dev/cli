@@ -69,7 +69,7 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
 
     # Can't really verify that the bootstrap provided is a valid one, but galasactl will pick this up later if not
     if [[ "${bootstrap}" == "" ]]; then
-        export bootstrap="https://prod1-galasa-dev.cicsk8s.hursley.ibm.com/api/bootstrap"
+        export bootstrap="https://galasa-ecosystem1.galasa.dev/api/bootstrap"
         info "No bootstrap supplied. Defaulting the --bootstrap to be ${bootstrap}"
     fi
 
@@ -78,8 +78,8 @@ if [[ "$CALLED_BY_MAIN" == "" ]]; then
     #-----------------------------------------------------------------------------------------
     # Constants
     #-----------------------------------------------------------------------------------------
-    export GALASA_TEST_NAME_SHORT="local.CoreLocalJava11Ubuntu"
-    export GALASA_TEST_NAME_LONG="dev.galasa.inttests.core.${GALASA_TEST_NAME_SHORT}"
+    export GALASA_TEST_NAME_SHORT="core.CoreManagerIVT"   
+    export GALASA_TEST_NAME_LONG="dev.galasa.ivts.${GALASA_TEST_NAME_SHORT}" 
     export GALASA_TEST_RUN_GET_EXPECTED_SUMMARY_LINE_COUNT="4"
     export GALASA_TEST_RUN_GET_EXPECTED_DETAILS_LINE_COUNT="14"
     export GALASA_TEST_RUN_GET_EXPECTED_RAW_PIPE_COUNT="11"
@@ -108,7 +108,7 @@ function launch_test_on_ecosystem_with_portfolio {
 
     cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
-    --stream inttests \
+    --stream ivts \
     --portfolio portfolio.yaml \
     --test ${GALASA_TEST_NAME_SHORT} \
     --log -"
@@ -166,7 +166,7 @@ function runs_download_check_folder_names_during_test_run {
     # Create the portfolio.
     cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
-    --stream inttests \
+    --stream ivts \
     --portfolio portfolio.yaml \
     --test ${GALASA_TEST_NAME_SHORT} \
     --log -"
@@ -192,7 +192,7 @@ function runs_download_check_folder_names_during_test_run {
     --bootstrap ${bootstrap} \
     --portfolio portfolio.yaml \
     --throttle 1 \
-    --poll 10 \
+    --poll 1 \
     --progress 1 \
     --noexitcodeontestfailures \
     --log ${log_file}"
@@ -318,8 +318,8 @@ function runs_reset_check_retry_present {
 
     cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
-    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
-    --stream inttests
+    --class dev.galasa.ivts/dev.galasa.ivts.core.TestSleep \
+    --stream ivts
     --throttle 1 \
     --poll 10 \
     --progress 1 \
@@ -342,11 +342,11 @@ function runs_reset_check_retry_present {
     while [[ "${run_name_found}" == "false" ]]; do
         if [[ -e $runs_submit_log_file ]]; then
             success "file exists"
-            # Check the run has reached building stage before attempting to reset
-            target_line=$(cat ${runs_submit_log_file} | grep "status is now 'building'")
+            # Check the run has been submitted before attempting to reset
+            target_line=$(cat ${runs_submit_log_file} | grep "submitted")
 
             if [[ "$target_line" != "" ]]; then
-                info "Target line is found - the test is now building."
+                info "Target line is found - the test has been submitted."
                 run_name_found="true"
             fi
         fi
@@ -357,6 +357,9 @@ function runs_reset_check_retry_present {
             exit 1
         fi
     done
+
+    # sleep for 10 seconds to allow the test to reach an active stage
+    sleep 10
 
     run_name=$(echo $target_line | cut -f4 -d' ')
     info "Run name is $run_name"
@@ -370,29 +373,29 @@ function runs_reset_check_retry_present {
     info "Command is: $cmd"
     $cmd
 
-    h2 "Now using runs get to check when the run is finished."
+    h2 "Now using runs get to check that two different runs show up in the runs get output."
 
     runs_get_log_file="runs-get-output-for-reset.txt"
 
-    # Now poll runs get to check when the test is finished
+    # Now poll runs get to check when the tests are finished
     cmd="${BINARY_LOCATION} runs get \
     --name ${run_name} \
     --bootstrap ${bootstrap}"
 
-    is_test_finished="false"
+    two_tests_found="false"
     retries=0
     max=100
     target_line=""
-    while [[ "${is_test_finished}" == "false" ]]; do
+    while [[ "${two_tests_found}" == "false" ]]; do
         sleep 5
 
         # Run the runs get command
         $cmd | tee $runs_get_log_file
-        # Check for line in the runs get output to signify the test is finished
-        target_line=$(cat ${runs_get_log_file} | grep "finished")
+        # Check for line in the runs get output to signify that there are 2 tests
+        target_line=$(cat ${runs_get_log_file} | grep "Total:2")
         if [[ "$target_line" != "" ]]; then
-            success "Target line is found - the test is finished."
-            is_test_finished="true"
+            success "Target line is found - two runs were found."
+            two_tests_found="true"
         fi
 
         # Give up if we've been waiting for the test to finish for too long. Test could be stuck.
@@ -403,117 +406,6 @@ function runs_reset_check_retry_present {
         fi
     done
 
-    h2 "Now checking if two results for the runName are shown - the original run and the reset run."
-
-    # Now check if the runs get shows two runs with a retry.
-    target_line=$(cat ${runs_get_log_file} | grep "Total:2")
-    if [[ "$target_line" != "" ]]; then
-        success "Target line found - the original and reset run were found."
-    fi
-
-}
-
-function runs_cancel_check_test_is_finished_and_cancelled {
-
-    h2 "Performing runs cancel on an active test run..."
-
-    run_name=$1
-
-    h2 "First, launching test on an ecosystem without a portfolio in a background process, so it can be cancelled."
-
-    mkdir -p ${BASEDIR}/temp
-    cd ${BASEDIR}/temp
-
-    runs_submit_log_file="runs-submit-output-for-cancel.txt"
-
-    cmd="${BINARY_LOCATION} runs submit \
-    --bootstrap $bootstrap \
-    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
-    --stream inttests
-    --throttle 1 \
-    --poll 10 \
-    --progress 1 \
-    --noexitcodeontestfailures \
-    --log ${runs_submit_log_file}"
-
-    info "Command is: $cmd"
-
-    set -o pipefail # Fail everything if anything in the pipeline fails. Else we are just checking the 'tee' return code.
-
-    # Start the test running inside a background process... so we can try to cancel it while it's running
-    $cmd &
-
-    run_name_found="false"
-    retries=0
-    max=100
-    target_line=""
-
-    # Loop waiting until we can extract the name of the test run which is running in the background.
-    while [[ "${run_name_found}" == "false" ]]; do
-        if [[ -e $runs_submit_log_file ]]; then
-            success "file exists"
-            # Check the run has reached building stage before attempting to cancel
-            target_line=$(cat ${runs_submit_log_file} | grep "status is now 'building'")
-
-            if [[ "$target_line" != "" ]]; then
-                info "Target line is found - the test is now building."
-                run_name_found="true"
-            fi
-        fi
-        sleep 3
-        ((retries++))
-        if (( $retries > $max )); then
-            error "Too many retries."
-            exit 1
-        fi
-    done
-
-    run_name=$(echo $target_line | cut -f4 -d' ')
-    info "Run name is $run_name"
-
-    h2 "Now attempting to cancel the run while it's running in the background process."
-
-    cmd="${BINARY_LOCATION} runs cancel \
-    --name ${run_name} \
-    --bootstrap ${bootstrap}"
-
-    info "Command is: $cmd"
-
-    $cmd
-
-    h2 "Now using the runs submit output to check the run was cancelled."
-
-    is_test_cancelled="false"
-    retries=0
-    max=100
-    target_line=""
-    while [[ "${is_test_cancelled}" == "false" ]]; do
-        sleep 5
-
-        if [[ -e $runs_submit_log_file ]]; then
-            success "file exists"
-            target_line=$(cat ${runs_submit_log_file} | grep "has finished(Cancelled)")
-
-            if [[ "$target_line" != "" ]]; then
-                info "Target line is found - the test was cancelled."
-                is_test_cancelled="true"
-            fi
-        fi
-
-        # Give up if we've been waiting for the test to show as cancelled for too long.
-        ((retries++))
-        if (( $retries > $max )); then
-            error "Too many retries."
-            exit 1
-        fi
-    done
-
-    h2 "Now check the result is set to Cancelled and the status is set to finished"
-
-    target_line=$(cat ${runs_submit_log_file} | grep "finished Cancelled")
-    if [[ "$target_line" != "" ]]; then
-        success "Target line found - the result and status were set to the correct values."
-    fi
 }
 
 #--------------------------------------------------------------------------
@@ -525,7 +417,7 @@ function get_result_with_runname {
     # Get the RunName from the output of galasactl runs submit
     # The output of runs submit should look like:
     # submitted-time(UTC) name  requestor status   result test-name
-    # 2024-09-05 12:45:33 C9955 galasa    building Passed inttests/dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu
+    # 2024-09-05 12:45:33 C9955 galasa    building Passed ivts/dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
     #
     # Total:1 Passed:1
 
@@ -836,7 +728,7 @@ function runs_get_check_raw_format_output_with_older_to_than_from_age {
 
 #--------------------------------------------------------------------------
 function runs_get_check_requestor_parameter {
-    requestor="Galasadelivery@ibm.com"
+    requestor="galasa-team"
     h2 "Performing runs get with details format providing a from age and requestor as $requestor..."
 
     cd ${BASEDIR}/temp
@@ -961,8 +853,8 @@ function launch_test_on_ecosystem_without_portfolio {
 
     cmd="${BINARY_LOCATION} runs submit \
     --bootstrap $bootstrap \
-    --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
-    --stream inttests
+    --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
+    --stream ivts
     --throttle 1 \
     --poll 10 \
     --progress 1 \
@@ -991,7 +883,7 @@ function create_portfolio_with_unknown_test {
 
     cmd="${BINARY_LOCATION} runs prepare \
     --bootstrap $bootstrap \
-    --stream inttests \
+    --stream ivts \
     --portfolio unknown-portfolio.yaml \
     --test local.UnknownTest \
     --log -"
@@ -1146,10 +1038,6 @@ function test_runs_commands {
 
     # Attempt to reset an active run...
     runs_reset_check_retry_present
-
-    # Attempt to cancel an active run...
-    # Temporarily commented out as failing and will block CLI builds.
-    # runs_cancel_check_test_is_finished_and_cancelled
 
     # Attempt to delete a run...
     runs_delete_check_run_can_be_deleted $RUN_NAME

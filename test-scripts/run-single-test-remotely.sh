@@ -17,15 +17,45 @@ export GALASA_HOME=$(pwd)
 
 cd "${BASEDIR}/.."
 
-galasactl runs submit \
---class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
---stream inttests \
---throttle 1 \
---poll 10 \
---progress 1 \
---noexitcodeontestfailures \
---log - \
---overridefile ${GALASA_HOME}/overrides.properties
+# This one invokes the sub-ecosystem
+# galasactl runs submit \
+# --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu \
+# --stream inttests \
+# --throttle 1 \
+# --poll 10 \
+# --progress 1 \
+# --noexitcodeontestfailures \
+# --log - \
+# --overridefile ${GALASA_HOME}/overrides.properties
+
+# Run a quick stand-alone test which doesn't do much.
+
+count=0
+while [ $count -lt "1" ];  do
+    count=$(($count+1));
+
+    galasactl runs submit \
+    --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
+    --stream ivts \
+    --throttle 3 \
+    --poll 10 \
+    --progress 1 \
+    --noexitcodeontestfailures \
+    --group mcobbett-$count \
+    --overridefile ${GALASA_HOME}/overrides.properties \
+    --log - --trace
+
+    echo "Hello $count"
+done
+
+# galasactl runs submit \
+#     --class dev.galasa.ivts/dev.galasa.ivts.core.CoreManagerIVT \
+#     --stream ivts \
+#     --throttle 3 \
+#     --poll 10 \
+#     --progress 1 \
+#     --noexitcodeontestfailures \
+#     --overridefile ${GALASA_HOME}/overrides.properties
 
 # galasactl runs prepare --portfolio my.portfolio --class dev.galasa.inttests/dev.galasa.inttests.core.local.CoreLocalJava11Ubuntu --stream inttests
 # galasactl runs submit --portfolio my.portfolio --log -
