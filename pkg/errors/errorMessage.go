@@ -419,6 +419,14 @@ var (
 	GALASA_ERROR_UPDATE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1216E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1216, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_UPDATE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1217E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1217, STACK_TRACE_NOT_WANTED)
 
+	// When getting multiple monitors...
+	GALASA_ERROR_GET_MONITORS_REQUEST_FAILED           = NewMessageType("GAL1218E: Failed to get monitors. Sending the get request to the Galasa service failed. Cause is %v", 1218, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_NO_RESPONSE_CONTENT      = NewMessageType("GAL1219E: Failed to get monitors. Unexpected http status code %v received from the server.", 1219, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_RESPONSE_BODY_UNREADABLE = NewMessageType("GAL1220E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1220, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_UNPARSEABLE_CONTENT      = NewMessageType("GAL1221E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1221, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_SERVER_REPORTED_ERROR    = NewMessageType("GAL1222E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1222, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_EXPLANATION_NOT_JSON     = NewMessageType("GAL1223E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1223, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 

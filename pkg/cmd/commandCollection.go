@@ -39,6 +39,8 @@ const (
 	COMMAND_NAME_PROJECT_CREATE           = "project create"
 	COMMAND_NAME_LOCAL                    = "local"
 	COMMAND_NAME_LOCAL_INIT               = "local init"
+	COMMAND_NAME_MONITORS                 = "monitors"
+	COMMAND_NAME_MONITORS_GET             = "monitors get"
 	COMMAND_NAME_PROPERTIES               = "properties"
 	COMMAND_NAME_PROPERTIES_GET           = "properties get"
 	COMMAND_NAME_PROPERTIES_SET           = "properties set"
@@ -135,6 +137,10 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 
 	if err == nil {
 		err = commands.addLocalCommands(factory, rootCommand)
+	}
+
+	if err == nil {
+		err = commands.addMonitorsCommands(factory, rootCommand, commsFlagSet)
 	}
 
 	if err == nil {
@@ -425,6 +431,26 @@ func (commands *commandCollectionImpl) addSecretsCommands(factory spi.Factory, r
 		commands.commandMap[secretsGetCommand.Name()] = secretsGetCommand
 		commands.commandMap[secretsSetCommand.Name()] = secretsSetCommand
 		commands.commandMap[secretsDeleteCommand.Name()] = secretsDeleteCommand
+	}
+
+	return err
+}
+
+func (commands *commandCollectionImpl) addMonitorsCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
+
+	var err error
+	var monitorsCommand spi.GalasaCommand
+	var monitorsGetCommand spi.GalasaCommand
+
+	monitorsCommand, err = NewMonitorsCmd(rootCommand, commsFlagSet)
+
+	if err == nil {
+		monitorsGetCommand, err = NewMonitorsGetCommand(factory, monitorsCommand, commsFlagSet)
+	}
+
+	if err == nil {
+		commands.commandMap[monitorsCommand.Name()] = monitorsCommand
+		commands.commandMap[monitorsGetCommand.Name()] = monitorsGetCommand
 	}
 
 	return err
