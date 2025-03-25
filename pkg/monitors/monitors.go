@@ -18,7 +18,7 @@ func validateMonitorName(monitorName string) (string, error) {
     monitorName = strings.TrimSpace(monitorName)
 
     if monitorName == "" || !utils.IsNameValid(monitorName) {
-        err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_SECRET_NAME)
+        err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_MONITOR_NAME)
     }
     return monitorName, err
 }

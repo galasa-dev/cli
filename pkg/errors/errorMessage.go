@@ -427,6 +427,10 @@ var (
 	GALASA_ERROR_GET_MONITORS_SERVER_REPORTED_ERROR    = NewMessageType("GAL1222E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1222, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_MONITORS_EXPLANATION_NOT_JSON     = NewMessageType("GAL1223E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1223, STACK_TRACE_NOT_WANTED)
 
+	// Getting a single monitor by name...
+	GALASA_ERROR_MONITOR_NAME_NOT_FOUND = NewMessageType("GAL1224E: Galasa Monitor named %v is not known on the Galasa service.", 1224, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_INVALID_MONITOR_NAME   = NewMessageType("GAL1225E: Invalid monitor name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1225, STACK_TRACE_NOT_WANTED)
+
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)
 

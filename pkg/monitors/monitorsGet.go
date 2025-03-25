@@ -37,8 +37,17 @@ func GetMonitors(
 
 	chosenFormatter, err = validateFormatFlag(format)
 	if err == nil {
-		// Get all monitors
-		monitors, err = getMonitorsFromRestApi(apiClient, byteReader)
+		if monitorName != "" {
+			// The user has provided a monitor name, so try to get that monitor
+			var monitor *galasaapi.GalasaMonitor
+			monitor, err = getMonitorByName(monitorName, apiClient, byteReader)
+			if err == nil {
+				monitors = append(monitors, *monitor)
+			}
+		} else {
+			// Get all monitors
+			monitors, err = getMonitorsFromRestApi(apiClient, byteReader)
+		}
 
 		// If we were able to get the monitors, format them as requested by the user
 		if err == nil {
@@ -51,6 +60,66 @@ func GetMonitors(
 	}
 	log.Printf("GetMonitors exiting. err is %v\n", err)
 	return err
+}
+
+func getMonitorByName(
+	monitorName string,
+	apiClient *galasaapi.APIClient,
+	byteReader spi.ByteReader,
+) (*galasaapi.GalasaMonitor, error) {
+	var err error
+	var monitor *galasaapi.GalasaMonitor
+	monitorName, err = validateMonitorName(monitorName)
+	if err == nil {
+		monitor, err = getMonitorFromRestApi(monitorName, apiClient, byteReader)
+		if monitor == nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_MONITOR_NAME_NOT_FOUND, monitorName)
+		}
+	}
+
+	return monitor, err
+}
+
+func getMonitorFromRestApi(
+	monitorName string,
+	apiClient *galasaapi.APIClient,
+	byteReader spi.ByteReader,
+) (*galasaapi.GalasaMonitor, error) {
+	var err error
+	var httpResponse *http.Response
+	var context context.Context = context.Background()
+	var restApiVersion string
+	var monitor *galasaapi.GalasaMonitor
+
+	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
+
+	if err == nil {
+		monitor, httpResponse, err = apiClient.MonitorsAPIApi.GetMonitorByName(context, monitorName).
+			ClientApiVersion(restApiVersion).
+			Execute()
+
+		if httpResponse != nil {
+			defer httpResponse.Body.Close()
+		}
+
+		if err != nil {
+			if httpResponse == nil {
+				err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_GET_MONITORS_REQUEST_FAILED, err.Error())
+			} else {
+				err = galasaErrors.HttpResponseToGalasaError(
+					httpResponse,
+					"",
+					byteReader,
+					galasaErrors.GALASA_ERROR_GET_MONITORS_NO_RESPONSE_CONTENT,
+					galasaErrors.GALASA_ERROR_GET_MONITORS_RESPONSE_BODY_UNREADABLE,
+					galasaErrors.GALASA_ERROR_GET_MONITORS_UNPARSEABLE_CONTENT,
+					galasaErrors.GALASA_ERROR_GET_MONITORS_SERVER_REPORTED_ERROR,
+					galasaErrors.GALASA_ERROR_GET_MONITORS_EXPLANATION_NOT_JSON,
+				)
+			}
+		}
+	}
+	return monitor, err
 }
 
 func getMonitorsFromRestApi(

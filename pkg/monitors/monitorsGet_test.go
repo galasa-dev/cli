@@ -66,10 +66,175 @@ data:
         filters:
             includes:
                 - dev.galasa.*
-                - *myMonitorClass
+                - '*myMonitorClass'
             excludes:
                 - exclude.me
-                - *exclude.me.too.*`, API_VERSION, monitorKind, monitorName, description)
+                - '*exclude.me.too.*'`, API_VERSION, monitorKind, monitorName, description)
+}
+
+func TestCanGetAMonitorByName(t *testing.T) {
+    // Given...
+    monitorName := "customManagerCleanup"
+    description := "my custom cleanup monitor"
+    outputFormat := "summary"
+
+    // Create the mock monitor to return
+    monitor := createMockGalasaMonitor(monitorName, description)
+    monitorBytes, _ := json.Marshal(monitor)
+    monitorJson := string(monitorBytes)
+
+    // Create the expected HTTP interactions with the API server
+    getMonitorInteraction := utils.NewHttpInteraction("/monitors/" + monitorName, http.MethodGet)
+    getMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+        writer.Header().Set("Content-Type", "application/json")
+        writer.WriteHeader(http.StatusOK)
+        writer.Write([]byte(monitorJson))
+    }
+
+    interactions := []utils.HttpInteraction{
+        getMonitorInteraction,
+    }
+
+    server := utils.NewMockHttpServer(t, interactions)
+    defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := GetMonitors(
+        monitorName,
+        outputFormat,
+        console,
+        apiClient,
+        mockByteReader)
+
+    // Then...
+    expectedOutput :=
+`name                 kind                         is-enabled
+customManagerCleanup GalasaResourceCleanupMonitor true
+
+Total:1
+`
+    assert.Nil(t, err, "GetMonitors returned an unexpected error")
+    assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestCanGetAMonitorByNameInYamlFormat(t *testing.T) {
+    // Given...
+    monitorName := "cleanupMonitor"
+    description := "my custom cleanup monitor"
+    outputFormat := "yaml"
+
+    // Create the mock monitor to return
+    monitor := createMockGalasaMonitor(monitorName, description)
+    monitorBytes, _ := json.Marshal(monitor)
+    monitorJson := string(monitorBytes)
+
+    // Create the expected HTTP interactions with the API server
+    getMonitorInteraction := utils.NewHttpInteraction("/monitors/" + monitorName, http.MethodGet)
+    getMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+        writer.Header().Set("Content-Type", "application/json")
+        writer.WriteHeader(http.StatusOK)
+        writer.Write([]byte(monitorJson))
+    }
+
+    interactions := []utils.HttpInteraction{
+        getMonitorInteraction,
+    }
+
+    server := utils.NewMockHttpServer(t, interactions)
+    defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := GetMonitors(
+        monitorName,
+        outputFormat,
+        console,
+        apiClient,
+        mockByteReader)
+
+    // Then...
+    expectedOutput := generateExpectedMonitorYaml(monitorName, description, "GalasaResourceCleanupMonitor") + "\n"
+    assert.Nil(t, err, "GetMonitors returned an unexpected error")
+    assert.Equal(t, expectedOutput, console.ReadText())
+}
+
+func TestGetAMonitorWithBlankNameDisplaysError(t *testing.T) {
+    // Given...
+    monitorName := "    "
+    outputFormat := "summary"
+
+    // The client-side validation should fail, so no HTTP interactions will be performed
+    interactions := []utils.HttpInteraction{}
+
+    server := utils.NewMockHttpServer(t, interactions)
+    defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := GetMonitors(
+        monitorName,
+        outputFormat,
+        console,
+        apiClient,
+        mockByteReader)
+
+    // Then...
+    assert.NotNil(t, err, "GetMonitors did not return an error as expected")
+    consoleOutputText := err.Error()
+    assert.Contains(t, consoleOutputText, "GAL1225E")
+    assert.Contains(t, consoleOutputText, " Invalid monitor name provided")
+}
+
+func TestGetNonExistantMonitorDisplaysError(t *testing.T) {
+    // Given...
+    nonExistantMonitor := "monitorDoesNotExist123"
+    outputFormat := "summary"
+
+    // Create the expected HTTP interactions with the API server
+    getMonitorInteraction := utils.NewHttpInteraction("/monitors/" + nonExistantMonitor, http.MethodGet)
+    getMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+        writer.Header().Set("Content-Type", "application/json")
+        writer.WriteHeader(http.StatusNotFound)
+        writer.Write([]byte(`{ "error_message": "No such monitor exists" }`))
+    }
+
+
+    interactions := []utils.HttpInteraction{ getMonitorInteraction }
+
+    server := utils.NewMockHttpServer(t, interactions)
+    defer server.Server.Close()
+
+    console := utils.NewMockConsole()
+    apiServerUrl := server.Server.URL
+    apiClient := api.InitialiseAPI(apiServerUrl)
+    mockByteReader := utils.NewMockByteReader()
+
+    // When...
+    err := GetMonitors(
+        nonExistantMonitor,
+        outputFormat,
+        console,
+        apiClient,
+        mockByteReader)
+
+    // Then...
+    assert.NotNil(t, err, "MonitorsGet did not return an error but it should have")
+    consoleOutputText := err.Error()
+    assert.Contains(t, consoleOutputText, nonExistantMonitor)
+    assert.Contains(t, consoleOutputText, "GAL1224E")
 }
 
 func TestCanGetAllMonitorsOk(t *testing.T) {
