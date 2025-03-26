@@ -12,44 +12,44 @@ import (
     "github.com/stretchr/testify/assert"
 )
 
-func TestCommandListContainsMonitorsEnableCommand(t *testing.T) {
+func TestCommandListContainsMonitorsDisableCommand(t *testing.T) {
     /// Given...
     factory := utils.NewMockFactory()
     commands, _ := NewCommandCollection(factory)
 
     // When...
-    monitorsCommand, err := commands.GetCommand(COMMAND_NAME_MONITORS_ENABLE)
+    monitorsCommand, err := commands.GetCommand(COMMAND_NAME_MONITORS_DISABLE)
     assert.Nil(t, err)
 
     // Then...
     assert.NotNil(t, monitorsCommand)
-    assert.Equal(t, COMMAND_NAME_MONITORS_ENABLE, monitorsCommand.Name())
+    assert.Equal(t, COMMAND_NAME_MONITORS_DISABLE, monitorsCommand.Name())
     assert.NotNil(t, monitorsCommand.Values())
-	assert.IsType(t, &MonitorsEnableCmdValues{}, monitorsCommand.Values())
+	assert.IsType(t, &MonitorsDisableCmdValues{}, monitorsCommand.Values())
 }
 
-func TestMonitorsEnableHelpFlagSetCorrectly(t *testing.T) {
+func TestMonitorsDisableHelpFlagSetCorrectly(t *testing.T) {
     // Given...
     factory := utils.NewMockFactory()
-	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_MONITORS_ENABLE, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_MONITORS_DISABLE, factory, t)
 
-    var args []string = []string{"monitors", "enable", "--help"}
+    var args []string = []string{"monitors", "disable", "--help"}
 
     // When...
     err := commandCollection.Execute(args)
 
     // Then...
-    checkOutput("Enables a monitor with the given name in the Galasa service", "", factory, t)
+    checkOutput("Disables a monitor with the given name in the Galasa service", "", factory, t)
 
     assert.Nil(t, err)
 }
 
-func TestMonitorsEnableWithNameFlagReturnsOk(t *testing.T) {
+func TestMonitorsDisableWithNameFlagReturnsOk(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
-	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_MONITORS_ENABLE, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_MONITORS_DISABLE, factory, t)
 
-	var args []string = []string{"monitors", "enable", "--name", "myMonitor"}
+	var args []string = []string{"monitors", "disable", "--name", "myMonitor"}
 
 	// When...
 	err := commandCollection.Execute(args)
@@ -61,12 +61,12 @@ func TestMonitorsEnableWithNameFlagReturnsOk(t *testing.T) {
 	checkOutput("", "", factory, t)
 }
 
-func TestMonitorsEnableNoFlagsReturnsErrorMessage(t *testing.T) {
+func TestMonitorsDisableNoFlagsReturnsErrorMessage(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
-	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_MONITORS_ENABLE, factory, t)
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_MONITORS_DISABLE, factory, t)
 
-	var args []string = []string{"monitors", "enable"}
+	var args []string = []string{"monitors", "disable"}
 
 	// When...
 	err := commandCollection.Execute(args)

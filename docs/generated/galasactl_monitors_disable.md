@@ -1,19 +1,19 @@
-## galasactl monitors enable
+## galasactl monitors disable
 
-Enable a monitor in the Galasa service
+Disable a monitor in the Galasa service
 
 ### Synopsis
 
-Enables a monitor with the given name in the Galasa service
+Disables a monitor with the given name in the Galasa service
 
 ```
-galasactl monitors enable [flags]
+galasactl monitors disable [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          Displays the options for the 'monitors enable' command.
+  -h, --help          Displays the options for the 'monitors disable' command.
       --name string   A mandatory flag that identifies the monitor to be manipulated by name.
 ```
 

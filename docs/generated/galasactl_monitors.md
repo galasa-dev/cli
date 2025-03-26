@@ -25,5 +25,6 @@ The parent command for operations to manipulate monitors in the Galasa service
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
+* [galasactl monitors disable](galasactl_monitors_disable.md)	 - Disable a monitor in the Galasa service
 * [galasactl monitors enable](galasactl_monitors_enable.md)	 - Enable a monitor in the Galasa service
 

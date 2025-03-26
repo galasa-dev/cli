@@ -16,57 +16,57 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type MonitorsEnableCmdValues struct {
+type MonitorsDisableCmdValues struct {
 }
 
-type MonitorsEnableCommand struct {
-	values *MonitorsEnableCmdValues
+type MonitorsDisableCommand struct {
+	values *MonitorsDisableCmdValues
     cobraCommand *cobra.Command
 }
 
 // ------------------------------------------------------------------------------------------------
 // Constructors methods
 // ------------------------------------------------------------------------------------------------
-func NewMonitorsEnableCommand(
+func NewMonitorsDisableCommand(
     factory spi.Factory,
-    monitorsEnableCommand spi.GalasaCommand,
+    monitorsDisableCommand spi.GalasaCommand,
     commsFlagSet GalasaFlagSet,
 ) (spi.GalasaCommand, error) {
 
-    cmd := new(MonitorsEnableCommand)
+    cmd := new(MonitorsDisableCommand)
 
-    err := cmd.init(factory, monitorsEnableCommand, commsFlagSet)
+    err := cmd.init(factory, monitorsDisableCommand, commsFlagSet)
     return cmd, err
 }
 
 // ------------------------------------------------------------------------------------------------
 // Public methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *MonitorsEnableCommand) Name() string {
-    return COMMAND_NAME_MONITORS_ENABLE
+func (cmd *MonitorsDisableCommand) Name() string {
+    return COMMAND_NAME_MONITORS_DISABLE
 }
 
-func (cmd *MonitorsEnableCommand) CobraCommand() *cobra.Command {
+func (cmd *MonitorsDisableCommand) CobraCommand() *cobra.Command {
     return cmd.cobraCommand
 }
 
-func (cmd *MonitorsEnableCommand) Values() interface{} {
+func (cmd *MonitorsDisableCommand) Values() interface{} {
 	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
 // Private methods
 // ------------------------------------------------------------------------------------------------
-func (cmd *MonitorsEnableCommand) init(factory spi.Factory, monitorsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
+func (cmd *MonitorsDisableCommand) init(factory spi.Factory, monitorsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
     var err error
 
-	cmd.values = &MonitorsEnableCmdValues{}
+	cmd.values = &MonitorsDisableCmdValues{}
     cmd.cobraCommand, err = cmd.createCobraCmd(factory, monitorsCommand, commsFlagSet.Values().(*CommsFlagSetValues))
 
     return err
 }
 
-func (cmd *MonitorsEnableCommand) createCobraCmd(
+func (cmd *MonitorsDisableCommand) createCobraCmd(
     factory spi.Factory,
     monitorsCommand spi.GalasaCommand,
     commsFlagSetValues *CommsFlagSetValues,
@@ -75,24 +75,24 @@ func (cmd *MonitorsEnableCommand) createCobraCmd(
     var err error
 
     monitorsCommandValues := monitorsCommand.Values().(*MonitorsCmdValues)
-    monitorsEnableCobraCmd := &cobra.Command{
-        Use:     "enable",
-        Short:   "Enable a monitor in the Galasa service",
-        Long:    "Enables a monitor with the given name in the Galasa service",
-        Aliases: []string{COMMAND_NAME_MONITORS_ENABLE},
+    monitorsDisableCobraCmd := &cobra.Command{
+        Use:     "disable",
+        Short:   "Disable a monitor in the Galasa service",
+        Long:    "Disables a monitor with the given name in the Galasa service",
+        Aliases: []string{COMMAND_NAME_MONITORS_DISABLE},
         RunE: func(cobraCommand *cobra.Command, args []string) error {
-			return cmd.executeMonitorsEnable(factory, monitorsCommand.Values().(*MonitorsCmdValues), commsFlagSetValues)
+			return cmd.executeMonitorsDisable(factory, monitorsCommand.Values().(*MonitorsCmdValues), commsFlagSetValues)
         },
     }
 
-    addMonitorNameFlag(monitorsEnableCobraCmd, true, monitorsCommandValues)
+    addMonitorNameFlag(monitorsDisableCobraCmd, true, monitorsCommandValues)
 
-    monitorsCommand.CobraCommand().AddCommand(monitorsEnableCobraCmd)
+    monitorsCommand.CobraCommand().AddCommand(monitorsDisableCobraCmd)
 
-    return monitorsEnableCobraCmd, err
+    return monitorsDisableCobraCmd, err
 }
 
-func (cmd *MonitorsEnableCommand) executeMonitorsEnable(
+func (cmd *MonitorsDisableCommand) executeMonitorsDisable(
     factory spi.Factory,
     monitorsCmdValues *MonitorsCmdValues,
     commsFlagSetValues *CommsFlagSetValues,
@@ -106,7 +106,7 @@ func (cmd *MonitorsEnableCommand) executeMonitorsEnable(
 	if err == nil {
 		commsFlagSetValues.isCapturingLogs = true
 
-		log.Println("Galasa CLI - Enable monitors from the Galasa service")
+		log.Println("Galasa CLI - Disable monitors from the Galasa service")
 
 		env := factory.GetEnvironment()
 
@@ -127,10 +127,10 @@ func (cmd *MonitorsEnableCommand) executeMonitorsEnable(
 
 				byteReader := factory.GetByteReader()
 
-				enableMonitorsFunc := func(apiClient *galasaapi.APIClient) error {
-					return monitors.EnableMonitor(monitorsCmdValues.name, apiClient, byteReader)
+				disableMonitorsFunc := func(apiClient *galasaapi.APIClient) error {
+					return monitors.DisableMonitor(monitorsCmdValues.name, apiClient, byteReader)
 				}
-				err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(enableMonitorsFunc)
+				err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(disableMonitorsFunc)
 			}
 		}
 	}

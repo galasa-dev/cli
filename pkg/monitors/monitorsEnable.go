@@ -24,11 +24,8 @@ func EnableMonitor(
 ) error {
 	var err error
 	
-	monitorName, err = validateMonitorName(monitorName)
-	if err == nil {
-		desiredEnabledState := true
-		err = setMonitorIsEnabledState(monitorName, desiredEnabledState, apiClient, byteReader)
-	}
+	desiredEnabledState := true
+	err = setMonitorIsEnabledState(monitorName, desiredEnabledState, apiClient, byteReader)
 
 	log.Printf("EnableMonitor exiting. err is %v\n", err)
 	return err
@@ -41,12 +38,27 @@ func setMonitorIsEnabledState(
 	byteReader spi.ByteReader,
 ) error {
 	var err error
+
+	monitorName, err = validateMonitorName(monitorName)
+	if err == nil {
+		err = sendUpdateMonitorStateRequest(monitorName, isEnabled, apiClient, byteReader)
+	}
+
+	return err
+}
+
+func sendUpdateMonitorStateRequest(
+	monitorName string,
+	isEnabled bool,
+	apiClient *galasaapi.APIClient,
+	byteReader spi.ByteReader,
+) error {
+	var err error
 	var httpResponse *http.Response
 	var context context.Context = context.Background()
 	var restApiVersion string
-
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
-
+	
 	if err == nil {
 		requestBody := *galasaapi.NewUpdateGalasaMonitorRequest()
 		requestBody.SetIsEnabled(isEnabled)
