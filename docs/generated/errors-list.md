@@ -222,7 +222,7 @@ The `galasactl` tool can generate the following errors:
 - GAL1223E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1224E: Galasa Monitor named {} is not known on the Galasa service.
 - GAL1225E: Invalid monitor name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
-- GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
+- GAL1226E: Invalid '--is-enabled' value provided. Supported values are 'true' and 'false'. Check your command parameters and try again.
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
 - GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. {} error: {}
 - GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. {} error: {}

@@ -10,6 +10,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/galasa-dev/cli/pkg/embedded"
 	galasaErrors "github.com/galasa-dev/cli/pkg/errors"
@@ -17,15 +18,20 @@ import (
 	"github.com/galasa-dev/cli/pkg/spi"
 )
 
-func EnableMonitor(
+func SetMonitor(
 	monitorName string,
+	isEnabledStr string,
 	apiClient *galasaapi.APIClient,
 	byteReader spi.ByteReader,
 ) error {
 	var err error
 	
-	desiredEnabledState := true
-	err = setMonitorIsEnabledState(monitorName, desiredEnabledState, apiClient, byteReader)
+	monitorName, err = validateMonitorName(monitorName)
+	if err == nil {
+		if isEnabledStr != "" {
+			err = setMonitorIsEnabledState(monitorName, isEnabledStr, apiClient, byteReader)
+		}
+	}
 
 	log.Printf("EnableMonitor exiting. err is %v\n", err)
 	return err
@@ -33,15 +39,18 @@ func EnableMonitor(
 
 func setMonitorIsEnabledState(
 	monitorName string,
-	isEnabled bool,
+	isEnabledStr string,
 	apiClient *galasaapi.APIClient,
 	byteReader spi.ByteReader,
 ) error {
 	var err error
+	var desiredEnabledState bool
 
-	monitorName, err = validateMonitorName(monitorName)
+	desiredEnabledState, err = strconv.ParseBool(isEnabledStr)
 	if err == nil {
-		err = sendUpdateMonitorStateRequest(monitorName, isEnabled, apiClient, byteReader)
+		err = sendUpdateMonitorStateRequest(monitorName, desiredEnabledState, apiClient, byteReader)
+	} else {
+		err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_INVALID_IS_ENABLED_FLAG)
 	}
 
 	return err
@@ -60,11 +69,14 @@ func sendUpdateMonitorStateRequest(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 	
 	if err == nil {
-		requestBody := *galasaapi.NewUpdateGalasaMonitorRequest()
-		requestBody.SetIsEnabled(isEnabled)
+		requestBody := *galasaapi.NewGalasaMonitor()
+		monitorData := *galasaapi.NewGalasaMonitorData()
+		monitorData.SetIsEnabled(isEnabled)
+
+		requestBody.SetData(monitorData)
 
 		httpResponse, err = apiClient.MonitorsAPIApi.SetMonitorStatus(context, monitorName).
-			UpdateGalasaMonitorRequest(requestBody).
+			GalasaMonitor(requestBody).
 			ClientApiVersion(restApiVersion).
 			Execute()
 
