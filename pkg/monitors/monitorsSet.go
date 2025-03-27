@@ -69,14 +69,14 @@ func sendUpdateMonitorStateRequest(
 	restApiVersion, err = embedded.GetGalasactlRestApiVersion()
 	
 	if err == nil {
-		requestBody := *galasaapi.NewGalasaMonitor()
-		monitorData := *galasaapi.NewGalasaMonitorData()
+		requestBody := *galasaapi.NewUpdateGalasaMonitorRequest()
+		monitorData := *galasaapi.NewUpdateGalasaMonitorRequestData()
 		monitorData.SetIsEnabled(isEnabled)
 
 		requestBody.SetData(monitorData)
 
 		httpResponse, err = apiClient.MonitorsAPIApi.SetMonitorStatus(context, monitorName).
-			GalasaMonitor(requestBody).
+			UpdateGalasaMonitorRequest(requestBody).
 			ClientApiVersion(restApiVersion).
 			Execute()
 

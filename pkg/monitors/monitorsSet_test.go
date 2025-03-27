@@ -18,8 +18,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func readMonitorRequestBody(req *http.Request) galasaapi.GalasaMonitor {
-    var monitorUpdateRequest galasaapi.GalasaMonitor
+func readMonitorRequestBody(req *http.Request) galasaapi.UpdateGalasaMonitorRequest {
+    var monitorUpdateRequest galasaapi.UpdateGalasaMonitorRequest
     requestBodyBytes, _ := io.ReadAll(req.Body)
     defer req.Body.Close()
 
