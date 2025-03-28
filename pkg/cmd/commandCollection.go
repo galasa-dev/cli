@@ -41,6 +41,7 @@ const (
 	COMMAND_NAME_LOCAL_INIT               = "local init"
 	COMMAND_NAME_MONITORS                 = "monitors"
 	COMMAND_NAME_MONITORS_GET             = "monitors get"
+	COMMAND_NAME_MONITORS_SET             = "monitors set"
 	COMMAND_NAME_PROPERTIES               = "properties"
 	COMMAND_NAME_PROPERTIES_GET           = "properties get"
 	COMMAND_NAME_PROPERTIES_SET           = "properties set"
@@ -441,16 +442,19 @@ func (commands *commandCollectionImpl) addMonitorsCommands(factory spi.Factory, 
 	var err error
 	var monitorsCommand spi.GalasaCommand
 	var monitorsGetCommand spi.GalasaCommand
+	var monitorsSetCommand spi.GalasaCommand
 
 	monitorsCommand, err = NewMonitorsCmd(rootCommand, commsFlagSet)
 
 	if err == nil {
 		monitorsGetCommand, err = NewMonitorsGetCommand(factory, monitorsCommand, commsFlagSet)
+		monitorsSetCommand, err = NewMonitorsSetCommand(factory, monitorsCommand, commsFlagSet)
 	}
 
 	if err == nil {
 		commands.commandMap[monitorsCommand.Name()] = monitorsCommand
 		commands.commandMap[monitorsGetCommand.Name()] = monitorsGetCommand
+		commands.commandMap[monitorsSetCommand.Name()] = monitorsSetCommand
 	}
 
 	return err

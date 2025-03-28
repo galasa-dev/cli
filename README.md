@@ -457,6 +457,26 @@ The run "C1234" can be cancelled using the following command:
 galasactl runs cancel --name C1234
 ```
 
+## monitors set
+
+This command can be used to update a monitor in the Galasa service. The name of the monitor to be enabled must be provided using the `--name` flag.
+
+### Examples
+
+To enable a monitor named "myCustomMonitor":
+
+```
+galasactl monitors set --name myCustomMonitor --is-enabled true
+```
+
+To disable a monitor named "myCustomMonitor":
+
+```
+galasactl monitors set --name myCustomMonitor --is-enabled false
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_monitors_set.md).
+
 ## monitors get
 
 This command can be used to get the details of monitors, like resource cleanup monitors, that are available in the Galasa service.

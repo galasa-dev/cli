@@ -26,4 +26,5 @@ The parent command for operations to manipulate monitors in the Galasa service
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
 * [galasactl monitors get](galasactl_monitors_get.md)	 - Get monitors from the Galasa service
+* [galasactl monitors set](galasactl_monitors_set.md)	 - Update a monitor in the Galasa service
 

@@ -222,11 +222,13 @@ The `galasactl` tool can generate the following errors:
 - GAL1223E: Failed to get monitors. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL1224E: Galasa Monitor named {} is not known on the Galasa service.
 - GAL1225E: Invalid monitor name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
-- GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
-- GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
-- GAL1228E: Internal failure. Contents of gzip could not be encoded and compressed. {} error: {}
-- GAL1229E: Internal failure. Contents of gzip could not be flushed while encoding and compressing. {} error: {}
-- GAL1230E: Internal failure. Gzip file could not be closed while encoding and compressing. {} error: {}
+- GAL1226E: Invalid '--is-enabled' value provided. Supported values are 'true' and 'false'. Check your command parameters and try again.
+- GAL1227E: Failed to update a monitor named '{}'. Sending the put request to the Galasa service failed. Cause is {}
+- GAL1228E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server.
+- GAL1229E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1230E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1231E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1232E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 
