@@ -419,19 +419,26 @@ var (
 	GALASA_ERROR_UPDATE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1216E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1216, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_UPDATE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1217E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1217, STACK_TRACE_NOT_WANTED)
 
-	// When updating a monitor...
-	GALASA_ERROR_UPDATE_MONITOR_REQUEST_FAILED           = NewMessageType("GAL1218E: Failed to update a monitor named '%s'. Sending the put request to the Galasa service failed. Cause is %v", 1218, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UPDATE_MONITOR_NO_RESPONSE_CONTENT      = NewMessageType("GAL1219E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server.", 1219, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UPDATE_MONITOR_RESPONSE_BODY_UNREADABLE = NewMessageType("GAL1220E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1220, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UPDATE_MONITOR_UNPARSEABLE_CONTENT      = NewMessageType("GAL1221E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1221, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UPDATE_MONITOR_SERVER_REPORTED_ERROR    = NewMessageType("GAL1222E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1222, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_UPDATE_MONITOR_EXPLANATION_NOT_JSON     = NewMessageType("GAL1223E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1223, STACK_TRACE_NOT_WANTED)
+	// When getting multiple monitors...
+	GALASA_ERROR_GET_MONITORS_REQUEST_FAILED           = NewMessageType("GAL1218E: Failed to get monitors. Sending the get request to the Galasa service failed. Cause is %v", 1218, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_NO_RESPONSE_CONTENT      = NewMessageType("GAL1219E: Failed to get monitors. Unexpected http status code %v received from the server.", 1219, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_RESPONSE_BODY_UNREADABLE = NewMessageType("GAL1220E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1220, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_UNPARSEABLE_CONTENT      = NewMessageType("GAL1221E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1221, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_SERVER_REPORTED_ERROR    = NewMessageType("GAL1222E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1222, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_MONITORS_EXPLANATION_NOT_JSON     = NewMessageType("GAL1223E: Failed to get monitors. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1223, STACK_TRACE_NOT_WANTED)
 
 	// Getting a single monitor by name...
 	GALASA_ERROR_MONITOR_NAME_NOT_FOUND = NewMessageType("GAL1224E: Galasa Monitor named %v is not known on the Galasa service.", 1224, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_INVALID_MONITOR_NAME   = NewMessageType("GAL1225E: Invalid monitor name provided. The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1225, STACK_TRACE_NOT_WANTED)
-
-	GALASA_ERROR_INVALID_IS_ENABLED_FLAG = NewMessageType("GAL1226E: Invalid '--is-enabled' value provided. Supported values are 'true' and 'false'. Check your command parameters and try again.", 1226, STACK_TRACE_NOT_WANTED)
+	
+	// When updating a monitor...
+	GALASA_ERROR_INVALID_IS_ENABLED_FLAG                 = NewMessageType("GAL1226E: Invalid '--is-enabled' value provided. Supported values are 'true' and 'false'. Check your command parameters and try again.", 1226, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_MONITOR_REQUEST_FAILED           = NewMessageType("GAL1227E: Failed to update a monitor named '%s'. Sending the put request to the Galasa service failed. Cause is %v", 1227, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_MONITOR_NO_RESPONSE_CONTENT      = NewMessageType("GAL1228E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server.", 1228, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_MONITOR_RESPONSE_BODY_UNREADABLE = NewMessageType("GAL1229E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1229, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_MONITOR_UNPARSEABLE_CONTENT      = NewMessageType("GAL1230E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1230, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_MONITOR_SERVER_REPORTED_ERROR    = NewMessageType("GAL1231E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1231, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_UPDATE_MONITOR_EXPLANATION_NOT_JSON     = NewMessageType("GAL1232E: Failed to update a monitor named '%s'. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1232, STACK_TRACE_NOT_WANTED)
 
 	// Warnings...
 	GALASA_WARNING_MAVEN_NO_GALASA_OBR_REPO = NewMessageType("GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '%s', and 'pre-release' repository is '%s'", 2000, STACK_TRACE_WANTED)

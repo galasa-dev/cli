@@ -124,7 +124,7 @@ func TestEnableNonExistantMonitorDisplaysError(t *testing.T) {
 
     // Then...
     assert.NotNil(t, err, "EnableMonitor did not return an error but it should have")
-    assert.ErrorContains(t, err, "GAL1222E")
+    assert.ErrorContains(t, err, "GAL1231E")
 }
 
 func TestEnableMonitorFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -158,7 +158,7 @@ func TestEnableMonitorFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *t
 
     // Then...
     assert.NotNil(t, err, "EnableMonitor did not return an error but it should have")
-    assert.ErrorContains(t, err, "GAL1219E")
+    assert.ErrorContains(t, err, "GAL1228E")
 }
 
 func TestEnableMonitorFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
@@ -195,7 +195,7 @@ func TestEnableMonitorFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCor
     // Then...
     assert.NotNil(t, err, "EnableMonitor did not return an error but it should have")
     assert.ErrorContains(t, err, strconv.Itoa(http.StatusInternalServerError))
-    assert.ErrorContains(t, err, "GAL1223E")
+    assert.ErrorContains(t, err, "GAL1232E")
     assert.ErrorContains(t, err, "Error details from the server are not in the json format")
 }
 
