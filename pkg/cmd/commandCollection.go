@@ -72,6 +72,8 @@ const (
 	COMMAND_NAME_USERS_DELETE             = "users delete"
 	COMMAND_NAME_ROLES                    = "roles"
 	COMMAND_NAME_ROLES_GET                = "roles get"
+	COMMAND_NAME_STREAMS                  = "streams"
+	COMMAND_NAME_STREAMS_GET              = "streams get"
 )
 
 // -----------------------------------------------------------------
@@ -170,6 +172,10 @@ func (commands *commandCollectionImpl) init(factory spi.Factory) error {
 
 	if err == nil {
 		err = commands.addRolesCommands(factory, rootCommand, commsFlagSet)
+	}
+
+	if err == nil {
+		err = commands.addStreamsCommands(factory, rootCommand, commsFlagSet)
 	}
 
 	if err == nil {
@@ -506,6 +512,26 @@ func (commands *commandCollectionImpl) addRolesCommands(factory spi.Factory, roo
 	}
 
 	return err
+}
+
+func (commands *commandCollectionImpl) addStreamsCommands(factory spi.Factory, rootCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
+
+	var err error
+	var streamsCommand spi.GalasaCommand
+	var streamsGetCommand spi.GalasaCommand
+
+	streamsCommand, err = NewStreamsCommand(rootCommand, commsFlagSet)
+
+	if err == nil {
+		streamsGetCommand, err = NewStreamsGetCommand(factory, streamsCommand, commsFlagSet)
+		if err == nil {
+			commands.commandMap[streamsCommand.Name()] = streamsCommand
+			commands.commandMap[streamsGetCommand.Name()] = streamsGetCommand
+		}
+	}
+
+	return err
+
 }
 
 func (commands *commandCollectionImpl) setHelpFlags() {
