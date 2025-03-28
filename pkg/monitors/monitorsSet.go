@@ -33,7 +33,7 @@ func SetMonitor(
 		}
 	}
 
-	log.Printf("EnableMonitor exiting. err is %v\n", err)
+	log.Printf("SetMonitor exiting. err is %v\n", err)
 	return err
 }
 

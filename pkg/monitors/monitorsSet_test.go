@@ -61,10 +61,10 @@ func TestCanEnableAMonitor(t *testing.T) {
         mockByteReader)
 
     // Then...
-    assert.Nil(t, err, "EnableMonitor returned an unexpected error")
+    assert.Nil(t, err, "SetMonitor returned an unexpected error")
 }
 
-func TestEnableMonitorWithBlankNameDisplaysError(t *testing.T) {
+func TestSetMonitorWithBlankNameDisplaysError(t *testing.T) {
     // Given...
     monitorName := "    "
     isEnabled := "true"
@@ -87,7 +87,7 @@ func TestEnableMonitorWithBlankNameDisplaysError(t *testing.T) {
         mockByteReader)
 
     // Then...
-    assert.NotNil(t, err, "EnableMonitor did not return an error as expected")
+    assert.NotNil(t, err, "SetMonitor did not return an error as expected")
     consoleOutputText := err.Error()
     assert.Contains(t, consoleOutputText, "GAL1225E")
     assert.Contains(t, consoleOutputText, " Invalid monitor name provided")
@@ -99,14 +99,14 @@ func TestEnableNonExistantMonitorDisplaysError(t *testing.T) {
     isEnabled := "true"
 
     // Create the expected HTTP interactions with the API server
-    enableMonitorInteraction := utils.NewHttpInteraction("/monitors/" + nonExistantMonitor, http.MethodPut)
-    enableMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+    setMonitorInteraction := utils.NewHttpInteraction("/monitors/" + nonExistantMonitor, http.MethodPut)
+    setMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.Header().Set("Content-Type", "application/json")
         writer.WriteHeader(http.StatusNotFound)
         writer.Write([]byte(`{ "error_message": "No such monitor exists" }`))
     }
 
-    interactions := []utils.HttpInteraction{ enableMonitorInteraction }
+    interactions := []utils.HttpInteraction{ setMonitorInteraction }
 
     server := utils.NewMockHttpServer(t, interactions)
     defer server.Server.Close()
@@ -123,23 +123,23 @@ func TestEnableNonExistantMonitorDisplaysError(t *testing.T) {
         mockByteReader)
 
     // Then...
-    assert.NotNil(t, err, "EnableMonitor did not return an error but it should have")
+    assert.NotNil(t, err, "SetMonitor did not return an error but it should have")
     assert.ErrorContains(t, err, "GAL1231E")
 }
 
-func TestEnableMonitorFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
+func TestSetMonitorFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
     // Given...
     monitorName := "myMonitor"
     isEnabled := "true"
 
     // Create the expected HTTP interactions with the API server
-    enableMonitorInteraction := utils.NewHttpInteraction("/monitors/" + monitorName, http.MethodPut)
-    enableMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+    setMonitorInteraction := utils.NewHttpInteraction("/monitors/" + monitorName, http.MethodPut)
+    setMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusInternalServerError)
     }
 
     interactions := []utils.HttpInteraction{
-        enableMonitorInteraction,
+        setMonitorInteraction,
     }
 
     server := utils.NewMockHttpServer(t, interactions)
@@ -157,25 +157,25 @@ func TestEnableMonitorFailsWithNoExplanationErrorPayloadGivesCorrectMessage(t *t
         mockByteReader)
 
     // Then...
-    assert.NotNil(t, err, "EnableMonitor did not return an error but it should have")
+    assert.NotNil(t, err, "SetMonitor did not return an error but it should have")
     assert.ErrorContains(t, err, "GAL1228E")
 }
 
-func TestEnableMonitorFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
+func TestSetMonitorFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCorrectMessage(t *testing.T) {
     // Given...
     monitorName := "myMonitor"
     isEnabled := "true"
 
     // Create the expected HTTP interactions with the API server
-    enableMonitorInteraction := utils.NewHttpInteraction("/monitors/" + monitorName, http.MethodPut)
-    enableMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+    setMonitorInteraction := utils.NewHttpInteraction("/monitors/" + monitorName, http.MethodPut)
+    setMonitorInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
         writer.WriteHeader(http.StatusInternalServerError)
         writer.Header().Set("Content-Type", "application/notJsonOnPurpose")
         writer.Write([]byte("something not json but non-zero-length."))
     }
 
     interactions := []utils.HttpInteraction{
-        enableMonitorInteraction,
+        setMonitorInteraction,
     }
 
     server := utils.NewMockHttpServer(t, interactions)
@@ -193,7 +193,7 @@ func TestEnableMonitorFailsWithNonJsonContentTypeExplanationErrorPayloadGivesCor
         mockByteReader)
 
     // Then...
-    assert.NotNil(t, err, "EnableMonitor did not return an error but it should have")
+    assert.NotNil(t, err, "SetMonitor did not return an error but it should have")
     assert.ErrorContains(t, err, strconv.Itoa(http.StatusInternalServerError))
     assert.ErrorContains(t, err, "GAL1232E")
     assert.ErrorContains(t, err, "Error details from the server are not in the json format")
@@ -233,5 +233,5 @@ func TestCanDisableAMonitor(t *testing.T) {
         mockByteReader)
 
     // Then...
-    assert.Nil(t, err, "DisableMonitor returned an unexpected error")
+    assert.Nil(t, err, "SetMonitor returned an unexpected error")
 }
