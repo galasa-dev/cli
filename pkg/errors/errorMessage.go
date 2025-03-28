@@ -426,4 +426,8 @@ var (
 	GALASA_INFO_FOLDER_DOWNLOADED_TO = NewMessageType("GAL2501I: Downloaded %d artifacts to folder '%s'\n", 2501, STACK_TRACE_NOT_WANTED)
 	GALASA_INFO_RUNS_RESET_SUCCESS   = NewMessageType("GAL2503I: The request to reset run '%s' has been accepted by the server.\n", 2503, STACK_TRACE_NOT_WANTED)
 	GALASA_INFO_RUNS_CANCEL_SUCCESS  = NewMessageType("GAL2504I: The request to cancel run '%s' has been accepted by the server.\n", 2504, STACK_TRACE_NOT_WANTED)
+
+	GALASA_ERROR_MISSING_STREAM_NAME_FLAG           = NewMessageType("GAL2505I: The stream name provided by the --name field cannot be an empty string.", 2505, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RETRIEVING_STREAMS_FROM_API_SERVER = NewMessageType("GAL2506I: Could not get list of test streams from API server. Reason: '%s'."+
+		" Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file", 2506, STACK_TRACE_WANTED)
 )

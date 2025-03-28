@@ -227,3 +227,5 @@ The `galasactl` tool can generate the following errors:
 
 - GAL2504I: The request to cancel run '{}' has been accepted by the server.
 
+- GAL2505I: The stream name provided by the --name field cannot be an empty string.
+- GAL2506I: Could not get list of test streams from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file
