@@ -457,6 +457,27 @@ The run "C1234" can be cancelled using the following command:
 galasactl runs cancel --name C1234
 ```
 
+## monitors get
+
+This command can be used to get the details of monitors, like resource cleanup monitors, that are available in the Galasa service.
+
+By default, the output of `monitors get` will be in a "summary" format. To change the output format, you can supply the `--format` flag followed by the format that you wish the output to be displayed in. For a list of supported formats, view the command's help information by running `galasactl monitors get --help`.
+
+### Examples
+
+To get a list of all monitors that are currently available in the Galasa service, run the following command:
+
+```
+galasactl monitors get 
+```
+
+If you would like to get a specific monitor, you can supply the name of the monitor with the `--name` flag. For example, the following command can be used to get a monitor named "myCustomMonitor":
+
+```
+galasactl monitors get --name myCustomMonitor
+```
+
+For a complete list of supported parameters see [here](./docs/generated/galasactl_monitors_get.md).
 
 ## properties get
 This command retrieves details of properties in a namespace.
