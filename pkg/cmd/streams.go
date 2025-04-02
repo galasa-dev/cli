@@ -67,8 +67,8 @@ func (cmd *StreamsCommand) createCobraCommand(
 
 	streamsCobraCmd := &cobra.Command{
 		Use:   "streams",
-		Short: "Manages test streams in an ecosystem",
-		Long:  "Allows interaction with the streams servlet to return information about test streams.",
+		Short: "Manages test streams in a Galasa service",
+		Long:  "Parent command for managing test streams in a Galasa service",
 	}
 
 	streamsCobraCmd.PersistentFlags().AddFlagSet(commsFlagSet.Flags())

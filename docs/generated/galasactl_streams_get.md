@@ -4,7 +4,7 @@ Gets a list of test streams
 
 ### Synopsis
 
-Get a list of test streams stored in the Galasa API server
+Get a list of test streams from the Galasa service
 
 ```
 galasactl streams get [flags]
@@ -13,8 +13,9 @@ galasactl streams get [flags]
 ### Options
 
 ```
-  -h, --help          Displays the options for the 'streams get' command.
-      --name string   An optional field indicating the name of a test stream
+      --format string   the output format of the returned streams. Supported formats are: 'summary', 'yaml'. (default "summary")
+  -h, --help            Displays the options for the 'streams get' command.
+      --name string     An optional field indicating the name of a test stream
 ```
 
 ### Options inherited from parent commands
@@ -29,5 +30,5 @@ galasactl streams get [flags]
 
 ### SEE ALSO
 
-* [galasactl streams](galasactl_streams.md)	 - Manages test streams in an ecosystem
+* [galasactl streams](galasactl_streams.md)	 - Manages test streams in a Galasa service
 

@@ -100,7 +100,7 @@ mystream2 enabled Another stream to...
 Total:2
 `
 
-	err := GetStreams("", apiClient, console)
+	err := GetStreams("", "summary", apiClient, console)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, console.ReadText())
@@ -110,7 +110,7 @@ Total:2
 func TestMissingStreamNameFlagReturnsBadRequest(t *testing.T) {
 	//Given...
 
-	body := `{"error_code": 2505,"error_message": "GAL2505I: The stream name provided by the --name field cannot be an empty string."}`
+	body := `{"error_code": 1218,"error_message": "GAL1218E: The stream name provided by the --name field cannot be an empty string."}`
 
 	getStreamsInteraction := utils.NewHttpInteraction("/streams", http.MethodGet)
 	getStreamsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
@@ -130,10 +130,10 @@ func TestMissingStreamNameFlagReturnsBadRequest(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.Server.URL)
 
 	console := utils.NewMockConsole()
-	expectedOutput := `GAL2505I: The stream name provided by the --name field cannot be an empty string.`
+	expectedOutput := `GAL1218E: The stream name provided by the --name field cannot be an empty string.`
 
 	//When
-	err := GetStreams("     ", apiClient, console)
+	err := GetStreams("     ", "summary", apiClient, console)
 
 	//Then
 	assert.NotNil(t, err)
@@ -197,7 +197,7 @@ mystream enabled A stream which I use to...
 Total:1
 `
 
-	err := GetStreams(streamName, apiClient, console)
+	err := GetStreams(streamName, "summary", apiClient, console)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, console.ReadText())

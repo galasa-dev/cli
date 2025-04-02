@@ -214,6 +214,9 @@ The `galasactl` tool can generate the following errors:
 - GAL1215E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1216E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1217E: An attempt to update a user '{}' failed. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1218E: The stream name provided by the --name field cannot be an empty string.
+- GAL1219E: Could not get list of test streams from API server. Reason: '{}'.
+- GAL1220E: The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
 - GAL1225E: Failed to open file '{}' cause: {}. Check that this file exists, and that you have read permissions.
 - GAL1226E: Internal failure. Contents of gzip could be read, but not decoded. New gzip reader failed: file: {} error: {}
 - GAL1227E: Internal failure. Contents of gzip could not be decoded. {} error: {}
@@ -227,5 +230,3 @@ The `galasactl` tool can generate the following errors:
 
 - GAL2504I: The request to cancel run '{}' has been accepted by the server.
 
-- GAL2505I: The stream name provided by the --name field cannot be an empty string.
-- GAL2506I: Could not get list of test streams from API server. Reason: '{}'. Ensure you have allocated a personal access token and configured your client program by setting your GALASA_TOKEN as an environment variable or by storing it in your galasactl.properties file

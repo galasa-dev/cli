@@ -17,11 +17,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type StreamsGetCmdValues struct {
+	outputFormat string
+}
+
 // Objective: Allow user to do this:
 //
 //	streams get
 type StreamsGetCommand struct {
 	cobraCommand *cobra.Command
+	values       *StreamsGetCmdValues
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -51,7 +56,7 @@ func (cmd *StreamsGetCommand) CobraCommand() *cobra.Command {
 }
 
 func (cmd *StreamsGetCommand) Values() interface{} {
-	return nil
+	return cmd.values
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -60,6 +65,7 @@ func (cmd *StreamsGetCommand) Values() interface{} {
 func (cmd *StreamsGetCommand) init(factory spi.Factory, streamsCommand spi.GalasaCommand, commsFlagSet GalasaFlagSet) error {
 
 	var err error
+	cmd.values = &StreamsGetCmdValues{}
 	cmd.cobraCommand, err = cmd.createCobraCmd(factory, streamsCommand, commsFlagSet)
 	return err
 
@@ -79,7 +85,7 @@ func (cmd *StreamsGetCommand) createCobraCmd(
 	streamsGetCobraCmd := &cobra.Command{
 		Use:     "get",
 		Short:   "Gets a list of test streams",
-		Long:    "Get a list of test streams stored in the Galasa API server",
+		Long:    "Get a list of test streams from the Galasa service",
 		Aliases: []string{COMMAND_NAME_STREAMS_GET},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
 			return cmd.executeStreamsGet(
@@ -89,6 +95,10 @@ func (cmd *StreamsGetCommand) createCobraCmd(
 	}
 
 	addStreamNameFlag(streamsGetCobraCmd, false, streamCommandValues)
+
+	formatters := streams.GetFormatterNamesAsString()
+	streamsGetCobraCmd.Flags().StringVar(&cmd.values.outputFormat, "format", "summary", "the output format of the returned streams. Supported formats are: "+formatters+".")
+
 	streamsCommand.CobraCommand().AddCommand(streamsGetCobraCmd)
 
 	return streamsGetCobraCmd, err
@@ -110,7 +120,7 @@ func (cmd *StreamsGetCommand) executeStreamsGet(
 	if err == nil {
 
 		commsFlagSetValues.isCapturingLogs = true
-		log.Println("Galasa CLI - Get users from the ecosystem")
+		log.Println("Galasa CLI - Get streams from the Galasa service")
 
 		env := factory.GetEnvironment()
 
@@ -131,7 +141,7 @@ func (cmd *StreamsGetCommand) executeStreamsGet(
 			if err == nil {
 				var console = factory.GetStdOutConsole()
 				getStreamsFunc := func(apiClient *galasaapi.APIClient) error {
-					return streams.GetStreams(streamsCmdValues.name, apiClient, console)
+					return streams.GetStreams(streamsCmdValues.name, cmd.values.outputFormat, apiClient, console)
 				}
 
 				err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(getStreamsFunc)

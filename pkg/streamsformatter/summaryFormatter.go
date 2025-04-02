@@ -31,6 +31,9 @@ func (*StreamsSummaryFormatter) GetName() string {
 	return SUMMARY_FORMATTER_NAME
 }
 
+var ENABLED_STATE = "enabled"
+var DISABLED_STATE = "disabled"
+
 func (*StreamsSummaryFormatter) FormatStreams(streams []galasaapi.Stream) (string, error) {
 
 	var result string
@@ -54,9 +57,9 @@ func (*StreamsSummaryFormatter) FormatStreams(streams []galasaapi.Stream) (strin
 			streamDescription := stream.Metadata.GetDescription()
 
 			if stream.GetData().IsEnabled != nil && *stream.GetData().IsEnabled {
-				state = "enabled"
+				state = ENABLED_STATE
 			} else {
-				state = "disabled"
+				state = DISABLED_STATE
 			}
 
 			line = append(line, streamName, state, streamDescription)

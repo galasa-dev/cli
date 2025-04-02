@@ -1,10 +1,10 @@
 ## galasactl streams
 
-Manages test streams in an ecosystem
+Manages test streams in a Galasa service
 
 ### Synopsis
 
-Allows interaction with the streams servlet to return information about test streams.
+Parent command for managing test streams in a Galasa service
 
 ### Options
 
