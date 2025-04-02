@@ -231,7 +231,7 @@ func TestTryGettingAnythingWithAnInvalidFormatterNameFailsImmediately(t *testing
 	assert.Contains(t, err.Error(), "GAL1067E")
 }
 
-func TestCanGetAStreamByNameWhenStreamExistsFindsItOkSummaryFormat(t *testing.T) {
+func TestCanGetAStreamByNameWhenStreamExistsGivesUnexpectedErrorSummaryFormat(t *testing.T) {
 	// Given...
 	outputFormat := "summary"
 
