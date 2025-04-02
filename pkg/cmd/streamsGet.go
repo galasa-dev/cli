@@ -139,9 +139,12 @@ func (cmd *StreamsGetCommand) executeStreamsGet(
 			)
 
 			if err == nil {
+
 				var console = factory.GetStdOutConsole()
+				var byteReader = factory.GetByteReader()
+
 				getStreamsFunc := func(apiClient *galasaapi.APIClient) error {
-					return streams.GetStreams(streamsCmdValues.name, cmd.values.outputFormat, apiClient, console)
+					return streams.GetStreams(streamsCmdValues.name, cmd.values.outputFormat, apiClient, console,byteReader)
 				}
 
 				err = commsClient.RunAuthenticatedCommandWithRateLimitRetries(getStreamsFunc)

@@ -24,19 +24,22 @@ var (
 	formatters = createFormatters()
 )
 
-func GetStreams(streamName string, format string, apiClient *galasaapi.APIClient, console spi.Console) error {
+func GetStreams(streamName string, format string, apiClient *galasaapi.APIClient, console spi.Console, byteReader spi.ByteReader) error {
 
-	var err error
 	var streamData []galasaapi.Stream
 
-	if streamName != "" {
-		streamName, err = validateStreamName(streamName)
-	}
+	chosenFormatter, err := validateFormatFlag(format)
 
 	if err == nil {
-		streamData, err = getStreamsFromRestApi(streamName, apiClient)
+		if streamName != "" {
+			streamName, err = validateStreamName(streamName)
+		}
+
 		if err == nil {
-			err = formatFetchedStreamsAndWriteToConsole(streamData, console, format)
+			streamData, err = getStreamsFromRestApi(streamName, apiClient, byteReader)
+			if err == nil {
+				err = formatFetchedStreamsAndWriteToConsole(streamData, console, chosenFormatter)
+			}
 		}
 	}
 
@@ -44,16 +47,11 @@ func GetStreams(streamName string, format string, apiClient *galasaapi.APIClient
 
 }
 
-func formatFetchedStreamsAndWriteToConsole(streams []galasaapi.Stream, console spi.Console, outputFormatString string) error {
+func formatFetchedStreamsAndWriteToConsole(streams []galasaapi.Stream, console spi.Console, formatter streamsformatter.StreamsFormatter) error {
 
-	var formattedOuptut string
-	chosenFormatter, err := validateFormatFlag(outputFormatString)
-
+	formattedOutput, err := formatter.FormatStreams(streams)
 	if err == nil {
-		formattedOuptut, err = chosenFormatter.FormatStreams(streams)
-		if err == nil {
-			console.WriteString(formattedOuptut)
-		}
+		console.WriteString(formattedOutput)
 	}
 
 	return err
@@ -63,6 +61,7 @@ func formatFetchedStreamsAndWriteToConsole(streams []galasaapi.Stream, console s
 func getStreamsFromRestApi(
 	streamName string,
 	apiClient *galasaapi.APIClient,
+	byteReader spi.ByteReader,
 ) ([]galasaapi.Stream, error) {
 
 	var streams []galasaapi.Stream
@@ -73,9 +72,9 @@ func getStreamsFromRestApi(
 
 	if err == nil {
 		if streamName != "" {
-			streams, err = getStreamByName(streamName, apiClient, restApiVersion)
+			streams, err = getStreamByName(streamName, apiClient, restApiVersion, byteReader)
 		} else {
-			streams, err = getAllStreams(apiClient, restApiVersion)
+			streams, err = getAllStreams(apiClient, restApiVersion, byteReader)
 		}
 	}
 
@@ -119,6 +118,7 @@ func getStreamByName(
 	streamName string,
 	apiClient *galasaapi.APIClient,
 	restApiVersion string,
+	byteReader spi.ByteReader,
 ) ([]galasaapi.Stream, error) {
 
 	var err error
@@ -131,20 +131,31 @@ func getStreamByName(
 
 	streamIn, resp, err = apiCall.Execute()
 
-	if err == nil {
-		var statusCode int
-		if resp != nil {
-			defer resp.Body.Close()
-			statusCode = resp.StatusCode
-		}
-
-		if statusCode != 200 {
-			log.Println("getStreamsFromRestApi - Failed to retrieve list of test streams from API server")
-			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RETRIEVING_STREAMS_FROM_API_SERVER, err.Error())
-		}
-		streamsToReturn = []galasaapi.Stream{*streamIn}
+	if resp != nil {
+		defer resp.Body.Close()
 	}
 
+	if err != nil {
+
+		if resp == nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_STREAMS_FROM_API_SERVER, err.Error())
+		} else {
+			err = galasaErrors.HttpResponseToGalasaError(
+				resp,
+				"",
+				byteReader,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_NO_RESPONSE_CONTENT,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_RESPONSE_BODY_UNREADABLE,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_UNPARSEABLE_CONTENT,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_SERVER_REPORTED_ERROR,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_EXPLANATION_NOT_JSON,
+			)
+			log.Println("getStreamsFromRestApi - Failed to retrieve list of test streams from API server")
+		}
+
+	}
+
+	streamsToReturn = []galasaapi.Stream{*streamIn}
 	return streamsToReturn, err
 
 }
@@ -152,6 +163,7 @@ func getStreamByName(
 func getAllStreams(
 	apiClient *galasaapi.APIClient,
 	restApiVersion string,
+	byteReader spi.ByteReader,
 ) ([]galasaapi.Stream, error) {
 
 	var err error
@@ -163,21 +175,28 @@ func getAllStreams(
 
 	streams, resp, err = apiCall.Execute()
 
-	if err == nil {
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 
-		var statusCode int
-		if resp != nil {
-			defer resp.Body.Close()
-			statusCode = resp.StatusCode
-		}
+	if err != nil {
 
-		if statusCode == 200 {
-			log.Printf("getUserDataFromRestApi - %v test streams collected", len(streams))
+		if resp == nil {
+			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_RETRIEVING_STREAMS_FROM_API_SERVER, err.Error())
 		} else {
-			log.Println("getStreamsFromRestApi - Failed to retrieve list of test streams from API server")
-			err = galasaErrors.NewGalasaErrorWithHttpStatusCode(statusCode, galasaErrors.GALASA_ERROR_RETRIEVING_STREAMS_FROM_API_SERVER, err.Error())
-			statusCode = 500
+			err = galasaErrors.HttpResponseToGalasaError(
+				resp,
+				"",
+				byteReader,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_NO_RESPONSE_CONTENT,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_RESPONSE_BODY_UNREADABLE,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_UNPARSEABLE_CONTENT,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_SERVER_REPORTED_ERROR,
+				galasaErrors.GALASA_ERROR_GET_STREAMS_EXPLANATION_NOT_JSON,
+			)
 		}
+		log.Println("getStreamsFromRestApi - Failed to retrieve list of test streams from API server")
+
 	}
 
 	return streams, err

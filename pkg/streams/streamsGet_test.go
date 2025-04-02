@@ -83,6 +83,8 @@ func TestMultipleStreamsGetFormatsResultsOk(t *testing.T) {
 		writer.Write([]byte(body))
 	}
 
+	mockByteReader := utils.NewMockByteReader()
+
 	interactions := []utils.HttpInteraction{
 		getStreamsInteraction,
 	}
@@ -100,7 +102,7 @@ mystream2 enabled Another stream to...
 Total:2
 `
 
-	err := GetStreams("", "summary", apiClient, console)
+	err := GetStreams("", "summary", apiClient, console, mockByteReader)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, console.ReadText())
@@ -110,7 +112,7 @@ Total:2
 func TestMissingStreamNameFlagReturnsBadRequest(t *testing.T) {
 	//Given...
 
-	body := `{"error_code": 1218,"error_message": "GAL1218E: The stream name provided by the --name field cannot be an empty string."}`
+	body := `{"error_code": 1233,"error_message": "GAL1233E: The stream name provided by the --name field cannot be an empty string."}`
 
 	getStreamsInteraction := utils.NewHttpInteraction("/streams", http.MethodGet)
 	getStreamsInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
@@ -119,6 +121,7 @@ func TestMissingStreamNameFlagReturnsBadRequest(t *testing.T) {
 		writer.WriteHeader(http.StatusBadRequest) // It's going to fail with an error on purpose !
 		writer.Write([]byte(body))
 	}
+	mockByteReader := utils.NewMockByteReader()
 
 	interactions := []utils.HttpInteraction{
 		getStreamsInteraction,
@@ -130,10 +133,10 @@ func TestMissingStreamNameFlagReturnsBadRequest(t *testing.T) {
 	apiClient := api.InitialiseAPI(server.Server.URL)
 
 	console := utils.NewMockConsole()
-	expectedOutput := `GAL1218E: The stream name provided by the --name field cannot be an empty string.`
+	expectedOutput := `GAL1233E: The stream name provided by the --name field cannot be an empty string.`
 
 	//When
-	err := GetStreams("     ", "summary", apiClient, console)
+	err := GetStreams("     ", "summary", apiClient, console, mockByteReader)
 
 	//Then
 	assert.NotNil(t, err)
@@ -180,6 +183,7 @@ func TestMultipleStreamByNameGetFormatsResultsOk(t *testing.T) {
 		writer.WriteHeader(http.StatusOK)
 		writer.Write([]byte(body))
 	}
+	mockByteReader := utils.NewMockByteReader()
 
 	interactions := []utils.HttpInteraction{
 		getStreamsInteraction,
@@ -197,9 +201,69 @@ mystream enabled A stream which I use to...
 Total:1
 `
 
-	err := GetStreams(streamName, "summary", apiClient, console)
+	err := GetStreams(streamName, "summary", apiClient, console, mockByteReader)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, console.ReadText())
 
+}
+
+func TestTryGettingAnythingWithAnInvalidFormatterNameFailsImmediately(t *testing.T) {
+	// Not expecting any iteractions...
+	interactions := []utils.HttpInteraction{}
+
+	server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
+
+	console := utils.NewMockConsole()
+	apiServerUrl := server.Server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockByteReader := utils.NewMockByteReader()
+
+	err := GetStreams(
+		"mystream",
+		"asdfghjk",
+		apiClient,
+		console,
+		mockByteReader)
+
+	assert.NotNil(t, err, "Expected an error, didn't get one!")
+	assert.Contains(t, err.Error(), "GAL1067E")
+}
+
+func TestCanGetAStreamByNameWhenStreamExistsFindsItOkSummaryFormat(t *testing.T) {
+	// Given...
+	outputFormat := "summary"
+
+	// Create the expected HTTP interactions with the API server.
+	getStreamInteraction := utils.NewHttpInteraction("/streams", http.MethodGet)
+	getStreamInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusOK)
+		writer.Write([]byte("Not valid json format output from fake service"))
+	}
+
+	interactions := []utils.HttpInteraction{
+		getStreamInteraction,
+	}
+
+	server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
+
+	console := utils.NewMockConsole()
+	apiServerUrl := server.Server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockByteReader := utils.NewMockByteReader()
+
+	// When...
+	err := GetStreams(
+		"",
+		outputFormat,
+		apiClient,
+		console,
+		mockByteReader)
+
+	// Then...
+	assert.NotNil(t, err, "GetStreams returned an error when none was expected")
+	assert.Contains(t, err.Error(), "GAL1238E")
 }

@@ -33,7 +33,7 @@ func CreateMockStream(streamName string, isEnabled bool, description string) *ga
 func TestStreamsSummaryFormatterSingleDataReturnsCorrectly(t *testing.T) {
 	// Given...
 	formatter := NewStreamsSummaryFormatter()
-	// No data to format...x
+
 	streams := make([]galasaapi.Stream, 0)
 	stream1 := CreateMockStream("mystream", true, "My test stream")
 	streams = append(streams, *stream1)
@@ -53,9 +53,9 @@ Total:1
 }
 
 func TestStreamsSummaryFormatterMultipleDataSeperatesWithNewLine(t *testing.T) {
-	// For..
+	//Given..
 	formatter := NewStreamsSummaryFormatter()
-	// No data to format...
+
 	streams := make([]galasaapi.Stream, 0)
 	stream1 := CreateMockStream("mystream", true, "This is a test stream")
 	stream2 := CreateMockStream("my-test-stream", false, "Dummy test stream")

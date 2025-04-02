@@ -419,9 +419,15 @@ var (
 	GALASA_ERROR_UPDATE_USER_SERVER_REPORTED_ERROR       = NewMessageType("GAL1216E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1216, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_UPDATE_USER_EXPLANATION_NOT_JSON        = NewMessageType("GAL1217E: An attempt to update a user '%s' failed. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1217, STACK_TRACE_NOT_WANTED)
 
-	GALASA_ERROR_MISSING_STREAM_NAME_FLAG           = NewMessageType("GAL1218E: The stream name provided by the --name field cannot be an empty string.", 1218, STACK_TRACE_NOT_WANTED)
-	GALASA_ERROR_RETRIEVING_STREAMS_FROM_API_SERVER = NewMessageType("GAL1219E: Could not get list of test streams from API server. Reason: '%s'.", 1219, STACK_TRACE_WANTED)
-	GALASA_ERROR_INVALID_STREAM_NAME                = NewMessageType("GAL1220E: The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1220, STACK_TRACE_WANTED)
+	GALASA_ERROR_MISSING_STREAM_NAME_FLAG             = NewMessageType("GAL1233E: The stream name provided by the --name field cannot be an empty string.", 1233, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_RETRIEVING_STREAMS_FROM_API_SERVER   = NewMessageType("GAL1234E: Could not get list of test streams from API server. Reason: '%s'.", 1234, STACK_TRACE_WANTED)
+	GALASA_ERROR_INVALID_STREAM_NAME                  = NewMessageType("GAL1235E: The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).", 1235, STACK_TRACE_WANTED)
+	GALASA_ERROR_GET_STREAMS_NO_RESPONSE_CONTENT      = NewMessageType("GAL1236E: Failed to get streams. Unexpected http status code %v received from the server.", 1236, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_STREAMS_RESPONSE_BODY_UNREADABLE = NewMessageType("GAL1237E: Failed to get streams. Unexpected http status code %v received from the server. Error details from the server could not be read. Cause: %s", 1237, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_STREAMS_UNPARSEABLE_CONTENT      = NewMessageType("GAL1238E: Failed to get streams. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1238, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_STREAMS_SERVER_REPORTED_ERROR    = NewMessageType("GAL1239E: Failed to get streams. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1239, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_GET_STREAMS_EXPLANATION_NOT_JSON     = NewMessageType("GAL1240E: Failed to get streams. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1240, STACK_TRACE_NOT_WANTED)
+
 	// When getting multiple monitors...
 	GALASA_ERROR_GET_MONITORS_REQUEST_FAILED           = NewMessageType("GAL1218E: Failed to get monitors. Sending the get request to the Galasa service failed. Cause is %v", 1218, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_MONITORS_NO_RESPONSE_CONTENT      = NewMessageType("GAL1219E: Failed to get monitors. Unexpected http status code %v received from the server.", 1219, STACK_TRACE_NOT_WANTED)

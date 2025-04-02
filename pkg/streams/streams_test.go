@@ -29,7 +29,7 @@ func TestValidateStreamNameRegexFlagReturnsError(t *testing.T) {
 	streamName, err := validateStreamName(invalidStreamName)
 
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "GAL1220E")
+	assert.ErrorContains(t, err, "GAL1235E")
 	assert.NotEmpty(t, streamName)
 }
 

@@ -229,6 +229,14 @@ The `galasactl` tool can generate the following errors:
 - GAL1230E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1231E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1232E: Failed to update a monitor named '{}'. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL1233E: The stream name provided by the --name field cannot be an empty string.
+- GAL1234E: Could not get list of test streams from API server. Reason: '{}'.
+- GAL1235E: The name provided with the --name flag cannot be empty and must only contain characters in the following ranges: 'a'-'z', 'A'-'Z', '0'-'9', '-' (dash), '_' (underscore).
+- GAL1236E: Failed to get streams. Unexpected http status code {} received from the server.
+- GAL1237E: Failed to get streams. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1238E: Failed to get streams. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1239E: Failed to get streams. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1240E: Failed to get streams. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

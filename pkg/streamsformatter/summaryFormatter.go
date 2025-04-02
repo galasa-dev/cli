@@ -18,6 +18,8 @@ import (
 // Summary format.
 const (
 	SUMMARY_FORMATTER_NAME = "summary"
+	ENABLED_STATE          = "enabled"
+	DISABLED_STATE         = "disabled"
 )
 
 type StreamsSummaryFormatter struct {
@@ -30,9 +32,6 @@ func NewStreamsSummaryFormatter() StreamsFormatter {
 func (*StreamsSummaryFormatter) GetName() string {
 	return SUMMARY_FORMATTER_NAME
 }
-
-var ENABLED_STATE = "enabled"
-var DISABLED_STATE = "disabled"
 
 func (*StreamsSummaryFormatter) FormatStreams(streams []galasaapi.Stream) (string, error) {
 

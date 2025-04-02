@@ -17,7 +17,7 @@ import (
 const (
 	STREAM_DESCRIPTION = "This a Galasa test stream"
 	MAVEN_REPO_URL     = "mvn:myGroup/myArtifact/0.38.0/obr"
-	TEST_CATALOG_URL   = "http://my/test/catalog.json"
+	TEST_CATALOG_URL   = "mvn:myGroup/myArtifact/0.38.0/obr"
 	MAVEN_GROUP_ID     = "myGroup"
 	MAVEN_ARTIFACT_ID  = "myArtifact"
 	MAVEN_VERSION      = "0.38.0"
@@ -71,14 +71,14 @@ metadata:
     description: %s
 data:
     repository:
-        - url: %s
-    testCatalog:
-        - url: %s
+        url: %s
     obrs:
-        - maven-group-id: %s
-          maven-artifact-id: %s
-          maven-version: %s`,
-		streamName, STREAM_DESCRIPTION, MAVEN_REPO_URL, TEST_CATALOG_URL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION)
+        - group-id: %s
+          artifact-id: %s
+          version: %s
+    testCatalog:
+        url: %s`,
+		streamName, STREAM_DESCRIPTION, MAVEN_REPO_URL, MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID, MAVEN_VERSION, TEST_CATALOG_URL)
 }
 
 func TestSecretsYamlFormatterNoDataReturnsBlankString(t *testing.T) {

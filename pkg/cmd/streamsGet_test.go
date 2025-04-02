@@ -61,3 +61,45 @@ func TestStreamsGetNameFlagsReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Contains(t, parentCmd.Values().(*StreamsCmdValues).name, "mystream")
 }
+
+func TestStreamsGetFormatFlagYamlValueReturnsOk(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_STREAMS_GET, factory, t)
+
+	var args []string = []string{"streams", "get", "--name", "mystream", "--format", "yaml"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", factory, t)
+
+	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_STREAMS)
+	assert.Nil(t, err)
+	assert.Contains(t, parentCmd.Values().(*StreamsCmdValues).name, "mystream")
+}
+
+func TestStreamsGetFormatFlagYamlSummaryReturnsOk(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_STREAMS_GET, factory, t)
+
+	var args []string = []string{"streams", "get", "--name", "mystream", "--format", "summary"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.Nil(t, err)
+
+	// Check what the user saw was reasonable
+	checkOutput("", "", factory, t)
+
+	parentCmd, err := commandCollection.GetCommand(COMMAND_NAME_STREAMS)
+	assert.Nil(t, err)
+	assert.Contains(t, parentCmd.Values().(*StreamsCmdValues).name, "mystream")
+}

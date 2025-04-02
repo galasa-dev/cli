@@ -33,59 +33,22 @@ func (*StreamsYamlFormatter) FormatStreams(streams []galasaapi.Stream) (string, 
 	buff := strings.Builder{}
 
 	for index, stream := range streams {
+		content := ""
+
 		if index > 0 {
-			buff.WriteString("---\n")
+			content += "---\n"
 		}
 
-		type ObrInfo struct {
-			MavenGroupID    string `yaml:"maven-group-id"`
-			MavenArtifactID string `yaml:"maven-artifact-id"`
-			MavenVersion    string `yaml:"maven-version"`
-		}
-
-		type RepositoryURL struct {
-			URL string `yaml:"url"`
-		}
-
-		type StreamYAML struct {
-			APIVersion string `yaml:"apiVersion"`
-			Kind       string `yaml:"kind"`
-			Metadata   struct {
-				Name        string `yaml:"name"`
-				Description string `yaml:"description"`
-			} `yaml:"metadata"`
-			Data struct {
-				Repository  []RepositoryURL `yaml:"repository"`
-				TestCatalog []RepositoryURL `yaml:"testCatalog"`
-				Obrs        []ObrInfo       `yaml:"obrs"`
-			} `yaml:"data"`
-		}
-
-		streamYAML := StreamYAML{
-			APIVersion: "galasa-dev/v1alpha1",
-			Kind:       "GalasaStream",
-		}
-		streamYAML.Metadata.Name = *stream.Metadata.Name
-		streamYAML.Metadata.Description = *stream.Metadata.Description
-
-		// Add repository and test catalog
-		streamYAML.Data.Repository = []RepositoryURL{{URL: *stream.Data.Repository.Url}}
-		streamYAML.Data.TestCatalog = []RepositoryURL{{URL: *stream.Data.TestCatalog.Url}}
-
-		// Add the obrs section
-		streamYAML.Data.Obrs = []ObrInfo{
-			{
-				MavenGroupID:    *stream.Data.Obrs[0].GroupId,
-				MavenArtifactID: *stream.Data.Obrs[0].ArtifactId,
-				MavenVersion:    *stream.Data.Obrs[0].Version,
-			},
-		}
-
-		yamlBytes, err := yaml.Marshal(streamYAML)
+		var yamlRepresentationBytes []byte
+		yamlRepresentationBytes, err = yaml.Marshal(stream)
 		if err == nil {
-			buff.Write(yamlBytes)
+			yamlStr := string(yamlRepresentationBytes)
+			content += yamlStr
 		}
+
+		buff.WriteString(content)
 	}
 
-	return buff.String(), err
+	result := buff.String()
+	return result, err
 }
