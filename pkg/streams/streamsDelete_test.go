@@ -7,7 +7,6 @@
 package streams
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -57,20 +56,10 @@ func WriteMockStreamResponse(
 
 }
 
-func TestStreamUserDeleteAUser(t *testing.T) {
+func TestStreamDeleteAStream(t *testing.T) {
 
 	//Given...
 	name := "mystream"
-	description := "This is a dummy stream"
-
-	streamToDelete := createMockStream(name, description)
-	streamToDeleteBytes, _ := json.Marshal(streamToDelete)
-	streamToDeleteJson := string(streamToDeleteBytes)
-
-	getStreamInteraction := utils.NewHttpInteraction("/streams/"+name, http.MethodGet)
-	getStreamInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
-		WriteMockStreamResponse(t, writer, req, name, []string{streamToDeleteJson})
-	}
 
 	deleteStreamInteraction := utils.NewHttpInteraction("/streams/"+name, http.MethodDelete)
 	deleteStreamInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
@@ -78,7 +67,6 @@ func TestStreamUserDeleteAUser(t *testing.T) {
 	}
 
 	interactions := []utils.HttpInteraction{
-		getStreamInteraction,
 		deleteStreamInteraction,
 	}
 
@@ -101,20 +89,43 @@ func TestStreamUserDeleteAUser(t *testing.T) {
 	assert.Empty(t, console.ReadText(), "The console was written to on a successful deletion, it should be empty")
 }
 
+func TestStreamDeleteAnInvalidStreamNameReturnsError(t *testing.T) {
+
+	//Given...
+	name := "my.stream"
+
+	deleteStreamInteraction := utils.NewHttpInteraction("/streams/"+name, http.MethodDelete)
+	deleteStreamInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
+		writer.WriteHeader(http.StatusBadRequest)
+	}
+
+	interactions := []utils.HttpInteraction{
+		deleteStreamInteraction,
+	}
+
+	server := utils.NewMockHttpServer(t, interactions)
+	defer server.Server.Close()
+
+	apiServerUrl := server.Server.URL
+	apiClient := api.InitialiseAPI(apiServerUrl)
+	mockByteReader := utils.NewMockByteReader()
+
+	// When...
+	err := DeleteStream(
+		name,
+		apiClient,
+		mockByteReader)
+
+	// Then...
+	assert.NotNil(t, err, "DeleteStream returned an unexpected error")
+	assert.Contains(t, err.Error(), "GAL1235E")
+	assert.Contains(t, err.Error(), "he name provided with the --name flag cannot be empty and must only contain characters in the following ranges:")
+}
+
 func TestStreamDeleteThrowsAnUnexpectedError(t *testing.T) {
 
 	//Given...
 	name := "mystream"
-	description := "This is a dummy stream"
-
-	streamToDelete := createMockStream(name, description)
-	streamToDeleteBytes, _ := json.Marshal(streamToDelete)
-	streamToDeleteJson := string(streamToDeleteBytes)
-
-	getStreamInteraction := utils.NewHttpInteraction("/streams/"+name, http.MethodGet)
-	getStreamInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
-		WriteMockStreamResponse(t, writer, req, name, []string{streamToDeleteJson})
-	}
 
 	deleteStreamInteraction := utils.NewHttpInteraction("/streams/"+name, http.MethodDelete)
 	deleteStreamInteraction.WriteHttpResponseFunc = func(writer http.ResponseWriter, req *http.Request) {
@@ -124,7 +135,6 @@ func TestStreamDeleteThrowsAnUnexpectedError(t *testing.T) {
 	}
 
 	interactions := []utils.HttpInteraction{
-		getStreamInteraction,
 		deleteStreamInteraction,
 	}
 
@@ -144,5 +154,5 @@ func TestStreamDeleteThrowsAnUnexpectedError(t *testing.T) {
 	// Then...
 	assert.NotNil(t, err, "DeleteStream returned an unexpected error")
 	assert.Contains(t, err.Error(), strconv.Itoa(http.StatusInternalServerError))
-	assert.Contains(t, err.Error(), "GAL1239E")
+	assert.Contains(t, err.Error(), "GAL1245E")
 }

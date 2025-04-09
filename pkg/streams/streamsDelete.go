@@ -19,16 +19,12 @@ import (
 
 func DeleteStream(streamName string, apiClient *galasaapi.APIClient, byteReader spi.ByteReader) error {
 
-	streams, err := getStreamsFromRestApi(streamName, apiClient, byteReader)
+	var err error
+
+	streamName, err = validateStreamName(streamName)
 
 	if err == nil {
-
-		if len(streams) != 0 {
-			err = deleteStreamFromRestApi(streams[0], apiClient, byteReader)
-		} else {
-			err = galasaErrors.NewGalasaError(galasaErrors.GALASA_ERROR_DELETE_STREAMS_NOT_FOUND)
-		}
-
+		err = deleteStreamFromRestApi(streamName, apiClient, byteReader)
 	}
 
 	return err
@@ -36,7 +32,7 @@ func DeleteStream(streamName string, apiClient *galasaapi.APIClient, byteReader 
 }
 
 func deleteStreamFromRestApi(
-	stream galasaapi.Stream,
+	streamName string,
 	apiClient *galasaapi.APIClient,
 	byteReader spi.ByteReader,
 ) error {
@@ -48,7 +44,6 @@ func deleteStreamFromRestApi(
 
 	if err == nil {
 
-		streamName := stream.Metadata.GetName()
 		apiCall := apiClient.StreamsAPIApi.DeleteStreamByName(context, streamName).ClientApiVersion(restApiVersion)
 		resp, err = apiCall.Execute()
 
@@ -68,11 +63,11 @@ func deleteStreamFromRestApi(
 					resp,
 					streamName,
 					byteReader,
-					galasaErrors.GALASA_ERROR_GET_STREAMS_NO_RESPONSE_CONTENT,
-					galasaErrors.GALASA_ERROR_GET_STREAMS_RESPONSE_BODY_UNREADABLE,
-					galasaErrors.GALASA_ERROR_GET_STREAMS_UNPARSEABLE_CONTENT,
-					galasaErrors.GALASA_ERROR_GET_STREAMS_SERVER_REPORTED_ERROR,
-					galasaErrors.GALASA_ERROR_GET_STREAMS_EXPLANATION_NOT_JSON,
+					galasaErrors.GALASA_ERROR_DELETE_STREAMS_NO_RESPONSE_CONTENT,
+					galasaErrors.GALASA_ERROR_DELETE_STREAMS_RESPONSE_BODY_UNREADABLE,
+					galasaErrors.GALASA_ERROR_DELETE_STREAMS_UNPARSEABLE_CONTENT,
+					galasaErrors.GALASA_ERROR_DELETE_STREAMS_SERVER_REPORTED_ERROR,
+					galasaErrors.GALASA_ERROR_DELETE_STREAMS_EXPLANATION_NOT_JSON,
 				)
 
 			}

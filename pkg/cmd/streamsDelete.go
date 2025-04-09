@@ -82,7 +82,7 @@ func (cmd *StreamsDeleteCommand) createCobraCmd(
 	streamsDeleteCobraCmd := &cobra.Command{
 		Use:     "delete",
 		Short:   "Deletes a test stream by name",
-		Long:    "Deletes a single test stream by the given name from the API Server",
+		Long:    "Deletes a single test stream with the given name from the Galasa service",
 		Aliases: []string{COMMAND_NAME_STREAMS_DELETE},
 		RunE: func(cobraCommand *cobra.Command, args []string) error {
 			return cmd.executeStreamsDelete(
@@ -91,7 +91,7 @@ func (cmd *StreamsDeleteCommand) createCobraCmd(
 		},
 	}
 
-	addStreamNameFlag(streamsDeleteCobraCmd, false, streamsCommandValues)
+	addStreamNameFlag(streamsDeleteCobraCmd, true, streamsCommandValues)
 	streamsCommand.CobraCommand().AddCommand(streamsDeleteCobraCmd)
 
 	return streamsDeleteCobraCmd, err

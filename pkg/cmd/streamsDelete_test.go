@@ -60,3 +60,21 @@ func TestStreamsDeleteNamespaceNameFlagsReturnsOk(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestStreamsDeleteNamespaceWithoutNameFlagReturnsError(t *testing.T) {
+	// Given...
+	factory := utils.NewMockFactory()
+	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_STREAMS_DELETE, factory, t)
+
+	var args []string = []string{"streams", "delete"}
+
+	// When...
+	err := commandCollection.Execute(args)
+
+	// Then...
+	assert.NotNil(t, err)
+
+	checkOutput("", "Error: required flag(s) \"name\" not set", factory, t)
+
+	assert.NotNil(t, err)
+}

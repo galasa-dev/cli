@@ -4,7 +4,7 @@ Deletes a test stream by name
 
 ### Synopsis
 
-Deletes a single test stream by the given name from the API Server
+Deletes a single test stream with the given name from the Galasa service
 
 ```
 galasactl streams delete [flags]
@@ -14,7 +14,7 @@ galasactl streams delete [flags]
 
 ```
   -h, --help          Displays the options for the 'streams delete' command.
-      --name string   An optional field indicating the name of a test stream
+      --name string   A mandatory field indicating the name of a test stream.
 ```
 
 ### Options inherited from parent commands
