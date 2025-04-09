@@ -74,6 +74,7 @@ const (
 	COMMAND_NAME_ROLES_GET                = "roles get"
 	COMMAND_NAME_STREAMS                  = "streams"
 	COMMAND_NAME_STREAMS_GET              = "streams get"
+	COMMAND_NAME_STREAMS_DELETE           = "streams delete"
 )
 
 // -----------------------------------------------------------------
@@ -519,14 +520,24 @@ func (commands *commandCollectionImpl) addStreamsCommands(factory spi.Factory, r
 	var err error
 	var streamsCommand spi.GalasaCommand
 	var streamsGetCommand spi.GalasaCommand
+	var streamsDeleteCommand spi.GalasaCommand
 
 	streamsCommand, err = NewStreamsCommand(rootCommand, commsFlagSet)
 
 	if err == nil {
+
+		commands.commandMap[streamsCommand.Name()] = streamsCommand
 		streamsGetCommand, err = NewStreamsGetCommand(factory, streamsCommand, commsFlagSet)
+
 		if err == nil {
-			commands.commandMap[streamsCommand.Name()] = streamsCommand
+
 			commands.commandMap[streamsGetCommand.Name()] = streamsGetCommand
+			streamsDeleteCommand, err = NewStreamsDeleteCommand(factory, streamsCommand, commsFlagSet)
+
+			if err == nil {
+				commands.commandMap[streamsDeleteCommand.Name()] = streamsDeleteCommand
+			}
+
 		}
 	}
 

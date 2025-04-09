@@ -427,6 +427,8 @@ var (
 	GALASA_ERROR_GET_STREAMS_UNPARSEABLE_CONTENT      = NewMessageType("GAL1238E: Failed to get streams. Unexpected http status code %v received from the server. Error details from the server are not in a valid json format. Cause: '%s'", 1238, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_STREAMS_SERVER_REPORTED_ERROR    = NewMessageType("GAL1239E: Failed to get streams. Unexpected http status code %v received from the server. Error details from the server are: '%s'", 1239, STACK_TRACE_NOT_WANTED)
 	GALASA_ERROR_GET_STREAMS_EXPLANATION_NOT_JSON     = NewMessageType("GAL1240E: Failed to get streams. Unexpected http status code %v received from the server. Error details from the server are not in the json format.", 1240, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_DELETE_STREAMS_NOT_FOUND             = NewMessageType("GAL1241E: The test stream could not be deleted by name because it was not found by the Galasa service. Try listing streams using 'galasactl streams get' to identify the one you wish to delete", 1241, STACK_TRACE_NOT_WANTED)
+	GALASA_ERROR_FAILED_TO_DELETE_STREAM              = NewMessageType("GAL1242E: Failed to test stream from database by stream name.", 1242, STACK_TRACE_NOT_WANTED)
 
 	// When getting multiple monitors...
 	GALASA_ERROR_GET_MONITORS_REQUEST_FAILED           = NewMessageType("GAL1218E: Failed to get monitors. Sending the get request to the Galasa service failed. Cause is %v", 1218, STACK_TRACE_NOT_WANTED)
