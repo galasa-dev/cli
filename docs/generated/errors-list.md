@@ -237,6 +237,12 @@ The `galasactl` tool can generate the following errors:
 - GAL1238E: Failed to get streams. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
 - GAL1239E: Failed to get streams. Unexpected http status code {} received from the server. Error details from the server are: '{}'
 - GAL1240E: Failed to get streams. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
+- GAL12412E: Failed to delete test stream with the given name from the Galasa service
+- GAL1242E: Failed to delete stream {}. Unexpected http status code {} received from the server.
+- GAL1243E: Failed to delete stream {}. Unexpected http status code {} received from the server. Error details from the server could not be read. Cause: {}
+- GAL1244E: Failed to delete stream {}. Unexpected http status code {} received from the server. Error details from the server are not in a valid json format. Cause: '{}'
+- GAL1245E: Failed to delete stream {}. Unexpected http status code {} received from the server. Error details from the server are: '{}'
+- GAL1246E: Failed to delete stream {}. Unexpected http status code {} received from the server. Error details from the server are not in the json format.
 - GAL2000W: Warning: Maven configuration file settings.xml should contain a reference to a Galasa repository so that the galasa OBR can be resolved. The official release repository is '{}', and 'pre-release' repository is '{}'
 - GAL2501I: Downloaded {} artifacts to folder '{}'
 

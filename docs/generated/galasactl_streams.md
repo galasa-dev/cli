@@ -25,5 +25,6 @@ Parent command for managing test streams in a Galasa service
 ### SEE ALSO
 
 * [galasactl](galasactl.md)	 - CLI for Galasa
+* [galasactl streams delete](galasactl_streams_delete.md)	 - Deletes a test stream by name
 * [galasactl streams get](galasactl_streams_get.md)	 - Gets a list of test streams
 
