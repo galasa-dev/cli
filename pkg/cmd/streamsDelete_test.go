@@ -61,7 +61,7 @@ func TestStreamsDeleteNamespaceNameFlagsReturnsOk(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestStreamsDeleteNamespaceWithoutNameFlagReturnsError(t *testing.T) {
+func TestStreamsDeleteWithoutNameFlagReturnsError(t *testing.T) {
 	// Given...
 	factory := utils.NewMockFactory()
 	commandCollection, _ := setupTestCommandCollection(COMMAND_NAME_STREAMS_DELETE, factory, t)

@@ -119,7 +119,7 @@ func TestStreamDeleteAnInvalidStreamNameReturnsError(t *testing.T) {
 	// Then...
 	assert.NotNil(t, err, "DeleteStream returned an unexpected error")
 	assert.Contains(t, err.Error(), "GAL1235E")
-	assert.Contains(t, err.Error(), "he name provided with the --name flag cannot be empty and must only contain characters in the following ranges:")
+	assert.Contains(t, err.Error(), "The name provided with the --name flag cannot be empty and must only contain characters in the following ranges:")
 }
 
 func TestStreamDeleteThrowsAnUnexpectedError(t *testing.T) {
