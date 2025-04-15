@@ -281,7 +281,7 @@ function runs_download_check_folder_names_during_test_run {
                     echo $folder_name | grep ":"
                     rc=$?
                     if [[ "${rc}" != "0" ]]; then
-                        if [[ "${no_artifacts}" < "${expected_artifact_count}" ]]; then
+                        if [[ "${no_artifacts}" -lt "${expected_artifact_count}" ]]; then
                             error "Folder named incorrectly. Has no timestamp when it should, because downloading from running tests should create a folder with a time in, such as U456-16:50:32."
                             exit 1
                         fi
@@ -485,7 +485,7 @@ function runs_get_check_summary_format_output {
 
     for header in "${headers[@]}"
     do
-        grep ${header} $output_file -q
+        grep "${header}" $output_file -q
         rc=$?
         # We expect a return code of '0' because the header name should be output.
         if [[ "${rc}" != "0" ]]; then
