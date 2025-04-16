@@ -1,4 +1,22 @@
-# Galasa CLI
+# Galasa CLI - Archive
+
+This repository has moved to a sub-folder of the `galasa` repository here: https://github.com/galasa-dev/galasa/tree/main/modules/cli
+
+It was moved to streamline the development process - making it easier to fork the galasa project, and acquire a build process in github actions using that one fork, from which most of the Galasa-related artifacts can be built.
+
+This repo has been marked as read-only for reference only.
+
+At some point it will be moved to the https://github.com/galasa-dev-archives organisation.
+
+This change went into effect after 0.40.0 was released, but prior to 0.41.0 being released, on 16th April 2025.
+
+The commit history was preserved when the code moved to the `galasa` repository.
+
+The released content will be copied to the `galasa` repository, and new versions of the released content will appear there.
+
+---
+
+# Old readme content.
 
 The Galasa command line interface (Galasa CLI) is used to interact with the Galasa ecosystem or local development environment.
 
