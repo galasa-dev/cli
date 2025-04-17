@@ -38,6 +38,7 @@ type ProjectCreateCmdValues struct {
 	force                      bool
 	isOBRProjectRequired       bool
 	featureNamesCommaSeparated string
+  manager                    string
 	useMaven                   bool
 	useGradle                  bool
 	isDevelopmentProjectCreate bool
@@ -118,7 +119,8 @@ func (cmd *ProjectCreateCommand) createCobraCommand(
 
 	projectCreateCmd.Flags().BoolVar(&cmd.values.force, "force", false, "Force-overwrite files which already exist.")
 	projectCreateCmd.Flags().BoolVar(&cmd.values.isOBRProjectRequired, "obr", false, "An OSGi Object Bundle Resource (OBR) project is needed.")
-	projectCreateCmd.Flags().StringVar(&cmd.values.featureNamesCommaSeparated, "features", "feature1",
+	projectCreateCmd.Flags().StringVar(&cmd.values.manager, "manager", "", "manager to create manager")
+  projectCreateCmd.Flags().StringVar(&cmd.values.featureNamesCommaSeparated, "features", "feature1",
 		"A comma-separated list of features you are testing. "+
 			"These must be able to form parts of a java package name. "+
 			"For example: \"payee,account\"")
@@ -151,6 +153,7 @@ func (cmd *ProjectCreateCommand) executeCreateProject(factory spi.Factory, rootC
 		err = createProject(fileSystem,
 			cmd.values.packageName,
 			cmd.values.featureNamesCommaSeparated,
+      cmd.values.manager,
 			cmd.values.isOBRProjectRequired,
 			cmd.values.force,
 			cmd.values.useMaven,
@@ -201,6 +204,7 @@ func createProject(
 	fileSystem spi.FileSystem,
 	packageName string,
 	featureNamesCommaSeparated string,
+  manager string,
 	isOBRProjectRequired bool,
 	forceOverwrite bool,
 	useMaven bool,
@@ -235,16 +239,16 @@ func createProject(
 
 				if err == nil {
 					err = createParentFolderContents(
-						fileGenerator, packageName, featureNames, isOBRProjectRequired,
+						fileGenerator, packageName, manager, featureNames, isOBRProjectRequired,
 						forceOverwrite, useMaven, useGradle, isDevelopment)
 				}
 
 				if err == nil {
-					err = createTestProjects(fileGenerator, packageName, featureNames, forceOverwrite,
+					err = createTestProjects(fileGenerator, packageName, featureNames, manager, forceOverwrite,
 						useMaven, useGradle, isDevelopment)
 					if err == nil {
 						if isOBRProjectRequired {
-							err = createOBRProject(fileGenerator, packageName, featureNames,
+							err = createOBRProject(fileGenerator, packageName, manager, featureNames,
 								forceOverwrite, useMaven, useGradle)
 						}
 					}
@@ -259,6 +263,7 @@ func createProject(
 func createParentFolderContents(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
+  manager string,
 	featureNames []string,
 	isOBRProjectRequired bool,
 	forceOverwrite bool,
@@ -268,15 +273,17 @@ func createParentFolderContents(
 ) error {
 	var err error
 
+  features := append(featureNames, manager)
+
 	if useMaven {
-		err = createParentFolderPom(fileGenerator, packageName, featureNames,
+		err = createParentFolderPom(fileGenerator, packageName, features,
 			isOBRProjectRequired, forceOverwrite, isDevelopment)
 	}
 
 	if err == nil {
 		if useGradle {
 			err = createParentFolderSettingsGradle(fileGenerator, packageName,
-				featureNames, isOBRProjectRequired, forceOverwrite, isDevelopment)
+				features, isOBRProjectRequired, forceOverwrite, isDevelopment)
 		}
 	}
 
@@ -433,6 +440,7 @@ func createTestProjects(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
 	featureNames []string,
+  manager string,
 	forceOverwrite bool,
 	useMaven bool,
 	useGradle bool,
@@ -446,6 +454,7 @@ func createTestProjects(
 			break
 		}
 	}
+  err = createTestManager(fileGenerator, packageName, manager, forceOverwrite, useMaven, useGradle, isDevelopment)
 	return err
 }
 
@@ -489,9 +498,49 @@ func createTestProject(
 	return err
 }
 
+func createTestManager(
+	fileGenerator *utils.FileGenerator,
+	packageName string,
+  manager string,
+	forceOverwrite bool,
+	useMaven bool,
+	useGradle bool,
+	isDevelopment bool,
+) error {
+
+	targetFolderPath := packageName + "/" + packageName + "." + manager
+	log.Printf("Creating tests project %s\n", targetFolderPath)
+
+	// Create the base test folder
+	err := fileGenerator.CreateFolder(targetFolderPath)
+	if err == nil {
+    if useMaven {
+			err = createTestFolderPom(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
+		}
+    
+    if useGradle {
+			err = createTestFolderGradle(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite, isDevelopment)
+		}
+	}
+  
+  if err == nil {
+	  err = createJavaSourceFolder(fileGenerator, targetFolderPath, packageName, manager, forceOverwrite)
+  }
+
+	if err == nil{
+    err = createTestResourceFolder(fileGenerator, targetFolderPath, forceOverwrite)
+  }
+
+	if err == nil {
+		log.Printf("Manager project %s created OK.", targetFolderPath)
+	}
+	return err
+}
+
 func createOBRProject(
 	fileGenerator *utils.FileGenerator,
 	packageName string,
+  manager string,
 	featureNames []string,
 	forceOverwrite bool,
 	useMaven bool,
@@ -500,15 +549,17 @@ func createOBRProject(
 	targetFolderPath := packageName + "/" + packageName + ".obr"
 	log.Printf("Creating obr project %s\n", targetFolderPath)
 
+  features := append(featureNames, manager)
+
 	// Create the base test folder
 	err := fileGenerator.CreateFolder(targetFolderPath)
 	if err == nil {
 		if useMaven {
-			err = createOBRFolderPom(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
+			err = createOBRFolderPom(fileGenerator, targetFolderPath, packageName, features, forceOverwrite)
 		}
 
 		if useGradle {
-			err = createOBRFolderBuildGradle(fileGenerator, targetFolderPath, packageName, featureNames, forceOverwrite)
+			err = createOBRFolderBuildGradle(fileGenerator, targetFolderPath, packageName, features, forceOverwrite)
 		}
 	}
 
